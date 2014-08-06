@@ -524,7 +524,7 @@ begin
       // set seat lower text
       if seat_info.Disconnected then
       begin
-        seat_lower_text := 'Disconnected';
+        seat_lower_text := Format('DC (%s)', [ChipsToStr(seat_info.Chips)]); // FIXME
         seat_lower_text_color := cColor2($FFFF3535);
       end
       else

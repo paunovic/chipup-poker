@@ -41,7 +41,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Tables.TableList, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc, Poker.Clubs.Club,
-  Poker.Tables.Table, Poker.Games.Game;
+  Poker.Tables.Table, Poker.Games.Game, Poker.Tournaments, Poker.Tournaments.Info;
 
 { TPlayerInfo }
 
@@ -81,6 +81,7 @@ var
   found: Boolean;
   to_remove: TList<TMongoId>;
   mongoid: TMongoId;
+  tournament: TTournamentInfo;
 begin
   FMongoId := ALoginReply.Self.MongoId;
   FEMail := ALoginReply.Self.EMail;
@@ -136,12 +137,21 @@ begin
     end;
 
     for pbgame in AloginReply.Games do
+    begin
       if FClubs.GetAndLock(pbgame.ClubMongoid, club) then
       try
         club.Games.AddGame(pbgame);
       finally
         FClubs.Unlock;
       end;
+
+      if Tournaments.GetAndLock(pbgame.Tournament, tournament) then
+      try
+        tournament.Games.AddGame(pbgame);
+      finally
+        Tournaments.Unlock;
+      end;
+    end;
 
     tables_close := TObjectList<TTable>.Create(FALSE);
     try

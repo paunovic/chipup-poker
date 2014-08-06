@@ -448,12 +448,12 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile Class="DebugSymbols" Configuration="Debug" LocalName="..\bin\Win32\Debug\client.rsm">
+					<DeployFile LocalName="..\bin\Win32\Debug\client.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win32">
 							<RemoteName>client.rsm</RemoteName>
 						</Platform>
 					</DeployFile>
-					<DeployFile Class="ProjectOutput" Configuration="Debug" LocalName="..\bin\Win32\Debug\client.exe">
+					<DeployFile LocalName="..\bin\Win32\Debug\client.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win32"/>
 					</DeployFile>
 					<DeployClass Name="ProjectOutput" Required="true">

@@ -44,7 +44,6 @@ uses
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, System.Generics.Collections, System.RegularExpressionsAPI,
   Vcl.Dialogs;
 
-
 {$IFDEF DEBUG}
 function ValueToStr(const AProperty: TRttiProperty; const AValue: TValue): String;
 var
@@ -554,6 +553,9 @@ end;
 
 function ChipsToStr(const AValue: UINT32): String;
 begin
+  if AValue = 0 then
+    Exit('0');
+
   result := IntToStr(AValue);
   if AValue mod 100 = 0 then
     Delete(result, Length(result) - 1, 2)
