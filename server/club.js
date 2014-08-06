@@ -99,54 +99,6 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 		}.bind(this));
 	} else cb();
 
-		if (handid) {
-			models.Game.findOne({_id:gameObj.id},function (err,gameRow) {
-				assert.ifError(err);
-				models.HandHistory.findOne({seq:handid}).lean(true).exec(function (err,historyRow) {
-					assert.ifError(err);
-					var savedCards = [];
-					var keyid = 0;
-					async.each(historyRow.players,function (player,cb) {
-						if (!player) return cb();
-						models.UserModel.findOne({_id:player._id},function (err,playerRow) {
-							player.keyid = keyid++;
-							player.nick = playerRow.displayname;
-
-							if (player.cards) {
-								savedCards[player.keyid] = new Buffer(player.cards);
-							}
-							player.origid = player._id;
-
-							if (!player.muck && player.cards) player.cards = new Buffer(player.cards);
-							else delete player.cards;
-							cb();
-						});
-					},function () {
-						historyRow.cards = new Buffer(historyRow.cards);
-						var obj = {clubid:this.clubid, gameid:gameObj.id, rows:[historyRow] };
-					for (var x in gameObj.users) {
-						for (var y=0; y<obj.rows[0].players.length; y++) {
-							if (obj.rows[0].players[y]) {
-								var key2 = obj.rows[0].players[y].keyid;
-								if (obj.rows[0].players[y].rehide) {
-									delete obj.rows[0].players[y].cards;
-									obj.rows[0].players[y].rehide = false;
-								}
-								if (obj.rows[0].players[y].cards) continue;
-								if (savedCards[key2]) {
-									if (compareObjectID(obj.rows[0].players[y].origid,x)) {
-										obj.rows[0].players[y].cards = savedCards[key2];
-										obj.rows[0].players[y].rehide = true;
-									}
-								}
-							}
-						}
-						gameObj.users[x].send(codes.srHandHistoryMsg,obj,'Poker.ClubHandHistoryReply');
-					}
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}
 };
 Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	// FIXME, add hands

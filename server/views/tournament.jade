@@ -1,0 +1,15 @@
+extends secure
+block content
+  form(method="post")
+    table(border=1)
+      tr
+        th name
+        td=tourn.name
+      tr
+        th state
+        td
+          select(name="state")
+            option(selected=tourn.state == 'tnsOpen',value='tnsOpen') open
+            option(selected=tourn.state == 'tnsInProgress',value='tnsInProgress') in-progress
+            option(selected=tourn.state == 'tnsCancelled',value='tnsCancelled') cancelled
+    input(type="submit")

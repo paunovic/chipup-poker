@@ -351,7 +351,7 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 				release();
 				return;
 			}
-			if (game.club.isSuspended(this.userid)) {
+			if (game.club && game.club.isSuspended(this.userid)) {
 				game.standUp(this,function (folded,events2,offset) {
 					game.broadcastStatus(null,true,events2);
 					release();
@@ -507,6 +507,10 @@ handlers[codes.scShowCards] = function (args,token) {
 				return;
 			}
 			if (game.state2 == 'gsClosed') return;
+			if (game.tournament) {
+				this.reply(0,'no sitting here!');
+				return;
+			}
 			if (game.club.isSuspended(this.userid)) return;
 			var temp = this.userid;
 			game.Lock.writeLock(function (release) {
@@ -557,6 +561,11 @@ handlers[codes.scShowCards] = function (args,token) {
 				var x = game.findSeat(this),token2,seating = game.members[x];
 				if (!seating) {
 					this.log('standup error %d',x);
+					release();
+					return;
+				}
+				if (game.tournament) {
+					this.reply(0,'you cant quit!');
 					release();
 					return;
 				}
@@ -626,8 +635,12 @@ handlers[codes.scShowCards] = function (args,token) {
 					release();
 					return;
 				}
-				assert.equal(this.state,2);
-				game.AddOn(this,params.chips);
+				if (game.club) {
+					assert.equal(this.state,2);
+					game.AddOn(this,params.chips);
+				} else {
+					this.reply(0,'trying to cheat eh?');
+				}
 				token.stop();
 				release();
 			}.bind(this));

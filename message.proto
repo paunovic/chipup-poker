@@ -579,11 +579,12 @@ message PlayerLimitParams {
 	required uint32 limit = 3;
 	required bool unlimited = 4;
 }
-message ClubHandHistoryReply {
-	required bytes clubid = 1 [(ObjectId)=true];
+message HandHistoryReply {
+	optional bytes club_id = 1 [(ObjectId)=true];
 	required bytes gameid = 2 [(ObjectId)=true];
 	repeated HandHistory rows = 3;
 	//repeated GameEventHistory events = 4;
+	optional bytes tournament_id = 4 [(ObjectId)=true];
 }
 message HandHistory {
 	message PlayerHandHistory {

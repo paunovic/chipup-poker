@@ -103,12 +103,16 @@ var internalHttpServer;
 	});*
 }*/
 function goOnline() {
-	Tournament.core.resetTimer();
-	internalHttpServer.goOnline();
-	secureServer.listen(12346);
-	server.listen(12345);
-	cactiServer.listen(1246);
-	log('server up');
+	Tournament.core.commonLock.writeLock(function (release) {
+		Tournament.core.resetTimer(function () {
+			release();
+			internalHttpServer.goOnline();
+			secureServer.listen(12346);
+			server.listen(12345);
+			cactiServer.listen(1246);
+			log('server up');
+		});
+	});
 }
 
 /*MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {

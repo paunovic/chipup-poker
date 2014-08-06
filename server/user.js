@@ -217,6 +217,9 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			var statuses = [];
 			async.each(toResume,function resumer(game,cb) {
 				game.game.reconnectUser(this,game.seated,game.seat,function (status) {
+					if (game.game.tournament) {
+						output.games.push(Game.makeGameProtobuf(game.game.obj));
+					}
 					statuses.push(status);
 					cb();
 				});

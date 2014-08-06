@@ -240,6 +240,35 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/paypal',this.paypalLog.bind(this));
 	app.post('/secure/newVersion',this.newVersion.bind(this));
 	app.get('/secure/disk',this.getDisk.bind(this));
+
+	app.get('/secure/tournaments',this.getTournaments.bind(this));
+	app.get('/secure/tournament',this.getTournament.bind(this));
+	app.post('/secure/tournament',this.postTournament.bind(this));
+};
+Server.prototype.getTournaments = function (req,res) {
+	models.Tournament.find(function (err,rows) {
+		res.render('tournaments',{tournaments:rows});
+	});
+};
+Server.prototype.getTournament = function (req,res) {
+	models.Tournament.findById(req.query.id,function (err,row) {
+		res.render('tournament',{tourn:row});
+	});
+};
+Server.prototype.postTournament = function (req,res) {
+	Tournament.core.commonLock.writeLock(function (release) {
+		models.Tournament.findById(req.query.id,function (err,row) {
+			row.state = req.body.state;
+			console.log('row:%j\nbody:%j',row,req.body);
+			row.save(function (err) {
+				assert.ifError(err);
+				Tournament.core.resetTimer(function () {
+					release();
+					this.getTournament(req,res);
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
 };
 Server.prototype.addSync = function (app) {
 	app.get('/sync/gitHook',this.gitHook.bind(this));

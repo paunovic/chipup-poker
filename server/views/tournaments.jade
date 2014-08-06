@@ -1,0 +1,13 @@
+extends secure
+block content
+  table(border=1)
+    tr
+      th name
+      th time
+      th state
+    each tourn in tournaments
+      tr
+        td
+          a(href="/secure/tournament?id="+tourn._id)=tourn.name
+        td=new Date(tourn.start_time*1000).toString()
+        td=tourn.state

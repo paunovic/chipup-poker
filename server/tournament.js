@@ -1,5 +1,6 @@
 var models = require('./db').models,
 	util = require('util'),
+	assert = require('assert'),
 	EventEmitter = require('events').EventEmitter,
 	myutils = require('./myutils');
 
@@ -7,7 +8,8 @@ var error = require('./error'),
 	Game = require('./game').Game,
 	deck = require('./deck'),
 	Hand = deck.Hand,
-	codes = require('./ServerCodes');
+	codes = require('./ServerCodes'),
+	ReadWriteLock = require('./lock');
 
 var lazy = {};
 lazy.__defineGetter__('user',function () {
@@ -34,11 +36,16 @@ Tournament.create = function (obj,cb) {
 		error.handleError(err);
 		console.log('doc is',doc);
 		core.emit('new_tournament',doc);
-		core.resetTimer();
-		cb();
-	});
+		this.commonLock.writeLock(function (release) {
+			core.resetTimer(function () {
+				release();
+				cb();
+			});
+		});
+	}.bind(this));
 }
 function TournamentCore() {
+	this.commonLock = new ReadWriteLock();
 }
 util.inherits(TournamentCore,EventEmitter);
 util.inherits(Tournament,EventEmitter);
@@ -94,40 +101,56 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 		});
 	});
 }
-TournamentCore.prototype.resetTimer = function () {
+TournamentCore.prototype.resetTimer = function (cb) {
+	assert.equal(this.commonLock.readers,-1);
 	if (this.timer) clearTimeout(this.timer);
 	delete this.timer;
 	models.Tournament.find({state:'tnsOpen'},{name:1,start_time:1,state:1}).sort({start_time:1}).limit(1).exec(function (err,rows) {
-		if (rows.length != 1) return; // dont start a timer, there is nothing to wait for
+		if (rows.length != 1) {
+			console.log('none found');
+			return cb(); // dont start a timer, there is nothing to wait for
+		}
 		var row = rows[0];
+		console.log('row0 is %j',row);
 		var now = Date.now() / 1000;
 		var timeleft = row.start_time - now;
-		if (timeleft < 0) this.checkTournaments();
+		if (timeleft < 0) this.checkTournaments(cb);
 		else {
 			console.log('found',err,rows,timeleft);
 			console.log('%d now',now);
 			console.log('%d goal',row.start_time);
-			this.timer = setTimeout(this.checkTournaments.bind(this),(timeleft+60)*1000);
+			this.timer = setTimeout(function () {
+				this.commonLock.writeLock(function (release) {
+					this.checkTournaments(function () {
+						release();
+					});
+				}.bind(this));
+			}.bind(this),(timeleft+60)*1000);
+			if (cb) cb();
 		}
 	}.bind(this));
 }
-TournamentCore.prototype.checkTournaments = function () {
+TournamentCore.prototype.checkTournaments = function (cb) {
 	models.Tournament.find({state:'tnsOpen'}).sort({name:1,start_time:1}).limit(1).exec(function (err,rows) {
-		if (rows.length != 1) return; // nothing found
+		if (rows.length != 1) return cb(); // nothing found
 		var row = rows[0];
 		var now = Date.now() / 1000;
 		var timeleft = row.start_time - now;
-		if (timeleft > 0) return this.resetTimer();
+		if (timeleft > 0) {
+			this.resetTimer(cb);
+			return;
+		}
 		if (row.registered_players < row.minplayers) {
+			console.log('not enough people online');
 			row.state = 'tnsCancelled';
 			row.save(function () {
 				core.emit('tournament_start',row);
-				this.resetTimer();
+				this.resetTimer(cb);
 			}.bind(this));
 			return;
 		}
 		this.startTournament(row,function () {
-			this.resetTimer();
+			this.resetTimer(cb);
 		}.bind(this));
 	}.bind(this));
 }

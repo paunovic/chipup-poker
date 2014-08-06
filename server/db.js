@@ -63,7 +63,7 @@ var ClubSchema = new Schema({
 	name:{type:String,index:{unique:true}},
 	owner:ObjectId,
 	chips:Number,
-	rake:Number,
+	rake: {type:Number,required:true},
 	unlimited_default_balance:Boolean,
 	default_balance_limit:Number,
 	members: [ObjectId],
