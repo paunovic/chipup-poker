@@ -312,8 +312,18 @@ begin
 end;
 
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  table: TTable;
 begin
-  Tables.Remove(FInternalId);
+  if FTableType <> ttTournament then // don't remove ttTournament tables from internal list
+    Tables.Remove(FInternalId)
+  else
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      table.Hidden := TRUE;
+    finally
+      Tables.Unlock;
+    end;
 end;
 
 procedure TfrmTable.FormCloseQuery(Sender: TObject; var CanClose: Boolean);

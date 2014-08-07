@@ -3604,7 +3604,6 @@ object frmChipUpMain: TfrmChipUpMain
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicClubsEnter
-          ExplicitHeight = 228
           object gridPublicClubsTable: TcxGridTableView
             OnCellDblClick = gridPublicClubsTableCellDblClick
             OnFocusedRecordChanged = gridPublicClubsTableFocusedRecordChanged
@@ -3671,7 +3670,6 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Style = []
           ParentFont = False
           OnClick = acShowHomeGamesLayoutExecute
-          ExplicitLeft = 495
         end
         object btPublicClubs: TcxButton
           Left = 155
@@ -3703,8 +3701,6 @@ object frmChipUpMain: TfrmChipUpMain
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
-          ExplicitTop = 265
-          ExplicitWidth = 676
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3799,7 +3795,6 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 278
         end
         object btOpenTable: TcxButton
           Left = 10
@@ -3819,7 +3814,6 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 316
         end
         object btCreateClub: TcxButton
           Left = 10
@@ -3839,7 +3833,6 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 354
         end
         object btJoinClub: TcxButton
           Left = 10
@@ -3859,7 +3852,6 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 392
         end
         object gridPrivateClubs: TcxGrid
           Left = 493
@@ -3869,8 +3861,6 @@ object frmChipUpMain: TfrmChipUpMain
           Anchors = [akTop, akRight, akBottom]
           TabOrder = 8
           OnEnter = gridPrivateClubsEnter
-          ExplicitLeft = 495
-          ExplicitHeight = 228
           object gridPrivateClubsTable: TcxGridTableView
             OnCellDblClick = gridPrivateClubsTableCellDblClick
             OnFocusedRecordChanged = gridPublicClubsTableFocusedRecordChanged
@@ -4291,6 +4281,19 @@ object frmChipUpMain: TfrmChipUpMain
                 Caption = '&Table'
               end
               item
+                Items = <
+                  item
+                    Caption = '-'
+                  end
+                  item
+                    Action = acTournamentsOpenAll
+                  end
+                  item
+                    Action = acTournamentsCloseAll
+                  end>
+                Caption = 'T&ournaments'
+              end
+              item
                 Caption = '-'
               end
               item
@@ -4336,6 +4339,8 @@ object frmChipUpMain: TfrmChipUpMain
             Caption = '&Dev'
           end>
         ActionBar = ActionMainMenuBar
+      end
+      item
       end>
     Left = 452
     Top = 52
@@ -4467,6 +4472,21 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Tournaments'
       Caption = 'UNREGISTER'
       OnExecute = acTournamentUnregisterExecute
+    end
+    object acTournamentsOpenAll: TAction
+      Category = 'Options'
+      Caption = 'Open All Tables'
+      OnExecute = acTournamentsOpenAllExecute
+    end
+    object acTournamentsCloseAll: TAction
+      Category = 'Options'
+      Caption = 'Close All Tables'
+      OnExecute = acTournamentsCloseAllExecute
+    end
+    object acTournamentItemOpen: TAction
+      Category = 'Options'
+      Caption = 'Open Tournament'
+      OnExecute = acTournamentItemOpenExecute
     end
   end
   object ApplicationEvents: TApplicationEvents

@@ -66,7 +66,7 @@ begin
   if Failed(DirectSoundCreate(nil, FDirectSound, nil)) then
     Exit(FALSE);
 
-  if Failed(FDirectSound.SetCooperativeLevel(AHandle, DSSCL_PRIORITY)) then
+  if Failed(FDirectSound.SetCooperativeLevel(AHandle, DSSCL_NORMAL)) then
   begin
     FDirectSound := nil;
     Exit(FALSE);
