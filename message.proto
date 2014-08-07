@@ -393,6 +393,7 @@ message SeatInfo {
 		psInHand = 2;
 		psFolded = 3;
 		psAllIn = 4;
+		psAutoPlay = 5;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2 [(ObjectId)=true];
