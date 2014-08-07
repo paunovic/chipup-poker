@@ -320,6 +320,7 @@ begin
   else
     if Tables.GetAndLockTable(FInternalId, table) then
     try
+      ServerSocket.TableSitOutNextHand(FGameId, TRUE);
       table.Hidden := TRUE;
     finally
       Tables.Unlock;
