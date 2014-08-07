@@ -347,7 +347,6 @@
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubStatsReply.pas"/>
-			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.AssetList.pas"/>
@@ -362,6 +361,8 @@
 			<DCCReference Include="modules\tournaments\Poker.Tournaments.Info.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentMember.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

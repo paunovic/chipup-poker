@@ -14,6 +14,8 @@ type
     constructor Create(const ATournamentInfo: TPB_TournamentInfo);
     destructor Destroy; override;
 
+    function StateToStr: String;
+
     property Games: TGameList read FGames write FGames;
   end;
 
@@ -31,6 +33,17 @@ destructor TTournamentInfo.Destroy;
 begin
   FGames.Free;
   inherited;
+end;
+
+function TTournamentInfo.StateToStr: String;
+begin
+  case State of
+    tnsOpen: result := 'Open';
+    tnsInProgress: result := 'In Progress';
+    tnsCancelled: result := 'Cancelled'
+  else
+    result := 'Unknown';
+  end;
 end;
 
 end.

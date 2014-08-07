@@ -36,7 +36,7 @@ var
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils, Poker.Games.GameList;
 
 { TTournamentList }
 
@@ -110,12 +110,32 @@ end;
 procedure TTournamentList.Assign(const ATournamentList: TList<TPB_TournamentInfo>);
 var
   pbtournament: TPB_TournamentInfo;
+  games: TObjectList<TGameInfo>;
+  game, gamecopy: TGameInfo;
+  tournament: TTournamentInfo;
 begin
   FLock.Enter;
   try
-    Clear;
-    for pbtournament in ATournamentList do
-      Add(pbtournament);
+    games := TObjectList<TGameInfo>.Create(FALSE);
+    try
+      for tournament in Values do
+        for game in tournament.Games.Values do
+        begin
+          gamecopy := TGameInfo.Create;
+          gamecopy.Assign(game);
+          games.Add(gamecopy);
+        end;
+
+      Clear;
+      for pbtournament in ATournamentList do
+        Add(pbtournament);
+
+      for game in games do
+        if TryGetValue(game.TournamentId, tournament) then
+          tournament.Games.Add(game.MongoId, game);
+    finally
+      games.Free;
+    end;
   finally
     FLock.Leave;
   end;

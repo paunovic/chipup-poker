@@ -166,7 +166,6 @@ uses
   Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas',
   Poker.Protobufs.Objects.ClubPlayerStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas',
   Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.ClubStatsReply.pas',
-  Poker.Protobufs.Objects.ClubHandHistoryReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas',
   Poker.Protobufs.Objects.HandHistory in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobufs\objects\Poker.Protobufs.Objects.AssetList.pas',
@@ -180,7 +179,9 @@ uses
   Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas',
   Poker.Tournaments.Info in 'modules\tournaments\Poker.Tournaments.Info.pas',
   Poker.Protobufs.Objects.TournamentMember in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentMember.pas',
-  Poker.Protobufs.Objects.TournamentTableStart in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas';
+  Poker.Protobufs.Objects.TournamentTableStart in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas',
+  Poker.Protobufs.Objects.HandHistoryReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas',
+  Poker.Protobufs.Objects.TournamentPlayerFinished in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas';
 
 procedure FocusApp;
 var

@@ -3586,20 +3586,21 @@ object frmChipUpMain: TfrmChipUpMain
       Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ClientRectBottom = 438
-      ClientRectRight = 841
-      ClientRectTop = 0
+      ClientRectBottom = 437
+      ClientRectLeft = 1
+      ClientRectRight = 840
+      ClientRectTop = 1
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
         DesignSize = (
-          841
-          438)
+          839
+          436)
         object gridPublicClubs: TcxGrid
           Left = 155
           Top = 34
           Width = 336
-          Height = 228
+          Height = 226
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicClubsEnter
@@ -3647,7 +3648,7 @@ object frmChipUpMain: TfrmChipUpMain
           end
         end
         object btPrivateClubs: TcxButton
-          Left = 495
+          Left = 493
           Top = 1
           Width = 334
           Height = 32
@@ -3695,8 +3696,8 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 265
-          Width = 676
+          Top = 263
+          Width = 674
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
@@ -3778,7 +3779,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 278
+          Top = 276
           Width = 143
           Height = 35
           Margin = 15
@@ -3797,7 +3798,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 316
+          Top = 314
           Width = 143
           Height = 35
           Margin = 15
@@ -3816,7 +3817,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 354
+          Top = 352
           Width = 143
           Height = 35
           Margin = 15
@@ -3835,7 +3836,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 392
+          Top = 390
           Width = 143
           Height = 35
           Margin = 15
@@ -3853,10 +3854,10 @@ object frmChipUpMain: TfrmChipUpMain
           ParentFont = False
         end
         object gridPrivateClubs: TcxGrid
-          Left = 495
+          Left = 493
           Top = 34
           Width = 336
-          Height = 228
+          Height = 226
           Anchors = [akTop, akRight, akBottom]
           TabOrder = 8
           OnEnter = gridPrivateClubsEnter
@@ -3918,12 +3919,12 @@ object frmChipUpMain: TfrmChipUpMain
         Caption = 'tsTournaments'
         ImageIndex = 1
         DesignSize = (
-          841
-          438)
+          839
+          436)
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
-          Width = 674
+          Width = 672
           Height = 32
           Anchors = [akLeft, akTop, akRight]
           Caption = 'TOURNAMENTS'
@@ -3947,8 +3948,8 @@ object frmChipUpMain: TfrmChipUpMain
         object gridTournaments: TcxGrid
           Left = 155
           Top = 34
-          Width = 463
-          Height = 393
+          Width = 461
+          Height = 391
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 1
           object gridTournamentsTable: TcxGridTableView
@@ -4021,10 +4022,10 @@ object frmChipUpMain: TfrmChipUpMain
           end
         end
         object rvTournamentInfo: TRichView
-          Left = 621
+          Left = 619
           Top = 34
           Width = 208
-          Height = 393
+          Height = 391
           Anchors = [akTop, akRight, akBottom]
           Color = 4539717
           TabOrder = 2
@@ -4034,7 +4035,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btTournamentLobby: TcxButton
           Left = 10
-          Top = 392
+          Top = 390
           Width = 143
           Height = 35
           Margin = 15
@@ -4054,7 +4055,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btTournamentRegister: TcxButton
           Left = 10
-          Top = 354
+          Top = 352
           Width = 143
           Height = 35
           Margin = 15
@@ -4211,7 +4212,7 @@ object frmChipUpMain: TfrmChipUpMain
     AnimationStyle = asFade
     ColorMap.HighlightColor = clBtnHighlight
     ColorMap.UnusedColor = 14673125
-    ColorMap.SelectedColor = clHighlight
+    ColorMap.MenuColor = clMenu
     EdgeInner = esNone
     EdgeOuter = esNone
     Font.Charset = DEFAULT_CHARSET
@@ -4280,6 +4281,19 @@ object frmChipUpMain: TfrmChipUpMain
                 Caption = '&Table'
               end
               item
+                Items = <
+                  item
+                    Caption = '-'
+                  end
+                  item
+                    Action = acTournamentsOpenAll
+                  end
+                  item
+                    Action = acTournamentsCloseAll
+                  end>
+                Caption = 'T&ournaments'
+              end
+              item
                 Caption = '-'
               end
               item
@@ -4325,6 +4339,8 @@ object frmChipUpMain: TfrmChipUpMain
             Caption = '&Dev'
           end>
         ActionBar = ActionMainMenuBar
+      end
+      item
       end>
     Left = 452
     Top = 52
@@ -4456,6 +4472,21 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Tournaments'
       Caption = 'UNREGISTER'
       OnExecute = acTournamentUnregisterExecute
+    end
+    object acTournamentsOpenAll: TAction
+      Category = 'Options'
+      Caption = 'Open All Tables'
+      OnExecute = acTournamentsOpenAllExecute
+    end
+    object acTournamentsCloseAll: TAction
+      Category = 'Options'
+      Caption = 'Close All Tables'
+      OnExecute = acTournamentsCloseAllExecute
+    end
+    object acTournamentItemOpen: TAction
+      Category = 'Options'
+      Caption = 'Open Tournament'
+      OnExecute = acTournamentItemOpenExecute
     end
   end
   object ApplicationEvents: TApplicationEvents

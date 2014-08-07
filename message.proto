@@ -59,6 +59,7 @@ enum ServerCodes {
 	seTableStatus = 58;
 	seTournamentList = 59;
 	seUserChange = 60;
+	seTournamentPlayerFinished = 61;
 	
 	scHello = 70;
 	scLogin = 71;
@@ -570,16 +571,19 @@ message ContactMessage {
 	required ContactReason reason = 1;
 	required string message = 2;
 }
+
 message BuyinError {
 	required bytes game_id = 1 [(ObjectId)=true];
 	required uint32 last_cashout = 2;
 }
+
 message PlayerLimitParams {
 	required bytes clubid = 1 [(ObjectId)=true];
 	required bytes userid = 2 [(ObjectId)=true];
 	required uint32 limit = 3;
 	required bool unlimited = 4;
 }
+
 message HandHistoryReply {
 	optional bytes club_id = 1 [(ObjectId)=true];
 	required bytes gameid = 2 [(ObjectId)=true];
@@ -587,6 +591,7 @@ message HandHistoryReply {
 	//repeated GameEventHistory events = 4;
 	optional bytes tournament_id = 4 [(ObjectId)=true];
 }
+
 message HandHistory {
 	message PlayerHandHistory {
 		required bytes _id = 1 [(ObjectId)=true];
@@ -625,14 +630,17 @@ message AssetList {
 message TournamentList {
 	repeated TournamentInfo items = 1;
 }
+
 message TournamentDetails {
 	required bytes _id = 1 [(ObjectId)=true];
 }
+
 message TournamentMember {
 	required bytes _id = 1 [(ObjectId)=true];
 	required string displayname = 2;
 	required uint32 chips = 3;
 }
+
 message TournamentInfo {
 	enum TournamentState {
 		tnsOpen = 0;
@@ -666,7 +674,14 @@ message TournamentCommandParams {
 	required bytes _id = 1 [(ObjectId)=true];
 	optional TournamentCommandEnum reply_status = 2;
 }
+
 message TournamentTableStart {
 	required Game game = 1;
 	required TableStatus table_status = 2;
+}
+
+message TournamentPlayerFinished {
+	required bytes tournament_id = 1 [(ObjectId)=true];
+	required bytes player_id = 2 [(ObjectId)=true];
+	required int32 place = 3;
 }

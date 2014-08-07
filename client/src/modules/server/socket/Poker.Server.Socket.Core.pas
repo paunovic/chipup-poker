@@ -88,11 +88,11 @@ uses
   Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError,
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
   Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -511,13 +511,14 @@ begin
     srContactUsOk: ;
     srTableBuyinLessThanCashout,
     srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
-    srHandHistoryMsg: ADataObject := TPB_ClubHandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srHandHistoryMsg: ADataObject := TPB_HandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
     srQueryAssetsReply: ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
     srSubscriptionPlanChange: ADataObject := TPB_SubscriptionPlanChange.Create(ADataPointer, ARpcMessage.DataSize);
     seTournamentList: ADataObject := TPB_TournamentList.Create(ADataPointer, ARpcMessage.DataSize);
     srTournamentReply: ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTournamentDetails: ADataObject := TPB_TournamentInfo.Create(ADataPointer, ARpcMessage.DataSize);
     srTournamentOpenTable: ADataObject := TPB_TournamentTableStart.Create(ADataPointer, ARpcMessage.DataSize);
+    seTournamentPlayerFinished: ADataObject := TPB_TournamentPlayerFinished.Create(ADataPointer, ARpcMessage.DataSize);
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
     Exit(FALSE);

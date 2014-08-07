@@ -10,6 +10,7 @@ type
   private
     FMongoId: TMongoId;
     FClubId: TMongoId;
+    FTournamentId: TMongoId;
     FCreatorId: TMongoId;
     FName: String;
     FSmallBlind: UINT32;
@@ -38,6 +39,7 @@ type
 
     property MongoId: TMongoId read FMongoId write FMongoId;
     property ClubId: TMongoId read FClubId write FClubId;
+    property TournamentId: TMongoId read FTournamentId write FTournamentId;
     property CreatorId: TMongoId read FCreatorId write FCreatorId;
     property Name: String read FName write FName;
     property Blinds: TGameBlinds read FBlinds;
@@ -64,6 +66,7 @@ begin
   FMongoId := AProtobufObject.MongoId;
   FCreatorId := AProtobufObject.CreatorMongoId;
   FClubId := AProtobufObject.ClubMongoid;
+  FTournamentId := AProtobufObject.Tournament;
   FName := AProtobufObject.Gamename;
   FBlinds := AProtobufObject.Blinds;
   BlindsEnumToInts(FBlinds, FSmallBlind, FBigBlind);
@@ -85,6 +88,7 @@ begin
   FMongoId := AGameInfo.MongoId;
   FCreatorId := AGameInfo.CreatorId;
   FClubId := AGameInfo.ClubId;
+  FTournamentId := AGameInfo.TournamentId;
   FName := AGameInfo.Name;
   FBlinds := AGameInfo.Blinds;
   FSmallBlind := AGameInfo.SmallBlind;

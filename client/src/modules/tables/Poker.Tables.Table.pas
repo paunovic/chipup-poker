@@ -35,6 +35,7 @@ type
       FSeatClearCaptionIndex: Integer;
       FGameplayLocked: Boolean;
       FGameplayLockedEndTime: DWORD;
+      FHidden: Boolean;
 
     procedure WndProc(var AMessage: TMessage);
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
@@ -54,7 +55,9 @@ type
 
     procedure BringToFront;
     procedure SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
-    procedure PlaySound(const ASound: String);
+    procedure PlaySound(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
+    procedure Hide;
+    procedure Show;
 
     function UpdateObjects: Boolean;
 
@@ -64,6 +67,7 @@ type
     property TableType: TTableType read FTableType;
     property GameId: TMongoId read FGameId;
     property ClubId: TMongoId read FClubId;
+    property TournamentId: TMongoId read FTournamentId;
     property Game: TGameInfo read FGame;
     property Club: TClubInfo read FClub;
     property Form: TForm read FForm;
@@ -74,6 +78,7 @@ type
     property Status: TTableStatus read FStatus;
     property GameplayLocked: Boolean read FGameplayLocked;
     property GameplayLockedEndTime: DWORD read FGameplayLockedEndTime;
+    property Hidden: Boolean read FHidden write FHidden;
   end;
 
 implementation
@@ -184,6 +189,13 @@ begin
   end;
 end;
 
+procedure TTable.Hide;
+begin
+  if Assigned(FForm) then
+    FForm.Close;
+  FHidden := TRUE;
+end;
+
 function TTable.UpdateObjects;
 var
   club: TClubInfo;
@@ -269,6 +281,13 @@ begin
   FLeaveNotify := TRUE;
   FRenderer.UpdateDXAreaSize;
   Exit(TRUE);
+end;
+
+procedure TTable.Show;
+begin
+  if Assigned(FForm) then
+    BringToFront;
+  FHidden := FALSE;
 end;
 
 function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
@@ -591,9 +610,9 @@ begin
   end;
 end;
 
-procedure TTable.PlaySound(const ASound: String);
+procedure TTable.PlaySound(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
 begin
-  if (GetForegroundWindow = FRenderer.RenderHandle) and
+  if ((AIgnoreFocus) or (GetForegroundWindow = FRenderer.RenderHandle)) and
      (Settings.Sounds) then
     Sounds.Play(ASound);
 end;

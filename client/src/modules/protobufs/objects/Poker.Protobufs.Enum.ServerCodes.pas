@@ -58,6 +58,7 @@ type
     seTableStatus = 58,
     seTournamentList = 59,
     seUserChange = 60,
+    seTournamentPlayerFinished = 61,
     scHello = 70,
     scLogin = 71,
     scTournamentRegister = 72,
@@ -181,6 +182,7 @@ begin
     seTableStatus: result := 'seTableStatus';
     seTournamentList: result := 'seTournamentList';
     seUserChange: result := 'seUserChange';
+    seTournamentPlayerFinished: result := 'seTournamentPlayerFinished';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
     scTournamentRegister: result := 'scTournamentRegister';

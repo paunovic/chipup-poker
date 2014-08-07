@@ -73,7 +73,7 @@ uses
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.ChangeSuspendState,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
-  Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply,
+  Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
   Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
   Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails;

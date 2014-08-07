@@ -283,22 +283,8 @@ begin
     to_remove_iid := TList<Integer>.Create;
     try
       for mongoid in to_remove do
-      begin
         if Tables.GetAndLockTable(mongoid, ttLive, table) then
-        try
           to_remove_iid.Add(table.InternalId);
-        finally
-          Tables.Unlock;
-        end;
-
-        if Tables.GetAndLockTable(mongoid, ttTournament, table) then
-        try
-          to_remove_iid.Add(table.InternalId);
-        finally
-          Tables.Unlock;
-        end;
-      end;
-
       for C1 := 0 to to_remove_iid.Count - 1 do
         Tables.Remove(to_remove_iid[C1]);
     finally

@@ -11,7 +11,7 @@ uses
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
-  TSoundPlayEvent = procedure(const ASound: String) of object;
+  TSoundPlayEvent = procedure(const ASound: String; const AIgnoreFocus: Boolean = FALSE) of object;
 
   TTableRenderer = class;
 
