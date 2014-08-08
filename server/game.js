@@ -629,7 +629,13 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				//this.stateMachine(function () {
 
 				this.updateMongoState({members:true},function () {
-					cb([this.makeEvent('teDealing')]);
+					var events = [this.makeEvent('teDealing')];
+					if (this.members[this.current_seat].autoplay) {
+						this.fold(this.current_seat,function (events2) {
+							for (var x=0; x<events2.length; x++) events.push(events2[x]);
+							cb(events);
+						});
+					} else cb(events);
 				}.bind(this));
 				//}.bind(this),
 				//players * 100);
@@ -848,9 +854,13 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 							if (this.members[x].sitOutNextRound) {
 								this.members[x].sitOutNextRound = false;
 								this.members[x].sitOutBB = false;
-								this.members[x].status = 'psOutOfPlay';
-								this.updateLeaveStats(x);
-								this.lastplayer[x] = this.seats[x].userid;
+								if (this.tournament) {
+									this.members[x].autoplay = true;
+								} else {
+									this.members[x].status = 'psOutOfPlay';
+									this.updateLeaveStats(x);
+									this.lastplayer[x] = this.seats[x].userid;
+								}
 							} else {
 								if (this.members[x].status != 'psOutOfHand') {
 									this.members[x].status = 'psInHand';

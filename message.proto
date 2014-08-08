@@ -393,7 +393,6 @@ message SeatInfo {
 		psInHand = 2;
 		psFolded = 3;
 		psAllIn = 4;
-		psAutoPlay = 5;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2 [(ObjectId)=true];
@@ -405,6 +404,8 @@ message SeatInfo {
 	required bool cards_visible = 8;
 	required bool disconnected = 9;
 	optional bool can_show = 10;
+	optional bool autoplay = 11;
+	optional bool auto_sittingout = 12;
 }
 
 message ChangeSuspendState {
