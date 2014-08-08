@@ -405,7 +405,6 @@ message SeatInfo {
 	required bool disconnected = 9;
 	optional bool can_show = 10;
 	optional bool autoplay = 11;
-	optional bool auto_sittingout = 12;
 }
 
 message ChangeSuspendState {
