@@ -657,79 +657,89 @@ begin
   FStatus.ActionStandUp := FTableType = ttLive;
 
   FStatus.FocusWindow := FALSE;
-  if FGame.State <> gsClosed then
-    case seat.Status of
-      psOutOfPlay: begin
-        FStatus.ActionPlayNow := TRUE;
-        FStatus.ActionFoldToAny := FALSE;
-        FStatus.ActionSitOut := FALSE;
-        FStatus.ActionSitOutNextBB := FALSE;
-      end;
 
-      psOutOfHand: begin
-        FStatus.ActionFoldToAny := FALSE;
-        FStatus.ActionSitOut := TRUE;
-        FStatus.ActionSitOutNextBB := TRUE;
-      end;
+  if seat.AutoPlay then
+  begin
+    FStatus.ActionPlayNow := TRUE;
+    FStatus.ActionFoldToAny := FALSE;
+    FStatus.ActionSitOut := FALSE;
+    FStatus.ActionSitOutNextBB := FALSE;
+  end
+  else
+    if FGame.State <> gsClosed then
+      case seat.Status of
+        psOutOfPlay: begin
+          FStatus.ActionPlayNow := TRUE;
+          FStatus.ActionFoldToAny := FALSE;
+          FStatus.ActionSitOut := FALSE;
+          FStatus.ActionSitOutNextBB := FALSE;
+        end;
 
-      psInHand, psAllIn: begin
-        FStatus.ActionSitOut := TRUE;
-        FStatus.ActionSitOutNextBB := TRUE;
-        if (seat.Status = psInHand) and
-           (FStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
-          FStatus.ActionFoldToAny := TRUE;
+        psOutOfHand: begin
+          FStatus.ActionFoldToAny := FALSE;
+          FStatus.ActionSitOut := TRUE;
+          FStatus.ActionSitOutNextBB := TRUE;
+        end;
 
-        if (FStatus.CurrentSeat = FStatus.SelfSeatIndex) and
-           (not FStatus.Locked) and
-           (not FGameplayLocked) then
-          case FStatus.State of
-            tsIdle: begin
-              FStatus.ActionFoldToAny := FALSE;
-            end;
+        psInHand, psAllIn: begin
+          FStatus.ActionSitOut := TRUE;
+          FStatus.ActionSitOutNextBB := TRUE;
+          if (seat.Status = psInHand) and
+             (FStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+            FStatus.ActionFoldToAny := TRUE;
 
-            tsPreFlop, tsFlop, tsTurn, tsRiver: begin
-              FStatus.ActionFold := TRUE;
-              FStatus.FocusWindow := TRUE;
+          if (FStatus.CurrentSeat = FStatus.SelfSeatIndex) and
+             (not FStatus.Locked) and
+             (not FGameplayLocked) then
+            case FStatus.State of
+              tsIdle: begin
+                FStatus.ActionFoldToAny := FALSE;
+              end;
 
-              // check if our current bet is smaller than minimumbet (call/raise situation)
-              if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
-              begin
-                if seat.Chips <= FStatus.MinimumBet then
-                  FStatus.CallCaption := 'CALL (ALL-IN)'
-                else
-                  FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet{ - FStatus.GetBet(seat_info.SeatIndex)})]);
-                FStatus.ActionCall := TRUE;
+              tsPreFlop, tsFlop, tsTurn, tsRiver: begin
+                FStatus.ActionFold := TRUE;
+                FStatus.FocusWindow := TRUE;
 
-                // if we can call, there is a possibility that we can raise too - we check if we can raise here
-                if (seat.Chips > FStatus.MinimumBet) and
-                   (FStatus.MinimumBet < FStatus.MinimumRaise) then
-                  FStatus.ActionRaise := TRUE;
-              end
-              else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
-              begin
-                FStatus.ActionCheck := TRUE;
-                FStatus.ActionBet := TRUE;
+                // check if our current bet is smaller than minimumbet (call/raise situation)
+                if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
+                begin
+                  if seat.Chips <= FStatus.MinimumBet then
+                    FStatus.CallCaption := 'CALL (ALL-IN)'
+                  else
+                    FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet{ - FStatus.GetBet(seat_info.SeatIndex)})]);
+                  FStatus.ActionCall := TRUE;
+
+                  // if we can call, there is a possibility that we can raise too - we check if we can raise here
+                  if (seat.Chips > FStatus.MinimumBet) and
+                     (FStatus.MinimumBet < FStatus.MinimumRaise) then
+                    FStatus.ActionRaise := TRUE;
+                end
+                else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
+                begin
+                  FStatus.ActionCheck := TRUE;
+                  FStatus.ActionBet := TRUE;
+                end;
+              end;
+
+              tsWinning, tsWinning2: begin
+                FStatus.ActionFoldToAny := FALSE;
               end;
             end;
+        end;
 
-            tsWinning, tsWinning2: begin
-              FStatus.ActionFoldToAny := FALSE;
-            end;
-          end;
+        psFolded: begin
+          FStatus.ActionFoldToAny := FALSE;
+          FStatus.ActionSitOut := TRUE;
+          FStatus.ActionSitOutNextBB := TRUE;
+        end;
       end;
-
-      psFolded: begin
-        FStatus.ActionFoldToAny := FALSE;
-        FStatus.ActionSitOut := TRUE;
-        FStatus.ActionSitOutNextBB := TRUE;
-      end;
-    end;
 
   // check if SHOW CARDS button is enabled
   FStatus.ActionShowCards := (FStatus.State in [tsWinning, tsWinning2]) and
                              (seat.CanShow) and
                              (not seat.CardsVisible) and
-                             (seat.Status in [psFolded, psAllIn, psInHand]);
+                             (seat.Status in [psFolded, psAllIn, psInHand]) and
+                             (not seat.AutoPlay);
 end;
 
 procedure TTable.WndProc(var AMessage: TMessage);

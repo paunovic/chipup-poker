@@ -1206,6 +1206,9 @@ var
   text: String;
   p: TPoint2;
 begin
+  if AValue = 0 then
+    Exit;
+
   text := ChipsToStr(AValue);
 
   font := TableResources.BarmenoFonts[High(TableResources.BarmenoFonts)];

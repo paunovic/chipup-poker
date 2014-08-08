@@ -24,6 +24,7 @@ type
       kCardsVisibleFieldNumber = 8;
       kDisconnectedFieldNumber = 9;
       kCanShowFieldNumber = 10;
+      kAutoplayFieldNumber = 11;
 
     var
       FSeat: Integer;
@@ -36,6 +37,7 @@ type
       FCardsVisible: Boolean;
       FDisconnected: Boolean;
       FCanShow: Boolean;
+      FAutoplay: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_Seat;
@@ -68,6 +70,9 @@ type
     procedure set_has_CanShow;
     procedure clear_has_CanShow;
     procedure SetCanShow(const AValue: Boolean);
+    procedure set_has_Autoplay;
+    procedure clear_has_Autoplay;
+    procedure SetAutoplay(const AValue: Boolean);
 
   public
     constructor Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE); overload;
@@ -126,6 +131,11 @@ type
     function has_CanShow: Boolean;
     procedure clear_CanShow;
     property CanShow: Boolean read FCanShow write SetCanShow;
+
+    // optional bool Autoplay = 11;
+    function has_Autoplay: Boolean;
+    procedure clear_Autoplay;
+    property Autoplay: Boolean read FAutoplay write SetAutoplay;
 
   end;
 
@@ -208,6 +218,11 @@ begin
         FCanShow := AProtobufReader.readBoolean;
         set_has_CanShow;
       end;
+      kAutoplayFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FAutoplay := AProtobufReader.readBoolean;
+        set_has_Autoplay;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -235,6 +250,8 @@ begin
     SetDisconnected(AFrom.Disconnected);
   if AFrom.has_CanShow then
     SetCanShow(AFrom.CanShow);
+  if AFrom.has_Autoplay then
+    SetAutoplay(AFrom.Autoplay);
 end;
 
 function TPB_SeatInfo.IsInitialized: Boolean;
@@ -548,6 +565,36 @@ begin
   set_has_CanShow;
 end;
 
+procedure TPB_SeatInfo.clear_Autoplay;
+begin
+  FAutoplay := false;
+  clear_has_Autoplay;
+end;
+
+function TPB_SeatInfo.has_Autoplay: Boolean;
+begin
+  result := (_has_bits_ and 1024) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Autoplay;
+begin
+  _has_bits_ := _has_bits_ or 1024;
+end;
+
+procedure TPB_SeatInfo.clear_has_Autoplay;
+begin
+  _has_bits_ := _has_bits_ and not 1024;
+end;
+
+procedure TPB_SeatInfo.SetAutoplay(const AValue: Boolean);
+begin
+  Assert(not has_Autoplay);
+  FAutoplay := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kAutoplayFieldNumber, AValue);
+  set_has_Autoplay;
+end;
+
 procedure TPB_SeatInfo.Clear;
 begin
   if _has_bits_ = 0 then
@@ -563,6 +610,7 @@ begin
   clear_CardsVisible;
   clear_Disconnected;
   clear_CanShow;
+  clear_Autoplay;
 end;
 
 procedure TPB_SeatInfoList.Assign(const APB_SeatInfoList: TList<TPB_SeatInfo>);

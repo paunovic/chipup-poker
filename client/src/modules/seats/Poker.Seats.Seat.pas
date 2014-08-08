@@ -22,6 +22,7 @@ type
     FCardsVisible: Boolean;
     FCanShow: Boolean;
     FDisconnected: Boolean;
+    FAutoPlay: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -47,6 +48,7 @@ type
     property CardsVisible: Boolean read FCardsVisible write FCardsVisible;
     property Disconnected: Boolean read FDisconnected;
     property CanShow: Boolean read FCanShow;
+    property AutoPlay: Boolean read FAutoPlay;
   end;
 
 implementation
@@ -79,6 +81,7 @@ begin
   FCardsVisible := ASeatInfoProtobuf.CardsVisible;
   FDisconnected := ASeatInfoProtobuf.Disconnected;
   FCanShow := ASeatInfoProtobuf.CanShow;
+  FAutoPlay := ASeatInfoProtobuf.Autoplay;
 end;
 
 procedure TSeatInfo.Assign(const ASeatInfo: TSeatInfo);
@@ -99,6 +102,7 @@ begin
   FDisconnected := ASeatInfo.Disconnected;
   FCanShow := ASeatInfo.FCanShow;
   FDealtCards := ASeatInfo.DealtCards;
+  FAutoPlay := ASeatInfo.Autoplay;
 end;
 
 procedure TSeatInfo.IncDealtCards;
