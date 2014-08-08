@@ -4287,9 +4287,11 @@ object frmChipUpMain: TfrmChipUpMain
                   end
                   item
                     Action = acTournamentsOpenAll
+                    Caption = '&Open All Tables'
                   end
                   item
                     Action = acTournamentsCloseAll
+                    Caption = '&Close All Tables'
                   end>
                 Caption = 'T&ournaments'
               end

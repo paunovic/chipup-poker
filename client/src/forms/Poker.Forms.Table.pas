@@ -102,8 +102,8 @@ type
       FDXBRaisePresets: array[0..3] of Integer;
       {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
-    procedure SetRaiseActionCaption;
-    procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
+    procedure SetActionCaptions;
+    procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure AddDealerChatMessage(const AMessage: String);
@@ -320,6 +320,7 @@ begin
   else
     if Tables.GetAndLockTable(FInternalId, table) then
     try
+      ServerSocket.TableSitOutNextHand(FGameId, TRUE);
       table.Hidden := TRUE;
     finally
       Tables.Unlock;
@@ -395,17 +396,21 @@ var
   table: TTable;
 begin
   DefocusControls;
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    table.Renderer.MouseDown(Button, Shift, X, Y, set_raise_amount);
 
-    if set_raise_amount then
-      SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +
-          (table.Status.MaximumRaise - table.Status.MinimumRaise) * table.Renderer.RaiseThumbPosition), table.game.BigBlind), TRUE, FALSE);
+  if Button = mbLeft then
+  begin
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      table.Renderer.MouseDown(Button, Shift, X, Y, set_raise_amount);
 
-    table.Renderer.Render;
-  finally
-    Tables.Unlock;
+      if set_raise_amount then
+        SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +
+            (table.Status.MaximumRaise - table.Status.MinimumRaise) * table.Renderer.RaiseThumbPosition), table.game.BigBlind), TRUE, FALSE);
+
+      table.Renderer.Render;
+    finally
+      Tables.Unlock;
+    end;
   end;
 end;
 
@@ -543,6 +548,7 @@ begin
 
   lbvHandHistory.Caption := lbl;
   lbvHandHistory.Visible := lbl <> '';
+  lbvHandHistory.Refresh;
 end;
 
 procedure TfrmTable.UpdateHandStrength;
@@ -866,7 +872,7 @@ begin
             table.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaiseMax;
           end;
 
-          SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
+          SetRaiseValue(FRaiseValue, TRUE, FALSE);
         end;
 
         lbvHandStrength.Top := Round(table.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds^[0].y - lbvHandStrength.Height - 5);
@@ -957,6 +963,8 @@ begin
   finally
     Tables.Unlock;
   end;
+
+  RefreshAll;
 end;
 
 procedure TfrmTable.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
@@ -1129,7 +1137,7 @@ begin
   SetRaiseValue(raise_value);
 end;
 
-procedure TfrmTable.SetRaiseActionCaption;
+procedure TfrmTable.SetActionCaptions;
 var
   seat_info: TSeatInfo;
   table: TTable;
@@ -1155,13 +1163,15 @@ begin
         end
         else
           acRaise.Caption := '';
+
+      acCall.Caption := table.Status.CallCaption;
     end;
   finally
     Tables.Unlock;
   end;
 end;
 
-procedure TfrmTable.SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
+procedure TfrmTable.SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 var
   val: UINT32;
   oldval: UINT32;
@@ -1172,13 +1182,6 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not AAbsoluteJump then
-      if val > oldval then
-        val := oldval + table.game.BigBlind
-      else
-        if val < oldval then
-          val := oldval - table.game.BigBlind;
-
     if val > table.Status.MaximumRaise then
       val := table.Status.MaximumRaise
     else
@@ -1196,7 +1199,7 @@ begin
     if ASetSpinEditValue then
       seRaiseAmount.Value := val / 100;
 
-    SetRaiseActionCaption;
+    SetActionCaptions;
 
     if FRaiseValue <> oldval then
       table.Renderer.Render;
@@ -1236,7 +1239,7 @@ begin
       acHandPlaybackPlay.Execute;
   end;
 
-  SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
+  SetRaiseValue(FRaiseValue, TRUE, FALSE);
 
   RefreshAll;
 
@@ -1258,6 +1261,7 @@ begin
   try
     table.Renderer.UpdateDXAreaSize;
     ConfigureGUI;
+    SetActionCaptions;
     table.Renderer.Render(FALSE);
 
     if (table.Status.ActionFoldToAny) and

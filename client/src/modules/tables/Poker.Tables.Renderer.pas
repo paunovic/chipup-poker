@@ -259,14 +259,15 @@ begin
     dxbutton.MouseDown(Button, Shift, X, Y);
 
   // check click on raise thumb button
-  if FMetrics.IsPointInRaiseThumb(X, Y) then
-    FRaiseThumbDown := TRUE
-  else
-    if FMetrics.IsPointInRaiseTrack(X, Y, percent) then // check click on raise track
-    begin
-      FRaiseThumbPosition := percent;
-      ASetRaiseAmount := TRUE;
-    end;
+  if not FRaiseThumbDown then
+    if FMetrics.IsPointInRaiseThumb(X, Y) then
+      FRaiseThumbDown := TRUE
+    else
+      if FMetrics.IsPointInRaiseTrack(X, Y, percent) then // check click on raise track
+      begin
+        FRaiseThumbPosition := percent;
+        ASetRaiseAmount := TRUE;
+      end;
 end;
 
 procedure TTableRenderer.MouseMove(Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
@@ -293,6 +294,7 @@ begin
       if percent > 1 then
         percent := 1;
 
+        OutputDebugString(PChar(Format('%.2f', [percent])));
     FRaiseThumbPosition := percent;
     ASetRaiseAmount := TRUE;
   end;
