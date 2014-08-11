@@ -91,6 +91,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 1
     object gridTablesTable: TcxGridTableView
+      OnCellDblClick = gridTablesTableCellDblClick
       OnFocusedRecordChanged = gridTablesTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>

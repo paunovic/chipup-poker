@@ -294,7 +294,6 @@ begin
       if percent > 1 then
         percent := 1;
 
-        OutputDebugString(PChar(Format('%.2f', [percent])));
     FRaiseThumbPosition := percent;
     ASetRaiseAmount := TRUE;
   end;

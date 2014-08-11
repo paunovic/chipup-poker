@@ -46,6 +46,8 @@ type
     procedure acUnregisterExecute(Sender: TObject);
     procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
       ANewItemRecordFocusingChanged: Boolean);
+    procedure gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTournamentId: TMongoId;
@@ -72,7 +74,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -229,6 +231,22 @@ begin
     AStyle := stylePlayersSelf
   else
     AStyle := stylePlayersOther;
+end;
+
+procedure TfrmTournamentLobby.gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+var
+  tournament: TTournamentInfo;
+  game: TPB_Game;
+begin
+  if FSelectedTableId.IsEmpty then
+    Exit;
+
+  if Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game) then
+  try
+    Tables.AddTournamentTable(game.MongoId, TRUE, TRUE);
+  finally
+    Tournaments.Unlock;
+  end;
 end;
 
 procedure TfrmTournamentLobby.gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);

@@ -47,7 +47,7 @@ type
     destructor Destroy; override;
 
     function SetupLiveTable(const AGameId: TMongoId; const ASendJoinCommand: Boolean): Boolean;
-    function SetupTournamentTable(const AGameId: TMongoId): Boolean;
+    function SetupTournamentTable(const AGameId: TMongoId; const ASendJoinCommand: Boolean): Boolean;
     function SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 
     procedure RenderSync;
@@ -261,7 +261,7 @@ begin
   Exit(TRUE);
 end;
 
-function TTable.SetupTournamentTable(const AGameId: TMongoId): Boolean;
+function TTable.SetupTournamentTable(const AGameId: TMongoId; const ASendJoinCommand: Boolean): Boolean;
 var
   form: TfrmTable;
 begin
@@ -280,6 +280,8 @@ begin
   SetTimer(FInternalHWND, TIMER_ID_RENDER, 250, nil);
   FForm := form;
   FLeaveNotify := TRUE;
+  if ASendJoinCommand then
+    ServerSocket.JoinTable(AGameId);
   FRenderer.UpdateDXAreaSize;
   Exit(TRUE);
 end;

@@ -110,12 +110,33 @@ end;
 procedure TTournamentList.Assign(const ATournamentList: TList<TPB_TournamentInfo>);
 var
   pbtournament: TPB_TournamentInfo;
+  tournament: TTournamentInfo;
+  C1: Integer;
+  games: TObjectList<TPB_Game>;
 begin
   FLock.Enter;
   try
-    Clear;
-    for pbtournament in ATournamentList do
-      Add(pbtournament);
+    games := TObjectList<TPB_Game>.Create;
+    try
+      Tournaments.Lock;
+      try
+        for tournament in Tournaments.Values do
+          for C1 := 0 to tournament.Games.Count - 1 do
+            games.Add(TPB_Game.Create(tournament.Games[C1]));
+      finally
+        Tournaments.Unlock;
+      end;
+
+      Clear;
+      for pbtournament in ATournamentList do
+        Add(pbtournament);
+
+      for C1 := 0 to games.Count - 1 do
+        if Tournaments.GetAndLock(games[C1].Tournament, tournament) then
+          tournament.AddGame(games[C1])
+    finally
+      games.Free;
+    end;
   finally
     FLock.Leave;
   end;
