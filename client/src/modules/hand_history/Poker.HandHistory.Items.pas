@@ -443,6 +443,7 @@ constructor THandHistoryItems.Create(const AParentId, AGameId: TMongoId);
 var
   club: TClubInfo;
   game: TGameInfo;
+  pbgame: TPB_Game;
   tournament: TTournamentInfo;
 begin
   inherited Create(TRUE);
@@ -467,10 +468,10 @@ begin
 
   if not Assigned(club) then
   begin
-    if Tournaments.GetAndLockByGame(FGameId, tournament, game) then
+    if Tournaments.GetAndLockByGame(FGameId, tournament, pbgame) then
     try
       FTournament := TTournamentInfo.Create(tournament);
-      FGame.Assign(game);
+      FGame.Assign(pbgame);
     finally
       Tournaments.Unlock;
     end;

@@ -147,7 +147,7 @@ begin
 
       if Tournaments.GetAndLock(pbgame.Tournament, tournament) then
       try
-        tournament.Games.AddGame(pbgame);
+        tournament.AddGame(pbgame);
       finally
         Tournaments.Unlock;
       end;

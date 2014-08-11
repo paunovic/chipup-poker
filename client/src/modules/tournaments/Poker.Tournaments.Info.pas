@@ -3,20 +3,19 @@ unit Poker.Tournaments.Info;
 interface
 
 uses
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentMember, System.Generics.Collections,
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentMember, System.Generics.Collections, Poker.Protobufs.Objects.Game,
   Poker.Games.GameList;
 
 type
   TTournamentInfo = class(TPB_TournamentInfo)
   private
-    FGames: TGameList;
   public
     constructor Create(const ATournamentInfo: TPB_TournamentInfo);
     destructor Destroy; override;
 
-    function StateToStr: String;
+    procedure AddGame(const AGame: TPB_Game);
 
-    property Games: TGameList read FGames write FGames;
+    function StateToStr: String;
   end;
 
 implementation
@@ -26,12 +25,10 @@ implementation
 constructor TTournamentInfo.Create(const ATournamentInfo: TPB_TournamentInfo);
 begin
   inherited Create(ATournamentInfo);
-  FGames := TGameList.Create;
 end;
 
 destructor TTournamentInfo.Destroy;
 begin
-  FGames.Free;
   inherited;
 end;
 
@@ -45,5 +42,20 @@ begin
     result := 'Unknown';
   end;
 end;
+
+procedure TTournamentInfo.AddGame(const AGame: TPB_Game);
+var
+  game: TPB_Game;
+begin
+  for game in Games do
+    if game.MongoId = AGame.MongoId then
+    begin
+      game.Clear;
+      game.MergeFrom(AGame);
+      Exit;
+    end;
+  Games.Add(TPB_Game.Create(AGame));
+end;
+
 
 end.

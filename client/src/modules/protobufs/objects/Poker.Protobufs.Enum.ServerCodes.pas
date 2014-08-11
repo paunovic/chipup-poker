@@ -99,7 +99,8 @@ type
     scResetPlayerBalance = 107,
     scQueryAssets = 108,
     scTournamentUnregister = 109,
-    scGetTournamentDetails = 110
+    scGetTournamentDetails = 110,
+    scTournamentLobbyClose = 111
   );
 
 {$IFDEF DEBUG}
@@ -224,6 +225,7 @@ begin
     scQueryAssets: result := 'scQueryAssets';
     scTournamentUnregister: result := 'scTournamentUnregister';
     scGetTournamentDetails: result := 'scGetTournamentDetails';
+    scTournamentLobbyClose: result := 'scTournamentLobbyClose';
   end;
 end;
 {$ENDIF DEBUG}

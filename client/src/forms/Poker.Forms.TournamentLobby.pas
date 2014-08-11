@@ -9,7 +9,7 @@ uses
   dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView,
   cxGridTableView, cxClasses, cxGridCustomView, cxGrid, cxCurrencyEdit,
-  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons;
+  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage, cxLabel, Vcl.ExtCtrls;
 
 type
   TfrmTournamentLobby = class(TForm, IFormParams)
@@ -22,10 +22,21 @@ type
     StyleRepository: TcxStyleRepository;
     stylePlayersSelf: TcxStyle;
     stylePlayersOther: TcxStyle;
-    btTournamentRegister: TcxButton;
     alTournamentLobby: TActionList;
     acRegister: TAction;
     acUnregister: TAction;
+    gridTables: TcxGrid;
+    gridTablesTable: TcxGridTableView;
+    gridTablesId: TcxGridColumn;
+    gridTablesName: TcxGridColumn;
+    gridTablesPlayers: TcxGridColumn;
+    gridTablesLevel: TcxGridLevel;
+    paHeader: TPanel;
+    btTournamentRegister: TcxButton;
+    lbsHeader: TcxLabel;
+    gridTablesSmallestStack: TcxGridColumn;
+    gridTablesAverageStack: TcxGridColumn;
+    gridTablesLargestStack: TcxGridColumn;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -33,15 +44,20 @@ type
       AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acRegisterExecute(Sender: TObject);
     procedure acUnregisterExecute(Sender: TObject);
+    procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
+      ANewItemRecordFocusingChanged: Boolean);
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTournamentId: TMongoId;
+    FSelectedTableId: TMongoId;
     FCallbacksId: Integer;
 
     procedure QueryTournamentInfo;
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
     procedure UpdatePlayersGrid;
+    procedure UpdateTablesGrid;
+    procedure UpdateCaptions;
     procedure RefreshAll;
   public
     procedure SetParams(const AParams: array of pointer);
@@ -56,7 +72,8 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -83,6 +100,7 @@ end;
 
 procedure TfrmTournamentLobby.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  ServerSocket.CloseTournamentLobby(FTournamentId);
   Action := caFree;
 end;
 
@@ -100,8 +118,21 @@ begin
 
   Tournaments.Add(proto);
   gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridTablesTable.OptionsView.NoDataToDisplayInfoText := ' ';
   alTournamentLobby.State := asNormal;
   RefreshAll;
+end;
+
+procedure TfrmTournamentLobby.UpdateCaptions;
+var
+  tournament: TTournamentInfo;
+begin
+  if Tournaments.GetAndLock(FTournamentId, tournament) then
+  try
+    lbsHeader.Caption := tournament.Name;
+  finally
+    Tournaments.Unlock;
+  end;
 end;
 
 procedure TfrmTournamentLobby.UpdatePlayersGrid;
@@ -109,22 +140,81 @@ var
   c: TcxDataController;
   tournament: TTournamentInfo;
   rec_count: Integer;
+  member: TPB_TournamentMember;
+  game: TPB_Game;
+begin
+  c := gridPlayersTable.DataController;
+  c.BeginFullUpdate;
+  try
+    rec_count := 0;
+    if (not FSelectedTableId.IsEmpty) and
+       (Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game)) then
+    try
+      for member in tournament.Players do
+        if member.Gameid = game.MongoId then
+        begin
+          Inc(rec_count);
+          if rec_count > c.RecordCount then
+            c.SetRecordCount(rec_count);
+          c.SetValue(rec_count - 1, gridPlayersMongoId.Index, member.MongoId.ToVariant);
+          c.SetValue(rec_count - 1, gridPlayersName.Index, member.Displayname);
+          c.SetValue(rec_count - 1, gridPlayersChips.Index, member.Chips / 100);
+        end;
+    finally
+      Tournaments.Unlock;
+    end;
+    c.SetRecordCount(rec_count);
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmTournamentLobby.UpdateTablesGrid;
+var
+  c: TcxDataController;
+  tournament: TTournamentInfo;
+  rec_count: Integer;
   C1: Integer;
+  game: TPB_Game;
+  member: TPB_TournamentMember;
+  stack_players, total_stack, smallest_stack, avg_stack, largest_stack: UINT32;
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
-    c := gridPlayersTable.DataController;
+    c := gridTablesTable.DataController;
     c.BeginFullUpdate;
     try
       rec_count := 0;
-      for C1 := 0 to tournament.Players.Count - 1 do
+      for C1 := 0 to tournament.Games.Count - 1 do
       begin
+        game := tournament.Games[C1];
         Inc(rec_count);
         if rec_count > c.RecordCount then
           c.SetRecordCount(rec_count);
-        c.SetValue(rec_count - 1, gridPlayersMongoId.Index, tournament.Players[C1].MongoId.ToVariant);
-        c.SetValue(rec_count - 1, gridPlayersName.Index, tournament.Players[C1].Displayname);
-        c.SetValue(rec_count - 1, gridPlayersChips.Index, tournament.Players[C1].Chips / 100);
+        c.SetValue(rec_count - 1, gridTablesId.Index, game.MongoId.ToVariant);
+        c.SetValue(rec_count - 1, gridTablesName.Index, game.Gamename);
+        c.SetValue(rec_count - 1, gridTablesPlayers.Index, game.Sitting);
+
+        total_stack := 0;
+        stack_players := 0;
+        smallest_stack := 0;
+        largest_stack := 0;
+        for member in tournament.Players do
+          if member.Gameid = game.MongoId then
+          begin
+            total_stack := total_stack + member.Chips;
+            if (member.Chips < smallest_stack) or
+               (smallest_stack = 0) then
+              smallest_stack := member.Chips;
+            if member.Chips > largest_stack then
+              largest_stack := member.Chips;
+            Inc(stack_players);
+          end;
+        avg_stack := total_stack div stack_players;
+
+        c.SetValue(rec_count - 1, gridTablesSmallestStack.Index, smallest_stack / 100);
+        c.SetValue(rec_count - 1, gridTablesAverageStack.Index, avg_stack / 100);
+        c.SetValue(rec_count - 1, gridTablesLargestStack.Index, largest_stack / 100);
       end;
       c.SetRecordCount(rec_count);
     finally
@@ -145,6 +235,26 @@ begin
     AStyle := stylePlayersSelf
   else
     AStyle := stylePlayersOther;
+end;
+
+procedure TfrmTournamentLobby.gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+var
+  recIndex: Integer;
+  tournament: TTournamentInfo;
+  game: TPB_Game;
+begin
+  recIndex := Sender.DataController.GetFocusedRecordIndex;
+  if recIndex = -1 then
+    FSelectedTableId.Clear
+  else
+  begin
+    FSelectedTableId := Sender.DataController.GetValue(recIndex, gridTablesId.Index);
+    if Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game) then
+      Tournaments.Unlock
+    else
+      FSelectedTableId.Clear;
+  end;
+  UpdatePlayersGrid;
 end;
 
 procedure TfrmTournamentLobby.CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
@@ -202,6 +312,8 @@ begin
   end;
 
   UpdatePlayersGrid;
+  UpdateTablesGrid;
+  UpdateCaptions;
 end;
 
 

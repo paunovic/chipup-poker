@@ -200,6 +200,7 @@ function TTable.UpdateObjects;
 var
   club: TClubInfo;
   game: TGameInfo;
+  pbgame: TPB_Game;
   tournament: TTournamentInfo;
 begin
   case FTableType of
@@ -220,10 +221,10 @@ begin
 
     ttTournament: begin
       result := FALSE;
-      if Tournaments.GetAndLockByGame(FGameId, tournament, game) then
+      if Tournaments.GetAndLockByGame(FGameId, tournament, pbgame) then
       try
         FTournamentId := tournament.MongoId;
-        FGame.Assign(game);
+        FGame.Assign(pbgame);
         result := TRUE;
       finally
         Tournaments.Unlock;

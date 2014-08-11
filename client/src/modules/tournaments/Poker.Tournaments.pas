@@ -4,7 +4,7 @@ interface
 
 uses
   Poker.Protobufs.Objects.TournamentList, System.SyncObjs, System.Generics.Collections, Poker.Types, Poker.Tournaments.Info,
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Games.Game;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Games.Game, Poker.Protobufs.Objects.Game;
 
 type
   TTournamentList = class(TObjectDictionary<TMongoId, TTournamentInfo>)
@@ -18,7 +18,7 @@ type
     destructor Destroy; override;
 
     function GetAndLock(const AId: TMongoId; out ATournament: TTournamentInfo): Boolean;
-    function GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TGameInfo): Boolean;
+    function GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TPB_Game): Boolean;
     function AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
 
     procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
@@ -110,32 +110,12 @@ end;
 procedure TTournamentList.Assign(const ATournamentList: TList<TPB_TournamentInfo>);
 var
   pbtournament: TPB_TournamentInfo;
-  games: TObjectList<TGameInfo>;
-  game, gamecopy: TGameInfo;
-  tournament: TTournamentInfo;
 begin
   FLock.Enter;
   try
-    games := TObjectList<TGameInfo>.Create(FALSE);
-    try
-      for tournament in Values do
-        for game in tournament.Games.Values do
-        begin
-          gamecopy := TGameInfo.Create;
-          gamecopy.Assign(game);
-          games.Add(gamecopy);
-        end;
-
-      Clear;
-      for pbtournament in ATournamentList do
-        Add(pbtournament);
-
-      for game in games do
-        if TryGetValue(game.TournamentId, tournament) then
-          tournament.Games.Add(game.MongoId, game);
-    finally
-      games.Free;
-    end;
+    Clear;
+    for pbtournament in ATournamentList do
+      Add(pbtournament);
   finally
     FLock.Leave;
   end;
@@ -165,19 +145,20 @@ begin
   end;
 end;
 
-function TTournamentList.GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TGameInfo): Boolean;
+function TTournamentList.GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TPB_Game): Boolean;
 var
   tournament: TTournamentInfo;
-  game: TGameInfo;
+  game: TPB_Game;
 begin
   FLock.Enter;
   for tournament in Values do
-    if tournament.Games.TryGetValue(AId, game) then
-    begin
-      ATournament := tournament;
-      AGame := game;
-      Exit(TRUE);
-    end;
+    for game in tournament.Games do
+      if game.MongoId = AId then
+      begin
+        ATournament := tournament;
+        AGame := game;
+        Exit(TRUE);
+      end;
   FLock.Leave;
   Exit(FALSE);
 end;

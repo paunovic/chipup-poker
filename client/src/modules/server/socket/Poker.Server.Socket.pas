@@ -56,6 +56,7 @@ type
     procedure TournamentRegister(const ATournamentId: TMongoId);
     procedure TournamentUnregister(const ATournamentId: TMongoId);
     procedure GetTournamentDetails(const ATournamentId: TMongoId);
+    procedure CloseTournamentLobby(const ATournamentId: TMongoId);
   end;
 
 var
@@ -640,5 +641,19 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TServerSocket.CloseTournamentLobby(const ATournamentId: TMongoId);
+var
+  protobuf: TPB_TournamentDetails;
+begin
+  protobuf := TPB_TournamentDetails.Create;
+  try
+    protobuf.MongoId := ATournamentId;
+    SendProtobuf(scTournamentLobbyClose, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 end.

@@ -15,11 +15,13 @@ type
       kIdFieldNumber = 1;
       kDisplaynameFieldNumber = 2;
       kChipsFieldNumber = 3;
+      kGameidFieldNumber = 4;
 
     var
       FId: TMongoId;
       FDisplayname: String;
       FChips: UInt32;
+      FGameid: TMongoId;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -31,6 +33,9 @@ type
     procedure set_has_Chips;
     procedure clear_has_Chips;
     procedure SetChips(const AValue: UInt32);
+    procedure set_has_Gameid;
+    procedure clear_has_Gameid;
+    procedure SetGameid(const AValue: TMongoId);
 
   public
     constructor Create(const AFrom: TPB_TournamentMember; const ALightweight: Boolean = FALSE); overload;
@@ -54,6 +59,11 @@ type
     function has_Chips: Boolean;
     procedure clear_Chips;
     property Chips: UInt32 read FChips write SetChips;
+
+    // optional bytes Gameid = 4;
+    function has_Gameid: Boolean;
+    procedure clear_Gameid;
+    property Gameid: TMongoId read FGameid write SetGameid;
 
   end;
 
@@ -101,6 +111,11 @@ begin
         FChips := AProtobufReader.readUInt32;
         set_has_Chips;
       end;
+      kGameidFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FGameid := AProtobufReader.readMongoId;
+        set_has_Gameid;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -114,6 +129,8 @@ begin
     SetDisplayname(AFrom.Displayname);
   if AFrom.has_Chips then
     SetChips(AFrom.Chips);
+  if AFrom.has_Gameid then
+    SetGameid(AFrom.Gameid);
 end;
 
 function TPB_TournamentMember.IsInitialized: Boolean;
@@ -217,6 +234,40 @@ begin
   set_has_Chips;
 end;
 
+procedure TPB_TournamentMember.clear_Gameid;
+begin
+  FGameid.Clear;
+  clear_has_Gameid;
+end;
+
+function TPB_TournamentMember.has_Gameid: Boolean;
+begin
+  result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_TournamentMember.set_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_TournamentMember.clear_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ and not 8;
+end;
+
+procedure TPB_TournamentMember.SetGameid(const AValue: TMongoId);
+begin
+  Assert(not has_Gameid);
+  FGameid := AValue;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kGameidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
+  set_has_Gameid;
+end;
+
 procedure TPB_TournamentMember.Clear;
 begin
   if _has_bits_ = 0 then
@@ -225,6 +276,7 @@ begin
   clear_MongoId;
   clear_Displayname;
   clear_Chips;
+  clear_Gameid;
 end;
 
 procedure TPB_TournamentMemberList.Assign(const APB_TournamentMemberList: TList<TPB_TournamentMember>);

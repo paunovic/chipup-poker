@@ -623,7 +623,7 @@ var
   tournament: TTournamentInfo;
   aci: TActionClientItem;
   C1: Integer;
-  game: TGameInfo;
+  game: TPB_Game;
   table: TTable;
   added: Boolean;
 begin
@@ -644,7 +644,7 @@ begin
       aci.Tag := C1 + 1;
       if Tournaments.GetAndLock(dmMain.SelfInfo.RegisteredTournaments[C1], tournament) then
       try
-        for game in tournament.Games.Values do
+        for game in tournament.Games do
           if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
           try
             FRegisteredTournamentsMap.Add(C1 + 1, table.GameId);
@@ -1540,7 +1540,7 @@ var
   action: TAction;
   mongoid: TMongoId;
   tournament: TTournamentInfo;
-  game: TGameInfo;
+  game: TPB_Game;
   table: TTable;
 begin
   if not (Sender is TAction) then
@@ -1601,7 +1601,7 @@ begin
 
   if Tournaments.GetAndLock(proto.Game.Tournament, tournament) then
   try
-    tournament.Games.AddGame(proto.Game);
+    tournament.AddGame(proto.Game);
   finally
     Tournaments.Unlock;
   end;
@@ -1610,6 +1610,7 @@ begin
   if Tables.GetAndLockTable(proto.Game.MongoId, ttTournament, table) then
   try
     table.SetTableStatus(proto.TableStatus, TRUE);
+    table.BringToFront;
   finally
     Tables.Unlock;
   end;
