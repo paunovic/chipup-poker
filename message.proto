@@ -101,7 +101,7 @@ enum ServerCodes {
 	scResetPlayerBalance = 107;
 	scQueryAssets = 108;
 	scTournamentUnregister = 109;
-	scGetTournamentDetails = 110;
+	scTournamentLobbyOpen = 110;
 	scTournamentLobbyClose = 111;
 }
 
