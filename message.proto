@@ -102,6 +102,7 @@ enum ServerCodes {
 	scQueryAssets = 108;
 	scTournamentUnregister = 109;
 	scGetTournamentDetails = 110;
+	scTournamentLobbyClose = 111;
 }
 
 message StringSizes {
