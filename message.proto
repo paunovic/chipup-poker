@@ -103,6 +103,7 @@ enum ServerCodes {
 	scTournamentUnregister = 109;
 	scTournamentLobbyOpen = 110;
 	scTournamentLobbyClose = 111;
+	scTournamentQueryInfo = 112;
 }
 
 message StringSizes {
