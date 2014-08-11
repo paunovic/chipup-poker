@@ -12,4 +12,8 @@ block content
             option(selected=tourn.state == 'tnsOpen',value='tnsOpen') open
             option(selected=tourn.state == 'tnsInProgress',value='tnsInProgress') in-progress
             option(selected=tourn.state == 'tnsCancelled',value='tnsCancelled') cancelled
+      tr
+        th reset chips?
+        td
+          input(type="checkbox",name="resetChips")
     input(type="submit")

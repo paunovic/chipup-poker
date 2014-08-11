@@ -259,6 +259,11 @@ Server.prototype.postTournament = function (req,res) {
 	Tournament.core.commonLock.writeLock(function (release) {
 		models.Tournament.findById(req.query.id,function (err,row) {
 			row.state = req.body.state;
+			if (req.body.resetChips) {
+				for (var x=0; x<row.players.length; x++) {
+					row.players[x].chips = row.startingchips*100;
+				}
+			}
 			console.log('row:%j\nbody:%j',row,req.body);
 			row.save(function (err) {
 				assert.ifError(err);

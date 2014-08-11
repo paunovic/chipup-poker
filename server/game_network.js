@@ -213,7 +213,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 		if (!game) return;
 		game.Lock.writeLock(function (release) {
 			var seatIdx = game.findSeat(this);
-			if (seatIdx === undefined) {
+			if (seatIdx === -1) {
 				this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
 				release();
 				return;
@@ -224,7 +224,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 				return;
 			}
 			this.log('flag is %j, status:%s state:%s',params,game.members[seatIdx].status);
-			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1) && params.flag) {
+			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1) && params.flag && game.club) {
 				this.log('going out of play');
 				game.members[seatIdx].status = 'psOutOfPlay';
 				game.clearDealTimer(); // FIXME, it may stop dealing when others are waiting?
@@ -233,7 +233,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 				game.updateMongoState({members:true},function () {
 					game.broadcastStatus(null,true,[]);
 				});
-			} else if (('psOutOfHand' == game.members[seatIdx].status) && params.flag) {
+			} else if (('psOutOfHand' == game.members[seatIdx].status) && params.flag && game.club) {
 				game.members[seatIdx].status = 'psOutOfPlay';
 				game.broadcastStatus(null,true,[]);
 			} else {
@@ -348,7 +348,8 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 			if (game.members[seatIdx].status != 'psOutOfPlay') {
 				game.members[seatIdx].sitOutNextRound = false;
 				game.members[seatIdx].sitOutBB = false;
-				release();
+				game.members[seatIdx].autoplay = false;
+				finish([]);
 				return;
 			}
 			if (game.club && game.club.isSuspended(this.userid)) {
@@ -433,9 +434,24 @@ handlers[codes.scShowCards] = function (args,token) {
 			if (game.state2 == 'gsClosed') return;
 			game.Lock.writeLock(function (release) {
 				var x;
-				this.log('game info',game.obj.clubid);
-				assert(game.club);
-				var club = game.club.obj; // FIXME
+				function dojoin() {
+					game.join(this,function () {
+						var events = [];
+						if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
+							var cards = game.flop.cards;
+							if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
+							if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
+							events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+						}
+						var status = game.getTableStatus(this,true,events);
+						this.send(codes.seTableStatus,status,'Poker.TableStatus');
+						release();
+						token.stop();
+					}.bind(this));
+				}
+				if (game.club) {
+					this.log('game info',game.obj.clubid);
+					var club = game.club.obj; // FIXME
 					if (club.suspended) {
 						for (x=0; x<club.suspended.length; x++) {
 							if (myutils.compareObjectID(club.suspended[x],this.userid)) {
@@ -450,20 +466,13 @@ handlers[codes.scShowCards] = function (args,token) {
 						this.reply(0,'your not a member of that club'); // FIXME, bots rely on this error
 						release();
 					} else {
-						game.join(this,function () {
-							var events = [];
-							if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
-								var cards = game.flop.cards;
-								if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
-								if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
-								events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
-							}
-							var status = game.getTableStatus(this,true,events);
-							this.send(codes.seTableStatus,status,'Poker.TableStatus');
-							release();
-							token.stop();
-						}.bind(this));
+						dojoin.call(this);
 					}
+				} else if (game.tournament) {
+					dojoin.call(this);
+				} else {
+					assert(false);
+				}
 			}.bind(this));
 		}.bind(this));
 	};
@@ -484,8 +493,21 @@ handlers[codes.scShowCards] = function (args,token) {
 					this.reply(0,'your not at the table');
 					return;
 				}
-				game.leave(this,'protocol',function () {});
-				token.stop();
+				if (game.tournament) {
+					var seatIdx = game.findSeat(this);
+					if (seatIdx == -1) {
+						game.leave(this,'protocol',function () {
+							token.stop();
+						});
+					} else {
+						this.reply(0,'you cant run away!');
+						token.stop();
+					}
+				} else {
+					game.leave(this,'protocol',function () {
+						token.stop();
+					});
+				}
 			}
 		}.bind(this));
 	};

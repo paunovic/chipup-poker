@@ -250,7 +250,8 @@ var PaypalRequestSchema = new Schema({
 var TournamentMemberSchema = new Schema({
 	_id: ObjectId,
 	displayname: String,
-	chips: Number
+	chips: Number,
+	gameid: ObjectId
 });
 var TournamentSchema = new Schema({
 	name: String,

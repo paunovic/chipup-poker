@@ -1166,7 +1166,7 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		token.stop();
 	}.bind(this));
 };
-handlers[codes.scGetTournamentDetails] = function (args,token) {
+handlers[codes.scTournamentQueryInfo] = function (args,token) {
 	var params;
 	try {
 		params = pb.Parse(args,'Poker.TournamentDetails');
@@ -1175,9 +1175,65 @@ handlers[codes.scGetTournamentDetails] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	models.Tournament.findById(params._id,function (err,doc) {
-		error.handleError(err);
-		this.send(codes.srTournamentDetails,doc,'Poker.TournamentInfo');
-		token.stop();
+	this.sendTournamentInfo(params._id,token,false);
+};
+handlers[codes.scTournamentLobbyOpen] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentDetails');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	this.sendTournamentInfo(params._id,token,true);
+};
+handlers[codes.scTournamentLobbyClose] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentDetails');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Tournament.core.getById(params._id,function (err,tourn) {
+		if (tourn && this.hook) {
+			tourn.removeListener('handOver',this.hook);
+			this.hook = null;
+		}
+	}.bind(this));
+};
+ClientSocket.prototype.tournChangeHandOver = function (tourn) {
+	// FIXME, put this into a toProtobuf function?
+	for (var x=0; x<tourn.obj.players.length; x++) {
+		tourn.obj.players[x].gameid = tourn.user_table_xref[tourn.obj.players[x]._id];
+	}
+	// HACK
+	var hack = pb.Parse(pb.Serialize(tourn.obj,'Poker.TournamentInfo'),'Poker.TournamentInfo');
+	// /HACK 
+	for (var x=0; x<tourn.tables.length; x++) {
+		hack.games[x] = Game.makeGameProtobuf(tourn.tables[x].obj);
+	}
+	this.send(codes.srTournamentDetails,hack,'Poker.TournamentInfo');
+};
+ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,token,register) {
+	Tournament.core.getById(tournid,function (err,tourn) {
+			if (register && !this.hook) {
+				this.log('registered hook');
+				this.hook = this.tournChangeHandOver.bind(this);
+				tourn.on('handOver',this.hook);
+			}
+			for (var x=0; x<tourn.obj.players.length; x++) {
+				tourn.obj.players[x].gameid = tourn.user_table_xref[tourn.obj.players[x]._id];
+			}
+			// HACK
+			var hack = pb.Parse(pb.Serialize(tourn.obj,'Poker.TournamentInfo'),'Poker.TournamentInfo');
+			// /HACK
+			for (var x=0; x<tourn.tables.length; x++) {
+				hack.games[x] = Game.makeGameProtobuf(tourn.tables[x].obj);
+			}
+			this.send(codes.srTournamentDetails,hack,'Poker.TournamentInfo');
+			token.stop();
 	}.bind(this));
 };

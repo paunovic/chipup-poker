@@ -25,6 +25,7 @@ var myutils = require('./myutils');
 var mdb = require('./db');
 var models = mdb.models;
 var error = require('./error');
+var Tournament = require('./tournament');
 
 var lazy = {};
 lazy.__defineGetter__('user',function () {
@@ -359,7 +360,9 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 };
 Game.prototype.handOver = function (cb,handid) {
 	if (this.club) this.club.handOver(this,cb);
-	else cb();
+	else if (this.tourn) {
+		this.tourn.handOver(this,cb);
+	} else cb();
 	if (handid) {
 		var gameRow = this.obj; // FIXME
 		models.HandHistory.findOne({seq:handid}).lean(true).exec(function (err,historyRow) {
@@ -631,10 +634,12 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.updateMongoState({members:true},function () {
 					var events = [this.makeEvent('teDealing')];
 					if (this.members[this.current_seat].autoplay) {
-						this.fold(this.current_seat,function (events2) {
-							for (var x=0; x<events2.length; x++) events.push(events2[x]);
-							cb(events);
-						});
+						this.broadcastStatus(null,null,events);
+						setTimeout(function () {
+							this.fold(this.current_seat,function (events2) {
+								cb(events2);
+							});
+						}.bind(this),1500);
 					} else cb(events);
 				}.bind(this));
 				//}.bind(this),
@@ -662,7 +667,7 @@ Game.prototype.setBet = function (seat,bet) {
 	this.members[seat].chips -= (bet - oldbet);
 	if (bet > this.minBet) {
 		this.minimum_raise = bet - this.minBet;
-		this.log('min raise %d',this.minimum_raise);
+		this.log('min raise A %d',this.minimum_raise);
 		this.minBet = bet;
 	}
 };
@@ -1388,7 +1393,7 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 
 
 	if (chips > maxbet) { // cheater!
-		conn.reply(0,'trying to go over pot limit');
+		conn.reply(0,util.format('trying to go over pot limit %d %d %d %d seat:%d',chips,oldbet,maxbet,this.members[seat].chips,seat));
 		//conn.error('cheater, going over pot limit '+chips+' '+maxbet);
 		//conn.destroy();
 		cb([],0);
@@ -1521,6 +1526,17 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		this.log('sm finish %j',events);
 		if (this.state != 'tsWinning') {
 			this.current_seat = this.getNextSeat(this.current_seat);
+			if (this.members[this.current_seat].autoplay) {
+				this.log('need to skip player %d',this.current_seat);
+				this.broadcastStatus(null,null,events);
+				setTimeout(function () {
+					this.fold(this.current_seat,function (events2) {
+						for (var x=0; x<events2.length; x++) events.push(events2[x]);
+						cb(events,offset);
+					}.bind(this));
+				}.bind(this),1500);
+				return;
+			}
 			if (this.members[this.current_seat].chips == 0) {
 				this.ranOut = true;
 				this.log('skipping');
@@ -1528,7 +1544,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			}
 			if (this.ranOut && (this.inHandCount() == 2)) {
 				this.log('somebody ran out, auto finishing');
-				return this.stateMachine(cb);
+				return this.stateMachine(cb,null,null,events,extradelay);
 			}
 		}
 		//this.broadcastStatus(null);
@@ -1545,7 +1561,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
 	assert.equal(typeof extradelay,'number');
-	this.log('state machine: %s events:%j',this.state,events);
+	this.log('state machine: %s events:%j currentSeat:%d',this.state,events,this.current_seat);
 	this.checkDelayedLeave();
 	switch (this.state) {
 	case 'tsWinning':
@@ -1559,6 +1575,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			this.dealer = -1;
 			this.current_seat = -1;
 		} else if (havechips < 2) {
+			// FIXME, tourmanement: merge tables or declare winner
 			this.log('only one guy has chips');
 			//this.nextDealer();
 		}
@@ -1609,21 +1626,20 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			}
 		}
 		if (this.members.length != this.obj.seats) emptyseat = true;
-		if (!emptyseat) {
+		if (!emptyseat || this.tournament) {
 			var to_kick = [];
 			for (var x=0; x<this.members.length; x++) {
 				if (!this.members[x]) continue;
-				if (this.members[x].status == 'psOutOfPlay') {
+				console.log('seat:%d chips:%d tournament:%j',x,this.members[x].chips,this.tournament.obj);
+				if (!emptyseat && (this.members[x].status == 'psOutOfPlay')) {
 					if (this.members[x].SittingOutRoundsCount >= (this.obj.seats * 2)) {
 						to_kick.push(x);
 						continue;
 					}
 				}
-				if (this.members[x].chips == 0) {
-					if (this.tournament) {
-						to_kick.push(x);
-						continue;
-					}
+				if ((this.members[x].chips == 0) && this.tournament) {
+					to_kick.push(x);
+					continue;
 				}
 			}
 			if (to_kick.length > 0) {
@@ -1647,11 +1663,15 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			this.log('future dealer:%d, sb:%d, bb:%d',this.dealer,small_blind,big_blind);
 			this.dealer = dealerbackup;
 			if (this.members[big_blind].sitOutBB) {
-				this.members[big_blind].status = 'psOutOfPlay';
-				this.updateLeaveStats(big_blind);
 				this.members[big_blind].sitOutBB = false;
-				this.stateMachine(cb,null,config,events,extradelay);
-				return;
+				if (this.tournament) {
+					this.members[big_blind].autoplay = true;
+				} else {
+					this.members[big_blind].status = 'psOutOfPlay';
+					this.updateLeaveStats(big_blind);
+					this.stateMachine(cb,null,config,events,extradelay);
+					return;
+				}
 			}
 			this.deal(cb,config,emptyseat);
 		} else {
@@ -1802,7 +1822,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
-		var obj = {seat:x, player_mongo_id:priv.userid, chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected};
+		var obj = {seat:x, player_mongo_id:priv.userid, chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected, autoplay:seat.autoplay };
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if ((['tsWinning','tsWinning2'].indexOf(this.state) != -1) && !seat.muck) showcards = true;
@@ -1816,7 +1836,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		}
 		if (priv.conn == self) {
 			tableStatus.maximum_raise = this.getLimit(x);
-			if (tableStatus.minimum_raise > seat.chips) tableStatus.minimum_raise = seat.chips;
+			if (tableStatus.minimum_raise > seat.chips) tableStatus.minimum_raise = seat.chips + this.bets[x];
 		}
 		obj.card_count = seat.hand.cards.length;
 		if (this.state == 'tsIdle') assert.equal(obj.card_count,0);
@@ -2053,9 +2073,16 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 }
 Game.prototype.handleDisconnect = function (conn,reason,cb) {
 	assert(conn.userid);
-	if (reason == 'logout') {
+	if (this.club && (reason == 'logout')) {
 		this.leave(conn,reason,cb);
 		return;
+	}
+	if (this.tournament && (reason == 'logout')) {
+		var seatIdx = this.findSeat(this);
+		if (seatIdx == -1) {
+			this.leave(conn,reason,cb);
+			return;
+		}
 	}
 	delete this.users[conn.userid];
 	this.reconnect.push(conn.userid);
@@ -2114,6 +2141,7 @@ Game.prototype.doDelete = function () {
 	}
 }
 Game.prototype.startTimer = function startTimer(seat,offset) {
+	return;
 	assert.equal(typeof offset,'number');
 	this.stopTimer(seat);
 	this.log('starting timer for seat %d in state %s',seat,this.state);
@@ -2227,12 +2255,14 @@ Game.getGame = function getgame(id,cb1) {
 					} else if (obj.tournament) { // tournament game
 						game.real_rake = 0;
 						game.ignoreOffline = false;
-						models.Tournament.findById(obj.tournament,function (err,tourn) {
-							game.tournament = tourn
-							finishGameInit(function () {
-								cb1(null,game);
-							});
-						}.bind(this));
+						var tourn = Tournament.core.activeTournaments[obj.tournament];
+						if (tourn) {
+							game.tournament = tourn.obj;
+							game.tourn = tourn;
+						}
+						finishGameInit(function () {
+							cb1(null,game);
+						});
 					}
 					function finishGameInit(cb2) {
 						game.rake = 0;
