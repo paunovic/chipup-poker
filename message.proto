@@ -661,6 +661,7 @@ message TournamentInfo {
 	required uint32 start_time = 12;
 	repeated TournamentMember players = 13;
 	required TournamentState state = 14;
+	repeated Game games = 15;
 }
 
 message TournamentCommandParams {
