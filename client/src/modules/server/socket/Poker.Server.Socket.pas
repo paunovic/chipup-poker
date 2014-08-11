@@ -55,8 +55,9 @@ type
     procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
     procedure TournamentRegister(const ATournamentId: TMongoId);
     procedure TournamentUnregister(const ATournamentId: TMongoId);
-    procedure GetTournamentDetails(const ATournamentId: TMongoId);
+    procedure OpenTournamentLobby(const ATournamentId: TMongoId);
     procedure CloseTournamentLobby(const ATournamentId: TMongoId);
+    procedure QueryTournamentInfo(const ATournamentId: TMongoId);
   end;
 
 var
@@ -629,14 +630,14 @@ begin
   end;
 end;
 
-procedure TServerSocket.GetTournamentDetails(const ATournamentId: TMongoId);
+procedure TServerSocket.OpenTournamentLobby(const ATournamentId: TMongoId);
 var
   protobuf: TPB_TournamentDetails;
 begin
   protobuf := TPB_TournamentDetails.Create;
   try
     protobuf.MongoId := ATournamentId;
-    SendProtobuf(scGetTournamentDetails, protobuf);
+    SendProtobuf(scTournamentLobbyOpen, protobuf);
   finally
     protobuf.Free;
   end;
@@ -654,6 +655,20 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TServerSocket.QueryTournamentInfo(const ATournamentId: TMongoId);
+var
+  protobuf: TPB_TournamentDetails;
+begin
+  protobuf := TPB_TournamentDetails.Create;
+  try
+    protobuf.MongoId := ATournamentId;
+    SendProtobuf(scTournamentQueryInfo, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 
 end.

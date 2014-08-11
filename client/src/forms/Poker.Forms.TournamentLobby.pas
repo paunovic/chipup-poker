@@ -52,7 +52,6 @@ type
     FSelectedTableId: TMongoId;
     FCallbacksId: Integer;
 
-    procedure QueryTournamentInfo;
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
     procedure UpdatePlayersGrid;
@@ -95,18 +94,13 @@ procedure TfrmTournamentLobby.SetParams(const AParams: array of pointer);
 begin
   FTournamentId := AParams[0];
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Tournament Lobby [%s]', [FTournamentId.ToString])); {$ENDIF}
-  QueryTournamentInfo;
+  ServerSocket.OpenTournamentLobby(FTournamentId);
 end;
 
 procedure TfrmTournamentLobby.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   ServerSocket.CloseTournamentLobby(FTournamentId);
   Action := caFree;
-end;
-
-procedure TfrmTournamentLobby.QueryTournamentInfo;
-begin
-  ServerSocket.GetTournamentDetails(FTournamentId);
 end;
 
 procedure TfrmTournamentLobby.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
@@ -266,7 +260,7 @@ begin
   if proto.MongoId <> FTournamentId then
     Exit;
 
-  QueryTournamentInfo;
+  ServerSocket.QueryTournamentInfo(FTournamentId);
 end;
 
 procedure TfrmTournamentLobby.acRegisterExecute(Sender: TObject);
