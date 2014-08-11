@@ -299,7 +299,7 @@ begin
   begin
     case tstatus.TableType of
       ttLive: Tables.AddLiveTable(tstatus.TableMongoId, TRUE, FALSE);
-      ttTournament: Tables.AddTournamentTable(tstatus.TableMongoId, TRUE);
+      ttTournament: Tables.AddTournamentTable(tstatus.TableMongoId, TRUE, FALSE);
     end;
 
     if Tables.GetAndLockTable(tstatus.TableMongoId, tstatus.TableType, table) then

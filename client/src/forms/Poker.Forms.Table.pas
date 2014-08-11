@@ -314,17 +314,25 @@ end;
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   table: TTable;
+  close_table: Boolean;
 begin
-  if FTableType <> ttTournament then // don't remove ttTournament tables from internal list
+  close_table := TRUE;
+
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.TableType = ttTournament) and
+       (table.Status.IsSitting) then
+      close_table := FALSE
+    else
+      table.Hidden := TRUE;
+  finally
+    Tables.Unlock;
+  end;
+
+  if close_table then
     Tables.Remove(FInternalId)
   else
-    if Tables.GetAndLockTable(FInternalId, table) then
-    try
-      ServerSocket.TableSitOutNextHand(FGameId, TRUE);
-      table.Hidden := TRUE;
-    finally
-      Tables.Unlock;
-    end;
+    ServerSocket.TableSitOutNextHand(FGameId, TRUE);
 end;
 
 procedure TfrmTable.FormCloseQuery(Sender: TObject; var CanClose: Boolean);

@@ -46,13 +46,14 @@ type
     procedure acUnregisterExecute(Sender: TObject);
     procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
       ANewItemRecordFocusingChanged: Boolean);
+    procedure gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTournamentId: TMongoId;
     FSelectedTableId: TMongoId;
     FCallbacksId: Integer;
 
-    procedure QueryTournamentInfo;
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
     procedure UpdatePlayersGrid;
@@ -73,7 +74,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -95,18 +96,13 @@ procedure TfrmTournamentLobby.SetParams(const AParams: array of pointer);
 begin
   FTournamentId := AParams[0];
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Tournament Lobby [%s]', [FTournamentId.ToString])); {$ENDIF}
-  QueryTournamentInfo;
+  ServerSocket.OpenTournamentLobby(FTournamentId);
 end;
 
 procedure TfrmTournamentLobby.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   ServerSocket.CloseTournamentLobby(FTournamentId);
   Action := caFree;
-end;
-
-procedure TfrmTournamentLobby.QueryTournamentInfo;
-begin
-  ServerSocket.GetTournamentDetails(FTournamentId);
 end;
 
 procedure TfrmTournamentLobby.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
@@ -237,6 +233,22 @@ begin
     AStyle := stylePlayersOther;
 end;
 
+procedure TfrmTournamentLobby.gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+var
+  tournament: TTournamentInfo;
+  game: TPB_Game;
+begin
+  if FSelectedTableId.IsEmpty then
+    Exit;
+
+  if Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game) then
+  try
+    Tables.AddTournamentTable(game.MongoId, TRUE, TRUE);
+  finally
+    Tournaments.Unlock;
+  end;
+end;
+
 procedure TfrmTournamentLobby.gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
@@ -266,7 +278,7 @@ begin
   if proto.MongoId <> FTournamentId then
     Exit;
 
-  QueryTournamentInfo;
+  ServerSocket.QueryTournamentInfo(FTournamentId);
 end;
 
 procedure TfrmTournamentLobby.acRegisterExecute(Sender: TObject);

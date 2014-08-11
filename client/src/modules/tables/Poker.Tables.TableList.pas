@@ -37,7 +37,7 @@ type
     procedure ClearWithoutNotification;
 
     function AddLiveTable(const AGameId: TMongoId; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
-    function AddTournamentTable(const AGameId: TMongoId; const AShow: Boolean): Boolean;
+    function AddTournamentTable(const AGameId: TMongoId; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
     function AddHandPlaybackTable(const AGameId: TMongoId; const AHandId: UINT): Boolean;
     function SittingCount: Integer;
     procedure CloseTablesForClub(const AClubId: TMongoId);
@@ -147,7 +147,7 @@ begin
   end;
 end;
 
-function TTableList.AddTournamentTable(const AGameId: TMongoId; const AShow: Boolean): Boolean;
+function TTableList.AddTournamentTable(const AGameId: TMongoId; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
 var
   table: TTable;
 begin
@@ -162,7 +162,7 @@ begin
 
   table := TTable.Create(FNextTableInternalId);
   Add(FNextTableInternalId, table);
-  if table.SetupTournamentTable(AGameId) then
+  if table.SetupTournamentTable(AGameId, ASendJoinCommand) then
   begin
     Inc(FNextTableInternalId);
     if AShow then

@@ -1606,7 +1606,7 @@ begin
     Tournaments.Unlock;
   end;
 
-  Tables.AddTournamentTable(proto.Game.MongoId, TRUE);
+  Tables.AddTournamentTable(proto.Game.MongoId, TRUE, FALSE);
   if Tables.GetAndLockTable(proto.Game.MongoId, ttTournament, table) then
   try
     table.SetTableStatus(proto.TableStatus, TRUE);
