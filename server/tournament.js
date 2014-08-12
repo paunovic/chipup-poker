@@ -22,6 +22,7 @@ lazy.__defineGetter__('ClientSocket',function () {
 var async = require('async');
 
 module.exports = Tournament;
+module.exports.PrintBlindStructure = PrintBlindStructure;
 
 function Tournament(obj) {
 	this.tables = [];
@@ -87,34 +88,40 @@ Tournament.prototype.handOver = function (game,cb) {
 	}.bind(this));
 }
 TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
-	models.Tournament.findById(tournid,function (err,doc) {
-		console.log(err,userid,doc);
-		var dup = false;
-		for (var i=0; i<doc.players.length; i++) {
-			if (myutils.compareObjectID(doc.players[i]._id,userid)) {
-				dup = true;
+	this.commonLock.writeLock(function (release) {
+		this.getByIdUnlocked(tournid,function (err,tourn) {
+			console.log(err,userid,tourn);
+			var dup = false;
+			for (var i=0; i<tourn.obj.players.length; i++) {
+				if (myutils.compareObjectID(tourn.obj.players[i]._id,userid)) {
+					dup = true;
+				}
 			}
-		}
-		if (dup) {
-			// error, already a member
-			return cb('alreadyMember');
-		} else if (doc.registered_players >= doc.maxplayers) {
-			return cb('full');
-		} else {
-			doc.players.push({_id:userid,displayname:nick,chips:doc.startingchips*100});
-			doc.registered_players = doc.players.length;
-			doc.save(function (err) {
-				console.log('saved -  join',arguments,doc);
-				cb('OK');
-			});
-		}
-	});
+			if (dup) {
+				// error, already a member
+				release();
+				return cb('alreadyMember');
+			} else if (tourn.obj.registered_players >= tourn.obj.maxplayers) {
+				release();
+				return cb('full');
+			} else {
+				tourn.obj.players.push({_id:userid,displayname:nick,chips:tourn.obj.startingchips*100});
+				tourn.obj.registered_players = tourn.obj.players.length;
+				tourn.obj.save(function (err) {
+					console.log('saved -  join',arguments,tourn);
+					release();
+					cb('OK');
+				});
+			}
+		});
+	}.bind(this));
 }
 TournamentCore.prototype.getByIdUnlocked = function (id,cb) {
 	if (this.activeTournaments[id]) {
 		cb(null,this.activeTournaments[id]);
 	} else {
 		models.Tournament.findById(id,function (err,doc) {
+			if (!doc) return cb('404');
 			this.activeTournaments[id] = new Tournament(doc);
 			this.activeTournaments[id].register();
 			cb(null,this.activeTournaments[id]);
@@ -130,19 +137,26 @@ TournamentCore.prototype.getById = function (id,cb) {
 	}.bind(this));
 }
 TournamentCore.prototype.leave = function (tournid,userid,cb) {
-	models.Tournament.findById(tournid,function (err,doc) {
-		if (!doc) return cb('404');
-		for (var i=0; i<doc.players.length; i++) {
-			if (myutils.compareObjectID(doc.players[i]._id,userid)) {
-				doc.players.splice(i,1);
+	this.commonLock.writeLock(function (release) {
+		this.getByIdUnlocked(tournid,function (err,tourn) {
+			if (err) {
+				release();
+				cb(err);
+				return;
 			}
-		}
-		doc.registered_players = doc.players.length;
-		doc.save(function (err) {
-			error.handleError(err);
-			cb('OK');
+			for (var i=0; i<tourn.obj.players.length; i++) {
+				if (myutils.compareObjectID(tourn.obj.players[i]._id,userid)) {
+					tourn.obj.players.splice(i,1);
+				}
+			}
+			tourn.obj.registered_players = tourn.obj.players.length;
+			tourn.obj.save(function (err) {
+				error.handleError(err);
+				release();
+				cb('OK');
+			});
 		});
-	});
+	}.bind(this))
 }
 TournamentCore.prototype.resetTimer = function (cb) {
 	assert.equal(this.commonLock.readers,-1);
@@ -162,6 +176,10 @@ TournamentCore.prototype.resetTimer = function (cb) {
 			console.log('found',err,rows,timeleft);
 			console.log('%d now',now);
 			console.log('%d goal',row.start_time);
+			if (timeleft > 100000) {
+				console.log('timeleft was %d years, trimming',timeleft/60/60/24/365);
+				timeleft = 100000;
+			}
 			this.timer = setTimeout(function () {
 				this.commonLock.writeLock(function (release) {
 					this.checkTournaments(function () {
@@ -274,3 +292,54 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 }
 var core = new TournamentCore();
 Tournament.core = core;
+function RoundBlind(ABlind, ARoundTo) {
+	//console.log('rounding %d %d',ABlind,ARoundTo,Math.floor(ABlind/ARoundTo),Math.ceil(ABlind/ARoundTo)*ARoundTo);
+	return Math.ceil(ABlind/ARoundTo)*ARoundTo;
+}
+function PrintBlindStructure(ASmallBlind,ABigBlind,AStartingChips,ALevelLength,ATournamentLength) {
+	var EXTRA_LEVELS = 3;
+	var EXTRA_LEVELS_MULTIPLIER = 1.25;
+	var C1,levels,sb,bb,prev_sb,prev_bb,sb_rounded,bb_rounded,sb_bb_ratio,multiplier;
+
+	levels = Math.floor((ATournamentLength * 60) / ALevelLength);
+	sb_bb_ratio = ASmallBlind/ABigBlind;
+
+	//console.log('Blinds: %d/%d; Chips: %d; L length: %dmin; T length: %dh',ASmallBlind, ABigBlind, AStartingChips, ALevelLength, ATournamentLength);
+	//console.log('Total levels: %d, extra levels: %d',levels,EXTRA_LEVELS);
+	//console.log('---------------------------------');
+	var blinds = [];
+	var out = { levels:levels, LevelLength:ALevelLength, blinds:blinds };
+
+	sb = ASmallBlind;
+	bb = ABigBlind;
+	sb_rounded = RoundBlind(sb,1);
+	bb_rounded = RoundBlind(bb,1);
+	//console.log('L%d: %d/%d',1,sb_rounded,bb_rounded);
+	blinds[0] = { sb:sb_rounded, bb:bb_rounded };
+
+	prev_sb = sb_rounded;
+	prev_bb = bb_rounded;
+	for (C1 = 2; C1 <= levels; C1++) {
+		multiplier = Math.pow(AStartingChips/ABigBlind,1/(levels-1));
+		while ((sb_rounded == prev_sb) || (bb_rounded == prev_bb)) {
+			bb = bb * multiplier;
+			sb = bb * sb_bb_ratio;
+			sb_rounded = RoundBlind(sb,5);
+			bb_rounded = RoundBlind(bb,10);
+		}
+		prev_sb = sb_rounded;
+		prev_bb = bb_rounded;
+
+		//console.log('L%d: %d/%d',C1,sb_rounded,bb_rounded);
+		blinds[C1-1] = { sb:sb_rounded, bb:bb_rounded };
+	}
+	for (C1 = 1; C1 <= EXTRA_LEVELS; C1++) {
+		bb = bb * EXTRA_LEVELS_MULTIPLIER;
+		sb = bb * sb_bb_ratio;
+		sb_rounded = RoundBlind(sb,5);
+		bb_rounded = RoundBlind(bb,10);
+		//console.log('L%d: %d/%d',levels+C1,sb_rounded,bb_rounded);
+		blinds[(levels+C1)-1] = { sb:sb_rounded, bb:bb_rounded };
+	}
+	return out;
+}

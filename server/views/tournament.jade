@@ -6,6 +6,20 @@ block content
         th name
         td=tourn.name
       tr
+        th sb/bb
+        td=tourn.sb+'/'+tourn.bb
+      tr
+        th blind schedule
+        td
+          table(border=1)
+            tr
+              th level
+              th SB/BB
+            each blind,level in blinds.blinds
+              tr
+                td=level+1
+                td=blind.sb+'/'+blind.bb
+      tr
         th state
         td
           select(name="state")

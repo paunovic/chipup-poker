@@ -2078,7 +2078,9 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		return;
 	}
 	if (this.tournament && (reason == 'logout')) {
-		var seatIdx = this.findSeat(this);
+		conn.log('its a tournament logout, checking seat');
+		var seatIdx = this.findSeat(conn);
+		conn.log('seat is %d',seatIdx);
 		if (seatIdx == -1) {
 			this.leave(conn,reason,cb);
 			return;

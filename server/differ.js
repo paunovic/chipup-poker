@@ -1,6 +1,6 @@
 "use strict";
 
-var http = require('http');
+var https = require('https');
 var fs = require('fs');
 var assert = require('assert');
 var child_process = require('child_process');
@@ -17,14 +17,17 @@ module.exports.setIO = setIO;
 var bsdiffLock = new ReadWriteLock();
 
 function makeDiff(sourcehash,desthash,path) {
+	console.log('makeDiff(%s,%s,%s)',sourcehash,desthash,path);
 	function pushDiff(doc) {
 		var body = new Buffer(JSON.stringify(doc));
-		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
-		req.on('data',function (chunk) {
-			console.log('chunk',chunk);
-		});
-		req.on('error',function (err) {
-			console.log('http error sending diff:',err);
+		var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword},function (res) {
+			res.setEncoding('utf8');
+			res.on('data',function (chunk) {
+				console.log('chunk',chunk);
+			});
+			res.on('error',function (err) {
+				console.log('http error sending diff:',err);
+			});
 		});
 		req.write(body);
 		req.end();
@@ -32,7 +35,7 @@ function makeDiff(sourcehash,desthash,path) {
 	if (!config.diffserver) {
 		console.log('need to ask diff server for %s',path);
 		var body = new Buffer(JSON.stringify({sourcehash:sourcehash,desthash:desthash,path:path}));
-		var req = http.request({host:'dev-server.chipuppoker.com',method:'POST',path:'/sync/makeDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
+		var req = https.request({host:'dev-server.chipuppoker.com',method:'POST',path:'/sync/makeDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
 		req.on('data',function (chunk) {
 			console.log('chunk');
 		});
@@ -46,10 +49,13 @@ function makeDiff(sourcehash,desthash,path) {
 	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
 		console.log('localCopy %s %s:%j',sourcehash,path,localCopy);
 		if (localCopy) {
+			console.log('getting lock');
 			bsdiffLock.writeLock(function bsdiffLocked(release) {
+				console.log('got lock');
 				models.Diff.findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
 					assert.ifError(err);
 					if (diffRow) {
+						console.log('found an existing diff:%j',diffRow);
 						pushDiff(diffRow);
 						return release();
 					}

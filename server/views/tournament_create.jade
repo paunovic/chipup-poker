@@ -48,7 +48,10 @@ block content
     | Minutes per level:
     input(type="text",name="timeperlevel")
     br
-    | blind structure
+    | Blinds, SB:
+    input(type="text",name="sb")
+    | BB:
+    input(type="text",name="bb")
     br
     | Start time:
     input(type="text",id="dateField",class="dateField",value="Date",onchange="updateTime();")
@@ -56,6 +59,9 @@ block content
     br
     | UTC start time
     input(type="text",id="UTC_time",name="start_time",readonly=true)
+    br
+    | Lenght in hours:
+    input(type="text",name="length")
     br
     input(type="submit",value="Create!")
     br
