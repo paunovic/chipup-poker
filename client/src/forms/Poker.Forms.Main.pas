@@ -1454,13 +1454,15 @@ begin
     Exit;
 
   case proto.ReplyStatus of
-    tceRegisterOk: begin
-      dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
-      Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, 1);
+    tceRegisterOk, tceAlreadyRegistered: begin
+      if not dmMain.SelfInfo.RegisteredTournaments.Contains(proto.MongoId) then
+      begin
+        dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
+        Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, 1);
+      end;
       UpdateTournamentList;
       UpdateTournamentActions;
     end;
-    tceAlreadyRegistered: ;
     tceRegisterLimitReached: ShowWarningDialog('This tournament is already filled');
     tceRegisterFailed: ShowWarningDialog('Tournament registration failed');
     tceUnregisterOk: begin

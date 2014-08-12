@@ -25,7 +25,7 @@ object frmTournamentLobby: TfrmTournamentLobby
   object gridPlayers: TcxGrid
     Left = 8
     Top = 402
-    Width = 397
+    Width = 453
     Height = 183
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
@@ -86,8 +86,8 @@ object frmTournamentLobby: TfrmTournamentLobby
   object gridTables: TcxGrid
     Left = 8
     Top = 151
-    Width = 397
-    Height = 245
+    Width = 453
+    Height = 248
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 1
     object gridTablesTable: TcxGridTableView
@@ -186,29 +186,6 @@ object frmTournamentLobby: TfrmTournamentLobby
     DesignSize = (
       877
       145)
-    object btTournamentRegister: TcxButton
-      Left = 710
-      Top = 16
-      Width = 143
-      Height = 35
-      Margin = 15
-      Action = acRegister
-      Anchors = [akLeft, akBottom]
-      Colors.NormalText = 48896
-      Colors.HotText = 58880
-      Colors.PressedText = 48896
-      Colors.DisabledText = 7631988
-      LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-      OptionsImage.Margin = 15
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 0
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = 51712
-      Font.Height = -11
-      Font.Name = 'Sintony'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
     object lbsHeader: TcxLabel
       AlignWithMargins = True
       Left = 1
@@ -235,6 +212,90 @@ object frmTournamentLobby: TfrmTournamentLobby
       Width = 875
       AnchorX = 439
       AnchorY = 60
+    end
+    object btTournamentRegister: TcxButton
+      Left = 714
+      Top = 16
+      Width = 143
+      Height = 35
+      Margin = 15
+      Action = acRegister
+      Anchors = [akLeft, akBottom]
+      Colors.NormalText = 48896
+      Colors.HotText = 58880
+      Colors.PressedText = 48896
+      Colors.DisabledText = 7631988
+      LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
+      OptionsImage.Margin = 15
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 0
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 51712
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+  end
+  object gridAllPlayers: TcxGrid
+    Left = 631
+    Top = 151
+    Width = 238
+    Height = 434
+    Anchors = [akLeft, akTop, akBottom]
+    TabOrder = 3
+    object gridAllPlayersTable: TcxGridTableView
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsCustomize.ColumnFiltering = False
+      OptionsCustomize.ColumnGrouping = False
+      OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnMoving = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.FocusRect = False
+      OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      Styles.Inactive = dmMain.styleInactiveCell
+      Styles.OnGetContentStyle = gridPlayersTableStylesGetContentStyle
+      object gridAllPlayersId: TcxGridColumn
+        Caption = 'Club ID'
+        DataBinding.ValueType = 'Variant'
+        PropertiesClassName = 'TcxBlobEditProperties'
+        Properties.BlobEditKind = bekMemo
+        Visible = False
+        HeaderAlignmentHorz = taCenter
+        Width = 41
+      end
+      object gridAllPlayersName: TcxGridColumn
+        Caption = 'Player'
+        PropertiesClassName = 'TcxTextEditProperties'
+        HeaderAlignmentHorz = taCenter
+        Options.Editing = False
+        SortIndex = 0
+        SortOrder = soAscending
+        Width = 221
+      end
+      object gridAllPlayersChips: TcxGridColumn
+        Caption = 'Chips'
+        DataBinding.ValueType = 'Currency'
+        PropertiesClassName = 'TcxCurrencyEditProperties'
+        Properties.Alignment.Horz = taRightJustify
+        Properties.DisplayFormat = ',0.##;(,0.##)'
+        Properties.EditFormat = '$,0.##;($,0.##)'
+        Properties.UseDisplayFormatWhenEditing = True
+        Properties.UseThousandSeparator = True
+        HeaderAlignmentHorz = taCenter
+        Width = 82
+      end
+    end
+    object gridAllPlayersLevel: TcxGridLevel
+      GridView = gridAllPlayersTable
     end
   end
   object StyleRepository: TcxStyleRepository
