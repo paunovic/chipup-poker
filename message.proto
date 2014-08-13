@@ -695,6 +695,6 @@ message TournamentPlayerFinished {
 }
 
 message GameBlinds {
-	required uint32 small_blind = 1;
-	required uint32 big_blind = 2;
+	required uint32 sb = 1;
+	required uint32 bb = 2;
 }
