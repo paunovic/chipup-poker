@@ -252,6 +252,7 @@ message Game {
 		gb10x25 = 3;
 		gb25x50 = 4;
 		gb50x100 = 6;
+		gsOther = 7;
 	}
 	
 	optional bytes _id = 1 [(ObjectId)=true];
@@ -269,6 +270,8 @@ message Game {
 	optional uint32 closetime = 14;
 	optional uint32 lasthandid = 15;
 	optional bytes tournament = 16 [(ObjectId)=true];
+	optional uint32 small_blind = 17;
+	optional uint32 big_blind = 18;
 }
 
 message ListClubsReply {
