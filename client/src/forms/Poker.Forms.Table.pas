@@ -532,7 +532,7 @@ begin
     finally
       Tables.Unlock;
     end;
-    SetRaiseValue(valuint, FALSE);
+    SetRaiseValue(valuint, FALSE, FALSE);
   end;
 end;
 

@@ -37,6 +37,12 @@ type
     gridTablesSmallestStack: TcxGridColumn;
     gridTablesAverageStack: TcxGridColumn;
     gridTablesLargestStack: TcxGridColumn;
+    gridAllPlayers: TcxGrid;
+    gridAllPlayersTable: TcxGridTableView;
+    gridAllPlayersId: TcxGridColumn;
+    gridAllPlayersName: TcxGridColumn;
+    gridAllPlayersChips: TcxGridColumn;
+    gridAllPlayersLevel: TcxGridLevel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -58,8 +64,11 @@ type
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
     procedure UpdatePlayersGrid;
     procedure UpdateTablesGrid;
-    procedure UpdateCaptions;
+    procedure UpdateAllPlayersGrid;
+    procedure UpdateFormData;
     procedure RefreshAll;
+  protected
+    procedure CreateParams(var AParams: TCreateParams); override;
   public
     procedure SetParams(const AParams: array of pointer);
 
@@ -105,6 +114,14 @@ begin
   Action := caFree;
 end;
 
+procedure TfrmTournamentLobby.CreateParams(var AParams: TCreateParams);
+begin
+  inherited;
+
+  AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
+  AParams.WndParent := 0;
+end;
+
 procedure TfrmTournamentLobby.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
 var
   proto: TPB_TournamentInfo;
@@ -119,13 +136,45 @@ begin
   RefreshAll;
 end;
 
-procedure TfrmTournamentLobby.UpdateCaptions;
+procedure TfrmTournamentLobby.UpdateAllPlayersGrid;
+var
+  c: TcxDataController;
+  tournament: TTournamentInfo;
+  rec_count: Integer;
+  member: TPB_TournamentMember;
+begin
+  c := gridAllPlayersTable.DataController;
+  c.BeginFullUpdate;
+  try
+    rec_count := 0;
+    if Tournaments.GetAndLock(FTournamentId, tournament) then
+    try
+      for member in tournament.Players do
+      begin
+        Inc(rec_count);
+        if rec_count > c.RecordCount then
+          c.SetRecordCount(rec_count);
+        c.SetValue(rec_count - 1, gridAllPlayersId.Index, member.MongoId.ToVariant);
+        c.SetValue(rec_count - 1, gridAllPlayersName.Index, member.Displayname);
+        c.SetValue(rec_count - 1, gridAllPlayersChips.Index, member.Chips / 100);
+      end;
+    finally
+      Tournaments.Unlock;
+    end;
+    c.SetRecordCount(rec_count);
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmTournamentLobby.UpdateFormData;
 var
   tournament: TTournamentInfo;
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
     lbsHeader.Caption := tournament.Name;
+    Caption := Format('Tournament Lobby - %s', [tournament.Name]);
   finally
     Tournaments.Unlock;
   end;
@@ -323,9 +372,10 @@ begin
     btTournamentRegister.Colors.PressedText := $0000BF00;
   end;
 
+  UpdateAllPlayersGrid;
   UpdatePlayersGrid;
   UpdateTablesGrid;
-  UpdateCaptions;
+  UpdateFormData;
 end;
 
 
