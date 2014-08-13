@@ -7,7 +7,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds;
 
 type
   TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2);
@@ -30,6 +30,7 @@ type
       kPlayersFieldNumber = 13;
       kStateFieldNumber = 14;
       kGamesFieldNumber = 15;
+      kBlindStructureFieldNumber = 16;
 
     var
       FId: TMongoId;
@@ -47,6 +48,7 @@ type
       FPlayers: TList<TPB_TournamentMember>;
       FState: TTournamentState;
       FGames: TList<TPB_Game>;
+      FBlindStructure: TList<TPB_GameBlinds>;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -92,8 +94,11 @@ type
     procedure SetState(const AValue: TTournamentState);
     procedure set_has_Games;
     procedure clear_has_Games;
+    procedure set_has_BlindStructure;
+    procedure clear_has_BlindStructure;
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+    procedure BlindStructureNotifyEvent(Sender: TObject; const Item: TPB_GameBlinds; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -182,6 +187,11 @@ type
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;
 
+    // repeated GameBlinds BlindStructure = 16;
+    function has_BlindStructure: Boolean;
+    procedure clear_BlindStructure;
+    property BlindStructure: TList<TPB_GameBlinds> read FBlindStructure;
+
   end;
 
   TPB_TournamentInfoList = class(TObjectList<TPB_TournamentInfo>)
@@ -212,6 +222,11 @@ begin
     FGames.OnNotify := nil;
     FreeAndNil(FGames);
   end;
+  if Assigned(FBlindStructure) then
+  begin
+    FBlindStructure.OnNotify := nil;
+    FreeAndNil(FBlindStructure);
+  end;
   inherited;
 end;
 
@@ -220,6 +235,7 @@ begin
   inherited;
   FPlayers := TObjectList<TPB_TournamentMember>.Create;
   FGames := TObjectList<TPB_Game>.Create;
+  FBlindStructure := TObjectList<TPB_GameBlinds>.Create;
 end;
 
 procedure TPB_TournamentInfo.HookNotifiers;
@@ -227,6 +243,7 @@ begin
   inherited;
   FPlayers.OnNotify := PlayersNotifyEvent;
   FGames.OnNotify := GamesNotifyEvent;
+  FBlindStructure.OnNotify := BlindStructureNotifyEvent;
 end;
 
 procedure TPB_TournamentInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -312,6 +329,11 @@ begin
         FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Games;
       end;
+      kBlindStructureFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FBlindStructure.Add(TPB_GameBlinds.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_BlindStructure;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -321,6 +343,7 @@ procedure TPB_TournamentInfo.MergeFrom(const AFrom: TPB_TournamentInfo);
 var
   pbobj12: TPB_TournamentMember;
   pbobj14: TPB_Game;
+  pbobj15: TPB_GameBlinds;
 begin
   if AFrom.has_MongoId then
     SetMongoId(AFrom.MongoId);
@@ -352,6 +375,8 @@ begin
     SetState(AFrom.State);
   for pbobj14 in AFrom.Games do
     FGames.Add(TPB_Game.Create(pbobj14));
+  for pbobj15 in AFrom.BlindStructure do
+    FBlindStructure.Add(TPB_GameBlinds.Create(pbobj15));
 end;
 
 function TPB_TournamentInfo.IsInitialized: Boolean;
@@ -364,6 +389,9 @@ begin
     if not pbobj.IsInitialized then
       Exit(FALSE);
   for pbobj in Games do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in BlindStructure do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
@@ -839,6 +867,44 @@ begin
   end;
 end;
 
+procedure TPB_TournamentInfo.clear_BlindStructure;
+var
+  on_notify: TCollectionNotifyEvent<TPB_GameBlinds>;
+begin
+  on_notify := FBlindStructure.OnNotify;
+  FBlindStructure.OnNotify := nil;
+  FBlindStructure.Clear;
+  FBlindStructure.OnNotify := on_notify;
+  clear_has_BlindStructure;
+end;
+
+function TPB_TournamentInfo.has_BlindStructure: Boolean;
+begin
+  result := (_has_bits_ and 32768) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_BlindStructure;
+begin
+  _has_bits_ := _has_bits_ or 32768;
+end;
+
+procedure TPB_TournamentInfo.clear_has_BlindStructure;
+begin
+  _has_bits_ := _has_bits_ and not 32768;
+end;
+
+procedure TPB_TournamentInfo.BlindStructureNotifyEvent(Sender: TObject; const Item: TPB_GameBlinds; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_BlindStructure;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kBlindStructureFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
 procedure TPB_TournamentInfo.Clear;
 begin
   if _has_bits_ = 0 then
@@ -859,6 +925,7 @@ begin
   clear_Players;
   clear_State;
   clear_Games;
+  clear_BlindStructure;
 end;
 
 procedure TPB_TournamentInfoList.Assign(const APB_TournamentInfoList: TList<TPB_TournamentInfo>);

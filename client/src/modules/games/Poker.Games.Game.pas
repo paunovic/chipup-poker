@@ -131,7 +131,7 @@ begin
       ASmallBlind := 50;
       ABigBlind := 100;
     end;
-    gsOther: begin
+    gbOther: begin
       ASmallBlind := 0;
       ABigBlind := 0;
     end;

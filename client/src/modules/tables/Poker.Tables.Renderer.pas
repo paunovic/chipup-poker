@@ -1,4 +1,3 @@
-
 unit Poker.Tables.Renderer;
 
 interface
@@ -435,6 +434,7 @@ var
   player_info: TPlayerInfo;
   seat_image: TAsphyreImage;
   seat_empty_image: TAsphyreImage;
+  seat_empty_image_no_text: TAsphyreImage;
   seat_inactive_image: TAsphyreImage;
   seat_active_image: TAsphyreImage;
   action_image: TAsphyreImage;
@@ -468,6 +468,7 @@ begin
   if FMetrics.GetTableSector(seat_point) in [tsLeft, tsTopLeft, tsBottomLeft] then
   begin
     seat_empty_image := TableResources.SeatLeftEmptyImage;
+    seat_empty_image_no_text := TableResources.SeatLeftEmptyTournamentImage;
     seat_inactive_image := TableResources.SeatLeftImage;
     seat_active_image := TableResources.SeatLeftActiveImage;
 
@@ -477,6 +478,7 @@ begin
   else
   begin
     seat_empty_image := TableResources.SeatRightEmptyImage;
+    seat_empty_image_no_text := TableResources.SeatRightEmptyTournamentImage;
     seat_inactive_image := TableResources.SeatRightImage;
     seat_active_image := TableResources.SeatRightActiveImage;
 
@@ -634,7 +636,10 @@ begin
     else
     begin
       // empty seat
-      DXCore.Canvas.UseImage(seat_empty_image, TexFull4);
+      if FTableType = ttLive then
+        DXCore.Canvas.UseImage(seat_empty_image, TexFull4)
+      else
+        DXCore.Canvas.UseImage(seat_empty_image_no_text, TexFull4);
       DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.SeatWidth / 2, seat_point.Y - FMetrics.SeatHeight / 2, FMetrics.SeatWidth, FMetrics.SeatHeight), clWhite4);
     end;
   finally

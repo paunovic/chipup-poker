@@ -31,6 +31,8 @@ type
       FSeatRightActiveImage: TAsphyreImage;
       FSeatRightEmptyImage: TAsphyreImage;
       FDealerButtonImage: TAsphyreImage;
+      FSeatRightEmptyTournamentImage: TAsphyreImage;
+      FSeatLeftEmptyTournamentImage: TAsphyreImage;
       FChip1Image: TAsphyreImage;
       FChip5Image: TAsphyreImage;
       FChip25Image: TAsphyreImage;
@@ -139,6 +141,8 @@ type
     property SeatRightImage: TAsphyreImage read FSeatRightImage;
     property SeatRightActiveImage: TAsphyreImage read FSeatRightActiveImage;
     property SeatRightEmptyImage: TAsphyreImage read FSeatRightEmptyImage;
+    property SeatLeftEmptyTournamentImage: TAsphyreImage read FSeatLeftEmptyTournamentImage;
+    property SeatRightEmptyTournamentImage: TAsphyreImage read FSeatRightEmptyTournamentImage;
     property DealerButtonImage: TAsphyreImage read FDealerButtonImage;
     property Chip1Image: TAsphyreImage read FChip1Image;
     property Chip5Image: TAsphyreImage read FChip5Image;
@@ -230,6 +234,8 @@ begin
   AddDXImage('SeatRight.image', FSeatRightImage);
   AddDXImage('SeatRightActive.image', FSeatRightActiveImage);
   AddDXImage('SeatRightEmpty.image', FSeatRightEmptyImage);
+  AddDXImage('SeatRightEmptyTournament.image', FSeatRightEmptyTournamentImage);
+  AddDXImage('SeatLeftEmptyTournament.image', FSeatLeftEmptyTournamentImage);
   AddDXImage('CardBackground.image', FCardBackgroundImage, FCardAspectRatio);
   AddDXImage('DealerButton.image', FDealerButtonImage, FDealerButtonAspectRatio);
   AddDXImage('Chip1.image', FChip1Image, FChipAspectRatio);

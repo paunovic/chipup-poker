@@ -15,7 +15,7 @@ type
 
   TGameState = (gsActive = 0,gsClosing = 1,gsClosed = 2,gsEmpty = 3);
 
-  TGameBlinds = (gb1x2 = 0,gb5x5 = 1,gb5x10 = 2,gb10x25 = 3,gb25x50 = 4,gb50x100 = 6,gsOther = 7);
+  TGameBlinds = (gb1x2 = 0,gb5x5 = 1,gb5x10 = 2,gb10x25 = 3,gb25x50 = 4,gb50x100 = 6,gbOther = 7);
 
   TPB_Game = class(TProtobufBaseObject)
   private
