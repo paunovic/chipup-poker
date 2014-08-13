@@ -252,7 +252,7 @@ message Game {
 		gb10x25 = 3;
 		gb25x50 = 4;
 		gb50x100 = 6;
-		gsOther = 7;
+		gbOther = 7;
 	}
 	
 	optional bytes _id = 1 [(ObjectId)=true];
