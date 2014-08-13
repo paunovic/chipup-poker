@@ -668,6 +668,7 @@ message TournamentInfo {
 	repeated TournamentMember players = 13;
 	required TournamentState state = 14;
 	repeated Game games = 15;
+	repeated GameBlinds blind_structure = 16;
 }
 
 message TournamentCommandParams {
@@ -691,4 +692,9 @@ message TournamentPlayerFinished {
 	required bytes tournament_id = 1 [(ObjectId)=true];
 	required bytes player_id = 2 [(ObjectId)=true];
 	required int32 place = 3;
+}
+
+message GameBlinds {
+	required uint32 small_blind = 1;
+	required uint32 big_blind = 2;
 }
