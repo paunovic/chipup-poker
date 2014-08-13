@@ -70,8 +70,8 @@ begin
   FName := AProtobufObject.Gamename;
   FBlinds := AProtobufObject.Blinds;
   BlindsEnumToInts(FBlinds, FSmallBlind, FBigBlind);
-  FSmallBlind := FSmallBlind * 100;
-  FBigBlind := FBigBlind * 100;
+  FSmallBlind := AProtobufObject.SmallBlind;
+  FBigBlind := AProtobufObject.BigBlind;
   FGameType := TGameType(AProtobufObject.GameType);
   FGameLimit := TGameLimit(AProtobufObject.GameLimit);
   FMinBuyin := AProtobufObject.BuyinMin;
@@ -130,6 +130,10 @@ begin
     gb50x100: begin
       ASmallBlind := 50;
       ABigBlind := 100;
+    end;
+    gsOther: begin
+      ASmallBlind := 0;
+      ABigBlind := 0;
     end;
   end;
 end;

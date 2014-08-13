@@ -4653,7 +4653,7 @@ object frmChipUpMain: TfrmChipUpMain
     Top = 52
   end
   object StyleRepository: TcxStyleRepository
-    Left = 672
+    Left = 648
     Top = 52
     PixelsPerInch = 96
     object styleTournamentOpen: TcxStyle

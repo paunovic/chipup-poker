@@ -57,7 +57,7 @@ begin
 
   FillChar(dsbd, SizeOf(dsbd), 0);
   dsbd.dwSize := SizeOf(dsbd);
-  dsbd.dwFlags := DSBCAPS_STATIC or DSBCAPS_CTRLPOSITIONNOTIFY;
+  dsbd.dwFlags := DSBCAPS_STATIC or DSBCAPS_CTRLPOSITIONNOTIFY or DSBCAPS_GLOBALFOCUS;
   dsbd.dwBufferBytes := FReader.CKIn.cksize;
   dsbd.lpwfxFormat := FReader.WFX;
 

@@ -132,6 +132,7 @@ begin
   Tournaments.Add(proto);
   gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridTablesTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridAllPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
   alTournamentLobby.State := asNormal;
   RefreshAll;
 end;
@@ -292,7 +293,7 @@ begin
 
   if Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game) then
   try
-    Tables.AddTournamentTable(game.MongoId, TRUE, TRUE);
+    Tables.AddTournamentTable(game.MongoId, FALSE, TRUE);
   finally
     Tournaments.Unlock;
   end;

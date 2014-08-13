@@ -15,7 +15,7 @@ type
 
   TGameState = (gsActive = 0,gsClosing = 1,gsClosed = 2,gsEmpty = 3);
 
-  TGameBlinds = (gb1x2 = 0,gb5x5 = 1,gb5x10 = 2,gb10x25 = 3,gb25x50 = 4,gb50x100 = 6);
+  TGameBlinds = (gb1x2 = 0,gb5x5 = 1,gb5x10 = 2,gb10x25 = 3,gb25x50 = 4,gb50x100 = 6,gsOther = 7);
 
   TPB_Game = class(TProtobufBaseObject)
   private
@@ -35,6 +35,8 @@ type
       kClosetimeFieldNumber = 14;
       kLasthandidFieldNumber = 15;
       kTournamentFieldNumber = 16;
+      kSmallBlindFieldNumber = 17;
+      kBigBlindFieldNumber = 18;
 
     var
       FId: TMongoId;
@@ -52,6 +54,8 @@ type
       FClosetime: UInt32;
       FLasthandid: UInt32;
       FTournament: TMongoId;
+      FSmallBlind: UInt32;
+      FBigBlind: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -99,6 +103,12 @@ type
     procedure set_has_Tournament;
     procedure clear_has_Tournament;
     procedure SetTournament(const AValue: TMongoId);
+    procedure set_has_SmallBlind;
+    procedure clear_has_SmallBlind;
+    procedure SetSmallBlind(const AValue: UInt32);
+    procedure set_has_BigBlind;
+    procedure clear_has_BigBlind;
+    procedure SetBigBlind(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE); overload;
@@ -182,6 +192,16 @@ type
     function has_Tournament: Boolean;
     procedure clear_Tournament;
     property Tournament: TMongoId read FTournament write SetTournament;
+
+    // optional uint32 SmallBlind = 17;
+    function has_SmallBlind: Boolean;
+    procedure clear_SmallBlind;
+    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
+
+    // optional uint32 BigBlind = 18;
+    function has_BigBlind: Boolean;
+    procedure clear_BigBlind;
+    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
 
   end;
 
@@ -289,6 +309,16 @@ begin
         FTournament := AProtobufReader.readMongoId;
         set_has_Tournament;
       end;
+      kSmallBlindFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSmallBlind := AProtobufReader.readUInt32;
+        set_has_SmallBlind;
+      end;
+      kBigBlindFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBigBlind := AProtobufReader.readUInt32;
+        set_has_BigBlind;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -326,6 +356,10 @@ begin
     SetLasthandid(AFrom.Lasthandid);
   if AFrom.has_Tournament then
     SetTournament(AFrom.Tournament);
+  if AFrom.has_SmallBlind then
+    SetSmallBlind(AFrom.SmallBlind);
+  if AFrom.has_BigBlind then
+    SetBigBlind(AFrom.BigBlind);
 end;
 
 function TPB_Game.IsInitialized: Boolean;
@@ -801,6 +835,66 @@ begin
   set_has_Tournament;
 end;
 
+procedure TPB_Game.clear_SmallBlind;
+begin
+  FSmallBlind := 0;
+  clear_has_SmallBlind;
+end;
+
+function TPB_Game.has_SmallBlind: Boolean;
+begin
+  result := (_has_bits_ and 65536) > 0;
+end;
+
+procedure TPB_Game.set_has_SmallBlind;
+begin
+  _has_bits_ := _has_bits_ or 65536;
+end;
+
+procedure TPB_Game.clear_has_SmallBlind;
+begin
+  _has_bits_ := _has_bits_ and not 65536;
+end;
+
+procedure TPB_Game.SetSmallBlind(const AValue: UInt32);
+begin
+  Assert(not has_SmallBlind);
+  FSmallBlind := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kSmallBlindFieldNumber, AValue);
+  set_has_SmallBlind;
+end;
+
+procedure TPB_Game.clear_BigBlind;
+begin
+  FBigBlind := 0;
+  clear_has_BigBlind;
+end;
+
+function TPB_Game.has_BigBlind: Boolean;
+begin
+  result := (_has_bits_ and 131072) > 0;
+end;
+
+procedure TPB_Game.set_has_BigBlind;
+begin
+  _has_bits_ := _has_bits_ or 131072;
+end;
+
+procedure TPB_Game.clear_has_BigBlind;
+begin
+  _has_bits_ := _has_bits_ and not 131072;
+end;
+
+procedure TPB_Game.SetBigBlind(const AValue: UInt32);
+begin
+  Assert(not has_BigBlind);
+  FBigBlind := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBigBlindFieldNumber, AValue);
+  set_has_BigBlind;
+end;
+
 procedure TPB_Game.Clear;
 begin
   if _has_bits_ = 0 then
@@ -821,6 +915,8 @@ begin
   clear_Closetime;
   clear_Lasthandid;
   clear_Tournament;
+  clear_SmallBlind;
+  clear_BigBlind;
 end;
 
 procedure TPB_GameList.Assign(const APB_GameList: TList<TPB_Game>);

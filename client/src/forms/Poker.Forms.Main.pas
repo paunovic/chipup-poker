@@ -222,7 +222,7 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF} Poker.Sounds,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
@@ -267,10 +267,10 @@ begin
                       TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
                       TServerMessageCallback.Create(srTournamentOpenTable, CSRTournamentOpenTable),
                       TServerMessageCallback.Create(seTournamentPlayerFinished, CSETournamentPlayerFinished),
+                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
-                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                       TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk, srTournamentOpenTable], CSRTableStatus)
                   ], TRUE);
 
