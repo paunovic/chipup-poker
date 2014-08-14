@@ -47,6 +47,7 @@ enum ServerCodes {
 	srNotSitting = 44;
 	srTournamentReply = 45;
 	srTournamentDetails = 46;
+	srTableMessage = 47;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
