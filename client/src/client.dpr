@@ -182,7 +182,8 @@ uses
   Poker.Protobufs.Objects.TournamentTableStart in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas',
   Poker.Protobufs.Objects.HandHistoryReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas',
   Poker.Protobufs.Objects.TournamentPlayerFinished in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas',
-  Poker.Protobufs.Objects.GameBlinds in 'modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas';
+  Poker.Protobufs.Objects.GameBlinds in 'modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas',
+  Poker.Protobufs.Objects.TableMessage in 'modules\protobufs\objects\Poker.Protobufs.Objects.TableMessage.pas';
 
 procedure FocusApp;
 var

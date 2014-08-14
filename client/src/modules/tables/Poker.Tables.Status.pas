@@ -347,8 +347,8 @@ begin
   if AGame.State = gsClosing then
   begin
     gtc := GetTickCount;
-    ct := AGame.ClosingTime - ServerSocket.TimeOffset;
-    if (AGame.ClosingTime = 0) or
+    ct := AGame.Closetime - ServerSocket.TimeOffset;
+    if (AGame.Closetime = 0) or
        (gtc > ct) then
       FClosingTime := 0
     else

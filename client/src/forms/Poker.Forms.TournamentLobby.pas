@@ -43,6 +43,12 @@ type
     gridAllPlayersName: TcxGridColumn;
     gridAllPlayersChips: TcxGridColumn;
     gridAllPlayersLevel: TcxGridLevel;
+    gridBlinds: TcxGrid;
+    gridBlindsTable: TcxGridTableView;
+    gridBlindsTLevel: TcxGridColumn;
+    gridBlindsBlinds: TcxGridColumn;
+    gridBlindsLevel: TcxGridLevel;
+    gridBlindsMinutes: TcxGridColumn;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -66,6 +72,7 @@ type
     procedure UpdateTablesGrid;
     procedure UpdateAllPlayersGrid;
     procedure UpdateFormData;
+    procedure UpdateBlindsStructureGrid;
     procedure RefreshAll;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -83,7 +90,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -133,6 +140,7 @@ begin
   gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridTablesTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridAllPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridBlindsTable.OptionsView.NoDataToDisplayInfoText := ' ';
   alTournamentLobby.State := asNormal;
   RefreshAll;
 end;
@@ -158,6 +166,40 @@ begin
         c.SetValue(rec_count - 1, gridAllPlayersId.Index, member.MongoId.ToVariant);
         c.SetValue(rec_count - 1, gridAllPlayersName.Index, member.Displayname);
         c.SetValue(rec_count - 1, gridAllPlayersChips.Index, member.Chips / 100);
+      end;
+    finally
+      Tournaments.Unlock;
+    end;
+    c.SetRecordCount(rec_count);
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmTournamentLobby.UpdateBlindsStructureGrid;
+var
+  c: TcxDataController;
+  tournament: TTournamentInfo;
+  rec_count: Integer;
+  C1: Integer;
+begin
+  c := gridBlindsTable.DataController;
+  c.BeginFullUpdate;
+  try
+    rec_count := 0;
+    if Tournaments.GetAndLock(FTournamentId, tournament) then
+    try
+      for C1 := 0 to tournament.BlindStructure.Count - 1 do
+      begin
+        Inc(rec_count);
+        if rec_count > c.RecordCount then
+          c.SetRecordCount(rec_count);
+        c.SetValue(rec_count - 1, gridBlindsTLevel.Index, C1 + 1);
+        c.SetValue(rec_count - 1, gridBlindsBlinds.Index, Format('%d / %d', [tournament.BlindStructure[C1].Sb, tournament.BlindStructure[C1].Bb]));
+        if C1 < tournament.BlindStructure.Count - 1 then
+          c.SetValue(rec_count - 1, gridBlindsMinutes.Index, tournament.Timeperlevel)
+        else
+          c.SetValue(rec_count - 1, gridBlindsMinutes.Index, '');
       end;
     finally
       Tournaments.Unlock;
@@ -376,6 +418,7 @@ begin
   UpdateAllPlayersGrid;
   UpdatePlayersGrid;
   UpdateTablesGrid;
+  UpdateBlindsStructureGrid;
   UpdateFormData;
 end;
 

@@ -25,7 +25,7 @@ object frmTournamentLobby: TfrmTournamentLobby
   object gridPlayers: TcxGrid
     Left = 8
     Top = 402
-    Width = 453
+    Width = 391
     Height = 183
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
@@ -36,7 +36,9 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsCustomize.ColumnFiltering = False
       OptionsCustomize.ColumnGrouping = False
       OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnHorzSizing = False
       OptionsCustomize.ColumnMoving = False
+      OptionsCustomize.ColumnSorting = False
       OptionsData.Deleting = False
       OptionsData.DeletingConfirmation = False
       OptionsData.Editing = False
@@ -62,8 +64,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         PropertiesClassName = 'TcxTextEditProperties'
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
-        SortIndex = 0
-        SortOrder = soAscending
         Width = 221
       end
       object gridPlayersChips: TcxGridColumn
@@ -86,7 +86,7 @@ object frmTournamentLobby: TfrmTournamentLobby
   object gridTables: TcxGrid
     Left = 8
     Top = 151
-    Width = 453
+    Width = 391
     Height = 248
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 1
@@ -99,7 +99,9 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsCustomize.ColumnFiltering = False
       OptionsCustomize.ColumnGrouping = False
       OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnHorzSizing = False
       OptionsCustomize.ColumnMoving = False
+      OptionsCustomize.ColumnSorting = False
       OptionsData.Deleting = False
       OptionsData.DeletingConfirmation = False
       OptionsData.Editing = False
@@ -238,7 +240,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     end
   end
   object gridAllPlayers: TcxGrid
-    Left = 631
+    Left = 402
     Top = 151
     Width = 238
     Height = 434
@@ -251,6 +253,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsCustomize.ColumnFiltering = False
       OptionsCustomize.ColumnGrouping = False
       OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnHorzSizing = False
       OptionsCustomize.ColumnMoving = False
       OptionsData.Deleting = False
       OptionsData.DeletingConfirmation = False
@@ -277,8 +280,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         PropertiesClassName = 'TcxTextEditProperties'
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
-        SortIndex = 0
-        SortOrder = soAscending
         Width = 221
       end
       object gridAllPlayersChips: TcxGridColumn
@@ -291,6 +292,8 @@ object frmTournamentLobby: TfrmTournamentLobby
         Properties.UseDisplayFormatWhenEditing = True
         Properties.UseThousandSeparator = True
         HeaderAlignmentHorz = taCenter
+        SortIndex = 0
+        SortOrder = soDescending
         Width = 82
       end
     end
@@ -298,9 +301,64 @@ object frmTournamentLobby: TfrmTournamentLobby
       GridView = gridAllPlayersTable
     end
   end
+  object gridBlinds: TcxGrid
+    Left = 643
+    Top = 151
+    Width = 226
+    Height = 218
+    Anchors = [akLeft, akTop, akBottom]
+    TabOrder = 4
+    object gridBlindsTable: TcxGridTableView
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsCustomize.ColumnFiltering = False
+      OptionsCustomize.ColumnGrouping = False
+      OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnHorzSizing = False
+      OptionsCustomize.ColumnMoving = False
+      OptionsCustomize.ColumnSorting = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.FocusRect = False
+      OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      Styles.Inactive = dmMain.styleInactiveCell
+      object gridBlindsTLevel: TcxGridColumn
+        Caption = 'Level'
+        DataBinding.ValueType = 'Integer'
+        PropertiesClassName = 'TcxSpinEditProperties'
+        Properties.Alignment.Horz = taCenter
+        HeaderAlignmentHorz = taCenter
+        Options.Editing = False
+        Width = 51
+      end
+      object gridBlindsBlinds: TcxGridColumn
+        Caption = 'Blinds'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
+        HeaderAlignmentHorz = taCenter
+        Width = 98
+      end
+      object gridBlindsMinutes: TcxGridColumn
+        Caption = 'Minutes'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
+        HeaderAlignmentHorz = taCenter
+        Width = 75
+      end
+    end
+    object gridBlindsLevel: TcxGridLevel
+      GridView = gridBlindsTable
+    end
+  end
   object StyleRepository: TcxStyleRepository
-    Left = 604
-    Top = 432
+    Left = 56
+    Top = 60
     PixelsPerInch = 96
     object stylePlayersSelf: TcxStyle
       AssignedValues = [svColor]
@@ -311,8 +369,8 @@ object frmTournamentLobby: TfrmTournamentLobby
   end
   object alTournamentLobby: TActionList
     State = asSuspended
-    Left = 724
-    Top = 432
+    Left = 176
+    Top = 60
     object acRegister: TAction
       Caption = 'REGISTER'
       OnExecute = acRegisterExecute

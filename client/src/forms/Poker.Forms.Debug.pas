@@ -844,8 +844,8 @@ begin
   if dfiUser in refresh_items then
   begin
     if (Assigned(dmMain.SelfInfo)) and
-       (dmMain.SelfInfo.Nick <> '') then
-      lbvUser.Caption := dmMain.SelfInfo.Nick
+       (dmMain.SelfInfo.Displayname <> '') then
+      lbvUser.Caption := dmMain.SelfInfo.Displayname
     else
       lbvUser.Caption := 'Unknown';
     lbvUser.Refresh;

@@ -236,7 +236,7 @@ uses
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
   Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart,
-  Poker.Protobufs.Objects.TournamentPlayerFinished;
+  Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -583,7 +583,7 @@ procedure TfrmChipUpMain.UpdateFormCaption;
 var
   cpt: String;
 begin
-  cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
+  cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Displayname]);
   if not dmMain.SelfInfo.Authed then
     cpt := cpt + ' (account verification pending)';
   if cpt <> Caption then
@@ -810,10 +810,10 @@ begin
           c.SetRecordCount(rcount);
 
         c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId.ToVariant);
-        c.SetValue(rcount - 1, gridGamesName.Index, game.Name);
+        c.SetValue(rcount - 1, gridGamesName.Index, game.Gamename);
         c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-        c.SetValue(rcount - 1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
+        c.SetValue(rcount - 1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.BuyinMin, game.BuyinMax]));
         c.SetValue(rcount - 1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
         c.SetValue(rcount - 1, gridGamesStatus.Index, game.StateAsStr);
       end;
@@ -1311,11 +1311,9 @@ begin
   if not TTypes.TryCast<TPB_User>(AObject, pbuser) then
     Exit;
 
-  dmMain.SelfInfo.MongoId := pbuser.MongoId;
-  dmMain.SelfInfo.EMail := pbuser.Email;
-  dmMain.SelfInfo.Nick := pbuser.Displayname;
-  dmMain.SelfInfo.AvatarId := pbuser.Avatar;
-  dmMain.SelfInfo.Authed := pbuser.Authed;
+
+  dmMain.SelfInfo.Clear;
+  dmMain.SelfInfo.MergeFrom(pbuser);
 
   dmMain.UpdateSelfInfoInPlayers;
 
@@ -1493,7 +1491,10 @@ begin
   SetLength(query_users, 0);
   for player in pb.Players do
     if Players.TryGetValue(player.MongoId, playerinfo) then
-      playerinfo.Nick := player.Displayname
+    begin
+      playerinfo.clear_Displayname;
+      playerinfo.Displayname := player.Displayname;
+    end
     else
     begin
       SetLength(query_users, Length(query_users) + 1);

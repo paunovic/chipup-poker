@@ -267,7 +267,7 @@ begin
 
     manager := '';
     if Players.TryGetValue(club.OwnerId, player) then
-      manager := player.Nick;
+      manager := player.Displayname;
 
     lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
 
@@ -558,7 +558,7 @@ var
   begin
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId.ToVariant);
     if Players.TryGetValue(AMember.MongoId, player) then
-      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Displayname)
     else
     begin
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, 'Unknown');
@@ -644,7 +644,7 @@ begin
           end;
 
           if club.Games.TryGetValue(tablestats.GameId, game) then
-            tmp := game.Name
+            tmp := game.Gamename
           else
             tmp := 'UNKNOWN';
 
@@ -744,7 +744,7 @@ begin
                 recidx := rec_count - 1;
 
               if Players.TryGetValue(playerstats.UserId, player) then
-                tmp := player.Nick
+                tmp := player.Displayname
               else
                 tmp := 'Unknown';
               c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
@@ -830,10 +830,10 @@ begin
         recidx := c.AppendRecord;
 
         c.SetValue(recidx, gridGamesId.Index, game.MongoId.ToVariant);
-        c.SetValue(recidx, gridGamesName.Index, game.Name);
+        c.SetValue(recidx, gridGamesName.Index, game.Gamename);
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-        c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
+        c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.BuyinMin, game.BuyinMax]));
         c.SetValue(recidx, gridGamesSeats.Index, game.Seats);
         c.SetValue(recidx, gridGamesTableStatus.Index, game.StateAsStr);
       end;
@@ -879,7 +879,7 @@ begin
   if not Players.TryGetValue(FSelectedPlayerId, player) then
     Exit;
 
-  if MessageDlg(Format('Are you sure you want to give club ownership to %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
+  if MessageDlg(Format('Are you sure you want to give club ownership to %s?', [player.Displayname]), mtConfirmation, mbYesNo, 0) = mrYes then
   begin
     if Players.TryGetValue(FSelectedPlayerId, player) then
       ServerSocket.GiveOwnership(FClubId, player.MongoId);
@@ -899,7 +899,7 @@ begin
   if not Players.TryGetValue(FSelectedPlayerId, player) then
     Exit;
 
-  if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
+  if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Displayname]), mtConfirmation, mbYesNo, 0) = mrYes then
   begin
     if Players.TryGetValue(FSelectedPlayerId, player) then
       ServerSocket.KickPlayer(FClubId, player.MongoId);
@@ -914,7 +914,7 @@ begin
   if not Players.TryGetValue(FSelectedPlayerId, player) then
     Exit;
 
-  if MessageDlg(Format('Reset balance for player %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
+  if MessageDlg(Format('Reset balance for player %s?', [player.Displayname]), mtConfirmation, mbYesNo, 0) = mrYes then
   begin
     if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
     try

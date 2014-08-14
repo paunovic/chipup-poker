@@ -7,14 +7,9 @@ uses
   Poker.Protobufs.Objects.User;
 
 type
-  TPlayerInfo = class
+  TPlayerInfo = class(TPB_User)
   private
-    FMongoId: TMongoId;
-    FNick: String;
-    FEMail: String;
     FPassword: String;
-    FAuthed: Boolean;
-    FAvatarId: TBytes;
     FClubs: TClubList;
     FRegisteredTournaments: TList<TMongoId>;
 
@@ -26,12 +21,7 @@ type
 
     procedure LoadFromLoginReply(const ALoginReply: TPB_LoginReply);
 
-    property MongoId: TMongoId read FMongoId write FMongoId;
-    property Nick: String read FNick write FNick;
     property Password: String read FPassword write FPassword;
-    property EMail: String read FEMail write FEMail;
-    property Authed: Boolean read FAuthed write FAuthed;
-    property AvatarId: TBytes read FAvatarId write FAvatarId;
     property Clubs: TClubList read FClubs;
     property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
   end;
@@ -47,6 +37,8 @@ uses
 
 constructor TPlayerInfo.Create;
 begin
+  inherited Create;
+
   FClubs := TClubList.Create;
   FRegisteredTournaments := TList<TMongoId>.Create;
 end;
@@ -61,13 +53,10 @@ end;
 
 procedure TPlayerInfo.Flush;
 begin
-  FMongoId.Clear;
-  FNick := '';
-  FEMail := '';
-  FPassword := '';
-  FAuthed := FALSE;
-  SetLength(FAvatarId, 0);
+  Clear;
   FClubs.Clear;
+  FPassword := '';
+  FRegisteredTournaments.Clear;
 end;
 
 procedure TPlayerInfo.LoadFromLoginReply(const ALoginReply: TPB_LoginReply);
@@ -83,11 +72,8 @@ var
   mongoid: TMongoId;
   tournament: TTournamentInfo;
 begin
-  FMongoId := ALoginReply.Self.MongoId;
-  FEMail := ALoginReply.Self.EMail;
-  FNick := ALoginReply.Self.DisplayName;
-  FAuthed := ALoginReply.Self.Authed;
-  FAvatarId := ALoginReply.Self.Avatar;
+  Clear;
+  MergeFrom(ALoginReply.Self);
 
   to_remove := TList<TMongoId>.Create;
   try

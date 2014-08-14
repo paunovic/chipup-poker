@@ -210,12 +210,12 @@ begin
 
   // basic info
   ALines.Add(Format('%sHand %s#%d%s: %s%s (%s/%s)%s - %s%s', [
-      ATags.HeaderNormal, ATags.HandId, FHandId, ATags.HeaderNormal, ATags.GameType, TGameInfo.GameTypeToStr(FCurrentGame, FParentItems.Game.Limit, FALSE),
+      ATags.HeaderNormal, ATags.HandId, FHandId, ATags.HeaderNormal, ATags.GameType, TGameInfo.GameTypeToStr(FCurrentGame, FParentItems.Game.GameLimit, FALSE),
       ChipsToStr(FParentItems.Game.SmallBlind), ChipsToStr(FParentItems.Game.BigBlind), ATags.HeaderNormal, ATags.GameTime, FStartTimeStr
   ]));
 
   ALines.Add(Format('%sTable ''%s%s%s'' (%s%d-max%s) - %s%s', [
-      ATags.HeaderNormal, ATags.TableName, FParentItems.Game.Name, ATags.HeaderNormal, ATags.TableMaxSeats, FParentItems.Game.Seats, ATags.HeaderNormal,
+      ATags.HeaderNormal, ATags.TableName, FParentItems.Game.Gamename, ATags.HeaderNormal, ATags.TableMaxSeats, FParentItems.Game.Seats, ATags.HeaderNormal,
       ATags.ClubName, FParentItems.Club.Name
   ]));
 

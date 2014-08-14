@@ -48,8 +48,8 @@ type
       FBlinds: TGameBlinds;
       FSeats: Integer;
       FSitting: Integer;
-      FBuyinMin: Integer;
-      FBuyinMax: Integer;
+      FBuyinMin: UInt32;
+      FBuyinMax: UInt32;
       FState: TGameState;
       FClosetime: UInt32;
       FLasthandid: UInt32;
@@ -87,10 +87,10 @@ type
     procedure SetSitting(const AValue: Integer);
     procedure set_has_BuyinMin;
     procedure clear_has_BuyinMin;
-    procedure SetBuyinMin(const AValue: Integer);
+    procedure SetBuyinMin(const AValue: UInt32);
     procedure set_has_BuyinMax;
     procedure clear_has_BuyinMax;
-    procedure SetBuyinMax(const AValue: Integer);
+    procedure SetBuyinMax(const AValue: UInt32);
     procedure set_has_State;
     procedure clear_has_State;
     procedure SetState(const AValue: TGameState);
@@ -163,15 +163,15 @@ type
     procedure clear_Sitting;
     property Sitting: Integer read FSitting write SetSitting;
 
-    // optional int32 BuyinMin = 11;
+    // optional uint32 BuyinMin = 11;
     function has_BuyinMin: Boolean;
     procedure clear_BuyinMin;
-    property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
+    property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
 
-    // optional int32 BuyinMax = 12;
+    // optional uint32 BuyinMax = 12;
     function has_BuyinMax: Boolean;
     procedure clear_BuyinMax;
-    property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
+    property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
 
     // optional GameState State = 13;
     function has_State: Boolean;
@@ -281,12 +281,12 @@ begin
       end;
       kBuyinMinFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBuyinMin := AProtobufReader.readInt32;
+        FBuyinMin := AProtobufReader.readUInt32;
         set_has_BuyinMin;
       end;
       kBuyinMaxFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBuyinMax := AProtobufReader.readInt32;
+        FBuyinMax := AProtobufReader.readUInt32;
         set_has_BuyinMax;
       end;
       kStateFieldNumber: begin
@@ -672,12 +672,12 @@ begin
   _has_bits_ := _has_bits_ and not 1024;
 end;
 
-procedure TPB_Game.SetBuyinMin(const AValue: Integer);
+procedure TPB_Game.SetBuyinMin(const AValue: UInt32);
 begin
   Assert(not has_BuyinMin);
   FBuyinMin := AValue;
   if not Lightweight then
-    ProtobufOutput.writeInt32(kBuyinMinFieldNumber, AValue);
+    ProtobufOutput.writeUInt32(kBuyinMinFieldNumber, AValue);
   set_has_BuyinMin;
 end;
 
@@ -702,12 +702,12 @@ begin
   _has_bits_ := _has_bits_ and not 2048;
 end;
 
-procedure TPB_Game.SetBuyinMax(const AValue: Integer);
+procedure TPB_Game.SetBuyinMax(const AValue: UInt32);
 begin
   Assert(not has_BuyinMax);
   FBuyinMax := AValue;
   if not Lightweight then
-    ProtobufOutput.writeInt32(kBuyinMaxFieldNumber, AValue);
+    ProtobufOutput.writeUInt32(kBuyinMaxFieldNumber, AValue);
   set_has_BuyinMax;
 end;
 

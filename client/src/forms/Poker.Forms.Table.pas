@@ -426,6 +426,8 @@ procedure TfrmTable.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Int
 var
   set_raise_amount: Boolean;
   table: TTable;
+  seat_index: Integer;
+  seat: TSeatInfo;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
@@ -440,10 +442,17 @@ begin
       ShowHint := TRUE;
     end
     else
-    begin
-      Hint := '';
-      ShowHint := FALSE;
-    end;
+      if (table.Renderer.Metrics.IsPointInSeat(table.game, X, Y, seat_index)) and
+         (table.Status.GetSeatInfo(seat_index, seat)) then
+      begin
+        Hint := Format('Chips: %s', [ChipsToStr(seat.Chips)]);
+        ShowHint := TRUE;
+      end
+      else
+      begin
+        Hint := '';
+        ShowHint := FALSE;
+      end;
 
     if set_raise_amount then
       SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +

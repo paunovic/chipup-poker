@@ -4,8 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status,
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TableEvent;
+  Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.TableEvent;
 
 type
   TTable = class
@@ -106,7 +106,6 @@ end;
 
 destructor TTable.Destroy;
 begin
-
   if FLeaveNotify then
     ServerSocket.LeaveTable(FGameId);
 
@@ -131,7 +130,6 @@ begin
   inherited;
 end;
 
-
 function TTable.GetTableCaption: String;
 var
   currentgame: String;
@@ -152,18 +150,18 @@ begin
         rot_index := FStatus.RotationHand;
         if rot_index = 0 then
           rot_index := 1;
-        result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FGame.Name, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind),
+        result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FGame.Gamename, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind),
              FGame.AsString(TRUE), (rot_index - 1) mod FGame.Seats + 1, FGame.Seats, currentgame, FClub.Name])
       end
       else
-        result := Format('%s (%s/%s %s) - %s', [FGame.Name, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), FGame.AsString(TRUE), FClub.Name]);
+        result := Format('%s (%s/%s %s) - %s', [FGame.Gamename, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), FGame.AsString(TRUE), FClub.Name]);
     end;
 
     ttTournament: begin
       result := 'Tournament';
       if Tournaments.GetAndLock(FTournamentId, tournament) then
       try
-        result := Format('Tournament %s, table %', [tournament.Name, FGame.Name]);
+        result := Format('Tournament %s, table %', [tournament.Name, FGame.Gamename]);
       finally
         Tournaments.Unlock;
       end;
@@ -177,7 +175,7 @@ begin
 
         if hhis.GetAndLockHand(FHandHistoryHandId, hhi) then
         try
-          result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
+          result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.GameLimit, FALSE),
                      ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
         finally
           hhis.Unlock;
@@ -449,7 +447,7 @@ begin
   if FStatus.GetSeatInfo(FStatus.CurrentSeat, seatdbg) then
   begin
     if Players.TryGetValue(seatdbg.PlayerMongoId, playerdbg) then
-      csdbg := csdbg + ' - ' + playerdbg.Nick;
+      csdbg := csdbg + ' - ' + playerdbg.Displayname;
     tb := seatdbg.Timebank;
   end;
 
@@ -470,24 +468,24 @@ begin
 
     case pbevent.Event of
       teFold: if Assigned(seatdbg) then
-        events := events + Format('FOLD [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)])
+        events := events + Format('FOLD [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)])
       else
         events := events + Format('FOLD [#%d]', [pbevent.Seat]);
-      teSit: events := events + Format('SIT [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teSit: events := events + Format('SIT [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
       teStandUp: events := events + Format('STAND UP [#%d]', [pbevent.Seat]);
       teWinning: events := events + 'WINNING';
       teDealing: events := events + 'DEALING';
-      teCheck: events := events + Format('CHECK [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-      teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-      teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-      teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teCheck: events := events + Format('CHECK [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
       teFlop: events := events + Format('FLOP [%s]', [FStatus.FlopCards.AsString]);
       teTurn: events := events + Format('TURN [%s]', [FStatus.TurnCard.AsString]);
       teRiver: events := events + Format('RIVER [%s]', [FStatus.RiverCard.AsString]);
       tePostRiver: events := events + 'POST RIVER';
       tePreWin: events := events + 'PRE WIN';
       teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards)]);
-      teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
     else
       events := events + Format('UNHANDLED EVENT RECEIVED: %s', [GetEnumName(TypeInfo(TTableEventType), Integer(pbevent.Event))]);
     end;

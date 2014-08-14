@@ -194,7 +194,7 @@ begin
   if ServerSocket.IsConnected then
   begin
     FCurrentStatus := rsLoggingIn;
-    ServerSocket.Login(dmMain.SelfInfo.Nick, dmMain.SelfInfo.Password);
+    ServerSocket.Login(dmMain.SelfInfo.Displayname, dmMain.SelfInfo.Password);
   end
   else
     ServerSocket.Disconnect;

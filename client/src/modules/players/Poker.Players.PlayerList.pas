@@ -54,10 +54,18 @@ begin
     Add(AId, player);
   end;
 
+  player.clear_MongoId;
   player.MongoId := AId;
-  player.Nick := ANick;
+
+  player.clear_Displayname;
+  player.Displayname := ANick;
+
+  player.clear_Email;
   player.EMail := AEMail;
-  player.AvatarId := AAvatarId;
+
+  player.clear_Avatar;
+  player.Avatar := AAvatarId;
+
   result := player;
 end;
 

@@ -246,7 +246,7 @@ begin
     C1 := 0;
     for hhis in HandHistory.Values do
     begin
-      table_name := Format('%s (%d-max) - %s', [hhis.Game.Name, hhis.Game.Seats, hhis.Club.Name]);
+      table_name := Format('%s (%d-max) - %s', [hhis.Game.Gamename, hhis.Game.Seats, hhis.Club.Name]);
       if C1 >= cbTable.Properties.Items.Count then
         cbTable.Properties.Items.Add(table_name)
       else
@@ -287,7 +287,7 @@ begin
     C1 := 0;
     for hhi in hhis do
     begin
-      hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhis.Game.Limit, FALSE),
+      hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhis.Game.GameLimit, FALSE),
          ChipsToStr(hhis.Game.SmallBlind), ChipsToStr(hhis.Game.BigBlind), hhi.StartTimeStr]);
 
       if C1 >= cbHand.Properties.Items.Count then

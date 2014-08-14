@@ -214,7 +214,7 @@ end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;
 begin
-  Players.AddPlayer(FSelfInfo.MongoId, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.AvatarId);
+  Players.AddPlayer(FSelfInfo.MongoId, FSelfInfo.Displayname, FSelfInfo.EMail, FSelfInfo.Avatar);
 end;
 
 procedure TdmMain.ProcessLoginReply(const ALoginReply: TPB_LoginReply);
@@ -223,7 +223,7 @@ var
   C1: Integer;
   pbts: TPB_TableStatus;
 begin
-  Avatars.Add(FSelfInfo.AvatarId, nil);
+  Avatars.Add(FSelfInfo.Avatar, nil);
   Players.LoadFromUsersProtobuf(ALoginReply.Users);
   Tournaments.Assign(ALoginReply.TournamentInfos);
   FSelfInfo.LoadFromLoginReply(ALoginReply);
@@ -363,7 +363,7 @@ end;
 function TdmMain.IsLoggedIn: Boolean;
 begin
   result := (not FormsContainer.Contains(TfrmChipUpLogin)) and
-            (dmMain.SelfInfo.Nick <> '');
+            (dmMain.SelfInfo.Displayname <> '');
 end;
 
 procedure TdmMain.ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer);
@@ -392,8 +392,8 @@ begin
 
       for memberpb in AClub.Members do
         if (not Players.TryGetValue(memberpb.MongoId, player)) or
-           (player.Nick = '') or
-           (Length(player.AvatarId) = 0) then
+           (player.Displayname = '') or
+           (Length(player.Avatar) = 0) then
         begin
           SetLength(query_users, Length(query_users) + 1);
           query_users[Length(query_users) - 1] := memberpb.MongoId;

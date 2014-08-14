@@ -7,7 +7,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableMessage;
 
 type
   TTableState = (tsIdle = 0,tsPreFlop = 1,tsFlop = 2,tsTurn = 3,tsRiver = 4,tsWinning = 5,tsWinning2 = 6);
@@ -39,6 +39,7 @@ type
       kGameLimitFieldNumber = 25;
       kMinimumRaiseFieldNumber = 26;
       kTableTypeFieldNumber = 27;
+      kTableMessageFieldNumber = 28;
 
     var
       FTableMongoId: TMongoId;
@@ -63,6 +64,7 @@ type
       FGameLimit: TGameLimit;
       FMinimumRaise: UInt32;
       FTableType: TTableType;
+      FTableMessage: TPB_TableMessage;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
@@ -127,6 +129,9 @@ type
     procedure set_has_TableType;
     procedure clear_has_TableType;
     procedure SetTableType(const AValue: TTableType);
+    procedure set_has_TableMessage;
+    procedure clear_has_TableMessage;
+    procedure SetTableMessage(const AValue: TPB_TableMessage);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -254,6 +259,11 @@ type
     procedure clear_TableType;
     property TableType: TTableType read FTableType write SetTableType;
 
+    // optional TableMessage TableMessage = 28;
+    function has_TableMessage: Boolean;
+    procedure clear_TableMessage;
+    property TableMessage: TPB_TableMessage read FTableMessage write SetTableMessage;
+
   end;
 
   TPB_TableStatusList = class(TObjectList<TPB_TableStatus>)
@@ -294,6 +304,7 @@ begin
     FPots.OnNotify := nil;
     FreeAndNil(FPots);
   end;
+  if Assigned(FTableMessage) then FreeAndNil(FTableMessage);
   inherited;
 end;
 
@@ -433,6 +444,13 @@ begin
         FTableType := TTableType(AProtobufReader.readEnum);
         set_has_TableType;
       end;
+      kTableMessageFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FTableMessage) then
+          FTableMessage := TPB_TableMessage.Create;
+        FTableMessage.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+        set_has_TableMessage;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -487,6 +505,8 @@ begin
     SetMinimumRaise(AFrom.MinimumRaise);
   if AFrom.has_TableType then
     SetTableType(AFrom.TableType);
+  if (AFrom.has_TableMessage) then
+    FTableMessage.MergeFrom(AFrom.TableMessage);
 end;
 
 function TPB_TableStatus.IsInitialized: Boolean;
@@ -503,6 +523,9 @@ begin
       Exit(FALSE);
   for pbobj in Pots do
     if not pbobj.IsInitialized then
+      Exit(FALSE);
+  if (has_TableMessage) then
+    if not FTableMessage.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
 end;
@@ -1199,6 +1222,36 @@ begin
   set_has_TableType;
 end;
 
+procedure TPB_TableStatus.clear_TableMessage;
+begin
+  FreeAndNil(FTableMessage);
+  clear_has_TableMessage;
+end;
+
+function TPB_TableStatus.has_TableMessage: Boolean;
+begin
+  result := (_has_bits_ and 134217728) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_TableMessage;
+begin
+  _has_bits_ := _has_bits_ or 134217728;
+end;
+
+procedure TPB_TableStatus.clear_has_TableMessage;
+begin
+  _has_bits_ := _has_bits_ and not 134217728;
+end;
+
+procedure TPB_TableStatus.SetTableMessage(const AValue: TPB_TableMessage);
+begin
+  Assert(not has_TableMessage);
+  FTableMessage := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kTableMessageFieldNumber, AValue.ProtobufOutput);
+  set_has_TableMessage;
+end;
+
 procedure TPB_TableStatus.Clear;
 begin
   if _has_bits_ = 0 then
@@ -1226,6 +1279,7 @@ begin
   clear_GameLimit;
   clear_MinimumRaise;
   clear_TableType;
+  clear_TableMessage;
 end;
 
 procedure TPB_TableStatusList.Assign(const APB_TableStatusList: TList<TPB_TableStatus>);

@@ -72,7 +72,7 @@ type
     procedure RenderSeat(const AGame: TGameInfo; const ASeatIndex: Integer);
     procedure RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single; const ATransparency: Byte = 0);
     procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
-    procedure RenderClosingText(const AGame: TGameInfo);
+    procedure RenderTableMessage(const AGame: TGameInfo);
     procedure RenderTimebar(const AGame: TGameInfo);
     procedure RenderTableCards;
     procedure RenderDealerButton(const AGame: TGameInfo);
@@ -385,7 +385,7 @@ begin
   try
     RenderBackground;
     RenderTable;
-    RenderClosingText(table.Game);
+    RenderTableMessage(table.Game);
     RenderTableCards;
     RenderDealerButton(table.Game);
     RenderDealingCardsAni;
@@ -509,10 +509,10 @@ begin
       if Assigned(player_info) then
       begin
         // set avatar
-        avatar := Avatars.Add(player_info.AvatarId, nil);
+        avatar := Avatars.Add(player_info.Avatar, nil);
 
         // set seat upper text
-        seat_upper_text := player_info.Nick;
+        seat_upper_text := player_info.Displayname;
         seat_upper_text_color := cColor2($FFCCCCCC);
       end
       else
@@ -527,7 +527,7 @@ begin
       // set seat lower text
       if seat_info.Disconnected then
       begin
-        seat_lower_text := Format('DC (%s)', [ChipsToStr(seat_info.Chips)]); // FIXME
+        seat_lower_text := 'Disconnected';
         seat_lower_text_color := cColor2($FFFF3535);
       end
       else
@@ -814,13 +814,14 @@ begin
   font.TextMidF(AMidPoint, AText, AColor);
 end;
 
-procedure TTableRenderer.RenderClosingText(const AGame: TGameInfo);
+procedure TTableRenderer.RenderTableMessage(const AGame: TGameInfo);
 var
   mins: Integer;
   minute_text: String;
   txt: String;
   table: TTable;
 begin
+  txt := '';
   if FTableType = ttLive then
     case AGame.State of
       gsClosing: begin
@@ -841,15 +842,15 @@ begin
         finally
 
         end;
-
-        RenderScaleFont(txt, clWhite2, Point2(FMetrics.TableCenter.x, FMetrics.TableCenter.Y + FMetrics.CardHeight / 3), TableResources.SintonyFonts,
-                        Low(TableResources.SintonyFonts), 12, 16, 2, 8 + 8 * FMetrics.TableResizeRatio, 0);
       end;
 
-      gsClosed: RenderScaleFont('Table is closed', clWhite2, Point2(FMetrics.TableCenter.x, FMetrics.TableCenter.Y + FMetrics.CardHeight / 3), TableResources.SintonyFonts,
-                          Low(TableResources.SintonyFonts), 12, 16, 2, 8 + 8 * FMetrics.TableResizeRatio, 0);
+      gsClosed: txt := 'Table is closed';
 
     end;
+
+  if txt <> '' then
+    RenderScaleFont(txt, clWhite2, Point2(FMetrics.TableCenter.x, FMetrics.TableCenter.Y + FMetrics.CardHeight / 3), TableResources.SintonyFonts,
+                    Low(TableResources.SintonyFonts), 12, 16, 2, 8 + 8 * FMetrics.TableResizeRatio, 0);
 end;
 
 procedure TTableRenderer.RenderTimebar(const AGame: TGameInfo);
@@ -1580,7 +1581,7 @@ begin
       try
         if (table.Status.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
            (Players.TryGetValue(seat.PlayerMongoId, player)) then
-          nick := player.Nick
+          nick := player.Displayname
         else
           nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
 

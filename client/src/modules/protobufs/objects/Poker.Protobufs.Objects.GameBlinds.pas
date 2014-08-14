@@ -12,20 +12,20 @@ type
   TPB_GameBlinds = class(TProtobufBaseObject)
   private
     const
-      kSmallBlindFieldNumber = 1;
-      kBigBlindFieldNumber = 2;
+      kSbFieldNumber = 1;
+      kBbFieldNumber = 2;
 
     var
-      FSmallBlind: UInt32;
-      FBigBlind: UInt32;
+      FSb: UInt32;
+      FBb: UInt32;
       _has_bits_: UINT32;
 
-    procedure set_has_SmallBlind;
-    procedure clear_has_SmallBlind;
-    procedure SetSmallBlind(const AValue: UInt32);
-    procedure set_has_BigBlind;
-    procedure clear_has_BigBlind;
-    procedure SetBigBlind(const AValue: UInt32);
+    procedure set_has_Sb;
+    procedure clear_has_Sb;
+    procedure SetSb(const AValue: UInt32);
+    procedure set_has_Bb;
+    procedure clear_has_Bb;
+    procedure SetBb(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_GameBlinds; const ALightweight: Boolean = FALSE); overload;
@@ -35,15 +35,15 @@ type
     procedure Clear;
     function IsInitialized: Boolean; override;
 
-    // required uint32 SmallBlind = 1;
-    function has_SmallBlind: Boolean;
-    procedure clear_SmallBlind;
-    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
+    // required uint32 Sb = 1;
+    function has_Sb: Boolean;
+    procedure clear_Sb;
+    property Sb: UInt32 read FSb write SetSb;
 
-    // required uint32 BigBlind = 2;
-    function has_BigBlind: Boolean;
-    procedure clear_BigBlind;
-    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
+    // required uint32 Bb = 2;
+    function has_Bb: Boolean;
+    procedure clear_Bb;
+    property Bb: UInt32 read FBb write SetBb;
 
   end;
 
@@ -76,15 +76,15 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      kSmallBlindFieldNumber: begin
+      kSbFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSmallBlind := AProtobufReader.readUInt32;
-        set_has_SmallBlind;
+        FSb := AProtobufReader.readUInt32;
+        set_has_Sb;
       end;
-      kBigBlindFieldNumber: begin
+      kBbFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBigBlind := AProtobufReader.readUInt32;
-        set_has_BigBlind;
+        FBb := AProtobufReader.readUInt32;
+        set_has_Bb;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -93,10 +93,10 @@ end;
 
 procedure TPB_GameBlinds.MergeFrom(const AFrom: TPB_GameBlinds);
 begin
-  if AFrom.has_SmallBlind then
-    SetSmallBlind(AFrom.SmallBlind);
-  if AFrom.has_BigBlind then
-    SetBigBlind(AFrom.BigBlind);
+  if AFrom.has_Sb then
+    SetSb(AFrom.Sb);
+  if AFrom.has_Bb then
+    SetBb(AFrom.Bb);
 end;
 
 function TPB_GameBlinds.IsInitialized: Boolean;
@@ -106,64 +106,64 @@ begin
   Exit(TRUE);
 end;
 
-procedure TPB_GameBlinds.clear_SmallBlind;
+procedure TPB_GameBlinds.clear_Sb;
 begin
-  FSmallBlind := 0;
-  clear_has_SmallBlind;
+  FSb := 0;
+  clear_has_Sb;
 end;
 
-function TPB_GameBlinds.has_SmallBlind: Boolean;
+function TPB_GameBlinds.has_Sb: Boolean;
 begin
   result := (_has_bits_ and 1) > 0;
 end;
 
-procedure TPB_GameBlinds.set_has_SmallBlind;
+procedure TPB_GameBlinds.set_has_Sb;
 begin
   _has_bits_ := _has_bits_ or 1;
 end;
 
-procedure TPB_GameBlinds.clear_has_SmallBlind;
+procedure TPB_GameBlinds.clear_has_Sb;
 begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_GameBlinds.SetSmallBlind(const AValue: UInt32);
+procedure TPB_GameBlinds.SetSb(const AValue: UInt32);
 begin
-  Assert(not has_SmallBlind);
-  FSmallBlind := AValue;
+  Assert(not has_Sb);
+  FSb := AValue;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kSmallBlindFieldNumber, AValue);
-  set_has_SmallBlind;
+    ProtobufOutput.writeUInt32(kSbFieldNumber, AValue);
+  set_has_Sb;
 end;
 
-procedure TPB_GameBlinds.clear_BigBlind;
+procedure TPB_GameBlinds.clear_Bb;
 begin
-  FBigBlind := 0;
-  clear_has_BigBlind;
+  FBb := 0;
+  clear_has_Bb;
 end;
 
-function TPB_GameBlinds.has_BigBlind: Boolean;
+function TPB_GameBlinds.has_Bb: Boolean;
 begin
   result := (_has_bits_ and 2) > 0;
 end;
 
-procedure TPB_GameBlinds.set_has_BigBlind;
+procedure TPB_GameBlinds.set_has_Bb;
 begin
   _has_bits_ := _has_bits_ or 2;
 end;
 
-procedure TPB_GameBlinds.clear_has_BigBlind;
+procedure TPB_GameBlinds.clear_has_Bb;
 begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_GameBlinds.SetBigBlind(const AValue: UInt32);
+procedure TPB_GameBlinds.SetBb(const AValue: UInt32);
 begin
-  Assert(not has_BigBlind);
-  FBigBlind := AValue;
+  Assert(not has_Bb);
+  FBb := AValue;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kBigBlindFieldNumber, AValue);
-  set_has_BigBlind;
+    ProtobufOutput.writeUInt32(kBbFieldNumber, AValue);
+  set_has_Bb;
 end;
 
 procedure TPB_GameBlinds.Clear;
@@ -171,8 +171,8 @@ begin
   if _has_bits_ = 0 then
     Exit;
 
-  clear_SmallBlind;
-  clear_BigBlind;
+  clear_Sb;
+  clear_Bb;
 end;
 
 procedure TPB_GameBlindsList.Assign(const APB_GameBlindsList: TList<TPB_GameBlinds>);

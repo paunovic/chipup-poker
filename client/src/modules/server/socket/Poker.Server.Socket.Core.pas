@@ -92,7 +92,8 @@ uses
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
   Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished,
+  Poker.Protobufs.Objects.TableMessage;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -454,7 +455,7 @@ begin
   case TServerCodes(ARpcMessage.MethodId) of
     srNotImplemented: begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
-      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Received not implemented MethodId: %s', [err]), ditException); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Received not implemented method id: %s', [err]), ditException); {$ENDIF}
     end;
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;

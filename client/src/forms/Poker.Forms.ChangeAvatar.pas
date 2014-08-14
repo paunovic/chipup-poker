@@ -66,7 +66,7 @@ begin
 
   FAvatarJPG := TJPEGImage.Create;
 
-  avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, nil);
+  avatar := Avatars.Add(dmMain.SelfInfo.Avatar, nil);
   imgAvatar.Picture.Assign(avatar.GetImage);
 end;
 
@@ -243,10 +243,14 @@ begin
 
   case pbreply.Status of
     saSuccess: begin
-      dmMain.SelfInfo.AvatarId := FAvatarId;
-      avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+      dmMain.SelfInfo.clear_Avatar;
+      dmMain.SelfInfo.Avatar := FAvatarId;
+      avatar := Avatars.Add(dmMain.SelfInfo.Avatar, FAvatarJPG);
       if Players.TryGetValue(dmMain.SelfInfo.MongoId, player_info) then
-        player_info.AvatarId := dmMain.SelfInfo.AvatarId;
+      begin
+        player_info.clear_Avatar;
+        player_info.Avatar := dmMain.SelfInfo.Avatar;
+      end;
       imgAvatar.Picture.Assign(avatar.GetImage);
 
       FAvatarChanged := FALSE;
