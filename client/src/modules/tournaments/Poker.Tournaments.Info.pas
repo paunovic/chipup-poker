@@ -24,7 +24,7 @@ implementation
 
 constructor TTournamentInfo.Create(const ATournamentInfo: TPB_TournamentInfo);
 begin
-  inherited Create(ATournamentInfo);
+  inherited Create(ATournamentInfo, TRUE);
 end;
 
 destructor TTournamentInfo.Destroy;

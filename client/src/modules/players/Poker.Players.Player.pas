@@ -37,7 +37,7 @@ uses
 
 constructor TPlayerInfo.Create;
 begin
-  inherited Create;
+  inherited Create(TRUE);
 
   FClubs := TClubList.Create;
   FRegisteredTournaments := TList<TMongoId>.Create;

@@ -161,7 +161,7 @@ begin
       result := 'Tournament';
       if Tournaments.GetAndLock(FTournamentId, tournament) then
       try
-        result := Format('Tournament %s, table %', [tournament.Name, FGame.Gamename]);
+        result := Format('Tournament %s, table #%s', [tournament.Name, FGame.Gamename]);
       finally
         Tournaments.Unlock;
       end;

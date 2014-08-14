@@ -10,6 +10,8 @@ type
   private
     function GetStateStr: String;
   public
+    constructor Create;
+
     procedure Assign(const AProtobufObject: TPB_Game);
 
     class procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
@@ -23,6 +25,11 @@ type
 implementation
 
 { TGameInfo }
+
+constructor TGameInfo.Create;
+begin
+  inherited Create(TRUE);
+end;
 
 procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
 begin
