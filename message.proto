@@ -700,13 +700,7 @@ message GameBlinds {
 }
 
 message TableMessage {
-	enum TableMessageDuration {
-		tmdUntilNextStatus = 1;
-		tmdCustomDuration = 2;
-	}
-	
 	required bytes table_mongo_id = 1 [(ObjectId)=true];
 	required string message = 2;
-	required TableMessageDuration message_duration = 3;
-	optional uint32 custom_duration = 4;
+	optional uint32 duration = 3;
 }
