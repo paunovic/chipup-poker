@@ -15,7 +15,7 @@ block content
             tr
               th level
               th SB/BB
-            each blind,level in blinds.blinds
+            each blind,level in tourn.blind_schedule.blinds
               tr
                 td=level+1
                 td=blind.sb+'/'+blind.bb

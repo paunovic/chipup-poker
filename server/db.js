@@ -253,6 +253,10 @@ var TournamentMemberSchema = new Schema({
 	chips: Number,
 	gameid: ObjectId
 });
+var BlindRow = new Schema({
+	sb: { type:Number, required:true },
+	bb: { type:Number, required:true }
+});
 var TournamentSchema = new Schema({
 	name: String,
 	description: String,
@@ -269,7 +273,12 @@ var TournamentSchema = new Schema({
 	state: { type:String, default:'tnsOpen', required:true },
 	sb: { type:Number, required:true },
 	bb: { type:Number, required:true },
-	length: { type:Number, required:true }
+	length: { type:Number, required:true },
+	blind_schedule: { type:{
+		levels: { type:Number, required:true },
+		LevelLength: { type:Number, required:true },
+		blinds: { type:[BlindRow], required:true }
+	}, required:true }
 });
 
 module.exports.close = function () {

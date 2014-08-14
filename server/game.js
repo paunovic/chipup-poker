@@ -456,6 +456,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 	myutils.getNextSequence('handHistory',function (seq) {
 		var x;
 		this.handid = seq;
+		if (this.tourn) this.updateBlinds();
 		models.Game.findOneAndUpdate({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
 		this.history = {moves:[],players:[],cards:[]};
 		Game.hands = seq;
@@ -1605,6 +1606,12 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			});
 			return;
 		}
+		if (this.tourn && this.tourn.onBreak) {
+			this.tourn.breakStart(this,function () {
+				cb(events);
+			});
+			return;
+		}
 		var havechips = 0;
 		var emptyseat = false;
 		for (var x=0; x<this.members.length; x++) {
@@ -1630,7 +1637,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			var to_kick = [];
 			for (var x=0; x<this.members.length; x++) {
 				if (!this.members[x]) continue;
-				console.log('seat:%d chips:%d tournament:%j',x,this.members[x].chips,this.tournament.obj);
+				//console.log('seat:%d chips:%d tournament:%j',x,this.members[x].chips,this.tourn);
 				if (!emptyseat && (this.members[x].status == 'psOutOfPlay')) {
 					if (this.members[x].SittingOutRoundsCount >= (this.obj.seats * 2)) {
 						to_kick.push(x);
@@ -1858,6 +1865,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
+	if (this.message) tableStatus.table_message = this.message;
 	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }
@@ -1870,6 +1878,11 @@ Game.prototype.sittingCount = function () {
 	}
 	return count;
 }
+Game.prototype.setMessage = function (obj) {
+	assert.equal(this.Lock.readers,-1);
+	this.message = obj;
+	this.broadcastStatus(null,true,[]);
+};
 Game.prototype.inHandCount = function () {
 	var count = 0;
 	for (var x=0; x<this.members.length; x++) {
@@ -2257,13 +2270,16 @@ Game.getGame = function getgame(id,cb1) {
 					} else if (obj.tournament) { // tournament game
 						game.real_rake = 0;
 						game.ignoreOffline = false;
-						var tourn = Tournament.core.activeTournaments[obj.tournament];
-						if (tourn) {
-							game.tournament = tourn.obj;
-							game.tourn = tourn;
-						}
-						finishGameInit(function () {
-							cb1(null,game);
+						game.obj.blinds = 'gbOther';
+						Tournament.core.getByIdUnlocked(obj.tournament,function (err,tourn) { // FIXME, tournament needs several locks
+							if (tourn) {
+								game.tournament = tourn.obj;
+								game.tourn = tourn;
+								game.updateBlinds();
+							} else game.log('tournament not found');
+							finishGameInit(function () {
+								cb1(null,game);
+							});
 						});
 					}
 					function finishGameInit(cb2) {
@@ -2294,6 +2310,13 @@ Game.getGame = function getgame(id,cb1) {
 			cb1(null,activeGames[id]);
 		}
 	}.bind(this));
+}
+Game.prototype.updateBlinds = function () {
+	var x = this.tourn.getLevel();
+	console.log('level is',x);
+	if (x >= this.tourn.blind_schedule.blinds.length) x = this.tourn.blind_schedule.blinds.length - 1;
+	this.obj.small_blind = this.tourn.obj.blind_schedule.blinds[x].sb * 100;
+	this.obj.big_blind = this.tourn.obj.blind_schedule.blinds[x].bb * 100;
 }
 Game.prototype.resume = function (game,cb) {
 	console.log('FINDME',game.members);

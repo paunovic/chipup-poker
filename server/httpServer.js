@@ -252,7 +252,7 @@ Server.prototype.getTournaments = function (req,res) {
 };
 Server.prototype.getTournament = function (req,res) {
 	models.Tournament.findById(req.query.id,function (err,row) {
-		res.render('tournament',{tourn:row,blinds:Tournament.PrintBlindStructure(row.sb,row.bb,row.startingchips,row.timeperlevel,row.length)});
+		res.render('tournament',{tourn:row});
 	});
 };
 Server.prototype.postTournament = function (req,res) {
@@ -306,14 +306,14 @@ Server.prototype.createTourn = function (req,res) {
 Server.prototype.createTournPost = function (req,res) {
 	var str = req.body.start_date + ' ' + req.body.start_time;
 	req.body.start_time = Math.round(new Date(str).getTime()/1000);
-	Tournament.create(req.body,function (err) {
+	Tournament.create(req.body,function (err,doc) {
 		if (err && ((err.name == 'ValidationError') || (err.name == 'CastError'))) {
 			res.end(err.toString());
 			return;
 		}
-		console.log('http body',req.body);
-		res.end('test');
-	});
+		req.query.id = doc._id;
+		this.getTournament(req,res);
+	}.bind(this));
 }
 Server.prototype.secureChangePasswordPost = function (req,res) {
 	console.log(req.body);

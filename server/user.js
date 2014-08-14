@@ -1205,17 +1205,8 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 	}.bind(this));
 };
 ClientSocket.prototype.tournChangeHandOver = function (tourn) {
-	// FIXME, put this into a toProtobuf function?
-	for (var x=0; x<tourn.obj.players.length; x++) {
-		tourn.obj.players[x].gameid = tourn.user_table_xref[tourn.obj.players[x]._id];
-	}
-	// HACK
-	var hack = pb.Parse(pb.Serialize(tourn.obj,'Poker.TournamentInfo'),'Poker.TournamentInfo');
-	// /HACK 
-	for (var x=0; x<tourn.tables.length; x++) {
-		hack.games[x] = Game.makeGameProtobuf(tourn.tables[x].obj);
-	}
-	this.send(codes.srTournamentDetails,hack,'Poker.TournamentInfo');
+	var out = tourn.toProto({games:true,players:true});
+	this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
 };
 ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,token,register) {
 	Tournament.core.getById(tournid,function (err,tourn) {
@@ -1224,16 +1215,8 @@ ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,
 				this.hook = this.tournChangeHandOver.bind(this);
 				tourn.on('handOver',this.hook);
 			}
-			for (var x=0; x<tourn.obj.players.length; x++) {
-				tourn.obj.players[x].gameid = tourn.user_table_xref[tourn.obj.players[x]._id];
-			}
-			// HACK
-			var hack = pb.Parse(pb.Serialize(tourn.obj,'Poker.TournamentInfo'),'Poker.TournamentInfo');
-			// /HACK
-			for (var x=0; x<tourn.tables.length; x++) {
-				hack.games[x] = Game.makeGameProtobuf(tourn.tables[x].obj);
-			}
-			this.send(codes.srTournamentDetails,hack,'Poker.TournamentInfo');
+			var out = tourn.toProto({games:true,players:true});
+			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
 			token.stop();
 	}.bind(this));
 };
