@@ -129,7 +129,7 @@ end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TMongoId);
 begin
-  Assert(not has_Userid);
+  if not Lightweight then    Assert(not has_Userid);
   FUserid := AValue;
   if not Lightweight then
   begin
@@ -163,7 +163,7 @@ end;
 
 procedure TPB_ClubPlayerStats.SetClubBalance(const AValue: Integer);
 begin
-  Assert(not has_ClubBalance);
+  if not Lightweight then    Assert(not has_ClubBalance);
   FClubBalance := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);

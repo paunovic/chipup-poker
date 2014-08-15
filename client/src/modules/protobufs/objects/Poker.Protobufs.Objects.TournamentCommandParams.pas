@@ -131,7 +131,7 @@ end;
 
 procedure TPB_TournamentCommandParams.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -165,7 +165,7 @@ end;
 
 procedure TPB_TournamentCommandParams.SetReplyStatus(const AValue: TTournamentCommandEnum);
 begin
-  Assert(not has_ReplyStatus);
+  if not Lightweight then    Assert(not has_ReplyStatus);
   FReplyStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kReplyStatusFieldNumber, Integer(AValue));

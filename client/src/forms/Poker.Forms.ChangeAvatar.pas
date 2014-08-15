@@ -243,14 +243,10 @@ begin
 
   case pbreply.Status of
     saSuccess: begin
-      dmMain.SelfInfo.clear_Avatar;
       dmMain.SelfInfo.Avatar := FAvatarId;
       avatar := Avatars.Add(dmMain.SelfInfo.Avatar, FAvatarJPG);
       if Players.TryGetValue(dmMain.SelfInfo.MongoId, player_info) then
-      begin
-        player_info.clear_Avatar;
         player_info.Avatar := dmMain.SelfInfo.Avatar;
-      end;
       imgAvatar.Picture.Assign(avatar.GetImage);
 
       FAvatarChanged := FALSE;

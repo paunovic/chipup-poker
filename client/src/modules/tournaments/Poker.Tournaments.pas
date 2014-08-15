@@ -94,7 +94,6 @@ begin
     Inc(reg_players, AAdjustment);
     if reg_players < 0 then
       reg_players := 0;
-    tournament.clear_RegisteredPlayers;
     tournament.RegisteredPlayers := reg_players;
     result := TRUE;
   finally

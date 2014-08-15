@@ -311,7 +311,7 @@ end;
 
 procedure TPB_Club.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -383,7 +383,7 @@ end;
 
 procedure TPB_Club.SetName(const AValue: String);
 begin
-  Assert(not has_Name);
+  if not Lightweight then    Assert(not has_Name);
   FName := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kNameFieldNumber, AValue);
@@ -413,7 +413,7 @@ end;
 
 procedure TPB_Club.SetOwner(const AValue: TMongoId);
 begin
-  Assert(not has_Owner);
+  if not Lightweight then    Assert(not has_Owner);
   FOwner := AValue;
   if not Lightweight then
   begin
@@ -447,7 +447,7 @@ end;
 
 procedure TPB_Club.SetPassword(const AValue: String);
 begin
-  Assert(not has_Password);
+  if not Lightweight then    Assert(not has_Password);
   FPassword := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
@@ -477,7 +477,7 @@ end;
 
 procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
 begin
-  Assert(not has_IsPrivate);
+  if not Lightweight then    Assert(not has_IsPrivate);
   FIsPrivate := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kIsPrivateFieldNumber, AValue);
@@ -507,7 +507,7 @@ end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);
 begin
-  Assert(not has_Seq);
+  if not Lightweight then    Assert(not has_Seq);
   FSeq := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
@@ -537,7 +537,7 @@ end;
 
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
-  Assert(not has_HasPassword);
+  if not Lightweight then    Assert(not has_HasPassword);
   FHasPassword := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kHasPasswordFieldNumber, AValue);
@@ -567,7 +567,7 @@ end;
 
 procedure TPB_Club.SetRake(const AValue: UInt32);
 begin
-  Assert(not has_Rake);
+  if not Lightweight then    Assert(not has_Rake);
   FRake := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
@@ -597,7 +597,7 @@ end;
 
 procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UInt32);
 begin
-  Assert(not has_DefaultBalanceLimit);
+  if not Lightweight then    Assert(not has_DefaultBalanceLimit);
   FDefaultBalanceLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kDefaultBalanceLimitFieldNumber, AValue);
@@ -627,7 +627,7 @@ end;
 
 procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);
 begin
-  Assert(not has_UnlimitedDefaultBalance);
+  if not Lightweight then    Assert(not has_UnlimitedDefaultBalance);
   FUnlimitedDefaultBalance := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kUnlimitedDefaultBalanceFieldNumber, AValue);

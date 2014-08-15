@@ -199,7 +199,7 @@ end;
 
 procedure TPB_User.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -233,7 +233,7 @@ end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
 begin
-  Assert(not has_Avatar);
+  if not Lightweight then    Assert(not has_Avatar);
   FAvatar := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kAvatarFieldNumber, AValue);
@@ -263,7 +263,7 @@ end;
 
 procedure TPB_User.SetDisplayname(const AValue: String);
 begin
-  Assert(not has_Displayname);
+  if not Lightweight then    Assert(not has_Displayname);
   FDisplayname := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kDisplaynameFieldNumber, AValue);
@@ -293,7 +293,7 @@ end;
 
 procedure TPB_User.SetEmail(const AValue: String);
 begin
-  Assert(not has_Email);
+  if not Lightweight then    Assert(not has_Email);
   FEmail := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kEmailFieldNumber, AValue);
@@ -323,7 +323,7 @@ end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
 begin
-  Assert(not has_Authed);
+  if not Lightweight then    Assert(not has_Authed);
   FAuthed := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kAuthedFieldNumber, AValue);
@@ -353,7 +353,7 @@ end;
 
 procedure TPB_User.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
 begin
-  Assert(not has_SubscriptionPlan);
+  if not Lightweight then    Assert(not has_SubscriptionPlan);
   FSubscriptionPlan := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));

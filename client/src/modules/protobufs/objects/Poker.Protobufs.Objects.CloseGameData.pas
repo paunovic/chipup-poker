@@ -131,7 +131,7 @@ end;
 
 procedure TPB_CloseGameData.SetGameid(const AValue: TMongoId);
 begin
-  Assert(not has_Gameid);
+  if not Lightweight then    Assert(not has_Gameid);
   FGameid := AValue;
   if not Lightweight then
   begin
@@ -165,7 +165,7 @@ end;
 
 procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
 begin
-  Assert(not has_Timestamp);
+  if not Lightweight then    Assert(not has_Timestamp);
   FTimestamp := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));

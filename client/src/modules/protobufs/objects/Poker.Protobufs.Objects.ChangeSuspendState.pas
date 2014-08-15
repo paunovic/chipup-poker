@@ -146,7 +146,7 @@ end;
 
 procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_ClubMongoId);
+  if not Lightweight then    Assert(not has_ClubMongoId);
   FClubMongoId := AValue;
   if not Lightweight then
   begin
@@ -180,7 +180,7 @@ end;
 
 procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_PlayerMongoId);
+  if not Lightweight then    Assert(not has_PlayerMongoId);
   FPlayerMongoId := AValue;
   if not Lightweight then
   begin
@@ -214,7 +214,7 @@ end;
 
 procedure TPB_ChangeSuspendState.SetSuspended(const AValue: Boolean);
 begin
-  Assert(not has_Suspended);
+  if not Lightweight then    Assert(not has_Suspended);
   FSuspended := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);

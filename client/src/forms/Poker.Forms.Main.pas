@@ -1491,10 +1491,7 @@ begin
   SetLength(query_users, 0);
   for player in pb.Players do
     if Players.TryGetValue(player.MongoId, playerinfo) then
-    begin
-      playerinfo.clear_Displayname;
-      playerinfo.Displayname := player.Displayname;
-    end
+      playerinfo.Displayname := player.Displayname
     else
     begin
       SetLength(query_users, Length(query_users) + 1);

@@ -198,7 +198,7 @@ end;
 
 procedure TPB_Pot.SetValue(const AValue: UInt32);
 begin
-  Assert(not has_Value);
+  if not Lightweight then    Assert(not has_Value);
   FValue := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kValueFieldNumber, AValue);
@@ -300,7 +300,7 @@ end;
 
 procedure TPB_Pot.SetRake(const AValue: UInt32);
 begin
-  Assert(not has_Rake);
+  if not Lightweight then    Assert(not has_Rake);
   FRake := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);

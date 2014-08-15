@@ -112,7 +112,7 @@ end;
 
 procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
 begin
-  Assert(not has_NewPassword);
+  if not Lightweight then    Assert(not has_NewPassword);
   FNewPassword := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kNewPasswordFieldNumber, AValue);

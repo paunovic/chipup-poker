@@ -147,7 +147,7 @@ end;
 
 procedure TPB_PutChips.SetTableMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_TableMongoId);
+  if not Lightweight then    Assert(not has_TableMongoId);
   FTableMongoId := AValue;
   if not Lightweight then
   begin
@@ -181,7 +181,7 @@ end;
 
 procedure TPB_PutChips.SetChipAmount(const AValue: UInt32);
 begin
-  Assert(not has_ChipAmount);
+  if not Lightweight then    Assert(not has_ChipAmount);
   FChipAmount := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
@@ -211,7 +211,7 @@ end;
 
 procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);
 begin
-  Assert(not has_CurrentState);
+  if not Lightweight then    Assert(not has_CurrentState);
   FCurrentState := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));

@@ -351,7 +351,7 @@ end;
 
 procedure TPB_HandHistory.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -385,7 +385,7 @@ end;
 
 procedure TPB_HandHistory.SetSeq(const AValue: UInt32);
 begin
-  Assert(not has_Seq);
+  if not Lightweight then    Assert(not has_Seq);
   FSeq := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kSeqFieldNumber, AValue);
@@ -415,7 +415,7 @@ end;
 
 procedure TPB_HandHistory.SetTotalrake(const AValue: UInt32);
 begin
-  Assert(not has_Totalrake);
+  if not Lightweight then    Assert(not has_Totalrake);
   FTotalrake := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kTotalrakeFieldNumber, AValue);
@@ -483,7 +483,7 @@ end;
 
 procedure TPB_HandHistory.SetCards(const AValue: TBytes);
 begin
-  Assert(not has_Cards);
+  if not Lightweight then    Assert(not has_Cards);
   FCards := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
@@ -513,7 +513,7 @@ end;
 
 procedure TPB_HandHistory.SetEndtime(const AValue: UInt32);
 begin
-  Assert(not has_Endtime);
+  if not Lightweight then    Assert(not has_Endtime);
   FEndtime := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kEndtimeFieldNumber, AValue);
@@ -615,7 +615,7 @@ end;
 
 procedure TPB_HandHistory.SetDealer(const AValue: UInt32);
 begin
-  Assert(not has_Dealer);
+  if not Lightweight then    Assert(not has_Dealer);
   FDealer := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kDealerFieldNumber, AValue);
@@ -645,7 +645,7 @@ end;
 
 procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
 begin
-  Assert(not has_Game);
+  if not Lightweight then    Assert(not has_Game);
   FGame := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kGameFieldNumber, AValue.ProtobufOutput);
@@ -675,7 +675,7 @@ end;
 
 procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
 begin
-  Assert(not has_CurrentGame);
+  if not Lightweight then    Assert(not has_CurrentGame);
   FCurrentGame := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
@@ -705,7 +705,7 @@ end;
 
 procedure TPB_HandHistory.SetRake(const AValue: Integer);
 begin
-  Assert(not has_Rake);
+  if not Lightweight then    Assert(not has_Rake);
   FRake := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kRakeFieldNumber, AValue);
