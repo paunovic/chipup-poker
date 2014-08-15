@@ -322,9 +322,10 @@ begin
   try
     if (table.TableType = ttTournament) and
        (table.Status.IsSitting) then
-      close_table := FALSE
-    else
+    begin
+      close_table := FALSE;
       table.Hidden := TRUE;
+    end;
   finally
     Tables.Unlock;
   end;
