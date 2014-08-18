@@ -49,6 +49,32 @@ function makeGameProtobuf(g) {
 		g.state = 'gsEmpty';
 	}
 	g.club_mongoid = g.clubid; // FIXME, rename this somewhere
+	switch (g.blinds) {
+	case 'gb1x2':
+		g.small_blind = 100;
+		g.big_blind = 200;
+		break;
+	case 'gb5x5':
+		g.small_blind = 500;
+		g.big_blind = 500;
+		break;
+	case 'gb5x10':
+		g.small_blind = 500;
+		g.big_blind = 1000;
+		break;
+	case 'gb10x25':
+		g.small_blind = 1000;
+		g.big_blind = 2500;
+		break;
+	case 'gb25x50':
+		g.small_blind = 2500;
+		g.big_blind = 5000;
+		break;
+	case 'gb50x100':
+		g.small_blind = 5000;
+		g.big_blind = 10000;
+		break;
+	}
 	return g;
 }
 function Game(obj) {
@@ -2156,7 +2182,6 @@ Game.prototype.doDelete = function () {
 	}
 }
 Game.prototype.startTimer = function startTimer(seat,offset) {
-	return;
 	assert.equal(typeof offset,'number');
 	this.stopTimer(seat);
 	this.log('starting timer for seat %d in state %s',seat,this.state);
@@ -2313,7 +2338,6 @@ Game.getGame = function getgame(id,cb1) {
 }
 Game.prototype.updateBlinds = function () {
 	var x = this.tourn.getLevel();
-	console.log('level is',x);
 	if (x >= this.tourn.blind_schedule.blinds.length) x = this.tourn.blind_schedule.blinds.length - 1;
 	this.obj.small_blind = this.tourn.obj.blind_schedule.blinds[x].sb * 100;
 	this.obj.big_blind = this.tourn.obj.blind_schedule.blinds[x].bb * 100;

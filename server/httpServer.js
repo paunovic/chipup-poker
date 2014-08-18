@@ -257,15 +257,15 @@ Server.prototype.getTournament = function (req,res) {
 };
 Server.prototype.postTournament = function (req,res) {
 	Tournament.core.commonLock.writeLock(function (release) {
-		models.Tournament.findById(req.query.id,function (err,row) {
-			row.state = req.body.state;
+		Tournament.core.getByIdUnlocked(req.query.id,function (err,tourn) {
+			tourn.obj.state = req.body.state;
 			if (req.body.resetChips) {
-				for (var x=0; x<row.players.length; x++) {
-					row.players[x].chips = row.startingchips*100;
+				for (var x=0; x<tourn.obj.players.length; x++) {
+					tourn.obj.players[x].chips = tourn.obj.startingchips*100;
 				}
 			}
-			console.log('row:%j\nbody:%j',row,req.body);
-			row.save(function (err) {
+			console.log('row:%j\nbody:%j',tourn.obj,req.body);
+			tourn.obj.save(function (err) {
 				assert.ifError(err);
 				Tournament.core.resetTimer(function () {
 					release();
@@ -1037,7 +1037,7 @@ Server.prototype.paypalLog = function (req,res) {
 }
 Server.prototype.contactPost = function (req,res) {
 	console.log(req.body);
-	RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
+	RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function (err) { // FIXME, do something with error
 		res.writeHead(302,{Location:'/contact.html?success=true'}); // FIXME
 		res.end();
 	});

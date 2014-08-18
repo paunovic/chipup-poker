@@ -1,4 +1,4 @@
-var http = require('http');
+var https = require('https');
 var rest = require('rest');
 
 function requestTracker(user,pass) {
@@ -6,19 +6,23 @@ function requestTracker(user,pass) {
 	this.pass = pass;
 }
 requestTracker.prototype.rest = function test(url,args,cb) {
-	rest({path:'http://rt.chipuppoker.com/REST/1.0/'+url,headers:{Cookie:this.auth,Referer:'http://rt.chipuppoker.com/REST/1.0/'},entity:args}).then(function(response) {
+	rest({path:'https://rt.chipuppoker.com/REST/1.0/'+url,headers:{Cookie:this.auth,Referer:'https://rt.chipuppoker.com/REST/1.0/'},rejectUnauthorized:false,entity:args}).then(function(response) {
 		console.log('response: ', response.entity);
 		if (cb) cb();
+	}).catch(function(e) {
+		console.log('error',e);
+		cb(e);
 	});
 	return;
 }
 requestTracker.prototype.login = function login(cb) {
 	var postbody = new Buffer("user="+this.user+"&pass="+this.pass);
-	var req = http.request({hostname:'rt.chipuppoker.com',method:'POST',path:'/NoAuth/Login.html',
+	var req = https.request({hostname:'rt.chipuppoker.com',method:'POST',path:'/NoAuth/Login.html',
 		headers:{
 		'Content-Type': 'application/x-www-form-urlencoded',
 		'Content-Length':postbody.length
-		}
+		},
+		rejectUnauthorized:false
 	},function (req) {
 		req.setEncoding('utf8');
 		req.on('data',function (data) {

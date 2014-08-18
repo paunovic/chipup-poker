@@ -1,5 +1,6 @@
 var models = require('./db').models,
 	util = require('util'),
+	colors = require('colors');
 	assert = require('assert'),
 	EventEmitter = require('events').EventEmitter,
 	myutils = require('./myutils');
@@ -85,7 +86,8 @@ Tournament.prototype.toProto = function (config) {
 			out.players = [];
 			for (var x=0; x<this.obj.players.length; x++) {
 				out.players[x] = this.obj.players[x];
-				out.players[x].gameid = this.user_table_xref[this.obj.players[x]._id];
+				var gameid = this.user_table_xref[this.obj.players[x]._id];
+				if (gameid) out.players[x].gameid = gameid
 			}
 		}
 	}
@@ -280,12 +282,11 @@ TournamentCore.prototype.resetTimer = function (cb) {
 			return cb(); // dont start a timer, there is nothing to wait for
 		}
 		var row = rows[0];
-		console.log('row0 is %j',row);
 		var now = Date.now() / 1000;
 		var timeleft = row.start_time - now - 60;
+		console.log('row0 is %d %j',timeleft,row);
 		if (timeleft < 0) this.checkTournaments(cb);
 		else {
-			console.log('found',err,rows,timeleft);
 			console.log('%d now',now);
 			console.log('%d goal',row.start_time);
 			if (timeleft > 100000) {
@@ -304,7 +305,8 @@ TournamentCore.prototype.resetTimer = function (cb) {
 	}.bind(this));
 }
 TournamentCore.prototype.checkTournaments = function (cb) {
-	models.Tournament.find({state:'tnsOpen'}).sort({name:1,start_time:1}).limit(1).exec(function (err,rows) {
+	assert.equal(this.commonLock.readers,-1);
+	models.Tournament.find({state:'tnsOpen'}).sort({start_time:1}).limit(1).exec(function (err,rows) {
 		if (rows.length != 1) return cb(); // nothing found
 		var row = rows[0];
 		var now = Date.now() / 1000;
@@ -395,7 +397,8 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 			async.eachSeries(online,forceSitDown,function (err) {
 				async.eachSeries(offline,forceSitDown,function (err) {
 					setTimeout(tourn.startGames.bind(tourn),30000);
-					tourn.obj.save(function () {
+					tourn.obj.save(function (err) {
+						if (err) return console.log(err.red);
 						this.emit('tournament_start',tourn.obj);
 						cb();
 					}.bind(this));
