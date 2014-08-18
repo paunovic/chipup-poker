@@ -129,7 +129,7 @@ end;
 
 procedure TPB_LoginParams.SetUsername(const AValue: String);
 begin
-  Assert(not has_Username);
+  if not Lightweight then    Assert(not has_Username);
   FUsername := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
@@ -159,7 +159,7 @@ end;
 
 procedure TPB_LoginParams.SetPassword(const AValue: String);
 begin
-  Assert(not has_Password);
+  if not Lightweight then    Assert(not has_Password);
   FPassword := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kPasswordFieldNumber, AValue);

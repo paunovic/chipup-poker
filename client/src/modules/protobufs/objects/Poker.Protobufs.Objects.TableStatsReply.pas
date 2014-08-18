@@ -192,7 +192,7 @@ end;
 
 procedure TPB_TableStatsReply.SetClubid(const AValue: TMongoId);
 begin
-  Assert(not has_Clubid);
+  if not Lightweight then    Assert(not has_Clubid);
   FClubid := AValue;
   if not Lightweight then
   begin
@@ -226,7 +226,7 @@ end;
 
 procedure TPB_TableStatsReply.SetGameid(const AValue: TMongoId);
 begin
-  Assert(not has_Gameid);
+  if not Lightweight then    Assert(not has_Gameid);
   FGameid := AValue;
   if not Lightweight then
   begin
@@ -298,7 +298,7 @@ end;
 
 procedure TPB_TableStatsReply.SetHands(const AValue: UInt32);
 begin
-  Assert(not has_Hands);
+  if not Lightweight then    Assert(not has_Hands);
   FHands := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);

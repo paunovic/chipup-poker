@@ -112,7 +112,7 @@ end;
 
 procedure TPB_PingParams.SetUptime(const AValue: UInt32);
 begin
-  Assert(not has_Uptime);
+  if not Lightweight then    Assert(not has_Uptime);
   FUptime := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);

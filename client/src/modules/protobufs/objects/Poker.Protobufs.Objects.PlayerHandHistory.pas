@@ -215,7 +215,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -249,7 +249,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetSeat(const AValue: Integer);
 begin
-  Assert(not has_Seat);
+  if not Lightweight then    Assert(not has_Seat);
   FSeat := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
@@ -279,7 +279,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
 begin
-  Assert(not has_Cards);
+  if not Lightweight then    Assert(not has_Cards);
   FCards := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
@@ -309,7 +309,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetChips(const AValue: UInt32);
 begin
-  Assert(not has_Chips);
+  if not Lightweight then    Assert(not has_Chips);
   FChips := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
@@ -339,7 +339,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetNick(const AValue: String);
 begin
-  Assert(not has_Nick);
+  if not Lightweight then    Assert(not has_Nick);
   FNick := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kNickFieldNumber, AValue);
@@ -369,7 +369,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
 begin
-  Assert(not has_Muck);
+  if not Lightweight then    Assert(not has_Muck);
   FMuck := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kMuckFieldNumber, AValue);
@@ -399,7 +399,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetStatus(const AValue: TPlayerStatus);
 begin
-  Assert(not has_Status);
+  if not Lightweight then    Assert(not has_Status);
   FStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));

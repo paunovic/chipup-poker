@@ -183,7 +183,7 @@ end;
 
 procedure TPB_ClubCommandReply.SetStatus(const AValue: TClubStatus);
 begin
-  Assert(not has_Status);
+  if not Lightweight then    Assert(not has_Status);
   FStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
@@ -213,7 +213,7 @@ end;
 
 procedure TPB_ClubCommandReply.SetClub(const AValue: TPB_Club);
 begin
-  Assert(not has_Club);
+  if not Lightweight then    Assert(not has_Club);
   FClub := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kClubFieldNumber, AValue.ProtobufOutput);

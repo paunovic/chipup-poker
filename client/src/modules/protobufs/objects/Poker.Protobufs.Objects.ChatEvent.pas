@@ -156,7 +156,7 @@ end;
 
 procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
 begin
-  Assert(not has_Event);
+  if not Lightweight then    Assert(not has_Event);
   FEvent := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
@@ -186,7 +186,7 @@ end;
 
 procedure TPB_ChatEvent.SetMsg(const AValue: TPB_ChatMessage);
 begin
-  Assert(not has_Msg);
+  if not Lightweight then    Assert(not has_Msg);
   FMsg := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kMsgFieldNumber, AValue.ProtobufOutput);
@@ -216,7 +216,7 @@ end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TMongoId);
 begin
-  Assert(not has_TableId);
+  if not Lightweight then    Assert(not has_TableId);
   FTableId := AValue;
   if not Lightweight then
   begin

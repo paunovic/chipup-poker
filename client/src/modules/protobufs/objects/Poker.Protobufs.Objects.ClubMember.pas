@@ -180,7 +180,7 @@ end;
 
 procedure TPB_ClubMember.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -214,7 +214,7 @@ end;
 
 procedure TPB_ClubMember.SetSuspended(const AValue: Boolean);
 begin
-  Assert(not has_Suspended);
+  if not Lightweight then    Assert(not has_Suspended);
   FSuspended := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
@@ -244,7 +244,7 @@ end;
 
 procedure TPB_ClubMember.SetBalanceLimit(const AValue: UInt32);
 begin
-  Assert(not has_BalanceLimit);
+  if not Lightweight then    Assert(not has_BalanceLimit);
   FBalanceLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBalanceLimitFieldNumber, AValue);
@@ -274,7 +274,7 @@ end;
 
 procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
 begin
-  Assert(not has_ClubBalance);
+  if not Lightweight then    Assert(not has_ClubBalance);
   FClubBalance := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
@@ -304,7 +304,7 @@ end;
 
 procedure TPB_ClubMember.SetUnlimitedLimit(const AValue: Boolean);
 begin
-  Assert(not has_UnlimitedLimit);
+  if not Lightweight then    Assert(not has_UnlimitedLimit);
   FUnlimitedLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);

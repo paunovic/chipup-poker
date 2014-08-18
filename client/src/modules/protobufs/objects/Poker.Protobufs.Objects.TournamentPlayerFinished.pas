@@ -146,7 +146,7 @@ end;
 
 procedure TPB_TournamentPlayerFinished.SetTournamentId(const AValue: TMongoId);
 begin
-  Assert(not has_TournamentId);
+  if not Lightweight then    Assert(not has_TournamentId);
   FTournamentId := AValue;
   if not Lightweight then
   begin
@@ -180,7 +180,7 @@ end;
 
 procedure TPB_TournamentPlayerFinished.SetPlayerId(const AValue: TMongoId);
 begin
-  Assert(not has_PlayerId);
+  if not Lightweight then    Assert(not has_PlayerId);
   FPlayerId := AValue;
   if not Lightweight then
   begin
@@ -214,7 +214,7 @@ end;
 
 procedure TPB_TournamentPlayerFinished.SetPlace(const AValue: Integer);
 begin
-  Assert(not has_Place);
+  if not Lightweight then    Assert(not has_Place);
   FPlace := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kPlaceFieldNumber, AValue);

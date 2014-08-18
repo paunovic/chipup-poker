@@ -258,7 +258,7 @@ end;
 
 procedure TPB_HandHistoryMove.SetBet(const AValue: UInt32);
 begin
-  Assert(not has_Bet);
+  if not Lightweight then    Assert(not has_Bet);
   FBet := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBetFieldNumber, AValue);
@@ -288,7 +288,7 @@ end;
 
 procedure TPB_HandHistoryMove.SetSeat(const AValue: Integer);
 begin
-  Assert(not has_Seat);
+  if not Lightweight then    Assert(not has_Seat);
   FSeat := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);

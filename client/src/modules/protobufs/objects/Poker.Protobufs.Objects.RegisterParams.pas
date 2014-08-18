@@ -146,7 +146,7 @@ end;
 
 procedure TPB_RegisterParams.SetEmail(const AValue: String);
 begin
-  Assert(not has_Email);
+  if not Lightweight then    Assert(not has_Email);
   FEmail := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kEmailFieldNumber, AValue);
@@ -176,7 +176,7 @@ end;
 
 procedure TPB_RegisterParams.SetPassword(const AValue: String);
 begin
-  Assert(not has_Password);
+  if not Lightweight then    Assert(not has_Password);
   FPassword := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
@@ -206,7 +206,7 @@ end;
 
 procedure TPB_RegisterParams.SetDisplayName(const AValue: String);
 begin
-  Assert(not has_DisplayName);
+  if not Lightweight then    Assert(not has_DisplayName);
   FDisplayName := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);

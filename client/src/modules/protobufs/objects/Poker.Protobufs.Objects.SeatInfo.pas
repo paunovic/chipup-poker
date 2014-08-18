@@ -284,7 +284,7 @@ end;
 
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
-  Assert(not has_Seat);
+  if not Lightweight then    Assert(not has_Seat);
   FSeat := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
@@ -314,7 +314,7 @@ end;
 
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_PlayerMongoId);
+  if not Lightweight then    Assert(not has_PlayerMongoId);
   FPlayerMongoId := AValue;
   if not Lightweight then
   begin
@@ -348,7 +348,7 @@ end;
 
 procedure TPB_SeatInfo.SetChips(const AValue: UInt32);
 begin
-  Assert(not has_Chips);
+  if not Lightweight then    Assert(not has_Chips);
   FChips := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
@@ -378,7 +378,7 @@ end;
 
 procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);
 begin
-  Assert(not has_CardCount);
+  if not Lightweight then    Assert(not has_CardCount);
   FCardCount := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kCardCountFieldNumber, AValue);
@@ -408,7 +408,7 @@ end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
 begin
-  Assert(not has_Cards);
+  if not Lightweight then    Assert(not has_Cards);
   FCards := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
@@ -438,7 +438,7 @@ end;
 
 procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
 begin
-  Assert(not has_Status);
+  if not Lightweight then    Assert(not has_Status);
   FStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
@@ -468,7 +468,7 @@ end;
 
 procedure TPB_SeatInfo.SetTimebank(const AValue: UInt32);
 begin
-  Assert(not has_Timebank);
+  if not Lightweight then    Assert(not has_Timebank);
   FTimebank := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kTimebankFieldNumber, AValue);
@@ -498,7 +498,7 @@ end;
 
 procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
 begin
-  Assert(not has_CardsVisible);
+  if not Lightweight then    Assert(not has_CardsVisible);
   FCardsVisible := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kCardsVisibleFieldNumber, AValue);
@@ -528,7 +528,7 @@ end;
 
 procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
 begin
-  Assert(not has_Disconnected);
+  if not Lightweight then    Assert(not has_Disconnected);
   FDisconnected := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kDisconnectedFieldNumber, AValue);
@@ -558,7 +558,7 @@ end;
 
 procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);
 begin
-  Assert(not has_CanShow);
+  if not Lightweight then    Assert(not has_CanShow);
   FCanShow := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
@@ -588,7 +588,7 @@ end;
 
 procedure TPB_SeatInfo.SetAutoplay(const AValue: Boolean);
 begin
-  Assert(not has_Autoplay);
+  if not Lightweight then    Assert(not has_Autoplay);
   FAutoplay := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kAutoplayFieldNumber, AValue);

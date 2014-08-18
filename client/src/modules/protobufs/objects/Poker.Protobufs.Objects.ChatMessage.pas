@@ -163,7 +163,7 @@ end;
 
 procedure TPB_ChatMessage.SetMongoId(const AValue: TMongoId);
 begin
-  Assert(not has_MongoId);
+  if not Lightweight then    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -197,7 +197,7 @@ end;
 
 procedure TPB_ChatMessage.SetUsername(const AValue: String);
 begin
-  Assert(not has_Username);
+  if not Lightweight then    Assert(not has_Username);
   FUsername := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
@@ -227,7 +227,7 @@ end;
 
 procedure TPB_ChatMessage.SetMsg(const AValue: String);
 begin
-  Assert(not has_Msg);
+  if not Lightweight then    Assert(not has_Msg);
   FMsg := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kMsgFieldNumber, AValue);
@@ -257,7 +257,7 @@ end;
 
 procedure TPB_ChatMessage.SetTimestamp(const AValue: UInt32);
 begin
-  Assert(not has_Timestamp);
+  if not Lightweight then    Assert(not has_Timestamp);
   FTimestamp := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kTimestampFieldNumber, AValue);

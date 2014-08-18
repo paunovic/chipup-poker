@@ -146,7 +146,7 @@ end;
 
 procedure TPB_TableSit.SetGameId(const AValue: TMongoId);
 begin
-  Assert(not has_GameId);
+  if not Lightweight then    Assert(not has_GameId);
   FGameId := AValue;
   if not Lightweight then
   begin
@@ -180,7 +180,7 @@ end;
 
 procedure TPB_TableSit.SetSeatIndex(const AValue: Integer);
 begin
-  Assert(not has_SeatIndex);
+  if not Lightweight then    Assert(not has_SeatIndex);
   FSeatIndex := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatIndexFieldNumber, AValue);
@@ -210,7 +210,7 @@ end;
 
 procedure TPB_TableSit.SetChips(const AValue: UInt32);
 begin
-  Assert(not has_Chips);
+  if not Lightweight then    Assert(not has_Chips);
   FChips := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
