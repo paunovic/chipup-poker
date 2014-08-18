@@ -5,11 +5,11 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
-  cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan,
-  ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
-  cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
-  Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
-  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar;
+  cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan, ChipUpPokerDarkSkin, cxPC,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles,
+  cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses,
+  cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
+  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -136,16 +136,12 @@ type
     procedure acDisconnectExecute(Sender: TObject);
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
-    procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
-      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acTournamentLobbyExecute(Sender: TObject);
     procedure acTournamentRegisterExecute(Sender: TObject);
-    procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acTournamentUnregisterExecute(Sender: TObject);
-    procedure gridTournamentsStatusStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acTournamentItemOpenExecute(Sender: TObject);
     procedure acTournamentsOpenAllExecute(Sender: TObject);
     procedure acTournamentsCloseAllExecute(Sender: TObject);
