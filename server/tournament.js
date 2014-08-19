@@ -199,7 +199,10 @@ Tournament.prototype.handOver = function (game,cb) {
 TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 	this.commonLock.writeLock(function (release) {
 		this.getByIdUnlocked(tournid,function (err,tourn) {
-			console.log(err,userid,tourn);
+			console.log('join start',err,userid);
+			if (tourn.obj.state != 'tnsOpen') {
+				return cb('notOpen');
+			}
 			var dup = false;
 			for (var i=0; i<tourn.obj.players.length; i++) {
 				if (myutils.compareObjectID(tourn.obj.players[i]._id,userid)) {
@@ -216,15 +219,15 @@ TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 			} else {
 				tourn.obj.players.push({_id:userid,displayname:nick,chips:tourn.obj.startingchips*100});
 				tourn.obj.registered_players = tourn.obj.players.length;
-				tourn.obj.save(function (err) {
-					console.log('saved - join',arguments);
+				tourn.obj.save(function (err,doc,rows) {
+					console.log('%s saved - join',new Date());
 					release();
-					tourn.emit('users_changed',this);
-					core.emit('users_changed',this);
+					tourn.emit('users_changed',tourn);
+					core.emit('users_changed',tourn);
 					cb('OK');
-				});
+				}.bind(this));
 			}
-		});
+		}.bind(this));
 	}.bind(this));
 }
 TournamentCore.prototype.getByIdUnlocked = function (id,cb) {
@@ -255,6 +258,9 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 				cb(err);
 				return;
 			}
+			if (tourn.obj.state != 'tnsOpen') {
+				return cb('notOpen');
+			}
 			for (var i=0; i<tourn.obj.players.length; i++) {
 				if (myutils.compareObjectID(tourn.obj.players[i]._id,userid)) {
 					tourn.obj.players.splice(i,1);
@@ -264,11 +270,11 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 			tourn.obj.save(function (err) {
 				error.handleError(err);
 				release();
-				tourn.emit('users_changed',this);
-				core.emit('users_changed',this);
+				tourn.emit('users_changed',tourn);
+				core.emit('users_changed',tourn);
 				cb('OK');
-			});
-		});
+			}.bind(this));
+		}.bind(this));
 	}.bind(this))
 }
 TournamentCore.prototype.resetTimer = function (cb) {
@@ -305,26 +311,28 @@ TournamentCore.prototype.resetTimer = function (cb) {
 }
 TournamentCore.prototype.checkTournaments = function (cb) {
 	assert.equal(this.commonLock.readers,-1);
-	models.Tournament.find({state:'tnsOpen'}).sort({start_time:1}).limit(1).exec(function (err,rows) {
+	models.Tournament.find({state:'tnsOpen'},{state:1}).sort({start_time:1}).limit(1).exec(function (err,rows) {
 		if (rows.length != 1) return cb(); // nothing found
-		var row = rows[0];
-		var now = Date.now() / 1000;
-		var timeleft = row.start_time - now - 30;
-		if (timeleft > 0) {
-			this.resetTimer(cb);
-			return;
-		}
-		if (row.registered_players < row.minplayers) {
-			console.log('not enough people online');
-			row.state = 'tnsCancelled';
-			row.save(function () {
-				core.emit('tournament_start',row);
+		this.getByIdUnlocked(rows[0]._id,function (err,tourn) {
+			var row = tourn.obj; // FIXME, replace references
+			var now = Date.now() / 1000;
+			var timeleft = row.start_time - now - 30;
+			if (timeleft > 0) {
+				this.resetTimer(cb);
+				return;
+			}
+			if (row.registered_players < row.minplayers) {
+				console.log('not enough people online');
+				row.state = 'tnsCancelled';
+				row.save(function () {
+					core.emit('tournament_start',row);
+					this.resetTimer(cb);
+				}.bind(this));
+				return;
+			}
+			this.startTournament(row,function () {
 				this.resetTimer(cb);
 			}.bind(this));
-			return;
-		}
-		this.startTournament(row,function () {
-			this.resetTimer(cb);
 		}.bind(this));
 	}.bind(this));
 }
@@ -398,7 +406,7 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 			async.eachSeries(online,forceSitDown,function (err) {
 				async.eachSeries(offline,forceSitDown,function (err) {
 					var obj = { message:'tmtTournamentStart', duration:30 };
-					async.each(this.tables,function (tbl,cb) {
+					async.each(tourn.tables,function (tbl,cb) {
 						tbl.Lock.writeLock(function (release) {
 							tbl.setMessage(obj);
 							release();

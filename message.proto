@@ -679,6 +679,7 @@ message TournamentCommandParams {
 		tceRegisterLimitReached = 2;
 		tceRegisterFailed = 3;
 		tceUnregisterOk = 4;
+		tceNotOpen = 5;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	optional TournamentCommandEnum reply_status = 2;

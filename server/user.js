@@ -1142,6 +1142,8 @@ handlers[codes.scTournamentRegister] = function (args,token) {
 			params.reply_status = 'tceRegisterLimitReached';
 		} else if (code == 'alreadyMember') {
 			params.reply_status = 'tceAlreadyRegistered';
+		} else if (code == 'notOpen') {
+			params.reply_status = 'tceNotOpen';
 		}
 		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
 		token.stop();
@@ -1160,9 +1162,10 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		if (code == '404') {
 			this.reply(0,'tournament not found');
 			return;
-		}
-		if (code == 'OK') {
+		} else if (code == 'OK') {
 			params.reply_status = 'tceUnregisterOk';
+		} else if (code == 'notOpen') {
+			params.reply_status = 'tceNotOpen';
 		}
 		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
 		token.stop();
