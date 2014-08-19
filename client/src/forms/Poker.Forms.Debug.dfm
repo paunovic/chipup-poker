@@ -77,6 +77,7 @@ object frmDebug: TfrmDebug
     TabOrder = 1
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
+    Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoAutoCopyUnicodeText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoFastFormatting]
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
   end
@@ -1010,7 +1011,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
@@ -1090,7 +1091,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item

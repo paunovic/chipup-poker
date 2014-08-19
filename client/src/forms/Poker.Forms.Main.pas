@@ -5,11 +5,11 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
-  cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan,
-  ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
-  cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
-  Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
-  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar;
+  cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan, ChipUpPokerDarkSkin, cxPC,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles,
+  cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses,
+  cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
+  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -136,16 +136,12 @@ type
     procedure acDisconnectExecute(Sender: TObject);
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
-    procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
-      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acTournamentLobbyExecute(Sender: TObject);
     procedure acTournamentRegisterExecute(Sender: TObject);
-    procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acTournamentUnregisterExecute(Sender: TObject);
-    procedure gridTournamentsStatusStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acTournamentItemOpenExecute(Sender: TObject);
     procedure acTournamentsOpenAllExecute(Sender: TObject);
     procedure acTournamentsCloseAllExecute(Sender: TObject);
@@ -160,7 +156,7 @@ type
 
     procedure ModalFormClose(ASender: TObject);
 
-    procedure LogoutFlushData;
+    procedure FlushData;
     procedure UpdateClublist;
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
@@ -222,21 +218,19 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF} Poker.Sounds,
-  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
-  Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF} Poker.Sounds, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc,
+  Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
-  Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby,
-  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
-  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
-  Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
-  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
-  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart,
-  Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage;
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
+  Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings,
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs,
+  Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup,
+  Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply, Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Core,
+  Poker.Forms.HandHistory, Poker.Forms.Settings, Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member,
+  Poker.Players.Player, Poker.Avatars.AvatarList, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions,
+  Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
+  Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
+  Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -302,12 +296,7 @@ end;
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  Tables.Lock;
-  try
-    Tables.Clear;
-  finally
-    Tables.Unlock;
-  end;
+  FlushData;
   FormsContainer.CloseAllForms;
   FActionMainMenuBarFont.Free;
   FRegisteredTournamentsMap.Free;
@@ -355,7 +344,7 @@ begin
 end;
 
 
-procedure TfrmChipUpMain.LogoutFlushData;
+procedure TfrmChipUpMain.FlushData;
 begin
   FormsContainer.CloseAllForms;
   Tables.ClearWithoutNotification;
@@ -376,7 +365,7 @@ end;
 procedure TfrmChipUpMain.DoLogout;
 begin
   Application.ShowMainForm := FALSE;
-  LogoutFlushData;
+  FlushData;
   Hide;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
 end;
@@ -642,20 +631,15 @@ begin
       added := FALSE;
       aci := ActionManager.ActionBars[0].Items[1].Items[1].Items.Insert(0) as TActionClientItem;
       aci.Tag := C1 + 1;
-      if Tournaments.GetAndLock(dmMain.SelfInfo.RegisteredTournaments[C1], tournament) then
-      try
-        for game in tournament.Games do
-          if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
-          try
-            FRegisteredTournamentsMap.Add(C1 + 1, table.GameId);
-            added := TRUE;
-            Break;
-          finally
-            Tables.Unlock;
-          end;
-      finally
-        Tournaments.Unlock;
-      end;
+      for game in tournament.Games do
+        if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
+        try
+          FRegisteredTournamentsMap.Add(C1 + 1, table.GameId);
+          added := TRUE;
+          Break;
+        finally
+          Tables.Unlock;
+        end;
 
       if not added then
         FRegisteredTournamentsMap.Add(C1 + 1, tournament.Mongoid);
@@ -714,7 +698,7 @@ begin
     btTournamentRegister.Colors.PressedText := $0000BF00;
   end;
 
-  if Tournaments.TryGetValue(FSelectedTournament, tournament) then
+  if Tournaments.GetAndLock(FSelectedTournament, tournament) then
   try
     rvTournamentInfo.Clear;
     rvTournamentInfo.AddNL(tournament.Description, 0, 0);

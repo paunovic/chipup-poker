@@ -3889,6 +3889,7 @@ object frmChipUpMain: TfrmChipUpMain
             end
             object gridHomeClubsId: TcxGridColumn
               Caption = 'Club ID'
+              DataBinding.ValueType = 'Integer'
               PropertiesClassName = 'TcxSpinEditProperties'
               HeaderAlignmentHorz = taCenter
               Width = 65
@@ -3981,11 +3982,13 @@ object frmChipUpMain: TfrmChipUpMain
             end
             object gridTournamentsStartTime: TcxGridColumn
               Caption = 'Start Time'
+              DataBinding.ValueType = 'DateTime'
               PropertiesClassName = 'TcxDateEditProperties'
               Properties.Alignment.Horz = taCenter
               Properties.DateButtons = []
-              Properties.DisplayFormat = 'dd MMM, hh:mm'
-              Properties.EditFormat = 'dd MMM, hh:mm'
+              Properties.DisplayFormat = 'dd MMM yyyy, hh:mm'
+              Properties.EditFormat = 'dd MMM yyyy, hh:mm'
+              Properties.ImmediatePost = True
               Properties.InputKind = ikStandard
               Properties.Kind = ckDateTime
               Properties.ReadOnly = False
