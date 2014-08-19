@@ -631,20 +631,15 @@ begin
       added := FALSE;
       aci := ActionManager.ActionBars[0].Items[1].Items[1].Items.Insert(0) as TActionClientItem;
       aci.Tag := C1 + 1;
-      if Tournaments.GetAndLock(dmMain.SelfInfo.RegisteredTournaments[C1], tournament) then
-      try
-        for game in tournament.Games do
-          if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
-          try
-            FRegisteredTournamentsMap.Add(C1 + 1, table.GameId);
-            added := TRUE;
-            Break;
-          finally
-            Tables.Unlock;
-          end;
-      finally
-        Tournaments.Unlock;
-      end;
+      for game in tournament.Games do
+        if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
+        try
+          FRegisteredTournamentsMap.Add(C1 + 1, table.GameId);
+          added := TRUE;
+          Break;
+        finally
+          Tables.Unlock;
+        end;
 
       if not added then
         FRegisteredTournamentsMap.Add(C1 + 1, tournament.Mongoid);
@@ -703,7 +698,7 @@ begin
     btTournamentRegister.Colors.PressedText := $0000BF00;
   end;
 
-  if Tournaments.TryGetValue(FSelectedTournament, tournament) then
+  if Tournaments.GetAndLock(FSelectedTournament, tournament) then
   try
     rvTournamentInfo.Clear;
     rvTournamentInfo.AddNL(tournament.Description, 0, 0);
