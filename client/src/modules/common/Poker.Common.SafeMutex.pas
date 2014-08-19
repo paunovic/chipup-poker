@@ -23,8 +23,10 @@ uses
 function TSafeMutex.Release: Boolean;
 begin
   result := ReleaseMutex(FHandle);
+  {$IFDEF DEBUG}
   if not result then
     DebugLn(0, Format('Attempted to release unacquired mutex object [%d]', [Handle]), ditException);
+  {$ENDIF}
 end;
 
 end.
