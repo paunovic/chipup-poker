@@ -91,6 +91,7 @@ function Game(obj) {
 	this.dealer = -1;
 	this.current_seat = -1;
 	this.bets = [];
+	this.message = [];
 	for (var x=0; x<this.obj.seats; x++) this.bets[x] = 0;
 	this.pots = [ new Pot(this) ];
 	this.minBet = 0;
@@ -1891,7 +1892,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
-	if (this.message) tableStatus.table_message = this.message;
+	tableStatus.table_message = this.message;
 	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }
@@ -1906,9 +1907,19 @@ Game.prototype.sittingCount = function () {
 }
 Game.prototype.setMessage = function (obj) {
 	assert.equal(this.Lock.readers,-1);
-	this.message = obj;
+	this.message.push(obj);
 	this.broadcastStatus(null,true,[]);
 };
+Game.prototype.clearMessage = function (type) {
+	assert.equal(this.Lock.readers,-1);
+	for (var x=0; x<this.message.length; x++) {
+		if (this.message[x].message == type) {
+			this.message.slice(x,1);
+			this.broadcastStatus(null,true,[]);
+			return;
+		}
+	}
+}
 Game.prototype.inHandCount = function () {
 	var count = 0;
 	for (var x=0; x<this.members.length; x++) {

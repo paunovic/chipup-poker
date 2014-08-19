@@ -109,6 +109,7 @@ function ClientSocket(socket) {
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 	Tournament.core.on('new_tournament',this.newTourn.bind(this));
 	Tournament.core.on('tournament_start',this.newTourn.bind(this));
+	Tournament.core.on('users_changed',this.newTourn.bind(this));
 	this.lastTourn = 0;
 }
 ClientSocket.prototype.error = function error(e) {
@@ -124,6 +125,7 @@ ClientSocket.prototype.error = function error(e) {
 ClientSocket.prototype.destroy = function () {
 	Tournament.core.removeListener('new_tournament',this.newTourn.bind(this));
 	Tournament.core.removeListener('tournament_start',this.newTourn.bind(this));
+	Tournament.core.removeListener('users_changed',this.newTourn.bind(this));
 };
 ClientSocket.prototype.newTourn = function (doc) {
 	if (this.state != 2) return;
@@ -1200,6 +1202,7 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 	Tournament.core.getById(params._id,function (err,tourn) {
 		if (tourn && this.hook) {
 			tourn.removeListener('handOver',this.hook);
+			tourn.removeListener('users_changed',this.hook);
 			this.hook = null;
 		}
 	}.bind(this));
@@ -1214,6 +1217,7 @@ ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,
 				this.log('registered hook');
 				this.hook = this.tournChangeHandOver.bind(this);
 				tourn.on('handOver',this.hook);
+				tourn.on('users_changed',this.hook);
 			}
 			var out = tourn.toProto({games:true,players:true});
 			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');

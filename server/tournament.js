@@ -33,7 +33,7 @@ function Tournament(obj) {
 	this.currentLevel = 0;
 	this.obj.blind_schedule.LevelLength = parseInt(this.obj.blind_schedule.LevelLength);
 	assert.equal(typeof this.obj.blind_schedule.LevelLength,'number');
-	this.breakmin = 58;
+	this.breakmin = 55;
 }
 
 Tournament.create = function (obj,cb) {
@@ -70,6 +70,7 @@ Tournament.prototype.startGames = function () {
 	this.nextLevel();
 	async.each(this.tables,function (tbl,cb1) {
 		tbl.Lock.writeLock(function (release) {
+			tbl.clearMessage('tmtTournamentStart');
 			var events = [];
 			tbl.stateMachine(function (events) {
 				console.log('events:%j',events);
@@ -151,14 +152,19 @@ Tournament.prototype.break_over = function () {
 	this.onBreak = false;
 	async.each(this.tables,function (tbl,cb1) {
 		tbl.Lock.writeLock(function (release) {
-			var events = [];
-			// FIXME, only if tsIdle
-			tbl.stateMachine(function (events) {
-				console.log('events:%j',events);
-				tbl.broadcastStatus(null,true,events);
+			tbl.clearMessage('tmtTournamentBreak');
+			if (tbl.state == 'tsIdle') {
+				var events = [];
+				tbl.stateMachine(function (events) {
+					console.log('events:%j',events);
+					tbl.broadcastStatus(null,true,events);
+					release();
+					cb1();
+				},null,{silent:true},events,0);
+			} else {
 				release();
 				cb1();
-			},null,{silent:true},events,0);
+			}
 		});
 	},function () {
 		var now = new Date();
@@ -213,6 +219,8 @@ TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 				tourn.obj.save(function (err) {
 					console.log('saved - join',arguments);
 					release();
+					tourn.emit('users_changed',this);
+					core.emit('users_changed',this);
 					cb('OK');
 				});
 			}
@@ -256,6 +264,8 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 			tourn.obj.save(function (err) {
 				error.handleError(err);
 				release();
+				tourn.emit('users_changed',this);
+				core.emit('users_changed',this);
 				cb('OK');
 			});
 		});
@@ -387,11 +397,20 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 			//console.log('game:',tourn.tables);
 			async.eachSeries(online,forceSitDown,function (err) {
 				async.eachSeries(offline,forceSitDown,function (err) {
-					setTimeout(tourn.startGames.bind(tourn),30000);
-					tourn.obj.save(function (err) {
-						if (err) return console.log(err.red);
-						this.emit('tournament_start',tourn.obj);
-						cb();
+					var obj = { message:'tmtTournamentStart', duration:30 };
+					async.each(this.tables,function (tbl,cb) {
+						tbl.Lock.writeLock(function (release) {
+							tbl.setMessage(obj);
+							release();
+							cb();
+						});
+					}.bind(this),function () {
+						setTimeout(tourn.startGames.bind(tourn),obj.duration*1000);
+						tourn.obj.save(function (err) {
+							if (err) return console.log(err.red);
+							this.emit('tournament_start',tourn.obj);
+							cb();
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
