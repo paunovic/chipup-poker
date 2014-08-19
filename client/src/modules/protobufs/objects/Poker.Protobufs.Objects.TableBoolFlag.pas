@@ -129,7 +129,8 @@ end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_TableMongoId);
+  if not Lightweight then
+    Assert(not has_TableMongoId);
   FTableMongoId := AValue;
   if not Lightweight then
   begin
@@ -163,7 +164,8 @@ end;
 
 procedure TPB_TableBoolFlag.SetFlag(const AValue: Boolean);
 begin
-  if not Lightweight then    Assert(not has_Flag);
+  if not Lightweight then
+    Assert(not has_Flag);
   FFlag := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kFlagFieldNumber, AValue);

@@ -131,7 +131,8 @@ end;
 
 procedure TPB_TableMessage.SetMessage(const AValue: TTableMessageType);
 begin
-  if not Lightweight then    Assert(not has_Message);
+  if not Lightweight then
+    Assert(not has_Message);
   FMessage := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kMessageFieldNumber, Integer(AValue));
@@ -161,7 +162,8 @@ end;
 
 procedure TPB_TableMessage.SetDuration(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Duration);
+  if not Lightweight then
+    Assert(not has_Duration);
   FDuration := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kDurationFieldNumber, AValue);

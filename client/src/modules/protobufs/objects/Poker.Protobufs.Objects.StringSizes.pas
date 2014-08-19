@@ -214,7 +214,8 @@ end;
 
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Email);
+  if not Lightweight then
+    Assert(not has_Email);
   FEmail := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kEmailFieldNumber, AValue);
@@ -244,7 +245,8 @@ end;
 
 procedure TPB_StringSizes.SetPassword(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Password);
+  if not Lightweight then
+    Assert(not has_Password);
   FPassword := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kPasswordFieldNumber, AValue);
@@ -274,7 +276,8 @@ end;
 
 procedure TPB_StringSizes.SetClubname(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Clubname);
+  if not Lightweight then
+    Assert(not has_Clubname);
   FClubname := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kClubnameFieldNumber, AValue);
@@ -304,7 +307,8 @@ end;
 
 procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Invcode);
+  if not Lightweight then
+    Assert(not has_Invcode);
   FInvcode := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kInvcodeFieldNumber, AValue);
@@ -334,7 +338,8 @@ end;
 
 procedure TPB_StringSizes.SetUsername(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Username);
+  if not Lightweight then
+    Assert(not has_Username);
   FUsername := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kUsernameFieldNumber, AValue);
@@ -364,7 +369,8 @@ end;
 
 procedure TPB_StringSizes.SetGamename(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Gamename);
+  if not Lightweight then
+    Assert(not has_Gamename);
   FGamename := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kGamenameFieldNumber, AValue);
@@ -394,7 +400,8 @@ end;
 
 procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_ContactMessage);
+  if not Lightweight then
+    Assert(not has_ContactMessage);
   FContactMessage := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kContactMessageFieldNumber, AValue);

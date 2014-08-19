@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TTournamentCommandEnum = (tceRegisterOk = 0,tceAlreadyRegistered = 1,tceRegisterLimitReached = 2,tceRegisterFailed = 3,tceUnregisterOk = 4);
+  TTournamentCommandEnum = (tceRegisterOk = 0,tceAlreadyRegistered = 1,tceRegisterLimitReached = 2,tceRegisterFailed = 3,tceUnregisterOk = 4,tceNotOpen = 5);
 
   TPB_TournamentCommandParams = class(TProtobufBaseObject)
   private
@@ -131,7 +131,8 @@ end;
 
 procedure TPB_TournamentCommandParams.SetMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_MongoId);
+  if not Lightweight then
+    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -165,7 +166,8 @@ end;
 
 procedure TPB_TournamentCommandParams.SetReplyStatus(const AValue: TTournamentCommandEnum);
 begin
-  if not Lightweight then    Assert(not has_ReplyStatus);
+  if not Lightweight then
+    Assert(not has_ReplyStatus);
   FReplyStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kReplyStatusFieldNumber, Integer(AValue));

@@ -131,7 +131,8 @@ end;
 
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Seat);
+  if not Lightweight then
+    Assert(not has_Seat);
   FSeat := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
@@ -161,7 +162,8 @@ end;
 
 procedure TPB_WinnerData.SetMsg(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Msg);
+  if not Lightweight then
+    Assert(not has_Msg);
   FMsg := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kMsgFieldNumber, AValue);

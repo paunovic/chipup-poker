@@ -558,7 +558,8 @@ end;
 
 procedure TPB_TableStatus.SetTableMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_TableMongoId);
+  if not Lightweight then
+    Assert(not has_TableMongoId);
   FTableMongoId := AValue;
   if not Lightweight then
   begin
@@ -630,7 +631,8 @@ end;
 
 procedure TPB_TableStatus.SetState(const AValue: TTableState);
 begin
-  if not Lightweight then    Assert(not has_State);
+  if not Lightweight then
+    Assert(not has_State);
   FState := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
@@ -660,7 +662,8 @@ end;
 
 procedure TPB_TableStatus.SetDealer(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Dealer);
+  if not Lightweight then
+    Assert(not has_Dealer);
   FDealer := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kDealerFieldNumber, AValue);
@@ -690,7 +693,8 @@ end;
 
 procedure TPB_TableStatus.SetCurrentSeat(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_CurrentSeat);
+  if not Lightweight then
+    Assert(not has_CurrentSeat);
   FCurrentSeat := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kCurrentSeatFieldNumber, AValue);
@@ -754,7 +758,8 @@ end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
 begin
-  if not Lightweight then    Assert(not has_Locked);
+  if not Lightweight then
+    Assert(not has_Locked);
   FLocked := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kLockedFieldNumber, AValue);
@@ -784,7 +789,8 @@ end;
 
 procedure TPB_TableStatus.SetSeq(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Seq);
+  if not Lightweight then
+    Assert(not has_Seq);
   FSeq := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
@@ -814,7 +820,8 @@ end;
 
 procedure TPB_TableStatus.SetMinimumBet(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_MinimumBet);
+  if not Lightweight then
+    Assert(not has_MinimumBet);
   FMinimumBet := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kMinimumBetFieldNumber, AValue);
@@ -844,7 +851,8 @@ end;
 
 procedure TPB_TableStatus.SetMaximumRaise(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_MaximumRaise);
+  if not Lightweight then
+    Assert(not has_MaximumRaise);
   FMaximumRaise := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kMaximumRaiseFieldNumber, AValue);
@@ -874,7 +882,8 @@ end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_SmallBlind);
+  if not Lightweight then
+    Assert(not has_SmallBlind);
   FSmallBlind := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kSmallBlindFieldNumber, AValue);
@@ -904,7 +913,8 @@ end;
 
 procedure TPB_TableStatus.SetBigBlind(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_BigBlind);
+  if not Lightweight then
+    Assert(not has_BigBlind);
   FBigBlind := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBigBlindFieldNumber, AValue);
@@ -934,7 +944,8 @@ end;
 
 procedure TPB_TableStatus.SetHandid(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Handid);
+  if not Lightweight then
+    Assert(not has_Handid);
   FHandid := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kHandidFieldNumber, AValue);
@@ -964,7 +975,8 @@ end;
 
 procedure TPB_TableStatus.SetTime(const AValue: UInt64);
 begin
-  if not Lightweight then    Assert(not has_Time);
+  if not Lightweight then
+    Assert(not has_Time);
   FTime := AValue;
   if not Lightweight then
     ProtobufOutput.WriteInt64(kTimeFieldNumber, AValue);
@@ -1070,7 +1082,8 @@ end;
 
 procedure TPB_TableStatus.SetRakePercent(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_RakePercent);
+  if not Lightweight then
+    Assert(not has_RakePercent);
   FRakePercent := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kRakePercentFieldNumber, AValue);
@@ -1100,7 +1113,8 @@ end;
 
 procedure TPB_TableStatus.SetCurrentGame(const AValue: TGameType);
 begin
-  if not Lightweight then    Assert(not has_CurrentGame);
+  if not Lightweight then
+    Assert(not has_CurrentGame);
   FCurrentGame := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
@@ -1130,7 +1144,8 @@ end;
 
 procedure TPB_TableStatus.SetRotation(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Rotation);
+  if not Lightweight then
+    Assert(not has_Rotation);
   FRotation := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kRotationFieldNumber, AValue);
@@ -1160,7 +1175,8 @@ end;
 
 procedure TPB_TableStatus.SetGameLimit(const AValue: TGameLimit);
 begin
-  if not Lightweight then    Assert(not has_GameLimit);
+  if not Lightweight then
+    Assert(not has_GameLimit);
   FGameLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kGameLimitFieldNumber, Integer(AValue));
@@ -1190,7 +1206,8 @@ end;
 
 procedure TPB_TableStatus.SetMinimumRaise(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_MinimumRaise);
+  if not Lightweight then
+    Assert(not has_MinimumRaise);
   FMinimumRaise := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kMinimumRaiseFieldNumber, AValue);
@@ -1220,7 +1237,8 @@ end;
 
 procedure TPB_TableStatus.SetTableType(const AValue: TTableType);
 begin
-  if not Lightweight then    Assert(not has_TableType);
+  if not Lightweight then
+    Assert(not has_TableType);
   FTableType := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kTableTypeFieldNumber, Integer(AValue));

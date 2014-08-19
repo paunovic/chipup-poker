@@ -114,7 +114,8 @@ end;
 
 procedure TPB_RegisterReply.SetStatus(const AValue: TRegisterStatus);
 begin
-  if not Lightweight then    Assert(not has_Status);
+  if not Lightweight then
+    Assert(not has_Status);
   FStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));

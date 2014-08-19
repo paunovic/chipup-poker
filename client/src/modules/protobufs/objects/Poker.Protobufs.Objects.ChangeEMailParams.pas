@@ -112,7 +112,8 @@ end;
 
 procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_NewMail);
+  if not Lightweight then
+    Assert(not has_NewMail);
   FNewMail := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kNewMailFieldNumber, AValue);

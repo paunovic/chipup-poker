@@ -95,7 +95,6 @@ type
     styleTournamentInProgress: TcxStyle;
     styleTournamentCancelled: TcxStyle;
     acTournamentsOpenAll: TAction;
-    acTournamentsCloseAll: TAction;
     acTournamentItemOpen: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -144,7 +143,6 @@ type
     procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acTournamentItemOpenExecute(Sender: TObject);
     procedure acTournamentsOpenAllExecute(Sender: TObject);
-    procedure acTournamentsCloseAllExecute(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -230,7 +228,8 @@ uses
   Poker.Players.Player, Poker.Avatars.AvatarList, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions,
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
-  Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage;
+  Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
+  Poker.Protobufs.Objects.TournamentMember;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -1453,6 +1452,7 @@ begin
       UpdateTournamentList;
       UpdateTournamentActions;
     end;
+    tceNotOpen: ;
   end;
 end;
 
@@ -1567,11 +1567,27 @@ end;
 procedure TfrmChipUpMain.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
 var
   proto: TPB_TournamentInfo;
+  member: TPB_TournamentMember;
+  self_registered: Boolean;
 begin
   if not TTypes.TryCast<TPB_TournamentInfo>(AObject, proto) then
     Exit;
 
   Tournaments.Add(proto);
+
+  self_registered := FALSE;
+  for member in proto.Players do
+    if member.MongoId = dmMain.SelfInfo.MongoId then
+    begin
+      self_registered := TRUE;
+      Break;
+    end;
+
+  if not self_registered then
+    dmMain.SelfInfo.RegisteredTournaments.Remove(proto.MongoId)
+  else
+    if not dmMain.SelfInfo.RegisteredTournaments.Contains(proto.MongoId) then
+      dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
 end;
 
 procedure TfrmChipUpMain.CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
@@ -1605,25 +1621,13 @@ end;
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
   ServerSocket.TournamentRegister(FSelectedTournament);
+  acTournamentRegister.Enabled := FALSE;
 end;
 
 procedure TfrmChipUpMain.acTournamentUnregisterExecute(Sender: TObject);
 begin
   ServerSocket.TournamentUnregister(FSelectedTournament);
-end;
-
-procedure TfrmChipUpMain.acTournamentsCloseAllExecute(Sender: TObject);
-var
-  table: TTable;
-begin
-  Tables.Lock;
-  try
-    for table in Tables.Values do
-      if table.TableType = ttTournament then
-        table.Hide;
-  finally
-    Tables.Unlock;
-  end;
+  acTournamentUnregister.Enabled := FALSE;
 end;
 
 procedure TfrmChipUpMain.acTournamentsOpenAllExecute(Sender: TObject);

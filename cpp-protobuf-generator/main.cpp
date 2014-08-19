@@ -465,7 +465,7 @@ class BaseGenerator : public CodeGenerator {
 			printer->Print(vars,
 				"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
 				"begin\n"
-				"  if not Lightweight then"
+				"  if not Lightweight then\n"
 				"    Assert(not has_$name$);\n"
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {

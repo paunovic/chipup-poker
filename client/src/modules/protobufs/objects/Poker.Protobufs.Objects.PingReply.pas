@@ -129,7 +129,8 @@ end;
 
 procedure TPB_PingReply.SetUptime(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Uptime);
+  if not Lightweight then
+    Assert(not has_Uptime);
   FUptime := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
@@ -159,7 +160,8 @@ end;
 
 procedure TPB_PingReply.SetServertime(const AValue: UInt64);
 begin
-  if not Lightweight then    Assert(not has_Servertime);
+  if not Lightweight then
+    Assert(not has_Servertime);
   FServertime := AValue;
   if not Lightweight then
     ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);

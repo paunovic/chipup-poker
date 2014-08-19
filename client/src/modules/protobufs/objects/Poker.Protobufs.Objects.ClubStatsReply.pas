@@ -158,7 +158,8 @@ end;
 
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Clubid);
+  if not Lightweight then
+    Assert(not has_Clubid);
   FClubid := AValue;
   if not Lightweight then
   begin

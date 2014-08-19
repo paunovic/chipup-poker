@@ -192,7 +192,8 @@ end;
 
 procedure TPB_HandHistoryReply.SetClubId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_ClubId);
+  if not Lightweight then
+    Assert(not has_ClubId);
   FClubId := AValue;
   if not Lightweight then
   begin
@@ -226,7 +227,8 @@ end;
 
 procedure TPB_HandHistoryReply.SetGameid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Gameid);
+  if not Lightweight then
+    Assert(not has_Gameid);
   FGameid := AValue;
   if not Lightweight then
   begin
@@ -298,7 +300,8 @@ end;
 
 procedure TPB_HandHistoryReply.SetTournamentId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_TournamentId);
+  if not Lightweight then
+    Assert(not has_TournamentId);
   FTournamentId := AValue;
   if not Lightweight then
   begin

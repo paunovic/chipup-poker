@@ -113,26 +113,62 @@ var
   tournament: TTournamentInfo;
   C1: Integer;
   games: TObjectList<TPB_Game>;
+  mongoid: TMongoId;
+  to_remove: TList<TMongoId>;
 begin
   FLock.Acquire;
   try
     games := TObjectList<TPB_Game>.Create;
     try
-      Tournaments.Lock;
+      for tournament in Values do
+        for C1 := 0 to tournament.Games.Count - 1 do
+          games.Add(TPB_Game.Create(tournament.Games[C1]));
+
+      to_remove := TList<TMongoId>.Create;
       try
-        for tournament in Tournaments.Values do
-          for C1 := 0 to tournament.Games.Count - 1 do
-            games.Add(TPB_Game.Create(tournament.Games[C1]));
+        for tournament in Values do
+          to_remove.Add(tournament.MongoId);
+
+        for pbtournament in ATournamentList do
+          if TryGetValue(pbtournament.MongoId, tournament) then
+          begin
+            if pbtournament.has_Name then
+              tournament.Name := pbtournament.Name;
+            if pbtournament.has_Description then
+              tournament.Description := pbtournament.Description;
+            if pbtournament.has_Gametype then
+              tournament.Gametype := pbtournament.Gametype;
+            if pbtournament.has_Limit then
+              tournament.Limit := pbtournament.Limit;
+            if pbtournament.has_SeatsPerTable then
+              tournament.SeatsPerTable := pbtournament.SeatsPerTable;
+            if pbtournament.has_Minplayers then
+              tournament.Minplayers := pbtournament.Minplayers;
+            if pbtournament.has_Maxplayers then
+              tournament.Maxplayers := pbtournament.Maxplayers;
+            if pbtournament.has_Startingchips then
+              tournament.Startingchips := pbtournament.Startingchips;
+            if pbtournament.has_Timeperlevel then
+              tournament.Timeperlevel := pbtournament.Timeperlevel;
+            if pbtournament.has_RegisteredPlayers then
+              tournament.RegisteredPlayers := pbtournament.RegisteredPlayers;
+            if pbtournament.has_StartTime then
+              tournament.StartTime := pbtournament.StartTime;
+            if pbtournament.has_State then
+              tournament.State := pbtournament.State;
+            to_remove.Remove(tournament.MongoId)
+          end
+          else
+            Add(pbtournament);
+
+        for mongoid in to_remove do
+          Remove(mongoid);
       finally
-        Tournaments.Unlock;
+        to_remove.Free;
       end;
 
-      Clear;
-      for pbtournament in ATournamentList do
-        Add(pbtournament);
-
       for C1 := 0 to games.Count - 1 do
-        if Tournaments.GetAndLock(games[C1].Tournament, tournament) then
+        if TryGetValue(games[C1].Tournament, tournament) then
           tournament.AddGame(games[C1])
     finally
       games.Free;

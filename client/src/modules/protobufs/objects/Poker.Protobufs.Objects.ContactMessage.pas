@@ -131,7 +131,8 @@ end;
 
 procedure TPB_ContactMessage.SetReason(const AValue: TContactReason);
 begin
-  if not Lightweight then    Assert(not has_Reason);
+  if not Lightweight then
+    Assert(not has_Reason);
   FReason := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kReasonFieldNumber, Integer(AValue));
@@ -161,7 +162,8 @@ end;
 
 procedure TPB_ContactMessage.SetMessage(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Message);
+  if not Lightweight then
+    Assert(not has_Message);
   FMessage := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kMessageFieldNumber, AValue);

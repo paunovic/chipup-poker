@@ -217,7 +217,8 @@ end;
 
 procedure TPB_TableEvent.SetEvent(const AValue: TTableEventType);
 begin
-  if not Lightweight then    Assert(not has_Event);
+  if not Lightweight then
+    Assert(not has_Event);
   FEvent := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
@@ -247,7 +248,8 @@ end;
 
 procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Seat);
+  if not Lightweight then
+    Assert(not has_Seat);
   FSeat := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
@@ -349,7 +351,8 @@ end;
 
 procedure TPB_TableEvent.SetCards(const AValue: TBytes);
 begin
-  if not Lightweight then    Assert(not has_Cards);
+  if not Lightweight then
+    Assert(not has_Cards);
   FCards := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);

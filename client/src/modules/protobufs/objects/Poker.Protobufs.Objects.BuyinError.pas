@@ -129,7 +129,8 @@ end;
 
 procedure TPB_BuyinError.SetGameId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_GameId);
+  if not Lightweight then
+    Assert(not has_GameId);
   FGameId := AValue;
   if not Lightweight then
   begin
@@ -163,7 +164,8 @@ end;
 
 procedure TPB_BuyinError.SetLastCashout(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_LastCashout);
+  if not Lightweight then
+    Assert(not has_LastCashout);
   FLastCashout := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);

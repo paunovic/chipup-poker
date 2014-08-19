@@ -158,7 +158,8 @@ end;
 
 procedure TPB_HelloParams.SetDebug(const AValue: Boolean);
 begin
-  if not Lightweight then    Assert(not has_Debug);
+  if not Lightweight then
+    Assert(not has_Debug);
   FDebug := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kDebugFieldNumber, AValue);

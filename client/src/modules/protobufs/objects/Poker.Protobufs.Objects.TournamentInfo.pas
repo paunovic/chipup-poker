@@ -420,7 +420,8 @@ end;
 
 procedure TPB_TournamentInfo.SetMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_MongoId);
+  if not Lightweight then
+    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -454,7 +455,8 @@ end;
 
 procedure TPB_TournamentInfo.SetName(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Name);
+  if not Lightweight then
+    Assert(not has_Name);
   FName := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kNameFieldNumber, AValue);
@@ -484,7 +486,8 @@ end;
 
 procedure TPB_TournamentInfo.SetDescription(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Description);
+  if not Lightweight then
+    Assert(not has_Description);
   FDescription := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kDescriptionFieldNumber, AValue);
@@ -514,7 +517,8 @@ end;
 
 procedure TPB_TournamentInfo.SetGametype(const AValue: TGameType);
 begin
-  if not Lightweight then    Assert(not has_Gametype);
+  if not Lightweight then
+    Assert(not has_Gametype);
   FGametype := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kGametypeFieldNumber, Integer(AValue));
@@ -544,7 +548,8 @@ end;
 
 procedure TPB_TournamentInfo.SetLimit(const AValue: TGameLimit);
 begin
-  if not Lightweight then    Assert(not has_Limit);
+  if not Lightweight then
+    Assert(not has_Limit);
   FLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kLimitFieldNumber, Integer(AValue));
@@ -574,7 +579,8 @@ end;
 
 procedure TPB_TournamentInfo.SetSeatsPerTable(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_SeatsPerTable);
+  if not Lightweight then
+    Assert(not has_SeatsPerTable);
   FSeatsPerTable := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kSeatsPerTableFieldNumber, AValue);
@@ -604,7 +610,8 @@ end;
 
 procedure TPB_TournamentInfo.SetMinplayers(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Minplayers);
+  if not Lightweight then
+    Assert(not has_Minplayers);
   FMinplayers := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kMinplayersFieldNumber, AValue);
@@ -634,7 +641,8 @@ end;
 
 procedure TPB_TournamentInfo.SetMaxplayers(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Maxplayers);
+  if not Lightweight then
+    Assert(not has_Maxplayers);
   FMaxplayers := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kMaxplayersFieldNumber, AValue);
@@ -664,7 +672,8 @@ end;
 
 procedure TPB_TournamentInfo.SetStartingchips(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Startingchips);
+  if not Lightweight then
+    Assert(not has_Startingchips);
   FStartingchips := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kStartingchipsFieldNumber, AValue);
@@ -694,7 +703,8 @@ end;
 
 procedure TPB_TournamentInfo.SetTimeperlevel(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Timeperlevel);
+  if not Lightweight then
+    Assert(not has_Timeperlevel);
   FTimeperlevel := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kTimeperlevelFieldNumber, AValue);
@@ -724,7 +734,8 @@ end;
 
 procedure TPB_TournamentInfo.SetRegisteredPlayers(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_RegisteredPlayers);
+  if not Lightweight then
+    Assert(not has_RegisteredPlayers);
   FRegisteredPlayers := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kRegisteredPlayersFieldNumber, AValue);
@@ -754,7 +765,8 @@ end;
 
 procedure TPB_TournamentInfo.SetStartTime(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_StartTime);
+  if not Lightweight then
+    Assert(not has_StartTime);
   FStartTime := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kStartTimeFieldNumber, AValue);
@@ -822,7 +834,8 @@ end;
 
 procedure TPB_TournamentInfo.SetState(const AValue: TTournamentState);
 begin
-  if not Lightweight then    Assert(not has_State);
+  if not Lightweight then
+    Assert(not has_State);
   FState := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));

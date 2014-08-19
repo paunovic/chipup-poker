@@ -4291,10 +4291,6 @@ object frmChipUpMain: TfrmChipUpMain
                   item
                     Action = acTournamentsOpenAll
                     Caption = '&Open All Tables'
-                  end
-                  item
-                    Action = acTournamentsCloseAll
-                    Caption = '&Close All Tables'
                   end>
                 Caption = 'T&ournaments'
               end
@@ -4482,11 +4478,6 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Options'
       Caption = 'Open All Tables'
       OnExecute = acTournamentsOpenAllExecute
-    end
-    object acTournamentsCloseAll: TAction
-      Category = 'Options'
-      Caption = 'Close All Tables'
-      OnExecute = acTournamentsCloseAllExecute
     end
     object acTournamentItemOpen: TAction
       Category = 'Options'
