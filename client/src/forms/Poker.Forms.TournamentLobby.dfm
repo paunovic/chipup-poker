@@ -370,10 +370,14 @@ object frmTournamentLobby: TfrmTournamentLobby
     Top = 60
     object acRegister: TAction
       Caption = 'REGISTER'
+      Enabled = False
+      Visible = False
       OnExecute = acRegisterExecute
     end
     object acUnregister: TAction
       Caption = 'UNREGISTER'
+      Enabled = False
+      Visible = False
       OnExecute = acUnregisterExecute
     end
   end

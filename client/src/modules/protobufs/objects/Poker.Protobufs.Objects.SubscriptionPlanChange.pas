@@ -147,7 +147,8 @@ end;
 
 procedure TPB_SubscriptionPlanChange.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
 begin
-  if not Lightweight then    Assert(not has_SubscriptionPlan);
+  if not Lightweight then
+    Assert(not has_SubscriptionPlan);
   FSubscriptionPlan := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));
@@ -177,7 +178,8 @@ end;
 
 procedure TPB_SubscriptionPlanChange.SetUrl(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Url);
+  if not Lightweight then
+    Assert(not has_Url);
   FUrl := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kUrlFieldNumber, AValue);
@@ -207,7 +209,8 @@ end;
 
 procedure TPB_SubscriptionPlanChange.SetStripeToken(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_StripeToken);
+  if not Lightweight then
+    Assert(not has_StripeToken);
   FStripeToken := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kStripeTokenFieldNumber, AValue);

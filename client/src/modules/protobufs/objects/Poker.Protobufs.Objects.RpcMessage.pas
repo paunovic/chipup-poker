@@ -146,7 +146,8 @@ end;
 
 procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_MethodId);
+  if not Lightweight then
+    Assert(not has_MethodId);
   FMethodId := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kMethodIdFieldNumber, AValue);
@@ -176,7 +177,8 @@ end;
 
 procedure TPB_RpcMessage.SetDataSize(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_DataSize);
+  if not Lightweight then
+    Assert(not has_DataSize);
   FDataSize := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kDataSizeFieldNumber, AValue);
@@ -206,7 +208,8 @@ end;
 
 procedure TPB_RpcMessage.SetToken(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Token);
+  if not Lightweight then
+    Assert(not has_Token);
   FToken := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kTokenFieldNumber, AValue);

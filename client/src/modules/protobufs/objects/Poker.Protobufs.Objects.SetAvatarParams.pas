@@ -112,7 +112,8 @@ end;
 
 procedure TPB_SetAvatarParams.SetAvatarId(const AValue: TBytes);
 begin
-  if not Lightweight then    Assert(not has_AvatarId);
+  if not Lightweight then
+    Assert(not has_AvatarId);
   FAvatarId := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);

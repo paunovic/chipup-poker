@@ -163,7 +163,8 @@ end;
 
 procedure TPB_TournamentMember.SetMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_MongoId);
+  if not Lightweight then
+    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -197,7 +198,8 @@ end;
 
 procedure TPB_TournamentMember.SetDisplayname(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Displayname);
+  if not Lightweight then
+    Assert(not has_Displayname);
   FDisplayname := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kDisplaynameFieldNumber, AValue);
@@ -227,7 +229,8 @@ end;
 
 procedure TPB_TournamentMember.SetChips(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Chips);
+  if not Lightweight then
+    Assert(not has_Chips);
   FChips := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
@@ -257,7 +260,8 @@ end;
 
 procedure TPB_TournamentMember.SetGameid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Gameid);
+  if not Lightweight then
+    Assert(not has_Gameid);
   FGameid := AValue;
   if not Lightweight then
   begin

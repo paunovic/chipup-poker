@@ -112,7 +112,8 @@ end;
 
 procedure TPB_TournamentDetails.SetMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_MongoId);
+  if not Lightweight then
+    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin

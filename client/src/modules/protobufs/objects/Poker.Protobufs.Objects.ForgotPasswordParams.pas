@@ -112,7 +112,8 @@ end;
 
 procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Email);
+  if not Lightweight then
+    Assert(not has_Email);
   FEmail := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kEmailFieldNumber, AValue);

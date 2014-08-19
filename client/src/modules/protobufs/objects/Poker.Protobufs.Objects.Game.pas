@@ -392,7 +392,8 @@ end;
 
 procedure TPB_Game.SetMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_MongoId);
+  if not Lightweight then
+    Assert(not has_MongoId);
   FId := AValue;
   if not Lightweight then
   begin
@@ -426,7 +427,8 @@ end;
 
 procedure TPB_Game.SetCreatorMongoId(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_CreatorMongoId);
+  if not Lightweight then
+    Assert(not has_CreatorMongoId);
   FCreatorMongoId := AValue;
   if not Lightweight then
   begin
@@ -460,7 +462,8 @@ end;
 
 procedure TPB_Game.SetGamename(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Gamename);
+  if not Lightweight then
+    Assert(not has_Gamename);
   FGamename := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
@@ -490,7 +493,8 @@ end;
 
 procedure TPB_Game.SetClubMongoid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_ClubMongoid);
+  if not Lightweight then
+    Assert(not has_ClubMongoid);
   FClubMongoid := AValue;
   if not Lightweight then
   begin
@@ -524,7 +528,8 @@ end;
 
 procedure TPB_Game.SetGameType(const AValue: TGameType);
 begin
-  if not Lightweight then    Assert(not has_GameType);
+  if not Lightweight then
+    Assert(not has_GameType);
   FGameType := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kGameTypeFieldNumber, Integer(AValue));
@@ -554,7 +559,8 @@ end;
 
 procedure TPB_Game.SetGameLimit(const AValue: TGameLimit);
 begin
-  if not Lightweight then    Assert(not has_GameLimit);
+  if not Lightweight then
+    Assert(not has_GameLimit);
   FGameLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kGameLimitFieldNumber, Integer(AValue));
@@ -584,7 +590,8 @@ end;
 
 procedure TPB_Game.SetBlinds(const AValue: TGameBlinds);
 begin
-  if not Lightweight then    Assert(not has_Blinds);
+  if not Lightweight then
+    Assert(not has_Blinds);
   FBlinds := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kBlindsFieldNumber, Integer(AValue));
@@ -614,7 +621,8 @@ end;
 
 procedure TPB_Game.SetSeats(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Seats);
+  if not Lightweight then
+    Assert(not has_Seats);
   FSeats := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSeatsFieldNumber, AValue);
@@ -644,7 +652,8 @@ end;
 
 procedure TPB_Game.SetSitting(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Sitting);
+  if not Lightweight then
+    Assert(not has_Sitting);
   FSitting := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kSittingFieldNumber, AValue);
@@ -674,7 +683,8 @@ end;
 
 procedure TPB_Game.SetBuyinMin(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_BuyinMin);
+  if not Lightweight then
+    Assert(not has_BuyinMin);
   FBuyinMin := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBuyinMinFieldNumber, AValue);
@@ -704,7 +714,8 @@ end;
 
 procedure TPB_Game.SetBuyinMax(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_BuyinMax);
+  if not Lightweight then
+    Assert(not has_BuyinMax);
   FBuyinMax := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBuyinMaxFieldNumber, AValue);
@@ -734,7 +745,8 @@ end;
 
 procedure TPB_Game.SetState(const AValue: TGameState);
 begin
-  if not Lightweight then    Assert(not has_State);
+  if not Lightweight then
+    Assert(not has_State);
   FState := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
@@ -764,7 +776,8 @@ end;
 
 procedure TPB_Game.SetClosetime(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Closetime);
+  if not Lightweight then
+    Assert(not has_Closetime);
   FClosetime := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kClosetimeFieldNumber, AValue);
@@ -794,7 +807,8 @@ end;
 
 procedure TPB_Game.SetLasthandid(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Lasthandid);
+  if not Lightweight then
+    Assert(not has_Lasthandid);
   FLasthandid := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
@@ -824,7 +838,8 @@ end;
 
 procedure TPB_Game.SetTournament(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Tournament);
+  if not Lightweight then
+    Assert(not has_Tournament);
   FTournament := AValue;
   if not Lightweight then
   begin
@@ -858,7 +873,8 @@ end;
 
 procedure TPB_Game.SetSmallBlind(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_SmallBlind);
+  if not Lightweight then
+    Assert(not has_SmallBlind);
   FSmallBlind := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kSmallBlindFieldNumber, AValue);
@@ -888,7 +904,8 @@ end;
 
 procedure TPB_Game.SetBigBlind(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_BigBlind);
+  if not Lightweight then
+    Assert(not has_BigBlind);
   FBigBlind := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBigBlindFieldNumber, AValue);

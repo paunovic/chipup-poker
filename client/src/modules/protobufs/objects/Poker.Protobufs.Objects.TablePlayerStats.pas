@@ -257,7 +257,8 @@ end;
 
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Userid);
+  if not Lightweight then
+    Assert(not has_Userid);
   FUserid := AValue;
   if not Lightweight then
   begin
@@ -291,7 +292,8 @@ end;
 
 procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_Balance);
+  if not Lightweight then
+    Assert(not has_Balance);
   FBalance := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kBalanceFieldNumber, AValue);
@@ -389,7 +391,8 @@ end;
 
 procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Rakecontrib);
+  if not Lightweight then
+    Assert(not has_Rakecontrib);
   FRakecontrib := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kRakecontribFieldNumber, AValue);
@@ -419,7 +422,8 @@ end;
 
 procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Secondsplayed);
+  if not Lightweight then
+    Assert(not has_Secondsplayed);
   FSecondsplayed := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kSecondsplayedFieldNumber, AValue);
@@ -449,7 +453,8 @@ end;
 
 procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Chipsinplay);
+  if not Lightweight then
+    Assert(not has_Chipsinplay);
   FChipsinplay := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kChipsinplayFieldNumber, AValue);
@@ -479,7 +484,8 @@ end;
 
 procedure TPB_TablePlayerStats.SetHands(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Hands);
+  if not Lightweight then
+    Assert(not has_Hands);
   FHands := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);

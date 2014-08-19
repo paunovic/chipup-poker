@@ -163,7 +163,8 @@ end;
 
 procedure TPB_PlayerLimitParams.SetClubid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Clubid);
+  if not Lightweight then
+    Assert(not has_Clubid);
   FClubid := AValue;
   if not Lightweight then
   begin
@@ -197,7 +198,8 @@ end;
 
 procedure TPB_PlayerLimitParams.SetUserid(const AValue: TMongoId);
 begin
-  if not Lightweight then    Assert(not has_Userid);
+  if not Lightweight then
+    Assert(not has_Userid);
   FUserid := AValue;
   if not Lightweight then
   begin
@@ -231,7 +233,8 @@ end;
 
 procedure TPB_PlayerLimitParams.SetLimit(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Limit);
+  if not Lightweight then
+    Assert(not has_Limit);
   FLimit := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kLimitFieldNumber, AValue);
@@ -261,7 +264,8 @@ end;
 
 procedure TPB_PlayerLimitParams.SetUnlimited(const AValue: Boolean);
 begin
-  if not Lightweight then    Assert(not has_Unlimited);
+  if not Lightweight then
+    Assert(not has_Unlimited);
   FUnlimited := AValue;
   if not Lightweight then
     ProtobufOutput.writeBoolean(kUnlimitedFieldNumber, AValue);

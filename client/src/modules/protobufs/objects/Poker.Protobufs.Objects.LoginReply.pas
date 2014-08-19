@@ -318,7 +318,8 @@ end;
 
 procedure TPB_LoginReply.SetLoginStatus(const AValue: TLoginStatus);
 begin
-  if not Lightweight then    Assert(not has_LoginStatus);
+  if not Lightweight then
+    Assert(not has_LoginStatus);
   FLoginStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kLoginStatusFieldNumber, Integer(AValue));
@@ -538,7 +539,8 @@ end;
 
 procedure TPB_LoginReply.SetSelf(const AValue: TPB_User);
 begin
-  if not Lightweight then    Assert(not has_Self);
+  if not Lightweight then
+    Assert(not has_Self);
   FSelf := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kSelfFieldNumber, AValue.ProtobufOutput);

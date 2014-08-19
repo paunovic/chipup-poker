@@ -144,7 +144,8 @@ end;
 
 procedure TPB_TournamentTableStart.SetGame(const AValue: TPB_Game);
 begin
-  if not Lightweight then    Assert(not has_Game);
+  if not Lightweight then
+    Assert(not has_Game);
   FGame := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kGameFieldNumber, AValue.ProtobufOutput);
@@ -174,7 +175,8 @@ end;
 
 procedure TPB_TournamentTableStart.SetTableStatus(const AValue: TPB_TableStatus);
 begin
-  if not Lightweight then    Assert(not has_TableStatus);
+  if not Lightweight then
+    Assert(not has_TableStatus);
   FTableStatus := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kTableStatusFieldNumber, AValue.ProtobufOutput);

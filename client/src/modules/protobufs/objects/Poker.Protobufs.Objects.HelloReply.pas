@@ -281,7 +281,8 @@ end;
 
 procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
 begin
-  if not Lightweight then    Assert(not has_StringSizes);
+  if not Lightweight then
+    Assert(not has_StringSizes);
   FStringSizes := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kStringSizesFieldNumber, AValue.ProtobufOutput);
@@ -311,7 +312,8 @@ end;
 
 procedure TPB_HelloReply.SetChangeExpireTime(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_ChangeExpireTime);
+  if not Lightweight then
+    Assert(not has_ChangeExpireTime);
   FChangeExpireTime := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kChangeExpireTimeFieldNumber, AValue);
@@ -341,7 +343,8 @@ end;
 
 procedure TPB_HelloReply.SetForgotExpireTime(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_ForgotExpireTime);
+  if not Lightweight then
+    Assert(not has_ForgotExpireTime);
   FForgotExpireTime := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kForgotExpireTimeFieldNumber, AValue);
@@ -371,7 +374,8 @@ end;
 
 procedure TPB_HelloReply.SetMaxPlayTime(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_MaxPlayTime);
+  if not Lightweight then
+    Assert(not has_MaxPlayTime);
   FMaxPlayTime := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kMaxPlayTimeFieldNumber, AValue);
@@ -401,7 +405,8 @@ end;
 
 procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
 begin
-  if not Lightweight then    Assert(not has_MaxTimebank);
+  if not Lightweight then
+    Assert(not has_MaxTimebank);
   FMaxTimebank := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kMaxTimebankFieldNumber, AValue);
@@ -431,7 +436,8 @@ end;
 
 procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
 begin
-  if not Lightweight then    Assert(not has_MinSizes);
+  if not Lightweight then
+    Assert(not has_MinSizes);
   FMinSizes := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kMinSizesFieldNumber, AValue.ProtobufOutput);
@@ -499,7 +505,8 @@ end;
 
 procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
 begin
-  if not Lightweight then    Assert(not has_ValidCharsRegex);
+  if not Lightweight then
+    Assert(not has_ValidCharsRegex);
   FValidCharsRegex := AValue;
   if not Lightweight then
     ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);

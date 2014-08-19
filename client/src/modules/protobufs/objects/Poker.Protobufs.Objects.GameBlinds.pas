@@ -129,7 +129,8 @@ end;
 
 procedure TPB_GameBlinds.SetSb(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Sb);
+  if not Lightweight then
+    Assert(not has_Sb);
   FSb := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kSbFieldNumber, AValue);
@@ -159,7 +160,8 @@ end;
 
 procedure TPB_GameBlinds.SetBb(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_Bb);
+  if not Lightweight then
+    Assert(not has_Bb);
   FBb := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kBbFieldNumber, AValue);

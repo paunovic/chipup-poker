@@ -52,14 +52,11 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure gridPlayersTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridPlayersTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acRegisterExecute(Sender: TObject);
     procedure acUnregisterExecute(Sender: TObject);
-    procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
-      ANewItemRecordFocusingChanged: Boolean);
-    procedure gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTournamentId: TMongoId;
@@ -68,6 +65,7 @@ type
 
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
+    procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
     procedure UpdatePlayersGrid;
     procedure UpdateTablesGrid;
     procedure UpdateAllPlayersGrid;
@@ -90,12 +88,14 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds,
+  Poker.Protobufs.Objects.TournamentList;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
+                      TServerMessageCallback.Create(seTournamentList, CSETournamentList),
                       TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply)
                   ]);
 end;
@@ -127,6 +127,22 @@ begin
 
   AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
   AParams.WndParent := 0;
+end;
+
+procedure TfrmTournamentLobby.CSETournamentList(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentList;
+  tournament_info: TPB_TournamentInfo;
+begin
+  if not TTypes.TryCast<TPB_TournamentList>(AObject, proto) then
+    Exit;
+
+  for tournament_info in proto.Items do
+    if tournament_info.MongoId = FTournamentId then
+    begin
+      RefreshAll;
+      Exit;
+    end;
 end;
 
 procedure TfrmTournamentLobby.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
@@ -369,18 +385,19 @@ begin
     Exit;
   if proto.MongoId <> FTournamentId then
     Exit;
-
-  ServerSocket.QueryTournamentInfo(FTournamentId);
+  RefreshAll;
 end;
 
 procedure TfrmTournamentLobby.acRegisterExecute(Sender: TObject);
 begin
   ServerSocket.TournamentRegister(FTournamentId);
+  acRegister.Enabled := FALSE;
 end;
 
 procedure TfrmTournamentLobby.acUnregisterExecute(Sender: TObject);
 begin
   ServerSocket.TournamentUnregister(FTournamentId);
+  acUnregister.Enabled := FALSE;
 end;
 
 procedure TfrmTournamentLobby.RefreshAll;
@@ -400,6 +417,8 @@ begin
       Tournaments.Unlock;
     end;
 
+  acRegister.Visible := acRegister.Enabled;
+  acUnregister.Visible := acUnregister.Enabled;
   if acUnregister.Enabled then
   begin
     btTournamentRegister.Action := acUnregister;
@@ -408,12 +427,13 @@ begin
     btTournamentRegister.Colors.PressedText := $001111BF;
   end
   else
-  begin
-    btTournamentRegister.Action := acRegister;
-    btTournamentRegister.Colors.HotText := $0000E600;
-    btTournamentRegister.Colors.NormalText := $0000BF00;
-    btTournamentRegister.Colors.PressedText := $0000BF00;
-  end;
+    if acRegister.Enabled then
+    begin
+      btTournamentRegister.Action := acRegister;
+      btTournamentRegister.Colors.HotText := $0000E600;
+      btTournamentRegister.Colors.NormalText := $0000BF00;
+      btTournamentRegister.Colors.PressedText := $0000BF00;
+    end;
 
   UpdateAllPlayersGrid;
   UpdatePlayersGrid;

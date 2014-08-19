@@ -182,7 +182,8 @@ end;
 
 procedure TPB_UpdateFileInfo.SetPath(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Path);
+  if not Lightweight then
+    Assert(not has_Path);
   FPath := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kPathFieldNumber, AValue);
@@ -212,7 +213,8 @@ end;
 
 procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
 begin
-  if not Lightweight then    Assert(not has_Hash);
+  if not Lightweight then
+    Assert(not has_Hash);
   FHash := Copy(AValue, 0, Length(AValue));
   if not Lightweight then
     ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
@@ -242,7 +244,8 @@ end;
 
 procedure TPB_UpdateFileInfo.SetUrl(const AValue: String);
 begin
-  if not Lightweight then    Assert(not has_Url);
+  if not Lightweight then
+    Assert(not has_Url);
   FUrl := AValue;
   if not Lightweight then
     ProtobufOutput.writeString(kUrlFieldNumber, AValue);
@@ -272,7 +275,8 @@ end;
 
 procedure TPB_UpdateFileInfo.SetFileType(const AValue: TUpdateFileType);
 begin
-  if not Lightweight then    Assert(not has_FileType);
+  if not Lightweight then
+    Assert(not has_FileType);
   FFileType := AValue;
   if not Lightweight then
     ProtobufOutput.writeInt32(kFileTypeFieldNumber, Integer(AValue));
@@ -302,7 +306,8 @@ end;
 
 procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UInt32);
 begin
-  if not Lightweight then    Assert(not has_FileSize);
+  if not Lightweight then
+    Assert(not has_FileSize);
   FFileSize := AValue;
   if not Lightweight then
     ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
