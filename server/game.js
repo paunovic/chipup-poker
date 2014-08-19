@@ -1633,7 +1633,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			return;
 		}
 		if (this.tourn && this.tourn.onBreak) {
-			this.tourn.breakStart(this,function () {
+			this.tourn.break_start(this,function () {
 				cb(events);
 			});
 			return;
@@ -2137,7 +2137,11 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		conn.log('leave idx %d',seatIdx);
 		if (seatIdx >= 0) {
 			this.members[seatIdx].disconnected = true;
-			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid),5 * 60 * 1000);
+			if (this.tourn) {
+				this.members[seatIdx].autoplay = true;
+			} else {
+				this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid),5 * 60 * 1000);
+			}
 			var fakeconn = {log:lazy.ClientSocket.prototype.log,userid:userid, nick:this.seats[seatIdx].conn.nick};
 			this.seats[seatIdx].conn = fakeconn;
 			var events = [];
@@ -2453,7 +2457,11 @@ Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 			clearTimeout(this.members[seat].disconnectTimer);
 			this.members[seat].disconnected = false;
 			this.seats[seat].conn = conn;
-			if (this.state == 'tsIdle') {
+			var kickstart = true;
+			if (this.tourn) {
+				if (this.tourn.onBreak) kickstart = false;
+			}
+			if (this.state == 'tsIdle' && kickstart) {
 				this.stateMachine(finish2.bind(this),null,{silent:true},events,0);
 			} else finish2.call(this,events);
 		} else finish2.call(this,events);

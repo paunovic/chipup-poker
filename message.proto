@@ -703,9 +703,7 @@ message GameBlinds {
 message TableMessage {
 	enum TableMessageType {
 		tmtClosing = 0;
-		tmtTournamentBreakAfterHand = 1;
-		tmtTournamentBreakWaitingTables = 2;
-		tmtTournamentBreak = 3;
+		tmtTournamentBreak = 1;
 	}
 	
 	required TableMessageType message = 1;

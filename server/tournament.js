@@ -31,21 +31,27 @@ function Tournament(obj) {
 	this.user_table_xref = {};
 	this.blind_schedule = obj.blind_schedule; // FIXME
 	this.currentLevel = 0;
+	this.obj.blind_schedule.LevelLength = parseInt(this.obj.blind_schedule.LevelLength);
+	assert.equal(typeof this.obj.blind_schedule.LevelLength,'number');
+	this.breakmin = 58;
 }
 
 Tournament.create = function (obj,cb) {
-	obj.blind_schedule = PrintBlindStructure(obj.sb, obj.bb, obj.startingchips, obj.timeperlevel, obj.length);
 	models.Tournament.create(obj,function (err,doc) {
 		if (err) {
 			if (err.name == 'ValidationError') return cb(err);
 			if (err.name == 'CastError') return cb(err);
 		}
 		error.handleError(err);
-		core.emit('new_tournament',doc);
-		core.commonLock.writeLock(function (release) {
-			core.resetTimer(function () {
-				release();
-				cb(null,doc);
+		doc.blind_schedule = PrintBlindStructure(doc.sb, doc.bb, doc.startingchips, doc.timeperlevel, doc.length);
+		doc.save(function () {
+			error.handleError(err);
+			core.emit('new_tournament',doc);
+			core.commonLock.writeLock(function (release) {
+				core.resetTimer(function () {
+					release();
+					cb(null,doc);
+				});
 			});
 		});
 	});
@@ -57,6 +63,7 @@ function TournamentCore() {
 util.inherits(TournamentCore,EventEmitter);
 util.inherits(Tournament,EventEmitter);
 Tournament.prototype.startGames = function () {
+	console.log('%s dealing cards',new Date());
 	this.startTime = Date.now();
 	this.currentLevel = -1;
 	this.onBreak = false;
@@ -99,23 +106,27 @@ Tournament.prototype.register = function () {
 };
 Tournament.prototype.getLevel = function () {
 	return this.currentLevel;
-	var runtime = (Date.now() - this.startTime)/1000;
-	return Math.floor(runtime / 60 / this.blind_schedule.LevelLength);
 };
 Tournament.prototype.nextLevel = function () {
-	console.log('level tick prev:%d',this.currentLevel);
+	assert.equal(typeof this.obj.blind_schedule.LevelLength,'number');
+	var now = new Date();
+	console.log('level tick prev:%d %s',this.currentLevel,now);
 	if (this.currentLevel == (this.obj.blind_schedule.blinds.length - 1)) return;
 	this.currentLevel++;
-	var minuteNow = new Date().getMinutes();
-	var minuteEnd = minuteNow + parseInt(this.obj.blind_schedule.LevelLength);
+	this.levelTime = now.getTime();
+	var minuteNow = now.getMinutes();
+	var minuteEnd = minuteNow + this.obj.blind_schedule.LevelLength;
 	console.log('now,end %d,%d',minuteNow,minuteEnd);
-	var breakmin = 10;
-	if ((minuteNow < (breakmin+1)) && (minuteEnd < (breakmin+1))) {
-		setTimeout(this.nextLevel.bind(this),this.obj.blind_schedule.LevelLength * 60000);
+	if ( ((minuteNow < (this.breakmin+1)) && (minuteEnd < (this.breakmin+1)))
+		|| ( (minuteNow > (this.breakmin+5)) && (minuteEnd > (this.breakmin+5)) ) ) {
+		var delay = this.obj.blind_schedule.LevelLength * 60;
+		delay = delay - now.getSeconds();
+		setTimeout(this.nextLevel.bind(this),delay * 1000);
 	} else {
-		var nexthalf = minuteEnd - breakmin
-		var delay = (this.obj.blind_schedule.LevelLength-nexthalf) * 60
-		delay = delay - (new Date().getSeconds());
+		var nexthalf = minuteEnd - this.breakmin;
+		this.nexthalf = nexthalf;
+		var delay = (this.obj.blind_schedule.LevelLength-nexthalf) * 60;
+		delay = delay - now.getSeconds();
 		console.log('need to do a break nexthalf:%d delay:%d',nexthalf,delay);
 		setTimeout(this.beginBreak.bind(this),(delay)*1000);
 	}
@@ -123,65 +134,45 @@ Tournament.prototype.nextLevel = function () {
 Tournament.prototype.beginBreak = function () {
 	console.log('break starting %s',new Date());
 	this.onBreak = true;
+	var obj = { message:'tmtTournamentBreak', duration:360 };
 	async.each(this.tables,function (tbl,cb) {
 		tbl.Lock.writeLock(function (release) {
-			var obj = { message:'tmtTournamentBreakAfterHand' };
 			tbl.setMessage(obj);
 			release();
 			cb();
 		});
 	}.bind(this),function () {
 		console.log('break begining');
-	});
+		setTimeout(this.break_over.bind(this),obj.duration*1000);
+	}.bind(this));
 }
-Tournament.prototype.breakStart = function (game,cb) {
-	console.log('a game hit break');
-	var allpaused = true;
-	for (var x=0; x<this.tables.length; x++) {
-		console.log('table %d state %s',x,this.tables[x].state);
-		if (this.tables[x].state != 'tsIdle') {
-			allpaused = false;
-			break;
-		}
-	}
-	if (allpaused) {
-		console.log('break can begin');
-		async.each(this.tables,function (tbl,cb1) {
-			if (tbl === game) {
-				var obj = { message:"tmtTournamentBreak", duration:300 };
-				tbl.setMessage(obj);
-				cb1();
-				return;
-			}
-			console.log('getting lock');
-			tbl.Lock.writeLock(function (release) {
-				console.log('got lock');
-				var obj = { message:"tmtTournamentBreak", duration:300 };
-				tbl.setMessage(obj);
+Tournament.prototype.break_over = function () {
+	console.log('%s break over, resuming games',new Date());
+	this.onBreak = false;
+	async.each(this.tables,function (tbl,cb1) {
+		tbl.Lock.writeLock(function (release) {
+			var events = [];
+			// FIXME, only if tsIdle
+			tbl.stateMachine(function (events) {
+				console.log('events:%j',events);
+				tbl.broadcastStatus(null,true,events);
 				release();
 				cb1();
-			}.bind(this));
-		},cb);
-	} else {
-		async.each(this.tables,function (tbl,cb1) {
-			if (tbl.state == 'tsIdle') {
-				obj = { message:"tmtTournamentBreakWaitingTables" };
-			} else {
-				obj = { message:"tmtTournamentBreakAfterHand" };
-			}
-			if (tbl === game) {
-				tbl.setMessage(obj);
-				cb1();
-				return;
-			}
-			tbl.Lock.writeLock(function (release) {
-				var obj;
-				tbl.setMessage(obj);
-				release();
-				cb1();
-			}.bind(this));
-		},cb);
-	}
+			},null,{silent:true},events,0);
+		});
+	},function () {
+		var now = new Date();
+		var delay = (this.nexthalf * 60) - now.getSeconds();
+		console.log('second level half delay: %d',delay);
+		setTimeout(function () {
+			console.log('%s level ends',new Date());
+			this.nextLevel();
+		}.bind(this),delay*1000);
+	}.bind(this));
+}
+Tournament.prototype.break_start = function (game,cb) {
+	game.log('game hit break');
+	cb();
 };
 Tournament.prototype.handOver = function (game,cb) {
 	// called after a hand ends in a game, updates tournament chip counts from game seats
@@ -195,9 +186,7 @@ Tournament.prototype.handOver = function (game,cb) {
 		}
 	}
 	this.obj.save(function (err) {
-		console.log('sending event');
 		this.emit('handOver',this);
-		console.log('post-save');
 		cb();
 	}.bind(this));
 }
@@ -283,7 +272,7 @@ TournamentCore.prototype.resetTimer = function (cb) {
 		}
 		var row = rows[0];
 		var now = Date.now() / 1000;
-		var timeleft = row.start_time - now - 60;
+		var timeleft = row.start_time - now - 30;
 		console.log('row0 is %d %j',timeleft,row);
 		if (timeleft < 0) this.checkTournaments(cb);
 		else {
@@ -310,7 +299,7 @@ TournamentCore.prototype.checkTournaments = function (cb) {
 		if (rows.length != 1) return cb(); // nothing found
 		var row = rows[0];
 		var now = Date.now() / 1000;
-		var timeleft = row.start_time - now;
+		var timeleft = row.start_time - now - 30;
 		if (timeleft > 0) {
 			this.resetTimer(cb);
 			return;
@@ -330,9 +319,11 @@ TournamentCore.prototype.checkTournaments = function (cb) {
 	}.bind(this));
 }
 TournamentCore.prototype.startTournament = function (row,cb) {
+	console.log('%s starting tournament',new Date());
 	assert.equal(this.commonLock.readers,-1);
 	this.getByIdUnlocked(row._id,function (err,tourn) {
 		tourn.startTime = Date.now();
+		assert.equal(typeof tourn.obj.blind_schedule.LevelLength,'number');
 		var table_count = tourn.obj.registered_players / tourn.obj.seats_per_table;
 		console.log('need %d tables',table_count);
 		var todo = [];
@@ -426,6 +417,7 @@ function PrintBlindStructure(ASmallBlind,ABigBlind,AStartingChips,ALevelLength,A
 	//console.log('---------------------------------');
 	var blinds = [];
 	var out = { levels:levels, LevelLength:ALevelLength, blinds:blinds };
+	assert.equal(typeof out.LevelLength,'number');
 
 	sb = ASmallBlind;
 	bb = ABigBlind;

@@ -278,7 +278,7 @@ var TournamentSchema = new Schema({
 		levels: { type:Number, required:true },
 		LevelLength: { type:Number, required:true },
 		blinds: { type:[BlindRow], required:true }
-	}, required:true }
+	} }
 });
 
 module.exports.close = function () {

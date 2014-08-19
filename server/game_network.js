@@ -233,6 +233,9 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 				game.updateMongoState({members:true},function () {
 					game.broadcastStatus(null,true,[]);
 				});
+			} else if (game.tourn && (game.state == 'tsIdle') && params.flag) {
+				game.members[seatIdx].autoplay = true;
+				game.broadcastStatus(null,true,[]);
 			} else if (('psOutOfHand' == game.members[seatIdx].status) && params.flag && game.club) {
 				game.members[seatIdx].status = 'psOutOfPlay';
 				game.broadcastStatus(null,true,[]);
