@@ -1856,7 +1856,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
-		var obj = {seat:x, player_mongo_id:priv.userid, chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected, autoplay:seat.autoplay };
+		var obj = {seat_index:x, player_mongo_id:priv.userid, chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected, autoplay:seat.autoplay };
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if ((['tsWinning','tsWinning2'].indexOf(this.state) != -1) && !seat.muck) showcards = true;
