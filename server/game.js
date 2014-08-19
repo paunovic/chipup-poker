@@ -1914,7 +1914,7 @@ Game.prototype.clearMessage = function (type) {
 	assert.equal(this.Lock.readers,-1);
 	for (var x=0; x<this.message.length; x++) {
 		if (this.message[x].message == type) {
-			this.message.slice(x,1);
+			this.message.splice(x,1);
 			this.broadcastStatus(null,true,[]);
 			return;
 		}
