@@ -64,7 +64,7 @@ type
       FGameLimit: TGameLimit;
       FMinimumRaise: UInt32;
       FTableType: TTableType;
-      FTableMessage: TPB_TableMessage;
+      FTableMessage: TList<TPB_TableMessage>;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
@@ -131,11 +131,11 @@ type
     procedure SetTableType(const AValue: TTableType);
     procedure set_has_TableMessage;
     procedure clear_has_TableMessage;
-    procedure SetTableMessage(const AValue: TPB_TableMessage);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
+    procedure TableMessageNotifyEvent(Sender: TObject; const Item: TPB_TableMessage; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -259,10 +259,10 @@ type
     procedure clear_TableType;
     property TableType: TTableType read FTableType write SetTableType;
 
-    // optional TableMessage TableMessage = 28;
+    // repeated TableMessage TableMessage = 28;
     function has_TableMessage: Boolean;
     procedure clear_TableMessage;
-    property TableMessage: TPB_TableMessage read FTableMessage write SetTableMessage;
+    property TableMessage: TList<TPB_TableMessage> read FTableMessage;
 
   end;
 
@@ -304,7 +304,11 @@ begin
     FPots.OnNotify := nil;
     FreeAndNil(FPots);
   end;
-  if Assigned(FTableMessage) then FreeAndNil(FTableMessage);
+  if Assigned(FTableMessage) then
+  begin
+    FTableMessage.OnNotify := nil;
+    FreeAndNil(FTableMessage);
+  end;
   inherited;
 end;
 
@@ -315,6 +319,7 @@ begin
   FBets := TList<UInt32>.Create;
   FEvents := TObjectList<TPB_TableEvent>.Create;
   FPots := TObjectList<TPB_Pot>.Create;
+  FTableMessage := TObjectList<TPB_TableMessage>.Create;
 end;
 
 procedure TPB_TableStatus.HookNotifiers;
@@ -324,6 +329,7 @@ begin
   FBets.OnNotify := BetsNotifyEvent;
   FEvents.OnNotify := EventsNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
+  FTableMessage.OnNotify := TableMessageNotifyEvent;
 end;
 
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -446,9 +452,7 @@ begin
       end;
       kTableMessageFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FTableMessage) then
-          FTableMessage := TPB_TableMessage.Create;
-        FTableMessage.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+        FTableMessage.Add(TPB_TableMessage.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_TableMessage;
       end;
     else
@@ -461,6 +465,7 @@ var
   pbobj1: TPB_SeatInfo;
   pbobj14: TPB_TableEvent;
   pbobj15: TPB_Pot;
+  pbobj22: TPB_TableMessage;
 begin
   if AFrom.has_TableMongoId then
     SetTableMongoId(AFrom.TableMongoId);
@@ -505,8 +510,8 @@ begin
     SetMinimumRaise(AFrom.MinimumRaise);
   if AFrom.has_TableType then
     SetTableType(AFrom.TableType);
-  if (AFrom.has_TableMessage) then
-    FTableMessage.MergeFrom(AFrom.TableMessage);
+  for pbobj22 in AFrom.TableMessage do
+    FTableMessage.Add(TPB_TableMessage.Create(pbobj22));
 end;
 
 function TPB_TableStatus.IsInitialized: Boolean;
@@ -524,8 +529,8 @@ begin
   for pbobj in Pots do
     if not pbobj.IsInitialized then
       Exit(FALSE);
-  if (has_TableMessage) then
-    if not FTableMessage.IsInitialized then
+  for pbobj in TableMessage do
+    if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
 end;
@@ -1223,8 +1228,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_TableMessage;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableMessage>;
 begin
-  FreeAndNil(FTableMessage);
+  on_notify := FTableMessage.OnNotify;
+  FTableMessage.OnNotify := nil;
+  FTableMessage.Clear;
+  FTableMessage.OnNotify := on_notify;
   clear_has_TableMessage;
 end;
 
@@ -1243,13 +1253,16 @@ begin
   _has_bits_ := _has_bits_ and not 134217728;
 end;
 
-procedure TPB_TableStatus.SetTableMessage(const AValue: TPB_TableMessage);
+procedure TPB_TableStatus.TableMessageNotifyEvent(Sender: TObject; const Item: TPB_TableMessage; Action: TCollectionNotification);
 begin
-  if not Lightweight then    Assert(not has_TableMessage);
-  FTableMessage := AValue;
-  if not Lightweight then
-    ProtobufOutput.writeMessage(kTableMessageFieldNumber, AValue.ProtobufOutput);
+  Assert(Action = cnAdded);
   set_has_TableMessage;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kTableMessageFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_TableStatus.Clear;
