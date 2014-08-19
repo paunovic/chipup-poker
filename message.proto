@@ -704,6 +704,7 @@ message TableMessage {
 	enum TableMessageType {
 		tmtClosing = 0;
 		tmtTournamentBreak = 1;
+		tmtTournamentStart = 2;
 	}
 	
 	required TableMessageType message = 1;
