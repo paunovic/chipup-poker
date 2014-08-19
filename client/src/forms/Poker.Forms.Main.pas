@@ -156,7 +156,7 @@ type
 
     procedure ModalFormClose(ASender: TObject);
 
-    procedure LogoutFlushData;
+    procedure FlushData;
     procedure UpdateClublist;
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
@@ -218,21 +218,19 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF} Poker.Sounds,
-  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
-  Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF} Poker.Sounds, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc,
+  Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
-  Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby,
-  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
-  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
-  Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
-  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
-  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart,
-  Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage;
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
+  Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings,
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs,
+  Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup,
+  Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply, Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Core,
+  Poker.Forms.HandHistory, Poker.Forms.Settings, Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member,
+  Poker.Players.Player, Poker.Avatars.AvatarList, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions,
+  Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
+  Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
+  Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -298,12 +296,7 @@ end;
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  Tables.Lock;
-  try
-    Tables.Clear;
-  finally
-    Tables.Unlock;
-  end;
+  FlushData;
   FormsContainer.CloseAllForms;
   FActionMainMenuBarFont.Free;
   FRegisteredTournamentsMap.Free;
@@ -351,7 +344,7 @@ begin
 end;
 
 
-procedure TfrmChipUpMain.LogoutFlushData;
+procedure TfrmChipUpMain.FlushData;
 begin
   FormsContainer.CloseAllForms;
   Tables.ClearWithoutNotification;
@@ -372,7 +365,7 @@ end;
 procedure TfrmChipUpMain.DoLogout;
 begin
   Application.ShowMainForm := FALSE;
-  LogoutFlushData;
+  FlushData;
   Hide;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
 end;

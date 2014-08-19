@@ -134,12 +134,9 @@ object frmTournamentLobby: TfrmTournamentLobby
       end
       object gridTablesPlayers: TcxGridColumn
         Caption = 'Players'
-        PropertiesClassName = 'TcxCurrencyEditProperties'
+        DataBinding.ValueType = 'Integer'
+        PropertiesClassName = 'TcxSpinEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.DisplayFormat = ',0.##;(,0.##)'
-        Properties.EditFormat = '$,0.##;($,0.##)'
-        Properties.UseDisplayFormatWhenEditing = True
-        Properties.UseThousandSeparator = True
         HeaderAlignmentHorz = taCenter
         Width = 69
       end
