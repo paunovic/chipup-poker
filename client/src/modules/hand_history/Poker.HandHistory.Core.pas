@@ -4,12 +4,12 @@ interface
 
 uses
   System.Classes, System.SysUtils, Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Items, Poker.Types,
-  System.Generics.Collections, System.SyncObjs;
+  System.Generics.Collections, Poker.Common.SafeMutex;
 
 type
   THandHistory = class(TObjectDictionary<TMongoId, THandHistoryItems>)
   private
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -46,7 +46,7 @@ end;
 
 constructor THandHistory.Create;
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   inherited Create([doOwnsValues]);
 end;
 
@@ -62,7 +62,7 @@ var
   hhis: THandHistoryItems;
   parentid: TMongoId;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
     begin
@@ -80,18 +80,18 @@ begin
       hhis.AddHand(pbhh);
     Exit(TRUE);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
 procedure THandHistory.Lock;
 begin
-  FLock.Enter;
+  FLock.Acquire;
 end;
 
 procedure THandHistory.Unlock;
 begin
-  FLock.Leave;
+  FLock.Release;
 end;
 
 end.

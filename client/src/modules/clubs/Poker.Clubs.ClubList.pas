@@ -3,12 +3,12 @@ unit Poker.Clubs.ClubList;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Games.Game, System.SyncObjs, Poker.Types;
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Games.Game, Poker.Common.SafeMutex, Poker.Types;
 
 type
   TClubList = class(TObjectDictionary<TMongoId, TClubInfo>)
   private
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
   public
     constructor Create;
     destructor Destroy; override;
@@ -29,7 +29,7 @@ implementation
 
 constructor TClubList.Create;
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   inherited Create([doOwnsValues]);
 end;
 
@@ -43,7 +43,7 @@ procedure TClubList.AddClub(const AProtobufObject: TPB_Club);
 var
   club: TClubInfo;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     if TryGetValue(AProtobufObject.MongoId, club) then
       club.Assign(AProtobufObject)
@@ -54,7 +54,7 @@ begin
       Add(club.MongoId, club);
     end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -86,12 +86,12 @@ end;
 
 procedure TClubList.Lock;
 begin
-  FLock.Enter;
+  FLock.Acquire;
 end;
 
 procedure TClubList.Unlock;
 begin
-  FLock.Leave;
+  FLock.Release;
 end;
 
 end.

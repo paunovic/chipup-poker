@@ -4,14 +4,14 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs,
-  Poker.Types, Poker.Protobufs.Objects.TableStatus;
+  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table,  Poker.Types,
+  Poker.Protobufs.Objects.TableStatus, Poker.Common.SafeMutex;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
     FNextTableInternalId: Integer;
   public
     class procedure Initialize;
@@ -69,7 +69,7 @@ constructor TTableList.Create;
 begin
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Tables'); {$ENDIF}
 
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   FNextTableInternalId := 0;
 
   inherited Create([doOwnsValues]);
@@ -77,11 +77,11 @@ end;
 
 destructor TTableList.Destroy;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     Clear;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
   inherited;
   FreeAndNil(FLock);
@@ -90,31 +90,31 @@ end;
 
 procedure TTableList.Lock;
 begin
-  FLock.Enter;
+  FLock.Acquire;
 end;
 
 procedure TTableList.Unlock;
 begin
-  FLock.Leave;
+  FLock.Release;
 end;
 
 procedure TTableList.Remove(const AId: Integer);
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     inherited Remove(AId);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
 procedure TTableList.Add(const AId: Integer; const ATable: TTable);
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     inherited Add(AId, ATable);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -213,14 +213,14 @@ var
   table: TTable;
 begin
   result := 0;
-  FLock.Enter;
+  FLock.Acquire;
   try
     for table in Values do
       if (table.TableType = ttLive) and
          (table.Status.IsSitting) then
         Inc(result);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -228,13 +228,13 @@ procedure TTableList.ClearWithoutNotification;
 var
   table: TTable;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for table in Values do
       table.LeaveNotify := FALSE;
     Clear;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -246,13 +246,13 @@ var
 begin
   to_remove := TList<Integer>.Create;
   try
-    FLock.Enter;
+    FLock.Acquire;
     try
       for table in Values do
         if table.ClubId = AClubId then
           to_remove.Add(table.InternalId);
     finally
-      FLock.Leave;
+      FLock.Release;
     end;
 
     for id in to_remove do
@@ -266,12 +266,12 @@ procedure TTableList.DisableAll;
 var
   table: TTable;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for table in Values do
       EnableWindow(table.Form.Handle, FALSE);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -279,12 +279,12 @@ procedure TTableList.EnableAll;
 var
   table: TTable;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for table in Values do
       EnableWindow(table.Form.Handle, TRUE);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -292,7 +292,7 @@ function TTableList.GetAndLockTable(const AMongoId: TMongoId; const ATableType: 
 var
   table: TTable;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   for table in Values do
     if (table.TableType = ATableType) and
        (table.GameId = AMongoId) then
@@ -300,17 +300,17 @@ begin
       ATable := table;
       Exit(TRUE);
     end;
-  FLock.Leave;
+  FLock.Release;
   Exit(FALSE);
 end;
 
 function TTableList.GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   result := TryGetValue(AId, ATable);
   if not result then
   begin
-    FLock.Leave;
+    FLock.Release;
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Cannot find table with internal id: %d', [AId]), ditException); {$ENDIF}
   end;
 end;
@@ -319,13 +319,13 @@ procedure TTableList.UpdateClubObject(const AClubId: TMongoId);
 var
   table: TTable;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for table in Values do
       if table.ClubId = AClubId then
         table.UpdateObjects;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 

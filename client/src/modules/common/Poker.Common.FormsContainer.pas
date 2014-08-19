@@ -3,13 +3,13 @@ unit Poker.Common.FormsContainer;
 interface
 
 uses
-  System.Generics.Collections, Vcl.Forms, System.SyncObjs, System.Classes;
+  System.Generics.Collections, Vcl.Forms, Poker.Common.SafeMutex, System.Classes;
 
 type
   TForms = TObjectList<TForm>;
   TFormsContainer = class
   private
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
     FItems: TForms;
     FStates: TList<Boolean>;
   public
@@ -104,7 +104,7 @@ end;
 
 constructor TFormsContainer.Create;
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   FItems := TForms.Create(FALSE);
   FStates := TList<Boolean>.Create;
 end;
@@ -119,11 +119,11 @@ end;
 
 procedure TFormsContainer.Add(const AForm: TForm);
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     FItems.Add(AForm);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -131,13 +131,13 @@ procedure TFormsContainer.Remove(const AForm: TForm);
 var
   index: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     index := FItems.IndexOf(AForm);
     if index >= 0 then
       FItems.Delete(index);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -153,7 +153,7 @@ function TFormsContainer.Find(const AFormClass: TFormClass; out AForm: TForm): B
 var
   form: TForm;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for form in FItems do
       if form is AFormClass then
@@ -163,7 +163,7 @@ begin
       end;
     Exit(FALSE);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -171,14 +171,14 @@ function TFormsContainer.Contains(const AFormClass: TFormClass): Boolean;
 var
   form: TForm;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for form in FItems do
       if form is AFormClass then
         Exit(TRUE);
     Exit(FALSE);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -197,13 +197,13 @@ procedure TFormsContainer.CloseAllForms;
 var
   C1: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for C1 := 0 to FItems.Count - 1 do
       FItems[C1].Close;
     FItems.Clear;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -229,12 +229,12 @@ procedure TFormsContainer.DisableAll;
 var
   C1: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for C1 := 0 to FItems.Count - 1 do
       EnableWindow(FItems[C1].Handle, FALSE);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -242,12 +242,12 @@ procedure TFormsContainer.ResetState;
 var
   C1: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for C1 := 0 to FStates.Count - 1 do
       EnableWindow(FItems[C1].Handle, FStates[C1]);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -255,13 +255,13 @@ procedure TFormsContainer.SaveState;
 var
   C1: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     FStates.Clear;
     for C1 := 0 to FItems.Count - 1 do
       FStates.Add(IsWindowEnabled(FItems[C1].Handle));
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 

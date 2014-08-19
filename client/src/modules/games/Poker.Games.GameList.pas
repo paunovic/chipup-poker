@@ -3,12 +3,12 @@ unit Poker.Games.GameList;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.Protobufs.Objects.Game, System.SyncObjs, Poker.Types;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.Protobufs.Objects.Game, Poker.Common.SafeMutex, Poker.Types;
 
 type
   TGameList = class(TObjectDictionary<TMongoId, TGameInfo>)
   private
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
   public
     constructor Create;
     destructor Destroy; override;
@@ -28,7 +28,7 @@ uses
 
 constructor TGameList.Create;
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   inherited Create([doOwnsValues]);
 end;
 
@@ -42,7 +42,7 @@ function TGameList.AddGame(const AProtobufObject: TPB_Game): TGameInfo;
 var
   game: TGameInfo;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     if TryGetValue(AProtobufObject.MongoId, game) then
       game.Assign(AProtobufObject)
@@ -55,7 +55,7 @@ begin
 
     result := game;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -67,7 +67,7 @@ var
   to_remove: TList<TMongoId>;
   mongoid: TMongoId;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     if not Assigned(AGameList) then
     begin
@@ -97,18 +97,18 @@ begin
       to_remove.Free;
     end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
 procedure TGameList.Lock;
 begin
-  FLock.Enter;
+  FLock.Acquire;
 end;
 
 procedure TGameList.Unlock;
 begin
-  FLock.Leave;
+  FLock.Release;
 end;
 
 

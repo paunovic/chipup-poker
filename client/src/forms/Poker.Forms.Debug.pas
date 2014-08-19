@@ -8,7 +8,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit, cxMemo,
   Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics,
   cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxCheckComboBox, System.SyncObjs, System.Generics.Collections, cxRadioGroup, cxCheckBox;
+  cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox, Poker.Common.SafeMutex;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
@@ -54,7 +54,7 @@ type
 
   TDebugObjects = class(TObjectDictionary<String, TDebugObject>)
   private
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
   public
     constructor Create;
     destructor Destroy; override;
@@ -610,13 +610,13 @@ var
 begin
   for C1 := 0 to ccbLogForms.Properties.Items.Count - 1 do
   begin
-    DebugObjects.FLock.Enter;
+    DebugObjects.FLock.Acquire;
     try
       for debug_object in DebugObjects.Values do
         if ccbLogForms.Properties.Items[C1].Tag = debug_object.Id then
           debug_object.Enabled := ccbLogForms.States[C1] = cbsChecked;
     finally
-      DebugObjects.FLock.Leave;
+      DebugObjects.FLock.Release;
     end;
   end;
 end;
@@ -683,7 +683,7 @@ var
   found: Boolean;
 begin
   C1 := 0;
-  DebugObjects.FLock.Enter;
+  DebugObjects.FLock.Acquire;
   try
     while C1 < ccbLogForms.Properties.Items.Count do
     begin
@@ -719,7 +719,7 @@ begin
       end;
     end;
   finally
-    DebugObjects.FLock.Leave;
+    DebugObjects.FLock.Release;
   end;
 
   ccbLogForms.Refresh;
@@ -968,7 +968,7 @@ end;
 
 constructor TDebugObjects.Create;
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   inherited Create([doOwnsValues]);
 end;
 
@@ -985,7 +985,7 @@ var
   debug_object: TDebugObject;
   enabled: Boolean;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     if TryGetValue(AName, debug_object) then
     begin
@@ -993,10 +993,10 @@ begin
       Exit(debug_object.Id);
     end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 
-  FLock.Enter;
+  FLock.Acquire;
   try
     id := 0;
     repeat
@@ -1025,7 +1025,7 @@ begin
     debug_object.Count := 1;
     DebugObjects.Add(AName, debug_object);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 
   TDebugFormObjectChange.Execute;
@@ -1037,7 +1037,7 @@ procedure TDebugObjects.UnregisterObject(const AId: Integer);
 var
   debug_object: TDebugObject;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for debug_object in DebugObjects.Values do
       if debug_object.Id = AId then
@@ -1049,7 +1049,7 @@ begin
         Break;
       end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 
   TDebugFormObjectChange.Execute;

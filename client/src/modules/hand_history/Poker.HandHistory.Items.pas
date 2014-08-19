@@ -3,7 +3,7 @@ unit Poker.HandHistory.Items;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, Poker.Common.SafeMutex, Poker.Protobufs.Objects.HandHistory,
   Poker.HandHistory.Players, Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game,
   Poker.Types, Poker.Tournaments, Poker.Tournaments.Info;
 
@@ -116,7 +116,7 @@ type
     FGame: TGameInfo;
     FClub: TClubInfo;
     FTournament: TTournamentInfo;
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
   public
     constructor Create(const AParentId, AGameId: TMongoId);
     destructor Destroy; override;
@@ -448,7 +448,7 @@ var
 begin
   inherited Create(TRUE);
 
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
 
   FParentId := AParentId;
   FGameId := AGameId;
@@ -500,7 +500,7 @@ var
   hhi: THandHistoryItem;
 begin
   result := FALSE;
-  FLock.Enter;
+  FLock.Acquire;
   for hhi in ToArray do
     if hhi.HandId = AHandId then
     begin
@@ -510,7 +510,7 @@ begin
     else
       if hhi.HandId > AHandId then
         Break;
-  FLock.Leave;
+  FLock.Release;
 end;
 
 procedure THandHistoryItems.AddHand(const AHandHistory: TPB_HandHistory);
@@ -524,33 +524,33 @@ begin
   end
   else
   begin
-    FLock.Enter;
+    FLock.Acquire;
     try
       while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
         inherited Remove(Last);
       inherited Add(THandHistoryItem.Create(self, AHandHistory));
     finally
-      FLock.Leave;
+      FLock.Release;
     end;
   end;
 end;
 
 function THandHistoryItems.LastHandId: UINT;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     if Count = 0 then
       Exit(0)
     else
       result := Last.HandId;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
 procedure THandHistoryItems.Unlock;
 begin
-  FLock.Leave;
+  FLock.Release;
 end;
 
 end.

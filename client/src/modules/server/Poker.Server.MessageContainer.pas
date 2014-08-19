@@ -3,14 +3,14 @@ unit Poker.Server.MessageContainer;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs, Poker.Server.MessageCallbacks;
+  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket, Poker.Common.SafeMutex, Poker.Server.MessageCallbacks;
 
 type
   TMessageContainer = class
   private
     FCallbackSets: TObjectList<TCallbackSet>;
     FInternalHWND: HWND;
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
 
     function GetCallbackSetsCount: Integer;
     procedure WndProc(var AMessage: TMessage);
@@ -55,19 +55,19 @@ end;
 
 constructor TMessageContainer.Create;
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   FInternalHWND := AllocateHWND(WndProc);
   FCallbackSets := TObjectList<TCallbackSet>.Create;
 end;
 
 destructor TMessageContainer.Destroy;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     FreeAndNil(FCallbackSets);
     DeallocateHWnd(FInternalHWND);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
   FreeAndNil(FLock);
 
@@ -76,11 +76,11 @@ end;
 
 function TMessageContainer.GetCallbackSetsCount: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     result := FCallbackSets.Count;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -93,7 +93,7 @@ begin
   id := 0;
   repeat
     found := FALSE;
-    FLock.Enter;
+    FLock.Acquire;
     try
       for callback_set in FCallbackSets do
         if callback_set.Id = id then
@@ -103,19 +103,19 @@ begin
           Break;
         end;
     finally
-      FLock.Leave;
+      FLock.Release;
     end;
   until not found;
 
   callback_set := TCallbackSet.Create(id, ACallbacks);
-  FLock.Enter;
+  FLock.Acquire;
   try
     if not APriority then
       FCallbackSets.Add(callback_set)
     else
       FCallbackSets.Insert(0, callback_set);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
   result := id;
 
@@ -126,7 +126,7 @@ procedure TMessageContainer.RemoveCallbacks(var AId: Integer);
 var
   callback: TCallbackSet;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for callback in FCallbackSets do
       if callback.Id = AId then
@@ -135,7 +135,7 @@ begin
         Break;
       end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
   AId := -1;
   {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
@@ -147,7 +147,7 @@ var
   callback_servermsg: TServerMessageCallback;
   obj: TObject;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for callback_set in FCallbackSets do
       for obj in callback_set do
@@ -158,7 +158,7 @@ begin
             callback_servermsg.Callback(AMethodId, AObject)
         end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 
   if Assigned(AObject) then
@@ -171,7 +171,7 @@ var
   callback_socketstatechange: TSocketStateChangeCallback;
   obj: TObject;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     for callback_set in FCallbackSets do
       for obj in callback_set do
@@ -181,7 +181,7 @@ begin
           callback_socketstatechange.Callback(AOldState, ANewState);
         end;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 

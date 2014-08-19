@@ -3,7 +3,8 @@ unit Poker.DirectX.Animations;
 interface
 
 uses
-   Winapi.Windows, System.Generics.Collections, System.Classes, Asphyre.Math, Asphyre.Timing, System.SyncObjs, Poker.DirectX.AnimationNew;
+   Winapi.Windows, System.Generics.Collections, System.Classes, Asphyre.Math, Asphyre.Timing, Poker.DirectX.AnimationNew, Poker.Common.SafeMutex,
+   System.SyncObjs;
 
 const
   ANITAG_CARD_INDEX   = 1;
@@ -18,7 +19,7 @@ type
     FWaitEvent: TEvent;
     FTiming: TAsphyreTiming;
     FAnimations: TObjectList<TDXAnimationNew>;
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
     FFPS: Integer;
     FEnabled: Boolean;
     FDXAreaSize: TPoint2px;
@@ -53,7 +54,7 @@ begin
   inherited Create(TRUE);
 
   FFPS := 30;
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   FEnabled := TRUE;
   FWaitEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
@@ -62,13 +63,13 @@ end;
 
 destructor TDXAnimations.Destroy;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     FAnimations.Free;
     FTiming.Free;
     FWaitEvent.Free;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 
   FLock.Free;
@@ -93,22 +94,22 @@ var
 begin
   time := FTiming.GetTimeValue;
   animation := TDXAnimationNew.Create(FDXAreaSize, APoints, time + AStartDelay, time + AStartDelay + ASpeed);
-  FLock.Enter;
+  FLock.Acquire;
   try
     FAnimations.Add(animation);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
   FWaitEvent.SetEvent;
 end;
 
 function TDXAnimations.GetCount: Integer;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     result := FAnimations.Count;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
@@ -118,22 +119,22 @@ var
   animation: TDXAnimationNew;
 begin
   time := FTiming.GetTimeValue;
-  FLock.Enter;
+  FLock.Acquire;
   try
     for animation in FAnimations do
       animation.Update(time, FDXAreaSize);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 
 procedure TDXAnimations.Clear;
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     FAnimations.Clear;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 end;
 

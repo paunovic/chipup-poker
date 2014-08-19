@@ -3,13 +3,13 @@ unit Poker.Common.WavePlayer;
 interface
 
 uses
-  Winapi.Windows, Winapi.DirectSound, System.SyncObjs, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer,
-  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread;
+  Winapi.Windows, Winapi.DirectSound, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer,
+  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread, Poker.Common.SafeMutex;
 
 type
   TWavePlayer = class
   private
-    FLock: TCriticalSection;
+    FLock: TSafeMutex;
     FDirectSound: IDirectSound;
     FBuffers: TObjectList<TDirectSoundBuffer>;
     FBufferNotificationThread: TDirectSoundBufferNotificationThread;
@@ -33,7 +33,7 @@ uses
 
 constructor TWavePlayer.Create(const AHandle: HWND);
 begin
-  FLock := TCriticalSection.Create;
+  FLock := TSafeMutex.Create;
   InitDirectSound(AHandle);
   FBuffers := TObjectList<TDirectSoundBuffer>.Create;
   FBufferNotificationThread := TDirectSoundBufferNotificationThread.Create;
@@ -47,11 +47,11 @@ begin
   FBufferNotificationThread.Signal;
   FBufferNotificationThread.WaitFor;
   FBufferNotificationThread.Free;
-  FLock.Enter;
+  FLock.Acquire;
   try
     FBuffers.Free;
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
   FDirectSound := nil;
   FreeAndNil(FLock);
@@ -96,11 +96,11 @@ begin
      (ds_buffer.FillBuffer) then
   begin
     FBufferNotificationThread.Add(ds_buffer, ds_buffer.PositionNotify.hEventNotify);
-    FLock.Enter;
+    FLock.Acquire;
     try
       FBuffers.Add(ds_buffer);
     finally
-      FLock.Leave;
+      FLock.Release;
     end;
     ADirectSoundBuffer := ds_buffer;
     {$IFDEF DEBUG} RefreshDebugForm([dfiSoundBuffers]); {$ENDIF}
@@ -115,11 +115,11 @@ end;
 
 procedure TWavePlayer.BufferDoneEvent(const ABuffer: TDirectSoundBuffer);
 begin
-  FLock.Enter;
+  FLock.Acquire;
   try
     FBuffers.Remove(ABuffer);
   finally
-    FLock.Leave;
+    FLock.Release;
   end;
 
   {$IFDEF DEBUG} RefreshDebugForm([dfiSoundBuffers]); {$ENDIF}

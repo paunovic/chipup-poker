@@ -365,6 +365,7 @@
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableMessage.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.SafeMutex.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

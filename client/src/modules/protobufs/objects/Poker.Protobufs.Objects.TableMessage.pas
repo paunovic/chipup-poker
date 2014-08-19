@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TTableMessageType = (tmtClosing = 0,tmtTournamentBreakAfterHand = 1,tmtTournamentBreakWaitingTables = 2,tmtTournamentBreak = 3);
+  TTableMessageType = (tmtClosing = 0,tmtTournamentBreak = 1);
 
   TPB_TableMessage = class(TProtobufBaseObject)
   private
