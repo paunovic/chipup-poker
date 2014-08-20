@@ -904,11 +904,12 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 						this.removeSuspended();
 						this.state = 'tsWinning2';
 						//this.broadcastStatus(null);
-						this.log('a');
+						this.log('doWin a');
 						this.stateMachine(function (events) {
-							this.log('b');
+							this.log('doWin b');
 							this.updateMongoState({members:true},function () {
-								this.log('c');
+								this.log('doWin c');
+								if (this.current_seat >= 0) this.startTimer(this.current_seat,0); /// FIXME?
 								this.broadcastStatus(null,true,events); // teDeal
 								release();
 							}.bind(this));
@@ -1551,7 +1552,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 	function finish(events,offset) {
 		assert(events);
 		assert.equal(typeof offset,'number');
-		this.log('sm finish %j',events);
+		this.log('sm finish %s %j',this.state,events);
 		if (this.state != 'tsWinning') {
 			this.current_seat = this.getNextSeat(this.current_seat);
 			if (this.members[this.current_seat].autoplay) {
@@ -1907,6 +1908,9 @@ Game.prototype.sittingCount = function () {
 }
 Game.prototype.setMessage = function (obj) {
 	assert.equal(this.Lock.readers,-1);
+	if (obj.duration) {
+		obj.end_time = (obj.duration*1000) + Date.now();
+	}
 	this.message.push(obj);
 	this.broadcastStatus(null,true,[]);
 };
