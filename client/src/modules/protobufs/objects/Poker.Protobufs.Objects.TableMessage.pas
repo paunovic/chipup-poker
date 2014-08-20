@@ -15,19 +15,19 @@ type
   private
     const
       kMessageFieldNumber = 1;
-      kDurationFieldNumber = 2;
+      kEndTimeFieldNumber = 2;
 
     var
       FMessage: TTableMessageType;
-      FDuration: UInt32;
+      FEndTime: UInt64;
       _has_bits_: UINT32;
 
     procedure set_has_Message;
     procedure clear_has_Message;
     procedure SetMessage(const AValue: TTableMessageType);
-    procedure set_has_Duration;
-    procedure clear_has_Duration;
-    procedure SetDuration(const AValue: UInt32);
+    procedure set_has_EndTime;
+    procedure clear_has_EndTime;
+    procedure SetEndTime(const AValue: UInt64);
 
   public
     constructor Create(const AFrom: TPB_TableMessage; const ALightweight: Boolean = FALSE); overload;
@@ -42,10 +42,10 @@ type
     procedure clear_Message;
     property Message: TTableMessageType read FMessage write SetMessage;
 
-    // optional uint32 Duration = 2;
-    function has_Duration: Boolean;
-    procedure clear_Duration;
-    property Duration: UInt32 read FDuration write SetDuration;
+    // optional uint64 EndTime = 2;
+    function has_EndTime: Boolean;
+    procedure clear_EndTime;
+    property EndTime: UInt64 read FEndTime write SetEndTime;
 
   end;
 
@@ -83,10 +83,10 @@ begin
         FMessage := TTableMessageType(AProtobufReader.readEnum);
         set_has_Message;
       end;
-      kDurationFieldNumber: begin
+      kEndTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FDuration := AProtobufReader.readUInt32;
-        set_has_Duration;
+        FEndTime := AProtobufReader.readInt64;
+        set_has_EndTime;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -97,8 +97,8 @@ procedure TPB_TableMessage.MergeFrom(const AFrom: TPB_TableMessage);
 begin
   if AFrom.has_Message then
     SetMessage(AFrom.Message);
-  if AFrom.has_Duration then
-    SetDuration(AFrom.Duration);
+  if AFrom.has_EndTime then
+    SetEndTime(AFrom.EndTime);
 end;
 
 function TPB_TableMessage.IsInitialized: Boolean;
@@ -139,35 +139,35 @@ begin
   set_has_Message;
 end;
 
-procedure TPB_TableMessage.clear_Duration;
+procedure TPB_TableMessage.clear_EndTime;
 begin
-  FDuration := 0;
-  clear_has_Duration;
+  FEndTime := 0;
+  clear_has_EndTime;
 end;
 
-function TPB_TableMessage.has_Duration: Boolean;
+function TPB_TableMessage.has_EndTime: Boolean;
 begin
   result := (_has_bits_ and 2) > 0;
 end;
 
-procedure TPB_TableMessage.set_has_Duration;
+procedure TPB_TableMessage.set_has_EndTime;
 begin
   _has_bits_ := _has_bits_ or 2;
 end;
 
-procedure TPB_TableMessage.clear_has_Duration;
+procedure TPB_TableMessage.clear_has_EndTime;
 begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_TableMessage.SetDuration(const AValue: UInt32);
+procedure TPB_TableMessage.SetEndTime(const AValue: UInt64);
 begin
   if not Lightweight then
-    Assert(not has_Duration);
-  FDuration := AValue;
+    Assert(not has_EndTime);
+  FEndTime := AValue;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kDurationFieldNumber, AValue);
-  set_has_Duration;
+    ProtobufOutput.WriteInt64(kEndTimeFieldNumber, AValue);
+  set_has_EndTime;
 end;
 
 procedure TPB_TableMessage.Clear;
@@ -176,7 +176,7 @@ begin
     Exit;
 
   clear_Message;
-  clear_Duration;
+  clear_EndTime;
 end;
 
 procedure TPB_TableMessageList.Assign(const APB_TableMessageList: TList<TPB_TableMessage>);

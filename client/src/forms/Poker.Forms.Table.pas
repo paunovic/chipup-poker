@@ -112,6 +112,7 @@ type
     procedure RendererDealerChatMessage(const AMessage: String);
     procedure RendererSoundPlay(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
     procedure RendererTimebankStarted(Sender: TObject);
+    procedure RendererUpdateHandStrength(Sender: TObject);
     procedure ConfigureActions;
     procedure AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
 
@@ -221,6 +222,7 @@ begin
     table.Renderer.OnDealerChatMessage := RendererDealerChatMessage;
     table.Renderer.OnSoundPlay := RendererSoundPlay;
     table.Renderer.OnTimebankStarted := RendererTimebankStarted;
+    table.Renderer.OnUpdateHandStrength := RendererUpdateHandStrength;
 
     table.Renderer.AddDXButton(acStandUp, @table.Renderer.Metrics.StandUpButtonBounds, TableResources.StandUpButtonNormalImage, TableResources.StandUpButtonPressedImage, nil);
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
@@ -1322,6 +1324,11 @@ begin
   finally
     Tables.Unlock;
   end;
+end;
+
+procedure TfrmTable.RendererUpdateHandStrength(Sender: TObject);
+begin
+  UpdateHandStrength;
 end;
 
 procedure TfrmTable.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);

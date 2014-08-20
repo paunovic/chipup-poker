@@ -867,7 +867,7 @@ begin
 
         case tournament_info.State of
           tnsOpen: text := 'Open';
-          tnsInProgress: text := 'In Progress';
+          tnsStarting, tnsInProgress, tnsOnBreak: text := 'Running';
           tnsCancelled: text := 'Cancelled';
         end;
         c.SetValue(rcount - 1, gridTournamentsStatus.Index, text);
@@ -1437,10 +1437,7 @@ begin
   case proto.ReplyStatus of
     tceRegisterOk, tceAlreadyRegistered: begin
       if not dmMain.SelfInfo.RegisteredTournaments.Contains(proto.MongoId) then
-      begin
         dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
-        Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, 1);
-      end;
       UpdateTournamentList;
       UpdateTournamentActions;
     end;
@@ -1448,7 +1445,6 @@ begin
     tceRegisterFailed: ShowWarningDialog('Tournament registration failed');
     tceUnregisterOk: begin
       dmMain.SelfInfo.RegisteredTournaments.Remove(proto.MongoId);
-      Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, -1);
       UpdateTournamentList;
       UpdateTournamentActions;
     end;

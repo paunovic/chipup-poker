@@ -236,6 +236,68 @@ object frmTournamentLobby: TfrmTournamentLobby
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object lbsCurrentBlindLevel: TcxLabel
+      Left = 8
+      Top = 100
+      Caption = 'Current blinds:'
+      ParentFont = False
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Arial'
+      Style.Font.Style = [fsBold]
+      Style.TextColor = 10132122
+      Style.IsFontAssigned = True
+      Properties.Alignment.Horz = taLeftJustify
+      Transparent = True
+      Visible = False
+    end
+    object lbvCurrentBlindLevel: TcxLabel
+      Left = 95
+      Top = 100
+      Caption = '      '
+      ParentFont = False
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Arial'
+      Style.Font.Style = [fsBold]
+      Style.TextColor = 10132122
+      Style.IsFontAssigned = True
+      Properties.Alignment.Horz = taLeftJustify
+      Transparent = True
+      Visible = False
+    end
+    object lbsTournamentState: TcxLabel
+      Left = 8
+      Top = 82
+      Caption = 'Tournament state:'
+      ParentFont = False
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Arial'
+      Style.Font.Style = [fsBold]
+      Style.TextColor = 10132122
+      Style.IsFontAssigned = True
+      Properties.Alignment.Horz = taLeftJustify
+      Transparent = True
+    end
+    object lbvTournamentState: TcxLabel
+      Left = 115
+      Top = 82
+      Caption = '      '
+      ParentFont = False
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Arial'
+      Style.Font.Style = [fsBold]
+      Style.TextColor = 10132122
+      Style.IsFontAssigned = True
+      Properties.Alignment.Horz = taLeftJustify
+      Transparent = True
+    end
   end
   object gridAllPlayers: TcxGrid
     Left = 402
@@ -326,6 +388,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
       Styles.Inactive = dmMain.styleInactiveCell
+      Styles.OnGetContentStyle = gridBlindsTableStylesGetContentStyle
       object gridBlindsTLevel: TcxGridColumn
         Caption = 'Level'
         DataBinding.ValueType = 'Integer'
@@ -355,8 +418,8 @@ object frmTournamentLobby: TfrmTournamentLobby
     end
   end
   object StyleRepository: TcxStyleRepository
-    Left = 56
-    Top = 60
+    Left = 668
+    Top = 68
     PixelsPerInch = 96
     object stylePlayersSelf: TcxStyle
       AssignedValues = [svColor]
@@ -364,11 +427,15 @@ object frmTournamentLobby: TfrmTournamentLobby
     end
     object stylePlayersOther: TcxStyle
     end
+    object styleActiveBlindLevel: TcxStyle
+      AssignedValues = [svColor]
+      Color = 6175255
+    end
   end
   object alTournamentLobby: TActionList
     State = asSuspended
-    Left = 176
-    Top = 60
+    Left = 788
+    Top = 68
     object acRegister: TAction
       Caption = 'REGISTER'
       Enabled = False
@@ -381,5 +448,12 @@ object frmTournamentLobby: TfrmTournamentLobby
       Visible = False
       OnExecute = acUnregisterExecute
     end
+  end
+  object tiGUIUpdate: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tiGUIUpdateTimer
+    Left = 724
+    Top = 432
   end
 end

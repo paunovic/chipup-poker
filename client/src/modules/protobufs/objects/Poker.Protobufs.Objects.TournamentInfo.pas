@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds;
 
 type
-  TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2);
+  TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2,tnsOnBreak = 3,tnsStarting = 4);
 
   TPB_TournamentInfo = class(TProtobufBaseObject)
   private
@@ -31,6 +31,8 @@ type
       kStateFieldNumber = 14;
       kGamesFieldNumber = 15;
       kBlindStructureFieldNumber = 16;
+      kCurrentBlindLevelFieldNumber = 17;
+      kCurrentBlindLevelEndTimeFieldNumber = 18;
 
     var
       FId: TMongoId;
@@ -49,6 +51,8 @@ type
       FState: TTournamentState;
       FGames: TList<TPB_Game>;
       FBlindStructure: TList<TPB_GameBlinds>;
+      FCurrentBlindLevel: UInt32;
+      FCurrentBlindLevelEndTime: UInt64;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -96,6 +100,12 @@ type
     procedure clear_has_Games;
     procedure set_has_BlindStructure;
     procedure clear_has_BlindStructure;
+    procedure set_has_CurrentBlindLevel;
+    procedure clear_has_CurrentBlindLevel;
+    procedure SetCurrentBlindLevel(const AValue: UInt32);
+    procedure set_has_CurrentBlindLevelEndTime;
+    procedure clear_has_CurrentBlindLevelEndTime;
+    procedure SetCurrentBlindLevelEndTime(const AValue: UInt64);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
     procedure BlindStructureNotifyEvent(Sender: TObject; const Item: TPB_GameBlinds; Action: TCollectionNotification);
@@ -191,6 +201,16 @@ type
     function has_BlindStructure: Boolean;
     procedure clear_BlindStructure;
     property BlindStructure: TList<TPB_GameBlinds> read FBlindStructure;
+
+    // optional uint32 CurrentBlindLevel = 17;
+    function has_CurrentBlindLevel: Boolean;
+    procedure clear_CurrentBlindLevel;
+    property CurrentBlindLevel: UInt32 read FCurrentBlindLevel write SetCurrentBlindLevel;
+
+    // optional uint64 CurrentBlindLevelEndTime = 18;
+    function has_CurrentBlindLevelEndTime: Boolean;
+    procedure clear_CurrentBlindLevelEndTime;
+    property CurrentBlindLevelEndTime: UInt64 read FCurrentBlindLevelEndTime write SetCurrentBlindLevelEndTime;
 
   end;
 
@@ -334,6 +354,16 @@ begin
         FBlindStructure.Add(TPB_GameBlinds.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_BlindStructure;
       end;
+      kCurrentBlindLevelFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCurrentBlindLevel := AProtobufReader.readUInt32;
+        set_has_CurrentBlindLevel;
+      end;
+      kCurrentBlindLevelEndTimeFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCurrentBlindLevelEndTime := AProtobufReader.readInt64;
+        set_has_CurrentBlindLevelEndTime;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -377,6 +407,10 @@ begin
     FGames.Add(TPB_Game.Create(pbobj14));
   for pbobj15 in AFrom.BlindStructure do
     FBlindStructure.Add(TPB_GameBlinds.Create(pbobj15));
+  if AFrom.has_CurrentBlindLevel then
+    SetCurrentBlindLevel(AFrom.CurrentBlindLevel);
+  if AFrom.has_CurrentBlindLevelEndTime then
+    SetCurrentBlindLevelEndTime(AFrom.CurrentBlindLevelEndTime);
 end;
 
 function TPB_TournamentInfo.IsInitialized: Boolean;
@@ -918,6 +952,68 @@ begin
   end;
 end;
 
+procedure TPB_TournamentInfo.clear_CurrentBlindLevel;
+begin
+  FCurrentBlindLevel := 0;
+  clear_has_CurrentBlindLevel;
+end;
+
+function TPB_TournamentInfo.has_CurrentBlindLevel: Boolean;
+begin
+  result := (_has_bits_ and 65536) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_CurrentBlindLevel;
+begin
+  _has_bits_ := _has_bits_ or 65536;
+end;
+
+procedure TPB_TournamentInfo.clear_has_CurrentBlindLevel;
+begin
+  _has_bits_ := _has_bits_ and not 65536;
+end;
+
+procedure TPB_TournamentInfo.SetCurrentBlindLevel(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_CurrentBlindLevel);
+  FCurrentBlindLevel := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kCurrentBlindLevelFieldNumber, AValue);
+  set_has_CurrentBlindLevel;
+end;
+
+procedure TPB_TournamentInfo.clear_CurrentBlindLevelEndTime;
+begin
+  FCurrentBlindLevelEndTime := 0;
+  clear_has_CurrentBlindLevelEndTime;
+end;
+
+function TPB_TournamentInfo.has_CurrentBlindLevelEndTime: Boolean;
+begin
+  result := (_has_bits_ and 131072) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_CurrentBlindLevelEndTime;
+begin
+  _has_bits_ := _has_bits_ or 131072;
+end;
+
+procedure TPB_TournamentInfo.clear_has_CurrentBlindLevelEndTime;
+begin
+  _has_bits_ := _has_bits_ and not 131072;
+end;
+
+procedure TPB_TournamentInfo.SetCurrentBlindLevelEndTime(const AValue: UInt64);
+begin
+  if not Lightweight then
+    Assert(not has_CurrentBlindLevelEndTime);
+  FCurrentBlindLevelEndTime := AValue;
+  if not Lightweight then
+    ProtobufOutput.WriteInt64(kCurrentBlindLevelEndTimeFieldNumber, AValue);
+  set_has_CurrentBlindLevelEndTime;
+end;
+
 procedure TPB_TournamentInfo.Clear;
 begin
   if _has_bits_ = 0 then
@@ -939,6 +1035,8 @@ begin
   clear_State;
   clear_Games;
   clear_BlindStructure;
+  clear_CurrentBlindLevel;
+  clear_CurrentBlindLevelEndTime;
 end;
 
 procedure TPB_TournamentInfoList.Assign(const APB_TournamentInfoList: TList<TPB_TournamentInfo>);

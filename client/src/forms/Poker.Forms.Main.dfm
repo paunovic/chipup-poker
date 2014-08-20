@@ -4656,7 +4656,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object styleTournamentInProgress: TcxStyle
       AssignedValues = [svColor]
-      Color = 4919830
+      Color = 6175255
     end
     object styleTournamentCancelled: TcxStyle
       AssignedValues = [svColor]

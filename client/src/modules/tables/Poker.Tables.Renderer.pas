@@ -60,6 +60,7 @@ type
     FOnDealerChatMessage: TDealerChatMessageEvent;
     FOnSoundPlay: TSoundPlayEvent;
     FOnTimebankStarted: TNotifyEvent;
+    FOnUpdateHandStrength: TNotifyEvent;
     FRaiseThumbDown: Boolean;
 
     FPots: TPB_PotList;
@@ -137,6 +138,7 @@ type
     property OnDealerChatMessage: TDealerChatMessageEvent read FOnDealerChatMessage write FOnDealerChatMessage;
     property OnSoundPlay: TSoundPlayEvent read FOnSoundPlay write FOnSoundPlay;
     property OnTimebankStarted: TNotifyEvent read FOnTimebankStarted write FOnTimebankStarted;
+    property OnUpdateHandStrength: TNotifyEvent read FOnUpdateHandStrength write FOnUpdateHandStrength;
 
     function AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage; const ARenderActionCaption: Boolean = FALSE; const AFontScale: Single = 1): Integer;
     function GetDXButton(const AId: Integer): TDXButton;
@@ -1427,6 +1429,9 @@ begin
         Tables.Unlock;
       end;
       FDealAnimations.Remove(animation.Id);
+      if (FDealAnimations.Count = 0) and
+         (Assigned(FOnUpdateHandStrength)) then
+        FOnUpdateHandStrength(self);
     end;
   end;
 

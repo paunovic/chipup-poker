@@ -19,7 +19,6 @@ type
 
     function GetAndLock(const AId: TMongoId; out ATournament: TTournamentInfo): Boolean;
     function GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TPB_Game): Boolean;
-    function AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
 
     procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
     procedure Assign(const ATournamentList: TPB_TournamentList); overload;
@@ -58,8 +57,8 @@ end;
 
 destructor TTournamentList.Destroy;
 begin
-  FLock.Free;
   inherited;
+  FLock.Free;
 end;
 
 procedure TTournamentList.Lock;
@@ -69,8 +68,7 @@ end;
 
 procedure TTournamentList.Unlock;
 begin
-  if not FLock.Release then
-    OutputDebugString('!');
+  FLock.Release;
 end;
 
 procedure TTournamentList.Clear;
@@ -80,25 +78,6 @@ begin
     inherited Clear;
   finally
     FLock.Release;
-  end;
-end;
-
-function TTournamentList.AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
-var
-  tournament: TTournamentInfo;
-  reg_players: Integer;
-begin
-  result := FALSE;
-  if GetAndLock(AId, tournament) then
-  try
-    reg_players := tournament.RegisteredPlayers;
-    Inc(reg_players, AAdjustment);
-    if reg_players < 0 then
-      reg_players := 0;
-    tournament.RegisteredPlayers := reg_players;
-    result := TRUE;
-  finally
-    Unlock;
   end;
 end;
 
