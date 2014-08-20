@@ -709,5 +709,5 @@ message TableMessage {
 	}
 	
 	required TableMessageType message = 1;
-	optional uint32 duration = 2;
+	optional uint32 end_time = 2;
 }
