@@ -653,6 +653,8 @@ message TournamentInfo {
 		tnsOpen = 0;
 		tnsInProgress = 1;
 		tnsCancelled = 2;
+		tnsOnBreak = 3;
+		tnsStarting = 4;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
@@ -672,7 +674,6 @@ message TournamentInfo {
 	repeated GameBlinds blind_structure = 16;
 	optional uint32 current_blind_level = 17;
 	optional uint64 current_blind_level_end_time = 18;
-	optional bool on_break = 19;
 }
 
 message TournamentCommandParams {
