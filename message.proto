@@ -672,6 +672,7 @@ message TournamentInfo {
 	repeated GameBlinds blind_structure = 16;
 	optional uint32 current_blind_level = 17;
 	optional uint64 current_blind_level_end_time = 18;
+	optional bool on_break = 19;
 }
 
 message TournamentCommandParams {
