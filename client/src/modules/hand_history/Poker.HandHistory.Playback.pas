@@ -225,7 +225,7 @@ begin
       for player in AHandHistoryItem.Players do
       begin
         pbseat := TPB_SeatInfo.Create;
-        pbseat.Seat := player.Seat;
+        pbseat.SeatIndex := player.Seat;
         pbseat.PlayerMongoId := player.MongoId;
         pbseat.Chips := current_player_chips[player.Seat];
         if (dmMain.SelfInfo.MongoId = player.MongoId) or

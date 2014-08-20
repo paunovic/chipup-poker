@@ -247,9 +247,9 @@ begin
     for hhis in HandHistory.Values do
     begin
       if hhis.Game.Tournament.IsEmpty then
-        table_name := Format('Tournament %s (%d-max) - %s', [hhis.Game.Gamename, hhis.Game.Seats, hhis.Club.Name])
+        table_name := Format('%s (%d-max) - %s', [hhis.Game.Gamename, hhis.Game.Seats, hhis.Club.Name])
       else
-        table_name := Format('%s, table #%s', [hhis.Tournament.Name, hhis.Game.Gamename]);
+        table_name := Format('Tournament %s, table #%s', [hhis.Tournament.Name, hhis.Game.Gamename]);
       if C1 >= cbTable.Properties.Items.Count then
         cbTable.Properties.Items.Add(table_name)
       else

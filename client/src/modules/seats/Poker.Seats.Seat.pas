@@ -3,26 +3,18 @@ unit Poker.Seats.Seat;
 interface
 
 uses
-  System.SysUtils, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Players.Player, Poker.Types;
+  System.SysUtils, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Players.Player;
 
 type
-  TSeatInfo = class
+  TSeatInfo = class(TPB_SeatInfo)
   private
-    FSeatIndex: Integer;
-    FPlayerMongoId: TMongoId;
     FPreviousChips: UINT32;
-    FChips: UINT32;
-    FCardCount: Integer;
     FCards: TCards;
     FDealtCards: Integer;
-    FStatus: TPlayerStatus;
     FUpperCaption: String;
     FLowerCaption: String;
-    FTimebank: UINT32;
-    FCardsVisible: Boolean;
-    FCanShow: Boolean;
-    FDisconnected: Boolean;
-    FAutoPlay: Boolean;
+    FLastDisconnectedBlink: TDateTime;
+    FShowDisconnectedLabel: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -30,25 +22,13 @@ type
     procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo); overload;
     procedure Assign(const ASeatInfo: TSeatInfo); overload;
 
-    procedure ResetDealtCards;
-    procedure IncDealtCards;
-    procedure FillDealtCards;
-
-    property SeatIndex: Integer read FSeatIndex;
-    property PlayerMongoId: TMongoId read FPlayerMongoId;
-    property PreviousChips: UINT32 read FPreviousChips;
-    property Chips: UINT32 read FChips;
-    property CardCount: Integer read FCardCount;
     property Cards: TCards read FCards;
-    property Status: TPlayerStatus read FStatus;
+    property PreviousChips: UINT32 read FPreviousChips;
+    property DealtCards: Integer read FDealtCards write FDealtCards;
     property UpperCaption: String read FUpperCaption write FUpperCaption;
     property LowerCaption: String read FLowerCaption write FLowerCaption;
-    property Timebank: UINT32 read FTimeBank;
-    property DealtCards: Integer read FDealtCards;
-    property CardsVisible: Boolean read FCardsVisible write FCardsVisible;
-    property Disconnected: Boolean read FDisconnected;
-    property CanShow: Boolean read FCanShow;
-    property AutoPlay: Boolean read FAutoPlay;
+    property LastDisconnectedBlink: TDateTime read FLastDisconnectedBlink write FLastDisconnectedBlink;
+    property ShowDisconnectedLabel: Boolean read FShowDisconnectedLabel write FShowDisconnectedLabel;
   end;
 
 implementation
@@ -58,67 +38,57 @@ implementation
 
 constructor TSeatInfo.Create;
 begin
+  inherited Create(TRUE);
   FCards := TCards.Create;
 end;
 
 destructor TSeatInfo.Destroy;
 begin
   FCards.Free;
-
   inherited;
 end;
 
 procedure TSeatInfo.Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
 begin
-  FSeatIndex := ASeatInfoProtobuf.Seat;
-  FPlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
-  FPreviousChips := FChips;
-  FChips := ASeatInfoProtobuf.Chips;
-  FCardCount := ASeatInfoProtobuf.CardCount;
-  FCards.Assign(ASeatInfoProtobuf.Cards);
-  FStatus := ASeatInfoProtobuf.Status;
-  FTimeBank := ASeatInfoProtobuf.Timebank;
-  FCardsVisible := ASeatInfoProtobuf.CardsVisible;
-  FDisconnected := ASeatInfoProtobuf.Disconnected;
-  FCanShow := ASeatInfoProtobuf.CanShow;
-  FAutoPlay := ASeatInfoProtobuf.Autoplay;
+  SeatIndex := ASeatInfoProtobuf.SeatIndex;
+  PlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
+  FPreviousChips := Chips;
+  Chips := ASeatInfoProtobuf.Chips;
+  CardCount := ASeatInfoProtobuf.CardCount;
+  Cards.Assign(ASeatInfoProtobuf.Cards);
+  Status := ASeatInfoProtobuf.Status;
+  TimeBank := ASeatInfoProtobuf.Timebank;
+  CardsVisible := ASeatInfoProtobuf.CardsVisible;
+  Disconnected := ASeatInfoProtobuf.Disconnected;
+  if not Disconnected then
+    FShowDisconnectedLabel := FALSE;
+  CanShow := ASeatInfoProtobuf.CanShow;
+  AutoPlay := ASeatInfoProtobuf.Autoplay;
 end;
 
 procedure TSeatInfo.Assign(const ASeatInfo: TSeatInfo);
 var
   C1: Integer;
 begin
-  FSeatIndex := ASeatInfo.FSeatIndex;
-  FPlayerMongoId := ASeatInfo.FPlayerMongoId;
-  FPreviousChips := ASeatInfo.FPreviousChips;
-  FChips := ASeatInfo.FChips;
-  FCardCount := ASeatInfo.FCardCount;
-  FCards.Clear;
+  SeatIndex := ASeatInfo.SeatIndex;
+  PlayerMongoId := ASeatInfo.PlayerMongoId;
+  FPreviousChips := ASeatInfo.PreviousChips;
+  Chips := ASeatInfo.Chips;
+  CardCount := ASeatInfo.CardCount;
+  Cards.Clear;
   for C1 := 0 to ASeatInfo.FCards.Count - 1 do
-    FCards.Add(TCard.Create(ASeatInfo.FCards[C1].Value, ASeatInfo.FCards[C1].Suit));
-  FStatus := ASeatInfo.FStatus;
-  FTimeBank := ASeatInfo.FTimebank;
-  FCardsVisible := ASeatInfo.FCardsVisible;
-  FDisconnected := ASeatInfo.Disconnected;
-  FCanShow := ASeatInfo.FCanShow;
+    Cards.Add(TCard.Create(ASeatInfo.FCards[C1].Value, ASeatInfo.FCards[C1].Suit));
+  Status := ASeatInfo.Status;
+  TimeBank := ASeatInfo.Timebank;
+  CardsVisible := ASeatInfo.CardsVisible;
+  Disconnected := ASeatInfo.Disconnected;
+  CanShow := ASeatInfo.CanShow;
   FDealtCards := ASeatInfo.DealtCards;
-  FAutoPlay := ASeatInfo.Autoplay;
+  AutoPlay := ASeatInfo.Autoplay;
+  FUpperCaption := ASeatInfo.UpperCaption;
+  FLowerCaption := ASeatInfo.LowerCaption;
+  FLastDisconnectedBlink := ASeatInfo.LastDisconnectedBlink;
+  FShowDisconnectedLabel := ASeatInfo.ShowDisconnectedLabel;
 end;
-
-procedure TSeatInfo.IncDealtCards;
-begin
-  Inc(FDealtCards);
-end;
-
-procedure TSeatInfo.ResetDealtCards;
-begin
-  FDealtCards := 0;
-end;
-
-procedure TSeatInfo.FillDealtCards;
-begin
-  FDealtCards := FCardCount;
-end;
-
 
 end.

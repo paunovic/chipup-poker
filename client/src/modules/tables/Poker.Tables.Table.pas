@@ -372,7 +372,7 @@ begin
   if not FFirstStatusSet then
   begin
     for C1 := 0 to FStatus.Seats.Count - 1 do
-      FStatus.Seats[C1].FillDealtCards;
+      FStatus.Seats[C1].DealtCards := FStatus.Seats[C1].CardCount;
 
     if FStatus.State in [tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2] then
       FRenderer.FlopAnimated := TRUE;

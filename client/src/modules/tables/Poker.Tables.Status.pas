@@ -258,7 +258,7 @@ begin
     begin
       delete := TRUE;
       for C2 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
-        if ATableStatusProtobuf.Seats[C2].Seat = FSeats[C1].SeatIndex then
+        if ATableStatusProtobuf.Seats[C2].SeatIndex = FSeats[C1].SeatIndex then
         begin
           delete := FALSE;
           Break;
@@ -274,7 +274,7 @@ begin
     begin
       seat := nil;
       for C2 := 0 to FSeats.Count - 1 do
-        if FSeats[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].Seat then
+        if FSeats[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].SeatIndex then
         begin
           seat := FSeats[C2];
           Break;

@@ -1,6 +1,7 @@
 object frmTournamentLobby: TfrmTournamentLobby
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Tournament Lobby'
   ClientHeight = 593

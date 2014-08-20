@@ -14,7 +14,7 @@ type
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
     const
-      kSeatFieldNumber = 1;
+      kSeatIndexFieldNumber = 1;
       kPlayerMongoIdFieldNumber = 2;
       kChipsFieldNumber = 3;
       kCardCountFieldNumber = 4;
@@ -27,7 +27,7 @@ type
       kAutoplayFieldNumber = 11;
 
     var
-      FSeat: Integer;
+      FSeatIndex: Integer;
       FPlayerMongoId: TMongoId;
       FChips: UInt32;
       FCardCount: Integer;
@@ -40,9 +40,9 @@ type
       FAutoplay: Boolean;
       _has_bits_: UINT32;
 
-    procedure set_has_Seat;
-    procedure clear_has_Seat;
-    procedure SetSeat(const AValue: Integer);
+    procedure set_has_SeatIndex;
+    procedure clear_has_SeatIndex;
+    procedure SetSeatIndex(const AValue: Integer);
     procedure set_has_PlayerMongoId;
     procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TMongoId);
@@ -82,10 +82,10 @@ type
     procedure Clear;
     function IsInitialized: Boolean; override;
 
-    // required int32 Seat = 1;
-    function has_Seat: Boolean;
-    procedure clear_Seat;
-    property Seat: Integer read FSeat write SetSeat;
+    // required int32 SeatIndex = 1;
+    function has_SeatIndex: Boolean;
+    procedure clear_SeatIndex;
+    property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
 
     // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
@@ -168,10 +168,10 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      kSeatFieldNumber: begin
+      kSeatIndexFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSeat := AProtobufReader.readInt32;
-        set_has_Seat;
+        FSeatIndex := AProtobufReader.readInt32;
+        set_has_SeatIndex;
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -230,8 +230,8 @@ end;
 
 procedure TPB_SeatInfo.MergeFrom(const AFrom: TPB_SeatInfo);
 begin
-  if AFrom.has_Seat then
-    SetSeat(AFrom.Seat);
+  if AFrom.has_SeatIndex then
+    SetSeatIndex(AFrom.SeatIndex);
   if AFrom.has_PlayerMongoId then
     SetPlayerMongoId(AFrom.PlayerMongoId);
   if AFrom.has_Chips then
@@ -261,35 +261,35 @@ begin
   Exit(TRUE);
 end;
 
-procedure TPB_SeatInfo.clear_Seat;
+procedure TPB_SeatInfo.clear_SeatIndex;
 begin
-  FSeat := 0;
-  clear_has_Seat;
+  FSeatIndex := 0;
+  clear_has_SeatIndex;
 end;
 
-function TPB_SeatInfo.has_Seat: Boolean;
+function TPB_SeatInfo.has_SeatIndex: Boolean;
 begin
   result := (_has_bits_ and 1) > 0;
 end;
 
-procedure TPB_SeatInfo.set_has_Seat;
+procedure TPB_SeatInfo.set_has_SeatIndex;
 begin
   _has_bits_ := _has_bits_ or 1;
 end;
 
-procedure TPB_SeatInfo.clear_has_Seat;
+procedure TPB_SeatInfo.clear_has_SeatIndex;
 begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
+procedure TPB_SeatInfo.SetSeatIndex(const AValue: Integer);
 begin
   if not Lightweight then
-    Assert(not has_Seat);
-  FSeat := AValue;
+    Assert(not has_SeatIndex);
+  FSeatIndex := AValue;
   if not Lightweight then
-    ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
-  set_has_Seat;
+    ProtobufOutput.writeInt32(kSeatIndexFieldNumber, AValue);
+  set_has_SeatIndex;
 end;
 
 procedure TPB_SeatInfo.clear_PlayerMongoId;
@@ -611,7 +611,7 @@ begin
   if _has_bits_ = 0 then
     Exit;
 
-  clear_Seat;
+  clear_SeatIndex;
   clear_PlayerMongoId;
   clear_Chips;
   clear_CardCount;

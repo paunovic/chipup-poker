@@ -303,6 +303,7 @@ begin
         stack_players := 0;
         smallest_stack := 0;
         largest_stack := 0;
+        avg_stack := 0;
         for member in tournament.Players do
           if member.Gameid = game.MongoId then
           begin
@@ -314,7 +315,8 @@ begin
               largest_stack := member.Chips;
             Inc(stack_players);
           end;
-        avg_stack := total_stack div stack_players;
+        if stack_players > 0 then
+          avg_stack := total_stack div stack_players;
 
         c.SetValue(rec_count - 1, gridTablesSmallestStack.Index, smallest_stack / 100);
         c.SetValue(rec_count - 1, gridTablesAverageStack.Index, avg_stack / 100);

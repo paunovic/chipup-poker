@@ -150,7 +150,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.DirectX.Core, Poker.Tables.Resources, Asphyre.Canvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
-  Poker.Common.Misc, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
+  Poker.Common.Misc, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation, System.DateUtils,
   Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table,
   Poker.Clubs.Member;
@@ -524,8 +524,16 @@ begin
         avatar := Avatars.DefaultAvatar;
       end;
 
+      // make seat blink text to blnk if its disconnected
+      if (seat_info.Disconnected) and
+         (MilliSecondsBetween(Now, seat_info.LastDisconnectedBlink) > 1200) then
+      begin
+        seat_info.ShowDisconnectedLabel := not seat_info.ShowDisconnectedLabel;
+        seat_info.LastDisconnectedBlink := Now;
+      end;
+
       // set seat lower text
-      if seat_info.Disconnected then
+      if seat_info.ShowDisconnectedLabel then
       begin
         seat_lower_text := 'Disconnected';
         seat_lower_text_color := cColor2($FFFF3535);
@@ -1414,7 +1422,7 @@ begin
       if Tables.GetAndLockTable(FInternalId, table) then
       try
         if table.Status.GetSeatInfo(seat_index, seat) then
-          seat.IncDealtCards;
+          seat.DealtCards := seat.DealtCards + 1;
       finally
         Tables.Unlock;
       end;
@@ -1521,7 +1529,7 @@ begin
       repeat
         if table.Status.GetSeatInfo(C1, seat) then
         begin
-          seat.ResetDealtCards;
+          seat.DealtCards := 0;
           if seat.CardCount > card_index then
           begin
             animation := DXTimer.AddAnimation(FInternalHWND,

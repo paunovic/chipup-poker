@@ -29,6 +29,7 @@ type
 
     procedure LoadFonts;
     function GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
+    procedure ProcessPlayerObject(const ALoginReply: TPB_LoginReply);
   public
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
     procedure ProcessReconnectedTables;
@@ -67,7 +68,7 @@ uses
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About, Poker.Clubs.Member,
   Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments, Poker.Games.Game, Poker.Tournaments.Info;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -227,6 +228,7 @@ begin
   Players.LoadFromUsersProtobuf(ALoginReply.Users);
   Tournaments.Assign(ALoginReply.TournamentInfos);
   FSelfInfo.LoadFromLoginReply(ALoginReply);
+  ProcessPlayerObject(ALoginReply);
   UpdateSelfInfoInPlayers;
 
   FSelfInfo.RegisteredTournaments.Clear;
@@ -245,6 +247,107 @@ begin
       end;
   finally
     mstream.Free;
+  end;
+end;
+
+procedure TdmMain.ProcessPlayerObject(const ALoginReply: TPB_LoginReply);
+var
+  club: TClubInfo;
+  pbclub: TPB_Club;
+  pbgame: TPB_Game;
+  tables_close: TObjectList<TTable>;
+  game: TGameInfo;
+  table: TTable;
+  found: Boolean;
+  to_remove: TList<TMongoId>;
+  mongoid: TMongoId;
+  tournament: TTournamentInfo;
+begin
+  to_remove := TList<TMongoId>.Create;
+  try
+    dmMain.SelfInfo.Clubs.Lock;
+    try
+      for club in dmMain.SelfInfo.Clubs.Values do
+      begin
+        found := FALSE;
+        for pbclub in ALoginReply.Clubs do
+          if pbclub.MongoId = club.MongoId then
+          begin
+            club.Assign(pbclub);
+            found := TRUE;
+            Break;
+          end;
+
+        if not found then
+          to_remove.Add(club.Mongoid);
+      end;
+    finally
+      dmMain.SelfInfo.Clubs.Unlock;
+    end;
+
+    for mongoid in to_remove do
+    begin
+      dmMain.SelfInfo.Clubs.Lock;
+      try
+        if dmMain.SelfInfo.Clubs.ContainsKey(mongoid) then
+        begin
+          Tables.CloseTablesForClub(mongoid);
+          dmMain.SelfInfo.Clubs.Remove(mongoid);
+        end;
+      finally
+        dmMain.SelfInfo.Clubs.Unlock;
+      end;
+    end;
+
+    for pbclub in ALoginReply.Clubs do
+    begin
+      dmMain.SelfInfo.Clubs.Lock;
+      try
+        if not dmMain.SelfInfo.Clubs.ContainsKey(pbclub.MongoId) then
+          dmMain.SelfInfo.Clubs.AddClub(pbclub);
+      finally
+        dmMain.SelfInfo.Clubs.Unlock;
+      end;
+    end;
+
+    for pbgame in ALoginReply.Games do
+    begin
+      if dmMain.SelfInfo.Clubs.GetAndLock(pbgame.ClubMongoid, club) then
+      try
+        club.Games.AddGame(pbgame);
+      finally
+        dmMain.SelfInfo.Clubs.Unlock;
+      end;
+
+      if Tournaments.GetAndLock(pbgame.Tournament, tournament) then
+      try
+        tournament.AddGame(pbgame);
+      finally
+        Tournaments.Unlock;
+      end;
+    end;
+
+    tables_close := TObjectList<TTable>.Create(FALSE);
+    try
+      Tables.Lock;
+      try
+        for table in Tables.Values do
+          if (not dmMain.SelfInfo.Clubs.GetAndLockByGame(table.GameId, club, game)) or
+             (not Tournaments.GetAndLockByGame(table.GameId, tournament, pbgame)) then
+            tables_close.Add(table)
+          else
+            dmMain.SelfInfo.Clubs.Unlock;
+      finally
+        Tables.Unlock;
+      end;
+
+      for table in tables_close do
+        Tables.Remove(table.InternalId);
+    finally
+      tables_close.Free;
+    end;
+  finally
+    to_remove.Free;
   end;
 end;
 
@@ -283,8 +386,14 @@ begin
     to_remove_iid := TList<Integer>.Create;
     try
       for mongoid in to_remove do
-        if Tables.GetAndLockTable(mongoid, ttLive, table) then
+        if (Tables.GetAndLockTable(mongoid, ttLive, table)) or
+           (Tables.GetAndLockTable(mongoid, ttTournament, table)) then
+        try
           to_remove_iid.Add(table.InternalId);
+        finally
+          Tables.Unlock;
+        end;
+
       for C1 := 0 to to_remove_iid.Count - 1 do
         Tables.Remove(to_remove_iid[C1]);
     finally
