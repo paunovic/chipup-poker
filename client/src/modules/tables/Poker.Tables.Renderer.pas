@@ -155,7 +155,7 @@ uses
   Poker.Common.Misc, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation, System.DateUtils,
   Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table,
-  Poker.Clubs.Member, Poker.Protobufs.Objects.TableMessage, Poker.Server.Socket;
+  Poker.Clubs.Member, Poker.Protobufs.Objects.TableMessage, Poker.Server.Socket, Poker.Tournaments, Poker.Tournaments.Info;
 
 { TTableRenderer }
 
@@ -826,16 +826,18 @@ end;
 procedure TTableRenderer.RenderTableMessages(const AGame: TGameInfo);
 var
   mins: Integer;
-  minute_text: String;
   txt: String;
   table: TTable;
   min_end_time: UINT64;
-  duration, gtc: UINT32;
+  seconds_until_next_level, current_level_end_time, duration, gtc: UINT32;
   tmessage, render_tmessage: TPB_TableMessage;
+  tournament: TTournamentInfo;
 begin
   txt := '';
   if Tables.GetAndLockTable(FInternalId, table) then
   try
+    gtc := GetTickCount;
+
     min_end_time := 0;
     render_tmessage := nil;
     for tmessage in table.Status.Messages do
@@ -849,7 +851,6 @@ begin
     if Assigned(render_tmessage) then
     begin
       min_end_time := render_tmessage.EndTime - ServerSocket.TimeOffset;
-      gtc := GetTickCount;
       if min_end_time < gtc then
         duration := 0
       else
@@ -863,13 +864,46 @@ begin
           begin
             mins := duration div 60000 + 1;
             if mins = 1 then
-              txt := Format('Table is closing in less than a minute', [mins, minute_text])
+              txt := 'Table is closing in less than a minute'
             else
               txt := Format('Table is closing in %d minutes', [mins]);
           end;
         end;
-        tmtTournamentBreak: ;
-        tmtTournamentStart: ;
+
+        tmtTournamentBreak: begin
+          mins := duration div 60000 + 1;
+          if mins = 1 then
+            txt := 'Break (ending in less than a minute)'
+          else
+            txt := Format('Break (%d minutes left)', [mins]);
+        end;
+
+        tmtTournamentStart: begin
+          mins := duration div 60000 + 1;
+          if mins = 1 then
+            txt := 'Tournament is starting in less than a minute'
+          else
+            txt := Format('Tournament is starting in %d minutes', [mins]);
+        end;
+      end;
+    end;
+
+    if not table.TournamentId.IsEmpty then
+    begin
+      if Tournaments.GetAndLock(table.TournamentId, tournament) then
+      try
+        current_level_end_time := tournament.CurrentBlindLevelEndTime - ServerSocket.TimeOffset;
+        if current_level_end_time < gtc then
+          seconds_until_next_level := 0
+        else
+          seconds_until_next_level := (current_level_end_time - gtc) div 1000;
+
+        if (seconds_until_next_level > tournament.Timeperlevel * 60 - 15) and
+           (seconds_until_next_level <= tournament.Timeperlevel * 60) and
+           (tournament.CurrentBlindLevel > 0) then
+          txt := Format('Blinds are going up. Level %d (%d/%d)', [tournament.CurrentBlindLevel + 1, tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb]);
+      finally
+        Tournaments.Unlock;
       end;
     end;
   finally
