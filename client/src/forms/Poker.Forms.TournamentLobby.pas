@@ -223,6 +223,7 @@ begin
       tnsCancelled: cap := 'Cancelled';
       tnsOnBreak: cap := 'Break';
       tnsStarting: cap := 'Starting';
+      tnsFinished: cap := 'Finished';
     end;
   finally
     Tournaments.Unlock;
@@ -234,20 +235,26 @@ end;
 procedure TfrmTournamentLobby.UpdateBlindLevelLabel;
 var
   tournament: TTournamentInfo;
-  ticks_until_next_level: DWORD;
+  current_level_end_time, gtc: DWORD;
   seconds_until_next_level: Integer;
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
     if tournament.State = tnsInProgress then
     begin
-      ticks_until_next_level := (tournament.CurrentBlindLevelEndTime - ServerSocket.TimeOffset) - GetTickCount;
-      seconds_until_next_level := ticks_until_next_level div 1000;
-      if seconds_until_next_level < 0 then
-        seconds_until_next_level := 0;
+      gtc := GetTickCount;
+      current_level_end_time := tournament.CurrentBlindLevelEndTime - ServerSocket.TimeOffset;
+      if current_level_end_time < gtc then
+        seconds_until_next_level := 0
+      else
+        seconds_until_next_level := (current_level_end_time - gtc) div 1000;
+
       if tournament.CurrentBlindLevel < UINT32(tournament.BlindStructure.Count) then
-        lbvCurrentBlindLevel.Caption := Format('%d/%d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
-            tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, seconds_until_next_level div 60, seconds_until_next_level mod 60])
+        if tournament.CurrentBlindLevel = UINT32(tournament.BlindStructure.Count - 1) then
+          lbvCurrentBlindLevel.Caption := Format('%d / %d', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb])
+        else
+          lbvCurrentBlindLevel.Caption := Format('%d / %d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
+              tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, seconds_until_next_level div 60, seconds_until_next_level mod 60])
       else
       begin
         lbvCurrentBlindLevel.Caption := '';

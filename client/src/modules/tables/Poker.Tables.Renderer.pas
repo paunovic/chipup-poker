@@ -73,7 +73,7 @@ type
     procedure RenderSeat(const AGame: TGameInfo; const ASeatIndex: Integer);
     procedure RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single; const ATransparency: Byte = 0);
     procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
-    procedure RenderTableMessage(const AGame: TGameInfo);
+    procedure RenderTableMessages(const AGame: TGameInfo);
     procedure RenderTimebar(const AGame: TGameInfo);
     procedure RenderTableCards;
     procedure RenderDealerButton(const AGame: TGameInfo);
@@ -155,7 +155,7 @@ uses
   Poker.Common.Misc, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation, System.DateUtils,
   Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table,
-  Poker.Clubs.Member;
+  Poker.Clubs.Member, Poker.Protobufs.Objects.TableMessage, Poker.Server.Socket;
 
 { TTableRenderer }
 
@@ -387,7 +387,7 @@ begin
   try
     RenderBackground;
     RenderTable;
-    RenderTableMessage(table.Game);
+    RenderTableMessages(table.Game);
     RenderTableCards;
     RenderDealerButton(table.Game);
     RenderDealingCardsAni;
@@ -823,39 +823,61 @@ begin
   font.TextMidF(AMidPoint, AText, AColor);
 end;
 
-procedure TTableRenderer.RenderTableMessage(const AGame: TGameInfo);
+procedure TTableRenderer.RenderTableMessages(const AGame: TGameInfo);
 var
   mins: Integer;
   minute_text: String;
   txt: String;
   table: TTable;
+  min_end_time: UINT64;
+  duration, gtc: UINT32;
+  tmessage, render_tmessage: TPB_TableMessage;
 begin
   txt := '';
-  if FTableType = ttLive then
-    case AGame.State of
-      gsClosing: begin
-        if Tables.GetAndLockTable(FInternalId, table) then
-        try
-          table.Status.UpdateClosingTime(AGame);
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    min_end_time := 0;
+    render_tmessage := nil;
+    for tmessage in table.Status.Messages do
+      if (min_end_time = 0) or
+         (tmessage.EndTime < min_end_time) then
+      begin
+        min_end_time := tmessage.EndTime;
+        render_tmessage := tmessage;
+      end;
 
-          if table.Status.ClosingTime = 0 then
-            txt := 'Table is closing after curent hand'
+    if Assigned(render_tmessage) then
+    begin
+      min_end_time := render_tmessage.EndTime - ServerSocket.TimeOffset;
+      gtc := GetTickCount;
+      if min_end_time < gtc then
+        duration := 0
+      else
+        duration := min_end_time - gtc;
+
+      case render_tmessage.Message of
+        tmtClosing: begin
+          if duration = 0 then
+            txt := 'Table is closing after current hand'
           else
           begin
-            mins := table.Status.ClosingTime div 60000 + 1;
+            mins := duration div 60000 + 1;
             if mins = 1 then
               txt := Format('Table is closing in less than a minute', [mins, minute_text])
             else
               txt := Format('Table is closing in %d minutes', [mins]);
           end;
-        finally
-
         end;
+        tmtTournamentBreak: ;
+        tmtTournamentStart: ;
       end;
-
-      gsClosed: txt := 'Table is closed';
-
     end;
+  finally
+    Tables.Unlock;
+  end;
+
+  if AGame.State = gsClosed then
+    txt := 'Table is closed';
 
   if txt <> '' then
     RenderScaleFont(txt, clWhite2, Point2(FMetrics.TableCenter.x, FMetrics.TableCenter.Y + FMetrics.CardHeight / 3), TableResources.SintonyFonts,

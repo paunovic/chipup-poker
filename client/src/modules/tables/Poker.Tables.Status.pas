@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
+  Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
+  Poker.Protobufs.Objects.TableMessage;
 
 type
   TTableStatus = class
@@ -36,6 +37,7 @@ type
     FTimebarEndtime: DWORD;
     FCurrentPlaytime: Int64;
     FSelfSeatIndex: Integer;
+    FMessages: TObjectList<TPB_TableMessage>;
 
     FActionStandUp: Boolean;
     FActionFold: Boolean;
@@ -109,6 +111,7 @@ type
     property ActionFoldToAny: Boolean read FActionFoldToAny write FActionFoldToAny;
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
+    property Messages: TObjectList<TPB_TableMessage> read FMessages;
 
     property CallCaption: String read FCallCaption write FCallCaption;
     property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;
@@ -140,10 +143,12 @@ begin
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
   FEvents := TPB_TableEventList.Create;
+  FMessages := TObjectList<TPB_TableMessage>.Create;
 end;
 
 destructor TTableStatus.Destroy;
 begin
+  FMessages.Free;
   FBets.Free;
   FPreviousBets.Free;
   FEvents.Free;
@@ -215,6 +220,7 @@ var
   oldstate: TTableState;
   seat_index: Integer;
   pot: TPB_Pot;
+  table_message: TPB_TableMessage;
 begin
   oldstate := FState;
   FState := ATableStatusProtobuf.State;
@@ -232,6 +238,9 @@ begin
   FRotationHand := ATableStatusProtobuf.Rotation;
   FCurrentLimit := ATableStatusProtobuf.GameLimit;
   FMinimumRaise := ATableStatusProtobuf.MinimumRaise;
+  FMessages.Clear;
+  for table_message in ATableStatusProtobuf.TableMessage do
+    FMessages.Add(TPB_TableMessage.Create(table_message));
 
   // assign certain values only if new table state is < tsWinning or previous table state is < tsWinning
   // this fixes animation bugs if some event occurs during tsWinning

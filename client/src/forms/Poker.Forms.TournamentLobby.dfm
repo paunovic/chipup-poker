@@ -48,6 +48,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsView.FocusRect = False
       OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
       OptionsView.ColumnAutoWidth = True
+      OptionsView.GridLines = glVertical
       OptionsView.GroupByBox = False
       Styles.Inactive = dmMain.styleInactiveCell
       Styles.OnGetContentStyle = gridPlayersTableStylesGetContentStyle
@@ -111,6 +112,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsView.FocusRect = False
       OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
       OptionsView.ColumnAutoWidth = True
+      OptionsView.GridLines = glVertical
       OptionsView.GroupByBox = False
       Styles.Inactive = dmMain.styleInactiveCell
       object gridTablesId: TcxGridColumn
@@ -323,6 +325,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsView.FocusRect = False
       OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
       OptionsView.ColumnAutoWidth = True
+      OptionsView.GridLines = glVertical
       OptionsView.GroupByBox = False
       Styles.Inactive = dmMain.styleInactiveCell
       Styles.OnGetContentStyle = gridPlayersTableStylesGetContentStyle
@@ -386,6 +389,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsView.FocusRect = False
       OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
       OptionsView.ColumnAutoWidth = True
+      OptionsView.GridLines = glVertical
       OptionsView.GroupByBox = False
       Styles.Inactive = dmMain.styleInactiveCell
       Styles.OnGetContentStyle = gridBlindsTableStylesGetContentStyle

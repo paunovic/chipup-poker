@@ -2529,7 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsStats
+    Properties.ActivePage = tsTables
     Properties.HideTabs = True
     ClientRectBottom = 441
     ClientRectLeft = 1
@@ -2538,10 +2538,6 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         892
         440)
@@ -2652,6 +2648,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
             object gridPlayersListId: TcxGridColumn
@@ -2697,7 +2694,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 154
+          Top = 148
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2710,11 +2707,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 172
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 154
+          Top = 148
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2727,11 +2723,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 172
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 154
+          Top = 148
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2744,11 +2739,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 172
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 154
+          Top = 148
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2761,11 +2755,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 172
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 154
+          Top = 148
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2778,17 +2771,12 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 172
         end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         892
         440)
@@ -2807,14 +2795,13 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 872
-          Height = 317
+          Height = 311
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 401
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2832,6 +2819,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = 'No active tables in this club'
             OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
             object gridGamesId: TcxGridColumn
@@ -2890,7 +2878,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 307
+          Top = 301
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2903,11 +2891,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 391
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 307
+          Top = 301
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2920,17 +2907,12 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 391
         end
       end
     end
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         892
         440)
@@ -2944,7 +2926,6 @@ object frmClubLobby: TfrmClubLobby
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
         TabOrder = 0
-        ExplicitHeight = 432
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
           OnDblClick = gridTablesTableDblClick
@@ -3035,13 +3016,11 @@ object frmClubLobby: TfrmClubLobby
         BevelOuter = bvNone
         ShowCaption = False
         TabOrder = 1
-        ExplicitWidth = 538
-        ExplicitHeight = 432
         object gridStats: TcxGrid
           Left = 0
           Top = 0
-          Width = 538
-          Height = 392
+          Width = 536
+          Height = 390
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -3146,8 +3125,8 @@ object frmClubLobby: TfrmClubLobby
         end
         object gridTotalStats: TcxGrid
           Left = 0
-          Top = 392
-          Width = 538
+          Top = 390
+          Width = 536
           Height = 40
           Align = alBottom
           BevelInner = bvNone

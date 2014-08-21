@@ -96,6 +96,7 @@ type
     styleTournamentCancelled: TcxStyle;
     acTournamentsOpenAll: TAction;
     acTournamentItemOpen: TAction;
+    styleTournamentFinished: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -869,6 +870,7 @@ begin
           tnsOpen: text := 'Open';
           tnsStarting, tnsInProgress, tnsOnBreak: text := 'Running';
           tnsCancelled: text := 'Cancelled';
+          tnsFinished: text := 'Finished';
         end;
         c.SetValue(rcount - 1, gridTournamentsStatus.Index, text);
       end;
@@ -980,6 +982,7 @@ begin
       tnsOpen: AStyle := styleTournamentOpen;
       tnsInProgress: AStyle := styleTournamentInProgress;
       tnsCancelled: AStyle := styleTournamentCancelled;
+      tnsFinished: AStyle := styleTournamentFinished;
     end;
   finally
     Tournaments.Unlock;

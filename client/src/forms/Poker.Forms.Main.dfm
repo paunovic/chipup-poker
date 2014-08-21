@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsTournaments
+      Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 437
@@ -3622,6 +3622,7 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = 'There are no active public clubs at the moment'
             OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
             object gridPublicClubsMongoId: TcxGridColumn
@@ -3719,6 +3720,7 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
             object gridGamesId: TcxGridColumn
@@ -3879,6 +3881,7 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = 'You are not member of any private clubs'
             OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
             object gridHomeClubsMongoId: TcxGridColumn
@@ -3971,6 +3974,7 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
             object gridTournamentsId: TcxGridColumn
@@ -4661,6 +4665,10 @@ object frmChipUpMain: TfrmChipUpMain
     object styleTournamentCancelled: TcxStyle
       AssignedValues = [svColor]
       Color = 108
+    end
+    object styleTournamentFinished: TcxStyle
+      AssignedValues = [svColor]
+      Color = 2844008
     end
   end
 end
