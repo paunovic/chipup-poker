@@ -829,15 +829,13 @@ var
   txt: String;
   table: TTable;
   min_end_time: UINT64;
-  seconds_until_next_level, current_level_end_time, duration, gtc: UINT32;
+  duration, gtc: UINT32;
   tmessage, render_tmessage: TPB_TableMessage;
   tournament: TTournamentInfo;
 begin
   txt := '';
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    gtc := GetTickCount;
-
     min_end_time := 0;
     render_tmessage := nil;
     for tmessage in table.Status.Messages do
@@ -850,6 +848,7 @@ begin
 
     if Assigned(render_tmessage) then
     begin
+      gtc := GetTickCount;
       min_end_time := render_tmessage.EndTime - ServerSocket.TimeOffset;
       if min_end_time < gtc then
         duration := 0
@@ -892,14 +891,8 @@ begin
     begin
       if Tournaments.GetAndLock(table.TournamentId, tournament) then
       try
-        current_level_end_time := tournament.CurrentBlindLevelEndTime - ServerSocket.TimeOffset;
-        if current_level_end_time < gtc then
-          seconds_until_next_level := 0
-        else
-          seconds_until_next_level := (current_level_end_time - gtc) div 1000;
-
-        if (seconds_until_next_level > tournament.Timeperlevel * 60 - 15) and
-           (seconds_until_next_level <= tournament.Timeperlevel * 60) and
+        if (tournament.SecondsUntilNextLevel > Integer(tournament.Timeperlevel * 60 - 15)) and
+           (tournament.SecondsUntilNextLevel <= Integer(tournament.Timeperlevel * 60)) and
            (tournament.CurrentBlindLevel > 0) then
           txt := Format('Blinds are going up. Level %d (%d/%d)', [tournament.CurrentBlindLevel + 1, tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb]);
       finally

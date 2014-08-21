@@ -1587,6 +1587,8 @@ begin
   else
     if not dmMain.SelfInfo.RegisteredTournaments.Contains(proto.MongoId) then
       dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
+
+  UpdateTournamentList;
 end;
 
 procedure TfrmChipUpMain.CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);

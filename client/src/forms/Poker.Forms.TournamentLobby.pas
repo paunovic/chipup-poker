@@ -221,7 +221,9 @@ begin
       tnsOpen: cap := 'Open';
       tnsInProgress: cap := 'Running';
       tnsCancelled: cap := 'Cancelled';
-      tnsOnBreak: cap := 'Break';
+      tnsOnBreak: begin
+        cap := Format('Break (%.2d:%.2d left)', [tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60]);
+      end;
       tnsStarting: cap := 'Starting';
       tnsFinished: cap := 'Finished';
     end;
@@ -235,26 +237,17 @@ end;
 procedure TfrmTournamentLobby.UpdateBlindLevelLabel;
 var
   tournament: TTournamentInfo;
-  current_level_end_time, gtc: DWORD;
-  seconds_until_next_level: Integer;
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
     if tournament.State = tnsInProgress then
     begin
-      gtc := GetTickCount;
-      current_level_end_time := tournament.CurrentBlindLevelEndTime - ServerSocket.TimeOffset;
-      if current_level_end_time < gtc then
-        seconds_until_next_level := 0
-      else
-        seconds_until_next_level := (current_level_end_time - gtc) div 1000;
-
       if tournament.CurrentBlindLevel < UINT32(tournament.BlindStructure.Count) then
         if tournament.CurrentBlindLevel = UINT32(tournament.BlindStructure.Count - 1) then
           lbvCurrentBlindLevel.Caption := Format('%d / %d', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb])
         else
           lbvCurrentBlindLevel.Caption := Format('%d / %d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
-              tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, seconds_until_next_level div 60, seconds_until_next_level mod 60])
+              tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60])
       else
       begin
         lbvCurrentBlindLevel.Caption := '';
