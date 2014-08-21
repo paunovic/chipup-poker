@@ -655,6 +655,7 @@ message TournamentInfo {
 		tnsCancelled = 2;
 		tnsOnBreak = 3;
 		tnsStarting = 4;
+		tnsFinished = 5;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
