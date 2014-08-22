@@ -1286,10 +1286,13 @@ begin
 
     if (table.Status.ActionFoldToAny) and
        (cbFoldToAnyBet.Checked) then
+    begin
       if acCheck.Enabled then
         acCheck.Execute
       else
         acFold.Execute;
+      table.Status.FocusWindow := FALSE;
+    end;
   finally
     Tables.Unlock;
   end;

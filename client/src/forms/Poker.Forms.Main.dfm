@@ -4656,11 +4656,11 @@ object frmChipUpMain: TfrmChipUpMain
     PixelsPerInch = 96
     object styleTournamentOpen: TcxStyle
       AssignedValues = [svColor]
-      Color = 1003277
+      Color = 6175255
     end
     object styleTournamentInProgress: TcxStyle
       AssignedValues = [svColor]
-      Color = 6175255
+      Color = 2844008
     end
     object styleTournamentCancelled: TcxStyle
       AssignedValues = [svColor]
@@ -4668,7 +4668,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object styleTournamentFinished: TcxStyle
       AssignedValues = [svColor]
-      Color = 2844008
+      Color = 1003277
     end
   end
 end
