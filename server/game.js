@@ -161,6 +161,7 @@ Game.prototype.doClose = function (conn,cb,gamerow) {
 	else {
 		this.autoDelete = true;
 		this.state2 = 'gsClosing';
+		this.setMessage({message:'tmtClosing',duration:0});
 		clubBroadcastGameState(gamerow.clubid,gamerow,cb);
 	}
 };
@@ -662,13 +663,26 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.updateMongoState({members:true},function () {
 					var events = [this.makeEvent('teDealing')];
 					if (this.members[this.current_seat].autoplay) {
-						this.broadcastStatus(null,null,events);
+						var lastseat = this.current_seat;
 						setTimeout(function () {
-							this.fold(this.current_seat,function (events2) {
-								cb(events2);
-							});
-						}.bind(this),1500);
-					} else cb(events);
+							this.log('deal fold getting lock');
+							this.Lock.writeLock(function (release) {
+								this.log('got lock');
+								if (lastseat != this.current_seat) {
+									this.log('skip, seat changed');
+									return release();
+								}
+								this.fold(this.current_seat,function (events2) {
+									this.log('folded');
+									if (this.current_seat >= 0) this.startTimer(this.current_seat,0); /// FIXME?
+									this.broadcastStatus(null,true,events2);
+									release();
+								}.bind(this));
+							}.bind(this));
+						}.bind(this),2500 + (players*50*cards));
+					}
+
+					cb(events);
 				}.bind(this));
 				//}.bind(this),
 				//players * 100);
@@ -909,7 +923,6 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 							this.log('doWin b');
 							this.updateMongoState({members:true},function () {
 								this.log('doWin c');
-								if (this.current_seat >= 0) this.startTimer(this.current_seat,0); /// FIXME?
 								this.broadcastStatus(null,true,events); // teDeal
 								release();
 							}.bind(this));
@@ -2449,8 +2462,13 @@ Game.checkAndResume = function (cb1) {
 	});
 }
 Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
+	var token = profiler.start('game-reconnect1');
 	this.Lock.writeLock(function (release) {
+		token.stop();
+		token = profiler.start('game-reconnect2.1');
 		function finish2(events) {
+			token.stop();
+			token = profiler.start('game-reconnect3');
 			this.log('finish2');
 			this.broadcastStatus(conn,true,events);
 			if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) {
@@ -2461,6 +2479,7 @@ Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 			}
 			var status = this.getTableStatus(conn,true,events);
 			release();
+			token.stop();
 			cb(status);
 		}
 		this.users[conn.userid] = conn;
@@ -2474,11 +2493,20 @@ Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 			this.seats[seat].conn = conn;
 			var kickstart = true;
 			if (this.tourn) {
-				if (this.tourn.onBreak) kickstart = false;
+				kickstart = false;
 			}
+			token.stop();
 			if (this.state == 'tsIdle' && kickstart) {
+				token = profiler.start('game-reconnect2.2');
 				this.stateMachine(finish2.bind(this),null,{silent:true},events,0);
-			} else finish2.call(this,events);
-		} else finish2.call(this,events);
+			} else {
+				token = profiler.start('game-reconnect2.3');
+				finish2.call(this,events);
+			}
+		} else {
+			token.stop();
+			token = profiler.start('game-reconnect2.4');
+			finish2.call(this,events);
+		}
 	}.bind(this));
 }

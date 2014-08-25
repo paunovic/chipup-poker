@@ -76,6 +76,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 			game.obj = gamerow; // FIXME
 			game.Lock.writeLock(function (release) {
 				if (params.timestamp > 0) {
+					game.setMessage({message:'tmtClosing',duration:params.timestamp});
 					game.closeTimer = setTimeout(function () {
 						game.Lock.writeLock(function (release2) {
 							game.doClose(this,release2,gamerow);

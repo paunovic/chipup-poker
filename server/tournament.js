@@ -65,9 +65,8 @@ util.inherits(Tournament,EventEmitter);
 Tournament.prototype.startGames = function () {
 	console.log('%s dealing cards',new Date());
 	this.startTime = Date.now();
-	this.currentLevel = -1;
+	this.currentLevel = 0; // FIXME, improve nextLevel handling
 	this.onBreak = false;
-	this.nextLevel();
 	async.each(this.tables,function (tbl,cb1) {
 		tbl.Lock.writeLock(function (release) {
 			tbl.clearMessage('tmtTournamentStart');
@@ -79,7 +78,17 @@ Tournament.prototype.startGames = function () {
 				cb1();
 			},null,{silent:true},events,0);
 		});
-	});
+	},function () {
+		this.obj.state = 'tnsInProgress';
+		this.obj.save(function (err) {
+			error.handleError(err);
+			this.emit('state_changed',this);
+			core.emit('state_changed',this);
+			this.emit('tournament_start',this.obj);
+			this.currentLevel = -1;
+			this.nextLevel();
+		}.bind(this));
+	}.bind(this));
 };
 Tournament.prototype.toProto = function (config) {
 	var out = { _id:this.obj._id, name:this.obj.name, description:this.obj.description, gametype:this.obj.gametype, limit:this.obj.limit, seats_per_table:this.obj.seats_per_table, minplayers:this.obj.minplayers, maxplayers:this.obj.maxplayers, startingchips:this.obj.startingchips, timeperlevel:this.obj.timeperlevel, registered_players:this.obj.registered_players, start_time:this.obj.start_time, state:this.obj.state };
@@ -94,12 +103,17 @@ Tournament.prototype.toProto = function (config) {
 			out.players = [];
 			for (var x=0; x<this.obj.players.length; x++) {
 				out.players[x] = this.obj.players[x];
+				out.players[x].position = x;
 				var gameid = this.user_table_xref[this.obj.players[x]._id];
 				if (gameid) out.players[x].gameid = gameid
 			}
 		}
 	}
 	out.blind_structure = this.blind_schedule.blinds;
+	if (['tnsStarting','tnsInProgress','tnsOnBreak'].indexOf(this.obj.state) != -1) {
+		out.current_blind_level = this.currentLevel;
+		out.current_blind_level_end_time = this.level_end_time;
+	}
 	return out;
 }
 Tournament.prototype.register = function () {
@@ -118,11 +132,14 @@ Tournament.prototype.nextLevel = function () {
 	var minuteNow = now.getMinutes();
 	var minuteEnd = minuteNow + this.obj.blind_schedule.LevelLength;
 	console.log('now,end %d,%d',minuteNow,minuteEnd);
+
+	var level_delay = this.obj.blind_schedule.LevelLength * 60;
+	level_delay = level_delay - now.getSeconds();
+
 	if ( ((minuteNow < (this.breakmin+1)) && (minuteEnd < (this.breakmin+1)))
 		|| ( (minuteNow > (this.breakmin+5)) && (minuteEnd > (this.breakmin+5)) ) ) {
-		var delay = this.obj.blind_schedule.LevelLength * 60;
-		delay = delay - now.getSeconds();
-		setTimeout(this.nextLevel.bind(this),delay * 1000);
+		setTimeout(this.nextLevel.bind(this),level_delay * 1000);
+		this.level_end_time = Date.now() + (level_delay * 1000);
 	} else {
 		var nexthalf = minuteEnd - this.breakmin;
 		this.nexthalf = nexthalf;
@@ -130,12 +147,15 @@ Tournament.prototype.nextLevel = function () {
 		delay = delay - now.getSeconds();
 		console.log('need to do a break nexthalf:%d delay:%d',nexthalf,delay);
 		setTimeout(this.beginBreak.bind(this),(delay)*1000);
+		this.level_end_time = Date.now() + (level_delay * 1000);
 	}
+	this.emit('state_changed',this);
+	core.emit('state_changed',this);
 }
 Tournament.prototype.beginBreak = function () {
 	console.log('break starting %s',new Date());
 	this.onBreak = true;
-	var obj = { message:'tmtTournamentBreak', duration:360 };
+	var obj = { message:'tmtTournamentBreak', duration:300 };
 	async.each(this.tables,function (tbl,cb) {
 		tbl.Lock.writeLock(function (release) {
 			tbl.setMessage(obj);
@@ -144,7 +164,14 @@ Tournament.prototype.beginBreak = function () {
 		});
 	}.bind(this),function () {
 		console.log('break begining');
-		setTimeout(this.break_over.bind(this),obj.duration*1000);
+		this.obj.state = 'tnsOnBreak';
+		this.obj.save(function (err) {
+			error.handleError(err);
+			this.emit('state_changed',this);
+			core.emit('state_changed',this);
+			setTimeout(this.break_over.bind(this),obj.duration*1000);
+			this.level_end_time = Date.now() + (obj.duration * 1000);
+		}.bind(this));
 	}.bind(this));
 }
 Tournament.prototype.break_over = function () {
@@ -167,31 +194,78 @@ Tournament.prototype.break_over = function () {
 			}
 		});
 	},function () {
-		var now = new Date();
-		var delay = (this.nexthalf * 60) - now.getSeconds();
-		console.log('second level half delay: %d',delay);
-		setTimeout(function () {
-			console.log('%s level ends',new Date());
-			this.nextLevel();
-		}.bind(this),delay*1000);
+		this.obj.state = 'tnsInProgress';
+		this.obj.save(function (err) {
+			error.handleError(err);
+			var now = new Date();
+			var delay = (this.nexthalf * 60) - now.getSeconds();
+			console.log('second level half delay: %d',delay);
+			setTimeout(function () {
+				console.log('%s level ends',new Date());
+				this.nextLevel();
+			}.bind(this),delay*1000);
+			this.level_end_time = Date.now() + (delay * 1000);
+			this.emit('state_changed',this);
+			core.emit('state_changed',this);
+		}.bind(this));
 	}.bind(this));
 }
 Tournament.prototype.break_start = function (game,cb) {
 	game.log('game hit break');
 	cb();
 };
+Tournament.prototype.fixRank = function (oldpos,rise) {
+	var looking = true;
+	var pos = oldpos;
+	var chips = this.obj.players[oldpos].chips;
+	var direction = rise ? -1 : 1;
+	var changed = false;
+	while (looking) {
+		var next = pos + direction;
+		var currentchips = this.obj.players[pos].chips;
+		if ((next >= this.obj.players.length) || (next < 0)) {
+			return changed;
+			console.log('next:%d pos:%d nc:NAN cc:%d',next,pos,currentchips);
+		} else {
+			var nextchips = this.obj.players[next].chips;
+			console.log('next:%d pos:%d nc:%d cc:%d',next,pos,nextchips,currentchips);
+			if ( ((nextchips > currentchips) && !rise) || ((nextchips < currentchips) && rise) ) {
+				var self = this.obj.players.splice(pos,1)[0];
+				this.obj.players.splice(next,0,self);
+				console.log('moved a player from %d->%d',pos,next);
+				changed = false;
+			} else looking = false;
+		}
+	}
+	return changed;
+};
 Tournament.prototype.handOver = function (game,cb) {
+	console.log('%s Tournament.handOver',new Date());
 	// called after a hand ends in a game, updates tournament chip counts from game seats
+	var players_remaining = 0;
 	for (var x=0; x<this.obj.players.length; x++) {
 		for (var y=0; y<game.members.length; y++) {
 			if (!game.members[y]) continue;
 			if (myutils.compareObjectID(this.obj.players[x]._id,game.seats[y].userid)) {
 				//console.log('match',x,y,this.obj.players[x],game.members[y]);
-				this.obj.players[x].chips = game.members[y].chips;
+				if (this.obj.players[x].chips != game.members[y].chips) {
+					console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips,game.members[y].chips);
+					var rise = game.members[y].chips > this.obj.players[x].chips;
+					this.obj.players[x].chips = game.members[y].chips;
+					if (this.fixRank(x,rise)) x = 0;
+				}
 			}
 		}
+		if (this.obj.players[x].chips > 0) players_remaining++;
+	}
+	if (players_remaining == 1) {
+		this.obj.state = 'tnsFinished';
 	}
 	this.obj.save(function (err) {
+		if (this.obj.state == 'tnsFinished') {
+			this.emit('state_changed',this);
+			core.emit('state_changed',this);
+		}
 		this.emit('handOver',this);
 		cb();
 	}.bind(this));
@@ -349,7 +423,7 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 			var doc = {game_type:tourn.obj.gametype, blinds:'gb5x10', seats:tourn.obj.seats_per_table, gamename:''+(i+1), game_limit:tourn.obj.limit, buyin_min: 10, buyin_max:20, rake:0, rotation:0, hands:0, tournament:tourn.obj._id};
 			todo.push(doc);
 		}
-		tourn.obj.state = 'tnsInProgress';
+		tourn.obj.state = 'tnsStarting';
 		async.each(todo,function (doc,cb) {
 			models.Game.create(doc,function (err,game) {
 				console.log('made %j',game);
