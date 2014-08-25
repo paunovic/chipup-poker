@@ -97,6 +97,7 @@ type
     acTournamentsOpenAll: TAction;
     acTournamentItemOpen: TAction;
     styleTournamentFinished: TcxStyle;
+    styleTournamentName: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);

@@ -783,7 +783,7 @@ begin
           server_socket_state_color := clRed;
         end;
       else
-        server_socket_state := 'Unknown';
+        server_socket_state := 'N/A';
       end;
     end
     else
@@ -818,7 +818,7 @@ begin
       end
       else
       begin
-        lbvLatency.Caption := 'Unknown';
+        lbvLatency.Caption := 'N/A';
         lbvLatency.Style.TextColor := clWhite;
       end;
       lbvLatency.Refresh;
@@ -837,7 +837,7 @@ begin
       lbvSwapChain.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
     end
     else
-      lbvSwapChain.Caption := 'Unknown';
+      lbvSwapChain.Caption := 'N/A';
     lbvSwapChain.Refresh;
   end;
 
@@ -847,7 +847,7 @@ begin
        (dmMain.SelfInfo.Displayname <> '') then
       lbvUser.Caption := dmMain.SelfInfo.Displayname
     else
-      lbvUser.Caption := 'Unknown';
+      lbvUser.Caption := 'N/A';
     lbvUser.Refresh;
   end;
 
@@ -862,7 +862,7 @@ begin
       lbvServer.Caption := line;
     end
     else
-      lbvServer.Caption := 'Unknown';
+      lbvServer.Caption := 'N/A';
     lbvServer.Refresh;
   end;
 
@@ -871,7 +871,7 @@ begin
     if Assigned(Sounds) then
       lbvSoundBuffers.Caption := IntToStr(Sounds.WavePlayer.Buffers.Count)
     else
-      lbvSoundBuffers.Caption := 'Unknown';
+      lbvSoundBuffers.Caption := 'N/A';
     lbvSoundBuffers.Refresh;
   end;
 
@@ -880,7 +880,7 @@ begin
     if Assigned(DXTimer) then
       lbvAnimations.Caption := IntToStr(DXTimer.Animations.Count)
     else
-      lbvAnimations.Caption := 'Unknown';
+      lbvAnimations.Caption := 'N/A';
     lbvAnimations.Refresh;
   end;
 end;

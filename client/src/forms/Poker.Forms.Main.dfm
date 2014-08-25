@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 437
@@ -3593,6 +3593,10 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           839
           436)
@@ -4007,6 +4011,7 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
+              Styles.Content = styleTournamentName
               Width = 222
             end
             object gridTournamentsPlayers: TcxGridColumn
@@ -4669,6 +4674,10 @@ object frmChipUpMain: TfrmChipUpMain
     object styleTournamentFinished: TcxStyle
       AssignedValues = [svColor]
       Color = 1003277
+    end
+    object styleTournamentName: TcxStyle
+      AssignedValues = [svTextColor]
+      TextColor = clWhite
     end
   end
 end

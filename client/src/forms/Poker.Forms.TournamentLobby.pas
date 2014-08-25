@@ -55,6 +55,7 @@ type
     styleActiveBlindLevel: TcxStyle;
     lbsTournamentState: TcxLabel;
     lbvTournamentState: TcxLabel;
+    gridAllPlayersPlace: TcxGridColumn;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -197,6 +198,7 @@ begin
         Inc(rec_count);
         if rec_count > c.RecordCount then
           c.SetRecordCount(rec_count);
+        c.SetValue(rec_count - 1, gridAllPlayersPlace.Index, member.Position + 1);
         c.SetValue(rec_count - 1, gridAllPlayersId.Index, member.MongoId.ToVariant);
         c.SetValue(rec_count - 1, gridAllPlayersName.Index, member.Displayname);
         c.SetValue(rec_count - 1, gridAllPlayersChips.Index, member.Chips / 100);
@@ -210,16 +212,46 @@ begin
   end;
 end;
 
+function MinutesToString(const AMinutes: UINT32): String;
+var
+  minutes: UINT32;
+  d, m, h: Integer;
+begin
+  minutes := AMinutes;
+  d := minutes div 1440;
+  minutes := minutes mod 1440;
+  h := minutes div 60;
+  minutes := minutes mod 60;
+  m := minutes;
+
+  if d > 0 then
+  begin
+    if d = 1 then
+      result := Format('1 day, %d:%d', [h, m])
+    else
+      result := Format('%d days, %dh:%dm', [d, h, m]);
+  end
+  else
+    result := Format('%dh:%dm', [h, m]);
+end;
+
 procedure TfrmTournamentLobby.UpdateTournamentStateLabel;
 var
   tournament: TTournamentInfo;
+  minutes: UINT32;
   cap: String;
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
     case tournament.State of
-      tnsOpen: cap := 'Open';
-      tnsInProgress: cap := 'Running';
+      tnsOpen: begin
+        minutes := MinutesBetween(TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)), Now);
+        cap := Format('Open (starting in %s)', [MinutesToString(minutes)]);
+      end;
+      tnsInProgress: begin
+        minutes := MinutesBetween(Now, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)));
+        cap := Format('Running (%s)', [MinutesToString(minutes)]);
+      end;
       tnsCancelled: cap := 'Cancelled';
       tnsOnBreak: begin
         cap := Format('Break (%.2d:%.2d left)', [tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60]);
