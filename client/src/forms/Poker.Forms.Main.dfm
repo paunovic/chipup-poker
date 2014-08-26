@@ -3593,10 +3593,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
           839
           436)
@@ -3994,8 +3990,8 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxDateEditProperties'
               Properties.Alignment.Horz = taCenter
               Properties.DateButtons = []
-              Properties.DisplayFormat = 'dd MMM yyyy, hh:mm'
-              Properties.EditFormat = 'dd MMM yyyy, hh:mm'
+              Properties.DisplayFormat = 'dd MMM, hh:mm'
+              Properties.EditFormat = 'dd MMM, hh:mm'
               Properties.ImmediatePost = True
               Properties.InputKind = ikStandard
               Properties.Kind = ckDateTime
@@ -4004,7 +4000,7 @@ object frmChipUpMain: TfrmChipUpMain
               HeaderAlignmentHorz = taCenter
               SortIndex = 0
               SortOrder = soAscending
-              Width = 110
+              Width = 92
             end
             object gridTournamentsName: TcxGridColumn
               Caption = 'Tournament'
@@ -4012,13 +4008,15 @@ object frmChipUpMain: TfrmChipUpMain
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
               Styles.Content = styleTournamentName
-              Width = 222
+              Width = 215
             end
             object gridTournamentsPlayers: TcxGridColumn
               Caption = 'Players'
-              PropertiesClassName = 'TcxTextEditProperties'
+              DataBinding.ValueType = 'Integer'
+              PropertiesClassName = 'TcxSpinEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
+              Width = 62
             end
             object gridTournamentsStatus: TcxGridColumn
               Caption = 'Status'
@@ -4026,7 +4024,7 @@ object frmChipUpMain: TfrmChipUpMain
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
               Styles.OnGetContentStyle = gridTournamentsStatusStylesGetContentStyle
-              Width = 92
+              Width = 90
             end
           end
           object gridTournamentsLevel: TcxGridLevel
