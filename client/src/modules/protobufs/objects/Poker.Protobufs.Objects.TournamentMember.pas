@@ -16,12 +16,14 @@ type
       kDisplaynameFieldNumber = 2;
       kChipsFieldNumber = 3;
       kGameidFieldNumber = 4;
+      kPositionFieldNumber = 5;
 
     var
       FId: TMongoId;
       FDisplayname: String;
       FChips: UInt32;
       FGameid: TMongoId;
+      FPosition: Integer;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -36,6 +38,9 @@ type
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
     procedure SetGameid(const AValue: TMongoId);
+    procedure set_has_Position;
+    procedure clear_has_Position;
+    procedure SetPosition(const AValue: Integer);
 
   public
     constructor Create(const AFrom: TPB_TournamentMember; const ALightweight: Boolean = FALSE); overload;
@@ -64,6 +69,11 @@ type
     function has_Gameid: Boolean;
     procedure clear_Gameid;
     property Gameid: TMongoId read FGameid write SetGameid;
+
+    // optional int32 Position = 5;
+    function has_Position: Boolean;
+    procedure clear_Position;
+    property Position: Integer read FPosition write SetPosition;
 
   end;
 
@@ -116,6 +126,11 @@ begin
         FGameid := AProtobufReader.readMongoId;
         set_has_Gameid;
       end;
+      kPositionFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FPosition := AProtobufReader.readInt32;
+        set_has_Position;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -131,6 +146,8 @@ begin
     SetChips(AFrom.Chips);
   if AFrom.has_Gameid then
     SetGameid(AFrom.Gameid);
+  if AFrom.has_Position then
+    SetPosition(AFrom.Position);
 end;
 
 function TPB_TournamentMember.IsInitialized: Boolean;
@@ -272,6 +289,37 @@ begin
   set_has_Gameid;
 end;
 
+procedure TPB_TournamentMember.clear_Position;
+begin
+  FPosition := 0;
+  clear_has_Position;
+end;
+
+function TPB_TournamentMember.has_Position: Boolean;
+begin
+  result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_TournamentMember.set_has_Position;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_TournamentMember.clear_has_Position;
+begin
+  _has_bits_ := _has_bits_ and not 16;
+end;
+
+procedure TPB_TournamentMember.SetPosition(const AValue: Integer);
+begin
+  if not Lightweight then
+    Assert(not has_Position);
+  FPosition := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kPositionFieldNumber, AValue);
+  set_has_Position;
+end;
+
 procedure TPB_TournamentMember.Clear;
 begin
   if _has_bits_ = 0 then
@@ -281,6 +329,7 @@ begin
   clear_Displayname;
   clear_Chips;
   clear_Gameid;
+  clear_Position;
 end;
 
 procedure TPB_TournamentMemberList.Assign(const APB_TournamentMemberList: TList<TPB_TournamentMember>);

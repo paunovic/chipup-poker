@@ -97,6 +97,7 @@ type
     acTournamentsOpenAll: TAction;
     acTournamentItemOpen: TAction;
     styleTournamentFinished: TcxStyle;
+    styleTournamentName: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -864,7 +865,7 @@ begin
         c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
         c.SetValue(rcount - 1, gridTournamentsStartTime.Index, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament_info.StartTime)));
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
-        c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
+        c.SetValue(rcount - 1, gridTournamentsPlayers.Index, tournament_info.RegisteredPlayers);
 
         case tournament_info.State of
           tnsOpen: text := 'Open';
@@ -980,7 +981,7 @@ begin
   try
     case tournament.State of
       tnsOpen: AStyle := styleTournamentOpen;
-      tnsInProgress: AStyle := styleTournamentInProgress;
+      tnsInProgress, tnsStarting, tnsOnBreak: AStyle := styleTournamentInProgress;
       tnsCancelled: AStyle := styleTournamentCancelled;
       tnsFinished: AStyle := styleTournamentFinished;
     end;

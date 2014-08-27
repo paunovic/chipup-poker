@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 437
@@ -3990,8 +3990,8 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxDateEditProperties'
               Properties.Alignment.Horz = taCenter
               Properties.DateButtons = []
-              Properties.DisplayFormat = 'dd MMM yyyy, hh:mm'
-              Properties.EditFormat = 'dd MMM yyyy, hh:mm'
+              Properties.DisplayFormat = 'dd MMM, hh:mm'
+              Properties.EditFormat = 'dd MMM, hh:mm'
               Properties.ImmediatePost = True
               Properties.InputKind = ikStandard
               Properties.Kind = ckDateTime
@@ -4000,20 +4000,23 @@ object frmChipUpMain: TfrmChipUpMain
               HeaderAlignmentHorz = taCenter
               SortIndex = 0
               SortOrder = soAscending
-              Width = 110
+              Width = 92
             end
             object gridTournamentsName: TcxGridColumn
               Caption = 'Tournament'
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
-              Width = 222
+              Styles.Content = styleTournamentName
+              Width = 215
             end
             object gridTournamentsPlayers: TcxGridColumn
               Caption = 'Players'
-              PropertiesClassName = 'TcxTextEditProperties'
+              DataBinding.ValueType = 'Integer'
+              PropertiesClassName = 'TcxSpinEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
+              Width = 62
             end
             object gridTournamentsStatus: TcxGridColumn
               Caption = 'Status'
@@ -4021,7 +4024,7 @@ object frmChipUpMain: TfrmChipUpMain
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
               Styles.OnGetContentStyle = gridTournamentsStatusStylesGetContentStyle
-              Width = 92
+              Width = 90
             end
           end
           object gridTournamentsLevel: TcxGridLevel
@@ -4669,6 +4672,10 @@ object frmChipUpMain: TfrmChipUpMain
     object styleTournamentFinished: TcxStyle
       AssignedValues = [svColor]
       Color = 1003277
+    end
+    object styleTournamentName: TcxStyle
+      AssignedValues = [svTextColor]
+      TextColor = clWhite
     end
   end
 end

@@ -49,12 +49,16 @@ type
     gridBlindsBlinds: TcxGridColumn;
     gridBlindsLevel: TcxGridLevel;
     gridBlindsMinutes: TcxGridColumn;
-    lbsCurrentBlindLevel: TcxLabel;
-    lbvCurrentBlindLevel: TcxLabel;
+    lbvSubSubHeader: TcxLabel;
     tiGUIUpdate: TTimer;
     styleActiveBlindLevel: TcxStyle;
-    lbsTournamentState: TcxLabel;
-    lbvTournamentState: TcxLabel;
+    gridAllPlayersPlace: TcxGridColumn;
+    lbsSubHeader: TcxLabel;
+    lbsTournamentPlayers: TcxLabel;
+    lbsTournamentTables: TcxLabel;
+    lbsTournamentBlinds: TcxLabel;
+    styleGridRowsNormal: TcxStyle;
+    imgHeader: TcxImage;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -80,8 +84,7 @@ type
     procedure UpdateAllPlayersGrid;
     procedure UpdateFormData;
     procedure UpdateBlindsStructureGrid;
-    procedure UpdateTournamentStateLabel;
-    procedure UpdateBlindLevelLabel;
+    procedure UpdateTournamentLabels;
     procedure RefreshAll;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -128,8 +131,7 @@ end;
 
 procedure TfrmTournamentLobby.tiGUIUpdateTimer(Sender: TObject);
 begin
-  UpdateTournamentStateLabel;
-  UpdateBlindLevelLabel;
+  UpdateTournamentLabels;
 end;
 
 procedure TfrmTournamentLobby.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -197,6 +199,7 @@ begin
         Inc(rec_count);
         if rec_count > c.RecordCount then
           c.SetRecordCount(rec_count);
+        c.SetValue(rec_count - 1, gridAllPlayersPlace.Index, member.Position + 1);
         c.SetValue(rec_count - 1, gridAllPlayersId.Index, member.MongoId.ToVariant);
         c.SetValue(rec_count - 1, gridAllPlayersName.Index, member.Displayname);
         c.SetValue(rec_count - 1, gridAllPlayersChips.Index, member.Chips / 100);
@@ -210,61 +213,71 @@ begin
   end;
 end;
 
-procedure TfrmTournamentLobby.UpdateTournamentStateLabel;
+function MinutesToString(const AMinutes: UINT32): String;
 var
-  tournament: TTournamentInfo;
-  cap: String;
+  minutes: UINT32;
+  d, m, h: Integer;
 begin
-  if Tournaments.GetAndLock(FTournamentId, tournament) then
-  try
-    case tournament.State of
-      tnsOpen: cap := 'Open';
-      tnsInProgress: cap := 'Running';
-      tnsCancelled: cap := 'Cancelled';
-      tnsOnBreak: begin
-        cap := Format('Break (%.2d:%.2d left)', [tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60]);
-      end;
-      tnsStarting: cap := 'Starting';
-      tnsFinished: cap := 'Finished';
-    end;
-  finally
-    Tournaments.Unlock;
-  end;
+  minutes := AMinutes;
+  d := minutes div 1440;
+  minutes := minutes mod 1440;
+  h := minutes div 60;
+  minutes := minutes mod 60;
+  m := minutes;
 
-  lbvTournamentState.Caption := cap;
+  if d > 0 then
+  begin
+    if d = 1 then
+      result := Format('1 day, %.2d:%.2d', [h, m])
+    else
+      result := Format('%d days, %.2dh:%.2dm', [d, h, m]);
+  end
+  else
+    result := Format('%.2dh:%.2dm', [h, m]);
 end;
 
-procedure TfrmTournamentLobby.UpdateBlindLevelLabel;
+procedure TfrmTournamentLobby.UpdateTournamentLabels;
 var
   tournament: TTournamentInfo;
+  subsubvisible: Boolean;
+  minutes: UINT32;
 begin
+  subsubvisible := FALSE;
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
-    if tournament.State = tnsInProgress then
-    begin
-      if tournament.CurrentBlindLevel < UINT32(tournament.BlindStructure.Count) then
-        if tournament.CurrentBlindLevel = UINT32(tournament.BlindStructure.Count - 1) then
-          lbvCurrentBlindLevel.Caption := Format('%d / %d', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb])
+    // subheader & sub sub header
+    case tournament.State of
+      tnsOpen: begin
+        minutes := MinutesBetween(TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)), Now);
+        lbsSubHeader.Caption := Format('Open (starts in %s)', [MinutesToString(minutes)]);
+
+        lbvSubSubHeader.Caption := Format('Registerd players: %d / %d', [tournament.RegisteredPlayers, tournament.Maxplayers]);
+        subsubvisible := TRUE;
+      end;
+      tnsInProgress: begin
+        minutes := MinutesBetween(Now, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)));
+        lbsSubHeader.Caption := Format('Running (%s)', [MinutesToString(minutes)]);
+
+        if tournament.CurrentBlindLevel < UINT32(tournament.BlindStructure.Count) then
+          if tournament.CurrentBlindLevel = UINT32(tournament.BlindStructure.Count - 1) then
+            lbvSubSubHeader.Caption := Format('Current blinds: %d / %d', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb])
+          else
+            lbvSubSubHeader.Caption := Format('Current blinds: %d / %d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
+                tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60])
         else
-          lbvCurrentBlindLevel.Caption := Format('%d / %d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
-              tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60])
-      else
-      begin
-        lbvCurrentBlindLevel.Caption := '';
-        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid current blind level: %d', [tournament.CurrentBlindLevel]), ditException); {$ENDIF}
+        begin
+          lbvSubSubHeader.Caption := '';
+          {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid current blind level: %d', [tournament.CurrentBlindLevel]), ditException); {$ENDIF}
+        end;
+        subsubvisible := TRUE;
       end;
-      if not lbsCurrentBlindLevel.Visible then
-      begin
-        lbsCurrentBlindLevel.Visible := TRUE;
-        lbvCurrentBlindLevel.Visible := TRUE;
-      end;
-    end
-    else
-      if lbsCurrentBlindLevel.Visible then
-      begin
-        lbsCurrentBlindLevel.Visible := FALSE;
-        lbvCurrentBlindLevel.Visible := FALSE;
-      end;
+      tnsCancelled: lbsSubHeader.Caption := 'Cancelled';
+      tnsOnBreak: lbsSubHeader.Caption := Format('Break (%.2d:%.2d left)', [tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60]);
+      tnsStarting: lbsSubHeader.Caption := 'Starting';
+      tnsFinished: lbsSubHeader.Caption := 'Finished';
+    end;
+
+    lbvSubSubHeader.Visible := subsubvisible;
   finally
     Tournaments.Unlock;
   end;
@@ -541,8 +554,7 @@ begin
   UpdateTablesGrid;
   UpdateBlindsStructureGrid;
   UpdateFormData;
-  UpdateTournamentStateLabel;
-  UpdateBlindLevelLabel;
+  UpdateTournamentLabels;
 end;
 
 
