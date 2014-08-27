@@ -387,9 +387,13 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 	}.bind(this));
 };
 Game.prototype.handOver = function (cb,handid) {
+	this.log('handOver start');
 	if (this.club) this.club.handOver(this,cb);
 	else if (this.tourn) {
-		this.tourn.handOver(this,cb);
+		this.tourn.handOver(this,function () {
+			this.log('handOver end');
+			cb();
+		}.bind(this));
 	} else cb();
 	if (handid) {
 		var gameRow = this.obj; // FIXME
@@ -809,7 +813,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 	case 'tsFlop':
 	case 'tsTurn':
 	case 'tsRiver':
-		priv.conn.log('normal fold state %s',this.state);
+		this.log('normal fold state %s',this.state);
 		for (x=0; x<this.pots.length; x++) {
 			//priv.conn.log('folding seat %d, pots:%j',seat,this.pots[x].members);
 			var idx = this.pots[x].members.indexOf(seat);
@@ -945,7 +949,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 
 		// redo
 		var rake = Math.round(pot.value * (this.rake / 100));
-		if (pot.trueMembers.length == 0) console.log('pots are',this.pots);
+		if (pot.trueMembers.length == 0) this.log('pots are',this.pots);
 		assert(pot.trueMembers.length > 0);
 		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
@@ -989,6 +993,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	//this.log('doWin',this.pots,this.members); // the timer breaks JSON stringify
 	this.pots = [ new Pot(this) ];
 	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
+		this.log('checking winner %j ',winnerObj,this.seats);
 		var seat = winnerObj.seat;
 		var userid = this.seats[seat].userid;
 		var gain = wins[seat];
@@ -2168,7 +2173,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 			if (this.tourn) {
 				this.members[seatIdx].autoplay = true;
 			} else {
-				this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid),5 * 60 * 1000);
+				this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid,'DC'),5 * 60 * 1000);
 			}
 			var fakeconn = {log:lazy.ClientSocket.prototype.log,userid:userid, nick:this.seats[seatIdx].conn.nick};
 			this.seats[seatIdx].conn = fakeconn;
@@ -2381,7 +2386,7 @@ Game.prototype.resume = function (game,cb) {
 		for (var x=0; x<game.members.length; x++) {
 			var item = game.members[x];
 			var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show };
-			pubSeat.disconnectTimer = setTimeout(this.eject.bind(this,item.seat,item.userid),5 * 60 * 1000);
+			pubSeat.disconnectTimer = setTimeout(this.eject.bind(this,item.seat,item.userid,'resume'),5 * 60 * 1000);
 			var privSeat = {conn:{log:lazy.ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
 			pubSeat.hand.cards = item.hand.cards;
 			this.members[item.seat] = pubSeat;
