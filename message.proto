@@ -60,6 +60,7 @@ enum ServerCodes {
 	seTournamentList = 59;
 	seUserChange = 60;
 	seTournamentPlayerFinished = 61;
+	seTournamentMovePlayer = 62;
 	
 	scHello = 70;
 	scLogin = 71;
@@ -716,4 +717,11 @@ message TableMessage {
 	
 	required TableMessageType message = 1;
 	optional uint64 end_time = 2;
+}
+message TournamentPlayerTransfer {
+	required bytes game_source = 1 [(ObjectId)=true];
+	required bytes game_destination = 2 [(ObjectId)=true];
+	required bytes user_id = 3 [(ObjectId)=true];
+	required uint32 seat_source = 4;
+	required uint32 seat_destination = 5;
 }
