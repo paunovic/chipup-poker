@@ -3999,7 +3999,7 @@ object frmChipUpMain: TfrmChipUpMain
               Properties.UseLeftAlignmentOnEditing = False
               HeaderAlignmentHorz = taCenter
               SortIndex = 0
-              SortOrder = soAscending
+              SortOrder = soDescending
               Width = 92
             end
             object gridTournamentsName: TcxGridColumn

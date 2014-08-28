@@ -396,7 +396,8 @@ begin
         largest_stack := 0;
         avg_stack := 0;
         for member in tournament.Players do
-          if member.Gameid = game.MongoId then
+          if (member.Gameid = game.MongoId) and
+             (member.Chips > 0) then
           begin
             total_stack := total_stack + member.Chips;
             if (member.Chips < smallest_stack) or

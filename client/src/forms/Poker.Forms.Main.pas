@@ -192,6 +192,7 @@ type
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
+    procedure CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -231,7 +232,7 @@ uses
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
-  Poker.Protobufs.Objects.TournamentMember;
+  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -263,6 +264,7 @@ begin
                       TServerMessageCallback.Create(srTournamentOpenTable, CSRTournamentOpenTable),
                       TServerMessageCallback.Create(seTournamentPlayerFinished, CSETournamentPlayerFinished),
                       TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
+                      TServerMessageCallback.Create(seTournamentPlayerTransfer, CSETournamentPlayerTransfer),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -1272,6 +1274,27 @@ begin
 
   if msg <> '' then
     MessageDlg(msg, mtInformation, [mbOk], 0);
+end;
+
+procedure TfrmChipUpMain.CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
+var
+  pbtransfer: TPB_TournamentPlayerTransfer;
+  table: TTAble;
+begin
+  if not TTypes.TryCast<TPB_TournamentPlayerTransfer>(AObject, pbtransfer) then
+    Exit;
+
+  if pbtransfer.UserId = dmMain.SelfInfo.MongoId then
+  begin
+    if not Tables.GetAndLockTable(pbtransfer.GameSource, ttTournament, table) then
+      Tables.AddTournamentTable(pbtransfer.GameDestination, TRUE, FALSE)
+    else
+      try
+        table.Transfer(pbtransfer);
+      finally
+        Tables.Unlock;
+      end;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSEUserChange(const AMethodId: Integer; const AObject: TObject);

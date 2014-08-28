@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
   Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.TableEvent;
+  Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.TournamentPlayerTransfer;
 
 type
   TTable = class
@@ -60,8 +60,8 @@ type
     procedure Show;
 
     function UpdateObjects: Boolean;
-
     function GetTableCaption: String;
+    procedure Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer);
 
     property InternalId: Integer read FInternalId;
     property TableType: TTableType read FTableType;
@@ -289,6 +289,12 @@ begin
   if Assigned(FForm) then
     BringToFront;
   FHidden := FALSE;
+end;
+
+procedure TTable.Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer);
+begin
+  FGameId := ATournamentPlayerTransfer.GameDestination;
+  UpdateObjects;
 end;
 
 function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
@@ -637,6 +643,7 @@ end;
 procedure TTable.ConfigureActions;
 var
   seat: TSeatInfo;
+  fgwnd: HWND;
 begin
   FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
@@ -699,7 +706,10 @@ begin
 
               tsPreFlop, tsFlop, tsTurn, tsRiver: begin
                 FStatus.ActionFold := TRUE;
-                FStatus.FocusWindow := TRUE;
+
+                fgwnd := GetForegroundWindow;
+                if (IsWindowVisible(fgwnd)) and (not IsIconic(fgwnd)) and (IsZoomed(fgwnd)) then // make sure to not focus if some fullscreen window is active
+                  FStatus.FocusWindow := TRUE;
 
                 // check if our current bet is smaller than minimumbet (call/raise situation)
                 if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
