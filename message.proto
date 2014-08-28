@@ -60,7 +60,7 @@ enum ServerCodes {
 	seTournamentList = 59;
 	seUserChange = 60;
 	seTournamentPlayerFinished = 61;
-	seTournamentMovePlayer = 62;
+	seTournamentPlayerTransfer = 62;
 	
 	scHello = 70;
 	scLogin = 71;
