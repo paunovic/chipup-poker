@@ -34,6 +34,7 @@ function Tournament(obj) {
 	this.obj.blind_schedule.LevelLength = parseInt(this.obj.blind_schedule.LevelLength);
 	assert.equal(typeof this.obj.blind_schedule.LevelLength,'number');
 	this.breakmin = 55;
+	this.transferLock = new ReadWriteLock();
 }
 
 Tournament.create = function (obj,cb) {
@@ -84,7 +85,7 @@ Tournament.prototype.startGames = function () {
 			error.handleError(err);
 			this.emit('state_changed',this);
 			core.emit('state_changed',this);
-			this.emit('tournament_start',this.obj);
+			this.emit('tournament_start',this);
 			this.currentLevel = -1;
 			this.nextLevel();
 		}.bind(this));
@@ -272,7 +273,7 @@ Tournament.prototype.handOver = function (game,cb) {
 		}
 	}
 	if (players_remaining == 1) {
-		this.obj.state = 'tnsFinished'; // FIXME, count all tables
+		this.obj.state = 'tnsFinished';
 		saveChanges.call(this);
 	} else {
 		var counts = [];
@@ -287,42 +288,41 @@ Tournament.prototype.handOver = function (game,cb) {
 			counts[x] = {count:players,id:this.tables[x].id};
 			total += players;
 		}
-		console.log('counts:%j total:%d',counts,total);
-		console.log('capacity:%d',this.obj.seats_per_table);
+		//console.log('counts:%j total:%d',counts,total);
 		var minTables = Math.ceil(total/this.obj.seats_per_table);
 		var remainder = total % this.obj.seats_per_table;
 		console.log('minTables:%d remainder:%d',minTables,remainder);
-		var avgPerTable = Math.floor(total/this.tables.length);
-		console.log('avg per table:%d',avgPerTable);
-		var targetPlayers = Math.floor(total/minTables);
+		var targetPlayers = Math.floor(total/this.tables.length); // should be minTables
 		console.log('avg per table2:%d',targetPlayers);
-		if (players_at_this_table > targetPlayers) {
+		if (players_at_this_table > targetPlayers /*|| true*/) {
 			console.log('current table is too full');
 			for (var x=0; x<counts.length; x++) {
-				if (counts[x].count < targetPlayers) {
+				if (counts[x].count < targetPlayers /*|| (this.tables[x] != game)*/) {
 					console.log('table %j is too empty',counts[x]);
 					if (this.tables[x].Lock.readers != 0) {
 						console.log('but its locked, waiting');
 						continue;
 					}
-					this.tables[x].Lock.writeLock(function (release) {
-						var tbl = this.tables[x];
-						console.log('time to find a seat dealer:%d',tbl.dealer);
-						var seat = tbl.dealer;
+					var table_dest = this.tables[x];
+					var table_source = game;
+					table_dest.Lock.writeLock(function (release) {
+						console.log('time to find a seat dealer:%d',table_dest.dealer);
+						var seat = table_dest.dealer;
 						var pos = 0;
 						var holes = [];
-						for (var y=0; y<tbl.obj.seats; y++) {
+						for (var y=0; y<table_dest.obj.seats; y++) {
 							//console.log('seat:%d pos:%d y:%d ',seat,pos,y,tbl.members[seat]);
-							if (tbl.members[seat]) {
+							if (table_dest.members[seat]) {
 								pos++;
 							} else {
 								holes.push({seat:seat,position:pos});
 							}
 							seat++;
-							if (seat >= tbl.obj.seats) seat -= tbl.obj.seats;
+							if (seat >= table_dest.obj.seats) seat -= table_dest.obj.seats;
 						}
 						console.log('holes:%j',holes);
-						seat = tbl.dealer;
+						seat = table_dest.dealer;
+						seat = 0;
 						pos = 0;
 						var candidates = [];
 						for (var y=0; y<game.obj.seats; y++) {
@@ -344,19 +344,45 @@ Tournament.prototype.handOver = function (game,cb) {
 							if (obj.pos < 2) continue;
 							var tseat = candidates[y].seat_destination;
 							var oseat = candidates[y].seat_source;
+							table_source.paused = true;
 
-							tbl.log('moving player %s into seat %d',game.seats[oseat].conn.nick,tseat);
-							tbl.members[candidates[y].seat_destination] = game.members[candidates[y].seat_source];
-							tbl.seats[candidates[y].seat_destination] = game.seats[candidates[y].seat_source];
-							tbl.members[tseat].status = 'psOutOfHand';
-							tbl.members[tseat].seat = tseat;
-							tbl.lastplayer[tseat] = tbl.seats[tseat].userid;
-							var event = tbl.makeEvent('teSit',candidates[y].seat_destination);
-							this.user_table_xref[tbl.seats[candidates[y].seat_destination].userid] = tbl.obj._id;
-							game.log('moving player %s from seat %d out',game.seats[oseat].conn.nick,oseat);
-							game.standUp(game.seats[obj.seat_source].conn,function (folded,events,offset) {
-								game.broadcastStatus(null,true,events);
-								tbl.broadcastStatus(null,true,[event]);
+							table_dest.log('moving player %s into seat %d',table_source.seats[oseat].conn.nick,tseat);
+							table_dest.members[tseat] = table_source.members[oseat];
+							table_dest.seats[tseat] = table_source.seats[oseat];
+							table_dest.members[tseat].status = 'psOutOfHand';
+							table_dest.members[tseat].seat = tseat;
+							table_dest.lastplayer[tseat] = table_dest.seats[tseat].userid;
+							var event = table_dest.makeEvent('teSit',tseat);
+							this.user_table_xref[table_dest.seats[tseat].userid] = table_dest.obj._id;
+
+							var pub = table_dest.members[tseat];
+							var userid = table_dest.seats[tseat].userid;
+
+							if (pub.disconnected) {
+								for (var x=0; x<table_source.reconnect.length; x++) {
+									if (myutils.compareObjectID(userid,table_source.reconnect[x])) {
+										table_source.reconnect.splice(x,1);
+									}
+								}
+								table_dest.reconnect.push(userid);
+							} else {
+								table_dest.users[table_dest.seats[tseat].userid] = table_dest.seats[tseat].conn;
+								delete table_source.users[table_dest.seats[tseat].userid];
+							}
+							table_source.log('moving player %s from seat %d out',table_source.seats[oseat].conn.nick,oseat);
+							table_source.standUp(table_source.seats[oseat].conn,function (folded,events,offset) {
+								var obj = { game_source:table_source.id, game_destination:table_dest.id, user_id:table_dest.seats[tseat].userid, seat_source:oseat, seat_destination:tseat };
+								for (var key in table_source.users) {
+									if (!table_source.users[key]) continue;
+									table_source.users[key].send(codes.seTournamentPlayerTransfer,obj,'Poker.TournamentPlayerTransfer');
+								}
+								for (var key in table_dest.users) {
+									if (!table_dest.users[key]) continue;
+									table_dest.users[key].send(codes.seTournamentPlayerTransfer,obj,'Poker.TournamentPlayerTransfer');
+								}
+								table_source.broadcastStatus(null,true,events);
+								table_dest.broadcastStatus(null,true,[event]);
+								setTimeout(this.postTransfer.bind(this,table_source,table_dest,oseat,tseat),5000);
 								release();
 								saveChanges.call(this);
 							}.bind(this));
@@ -372,6 +398,21 @@ Tournament.prototype.handOver = function (game,cb) {
 		}
 		saveChanges.call(this);
 	}
+};
+Tournament.prototype.postTransfer = function (table_source,table_dest,oseat,tseat) {
+	table_source.Lock.writeLock(function (release) {
+		table_source.paused = false;
+		if (table_source.state == 'tsIdle') {
+			var events = [];
+			table_source.stateMachine(function (events) {
+				console.log('events:%j',events);
+				table_source.broadcastStatus(null,true,events);
+				release();
+			},null,{silent:true},events,0);
+		} else {
+			release();
+		}
+	}.bind(this));
 };
 Tournament.prototype.countPlayers = function (tbl) {
 	var count = 0;
@@ -601,6 +642,7 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 						tourn.obj.save(function (err) {
 							if (err) return console.log(err.red);
 							this.emit('tournament_start',tourn.obj);
+							tourn.emit('tournament_start',tourn);
 							cb();
 						}.bind(this));
 					}.bind(this));

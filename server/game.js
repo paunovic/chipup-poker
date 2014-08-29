@@ -1652,11 +1652,17 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			});
 			return;
 		}
-		if (this.tourn && this.tourn.onBreak) {
-			this.tourn.break_start(this,function () {
+		if (this.tourn) {
+			if (this.tourn.onBreak) {
+				this.tourn.break_start(this,function () {
+					cb(events);
+				});
+				return;
+			}
+			if (this.paused) {
 				cb(events);
-			});
-			return;
+				return;
+			}
 		}
 		var havechips = 0;
 		var emptyseat = false;
@@ -2184,7 +2190,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		} else finish.call(this);
 	}.bind(this));
 }
-Game.prototype.eject = function (seatIdx,userid) {
+Game.prototype.eject = function (seatIdx,userid,reason) {
 	assert(userid);
 	this.Lock.writeLock(function (release) {
 		this.standUp(this.seats[seatIdx].conn,function eject_locked(folded,events,offset) {
