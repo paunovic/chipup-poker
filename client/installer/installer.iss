@@ -32,7 +32,7 @@ PrivilegesRequired=none
 [Files]
 Source: "skins\VclStylesInno.dll"; DestDir: "{app}"; Flags: uninsneveruninstall ignoreversion
 Source: "skins\{#SkinName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "files\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "files\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Permissions: everyone-full
    
 [Icons]
 Name: "{code:StartMenuPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
