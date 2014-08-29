@@ -1226,6 +1226,7 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 			tourn.removeListener('handOver',this.hook);
 			tourn.removeListener('users_changed',this.hook);
 			tourn.removeListener('state_changed',this.hook);
+			tourn.removeListener('tournament_start',this.hook);
 			this.hook = null;
 		}
 	}.bind(this));
@@ -1252,6 +1253,7 @@ ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,
 				tourn.on('handOver',this.hook);
 				tourn.on('users_changed',this.hook);
 				tourn.on('state_changed',this.hook);
+				tourn.on('tournament_start',this.hook);
 			}
 			var out = tourn.toProto({games:true,players:true});
 			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
