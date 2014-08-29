@@ -59,6 +59,7 @@ type
     seTournamentList = 59,
     seUserChange = 60,
     seTournamentPlayerFinished = 61,
+    seTournamentPlayerTransfer = 62,
     scHello = 70,
     scLogin = 71,
     scTournamentRegister = 72,
@@ -185,6 +186,7 @@ begin
     seTournamentList: result := 'seTournamentList';
     seUserChange: result := 'seUserChange';
     seTournamentPlayerFinished: result := 'seTournamentPlayerFinished';
+    seTournamentPlayerTransfer: result := 'seTournamentPlayerTransfer';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
     scTournamentRegister: result := 'scTournamentRegister';

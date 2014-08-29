@@ -141,6 +141,7 @@ type
     procedure WndProc(var AMessage: TMessage); override;
   public
     constructor Create(const AInternalId: Integer); reintroduce;
+    procedure ChangeGameId(const AGameId: TMongoId);
   end;
 
 implementation
@@ -782,6 +783,11 @@ begin
     end;
     ceServerMessage: ;
   end;
+end;
+
+procedure TfrmTable.ChangeGameId(const AGameId: TMongoId);
+begin
+  FGameId := AGameId;
 end;
 
 procedure TfrmTable.CheckChatScrollbackLimit;

@@ -184,7 +184,8 @@ uses
   Poker.Protobufs.Objects.TournamentPlayerFinished in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas',
   Poker.Protobufs.Objects.GameBlinds in 'modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas',
   Poker.Protobufs.Objects.TableMessage in 'modules\protobufs\objects\Poker.Protobufs.Objects.TableMessage.pas',
-  Poker.Common.SafeMutex in 'modules\common\Poker.Common.SafeMutex.pas';
+  Poker.Common.SafeMutex in 'modules\common\Poker.Common.SafeMutex.pas',
+  Poker.Protobufs.Objects.TournamentPlayerTransfer in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas';
 
 procedure FocusApp;
 var

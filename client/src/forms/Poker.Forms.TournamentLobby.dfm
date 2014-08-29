@@ -2656,7 +2656,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     end
     object lbvSubSubHeader: TcxLabel
       Left = 1
-      Top = 118
+      Top = 116
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
       ParentFont = False
@@ -2674,7 +2674,7 @@ object frmTournamentLobby: TfrmTournamentLobby
       Height = 19
       Width = 875
       AnchorX = 439
-      AnchorY = 128
+      AnchorY = 126
     end
     object lbsSubHeader: TcxLabel
       Left = 1
@@ -2849,8 +2849,8 @@ object frmTournamentLobby: TfrmTournamentLobby
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Height = 24
-    Width = 240
-    AnchorX = 127
+    Width = 241
+    AnchorX = 128
     AnchorY = 157
   end
   object lbsTournamentTables: TcxLabel
@@ -2871,7 +2871,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Height = 24
-    Width = 393
+    Width = 394
     AnchorX = 445
     AnchorY = 157
   end

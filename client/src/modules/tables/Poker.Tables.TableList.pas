@@ -33,6 +33,7 @@ type
     function GetAndLockTable(const AMongoId: TMongoId; const ATableType: TTableType; out ATable: TTable): Boolean; overload;
     procedure UpdateGameObject(const AGameId: TMongoId);
     procedure UpdateClubObject(const AClubId: TMongoId);
+    function ContainsMongoId(const AMongoId: TMongoId): Boolean;
 
     procedure ClearWithoutNotification;
 
@@ -260,6 +261,16 @@ begin
   finally
     to_remove.Free;
   end;
+end;
+
+function TTableList.ContainsMongoId(const AMongoId: TMongoId): Boolean;
+var
+  table: TTable;
+begin
+  for table in Values do
+    if table.GameId = AMongoId then
+      Exit(TRUE);
+  Exit(FALSE);
 end;
 
 procedure TTableList.DisableAll;
