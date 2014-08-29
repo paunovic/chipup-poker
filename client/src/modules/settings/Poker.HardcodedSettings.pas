@@ -89,7 +89,7 @@ type
         // assets paths
         ASSETS: (
           DIRECTORY: 'assets\';
-          DIRECTX_MEDIA: 'dxmedia.dat';
+          DIRECTX_MEDIA: 'dxmedia.cpa';
         );
 
         // check these files for update
