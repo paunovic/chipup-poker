@@ -52,6 +52,10 @@ Name: desktopicon; Description: "&Desktop shortcut"; GroupDescription: "Shortcut
 Name: quicklaunch; Description: "&Quick launch shortcut"; GroupDescription: "Shortcuts:"
 Name: startmenu; Description: "&Start menu shortcut"; GroupDescription: "Shortcuts:"
 
+[UninstallDelete]
+Type: files; Name: "{app}\assets\*.cpa"
+Type: dirifempty; Name: "{app}\assets"
+
 [Messages]
 WizardSelectTasks=Select Tasks
 SelectTasksDesc=Which tasks should be performed?
@@ -145,7 +149,7 @@ end;
 
 function CurrentUserInstallPath: String;
 begin
-  result := ExpandConstant('{userpf}\{#ApplicationName}');
+  result := ExpandConstant('{userappdata}\Programs\{#ApplicationName}');
 end;
 
 function AllUsersInstallPath: String;
