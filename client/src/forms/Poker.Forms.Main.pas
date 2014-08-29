@@ -1279,7 +1279,7 @@ end;
 procedure TfrmChipUpMain.CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
 var
   pbtransfer: TPB_TournamentPlayerTransfer;
-  table: TTAble;
+  table: TTable;
 begin
   if not TTypes.TryCast<TPB_TournamentPlayerTransfer>(AObject, pbtransfer) then
     Exit;
@@ -1290,7 +1290,10 @@ begin
       Tables.AddTournamentTable(pbtransfer.GameDestination, TRUE, FALSE)
     else
       try
-        table.Transfer(pbtransfer);
+        if not Tables.ContainsMongoId(pbtransfer.GameDestination) then
+          table.Transfer(pbtransfer)
+        else
+          Tables.Remove(table.InternalId);
       finally
         Tables.Unlock;
       end;

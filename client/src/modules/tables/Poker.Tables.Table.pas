@@ -227,7 +227,6 @@ begin
       finally
         Tournaments.Unlock;
       end;
-
     end;
   else
     result := FALSE;
@@ -294,6 +293,8 @@ end;
 procedure TTable.Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer);
 begin
   FGameId := ATournamentPlayerTransfer.GameDestination;
+  if Assigned(FForm) then
+    (FForm as TfrMTable).ChangeGameId(FGameId);
   UpdateObjects;
 end;
 

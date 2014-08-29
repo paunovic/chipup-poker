@@ -251,7 +251,7 @@ begin
         minutes := MinutesBetween(TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)), Now);
         lbsSubHeader.Caption := Format('Open (starts in %s)', [MinutesToString(minutes)]);
 
-        lbvSubSubHeader.Caption := Format('Registerd players: %d / %d', [tournament.RegisteredPlayers, tournament.Maxplayers]);
+        lbvSubSubHeader.Caption := Format('Registered players: %d / %d', [tournament.RegisteredPlayers, tournament.Maxplayers]);
         subsubvisible := TRUE;
       end;
       tnsInProgress: begin
