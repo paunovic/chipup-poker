@@ -3952,7 +3952,7 @@ object frmChipUpMain: TfrmChipUpMain
         object gridTournaments: TcxGrid
           Left = 155
           Top = 34
-          Width = 461
+          Width = 467
           Height = 391
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 1
@@ -4007,7 +4007,7 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
-              Styles.Content = styleTournamentName
+              Styles.OnGetContentStyle = gridTournamentsNameStylesGetContentStyle
               Width = 215
             end
             object gridTournamentsPlayers: TcxGridColumn
@@ -4031,18 +4031,6 @@ object frmChipUpMain: TfrmChipUpMain
             GridView = gridTournamentsTable
           end
         end
-        object rvTournamentInfo: TRichView
-          Left = 619
-          Top = 34
-          Width = 208
-          Height = 391
-          Anchors = [akTop, akRight, akBottom]
-          Color = 4539717
-          TabOrder = 2
-          BorderStyle = bsNone
-          DoInPaletteMode = rvpaCreateCopies
-          Style = RVStyle
-        end
         object btTournamentLobby: TcxButton
           Left = 10
           Top = 390
@@ -4055,7 +4043,7 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 3
+          TabOrder = 2
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -4078,13 +4066,157 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 4
+          TabOrder = 3
           Font.Charset = DEFAULT_CHARSET
           Font.Color = 51712
           Font.Height = -11
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+        end
+        object paTournamentInfo: TPanel
+          Left = 624
+          Top = 32
+          Width = 203
+          Height = 391
+          BevelOuter = bvNone
+          Color = clBlack
+          ParentBackground = False
+          TabOrder = 4
+          object lbvTournamentName: TcxLabel
+            AlignWithMargins = True
+            Left = 0
+            Top = 34
+            Margins.Left = 0
+            Margins.Top = 10
+            Margins.Right = 0
+            Margins.Bottom = 0
+            Align = alTop
+            AutoSize = False
+            Caption = 'Sunday'#39's Night Extravaganza'
+            ParentFont = False
+            Style.Font.Charset = DEFAULT_CHARSET
+            Style.Font.Color = clWindowText
+            Style.Font.Height = -13
+            Style.Font.Name = 'Arial'
+            Style.Font.Style = [fsBold, fsItalic]
+            Style.TextColor = 4883967
+            Style.IsFontAssigned = True
+            Properties.Alignment.Horz = taCenter
+            Properties.WordWrap = True
+            Height = 36
+            Width = 203
+            AnchorX = 102
+          end
+          object lbvTournamentInfo: TcxLabel
+            Left = 0
+            Top = 119
+            Align = alTop
+            AutoSize = False
+            Caption = '1500 starting chips'
+            ParentFont = False
+            Style.Font.Charset = DEFAULT_CHARSET
+            Style.Font.Color = clWindowText
+            Style.Font.Height = -12
+            Style.Font.Name = 'Arial'
+            Style.Font.Style = [fsBold]
+            Style.TextColor = 15329769
+            Style.IsFontAssigned = True
+            Properties.Alignment.Horz = taCenter
+            Properties.WordWrap = True
+            Height = 62
+            Width = 203
+            AnchorX = 102
+          end
+          object lbvTournamentGameType: TcxLabel
+            Left = 0
+            Top = 95
+            Align = alTop
+            AutoSize = False
+            Caption = 'No Limit Holdem, 6-max'
+            ParentFont = False
+            Style.Font.Charset = DEFAULT_CHARSET
+            Style.Font.Color = clWindowText
+            Style.Font.Height = -12
+            Style.Font.Name = 'Arial'
+            Style.Font.Style = [fsBold]
+            Style.TextColor = 9549311
+            Style.IsFontAssigned = True
+            Properties.Alignment.Horz = taCenter
+            Properties.WordWrap = True
+            Height = 24
+            Width = 203
+            AnchorX = 102
+          end
+          object lbvTournamentState: TcxLabel
+            Left = 0
+            Top = 70
+            Align = alTop
+            AutoSize = False
+            Caption = 'Running (25h:12m)'
+            ParentFont = False
+            Style.Font.Charset = DEFAULT_CHARSET
+            Style.Font.Color = clWindowText
+            Style.Font.Height = -12
+            Style.Font.Name = 'Arial'
+            Style.Font.Style = [fsBold]
+            Style.TextColor = clYellow
+            Style.TextStyle = [fsBold]
+            Style.IsFontAssigned = True
+            Properties.Alignment.Horz = taCenter
+            Properties.WordWrap = True
+            ExplicitTop = 71
+            Height = 25
+            Width = 203
+            AnchorX = 102
+          end
+          object lbvTournamentDescription: TcxLabel
+            Left = 0
+            Top = 181
+            Align = alClient
+            AutoSize = False
+            Caption = 
+              'Join this tournament and receive hefty prizes! Lololo trolololo ' +
+              'bobobobobobo'
+            ParentFont = False
+            Style.Font.Charset = DEFAULT_CHARSET
+            Style.Font.Color = clWindowText
+            Style.Font.Height = -11
+            Style.Font.Name = 'Arial'
+            Style.Font.Style = [fsBold]
+            Style.TextColor = 13816530
+            Style.IsFontAssigned = True
+            Properties.Alignment.Horz = taCenter
+            Properties.WordWrap = True
+            ExplicitTop = 200
+            ExplicitHeight = 192
+            Height = 210
+            Width = 203
+            AnchorX = 102
+          end
+          object lbsTournamentDetails: TcxLabel
+            Left = 0
+            Top = 0
+            Align = alTop
+            AutoSize = False
+            Caption = 'Tournament Details'
+            ParentColor = False
+            ParentFont = False
+            Style.Color = 3487029
+            Style.Font.Charset = DEFAULT_CHARSET
+            Style.Font.Color = clWindowText
+            Style.Font.Height = -11
+            Style.Font.Name = 'Tahoma'
+            Style.Font.Style = [fsBold]
+            Style.TextColor = 14803425
+            Style.IsFontAssigned = True
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            Height = 24
+            Width = 203
+            AnchorX = 102
+            AnchorY = 12
+          end
         end
       end
     end
@@ -4658,24 +4790,60 @@ object frmChipUpMain: TfrmChipUpMain
     Top = 52
     PixelsPerInch = 96
     object styleTournamentOpen: TcxStyle
-      AssignedValues = [svColor]
-      Color = 6175255
+      AssignedValues = [svFont, svTextColor]
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clDefault
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      TextColor = 14062932
     end
     object styleTournamentInProgress: TcxStyle
-      AssignedValues = [svColor]
-      Color = 2844008
+      AssignedValues = [svFont, svTextColor]
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clDefault
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      TextColor = 6733249
     end
     object styleTournamentCancelled: TcxStyle
-      AssignedValues = [svColor]
-      Color = 108
+      AssignedValues = [svFont, svTextColor]
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clDefault
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      TextColor = 1118719
     end
     object styleTournamentFinished: TcxStyle
-      AssignedValues = [svColor]
-      Color = 1003277
+      AssignedValues = [svFont, svTextColor]
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clDefault
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      TextColor = 4251452
     end
     object styleTournamentName: TcxStyle
       AssignedValues = [svTextColor]
       TextColor = clWhite
     end
+    object styleTournamentNameRegistered: TcxStyle
+      AssignedValues = [svFont, svTextColor]
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      TextColor = 4227327
+    end
+  end
+  object tiTournamentInfoRefresh: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tiTournamentInfoRefreshTimer
+    Left = 736
+    Top = 52
   end
 end

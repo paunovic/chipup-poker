@@ -103,7 +103,7 @@ uses
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds,
-  Poker.Protobufs.Objects.TournamentList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus, System.DateUtils;
+  Poker.Protobufs.Objects.TournamentList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus, System.DateUtils, Poker.Common.Misc;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -211,29 +211,6 @@ begin
   finally
     c.EndFullUpdate;
   end;
-end;
-
-function MinutesToString(const AMinutes: UINT32): String;
-var
-  minutes: UINT32;
-  d, m, h: Integer;
-begin
-  minutes := AMinutes;
-  d := minutes div 1440;
-  minutes := minutes mod 1440;
-  h := minutes div 60;
-  minutes := minutes mod 60;
-  m := minutes;
-
-  if d > 0 then
-  begin
-    if d = 1 then
-      result := Format('1 day, %.2d:%.2d', [h, m])
-    else
-      result := Format('%d days, %.2dh:%.2dm', [d, h, m]);
-  end
-  else
-    result := Format('%.2dh:%.2dm', [h, m]);
 end;
 
 procedure TfrmTournamentLobby.UpdateTournamentLabels;

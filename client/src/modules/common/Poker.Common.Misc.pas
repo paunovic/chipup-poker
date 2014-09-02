@@ -36,6 +36,7 @@ function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
 procedure ShowWarningDialog(const AError: String);
+function MinutesToString(const AMinutes: UINT32): String;
 
 implementation
 
@@ -686,6 +687,29 @@ end;
 procedure ShowWarningDialog(const AError: String);
 begin
   MessageDlg(AError, mtWarning, [mbOK], 0);
+end;
+
+function MinutesToString(const AMinutes: UINT32): String;
+var
+  minutes: UINT32;
+  d, m, h: Integer;
+begin
+  minutes := AMinutes;
+  d := minutes div 1440;
+  minutes := minutes mod 1440;
+  h := minutes div 60;
+  minutes := minutes mod 60;
+  m := minutes;
+
+  if d > 0 then
+  begin
+    if d = 1 then
+      result := Format('1 day, %.2d:%.2d', [h, m])
+    else
+      result := Format('%d days, %.2dh:%.2dm', [d, h, m]);
+  end
+  else
+    result := Format('%.2dh:%.2dm', [h, m]);
 end;
 
 

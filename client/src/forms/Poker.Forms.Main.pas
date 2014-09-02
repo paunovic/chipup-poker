@@ -9,7 +9,7 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles,
   cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses,
   cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
-  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar;
+  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar, dxBevel;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -82,7 +82,6 @@ type
     gridTournamentsStartTime: TcxGridColumn;
     gridTournamentsStatus: TcxGridColumn;
     gridTournamentsLevel: TcxGridLevel;
-    rvTournamentInfo: TRichView;
     btTournamentLobby: TcxButton;
     RVStyle: TRVStyle;
     acTournamentLobby: TAction;
@@ -98,6 +97,15 @@ type
     acTournamentItemOpen: TAction;
     styleTournamentFinished: TcxStyle;
     styleTournamentName: TcxStyle;
+    paTournamentInfo: TPanel;
+    lbvTournamentName: TcxLabel;
+    lbvTournamentInfo: TcxLabel;
+    lbvTournamentGameType: TcxLabel;
+    lbvTournamentState: TcxLabel;
+    lbvTournamentDescription: TcxLabel;
+    lbsTournamentDetails: TcxLabel;
+    tiTournamentInfoRefresh: TTimer;
+    styleTournamentNameRegistered: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -145,6 +153,9 @@ type
     procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acTournamentItemOpenExecute(Sender: TObject);
     procedure acTournamentsOpenAllExecute(Sender: TObject);
+    procedure tiTournamentInfoRefreshTimer(Sender: TObject);
+    procedure gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -166,6 +177,7 @@ type
     procedure UpdateMenuActions;
     procedure UpdateFormCaption;
     procedure FillTournamentMenuList;
+    procedure UpdateTournamentInfo;
     procedure RefreshAll;
 
     procedure ShowTournamentLayout(const AShow: Boolean);
@@ -341,9 +353,9 @@ begin
   btTournamentsHeader.Left := btPublicClubs.Left;
   btTournamentsHeader.Width := btPublicClubs.Width + 3 + btPrivateClubs.Width;
   gridTournaments.Left := btTournamentsHeader.Left;
-  rvTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
-  rvTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
-  rvTournamentInfo.Height := gridTournaments.Height - 1;
+  paTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
+  paTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
+  paTournamentInfo.Height := gridTournaments.Height - 1;
 end;
 
 
@@ -387,8 +399,10 @@ begin
 
   btTournamentsHeader.Visible := AShow;
   gridTournaments.Visible := AShow;
-  rvTournamentInfo.Visible := AShow;
+  paTournamentInfo.Visible := AShow;
   btTournamentLobby.Visible := AShow;
+
+  tiTournamentInfoRefresh.Enabled := AShow;
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
@@ -421,6 +435,11 @@ begin
   end;
 
   {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
+end;
+
+procedure TfrmChipUpMain.tiTournamentInfoRefreshTimer(Sender: TObject);
+begin
+  UpdateTournamentInfo;
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
@@ -701,14 +720,70 @@ begin
     btTournamentRegister.Colors.PressedText := $0000BF00;
   end;
 
-  if Tournaments.GetAndLock(FSelectedTournament, tournament) then
-  try
-    rvTournamentInfo.Clear;
-    rvTournamentInfo.AddNL(tournament.Description, 0, 0);
-    rvTournamentInfo.Format;
-  finally
-    Tournaments.Unlock;
-  end;
+  UpdateTournamentInfo;
+end;
+
+procedure TfrmChipUpMain.UpdateTournamentInfo;
+var
+  tournament: TTournamentInfo;
+  minutes: Integer;
+  minutes_text, players_text: String;
+begin
+  if not Tournaments.GetAndLock(FSelectedTournament, tournament) then
+  begin
+    lbvTournamentName.Clear;
+    lbvTournamentState.Clear;
+    lbvTournamentGameType.Clear;
+    lbvTournamentInfo.Clear;
+    lbvTournamentDescription.Clear;
+  end
+  else
+    try
+      lbvTournamentName.Caption := tournament.Name;
+
+      case tournament.State of
+        tnsOpen: begin
+          lbvTournamentState.Style.TextColor := styleTournamentOpen.TextColor;
+          minutes := MinutesBetween(TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)), Now);
+          lbvTournamentState.Caption := Format('Starts in %s', [MinutesToString(minutes)]);
+        end;
+        tnsStarting, tnsInProgress, tnsOnBreak: begin
+          lbvTournamentState.Style.TextColor := styleTournamentInProgress.TextColor;
+          minutes := MinutesBetween(Now, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)));
+          if tournament.State = tnsOnBreak then
+            lbvTournamentState.Caption := Format('Running (%s, on break)', [MinutesToString(minutes)])
+          else
+            lbvTournamentState.Caption := Format('Running (%s)', [MinutesToString(minutes)]);
+        end;
+        tnsCancelled: begin
+          lbvTournamentState.Style.TextColor := styleTournamentCancelled.TextColor;
+          lbvTournamentState.Caption := 'Cancelled';
+        end;
+        tnsFinished: begin
+          lbvTournamentState.Style.TextColor := styleTournamentFinished.TextColor;
+          lbvTournamentState.Caption := 'Finished';
+        end;
+      end;
+
+      lbvTournamentGameType.Caption := Format('%s, %d-max', [TGameInfo.GameTypeToStr(tournament.GameType, tournament.Limit, FALSE), tournament.SeatsPerTable]);
+
+      if tournament.RegisteredPlayers = 1 then
+        players_text := 'player'
+      else
+        players_text := 'players';
+
+      if tournament.Timeperlevel = 1 then
+        minutes_text := 'minute'
+      else
+        minutes_text := 'minutes';
+
+      lbvTournamentInfo.Caption := Format('%d registered %s'#10'%d starting chips'#10'%d %s per level',
+        [tournament.RegisteredPlayers, players_text, tournament.Startingchips, tournament.Timeperlevel, minutes_text]);
+
+      lbvTournamentDescription.Caption := tournament.Description;
+    finally
+      Tournaments.Unlock;
+    end;
 end;
 
 function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
@@ -970,6 +1045,17 @@ begin
   end;
 
   UpdateGamelist;
+end;
+
+procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+var
+  mongoid: TMongoId;
+begin
+  mongoid := ARecord.Values[gridTournamentsId.Index];
+  if dmMain.SelfInfo.RegisteredTournaments.Contains(mongoid) then
+    AStyle := styleTournamentNameRegistered
+  else
+    AStyle := styleTournamentName;
 end;
 
 procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;

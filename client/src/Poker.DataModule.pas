@@ -53,7 +53,7 @@ type
 var
   dmMain: TdmMain;
   SelfPath: String;
-  AppDataPath: String;
+  UserDataPath: String;
 
 implementation
 
@@ -76,8 +76,8 @@ var
   server_index: Integer;
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-  AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
-  ForceDirectories(AppDataPath);
+  UserDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
+  ForceDirectories(UserDataPath);
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
@@ -85,8 +85,8 @@ begin
 
   LoadFonts;
 
-  TSettings.Initialize(AppDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
-  TDatabase.Initialize(AppDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
+  TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
@@ -213,12 +213,12 @@ var
   C1: Integer;
   pbts: TPB_TableStatus;
 begin
-  Avatars.Add(FSelfInfo.Avatar, nil);
   Players.LoadFromUsersProtobuf(ALoginReply.Users);
   Tournaments.Assign(ALoginReply.TournamentInfos);
   FSelfInfo.LoadFromLoginReply(ALoginReply);
   ProcessPlayerObject(ALoginReply);
   UpdateSelfInfoInPlayers;
+  Avatars.Add(FSelfInfo.Avatar, nil);
 
   FSelfInfo.RegisteredTournaments.Clear;
   FSelfInfo.RegisteredTournaments.AddRange(ALoginReply.RegisteredTournaments);
