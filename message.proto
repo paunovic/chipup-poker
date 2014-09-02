@@ -648,6 +648,7 @@ message TournamentMember {
 	required uint32 chips = 3;
 	optional bytes gameid = 4 [(ObjectId)=true];
 	optional int32 position = 5;
+	optional uint32 seat_index = 6;
 }
 
 message TournamentInfo {
