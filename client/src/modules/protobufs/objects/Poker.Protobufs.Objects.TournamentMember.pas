@@ -17,6 +17,7 @@ type
       kChipsFieldNumber = 3;
       kGameidFieldNumber = 4;
       kPositionFieldNumber = 5;
+      kSeatIndexFieldNumber = 6;
 
     var
       FId: TMongoId;
@@ -24,6 +25,7 @@ type
       FChips: UInt32;
       FGameid: TMongoId;
       FPosition: Integer;
+      FSeatIndex: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -41,6 +43,9 @@ type
     procedure set_has_Position;
     procedure clear_has_Position;
     procedure SetPosition(const AValue: Integer);
+    procedure set_has_SeatIndex;
+    procedure clear_has_SeatIndex;
+    procedure SetSeatIndex(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_TournamentMember; const ALightweight: Boolean = FALSE); overload;
@@ -74,6 +79,11 @@ type
     function has_Position: Boolean;
     procedure clear_Position;
     property Position: Integer read FPosition write SetPosition;
+
+    // optional uint32 SeatIndex = 6;
+    function has_SeatIndex: Boolean;
+    procedure clear_SeatIndex;
+    property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
 
   end;
 
@@ -131,6 +141,11 @@ begin
         FPosition := AProtobufReader.readInt32;
         set_has_Position;
       end;
+      kSeatIndexFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSeatIndex := AProtobufReader.readUInt32;
+        set_has_SeatIndex;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -148,6 +163,8 @@ begin
     SetGameid(AFrom.Gameid);
   if AFrom.has_Position then
     SetPosition(AFrom.Position);
+  if AFrom.has_SeatIndex then
+    SetSeatIndex(AFrom.SeatIndex);
 end;
 
 function TPB_TournamentMember.IsInitialized: Boolean;
@@ -320,6 +337,37 @@ begin
   set_has_Position;
 end;
 
+procedure TPB_TournamentMember.clear_SeatIndex;
+begin
+  FSeatIndex := 0;
+  clear_has_SeatIndex;
+end;
+
+function TPB_TournamentMember.has_SeatIndex: Boolean;
+begin
+  result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_TournamentMember.set_has_SeatIndex;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_TournamentMember.clear_has_SeatIndex;
+begin
+  _has_bits_ := _has_bits_ and not 32;
+end;
+
+procedure TPB_TournamentMember.SetSeatIndex(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_SeatIndex);
+  FSeatIndex := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kSeatIndexFieldNumber, AValue);
+  set_has_SeatIndex;
+end;
+
 procedure TPB_TournamentMember.Clear;
 begin
   if _has_bits_ = 0 then
@@ -330,6 +378,7 @@ begin
   clear_Chips;
   clear_Gameid;
   clear_Position;
+  clear_SeatIndex;
 end;
 
 procedure TPB_TournamentMemberList.Assign(const APB_TournamentMemberList: TList<TPB_TournamentMember>);
