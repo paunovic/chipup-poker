@@ -4093,7 +4093,6 @@ object frmChipUpMain: TfrmChipUpMain
             Margins.Bottom = 0
             Align = alTop
             AutoSize = False
-            Caption = 'Sunday'#39's Night Extravaganza'
             ParentFont = False
             Style.Font.Charset = DEFAULT_CHARSET
             Style.Font.Color = clWindowText
@@ -4113,7 +4112,6 @@ object frmChipUpMain: TfrmChipUpMain
             Top = 119
             Align = alTop
             AutoSize = False
-            Caption = '1500 starting chips'
             ParentFont = False
             Style.Font.Charset = DEFAULT_CHARSET
             Style.Font.Color = clWindowText
@@ -4133,7 +4131,6 @@ object frmChipUpMain: TfrmChipUpMain
             Top = 95
             Align = alTop
             AutoSize = False
-            Caption = 'No Limit Holdem, 6-max'
             ParentFont = False
             Style.Font.Charset = DEFAULT_CHARSET
             Style.Font.Color = clWindowText
@@ -4153,7 +4150,6 @@ object frmChipUpMain: TfrmChipUpMain
             Top = 70
             Align = alTop
             AutoSize = False
-            Caption = 'Running (25h:12m)'
             ParentFont = False
             Style.Font.Charset = DEFAULT_CHARSET
             Style.Font.Color = clWindowText
@@ -4165,7 +4161,6 @@ object frmChipUpMain: TfrmChipUpMain
             Style.IsFontAssigned = True
             Properties.Alignment.Horz = taCenter
             Properties.WordWrap = True
-            ExplicitTop = 71
             Height = 25
             Width = 203
             AnchorX = 102
@@ -4175,9 +4170,6 @@ object frmChipUpMain: TfrmChipUpMain
             Top = 181
             Align = alClient
             AutoSize = False
-            Caption = 
-              'Join this tournament and receive hefty prizes! Lololo trolololo ' +
-              'bobobobobobo'
             ParentFont = False
             Style.Font.Charset = DEFAULT_CHARSET
             Style.Font.Color = clWindowText
@@ -4188,8 +4180,6 @@ object frmChipUpMain: TfrmChipUpMain
             Style.IsFontAssigned = True
             Properties.Alignment.Horz = taCenter
             Properties.WordWrap = True
-            ExplicitTop = 200
-            ExplicitHeight = 192
             Height = 210
             Width = 203
             AnchorX = 102
@@ -4805,7 +4795,7 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
-      TextColor = 6733249
+      TextColor = 2685695
     end
     object styleTournamentCancelled: TcxStyle
       AssignedValues = [svFont, svTextColor]
