@@ -1,6 +1,6 @@
 'use strict';
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
+var Schema = mongoose.Schema, ObjectId = Schema.ObjectId, Mixed = Schema.Mixed;
 var assert = require('assert');
 
 mongoose.Types.ObjectId.prototype.toProtobuf = function () {
@@ -48,7 +48,8 @@ var DebugLogSchema = new Schema({
 	connid:Number,
 	objects:Array,
 	gameid:ObjectId,
-	name:String
+	name:String,
+	ip:String
 },{collection:'debugLogs',capped:1024 * 1024*32});
 
 var ProfileSchema = new Schema({
@@ -251,7 +252,8 @@ var TournamentMemberSchema = new Schema({
 	_id: ObjectId,
 	displayname: String,
 	chips: Number,
-	gameid: ObjectId
+	gameid: ObjectId,
+	seat_index: Number
 });
 var BlindRow = new Schema({
 	sb: { type:Number, required:true },
@@ -279,6 +281,10 @@ var TournamentSchema = new Schema({
 		LevelLength: { type:Number, required:true },
 		blinds: { type:[BlindRow], required:true }
 	} }
+});
+var TournamentLogSchema = new Schema({
+	tournament_id:ObjectId,
+	records: [ Mixed ]
 });
 
 module.exports.close = function () {
@@ -311,6 +317,7 @@ module.exports.open = function (dbname) {
 	models.Counter = mongoose.model('Counter',CounterSchema);
 	models.PaypalRequest = mongoose.model('PaypalRequest',PaypalRequestSchema);
 	models.Tournament = mongoose.model('Tournament',TournamentSchema);
+	models.TournamentLog = mongoose.model('TournamentLog',TournamentLogSchema);
 }
 
 if (require.main === module) {

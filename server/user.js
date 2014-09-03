@@ -290,12 +290,14 @@ ClientSocket.prototype.eject = function () {
 	this.send(codes.seSecondaryLoginDetected);
 };
 ClientSocket.prototype.log = function log(format) {
+	var ip = 'UNK';
+	if (this.socket && this.socket.remoteAddress) ip = this.socket.remoteAddress;
 	var out = Array.prototype.slice.call(arguments);
 	if (format.indexOf('%') != -1) {
 		out = [ util.format.apply(util,out) ];
 	}
-	process.send({type:'conn',nick:this.nick,connid:this.connid,ts:new Date().toString(),objects:out});
-	var obj = new models.DebugLogs({type:'conn',nick:this.nick,connid:this.connid,objects:out});
+	process.send({ip:ip,type:'conn',nick:this.nick,connid:this.connid,ts:new Date().toString(),objects:out});
+	var obj = new models.DebugLogs({ip:ip,type:'conn',nick:this.nick,connid:this.connid,objects:out});
 	obj.save(function (){});
 };
 ClientSocket.prototype.reply = function reply(code,message,type) {
@@ -401,7 +403,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 				if (toUpdate.length === 0) {
 					this.currentVersion = targetVersion._id;
 				} else {
-					console.log('toUpdate:%j',toUpdate);
+					console.log('%s toUpdate:%j',this.socket.remoteAddress,toUpdate);
 				}
 				if (mainfiles) {
 					msg = JSON.parse(JSON.stringify(global.sharedconfig));

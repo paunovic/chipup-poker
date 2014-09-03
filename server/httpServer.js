@@ -252,7 +252,9 @@ Server.prototype.getTournaments = function (req,res) {
 };
 Server.prototype.getTournament = function (req,res) {
 	models.Tournament.findById(req.query.id,function (err,row) {
-		res.render('tournament',{tourn:row});
+		models.TournamentLog.find({tournament_id:row._id}).sort({_id:1}).exec(function (err,logs) {
+			res.render('tournament',{ tourn:row, logs:logs });
+		});
 	});
 };
 Server.prototype.postTournament = function (req,res) {

@@ -386,14 +386,17 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 		}
 	}.bind(this));
 };
-Game.prototype.handOver = function (cb,handid) {
+Game.prototype.handOver = function (cb,handid,reason) {
 	this.log('handOver start');
 	if (this.club) this.club.handOver(this,cb);
 	else if (this.tourn) {
-		this.tourn.handOver(this,function () {
-			this.log('handOver end');
-			cb();
-		}.bind(this));
+		if (reason == 'updateCashOut') cb();
+		else {
+			this.tourn.handOver(this,function () {
+				this.log('handOver end');
+				cb();
+			}.bind(this));
+		}
 	} else cb();
 	if (handid) {
 		var gameRow = this.obj; // FIXME
@@ -1698,6 +1701,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 				}
 				if ((this.members[x].chips == 0) && this.tournament) {
 					to_kick.push(x);
+					this.tourn.bust(this.seats[x].userid);
 					continue;
 				}
 			}
@@ -1986,7 +1990,7 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 		error.handleError(err);
 		this.handOver(function () {
 			cb();
-		});
+		},null,'updateCashOut');
 	}.bind(this));
 }
 Game.prototype.standUp = function (conn,cb1,seatIdxIn) {

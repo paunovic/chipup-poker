@@ -1,4 +1,6 @@
 extends secure
+block header
+  script(src='/tournament.js')
 block content
   form(method="post")
     table(border=1)
@@ -31,3 +33,8 @@ block content
         td
           input(type="checkbox",name="resetChips")
     input(type="submit")
+  script.
+    var logs = !{JSON.stringify(logs)};
+  each log,idx in logs
+    p
+      a(href="#",onclick="selectLog("+idx+",this);return false")='open log #'+idx+'('+log.records.length+' items)'
