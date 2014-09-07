@@ -244,6 +244,7 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/tournaments',this.getTournaments.bind(this));
 	app.get('/secure/tournament',this.getTournament.bind(this));
 	app.post('/secure/tournament',this.postTournament.bind(this));
+	app.get('/secure/tournament_log',this.getTournamentLog.bind(this));
 };
 Server.prototype.getTournaments = function (req,res) {
 	models.Tournament.find(function (err,rows) {
@@ -255,6 +256,11 @@ Server.prototype.getTournament = function (req,res) {
 		models.TournamentLog.find({tournament_id:row._id}).sort({_id:1}).exec(function (err,logs) {
 			res.render('tournament',{ tourn:row, logs:logs });
 		});
+	});
+};
+Server.prototype.getTournamentLog = function (req,res) {
+	models.TournamentLog.findById(req.query.id,function (err,log) {
+		res.end(JSON.stringify(log));
 	});
 };
 Server.prototype.postTournament = function (req,res) {

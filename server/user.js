@@ -94,7 +94,9 @@ function ClientSocket(socket) {
 		this.state = -1;
 		this.log('client lost');
 		delete global.activeUsers[this.userid];
-		Game.handleDisconnect(this,'closed');
+		Game.handleDisconnect(this,'closed',function () {
+			this.log('DC done');
+		}.bind(this));
 		this.destroy();
 	}.bind(this));
 	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
@@ -102,6 +104,7 @@ function ClientSocket(socket) {
 		clearTimeout(this.idleTimer);
 		this.state = -2;
 		this.log('error!',err.code);
+		this.log('stack1:',new Error().stack);
 		Game.handleDisconnect(this,'error');
 		this.logout();
 	}.bind(this));
@@ -119,17 +122,11 @@ ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
 	this.log('error!',e);
 	this.log('stack:',e.stack);
-	console.log('TEMP',e.stack,e);
+	console.log('TEMP',this.nick,e.stack,e);
 	Game.handleDisconnect(this,'error2');
 	if (e != 'sendq overflow') this.logout();
 	this.socket.destroy();
 	this.destroy();
-};
-ClientSocket.prototype.destroy = function () {
-	Tournament.core.removeListener('new_tournament',this.newTournHook);
-	Tournament.core.removeListener('tournament_start',this.newTournHook);
-	Tournament.core.removeListener('users_changed',this.newTournHook);
-	Tournament.core.removeListener('state_changed',this.stateChangeHook);
 };
 ClientSocket.prototype.newTourn = function (doc) {
 	if (this.state != 2) return;
@@ -228,7 +225,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					}
 				}
 			}
-			if (toResume.length > 0) this.log('resuming %d games',toResume.length);
+			if (toResume.length > 0) this.log('resuming %d games ',toResume.length,toResume);
 			var statuses = [];
 			async.each(toResume,function resumer(game,cb) {
 				var token2 = profiler.start('login-game-reconnect');
@@ -1144,6 +1141,11 @@ function fetchSize(hash) {
 	req.end();
 }
 ClientSocket.prototype.destroy = function destroy() {
+	Tournament.core.removeListener('new_tournament',this.newTournHook);
+	Tournament.core.removeListener('tournament_start',this.newTournHook);
+	Tournament.core.removeListener('users_changed',this.newTournHook);
+	Tournament.core.removeListener('state_changed',this.stateChangeHook);
+	this.log('events un-hooked');
 	this.socket.destroy();
 	clearTimeout(this.idleTimer);
 };
@@ -1238,7 +1240,7 @@ ClientSocket.prototype.tournChangeHandOver = function (tourn) {
 	this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
 };
 ClientSocket.prototype.stateChangeHandOver = function (tourn) {
-	//console.log('hook fired on user %s %j',this.nick,tourn.obj.players);
+	this.log('hook fired on user %s %j',this.nick,tourn.obj.players);
 	for (var x=0; x<tourn.obj.players.length; x++) {
 		if (myutils.compareObjectID(tourn.obj.players[x]._id,this.userid)) {
 			var out = tourn.toProto({games:true,players:true});

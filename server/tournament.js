@@ -96,8 +96,9 @@ Tournament.prototype.toProto = function (config) {
 	if (config) {
 		if (config.games) {
 			out.games = [];
+			var result = this.countPlayersPerTable();
 			for (var x=0; x<this.tables.length; x++) {
-				out.games[x] = Game.makeGameProtobuf(this.tables[x].obj);
+				if (result.counts[x].count > 0) out.games[x] = Game.makeGameProtobuf(this.tables[x].obj);
 			}
 		}
 		if (config.players) {
@@ -133,6 +134,9 @@ Tournament.prototype.nextLevel = function () {
 	assert.equal(typeof this.obj.blind_schedule.LevelLength,'number');
 	var now = new Date();
 	console.log('level tick prev:%d %s',this.currentLevel,now);
+	if (this.obj.state == 'tnsFinished') {
+		return;
+	}
 	if (this.currentLevel == (this.obj.blind_schedule.blinds.length - 1)) return;
 	this.currentLevel++;
 	this.levelTime = now.getTime();
@@ -247,6 +251,13 @@ Tournament.prototype.fixRank = function (oldpos,rise) {
 	}
 	return changed;
 };
+Tournament.prototype.rerebalance = function (game) {
+	game.Lock.writeLock(function (release) {
+		this.handOver(game,function () {
+			release();
+		}.bind(this));
+	}.bind(this));
+}
 Tournament.prototype.handOver = function (game,cb) {
 	function saveChanges(release_tourn) {
 		this.log.save(function (err) {
@@ -295,27 +306,47 @@ Tournament.prototype.handOver = function (game,cb) {
 			var remainder = total % this.obj.seats_per_table;
 			var targetPlayers = Math.floor(total/minTables);
 			console.log('minTables:%d remainder:%d avg per table2:%d, this table:%d min:%d max:%d',minTables,remainder,targetPlayers,players_at_this_table,result.min,result.max);
-			this.log.records.push({type:'counts',counts:result});
+			this.log.records.push({ type:'counts', counts:result, thisTable:parseInt(game.obj.gamename)-1 });
 			if ((result.active > minTables) && (players_at_this_table == result.min)) {
 				game.clearOut = true;
-				console.log('begining destruction of table %s',game.obj.gamename);
+				console.log('begining destruction of table %s',parseInt(game.obj.gamename)-1);
 			}
 			if (game.clearOut) {
 				var target = targetPlayers + 1;
 				if (target > this.obj.seats_per_table) target = this.obj.seats_per_table;
 				var table_dest = this.findEmptyTable(counts,target,game);
 				if (table_dest) {
-					console.log('too many tables A, found %s',table_dest.obj.gamename);
+					console.log('too many tables A, found %s',parseInt(table_dest.obj.gamename)-1);
 					this.log.records.push({type:'msg',msg:'too many tables A, attempting transfer'});
 					this.doRebalance(game,table_dest,function () {
-						saveChanges.call(this,release_tourn);
+						var result = this.countPlayersPerTable(game);
+						console.log('moved a player, re-counting',result);
+						if (result.players_at_this_table >= 1) {
+							var table_dest = this.findEmptyTable(result.counts,target,game);
+							if (table_dest) {
+								this.log.records.push({type:'xfer1',msg:'too many tables C, attempting transfer', counts:result, thisTable:parseInt(game.obj.gamename)-1 });
+								this.doRebalance(game,table_dest,function () {
+									saveChanges.call(this,release_tourn);
+									setTimeout(this.rerebalance.bind(this,game),1000);
+								}.bind(this),true);
+							} else {
+								saveChanges.call(this,release_tourn);
+								this.log.records.push({type:'msg',msg:'no table available to move final player, re-checking'});
+								setTimeout(this.rerebalance.bind(this,game),1000);
+							}
+						} else saveChanges.call(this,release_tourn);
 					}.bind(this),true);
 					return;
 				} else {
-					this.log.records.push({type:'msg',msg:'too many tables A, none found'});
 					console.log('too many tables A, none found');
+					if (result.players_at_this_table == 1) {
+						this.log.records.push({type:'msg',msg:'too many tables A, none found yet'});
+						setTimeout(this.rerebalance.bind(this,game),1000);
+					} else {
+						this.log.records.push({type:'msg',msg:'too many tables A, none found'});
+					}
 				}
-			} else if (((players_at_this_table > targetPlayers) && (result.min < targetPlayers)) || ((players_at_this_table == result.max) && ((result.max-result.min) >= 2))) {
+			} else if ((players_at_this_table > targetPlayers) && (result.min < targetPlayers)) /*|| ((players_at_this_table == result.max) && ((result.max-result.min) >= 2)))*/ {
 				console.log('current table is too full');
 				this.log.records.push({type:'msg',msg:'current table is too full'});
 				var table_dest = this.findEmptyTable(counts,targetPlayers);
@@ -343,6 +374,18 @@ Tournament.prototype.doRebalance = function (table_source,table_dest,cb,force) {
 		console.log('holes:%j',holes);
 		var candidates = this.findCandidates(table_source,holes);
 		console.log('candidates:%j',candidates);
+		if ((candidates.length == 0) && force) {
+			// no matching seats, but force mode is on, move anyways
+			for (var y=0; y<table_source.obj.seats; y++) {
+				if (table_source.members[y]) {
+					for (var i=0; i<holes.length; i++) {
+						candidates.unshift({seat_source:y, seat_destination:holes[i].seat, position:-1});
+					}
+				}
+			}
+			this.log.records.push({type:'msg', msg:'forcing a move since no matches found'});
+			console.log('candidates:%j',candidates);
+		}
 		for (var y=0; y<candidates.length; y++) {
 			var obj = candidates[y];
 			if (!force && (obj.pos < 2)) continue;
@@ -374,7 +417,7 @@ Tournament.prototype.doRebalance = function (table_source,table_dest,cb,force) {
 				delete table_source.users[table_dest.seats[tseat].userid];
 			}
 			table_source.log('moving player %s from seat %d out',table_source.seats[oseat].conn.nick,oseat);
-			this.log.records.push({type:'move', oseat:oseat, tseat:tseat, otable:table_source.obj.gamename, ttable:table_dest.obj.gamename });
+			this.log.records.push({type:'move', oseat:oseat, tseat:tseat, otable:parseInt(table_source.obj.gamename)-1, ttable:parseInt(table_dest.obj.gamename)-1 });
 			table_source.standUp(table_source.seats[oseat].conn,function (folded,events,offset) {
 				table_source.log('standup completed');
 				var obj = { game_source:table_source.id, game_destination:table_dest.id, user_id:table_dest.seats[tseat].userid, seat_source:oseat, seat_destination:tseat };
@@ -395,7 +438,7 @@ Tournament.prototype.doRebalance = function (table_source,table_dest,cb,force) {
 			return; // // dont call saveChanges yet
 		}
 		// no suitable seat found, release lock and do cb
-		this.log.records.push({type:'msg',msg:'no suitable matches found'});
+		this.log.records.push({type:'no_candidate', msg:'no suitable matches found', holes:holes });
 		release();
 		cb();
 	}.bind(this));
@@ -424,7 +467,7 @@ Tournament.prototype.findHoles = function (table_dest) {
 	var pos = 0;
 	var seat = table_dest.dealer;
 	for (var y=0; y<table_dest.obj.seats; y++) {
-		//console.log('seat:%d pos:%d y:%d ',seat,pos,y,tbl.members[seat]);
+		//console.log('seat:%d pos:%d y:%d ',seat,pos,y,table_dest.members[seat]);
 		if (table_dest.members[seat]) {
 			pos++;
 		} else {
@@ -440,13 +483,13 @@ Tournament.prototype.findEmptyTable = function (counts,targetPlayers,skip) {
 		if (counts[x].count < targetPlayers) {
 			if (this.tables[x] == skip) continue;
 			if (this.tables[x].clearOut) continue;
-			console.log('table %j is too empty',counts[x]);
+			console.log('table %d %j is too empty',x,counts[x]);
 			if (this.tables[x].Lock.readers != 0) {
 				console.log('but its locked, waiting');
 				continue;
 			}
 			return this.tables[x];
-		}
+		} else console.log('table %d %d is good',x,counts[x].count);
 	}
 };
 Tournament.prototype.countPlayersPerTable = function (this_table) {
@@ -465,14 +508,24 @@ Tournament.prototype.countPlayersPerTable = function (this_table) {
 		counts[x] = {count:players,id:this.tables[x].id};
 		total += players;
 		if (players > max) max = players;
-		if (players < min) min = players;
+		if ((players < min) && (players > 0)) min = players;
 		if (players > 0) active++;
 	}
 	return {counts:counts, total:total, players_at_this_table:players_at_this_table, max:max, min:min, active:active };
 };
-Tournament.prototype.bust = function (userid) {
+Tournament.prototype.bust = function (userid,seat,table) {
+	this.log.records.push({type:'bust', userid:userid, table:parseInt(table.obj.gamename)-1, seat:seat });
 	this.user_table_xref[userid] = null;
 	console.log('user %s busted',userid);
+	for (var x=0; x<this.obj.players.length; x++) {
+		if (myutils.compareObjectID(this.obj.players[x]._id,userid)) {
+			//console.log('match',x,y,this.obj.players[x],game.members[y]);
+			//console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips,game.members[y].chips);
+			this.obj.players[x].chips = 0;
+			this.fixRank(x,false);
+			break;
+		}
+	}
 };
 Tournament.prototype.postTransfer = function (table_source,table_dest,oseat,tseat) {
 	function finish() {

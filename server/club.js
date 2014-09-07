@@ -120,7 +120,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	models.GameStats.find({gameid:{$in:gamelist}}).lean(true).exec(function (err,stats) {
 		assert.ifError(err);
 			for (var i=0; i<stats.length; i++) {
-				if (!stats[i].userid) console.log('FINDME',stats[i]);
+				//if (!stats[i].userid) console.log('FINDME',stats[i]);
 				assert(stats[i].userid);
 				var gameidhex = stats[i].gameid.toString();
 				if (!games[gameidhex]) {

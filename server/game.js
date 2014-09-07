@@ -1564,6 +1564,29 @@ Game.prototype.checkDelayedLeave = function () {
 		}
 	}
 }
+Game.prototype.checkBust = function (cb,conn,config,events,extradelay) {
+	function loop() {
+		var x = to_kick.pop();
+		this.standUp(this.seats[x].conn,function (folded,events2,offset) {
+			if (to_kick.length > 0) return loop.call(this);
+			else this.stateMachine(cb,conn,config,events,extradelay);
+		}.bind(this));
+	}
+	var to_kick = [];
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		if (this.members[x].chips == 0) {
+			to_kick.push(x);
+			this.tourn.bust(this.seats[x].userid,x,this);
+			continue;
+		}
+	}
+	if (to_kick.length > 0) {
+		loop.call(this);
+		return true;
+	}
+	return false;
+}
 Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extradelay,cb3) {
 	function finish1() {
 		if (config && config.silent) {
@@ -1625,14 +1648,15 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			this.dealer = -1;
 			this.current_seat = -1;
 		} else if (havechips < 2) {
-			// FIXME, tourmanement: merge tables or declare winner
+			// FIX_ME, tourmanement: merge tables or declare winner, handled in handOver below
 			this.log('only one guy has chips');
 			//this.nextDealer();
 		}
-		this.state = 'tsIdle';
 		this.checkDelayedLeave();
 		this.current_seat = -1;
 		//this.nextDealer();
+		if (this.tourn && this.checkBust(cb,conn,config,events,extradelay)) return;
+		this.state = 'tsIdle';
 		var jobs = [];
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
@@ -1688,7 +1712,10 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			}
 		}
 		if (this.members.length != this.obj.seats) emptyseat = true;
-		if (!emptyseat || this.tournament) {
+		if (this.tournament) {
+			if (this.checkBust(cb,conn,config,events,extradelay)) return;
+		}
+		if (!emptyseat) {
 			var to_kick = [];
 			for (var x=0; x<this.members.length; x++) {
 				if (!this.members[x]) continue;
@@ -1698,11 +1725,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 						to_kick.push(x);
 						continue;
 					}
-				}
-				if ((this.members[x].chips == 0) && this.tournament) {
-					to_kick.push(x);
-					this.tourn.bust(this.seats[x].userid);
-					continue;
 				}
 			}
 			if (to_kick.length > 0) {
@@ -1907,7 +1929,10 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 			if (['psOutOfPlay','psOutOfHand','psFolded'].indexOf(seat.status) != -1) {
 			} else if (this.omaha) assert.equal(obj.card_count,4);
 			else {
-				if (obj.card_count != 2) console.log('card count %s %j %s',util.inspect(seat),obj,this.state);
+				if (obj.card_count != 2) {
+					console.log('card count %s %j %s',util.inspect(seat),obj,this.state);
+					console.log('all seats',this.members);
+				}
 				assert.equal(obj.card_count,2);
 			}
 		}
@@ -2014,7 +2039,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 	this.lastplayer[seatIdx] = conn.userid;
 	this.log('nulled out seat',seatIdx);
 	
-	if ((['tsIdle','tsWinning'].indexOf(this.state) == -1) && (['psInHand','psAllIn'].indexOf(seatObj.status) != -1)) {
+	if ((['tsIdle','tsWinning','tsWinning2'].indexOf(this.state) == -1) && (['psInHand','psAllIn'].indexOf(seatObj.status) != -1)) {
 		token = profiler.start('standup-inner2');
 		this.fold(seatIdx,finish1.bind(this));
 		folded = true;
@@ -2111,7 +2136,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 	this.Lock.writeLock(function (release) {
 		conn.log('got lock',this.Lock.readers);
 		var seatIdx = this.findSeat(conn);
-		conn.log('leave idx %d %s',seatIdx,reason);
+		conn.log('leave1 idx %d %s',seatIdx,reason);
 		if (seatIdx >= 0) {
 			this.standUp(conn,function (folded,events) {
 					conn.log('releasing lock events:%j',events);
@@ -2153,9 +2178,10 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 		}
 	}.bind(this));
 }
-Game.prototype.handleDisconnect = function (conn,reason,cb) {
+Game.prototype.handleDisconnect = function (conn,reason,userid,cb) {
 	assert(conn.userid);
 	if (this.club && (reason == 'logout')) {
+		conn.log('club game logout');
 		this.leave(conn,reason,cb);
 		return;
 	}
@@ -2168,17 +2194,17 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 			return;
 		}
 	}
-	delete this.users[conn.userid];
-	this.reconnect.push(conn.userid);
-	var userid = conn.userid;
+	delete this.users[userid];
+	this.reconnect.push(userid);
 	this.Lock.writeLock(function (release) {
 		function finish() {
 			cb();
 			release();
 		}
 		var seatIdx = this.findSeat(conn);
-		conn.log('leave idx %d',seatIdx);
+		conn.log('leave2 idx %d',seatIdx);
 		if (seatIdx >= 0) {
+			conn.log('marking as offline');
 			this.members[seatIdx].disconnected = true;
 			if (this.tourn) {
 				this.members[seatIdx].autoplay = true;
@@ -2286,11 +2312,16 @@ Game.handleDisconnect = function handleDisconnect(conn,reason,cb1) {
 	conn.log('handling disconnect:%s',reason);
 	var jobs = [];
 	for (var key in activeGames) {
+		console.log('key is %s, userid %s',key,conn.userid);
 		var game = activeGames[key];
-		if (game.users[conn.userid]) jobs.push(game);
+		if (game.users[conn.userid]) {
+			conn.log('found game %s',key);
+			jobs.push(game);
+		}
 	}
+	var userid = conn.userid;
 	async.each(jobs,function (game,cb2) {
-		game.handleDisconnect(conn,reason,cb2);
+		game.handleDisconnect(conn,reason,userid,cb2);
 	},cb1);
 }
 Game.prototype.logEvent = function (type,userid,change) {
