@@ -313,12 +313,12 @@ Tournament.prototype.handOver = function (game,cb) {
 		for (var x=0; x<this.obj.players.length; x++) {
 			var p = this.obj.players[x];
 			if (!data[p.gameid]) data[p.gameid] = {seats:[]};
-			data[p.gameid].seats[p.seat_index] = p.chips;
+			data[p.gameid].seats[p.seat_index] = p.chips/100;
 		}
 		for (var key in data) {
 			var sum = 0;
 			for (var x=0; x<data[key].seats.length; x++) sum += data[key].seats[x];
-			console.log('sum:%d key:%s seats:%j',sum,key,data[key].seats);
+			console.log('sum:%d key:%s seats:%j',sum/100,key,data[key].seats);
 		}
 		// debug2
 		/*var total = 0;
