@@ -1,7 +1,10 @@
 function displayLog(log,elem) {
 	var node = elem.parentNode;
-	console.log(log,node);
+	console.log('node is',node);
+	var existing = node.querySelector('.data');
+	if (existing) node.removeChild(existing);
 	var tbl = document.createElement('table');
+	tbl.className = 'data';
 	tbl.border = 1;
 	var header = document.createElement('tr');
 	header.insertCell(-1).textContent = 'row#';
@@ -41,11 +44,13 @@ function displayLog(log,elem) {
 			row.insertCell(-1).textContent = x;
 			row.insertCell(-1).textContent = 'move from T'+record.otable+'S'+record.oseat+'->T'+record.ttable+'S'+record.tseat;
 			tbl.appendChild(row);
+		} else if (record.type == 'no_candidate') {
 		} else if (record.type == 'bust') {
 			var row = document.createElement('tr');
 			row.insertCell(-1).textContent = x;
 			row.insertCell(-1).textContent = 'T'+record.table+'S'+record.seat+' busted';
 			tbl.appendChild(row);
+		} else if (record.type == 'tableids') {
 		} else {
 			var row = document.createElement('tr');
 			row.insertCell(-1).textContent = x;
@@ -68,4 +73,8 @@ function downloadLog(id,elem) {
 		}
 	}
 	xhr.send();
+}
+function loopLog(id,elem) {
+	downloadLog(id,elem);
+	setInterval(function () { downloadLog(id,elem); },30000);
 }

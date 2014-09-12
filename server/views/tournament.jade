@@ -36,3 +36,5 @@ block content
   each log,idx in logs
     p
       a(href="#",onclick="downloadLog('"+log._id+"',this);return false")='open log #'+idx+'('+log.records.length+' items)'
+      | or
+      a(href="#",onclick="loopLog('"+log._id+"',this);return false")=' loop log'

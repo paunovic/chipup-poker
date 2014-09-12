@@ -489,7 +489,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 	this.rotation++;
 	//this.log('post rotation:%d omaha:%s limit:%s',this.rotation,this.omaha,this.game_limit);
 	myutils.getNextSequence('handHistory',function (seq) {
-		var x;
+		var x,y;
 		this.handid = seq;
 		if (this.tourn) this.updateBlinds();
 		models.Game.findOneAndUpdate({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
@@ -515,9 +515,19 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 
 		var sb = this.getNextSeat(oldDealer);
 		var bb = this.getNextSeat(sb);
+		//var inc = false;
 		if (bb < oldDealer) bb += this.obj.seats;
-		for (x=0; x<this.members.length; x++) {
-			if (!this.members[x]) continue;
+		// x starts at oldDealer and runs until oldDealer-1
+		// y is a loop counter
+		for (x=oldDealer, y=0; y<this.obj.seats; x++, y++) {
+			if (x >= this.obj.seats) x -= this.obj.seats;
+			var new_x = x;
+			if (new_x < oldDealer) new_x += this.obj.seats;
+			if (!this.members[x]) {
+				this.log('seat %d is empty',x);
+				continue;
+			}
+			this.log('seat %d initialy in state %s',x,this.members[x].status);
 			if (this.members[x].status == 'psOutOfPlay') {
 				if (!emptyseat) this.members[x].SittingOutRoundsCount++;
 				else this.members[x].SittingOutRoundsCount = 0;
@@ -535,8 +545,9 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
 			}
-			if (this.members[x].status == 'psOutOfHand') {
+			if (this.club && (this.members[x].status == 'psOutOfHand')) {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
+				this.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
 				if (myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
 					this.members[x].status = 'psInHand';
 				}
@@ -545,8 +556,8 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			} else if (bb == -1) { // initial round
 			} else if (sb == -1) {
 			} else if (this.members[x].status == 'psInHand') {
-			} else if ((oldDealer < bb) && (bb < x)) { // you are after BB
-				this.log('XXX %d is after bb:%d',x,bb);
+			} else if ( (bb < new_x) && (oldDealer < new_x) ) { // CASE1 you are after BB
+				this.log('XXX %d/%d is after oldDealer/bb:%d/%d',x,new_x,oldDealer,bb);
 			/*} else if (x == oldDealer) {
 				this.log('XXX %d is dealer %d %d',x,sb,bb);
 				this.nextDealer();
@@ -554,22 +565,23 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				bb = this.getNextSeat(sb);
 				if (bb < this.dealer) bb += this.obj.seats;
 				continue;*/
-			} else if ((oldDealer < x) && (x < bb) && (bb > this.obj.seats)) {
-				this.log('XXX %d is between %d-%d, but should still get cards',x,oldDealer,bb);
+			} else if ( (oldDealer < new_x) && (new_x < bb) ) { // CASE2 X is between dealer and BB and will be the next dealer
+				this.log('XXX %d/%d is between %d-%d, but may still get cards',x,new_x,oldDealer,bb);
 				if (x == this.dealer) {
 					this.nextDealer();
-					todo[x] = 'forcedBB';
-				}
-			} else if ((oldDealer < x) && (x < bb)) {
-				this.log('XXX %d is between %d-%d',x,oldDealer,bb);
-				if (x == this.dealer) {
-					this.nextDealer();
-				}
-				continue;
+					if (this.club) todo[x] = 'forcedBB';
+				} else continue;
+			//} else if ( ((oldDealer < x) && (x < bb)) || ((bb < oldDealer) && (x < bb)) ) {
+			//	this.log('XXX %d is between %d-%d, skipping',x,oldDealer,bb);
+			//	if (x == this.dealer) {
+			//		this.nextDealer();
+			//	}
+			//	continue;
 			} else {
-				this.log('XXX dealer:%d x:%d(%s) sb:%d bb:%d',oldDealer,x,this.members[x].status,sb,bb);
+				this.log('XXX dealer:%d x:%d/%d(%s) sb:%d bb:%d',oldDealer,x,new_x,this.members[x].status,sb,bb);
 			}
 			this.members[x].SittingOutRoundsCount = 0;
+			this.log('dealing cards to %d',x);
 			if (this.omaha) {
 				//players++;
 				this.deck.draw(4,this.members[x].hand);
@@ -581,7 +593,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
 				if (!myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
 					if (!this.headsup) {
-						todo[x] = 'forcedBB';
+						if (this.club) todo[x] = 'forcedBB';
 					}
 				}
 			}
@@ -1664,13 +1676,19 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			this.log('found %d %s %d',x,this.members[x].status,this.members[x].sitTime);
 			jobs.push(x);
 		}
-		async.each(jobs,function (seatIdx,cb2) {
-			this.updateLeaveStats(seatIdx,true,cb2);
-		}.bind(this),function () {
+		if (this.tourn) {
 			this.handOver(function () {
 				this.stateMachine(cb,conn,config,events,extradelay);
 			}.bind(this),this.handid);
-		}.bind(this));
+		} else {
+			async.each(jobs,function (seatIdx,cb2) {
+				this.updateLeaveStats(seatIdx,true,cb2);
+			}.bind(this),function () {
+				this.handOver(function () {
+					this.stateMachine(cb,conn,config,events,extradelay);
+				}.bind(this),this.handid);
+			}.bind(this));
+		}
 		break;
 	case 'tsIdle':
 		if (this.autoDelete) {
@@ -2421,7 +2439,7 @@ Game.prototype.updateBlinds = function () {
 	this.obj.big_blind = this.tourn.obj.blind_schedule.blinds[x].bb * 100;
 }
 Game.prototype.resume = function (game,cb) {
-	console.log('FINDME',game.members);
+	//console.log('FINDME',game.members);
 	if (game.users) this.reconnect = game.users;
 	if (game.members) {
 		for (var x=0; x<game.members.length; x++) {

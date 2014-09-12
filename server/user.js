@@ -117,6 +117,8 @@ function ClientSocket(socket) {
 	Tournament.core.on('users_changed',this.newTournHook);
 	Tournament.core.on('state_changed',this.stateChangeHook);
 	this.lastTourn = 0;
+	this.lastTournDetail = {};
+	this.tournDetailTimer = {};
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
@@ -143,6 +145,7 @@ ClientSocket.prototype.flushTourn = function () {
 	models.Tournament.find(function (err,items) {
 		var out = { items: items };
 		this.send(codes.seTournamentList,out,'Poker.TournamentList');
+		this.lastTourn = Date.now();
 	}.bind(this));
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
@@ -1235,16 +1238,31 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 		}
 	}.bind(this));
 };
-ClientSocket.prototype.tournChangeHandOver = function (tourn) {
+ClientSocket.prototype.queueDetails = function (tourn) {
+	if (!this.lastTournDetail[tourn.id]) this.lastTournDetail[tourn.id] = 0;
+	var elapsed = Date.now() - this.lastTournDetail[tourn.id];
+	console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
+	if (elapsed < 15000) { // 15 sec
+		if (this.tournDetailTimer[tourn.id]) clearTimeout(this.tournDetailTimer[tourn.id]);
+		this.tournDetailTimer[tourn.id] = setTimeout(this.flushTournDetail.bind(this,tourn),15000 - elapsed);
+	} else {
+		this.flushTournDetail(tourn);
+	}
+};
+ClientSocket.prototype.flushTournDetail = function (tourn) {
+	delete this.tournDetailTimer[tourn.id];
 	var out = tourn.toProto({games:true,players:true});
 	this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
+	this.lastTournDetail[tourn.id] = Date.now();
+}
+ClientSocket.prototype.tournChangeHandOver = function (tourn) {
+	this.queueDetails(tourn);
 };
 ClientSocket.prototype.stateChangeHandOver = function (tourn) {
 	this.log('hook fired on user %s %j',this.nick,tourn.obj.players);
 	for (var x=0; x<tourn.obj.players.length; x++) {
 		if (myutils.compareObjectID(tourn.obj.players[x]._id,this.userid)) {
-			var out = tourn.toProto({games:true,players:true});
-			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
+			this.queueDetails(tourn);
 			return;
 		}
 	}
@@ -1259,8 +1277,7 @@ ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,
 				tourn.on('state_changed',this.hook);
 				tourn.on('tournament_start',this.hook);
 			}
-			var out = tourn.toProto({games:true,players:true});
-			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
+			this.queueDetails(tourn);
 			token.stop();
 	}.bind(this));
 };
