@@ -134,6 +134,7 @@ begin
   FTournamentId := AParams[0];
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Tournament Lobby [%s]', [FTournamentId.ToString])); {$ENDIF}
   ServerSocket.OpenTournamentLobby(FTournamentId);
+  RefreshAll;
 end;
 
 procedure TfrmTournamentLobby.tiGUIUpdateTimer(Sender: TObject);
