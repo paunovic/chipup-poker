@@ -387,6 +387,13 @@ begin
   begin
     dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
     acUpdate.Execute;
+  end
+  else
+  begin
+    {$IFDEF DEBUG}
+    if TCommandLineParams.NoUpdateFlag then
+      DebugLn(FDebugId, 'Skipping update, -noupdate parameter found', ditApplication);
+    {$ENDIF}
   end;
 
   ServerSettings.ParseHelloMessage(pbhello);
