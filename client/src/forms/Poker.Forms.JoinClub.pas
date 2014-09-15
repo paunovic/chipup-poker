@@ -82,7 +82,6 @@ procedure TfrmJoinClub.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShift
 begin
   case Key of
     VK_ESCAPE: acCancel.Execute;
-    VK_RETURN:
   end;
 end;
 
