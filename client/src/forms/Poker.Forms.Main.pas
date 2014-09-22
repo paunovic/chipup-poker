@@ -926,10 +926,12 @@ var
   rcount: Integer;
   tournament_info: TPB_TournamentInfo;
   text: String;
+  sel_index: Integer;
 begin
   c := gridTournamentsTable.DataController;
   c.BeginFullUpdate;
   try
+    sel_index := c.FocusedRecordIndex;
     rcount := 0;
     Tournaments.Lock;
     try
@@ -956,6 +958,9 @@ begin
       Tournaments.Unlock;
     end;
     c.SetRecordCount(rcount);
+    if (sel_index >= 0) and
+       (sel_index < c.RecordCount) then
+      c.FocusedRecordIndex := sel_index;
   finally
     c.EndFullUpdate;
   end;

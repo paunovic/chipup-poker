@@ -2964,7 +2964,7 @@ object frmTournamentLobby: TfrmTournamentLobby
   end
   object alTournamentLobby: TActionList
     State = asSuspended
-    Left = 788
+    Left = 780
     Top = 68
     object acRegister: TAction
       Caption = 'REGISTER'
