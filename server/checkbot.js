@@ -80,6 +80,10 @@ Client.prototype.handle = function (err,code,buffer) {
 		break;
 	case codes.srNotImplemented:
 		this.log(buffer.toString('utf8'));
+		break;
+	case codes.seSecondaryLoginDetected:
+		this.socket.destroy();
+		break;
 	}
 }
 Client.prototype.reply = function (code,data,type) {

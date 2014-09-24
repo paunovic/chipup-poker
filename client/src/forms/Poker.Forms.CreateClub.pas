@@ -79,7 +79,9 @@ begin
     end;
     VK_RETURN: begin
       if not edClubCode.Focused then
-        SelectNext(ActiveControl, TRUE, TRUE);
+        SelectNext(ActiveControl, TRUE, TRUE)
+      else
+        acOK.Execute;
       Key := #0;
     end;
   end;

@@ -318,12 +318,12 @@ Tournament.prototype.handOver = function (game,cb) {
 		for (var x=0; x<this.obj.players.length; x++) {
 			var p = this.obj.players[x];
 			if (!data[p.gameid]) data[p.gameid] = {seats:[]};
-			data[p.gameid].seats[p.seat_index] = p.chips;
+			data[p.gameid].seats[p.seat_index] = p.chips/100;
 		}
 		for (var key in data) {
 			var sum = 0;
 			for (var x=0; x<data[key].seats.length; x++) sum += data[key].seats[x];
-			console.log('sum:%d key:%s seats:%j',sum,key,data[key].seats);
+			console.log('sum:%d key:%s seats:%j',sum/100,key,data[key].seats);
 		}
 		// debug2
 		/*var total = 0;
@@ -366,7 +366,7 @@ Tournament.prototype.handOver = function (game,cb) {
 					this.log.records.push({type:'msg',msg:'too many tables A, attempting transfer'});
 					this.doRebalance(game,table_dest,function () {
 						var result = this.countPlayersPerTable(game);
-						console.log('moved a player, re-counting',result);
+						console.log('moved a player, re-counting:%j',result);
 						if (result.players_at_this_table >= 1) {
 							var table_dest = this.findEmptyTable(result.counts,target,game);
 							if (table_dest) {
@@ -465,7 +465,7 @@ Tournament.prototype.doRebalance = function (table_source,table_dest,cb,force) {
 			table_source.log('moving player %s from seat %d out',table_source.seats[oseat].conn.nick,oseat);
 			this.log.records.push({type:'move', oseat:oseat, tseat:tseat, otable:parseInt(table_source.obj.gamename)-1, ttable:parseInt(table_dest.obj.gamename)-1, thandid: table_dest.handid, position:obj.position });
 			table_source.standUp(table_source.seats[oseat].conn,function (folded,events,offset) {
-				table_source.log('standup completed');
+				//table_source.log('standup completed');
 				var obj = { game_source:table_source.id, game_destination:table_dest.id, user_id:table_dest.seats[tseat].userid, seat_source:oseat, seat_destination:tseat };
 				for (var key in table_source.users) {
 					if (!table_source.users[key]) continue;

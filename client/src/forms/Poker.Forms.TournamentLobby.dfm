@@ -2640,7 +2640,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       Properties.Alignment.Horz = taCenter
       Properties.Alignment.Vert = taVCenter
       Transparent = True
-      ExplicitTop = 5
       Height = 107
       Width = 875
       AnchorX = 439
@@ -2696,7 +2695,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       Top = 89
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
-      Caption = '890890890890890890890890'
       ParentFont = False
       Style.Font.Charset = ANSI_CHARSET
       Style.Font.Color = clWindowText
@@ -2718,7 +2716,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       Top = 71
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
-      Caption = '56756756756756567567567'
       ParentFont = False
       Style.Font.Charset = ANSI_CHARSET
       Style.Font.Color = clWindowText
@@ -2967,7 +2964,7 @@ object frmTournamentLobby: TfrmTournamentLobby
   end
   object alTournamentLobby: TActionList
     State = asSuspended
-    Left = 788
+    Left = 780
     Top = 68
     object acRegister: TAction
       Caption = 'REGISTER'
