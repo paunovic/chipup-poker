@@ -703,6 +703,7 @@ message TournamentPlayerFinished {
 	required bytes tournament_id = 1 [(ObjectId)=true];
 	required bytes player_id = 2 [(ObjectId)=true];
 	required int32 place = 3;
+	optional TournamentPrize prize = 4;
 }
 
 message GameBlinds {
