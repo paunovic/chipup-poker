@@ -300,7 +300,7 @@ Tournament.prototype.handOver = function (game,cb) {
 				if (myutils.compareObjectID(this.obj.players[x]._id,game.seats[y].userid)) {
 					//console.log('match',x,y,this.obj.players[x],game.members[y]);
 					if (this.obj.players[x].chips != game.members[y].chips) {
-						console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips,game.members[y].chips);
+						console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips/100,game.members[y].chips/100);
 						var rise = game.members[y].chips > this.obj.players[x].chips;
 						this.obj.players[x].chips = game.members[y].chips;
 						if (this.fixRank(x,rise)) x = 0;
@@ -323,7 +323,7 @@ Tournament.prototype.handOver = function (game,cb) {
 		for (var key in data) {
 			var sum = 0;
 			for (var x=0; x<data[key].seats.length; x++) sum += data[key].seats[x];
-			console.log('sum:%d key:%s seats:%j',sum/100,key,data[key].seats);
+			console.log('sum:%d key:%s seats:%j',sum,key,data[key].seats);
 		}
 		// debug2
 		/*var total = 0;
@@ -341,20 +341,25 @@ Tournament.prototype.handOver = function (game,cb) {
 		// /DEBUG
 		if (players_remaining == 1) {
 			this.obj.state = 'tnsFinished';
-			//game.standUp(game.seats[oseat].conn,function (folded,events,offset) {
-			for (var x=0; x<this.obj.players.length; x++) {
-				if (this.obj.players[x].chips > 0) {
-					var conn = global.activeUsers[this.obj.players[x]._id];
-					if (conn) {
-						var obj = {tournament_id:this.id, player_id:this.obj.players[x]._id, place:x }
-						if (this.obj.prizes[x]) obj.prize = this.obj.prizes[x];
-						console.log('FINDME',obj);
-						conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
-					}
-					break;
+			var winner = this.obj.players[0];
+			var conn = global.activeUsers[winner._id];
+			if (conn) {
+				var obj = {tournament_id:this.id, player_id:winner._id, place:0 }
+				if (this.obj.prizes[0]) obj.prize = this.obj.prizes[0];
+				conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
+			}
+			console.log(winner);
+			var winner_conn = false;
+			for (var x=0; x<game.seats.length; x++) {
+				if (!game.members[x]) continue;
+				if (myutils.compareObjectID(winner._id,game.seats[x].userid)) {
+					console.log(x,game.seats[x]);
+					winner_conn = game.seats[x].conn;
 				}
 			}
-			saveChanges.call(this,release_tourn);
+			game.leave(winner_conn,'tournamentWinner',function () {
+				saveChanges.call(this,release_tourn);
+			}.bind(this));
 		} else {
 			var result = this.countPlayersPerTable(game);
 			var counts = result.counts;
