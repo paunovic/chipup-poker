@@ -254,7 +254,17 @@ Server.prototype.getTournaments = function (req,res) {
 Server.prototype.getTournament = function (req,res) {
 	models.Tournament.findById(req.query.id,function (err,row) {
 		models.TournamentLog.find({tournament_id:row._id}).sort({_id:1}).exec(function (err,logs) {
-			res.render('tournament',{ tourn:row, logs:logs });
+			var idlist = [];
+			for (var x=0; x<row.players.length; x++) {
+				idlist.push(row.players[x]._id);
+			}
+			models.UserModel.find({_id:{$in:idlist}},function (err,users) {
+				var map = {};
+				for (var x=0; x<users.length; x++) {
+					map[users[x]._id] = users[x];
+				}
+				res.render('tournament',{ tourn:row, logs:logs, users:map });
+			});
 		});
 	});
 };
@@ -314,6 +324,10 @@ Server.prototype.createTourn = function (req,res) {
 Server.prototype.createTournPost = function (req,res) {
 	var str = req.body.start_date + ' ' + req.body.start_time;
 	req.body.start_time = Math.round(new Date(str).getTime()/1000);
+	req.body.prizes = JSON.parse(req.body.raw_prizes);
+	for (var x=0; x<req.body.prizes.length; x++) {
+		req.body.prizes[x] = { place:x, name:req.body.prizes[x] };
+	}
 	Tournament.create(req.body,function (err,doc) {
 		if (err && ((err.name == 'ValidationError') || (err.name == 'CastError'))) {
 			res.end(err.toString());

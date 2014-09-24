@@ -280,7 +280,11 @@ var TournamentSchema = new Schema({
 		levels: { type:Number, required:true },
 		LevelLength: { type:Number, required:true },
 		blinds: { type:[BlindRow], required:true }
-	} }
+	} },
+	prizes: { type:[{
+		place: { type:Number, required:true },
+		name: { type:String, required:true }
+	}] }
 });
 var TournamentLogSchema = new Schema({
 	tournament_id:ObjectId,
