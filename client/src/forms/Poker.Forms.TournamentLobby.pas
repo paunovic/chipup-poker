@@ -65,6 +65,12 @@ type
     lbvTournamentInfo: TcxLabel;
     dxBevel1: TdxBevel;
     dxBevel2: TdxBevel;
+    cxLabel1: TcxLabel;
+    gridPrizes: TcxGrid;
+    gridPrizesTable: TcxGridTableView;
+    gridPrizesPlace: TcxGridColumn;
+    gridPrizesName: TcxGridColumn;
+    gridPrizesLevel: TcxGridLevel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -88,6 +94,7 @@ type
     procedure UpdatePlayersGrid;
     procedure UpdateTablesGrid;
     procedure UpdateAllPlayersGrid;
+    procedure UpdatePrizesGrid;
     procedure UpdateFormData;
     procedure UpdateBlindsStructureGrid;
     procedure UpdateTournamentLabels;
@@ -110,7 +117,7 @@ uses
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds,
   Poker.Protobufs.Objects.TournamentList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus, System.DateUtils, Poker.Common.Misc,
-  Poker.Games.Game, Poker.Forms.Main;
+  Poker.Games.Game, Poker.Forms.Main, Poker.Protobufs.Objects.TournamentPrize;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -180,10 +187,11 @@ begin
     Exit;
 
   Tournaments.Add(proto);
-  gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ' ;
   gridTablesTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridAllPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridBlindsTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridPrizesTable.OptionsView.NoDataToDisplayInfoText := ' ';
   alTournamentLobby.State := asNormal;
   tiGUIUpdate.Enabled := TRUE;
   RefreshAll;
@@ -379,6 +387,39 @@ begin
     end;
   finally
     c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmTournamentLobby.UpdatePrizesGrid;
+var
+  c: TcxDataController;
+  tournament: TTournamentInfo;
+  rec_count: Integer;
+  C1: Integer;
+  prize: TPB_TournamentPrize;
+begin
+  if Tournaments.GetAndLock(FTournamentId, tournament) then
+  try
+    c := gridPrizesTable.DataController;
+    c.BeginFullUpdate;
+    try
+      rec_count := 0;
+      for C1 := 0 to tournament.Prizes.Count - 1 do
+      begin
+        prize := tournament.Prizes[C1];
+        Inc(rec_count);
+        if rec_count > c.RecordCount then
+          c.SetRecordCount(rec_count);
+
+        c.SetValue(rec_count - 1, gridPrizesPlace.Index, prize.Place + 1);
+        c.SetValue(rec_count - 1, gridPrizesName.Index, prize.Name);
+      end;
+      c.SetRecordCount(rec_count);
+    finally
+      c.EndFullUpdate;
+    end;
+  finally
+    Tournaments.Unlock;
   end;
 end;
 
@@ -582,6 +623,7 @@ begin
   UpdatePlayersGrid;
   UpdateTablesGrid;
   UpdateBlindsStructureGrid;
+  UpdatePrizesGrid;
   UpdateFormData;
   UpdateTournamentLabels;
 end;

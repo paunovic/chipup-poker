@@ -7,7 +7,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds, Poker.Protobufs.Objects.TournamentPrize;
 
 type
   TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2,tnsOnBreak = 3,tnsStarting = 4,tnsFinished = 5);
@@ -33,6 +33,7 @@ type
       kBlindStructureFieldNumber = 16;
       kCurrentBlindLevelFieldNumber = 17;
       kCurrentBlindLevelEndTimeFieldNumber = 18;
+      kPrizesFieldNumber = 19;
 
     var
       FId: TMongoId;
@@ -53,6 +54,7 @@ type
       FBlindStructure: TList<TPB_GameBlinds>;
       FCurrentBlindLevel: UInt32;
       FCurrentBlindLevelEndTime: UInt64;
+      FPrizes: TList<TPB_TournamentPrize>;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -106,9 +108,12 @@ type
     procedure set_has_CurrentBlindLevelEndTime;
     procedure clear_has_CurrentBlindLevelEndTime;
     procedure SetCurrentBlindLevelEndTime(const AValue: UInt64);
+    procedure set_has_Prizes;
+    procedure clear_has_Prizes;
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
     procedure BlindStructureNotifyEvent(Sender: TObject; const Item: TPB_GameBlinds; Action: TCollectionNotification);
+    procedure PrizesNotifyEvent(Sender: TObject; const Item: TPB_TournamentPrize; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -212,6 +217,11 @@ type
     procedure clear_CurrentBlindLevelEndTime;
     property CurrentBlindLevelEndTime: UInt64 read FCurrentBlindLevelEndTime write SetCurrentBlindLevelEndTime;
 
+    // repeated TournamentPrize Prizes = 19;
+    function has_Prizes: Boolean;
+    procedure clear_Prizes;
+    property Prizes: TList<TPB_TournamentPrize> read FPrizes;
+
   end;
 
   TPB_TournamentInfoList = class(TObjectList<TPB_TournamentInfo>)
@@ -247,6 +257,11 @@ begin
     FBlindStructure.OnNotify := nil;
     FreeAndNil(FBlindStructure);
   end;
+  if Assigned(FPrizes) then
+  begin
+    FPrizes.OnNotify := nil;
+    FreeAndNil(FPrizes);
+  end;
   inherited;
 end;
 
@@ -256,6 +271,7 @@ begin
   FPlayers := TObjectList<TPB_TournamentMember>.Create;
   FGames := TObjectList<TPB_Game>.Create;
   FBlindStructure := TObjectList<TPB_GameBlinds>.Create;
+  FPrizes := TObjectList<TPB_TournamentPrize>.Create;
 end;
 
 procedure TPB_TournamentInfo.HookNotifiers;
@@ -264,6 +280,7 @@ begin
   FPlayers.OnNotify := PlayersNotifyEvent;
   FGames.OnNotify := GamesNotifyEvent;
   FBlindStructure.OnNotify := BlindStructureNotifyEvent;
+  FPrizes.OnNotify := PrizesNotifyEvent;
 end;
 
 procedure TPB_TournamentInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -364,6 +381,11 @@ begin
         FCurrentBlindLevelEndTime := AProtobufReader.readInt64;
         set_has_CurrentBlindLevelEndTime;
       end;
+      kPrizesFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPrizes.Add(TPB_TournamentPrize.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_Prizes;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -374,6 +396,7 @@ var
   pbobj12: TPB_TournamentMember;
   pbobj14: TPB_Game;
   pbobj15: TPB_GameBlinds;
+  pbobj18: TPB_TournamentPrize;
 begin
   if AFrom.has_MongoId then
     SetMongoId(AFrom.MongoId);
@@ -411,6 +434,8 @@ begin
     SetCurrentBlindLevel(AFrom.CurrentBlindLevel);
   if AFrom.has_CurrentBlindLevelEndTime then
     SetCurrentBlindLevelEndTime(AFrom.CurrentBlindLevelEndTime);
+  for pbobj18 in AFrom.Prizes do
+    FPrizes.Add(TPB_TournamentPrize.Create(pbobj18));
 end;
 
 function TPB_TournamentInfo.IsInitialized: Boolean;
@@ -426,6 +451,9 @@ begin
     if not pbobj.IsInitialized then
       Exit(FALSE);
   for pbobj in BlindStructure do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in Prizes do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
@@ -1014,6 +1042,44 @@ begin
   set_has_CurrentBlindLevelEndTime;
 end;
 
+procedure TPB_TournamentInfo.clear_Prizes;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TournamentPrize>;
+begin
+  on_notify := FPrizes.OnNotify;
+  FPrizes.OnNotify := nil;
+  FPrizes.Clear;
+  FPrizes.OnNotify := on_notify;
+  clear_has_Prizes;
+end;
+
+function TPB_TournamentInfo.has_Prizes: Boolean;
+begin
+  result := (_has_bits_ and 262144) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_Prizes;
+begin
+  _has_bits_ := _has_bits_ or 262144;
+end;
+
+procedure TPB_TournamentInfo.clear_has_Prizes;
+begin
+  _has_bits_ := _has_bits_ and not 262144;
+end;
+
+procedure TPB_TournamentInfo.PrizesNotifyEvent(Sender: TObject; const Item: TPB_TournamentPrize; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_Prizes;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPrizesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
 procedure TPB_TournamentInfo.Clear;
 begin
   if _has_bits_ = 0 then
@@ -1037,6 +1103,7 @@ begin
   clear_BlindStructure;
   clear_CurrentBlindLevel;
   clear_CurrentBlindLevelEndTime;
+  clear_Prizes;
 end;
 
 procedure TPB_TournamentInfoList.Assign(const APB_TournamentInfoList: TList<TPB_TournamentInfo>);

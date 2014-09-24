@@ -6,7 +6,8 @@ unit Poker.Protobufs.Objects.TournamentPlayerFinished;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  Poker.Protobufs.Objects.TournamentPrize;
 
 type
   TPB_TournamentPlayerFinished = class(TProtobufBaseObject)
@@ -15,11 +16,13 @@ type
       kTournamentIdFieldNumber = 1;
       kPlayerIdFieldNumber = 2;
       kPlaceFieldNumber = 3;
+      kPrizeFieldNumber = 4;
 
     var
       FTournamentId: TMongoId;
       FPlayerId: TMongoId;
       FPlace: Integer;
+      FPrize: TPB_TournamentPrize;
       _has_bits_: UINT32;
 
     procedure set_has_TournamentId;
@@ -31,6 +34,9 @@ type
     procedure set_has_Place;
     procedure clear_has_Place;
     procedure SetPlace(const AValue: Integer);
+    procedure set_has_Prize;
+    procedure clear_has_Prize;
+    procedure SetPrize(const AValue: TPB_TournamentPrize);
 
   public
     constructor Create(const AFrom: TPB_TournamentPlayerFinished; const ALightweight: Boolean = FALSE); overload;
@@ -55,6 +61,11 @@ type
     procedure clear_Place;
     property Place: Integer read FPlace write SetPlace;
 
+    // optional TournamentPrize Prize = 4;
+    function has_Prize: Boolean;
+    procedure clear_Prize;
+    property Prize: TPB_TournamentPrize read FPrize write SetPrize;
+
   end;
 
   TPB_TournamentPlayerFinishedList = class(TObjectList<TPB_TournamentPlayerFinished>)
@@ -75,6 +86,7 @@ end;
 
 destructor TPB_TournamentPlayerFinished.Destroy;
 begin
+  if Assigned(FPrize) then FreeAndNil(FPrize);
   inherited;
 end;
 
@@ -101,6 +113,13 @@ begin
         FPlace := AProtobufReader.readInt32;
         set_has_Place;
       end;
+      kPrizeFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FPrize) then
+          FPrize := TPB_TournamentPrize.Create;
+        FPrize.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+        set_has_Prize;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -114,12 +133,17 @@ begin
     SetPlayerId(AFrom.PlayerId);
   if AFrom.has_Place then
     SetPlace(AFrom.Place);
+  if (AFrom.has_Prize) then
+    FPrize.MergeFrom(AFrom.Prize);
 end;
 
 function TPB_TournamentPlayerFinished.IsInitialized: Boolean;
 begin
   if (_has_bits_ and $7) <> $7 then
     Exit(FALSE);
+  if (has_Prize) then
+    if not FPrize.IsInitialized then
+      Exit(FALSE);
   Exit(TRUE);
 end;
 
@@ -224,6 +248,37 @@ begin
   set_has_Place;
 end;
 
+procedure TPB_TournamentPlayerFinished.clear_Prize;
+begin
+  FreeAndNil(FPrize);
+  clear_has_Prize;
+end;
+
+function TPB_TournamentPlayerFinished.has_Prize: Boolean;
+begin
+  result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_TournamentPlayerFinished.set_has_Prize;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_TournamentPlayerFinished.clear_has_Prize;
+begin
+  _has_bits_ := _has_bits_ and not 8;
+end;
+
+procedure TPB_TournamentPlayerFinished.SetPrize(const AValue: TPB_TournamentPrize);
+begin
+  if not Lightweight then
+    Assert(not has_Prize);
+  FPrize := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kPrizeFieldNumber, AValue.ProtobufOutput);
+  set_has_Prize;
+end;
+
 procedure TPB_TournamentPlayerFinished.Clear;
 begin
   if _has_bits_ = 0 then
@@ -232,6 +287,7 @@ begin
   clear_TournamentId;
   clear_PlayerId;
   clear_Place;
+  clear_Prize;
 end;
 
 procedure TPB_TournamentPlayerFinishedList.Assign(const APB_TournamentPlayerFinishedList: TList<TPB_TournamentPlayerFinished>);

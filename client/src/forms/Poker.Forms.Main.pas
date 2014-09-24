@@ -1347,7 +1347,7 @@ procedure TfrmChipUpMain.CSETournamentPlayerFinished(const AMethodId: Integer; c
 var
   proto: TPB_TournamentPlayerFinished;
   tournament: TTournamentInfo;
-  msg: String;
+  place_str, msg, nsuffix, suffix: String;
 begin
   if not TTypes.TryCast<TPB_TournamentPlayerFinished>(AObject, proto) then
     Exit;
@@ -1358,7 +1358,29 @@ begin
   msg := '';
   if Tournaments.GetAndLock(proto.TournamentId, tournament) then
   try
-    msg := Format('You finished tournament at %d/%d place', [proto.Place, tournament.Maxplayers]);
+    suffix := '!';
+    nsuffix := '';
+    case proto.Place + 1 of
+      1: place_str := 'the first';
+      2: place_str := 'the second';
+      3: place_str := 'the third';
+    else
+      nsuffix := 'th';
+      if proto.Place + 1 > 20 then
+        case (proto.Place + 1) mod 10 of
+          1: nsuffix := 'st';
+          2: nsuffix := 'nd';
+          3: nsuffix := 'rd';
+        end;
+      place_str := Format('%d%s', [proto.Place + 1, nsuffix]);
+      suffix := '.';
+    end;
+
+    msg := Format('You have finished the tournament at %s place%s', [place_str, suffix]);
+    if (proto.has_Prize) and
+       (proto.Prize.Name <> '') then
+      msg := msg + #10 + Format('You have won the following prize: %s!', [proto.Prize.Name]) + #10 +
+         'We will contact you soon on your E-Mail address about more details for claiming your prize.';
   finally
     Tournaments.Unlock;
   end;
@@ -1414,7 +1436,6 @@ var
 begin
   if not TTypes.TryCast<TPB_User>(AObject, pbuser) then
     Exit;
-
 
   dmMain.SelfInfo.Clear;
   dmMain.SelfInfo.MergeFrom(pbuser);

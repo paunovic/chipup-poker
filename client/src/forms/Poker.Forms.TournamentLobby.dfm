@@ -24,7 +24,7 @@ object frmTournamentLobby: TfrmTournamentLobby
   PixelsPerInch = 96
   TextHeight = 13
   object dxBevel1: TdxBevel
-    Left = 645
+    Left = 644
     Top = 151
     Width = 10
     Height = 430
@@ -2809,10 +2809,10 @@ object frmTournamentLobby: TfrmTournamentLobby
     end
   end
   object gridBlinds: TcxGrid
-    Left = 660
-    Top = 167
+    Left = 658
+    Top = 412
     Width = 209
-    Height = 418
+    Height = 173
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 4
     object gridBlindsTable: TcxGridTableView
@@ -2914,8 +2914,8 @@ object frmTournamentLobby: TfrmTournamentLobby
     AnchorY = 157
   end
   object lbsTournamentBlinds: TcxLabel
-    Left = 659
-    Top = 145
+    Left = 657
+    Top = 390
     AutoSize = False
     Caption = 'Blind structure'
     ParentColor = False
@@ -2932,8 +2932,84 @@ object frmTournamentLobby: TfrmTournamentLobby
     Properties.Alignment.Vert = taVCenter
     Height = 24
     Width = 212
-    AnchorX = 765
+    AnchorX = 763
+    AnchorY = 402
+  end
+  object cxLabel1: TcxLabel
+    Left = 657
+    Top = 145
+    AutoSize = False
+    Caption = 'Prizes'
+    ParentColor = False
+    ParentFont = False
+    Style.Color = 789633
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = [fsBold]
+    Style.TextColor = 14803425
+    Style.IsFontAssigned = True
+    Properties.Alignment.Horz = taCenter
+    Properties.Alignment.Vert = taVCenter
+    Height = 24
+    Width = 212
+    AnchorX = 763
     AnchorY = 157
+  end
+  object gridPrizes: TcxGrid
+    Left = 658
+    Top = 167
+    Width = 209
+    Height = 223
+    Anchors = [akLeft, akTop, akBottom]
+    TabOrder = 9
+    object gridPrizesTable: TcxGridTableView
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsCustomize.ColumnFiltering = False
+      OptionsCustomize.ColumnGrouping = False
+      OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnHorzSizing = False
+      OptionsCustomize.ColumnMoving = False
+      OptionsCustomize.ColumnSorting = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsSelection.HideSelection = True
+      OptionsView.FocusRect = False
+      OptionsView.NoDataToDisplayInfoText = 'Retrieving data...'
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GridLines = glVertical
+      OptionsView.GroupByBox = False
+      Styles.Inactive = dmMain.styleInactiveCell
+      object gridPrizesPlace: TcxGridColumn
+        Caption = 'Place'
+        DataBinding.ValueType = 'Integer'
+        PropertiesClassName = 'TcxSpinEditProperties'
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentHorz = taCenter
+        Options.Editing = False
+        SortIndex = 0
+        SortOrder = soAscending
+        Width = 35
+      end
+      object gridPrizesName: TcxGridColumn
+        Caption = 'Prize'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentHorz = taCenter
+        Width = 98
+      end
+    end
+    object gridPrizesLevel: TcxGridLevel
+      GridView = gridPrizesTable
+    end
   end
   object StyleRepository: TcxStyleRepository
     Left = 668
@@ -2983,7 +3059,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Enabled = False
     Interval = 500
     OnTimer = tiGUIUpdateTimer
-    Left = 724
-    Top = 432
+    Left = 296
+    Top = 200
   end
 end
