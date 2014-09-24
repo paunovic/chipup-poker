@@ -730,6 +730,6 @@ message TournamentPlayerTransfer {
 }
 
 message TournamentPrize {
-	required int place = 1;
+	required int32 place = 1;
 	required string name = 2;
 }
