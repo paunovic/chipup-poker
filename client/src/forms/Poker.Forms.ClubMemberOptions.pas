@@ -53,6 +53,7 @@ end;
 
 procedure TfrmClubMemberOptions.FormDestroy(Sender: TObject);
 begin
+  MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
 end;
 

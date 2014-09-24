@@ -403,6 +403,7 @@ begin
     if Tables.GetAndLockTable(tstatus.TableMongoId, tstatus.TableType, table) then
     try
       table.SetTableStatus(tstatus, FALSE);
+      table.Show;
     finally
       Tables.Unlock;
     end;

@@ -127,7 +127,7 @@ begin
   if GetAndLockTable(AGameId, ttLive, table) then
   begin
     if AShow then
-      table.BringToFront;
+      table.Show;
     Unlock;
     Exit(TRUE);
   end;
@@ -138,7 +138,7 @@ begin
   begin
     Inc(FNextTableInternalId);
     if AShow then
-      table.BringToFront;
+      table.Show;
     result := TRUE;
   end
   else
@@ -156,7 +156,7 @@ begin
   if GetAndLockTable(AGameId, ttTournament, table) then
   begin
     if AShow then
-      table.BringToFront;
+      table.Show;
     Unlock;
     Exit(TRUE);
   end;
@@ -167,7 +167,7 @@ begin
   begin
     Inc(FNextTableInternalId);
     if AShow then
-      table.BringToFront;
+      table.Show;
     result := TRUE;
   end
   else
@@ -196,7 +196,7 @@ begin
       if table.SetupHandHistoryTable(hhis, hhi) then
       begin
         Inc(FNextTableInternalId);
-        table.BringToFront;
+        table.Show;
         result := TRUE;
       end
       else

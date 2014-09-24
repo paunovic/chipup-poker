@@ -1,10 +1,10 @@
 object frmTable: TfrmTable
   Left = 0
   Top = 0
-  ClientHeight = 524
-  ClientWidth = 792
+  ClientHeight = 466
+  ClientWidth = 704
   Color = 3505587
-  Constraints.MinWidth = 600
+  Constraints.MinWidth = 533
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -26,13 +26,13 @@ object frmTable: TfrmTable
   OnResize = FormResize
   OnShow = FormShow
   DesignSize = (
-    792
-    524)
+    704
+    466)
   PixelsPerInch = 96
-  TextHeight = 27
+  TextHeight = 24
   object edChat: TcxTextEdit
-    Left = 16
-    Top = 427
+    Left = 14
+    Top = 380
     Margins.Left = 1
     Margins.Top = 0
     Margins.Right = 0
@@ -45,7 +45,7 @@ object frmTable: TfrmTable
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -11
+    Style.Font.Height = -9
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.TextColor = clGray
@@ -56,12 +56,12 @@ object frmTable: TfrmTable
     OnEnter = edChatEnter
     OnExit = edChatExit
     OnKeyPress = edChatKeyPress
-    Height = 18
-    Width = 213
+    Height = 16
+    Width = 190
   end
   object cbFoldToAnyBet: TcxCheckBox
-    Left = 251
-    Top = 435
+    Left = 223
+    Top = 387
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Fold to any bet'
@@ -70,7 +70,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbFoldToAnyBetPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 14
+    Style.Font.Height = 13
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -78,12 +78,12 @@ object frmTable: TfrmTable
     TabOrder = 1
     Transparent = True
     Visible = False
-    Height = 17
-    Width = 106
+    Height = 15
+    Width = 94
   end
   object cbSitOutNextHand: TcxCheckBox
-    Left = 251
-    Top = 453
+    Left = 223
+    Top = 403
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next hand'
@@ -92,7 +92,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbSitOutNextHandPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 14
+    Style.Font.Height = 13
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -100,12 +100,12 @@ object frmTable: TfrmTable
     TabOrder = 2
     Transparent = True
     Visible = False
-    Height = 17
-    Width = 106
+    Height = 15
+    Width = 94
   end
   object cbSitOutNextBB: TcxCheckBox
-    Left = 251
-    Top = 470
+    Left = 223
+    Top = 418
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next BB'
@@ -114,7 +114,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbSitOutNextBBPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 14
+    Style.Font.Height = 13
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -122,12 +122,12 @@ object frmTable: TfrmTable
     TabOrder = 3
     Transparent = True
     Visible = False
-    Height = 17
-    Width = 106
+    Height = 15
+    Width = 94
   end
   object seRaiseAmount: TcxSpinEdit
-    Left = 454
-    Top = 435
+    Left = 404
+    Top = 387
     Anchors = []
     AutoSize = False
     ParentFont = False
@@ -144,7 +144,7 @@ object frmTable: TfrmTable
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -13
+    Style.Font.Height = -12
     Style.Font.Name = 'Sintony'
     Style.Font.Style = []
     Style.Font.Quality = fqAntialiased
@@ -154,14 +154,14 @@ object frmTable: TfrmTable
     Value = 76950.000000000000000000
     Visible = False
     OnKeyDown = seRaiseAmountKeyDown
-    Height = 22
-    Width = 95
+    Height = 19
+    Width = 84
   end
   object rvChat: TRichView
-    Left = 16
-    Top = 446
-    Width = 213
-    Height = 70
+    Left = 14
+    Top = 396
+    Width = 190
+    Height = 63
     Color = 4539717
     TabOrder = 5
     BorderStyle = bsNone
@@ -169,15 +169,15 @@ object frmTable: TfrmTable
     Style = RVStyle
   end
   object lbvHandStrength: TcxLabel
-    Left = 695
-    Top = 416
+    Left = 626
+    Top = 370
     Anchors = [akRight, akBottom]
     Caption = 'Hand Strength'
     ParentFont = False
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -11
+    Style.Font.Height = -9
     Style.Font.Name = 'Sintony'
     Style.Font.Style = []
     Style.Font.Quality = fqAntialiased
@@ -191,18 +191,18 @@ object frmTable: TfrmTable
     StyleHot.LookAndFeel.NativeStyle = True
     Properties.Alignment.Horz = taRightJustify
     Transparent = True
-    AnchorX = 776
+    AnchorX = 690
   end
   object lbvHandHistory: TcxLabel
-    Left = 8
-    Top = 6
+    Left = 7
+    Top = 5
     Cursor = crHandPoint
     Caption = 'Previous Hand (#2607989742077)'
     ParentFont = False
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -9
+    Style.Font.Height = -8
     Style.Font.Name = 'Sintony'
     Style.Font.Style = [fsBold]
     Style.Font.Quality = fqAntialiased
@@ -225,10 +225,10 @@ object frmTable: TfrmTable
     OnClick = lbvHandHistoryClick
   end
   object btPlayPause: TcxButton
-    Left = 371
-    Top = 344
-    Width = 48
-    Height = 47
+    Left = 330
+    Top = 306
+    Width = 42
+    Height = 42
     Action = acHandPlaybackPause
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -243,16 +243,16 @@ object frmTable: TfrmTable
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -9
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
   end
   object btStepForward: TcxButton
-    Left = 425
-    Top = 344
-    Width = 48
-    Height = 47
+    Left = 378
+    Top = 306
+    Width = 42
+    Height = 42
     Action = acHandPlaybackStepForward
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -268,16 +268,16 @@ object frmTable: TfrmTable
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -9
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
   end
   object btStepBackwards: TcxButton
-    Left = 317
-    Top = 344
-    Width = 48
-    Height = 47
+    Left = 282
+    Top = 306
+    Width = 42
+    Height = 42
     Action = acHandPlaybackStepBackwards
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -293,14 +293,14 @@ object frmTable: TfrmTable
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -9
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
   end
   object pbHandPlaybackProgress: TcxProgressBar
-    Left = 268
-    Top = 329
+    Left = 238
+    Top = 292
     AutoSize = False
     ParentColor = False
     Properties.BarStyle = cxbsGradient
@@ -321,7 +321,7 @@ object frmTable: TfrmTable
     TabOrder = 11
     Visible = False
     Height = 8
-    Width = 257
+    Width = 229
   end
   object ActionManager: TActionManager
     Images = il48px

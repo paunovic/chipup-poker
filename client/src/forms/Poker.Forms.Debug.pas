@@ -478,7 +478,7 @@ begin
     BestWidth := 0;
     Options := [rvtoRTFAllowAutofit];
 
-    Cells[0, 0].BestWidth := 75;
+    Cells[0, 0].BestWidth := 80;
     Cells[0, 1].BestWidth := 40;
     Cells[0, 2].BestWidth := 10;
 

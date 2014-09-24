@@ -270,7 +270,7 @@ begin
         subvisible := TRUE;
       end;
       tnsCancelled: begin
-        lbvTournamentState.Caption := 'Cancelled';
+        lbvTournamentState.Caption := tournament.StateToStr;
         lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentCancelled.TextColor;
       end;
       tnsOnBreak: begin
@@ -278,11 +278,11 @@ begin
         lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentInProgress.TextColor;
       end;
       tnsStarting: begin
-        lbvTournamentState.Caption := 'Starting';
+        lbvTournamentState.Caption := tournament.StateToStr;
         lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentInProgress.TextColor;
       end;
       tnsFinished: begin
-        lbvTournamentState.Caption := 'Finished';
+        lbvTournamentState.Caption := tournament.StateToStr;
         lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentFinished.TextColor;
       end;
     end;
@@ -533,7 +533,7 @@ begin
   if Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game) then
   try
     if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
-      table.BringToFront
+      table.Show
     else
       Tables.AddTournamentTable(game.MongoId, FALSE, TRUE);
   finally

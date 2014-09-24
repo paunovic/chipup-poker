@@ -986,6 +986,9 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.SetTableStatus(pbtablestatus, FALSE);
+    if (not table.Form.Visible) and
+       (not table.Hidden) then
+      table.Show;
   finally
     Tables.Unlock;
   end;
