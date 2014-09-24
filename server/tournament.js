@@ -357,9 +357,12 @@ Tournament.prototype.handOver = function (game,cb) {
 					winner_conn = game.seats[x].conn;
 				}
 			}
-			game.leave(winner_conn,'tournamentWinner',function () {
-				saveChanges.call(this,release_tourn);
+			process.nextTick(function () {
+				game.leave(winner_conn,'tournamentWinner',function () {
+					console.log('user kicked');
+				}.bind(this));
 			}.bind(this));
+			saveChanges.call(this,release_tourn);
 		} else {
 			var result = this.countPlayersPerTable(game);
 			var counts = result.counts;
