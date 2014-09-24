@@ -5,6 +5,7 @@ block header
   script(src="/js/prototype.js")
   script(src="/js/jquery.timepicker.js")
   script(src="/js/calendarview.js")
+  script(src="/js/create_tournament.js")
 block header2
   script.
     jQuery(document).ready(function ($) {
@@ -16,7 +17,7 @@ block header2
       document.getElementById('UTC_time').value = date.toUTCString();
     }
 block content
-  form(method="post")
+  form(method="post",onkeypress="return event.keyCode != 13;")
     | name:
     input(type="text",name="name")
     br
@@ -62,6 +63,14 @@ block content
     br
     | Approx length in hours:
     input(type="text",name="length")
+    br
+    | Prizes:
+    table(border=1,id="prizes")
+      tr(id='prize_0')
+        td(class='rank') 1
+        td
+          input(onblur="updatePrize(this.parentNode.parentNode)",class="name",onkeyup="updatePrize(this.parentNode.parentNode)",tabindex=1)
+    input(type="text",id="raw_prizes",value="[]",name="raw_prizes")
     br
     input(type="submit",value="Create!")
     br

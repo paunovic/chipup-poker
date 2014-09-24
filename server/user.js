@@ -144,6 +144,9 @@ ClientSocket.prototype.flushTourn = function () {
 	delete this.tournTimer;
 	models.Tournament.find(function (err,items) {
 		var out = { items: items };
+		for (var x=0; x<items.length; x++) {
+			items[x].prizes = undefined;
+		}
 		this.send(codes.seTournamentList,out,'Poker.TournamentList');
 		this.lastTourn = Date.now();
 	}.bind(this));
@@ -170,6 +173,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			var i,j;
 			error.handleError(err);
 			for (i=0; i<items.length; i++) {
+				items[i].prizes = undefined;;
 				for (j=0; j<items[i].players.length; j++) {
 					if (myutils.compareObjectID(items[i].players[j]._id,row._id)) {
 						registered_tournaments.push(items[i]._id);
@@ -1235,13 +1239,15 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 			tourn.removeListener('state_changed',this.hook);
 			tourn.removeListener('tournament_start',this.hook);
 			this.hook = null;
+			this.hookNoLimit = null;
 		}
 	}.bind(this));
 };
-ClientSocket.prototype.queueDetails = function (tourn) {
+ClientSocket.prototype.queueDetails = function (tourn,force) {
 	if (!this.lastTournDetail[tourn.id]) this.lastTournDetail[tourn.id] = 0;
 	var elapsed = Date.now() - this.lastTournDetail[tourn.id];
 	console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
+	if (force) elapsed = 15000;
 	if (elapsed < 15000) { // 15 sec
 		if (this.tournDetailTimer[tourn.id]) clearTimeout(this.tournDetailTimer[tourn.id]);
 		this.tournDetailTimer[tourn.id] = setTimeout(this.flushTournDetail.bind(this,tourn),15000 - elapsed);
@@ -1250,13 +1256,18 @@ ClientSocket.prototype.queueDetails = function (tourn) {
 	}
 };
 ClientSocket.prototype.flushTournDetail = function (tourn) {
+	clearTimeout(this.tournDetailTimer[tourn.id]);
 	delete this.tournDetailTimer[tourn.id];
 	var out = tourn.toProto({games:true,players:true});
 	this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
 	this.lastTournDetail[tourn.id] = Date.now();
 }
-ClientSocket.prototype.tournChangeHandOver = function (tourn) {
-	this.queueDetails(tourn);
+ClientSocket.prototype.tournChangeHandOver = function (tourn,userid) {
+	if (userid && myutils.compareObjectID(userid,this.userid)) {
+		this.queueDetails(tourn,true);
+	} else {
+		this.queueDetails(tourn);
+	}
 };
 ClientSocket.prototype.stateChangeHandOver = function (tourn) {
 	this.log('hook fired on user %s %j',this.nick,tourn.obj.players);
@@ -1277,7 +1288,7 @@ ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,
 				tourn.on('state_changed',this.hook);
 				tourn.on('tournament_start',this.hook);
 			}
-			this.queueDetails(tourn);
+			this.queueDetails(tourn,true);
 			token.stop();
 	}.bind(this));
 };

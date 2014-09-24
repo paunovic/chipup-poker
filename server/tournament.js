@@ -94,7 +94,7 @@ Tournament.prototype.startGames = function () {
 	}.bind(this));
 };
 Tournament.prototype.toProto = function (config) {
-	var out = { _id:this.obj._id, name:this.obj.name, description:this.obj.description, gametype:this.obj.gametype, limit:this.obj.limit, seats_per_table:this.obj.seats_per_table, minplayers:this.obj.minplayers, maxplayers:this.obj.maxplayers, startingchips:this.obj.startingchips, timeperlevel:this.obj.timeperlevel, registered_players:this.obj.registered_players, start_time:this.obj.start_time, state:this.obj.state };
+	var out = { _id:this.obj._id, name:this.obj.name, description:this.obj.description, gametype:this.obj.gametype, limit:this.obj.limit, seats_per_table:this.obj.seats_per_table, minplayers:this.obj.minplayers, maxplayers:this.obj.maxplayers, startingchips:this.obj.startingchips, timeperlevel:this.obj.timeperlevel, registered_players:this.obj.registered_players, start_time:this.obj.start_time, state:this.obj.state, prizes:this.obj.prizes };
 	if (config) {
 		if (config.games) {
 			out.games = [];
@@ -341,6 +341,19 @@ Tournament.prototype.handOver = function (game,cb) {
 		// /DEBUG
 		if (players_remaining == 1) {
 			this.obj.state = 'tnsFinished';
+			//game.standUp(game.seats[oseat].conn,function (folded,events,offset) {
+			for (var x=0; x<this.obj.players.length; x++) {
+				if (this.obj.players[x].chips > 0) {
+					var conn = global.activeUsers[this.obj.players[x]._id];
+					if (conn) {
+						var obj = {tournament_id:this.id, player_id:this.obj.players[x]._id, place:x }
+						if (this.obj.prizes[x]) obj.prize = this.obj.prizes[x];
+						console.log('FINDME',obj);
+						conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
+					}
+					break;
+				}
+			}
 			saveChanges.call(this,release_tourn);
 		} else {
 			var result = this.countPlayersPerTable(game);
@@ -573,6 +586,17 @@ Tournament.prototype.doBust = function (userid,seat,table) {
 			//console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips,game.members[y].chips);
 			this.obj.players[x].chips = 0;
 			this.fixRank(x,false);
+			break;
+		}
+	}
+	for (var x=0; x<this.obj.players.length; x++) {
+		if (myutils.compareObjectID(this.obj.players[x]._id,userid)) {
+			var conn = global.activeUsers[userid];
+			if (conn) {
+				var obj = {tournament_id:this.id, player_id:userid, place:x }
+				if (this.obj.prizes[x]) obj.prize = this.obj.prizes[x];
+				conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
+			}
 			break;
 		}
 	}
