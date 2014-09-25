@@ -65,7 +65,7 @@ type
     lbvTournamentInfo: TcxLabel;
     dxBevel1: TdxBevel;
     dxBevel2: TdxBevel;
-    cxLabel1: TcxLabel;
+    lbsPrizes: TcxLabel;
     gridPrizes: TcxGrid;
     gridPrizesTable: TcxGridTableView;
     gridPrizesPlace: TcxGridColumn;
@@ -431,6 +431,7 @@ var
   C1: Integer;
   game: TPB_Game;
   member: TPB_TournamentMember;
+  gamenameint: Integer;
   stack_players, total_stack, smallest_stack, avg_stack, largest_stack: UINT32;
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
@@ -446,7 +447,11 @@ begin
         if rec_count > c.RecordCount then
           c.SetRecordCount(rec_count);
         c.SetValue(rec_count - 1, gridTablesId.Index, game.MongoId.ToVariant);
-        c.SetValue(rec_count - 1, gridTablesName.Index, game.Gamename);
+        gamenameint := StrToIntDef(game.Gamename, 0);
+        if game.FinalTable then
+          c.SetValue(rec_count - 1, gridTablesName.Index, 'Final Table')
+        else
+          c.SetValue(rec_count - 1, gridTablesName.Index, gamenameint);
         c.SetValue(rec_count - 1, gridTablesPlayers.Index, game.Sitting);
 
         total_stack := 0;

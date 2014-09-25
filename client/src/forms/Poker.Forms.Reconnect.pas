@@ -211,6 +211,7 @@ begin
     lrSuccess: begin
       dmMain.ProcessLoginReply(pbreply);
       dmMain.ProcessReconnectedTables;
+      dmMain.ProcessOpenedTournamentLobbies;
       FCurrentStatus := rsLoggedIn;
       FormsContainer.ResetState;
       Tables.EnableAll;

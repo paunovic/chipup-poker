@@ -152,18 +152,22 @@ begin
         rot_index := FStatus.RotationHand;
         if rot_index = 0 then
           rot_index := 1;
-        result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FGame.Gamename, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind),
+        result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FGame.GameName, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind),
              FGame.AsString(TRUE), (rot_index - 1) mod FGame.Seats + 1, FGame.Seats, currentgame, FClub.Name])
       end
       else
-        result := Format('%s (%s/%s %s) - %s', [FGame.Gamename, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), FGame.AsString(TRUE), FClub.Name]);
+        result := Format('%s (%s/%s %s) - %s', [FGame.GameName, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), FGame.AsString(TRUE), FClub.Name]);
     end;
 
     ttTournament: begin
       result := 'Tournament';
       if Tournaments.GetAndLock(FTournamentId, tournament) then
       try
-        result := Format('Tournament %s, table #%s', [tournament.Name, FGame.Gamename]);
+        if FGame.FinalTable then
+          currentgame := FGame.GameName
+        else
+          currentgame := Format('table #%s', [FGame.GameName]);
+        result := Format('Tournament %s, %s', [tournament.Name, currentgame]);
       finally
         Tournaments.Unlock;
       end;
@@ -299,7 +303,7 @@ procedure TTable.Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerT
 begin
   FGameId := ATournamentPlayerTransfer.GameDestination;
   if Assigned(FForm) then
-    (FForm as TfrMTable).ChangeGameId(FGameId);
+    (FForm as TfrmTable).ChangeGameId(FGameId);
   UpdateObjects;
 end;
 

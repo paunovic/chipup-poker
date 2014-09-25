@@ -33,6 +33,7 @@ type
   public
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
     procedure ProcessReconnectedTables;
+    procedure ProcessOpenedTournamentLobbies;
     procedure ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer);
 
     function CheckAuthed: Boolean;
@@ -68,7 +69,8 @@ uses
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About, Poker.Clubs.Member,
   Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments, Poker.Games.Game, Poker.Tournaments.Info;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments, Poker.Games.Game, Poker.Tournaments.Info,
+  Poker.Forms.TournamentLobby;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -237,6 +239,15 @@ begin
   finally
     mstream.Free;
   end;
+end;
+
+procedure TdmMain.ProcessOpenedTournamentLobbies;
+var
+  form: TForm;
+begin
+  for form in FormsContainer.Items do
+    if form is TfrmTournamentLobby then
+      ServerSocket.OpenTournamentLobby((form as TfrmTournamentLobby).TournamentId);
 end;
 
 procedure TdmMain.ProcessPlayerObject(const ALoginReply: TPB_LoginReply);

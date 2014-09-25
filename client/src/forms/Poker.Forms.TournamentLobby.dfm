@@ -143,10 +143,9 @@ object frmTournamentLobby: TfrmTournamentLobby
       end
       object gridTablesName: TcxGridColumn
         Caption = 'Table'
-        DataBinding.ValueType = 'Integer'
-        PropertiesClassName = 'TcxSpinEditProperties'
+        DataBinding.ValueType = 'Variant'
+        PropertiesClassName = 'TcxTextEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
         SortIndex = 0
@@ -2935,7 +2934,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     AnchorX = 763
     AnchorY = 402
   end
-  object cxLabel1: TcxLabel
+  object lbsPrizes: TcxLabel
     Left = 657
     Top = 145
     AutoSize = False

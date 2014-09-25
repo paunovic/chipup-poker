@@ -205,6 +205,7 @@ type
     procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEUpdateGameObjects(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -245,7 +246,8 @@ uses
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
-  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer;
+  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Protobufs.Objects.UpdateGameObjects,
+  Poker.Forms.Table;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -269,6 +271,7 @@ begin
                       TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                       TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                      TServerMessageCallback.Create(seUpdateGameObjects, CSEUpdateGameObjects),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
@@ -1171,6 +1174,7 @@ begin
       RefreshAll;
       Show;
       dmMain.ProcessReconnectedTables;
+      dmMain.ProcessOpenedTournamentLobbies;
       RefreshAll;
     end;
 
@@ -1346,6 +1350,7 @@ var
   proto: TPB_TournamentPlayerFinished;
   tournament: TTournamentInfo;
   place_str, msg, nsuffix, suffix: String;
+  table: TTable;
 begin
   if not TTypes.TryCast<TPB_TournamentPlayerFinished>(AObject, proto) then
     Exit;
@@ -1385,6 +1390,13 @@ begin
 
   if msg <> '' then
     MessageDlg(msg, mtInformation, [mbOk], 0);
+
+  if Tables.GetAndLockTable(proto.TableId, ttTournament, table) then
+  try
+    Tables.Remove(table.InternalId);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
@@ -1408,6 +1420,43 @@ begin
       finally
         Tables.Unlock;
       end;
+
+    if Tables.GetAndLockTable(pbtransfer.GameDestination, ttTournament, table) then
+    try
+      table.Show;
+    finally
+      Tables.Unlock;
+    end;
+  end;
+end;
+
+procedure TfrmChipUpMain.CSEUpdateGameObjects(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_UpdateGameObjects;
+  club: TClubInfo;
+  newgame, pbgame: TPB_Game;
+  game_info: TGameInfo;
+  tournament: TTournamentInfo;
+begin
+  if not TTypes.TryCast<TPB_UpdateGameObjects>(AObject, proto) then
+    Exit;
+
+  for newgame in proto.Games do
+  begin
+    if dmMain.SelfInfo.Clubs.GetAndLockByGame(newgame.MongoId, club, game_info) then
+    try
+      game_info.Assign(newgame);
+    finally
+      dmMain.SelfInfo.Clubs.Unlock;
+    end;
+
+    if Tournaments.GetAndLockByGame(newgame.MongoId, tournament, pbgame) then
+    try
+      pbgame.Clear;
+      pbgame.MergeFrom(newgame);
+    finally
+      Tournaments.Unlock;
+    end;
   end;
 end;
 

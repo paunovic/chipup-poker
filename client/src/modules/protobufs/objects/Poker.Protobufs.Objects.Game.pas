@@ -37,6 +37,7 @@ type
       kTournamentFieldNumber = 16;
       kSmallBlindFieldNumber = 17;
       kBigBlindFieldNumber = 18;
+      kFinalTableFieldNumber = 19;
 
     var
       FId: TMongoId;
@@ -56,6 +57,7 @@ type
       FTournament: TMongoId;
       FSmallBlind: UInt32;
       FBigBlind: UInt32;
+      FFinalTable: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -109,6 +111,9 @@ type
     procedure set_has_BigBlind;
     procedure clear_has_BigBlind;
     procedure SetBigBlind(const AValue: UInt32);
+    procedure set_has_FinalTable;
+    procedure clear_has_FinalTable;
+    procedure SetFinalTable(const AValue: Boolean);
 
   public
     constructor Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE); overload;
@@ -202,6 +207,11 @@ type
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
     property BigBlind: UInt32 read FBigBlind write SetBigBlind;
+
+    // optional bool FinalTable = 19;
+    function has_FinalTable: Boolean;
+    procedure clear_FinalTable;
+    property FinalTable: Boolean read FFinalTable write SetFinalTable;
 
   end;
 
@@ -319,6 +329,11 @@ begin
         FBigBlind := AProtobufReader.readUInt32;
         set_has_BigBlind;
       end;
+      kFinalTableFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FFinalTable := AProtobufReader.readBoolean;
+        set_has_FinalTable;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -360,6 +375,8 @@ begin
     SetSmallBlind(AFrom.SmallBlind);
   if AFrom.has_BigBlind then
     SetBigBlind(AFrom.BigBlind);
+  if AFrom.has_FinalTable then
+    SetFinalTable(AFrom.FinalTable);
 end;
 
 function TPB_Game.IsInitialized: Boolean;
@@ -912,6 +929,37 @@ begin
   set_has_BigBlind;
 end;
 
+procedure TPB_Game.clear_FinalTable;
+begin
+  FFinalTable := false;
+  clear_has_FinalTable;
+end;
+
+function TPB_Game.has_FinalTable: Boolean;
+begin
+  result := (_has_bits_ and 262144) > 0;
+end;
+
+procedure TPB_Game.set_has_FinalTable;
+begin
+  _has_bits_ := _has_bits_ or 262144;
+end;
+
+procedure TPB_Game.clear_has_FinalTable;
+begin
+  _has_bits_ := _has_bits_ and not 262144;
+end;
+
+procedure TPB_Game.SetFinalTable(const AValue: Boolean);
+begin
+  if not Lightweight then
+    Assert(not has_FinalTable);
+  FFinalTable := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kFinalTableFieldNumber, AValue);
+  set_has_FinalTable;
+end;
+
 procedure TPB_Game.Clear;
 begin
   if _has_bits_ = 0 then
@@ -934,6 +982,7 @@ begin
   clear_Tournament;
   clear_SmallBlind;
   clear_BigBlind;
+  clear_FinalTable;
 end;
 
 procedure TPB_GameList.Assign(const APB_GameList: TList<TPB_Game>);

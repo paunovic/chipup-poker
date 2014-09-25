@@ -9,6 +9,7 @@ type
   TGameInfo = class(TPB_Game)
   private
     function GetStateStr: String;
+    function GetName: String;
   public
     constructor Create;
 
@@ -19,6 +20,7 @@ type
 
     function AsString(const AShort: Boolean): String;
 
+    property GameName: String read GetName;
     property StateAsStr: String read GetStateStr;
   end;
 
@@ -105,6 +107,14 @@ begin
       result := result + ' Omaha';
     gtRotationNLHPLO: result := 'Rotation NLH/PLO';
   end;
+end;
+
+function TGameInfo.GetName: String;
+begin
+  if FinalTable then
+    result := 'Final Table'
+  else
+    result := (self as TPB_Game).Gamename;
 end;
 
 function TGameInfo.GetStateStr: String;

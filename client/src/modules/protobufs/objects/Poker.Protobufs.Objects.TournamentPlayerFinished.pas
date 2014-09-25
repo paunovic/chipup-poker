@@ -17,12 +17,14 @@ type
       kPlayerIdFieldNumber = 2;
       kPlaceFieldNumber = 3;
       kPrizeFieldNumber = 4;
+      kTableIdFieldNumber = 5;
 
     var
       FTournamentId: TMongoId;
       FPlayerId: TMongoId;
       FPlace: Integer;
       FPrize: TPB_TournamentPrize;
+      FTableId: TMongoId;
       _has_bits_: UINT32;
 
     procedure set_has_TournamentId;
@@ -37,6 +39,9 @@ type
     procedure set_has_Prize;
     procedure clear_has_Prize;
     procedure SetPrize(const AValue: TPB_TournamentPrize);
+    procedure set_has_TableId;
+    procedure clear_has_TableId;
+    procedure SetTableId(const AValue: TMongoId);
 
   public
     constructor Create(const AFrom: TPB_TournamentPlayerFinished; const ALightweight: Boolean = FALSE); overload;
@@ -65,6 +70,11 @@ type
     function has_Prize: Boolean;
     procedure clear_Prize;
     property Prize: TPB_TournamentPrize read FPrize write SetPrize;
+
+    // required bytes TableId = 5;
+    function has_TableId: Boolean;
+    procedure clear_TableId;
+    property TableId: TMongoId read FTableId write SetTableId;
 
   end;
 
@@ -120,6 +130,11 @@ begin
         FPrize.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_Prize;
       end;
+      kTableIdFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FTableId := AProtobufReader.readMongoId;
+        set_has_TableId;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -135,11 +150,13 @@ begin
     SetPlace(AFrom.Place);
   if (AFrom.has_Prize) then
     FPrize.MergeFrom(AFrom.Prize);
+  if AFrom.has_TableId then
+    SetTableId(AFrom.TableId);
 end;
 
 function TPB_TournamentPlayerFinished.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $7) <> $7 then
+  if (_has_bits_ and $17) <> $17 then
     Exit(FALSE);
   if (has_Prize) then
     if not FPrize.IsInitialized then
@@ -279,6 +296,41 @@ begin
   set_has_Prize;
 end;
 
+procedure TPB_TournamentPlayerFinished.clear_TableId;
+begin
+  FTableId.Clear;
+  clear_has_TableId;
+end;
+
+function TPB_TournamentPlayerFinished.has_TableId: Boolean;
+begin
+  result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_TournamentPlayerFinished.set_has_TableId;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_TournamentPlayerFinished.clear_has_TableId;
+begin
+  _has_bits_ := _has_bits_ and not 16;
+end;
+
+procedure TPB_TournamentPlayerFinished.SetTableId(const AValue: TMongoId);
+begin
+  if not Lightweight then
+    Assert(not has_TableId);
+  FTableId := AValue;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kTableIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
+  set_has_TableId;
+end;
+
 procedure TPB_TournamentPlayerFinished.Clear;
 begin
   if _has_bits_ = 0 then
@@ -288,6 +340,7 @@ begin
   clear_PlayerId;
   clear_Place;
   clear_Prize;
+  clear_TableId;
 end;
 
 procedure TPB_TournamentPlayerFinishedList.Assign(const APB_TournamentPlayerFinishedList: TList<TPB_TournamentPlayerFinished>);

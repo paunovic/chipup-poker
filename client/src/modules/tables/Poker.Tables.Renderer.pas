@@ -67,7 +67,7 @@ type
     FBets: TList<Integer>;
 
     procedure RenderEvent(Sender: TObject);
-    procedure RenderBackground;
+    procedure RenderBackground(const AGameInfo: TGameInfo);
     procedure RenderTable;
     procedure RenderSeats(const AGameInfo: TGameInfo);
     procedure RenderSeat(const AGame: TGameInfo; const ASeatIndex: Integer);
@@ -385,7 +385,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    RenderBackground;
+    RenderBackground(table.Game);
     RenderTable;
     RenderTableMessages(table.Game);
     RenderTableCards;
@@ -407,10 +407,10 @@ procedure TTableRenderer.RenderBackground;
 var
   background_image: TAsphyreImage;
 begin
-  // if IsFinalTable then
-//    background_image := TableResources.FinalRoomBackgroundImage
-//  else FIXME
-  background_image := TableResources.RoomBackgroundImage;
+  if AGameInfo.FinalTable then
+    background_image := TableResources.FinalRoomBackgroundImage
+  else
+    background_image := TableResources.RoomBackgroundImage;
 
   if FTableType = ttHandReplay then
     DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(background_image), TexFull4)
