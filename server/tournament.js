@@ -344,7 +344,7 @@ Tournament.prototype.handOver = function (game,cb) {
 			var winner = this.obj.players[0];
 			var conn = global.activeUsers[winner._id];
 			if (conn) {
-				var obj = {tournament_id:this.id, player_id:winner._id, place:0 }
+				var obj = {tournament_id:this.id, player_id:winner._id, place:0, table_id:game.id }
 				if (this.obj.prizes[0]) obj.prize = this.obj.prizes[0];
 				conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
 			}
@@ -359,7 +359,6 @@ Tournament.prototype.handOver = function (game,cb) {
 			}
 			process.nextTick(function () {
 				game.leave(winner_conn,'tournamentWinner',function () {
-					console.log('user kicked');
 				}.bind(this));
 			}.bind(this));
 			saveChanges.call(this,release_tourn);
@@ -601,7 +600,7 @@ Tournament.prototype.doBust = function (userid,seat,table) {
 		if (myutils.compareObjectID(this.obj.players[x]._id,userid)) {
 			var conn = global.activeUsers[userid];
 			if (conn) {
-				var obj = {tournament_id:this.id, player_id:userid, place:x }
+				var obj = {tournament_id:this.id, player_id:userid, place:x, table_id:table.id }
 				if (this.obj.prizes[x]) obj.prize = this.obj.prizes[x];
 				conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
 			}

@@ -1246,7 +1246,7 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 ClientSocket.prototype.queueDetails = function (tourn,force) {
 	if (!this.lastTournDetail[tourn.id]) this.lastTournDetail[tourn.id] = 0;
 	var elapsed = Date.now() - this.lastTournDetail[tourn.id];
-	console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
+	//console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
 	if (force) elapsed = 15000;
 	if (elapsed < 15000) { // 15 sec
 		if (this.tournDetailTimer[tourn.id]) clearTimeout(this.tournDetailTimer[tourn.id]);
