@@ -156,6 +156,7 @@ IO.on('connection',function (socket) {
 	});
 	socket.on('changeServer',function (id) {
 		activeServer = id;
+		console.log('changed active to %s',id);
 	});
 	for (var key in bots) {
 		socket.emit('botStarted',bots[key].config);
@@ -344,7 +345,7 @@ function startImHub() {
 			break;
 		case 'conn':
 			var display = [ msg.ts,msg.nick+':' ];
-			var log = [ msg.ts,msg.nick,msg.connid ];
+			var log = [ msg.ts,msg.nick,msg.ip,msg.connid ];
 			//console.log(msg.ts,msg.nick,util.inspect(msg.objects,{colors:true}));
 			for (var x=0; x<msg.objects.length; x++) {
 				display.push(util.inspect(msg.objects[x],{colors:true}));

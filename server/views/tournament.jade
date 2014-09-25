@@ -1,4 +1,6 @@
 extends secure
+block header
+  script(src='/tournament.js')
 block content
   form(method="post")
     table(border=1)
@@ -26,8 +28,37 @@ block content
             option(selected=tourn.state == 'tnsOpen',value='tnsOpen') open
             option(selected=tourn.state == 'tnsInProgress',value='tnsInProgress') in-progress
             option(selected=tourn.state == 'tnsCancelled',value='tnsCancelled') cancelled
+            option(selected=tourn.state == 'tnsFinished',value='tnsFinished') finished
       tr
         th reset chips?
         td
           input(type="checkbox",name="resetChips")
     input(type="submit")
+  | players
+  table(border=1)
+    tr
+      th rank
+      th name
+      th email
+      th prize
+    each row,idx in tourn.players
+      tr
+        td=idx+1
+        td=row.displayname
+        td
+          a(href="mailto:"+users[row._id].email)=users[row._id].email
+        td
+          if (tourn.state == 'tnsFinished')
+            if (tourn.prizes[idx])
+              p=tourn.prizes[idx].name
+          else if ( (tourn.state == 'tnsInProgress') || (tourn.state == 'tnsOnBreak') ) && (row.chips == 0) && (tourn.prizes[idx])
+            p=tourn.prizes[idx].name
+          else if ( (tourn.state == 'tnsInProgress') || (tourn.state == 'tnsOnBreak') ) && (row.chips == 0)
+            | 
+          else
+            p='not yet finalized '+(row.chips/100)
+  each log,idx in logs
+    p
+      a(href="#",onclick="downloadLog('"+log._id+"',this);return false")='open log #'+idx+'('+log.records.length+' items)'
+      | or
+      a(href="#",onclick="loopLog('"+log._id+"',this);return false")=' loop log'

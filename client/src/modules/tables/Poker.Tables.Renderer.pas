@@ -404,11 +404,18 @@ begin
 end;
 
 procedure TTableRenderer.RenderBackground;
+var
+  background_image: TAsphyreImage;
 begin
+  // if IsFinalTable then
+//    background_image := TableResources.FinalRoomBackgroundImage
+//  else FIXME
+  background_image := TableResources.RoomBackgroundImage;
+
   if FTableType = ttHandReplay then
-    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.RoomBackgroundImage), TexFull4)
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(background_image), TexFull4)
   else
-    DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4);
+    DXCore.Canvas.UseImage(background_image, TexFull4);
   DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), clWhite4);
 end;
 

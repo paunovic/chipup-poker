@@ -9,7 +9,8 @@ uses
   dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView,
   cxGridTableView, cxClasses, cxGridCustomView, cxGrid, cxCurrencyEdit,
-  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage, cxLabel, Vcl.ExtCtrls;
+  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage, cxLabel, Vcl.ExtCtrls,
+  dxBevel;
 
 type
   TfrmTournamentLobby = class(TForm, IFormParams)
@@ -33,7 +34,7 @@ type
     gridTablesLevel: TcxGridLevel;
     paHeader: TPanel;
     btTournamentRegister: TcxButton;
-    lbsHeader: TcxLabel;
+    lbvHeader: TcxLabel;
     gridTablesSmallestStack: TcxGridColumn;
     gridTablesAverageStack: TcxGridColumn;
     gridTablesLargestStack: TcxGridColumn;
@@ -49,16 +50,27 @@ type
     gridBlindsBlinds: TcxGridColumn;
     gridBlindsLevel: TcxGridLevel;
     gridBlindsMinutes: TcxGridColumn;
-    lbvSubSubHeader: TcxLabel;
+    lbvSubHeader: TcxLabel;
     tiGUIUpdate: TTimer;
     styleActiveBlindLevel: TcxStyle;
     gridAllPlayersPlace: TcxGridColumn;
-    lbsSubHeader: TcxLabel;
+    lbvTournamentState: TcxLabel;
     lbsTournamentPlayers: TcxLabel;
     lbsTournamentTables: TcxLabel;
     lbsTournamentBlinds: TcxLabel;
     styleGridRowsNormal: TcxStyle;
     imgHeader: TcxImage;
+    stylePlayersFinished: TcxStyle;
+    stylePlayersIngame: TcxStyle;
+    lbvTournamentInfo: TcxLabel;
+    dxBevel1: TdxBevel;
+    dxBevel2: TdxBevel;
+    cxLabel1: TcxLabel;
+    gridPrizes: TcxGrid;
+    gridPrizesTable: TcxGridTableView;
+    gridPrizesPlace: TcxGridColumn;
+    gridPrizesName: TcxGridColumn;
+    gridPrizesLevel: TcxGridLevel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -68,8 +80,8 @@ type
     procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure tiGUIUpdateTimer(Sender: TObject);
-    procedure gridBlindsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridBlindsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridAllPlayersPlaceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTournamentId: TMongoId;
@@ -82,6 +94,7 @@ type
     procedure UpdatePlayersGrid;
     procedure UpdateTablesGrid;
     procedure UpdateAllPlayersGrid;
+    procedure UpdatePrizesGrid;
     procedure UpdateFormData;
     procedure UpdateBlindsStructureGrid;
     procedure UpdateTournamentLabels;
@@ -103,7 +116,8 @@ uses
   Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds,
-  Poker.Protobufs.Objects.TournamentList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus, System.DateUtils;
+  Poker.Protobufs.Objects.TournamentList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus, System.DateUtils, Poker.Common.Misc,
+  Poker.Games.Game, Poker.Forms.Main, Poker.Protobufs.Objects.TournamentPrize;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -127,6 +141,7 @@ begin
   FTournamentId := AParams[0];
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Tournament Lobby [%s]', [FTournamentId.ToString])); {$ENDIF}
   ServerSocket.OpenTournamentLobby(FTournamentId);
+  RefreshAll;
 end;
 
 procedure TfrmTournamentLobby.tiGUIUpdateTimer(Sender: TObject);
@@ -172,10 +187,11 @@ begin
     Exit;
 
   Tournaments.Add(proto);
-  gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ' ;
   gridTablesTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridAllPlayersTable.OptionsView.NoDataToDisplayInfoText := ' ';
   gridBlindsTable.OptionsView.NoDataToDisplayInfoText := ' ';
+  gridPrizesTable.OptionsView.NoDataToDisplayInfoText := ' ';
   alTournamentLobby.State := asNormal;
   tiGUIUpdate.Enabled := TRUE;
   RefreshAll;
@@ -213,71 +229,66 @@ begin
   end;
 end;
 
-function MinutesToString(const AMinutes: UINT32): String;
-var
-  minutes: UINT32;
-  d, m, h: Integer;
-begin
-  minutes := AMinutes;
-  d := minutes div 1440;
-  minutes := minutes mod 1440;
-  h := minutes div 60;
-  minutes := minutes mod 60;
-  m := minutes;
-
-  if d > 0 then
-  begin
-    if d = 1 then
-      result := Format('1 day, %.2d:%.2d', [h, m])
-    else
-      result := Format('%d days, %.2dh:%.2dm', [d, h, m]);
-  end
-  else
-    result := Format('%.2dh:%.2dm', [h, m]);
-end;
-
 procedure TfrmTournamentLobby.UpdateTournamentLabels;
 var
   tournament: TTournamentInfo;
-  subsubvisible: Boolean;
+  subvisible: Boolean;
   minutes: UINT32;
 begin
-  subsubvisible := FALSE;
+  subvisible := FALSE;
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
-    // subheader & sub sub header
+    // tournament info
+    lbvTournamentInfo.Caption := Format('%s, %d-max', [TGameInfo.GameTypeToStr(tournament.Gametype, tournament.Limit, FALSE), tournament.SeatsPerTable]);
+
+    // tournament state
     case tournament.State of
       tnsOpen: begin
         minutes := MinutesBetween(TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)), Now);
-        lbsSubHeader.Caption := Format('Open (starts in %s)', [MinutesToString(minutes)]);
+        lbvTournamentState.Caption := Format('Open (starts in %s)', [MinutesToString(minutes)]);
+        lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentOpen.TextColor;
 
-        lbvSubSubHeader.Caption := Format('Registered players: %d / %d', [tournament.RegisteredPlayers, tournament.Maxplayers]);
-        subsubvisible := TRUE;
+        lbvSubHeader.Caption := Format('Registered players: %d / %d', [tournament.RegisteredPlayers, tournament.Maxplayers]);
+        subvisible := TRUE;
       end;
       tnsInProgress: begin
         minutes := MinutesBetween(Now, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament.StartTime)));
-        lbsSubHeader.Caption := Format('Running (%s)', [MinutesToString(minutes)]);
+        lbvTournamentState.Caption := Format('Running (%s)', [MinutesToString(minutes)]);
+        lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentInProgress.TextColor;
 
         if tournament.CurrentBlindLevel < UINT32(tournament.BlindStructure.Count) then
           if tournament.CurrentBlindLevel = UINT32(tournament.BlindStructure.Count - 1) then
-            lbvSubSubHeader.Caption := Format('Current blinds: %d / %d', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb])
+            lbvSubHeader.Caption := Format('Current blinds: %d / %d', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb, tournament.BlindStructure[tournament.CurrentBlindLevel].Bb])
           else
-            lbvSubSubHeader.Caption := Format('Current blinds: %d / %d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
+            lbvSubHeader.Caption := Format('Current blinds: %d / %d (%.2d:%.2d until next level)', [tournament.BlindStructure[tournament.CurrentBlindLevel].Sb,
                 tournament.BlindStructure[tournament.CurrentBlindLevel].Bb, tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60])
         else
         begin
-          lbvSubSubHeader.Caption := '';
+          lbvSubHeader.Caption := '';
           {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid current blind level: %d', [tournament.CurrentBlindLevel]), ditException); {$ENDIF}
         end;
-        subsubvisible := TRUE;
+        subvisible := TRUE;
       end;
-      tnsCancelled: lbsSubHeader.Caption := 'Cancelled';
-      tnsOnBreak: lbsSubHeader.Caption := Format('Break (%.2d:%.2d left)', [tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60]);
-      tnsStarting: lbsSubHeader.Caption := 'Starting';
-      tnsFinished: lbsSubHeader.Caption := 'Finished';
+      tnsCancelled: begin
+        lbvTournamentState.Caption := tournament.StateToStr;
+        lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentCancelled.TextColor;
+      end;
+      tnsOnBreak: begin
+        lbvTournamentState.Caption := Format('Break (%.2d:%.2d left)', [tournament.SecondsUntilNextLevel div 60, tournament.SecondsUntilNextLevel mod 60]);
+        lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentInProgress.TextColor;
+      end;
+      tnsStarting: begin
+        lbvTournamentState.Caption := tournament.StateToStr;
+        lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentInProgress.TextColor;
+      end;
+      tnsFinished: begin
+        lbvTournamentState.Caption := tournament.StateToStr;
+        lbvTournamentState.Style.TextColor := frmChipUpMain.styleTournamentFinished.TextColor;
+      end;
     end;
 
-    lbvSubSubHeader.Visible := subsubvisible;
+    // tournament subheader
+    lbvSubHeader.Visible := subvisible;
   finally
     Tournaments.Unlock;
   end;
@@ -323,7 +334,7 @@ var
 begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
-    lbsHeader.Caption := tournament.Name;
+    lbvHeader.Caption := tournament.Name;
     Caption := Format('Tournament Lobby - %s', [tournament.Name]);
   finally
     Tournaments.Unlock;
@@ -334,33 +345,81 @@ procedure TfrmTournamentLobby.UpdatePlayersGrid;
 var
   c: TcxDataController;
   tournament: TTournamentInfo;
-  rec_count: Integer;
   member: TPB_TournamentMember;
+  members: TPB_TournamentMemberList;
   game: TPB_Game;
+  C1, insert_index: Integer;
 begin
   c := gridPlayersTable.DataController;
   c.BeginFullUpdate;
   try
-    rec_count := 0;
     if (not FSelectedTableId.IsEmpty) and
        (Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game)) then
     try
-      for member in tournament.Players do
-        if member.Gameid = game.MongoId then
+      members := TPB_TournamentMemberList.Create(FALSE);
+      try
+        for member in tournament.Players do
+          if member.Gameid = game.MongoId then
+          begin
+            // insertion sort, sort by seats
+            insert_index := 0;
+            while insert_index < members.Count do
+              if members[insert_index].SeatIndex > member.SeatIndex then
+                Break
+              else
+                Inc(insert_index);
+            members.Insert(insert_index, member);
+          end;
+
+        c.SetRecordCount(members.Count);
+        for C1 := 0 to members.Count - 1 do
         begin
-          Inc(rec_count);
-          if rec_count > c.RecordCount then
-            c.SetRecordCount(rec_count);
-          c.SetValue(rec_count - 1, gridPlayersMongoId.Index, member.MongoId.ToVariant);
-          c.SetValue(rec_count - 1, gridPlayersName.Index, member.Displayname);
-          c.SetValue(rec_count - 1, gridPlayersChips.Index, member.Chips / 100);
+          member := members[C1];
+          c.SetValue(C1, gridPlayersMongoId.Index, member.MongoId.ToVariant);
+          c.SetValue(C1, gridPlayersName.Index, member.Displayname);
+          c.SetValue(C1, gridPlayersChips.Index, member.Chips / 100);
         end;
+      finally
+        members.Free;
+      end;
     finally
       Tournaments.Unlock;
     end;
-    c.SetRecordCount(rec_count);
   finally
     c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmTournamentLobby.UpdatePrizesGrid;
+var
+  c: TcxDataController;
+  tournament: TTournamentInfo;
+  rec_count: Integer;
+  C1: Integer;
+  prize: TPB_TournamentPrize;
+begin
+  if Tournaments.GetAndLock(FTournamentId, tournament) then
+  try
+    c := gridPrizesTable.DataController;
+    c.BeginFullUpdate;
+    try
+      rec_count := 0;
+      for C1 := 0 to tournament.Prizes.Count - 1 do
+      begin
+        prize := tournament.Prizes[C1];
+        Inc(rec_count);
+        if rec_count > c.RecordCount then
+          c.SetRecordCount(rec_count);
+
+        c.SetValue(rec_count - 1, gridPrizesPlace.Index, prize.Place + 1);
+        c.SetValue(rec_count - 1, gridPrizesName.Index, prize.Name);
+      end;
+      c.SetRecordCount(rec_count);
+    finally
+      c.EndFullUpdate;
+    end;
+  finally
+    Tournaments.Unlock;
   end;
 end;
 
@@ -396,10 +455,9 @@ begin
         largest_stack := 0;
         avg_stack := 0;
         for member in tournament.Players do
-          if (member.Gameid = game.MongoId) and
-             (member.Chips > 0) then
+          if member.Gameid = game.MongoId then
           begin
-            total_stack := total_stack + member.Chips;
+            Inc(total_stack, member.Chips);
             if (member.Chips < smallest_stack) or
                (smallest_stack = 0) then
               smallest_stack := member.Chips;
@@ -421,6 +479,17 @@ begin
   finally
     Tournaments.Unlock;
   end;
+end;
+
+procedure TfrmTournamentLobby.gridAllPlayersPlaceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+var
+  chips: Currency;
+begin
+  chips := ARecord.Values[gridAllPlayersChips.Index];
+  if chips = 0 then
+    AStyle := stylePlayersFinished
+  else
+    AStyle := stylePlayersIngame;
 end;
 
 procedure TfrmTournamentLobby.gridBlindsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
@@ -464,7 +533,7 @@ begin
   if Tournaments.GetAndLockByGame(FSelectedTableId, tournament, game) then
   try
     if Tables.GetAndLockTable(game.MongoId, ttTournament, table) then
-      table.BringToFront
+      table.Show
     else
       Tables.AddTournamentTable(game.MongoId, FALSE, TRUE);
   finally
@@ -554,6 +623,7 @@ begin
   UpdatePlayersGrid;
   UpdateTablesGrid;
   UpdateBlindsStructureGrid;
+  UpdatePrizesGrid;
   UpdateFormData;
   UpdateTournamentLabels;
 end;

@@ -94,7 +94,9 @@ function ClientSocket(socket) {
 		this.state = -1;
 		this.log('client lost');
 		delete global.activeUsers[this.userid];
-		Game.handleDisconnect(this,'closed');
+		Game.handleDisconnect(this,'closed',function () {
+			this.log('DC done');
+		}.bind(this));
 		this.destroy();
 	}.bind(this));
 	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
@@ -102,6 +104,7 @@ function ClientSocket(socket) {
 		clearTimeout(this.idleTimer);
 		this.state = -2;
 		this.log('error!',err.code);
+		this.log('stack1:',new Error().stack);
 		Game.handleDisconnect(this,'error');
 		this.logout();
 	}.bind(this));
@@ -114,22 +117,19 @@ function ClientSocket(socket) {
 	Tournament.core.on('users_changed',this.newTournHook);
 	Tournament.core.on('state_changed',this.stateChangeHook);
 	this.lastTourn = 0;
+	this.lastTournDetail = {};
+	this.tournDetailTimer = {};
+	this.handOverHook = this.tournChangeHandOver.bind(this);
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
 	this.log('error!',e);
 	this.log('stack:',e.stack);
-	console.log('TEMP',e.stack,e);
+	console.log('TEMP',this.nick,e.stack,e);
 	Game.handleDisconnect(this,'error2');
 	if (e != 'sendq overflow') this.logout();
 	this.socket.destroy();
 	this.destroy();
-};
-ClientSocket.prototype.destroy = function () {
-	Tournament.core.removeListener('new_tournament',this.newTournHook);
-	Tournament.core.removeListener('tournament_start',this.newTournHook);
-	Tournament.core.removeListener('users_changed',this.newTournHook);
-	Tournament.core.removeListener('state_changed',this.stateChangeHook);
 };
 ClientSocket.prototype.newTourn = function (doc) {
 	if (this.state != 2) return;
@@ -145,7 +145,11 @@ ClientSocket.prototype.flushTourn = function () {
 	delete this.tournTimer;
 	models.Tournament.find(function (err,items) {
 		var out = { items: items };
+		for (var x=0; x<items.length; x++) {
+			items[x].prizes = undefined;
+		}
 		this.send(codes.seTournamentList,out,'Poker.TournamentList');
+		this.lastTourn = Date.now();
 	}.bind(this));
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
@@ -170,14 +174,22 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			var i,j;
 			error.handleError(err);
 			for (i=0; i<items.length; i++) {
+				items[i].prizes = undefined;;
 				for (j=0; j<items[i].players.length; j++) {
 					if (myutils.compareObjectID(items[i].players[j]._id,row._id)) {
 						registered_tournaments.push(items[i]._id);
 					}
 				}
 			}
-			tournaments = items;
-			finish3.call(this,row);
+			async.each(registered_tournaments,function (tournid,cb) {
+				Tournament.core.getById(tournid,function (err,tourn) {
+					tourn.on('handOver',this.handOverHook);
+					cb();
+				}.bind(this));
+			}.bind(this),function () {
+				tournaments = items;
+				finish3.call(this,row);
+			}.bind(this));
 		}.bind(this));
 	}
 	function finish3(row) {
@@ -228,7 +240,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					}
 				}
 			}
-			if (toResume.length > 0) this.log('resuming %d games',toResume.length);
+			if (toResume.length > 0) this.log('resuming %d games ',toResume.length,toResume);
 			var statuses = [];
 			async.each(toResume,function resumer(game,cb) {
 				var token2 = profiler.start('login-game-reconnect');
@@ -280,6 +292,9 @@ ClientSocket.prototype.logout = function () {
 	this.userid = null;
 	this.nick = null;
 	delete this.chips;
+	for (var key in Tournament.core.activeTournaments) {
+		Tournament.core.activeTournaments[key].removeListener('handOver',this.handOverHook);
+	}
 };
 ClientSocket.prototype.eject = function () {
 	Game.handleDisconnect(this,'eject');
@@ -290,12 +305,14 @@ ClientSocket.prototype.eject = function () {
 	this.send(codes.seSecondaryLoginDetected);
 };
 ClientSocket.prototype.log = function log(format) {
+	var ip = 'UNK';
+	if (this.socket && this.socket.remoteAddress) ip = this.socket.remoteAddress;
 	var out = Array.prototype.slice.call(arguments);
 	if (format.indexOf('%') != -1) {
 		out = [ util.format.apply(util,out) ];
 	}
-	process.send({type:'conn',nick:this.nick,connid:this.connid,ts:new Date().toString(),objects:out});
-	var obj = new models.DebugLogs({type:'conn',nick:this.nick,connid:this.connid,objects:out});
+	process.send({ip:ip,type:'conn',nick:this.nick,connid:this.connid,ts:new Date().toString(),objects:out});
+	var obj = new models.DebugLogs({ip:ip,type:'conn',nick:this.nick,connid:this.connid,objects:out});
 	obj.save(function (){});
 };
 ClientSocket.prototype.reply = function reply(code,message,type) {
@@ -401,7 +418,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 				if (toUpdate.length === 0) {
 					this.currentVersion = targetVersion._id;
 				} else {
-					console.log('toUpdate:%j',toUpdate);
+					console.log('%s toUpdate:%j',this.socket.remoteAddress,toUpdate);
 				}
 				if (mainfiles) {
 					msg = JSON.parse(JSON.stringify(global.sharedconfig));
@@ -1142,6 +1159,11 @@ function fetchSize(hash) {
 	req.end();
 }
 ClientSocket.prototype.destroy = function destroy() {
+	Tournament.core.removeListener('new_tournament',this.newTournHook);
+	Tournament.core.removeListener('tournament_start',this.newTournHook);
+	Tournament.core.removeListener('users_changed',this.newTournHook);
+	Tournament.core.removeListener('state_changed',this.stateChangeHook);
+	this.log('events un-hooked');
 	this.socket.destroy();
 	clearTimeout(this.idleTimer);
 };
@@ -1154,8 +1176,9 @@ handlers[codes.scTournamentRegister] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	Tournament.core.join(params._id,this.userid,this.nick,function (code) {
+	Tournament.core.join(params._id,this.userid,this.nick,function (code,tourn) {
 		if (code == 'OK') {
+			tourn.on('handOver',this.handOverHook);
 			params.reply_status = 'tceRegisterOk';
 		} else if (code == 'full') {
 			params.reply_status = 'tceRegisterLimitReached';
@@ -1182,6 +1205,7 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 			this.reply(0,'tournament not found');
 			return;
 		} else if (code == 'OK') {
+			tourn.removeListener('handOver',this.handOverHook);
 			params.reply_status = 'tceUnregisterOk';
 		} else if (code == 'notOpen') {
 			params.reply_status = 'tceNotOpen';
@@ -1228,19 +1252,41 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 			tourn.removeListener('state_changed',this.hook);
 			tourn.removeListener('tournament_start',this.hook);
 			this.hook = null;
+			this.hookNoLimit = null;
 		}
 	}.bind(this));
 };
-ClientSocket.prototype.tournChangeHandOver = function (tourn) {
+ClientSocket.prototype.queueDetails = function (tourn,force) {
+	if (!this.lastTournDetail[tourn.id]) this.lastTournDetail[tourn.id] = 0;
+	var elapsed = Date.now() - this.lastTournDetail[tourn.id];
+	//console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
+	if (force) elapsed = 15000;
+	if (elapsed < 15000) { // 15 sec
+		if (this.tournDetailTimer[tourn.id]) clearTimeout(this.tournDetailTimer[tourn.id]);
+		this.tournDetailTimer[tourn.id] = setTimeout(this.flushTournDetail.bind(this,tourn),15000 - elapsed);
+	} else {
+		this.flushTournDetail(tourn);
+	}
+};
+ClientSocket.prototype.flushTournDetail = function (tourn) {
+	clearTimeout(this.tournDetailTimer[tourn.id]);
+	delete this.tournDetailTimer[tourn.id];
 	var out = tourn.toProto({games:true,players:true});
 	this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
+	this.lastTournDetail[tourn.id] = Date.now();
+}
+ClientSocket.prototype.tournChangeHandOver = function (tourn,userid) {
+	if (userid && myutils.compareObjectID(userid,this.userid)) {
+		this.queueDetails(tourn,true);
+	} else {
+		this.queueDetails(tourn);
+	}
 };
 ClientSocket.prototype.stateChangeHandOver = function (tourn) {
-	//console.log('hook fired on user %s %j',this.nick,tourn.obj.players);
+	this.log('hook fired on user %s %j',this.nick,tourn.obj.players);
 	for (var x=0; x<tourn.obj.players.length; x++) {
 		if (myutils.compareObjectID(tourn.obj.players[x]._id,this.userid)) {
-			var out = tourn.toProto({games:true,players:true});
-			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
+			this.queueDetails(tourn);
 			return;
 		}
 	}
@@ -1255,8 +1301,7 @@ ClientSocket.prototype.sendTournamentInfo = function sendTournamentInfo(tournid,
 				tourn.on('state_changed',this.hook);
 				tourn.on('tournament_start',this.hook);
 			}
-			var out = tourn.toProto({games:true,players:true});
-			this.send(codes.srTournamentDetails,out,'Poker.TournamentInfo');
+			this.queueDetails(tourn,true);
 			token.stop();
 	}.bind(this));
 };

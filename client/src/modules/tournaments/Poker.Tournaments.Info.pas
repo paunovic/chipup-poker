@@ -52,8 +52,9 @@ function TTournamentInfo.StateToStr: String;
 begin
   case State of
     tnsOpen: result := 'Open';
-    tnsInProgress: result := 'In Progress';
-    tnsCancelled: result := 'Cancelled'
+    tnsInProgress, tnsOnBreak, tnsStarting: result := 'Running';
+    tnsFinished: result := 'Finished';
+    tnsCancelled: result := 'Cancelled';
   else
     result := 'Unknown';
   end;

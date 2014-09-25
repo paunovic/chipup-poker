@@ -32,7 +32,7 @@ PrivilegesRequired=none
 [Files]
 Source: "skins\VclStylesInno.dll"; DestDir: "{app}"; Flags: uninsneveruninstall ignoreversion
 Source: "skins\{#SkinName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "files\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "files\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Permissions: everyone-full
    
 [Icons]
 Name: "{code:StartMenuPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
@@ -51,6 +51,10 @@ Name: install_currentuser; Description: "&Current user"; GroupDescription: "Inst
 Name: desktopicon; Description: "&Desktop shortcut"; GroupDescription: "Shortcuts:"
 Name: quicklaunch; Description: "&Quick launch shortcut"; GroupDescription: "Shortcuts:"
 Name: startmenu; Description: "&Start menu shortcut"; GroupDescription: "Shortcuts:"
+
+[UninstallDelete]
+Type: files; Name: "{app}\assets\*.cpa"
+Type: dirifempty; Name: "{app}\assets"
 
 [Messages]
 WizardSelectTasks=Select Tasks
@@ -145,7 +149,7 @@ end;
 
 function CurrentUserInstallPath: String;
 begin
-  result := ExpandConstant('{userpf}\{#ApplicationName}');
+  result := ExpandConstant('{userappdata}\Programs\{#ApplicationName}');
 end;
 
 function AllUsersInstallPath: String;

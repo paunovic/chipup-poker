@@ -144,6 +144,9 @@ type
     procedure acResetBalanceExecute(Sender: TObject);
     procedure acSetLimitExecute(Sender: TObject);
     procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -195,7 +198,8 @@ uses
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member,
-  Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply;
+  Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
+  Poker.Tables.Table, Poker.Forms.Main;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -359,6 +363,12 @@ end;
 procedure TfrmClubLobby.btStatsClick(Sender: TObject);
 begin
   pcTabs.ACtivePage := tsStats;
+end;
+
+procedure TfrmClubLobby.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  frmChipUpMain.OpenClubTable(FClubId, FSelectedGameId);
 end;
 
 procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);

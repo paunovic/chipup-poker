@@ -89,7 +89,7 @@ type
         // assets paths
         ASSETS: (
           DIRECTORY: 'assets\';
-          DIRECTX_MEDIA: 'dxmedia.dat';
+          DIRECTX_MEDIA: 'dxmedia.cpa';
         );
 
         // check these files for update
@@ -101,7 +101,7 @@ type
           (Path: 'sqlite3.dll'; RequiresReboot: TRUE),
           (Path: 'VclStylesInno.dll'; RequiresReboot: FALSE),
           (Path: 'Carbon.vsf'; RequiresReboot: FALSE),
-          (Path: 'assets\dxmedia.dat'; RequiresReboot: FALSE)
+          (Path: 'assets\dxmedia.cpa'; RequiresReboot: FALSE)
         );
 
         // animation metrics. times are in seconds

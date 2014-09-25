@@ -53,7 +53,7 @@ type
 var
   dmMain: TdmMain;
   SelfPath: String;
-  AppDataPath: String;
+  UserDataPath: String;
 
 implementation
 
@@ -73,22 +73,11 @@ uses
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 var
-  common, local: String;
   server_index: Integer;
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-  local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
-  common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
-  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
-    AppDataPath := common
-  else
-    AppDataPath := local;
-  AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AppDataPath) + 'ChipUP Poker');
-
-  ForceDirectories(AppDataPath);
-  if (not DirectoryExists(AppDataPath)) or
-     (not IsDirectoryWriteable(AppDataPath)) then
-    AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(local) + 'ChipUP Poker');
+  UserDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
+  ForceDirectories(UserDataPath);
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
@@ -96,8 +85,8 @@ begin
 
   LoadFonts;
 
-  TSettings.Initialize(AppDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
-  TDatabase.Initialize(AppDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
+  TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
@@ -224,12 +213,12 @@ var
   C1: Integer;
   pbts: TPB_TableStatus;
 begin
-  Avatars.Add(FSelfInfo.Avatar, nil);
   Players.LoadFromUsersProtobuf(ALoginReply.Users);
   Tournaments.Assign(ALoginReply.TournamentInfos);
   FSelfInfo.LoadFromLoginReply(ALoginReply);
   ProcessPlayerObject(ALoginReply);
   UpdateSelfInfoInPlayers;
+  Avatars.Add(FSelfInfo.Avatar, nil);
 
   FSelfInfo.RegisteredTournaments.Clear;
   FSelfInfo.RegisteredTournaments.AddRange(ALoginReply.RegisteredTournaments);
@@ -414,6 +403,7 @@ begin
     if Tables.GetAndLockTable(tstatus.TableMongoId, tstatus.TableType, table) then
     try
       table.SetTableStatus(tstatus, FALSE);
+      table.Show;
     finally
       Tables.Unlock;
     end;

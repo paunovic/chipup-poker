@@ -244,6 +244,7 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/tournaments',this.getTournaments.bind(this));
 	app.get('/secure/tournament',this.getTournament.bind(this));
 	app.post('/secure/tournament',this.postTournament.bind(this));
+	app.get('/secure/tournament_log',this.getTournamentLog.bind(this));
 };
 Server.prototype.getTournaments = function (req,res) {
 	models.Tournament.find(function (err,rows) {
@@ -252,7 +253,24 @@ Server.prototype.getTournaments = function (req,res) {
 };
 Server.prototype.getTournament = function (req,res) {
 	models.Tournament.findById(req.query.id,function (err,row) {
-		res.render('tournament',{tourn:row});
+		models.TournamentLog.find({tournament_id:row._id}).sort({_id:1}).exec(function (err,logs) {
+			var idlist = [];
+			for (var x=0; x<row.players.length; x++) {
+				idlist.push(row.players[x]._id);
+			}
+			models.UserModel.find({_id:{$in:idlist}},function (err,users) {
+				var map = {};
+				for (var x=0; x<users.length; x++) {
+					map[users[x]._id] = users[x];
+				}
+				res.render('tournament',{ tourn:row, logs:logs, users:map });
+			});
+		});
+	});
+};
+Server.prototype.getTournamentLog = function (req,res) {
+	models.TournamentLog.findById(req.query.id,function (err,log) {
+		res.end(JSON.stringify(log));
 	});
 };
 Server.prototype.postTournament = function (req,res) {
@@ -306,6 +324,10 @@ Server.prototype.createTourn = function (req,res) {
 Server.prototype.createTournPost = function (req,res) {
 	var str = req.body.start_date + ' ' + req.body.start_time;
 	req.body.start_time = Math.round(new Date(str).getTime()/1000);
+	req.body.prizes = JSON.parse(req.body.raw_prizes);
+	for (var x=0; x<req.body.prizes.length; x++) {
+		req.body.prizes[x] = { place:x, name:req.body.prizes[x] };
+	}
 	Tournament.create(req.body,function (err,doc) {
 		if (err && ((err.name == 'ValidationError') || (err.name == 'CastError'))) {
 			res.end(err.toString());

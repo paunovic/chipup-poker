@@ -7,6 +7,7 @@ module.exports.compareObjectID = compareObjectID;
 module.exports.getNextSequence = getNextSequence;
 module.exports.containsObjectID = containsObjectID;
 module.exports.throttle = throttle;
+module.exports.shuffle = shuffle;
 
 var models = require('./db').models;
 
@@ -71,4 +72,8 @@ function throttle(key,interval,func) {
 		throttled_funcs[key].lastrun = Date.now();
 		func();
 	},(interval * 1000) - (Date.now() - throttled_funcs[key].lastrun));
+}
+function shuffle(o) {
+	for (var j,x,i=o.length; i; j=Math.floor(Math.random()*i),x=o[--i],o[i]=o[j], o[j]=x);
+	return o;
 }

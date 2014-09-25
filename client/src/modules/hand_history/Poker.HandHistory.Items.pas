@@ -203,6 +203,7 @@ var
   C1: Integer;
   action: String;
   last_bet: UINT32;
+  parent_name: String;
 begin
   ALines.Clear;
 
@@ -214,9 +215,14 @@ begin
       ChipsToStr(FParentItems.Game.SmallBlind), ChipsToStr(FParentItems.Game.BigBlind), ATags.HeaderNormal, ATags.GameTime, FStartTimeStr
   ]));
 
+  if Assigned(FParentItems.Tournament) then
+    parent_name := FParentItems.Tournament.Name
+  else
+    parent_name := FParentItems.Club.Name;
+
   ALines.Add(Format('%sTable ''%s%s%s'' (%s%d-max%s) - %s%s', [
       ATags.HeaderNormal, ATags.TableName, FParentItems.Game.Gamename, ATags.HeaderNormal, ATags.TableMaxSeats, FParentItems.Game.Seats, ATags.HeaderNormal,
-      ATags.ClubName, FParentItems.Club.Name
+      ATags.ClubName, parent_name
   ]));
 
   ALines.Add('');

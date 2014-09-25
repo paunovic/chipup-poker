@@ -36,12 +36,14 @@ type
       FGameplayLocked: Boolean;
       FGameplayLockedEndTime: DWORD;
       FHidden: Boolean;
+      FReceivedStatus: Boolean;
 
     procedure WndProc(var AMessage: TMessage);
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
     procedure SeatClearCaptionTimerCallback;
     procedure ConfigureActions;
     procedure NotifyRendererHandle;
+    procedure BringToFront;
   public
     constructor Create(const AInternalId: Integer);
     destructor Destroy; override;
@@ -53,7 +55,6 @@ type
     procedure RenderSync;
     procedure LockGameplay(const ASeconds: Single);
 
-    procedure BringToFront;
     procedure SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
     procedure PlaySound(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
     procedure Hide;
@@ -102,6 +103,7 @@ begin
   FStatus := TTableStatus.Create;
   FClub := TClubInfo.Create;
   FGame := TGameInfo.Create;
+  FReceivedStatus := FALSE;
 end;
 
 destructor TTable.Destroy;
@@ -285,6 +287,9 @@ end;
 
 procedure TTable.Show;
 begin
+  if not FReceivedStatus then
+    Exit;
+
   if Assigned(FForm) then
     BringToFront;
   FHidden := FALSE;
@@ -329,6 +334,9 @@ end;
 
 procedure TTable.BringToFront;
 begin
+  if not FReceivedStatus then
+    Exit;
+
   if IsIconic(FForm.Handle) then
     ShowWindow(FForm.Handle, SW_RESTORE);
   FForm.Show;
@@ -375,6 +383,7 @@ begin
     FRenderer.ClearAnimations;
 
   FStatus.Assign(ATableStatus);
+  FReceivedStatus := TRUE;
 
   if not FFirstStatusSet then
   begin

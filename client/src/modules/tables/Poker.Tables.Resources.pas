@@ -22,6 +22,7 @@ type
       FDXFonts: TAsphyreFonts;
 
       FRoomBackgroundImage: TAsphyreImage;
+      FFinalRoomBackgroundImage: TAsphyreImage;
       FTableImage: TAsphyreImage;
       FCardBackgroundImage: TAsphyreImage;
       FSeatLeftImage: TAsphyreImage;
@@ -133,6 +134,7 @@ type
     property DXImages: TAsphyreImages read FDXImages;
 
     property RoomBackgroundImage: TAsphyreImage read FRoomBackgroundImage;
+    property FinalRoomBackgroundImage: TAsphyreImage read FFinalRoomBackgroundImage;
     property TableImage: TAsphyreImage read FTableImage;
     property CardBackgroundImage: TAsphyreImage read FCardBackgroundImage;
     property SeatLeftImage: TAsphyreImage read FSeatLeftImage;
@@ -227,6 +229,7 @@ begin
   FDXImages := TAsphyreImages.Create;
 
   AddDXImage('RoomBackground.image', FRoomBackgroundImage);
+  AddDXImage('RoomBackground_ParketRed.image', FFinalRoomBackgroundImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
   AddDXImage('SeatLeft.image', FSeatLeftImage, FSeatAspectRatio);
   AddDXImage('SeatLeftActive.image', FSeatLeftActiveImage);

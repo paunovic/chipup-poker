@@ -61,6 +61,7 @@ enum ServerCodes {
 	seUserChange = 60;
 	seTournamentPlayerFinished = 61;
 	seTournamentPlayerTransfer = 62;
+	seUpdateGameObjects = 63;
 	
 	scHello = 70;
 	scLogin = 71;
@@ -273,6 +274,7 @@ message Game {
 	optional bytes tournament = 16 [(ObjectId)=true];
 	optional uint32 small_blind = 17;
 	optional uint32 big_blind = 18;
+	optional bool final_table = 19;
 }
 
 message ListClubsReply {
@@ -648,6 +650,7 @@ message TournamentMember {
 	required uint32 chips = 3;
 	optional bytes gameid = 4 [(ObjectId)=true];
 	optional int32 position = 5;
+	optional uint32 seat_index = 6;
 }
 
 message TournamentInfo {
@@ -677,6 +680,7 @@ message TournamentInfo {
 	repeated GameBlinds blind_structure = 16;
 	optional uint32 current_blind_level = 17;
 	optional uint64 current_blind_level_end_time = 18;
+	repeated TournamentPrize prizes = 19;
 }
 
 message TournamentCommandParams {
@@ -701,6 +705,8 @@ message TournamentPlayerFinished {
 	required bytes tournament_id = 1 [(ObjectId)=true];
 	required bytes player_id = 2 [(ObjectId)=true];
 	required int32 place = 3;
+	optional TournamentPrize prize = 4;
+	required bytes table_id = 5 [(ObjectId)=true];
 }
 
 message GameBlinds {
@@ -718,10 +724,20 @@ message TableMessage {
 	required TableMessageType message = 1;
 	optional uint64 end_time = 2;
 }
+
 message TournamentPlayerTransfer {
 	required bytes game_source = 1 [(ObjectId)=true];
 	required bytes game_destination = 2 [(ObjectId)=true];
 	required bytes user_id = 3 [(ObjectId)=true];
 	required uint32 seat_source = 4;
 	required uint32 seat_destination = 5;
+}
+
+message TournamentPrize {
+	required int32 place = 1;
+	required string name = 2;
+}
+
+message UpdateGameObjects {
+	repeated Game games = 1;
 }
