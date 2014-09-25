@@ -274,6 +274,7 @@ message Game {
 	optional bytes tournament = 16 [(ObjectId)=true];
 	optional uint32 small_blind = 17;
 	optional uint32 big_blind = 18;
+	optional bool final_table = 19;
 }
 
 message ListClubsReply {

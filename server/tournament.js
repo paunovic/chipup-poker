@@ -37,6 +37,7 @@ function Tournament(obj) {
 	this.Lock = new ReadWriteLock();
 	this.id = this.obj._id;
 	this.bustQueue = {};
+	this.final_table = false;
 }
 
 Tournament.create = function (obj,cb) {
@@ -171,6 +172,10 @@ Tournament.prototype.nextLevel = function () {
 	core.emit('state_changed',this);
 }
 Tournament.prototype.beginBreak = function () {
+	if (this.obj.state == 'tnsFinished') {
+		console.log('break canceled');
+		return;
+	}
 	console.log('break starting %s',new Date());
 	this.onBreak = true;
 	var obj = { message:'tmtTournamentBreak', duration:300 };
@@ -340,6 +345,7 @@ Tournament.prototype.handOver = function (game,cb) {
 		assert.equal(total2,330000);*/
 		// /DEBUG
 		if (players_remaining == 1) {
+			console.log('on the final player');
 			this.obj.state = 'tnsFinished';
 			var winner = this.obj.players[0];
 			var conn = global.activeUsers[winner._id];
@@ -361,6 +367,8 @@ Tournament.prototype.handOver = function (game,cb) {
 				game.leave(winner_conn,'tournamentWinner',function () {
 				}.bind(this));
 			}.bind(this));
+			assert.equal(winner.chips,this.obj.startingchips * 100 * this.obj.players.length);
+			winner.chips = 0;
 			saveChanges.call(this,release_tourn);
 		} else {
 			var result = this.countPlayersPerTable(game);
@@ -373,6 +381,11 @@ Tournament.prototype.handOver = function (game,cb) {
 			var targetPlayers = Math.floor(total/minTables);
 			console.log('minTables:%d remainder:%d avg per table2:%d, this table:%d min:%d max:%d',minTables,remainder,targetPlayers,players_at_this_table,result.min,result.max);
 			this.log.records.push({ type:'counts', counts:result, thisTable:parseInt(game.obj.gamename)-1 });
+
+			if ( (result.active == 1) && (result.players_at_this_table > 0) ) {
+				game.final_table = true;
+				this.final_table = true;
+			}
 			if ((result.active > minTables) && (players_at_this_table == result.min)) {
 				game.clearOut = true;
 				console.log('begining destruction of table %s',parseInt(game.obj.gamename)-1);
@@ -602,6 +615,7 @@ Tournament.prototype.doBust = function (userid,seat,table) {
 			if (conn) {
 				var obj = {tournament_id:this.id, player_id:userid, place:x, table_id:table.id }
 				if (this.obj.prizes[x]) obj.prize = this.obj.prizes[x];
+				console.log(this.obj.prizes,x,obj);
 				conn.send(codes.seTournamentPlayerFinished,obj,'Poker.TournamentPlayerFinished');
 			}
 			break;
@@ -674,7 +688,7 @@ TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 					release();
 					tourn.emit('users_changed',tourn,userid);
 					core.emit('users_changed',tourn);
-					cb('OK');
+					cb('OK',tourn);
 				}.bind(this));
 			}
 		}.bind(this));
@@ -794,6 +808,7 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 			tourn.log = doc;
 		});
 		tourn.startTime = Date.now();
+		tourn.final_table = false;
 		assert.equal(typeof tourn.obj.blind_schedule.LevelLength,'number');
 		var table_count = tourn.obj.registered_players / tourn.obj.seats_per_table;
 		console.log('need %d tables',table_count);

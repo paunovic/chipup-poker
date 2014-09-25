@@ -43,6 +43,7 @@ function makeGameProtobuf(g) {
 		g.sitting = gameobj.sittingCount();
 		g.state = gameobj.state2;
 		if (g.state == 'gsClosing') g.closetime = gameobj.closeTime;
+		if (gameobj.final_table) g.final_table = true;
 	} else if (g.state2) {
 		g.state = g.state2;
 	} else {
@@ -1940,6 +1941,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (priv.conn == self) {
 			tableStatus.maximum_raise = this.getLimit(x);
 			if (tableStatus.minimum_raise > seat.chips) tableStatus.minimum_raise = seat.chips + this.bets[x];
+			if (tableStatus.minimum_raise > tableStatus.maximum_raise) tableStatus.minimum_raise = tableStatus.maximum_raise;
 		}
 		obj.card_count = seat.hand.cards.length;
 		if (this.state == 'tsIdle') assert.equal(obj.card_count,0);

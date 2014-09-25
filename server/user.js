@@ -119,6 +119,7 @@ function ClientSocket(socket) {
 	this.lastTourn = 0;
 	this.lastTournDetail = {};
 	this.tournDetailTimer = {};
+	this.handOverHook = this.tournChangeHandOver.bind(this);
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
@@ -180,8 +181,15 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					}
 				}
 			}
-			tournaments = items;
-			finish3.call(this,row);
+			async.each(registered_tournaments,function (tournid,cb) {
+				Tournament.core.getById(tournid,function (err,tourn) {
+					tourn.on('handOver',this.handOverHook);
+					cb();
+				}.bind(this));
+			}.bind(this),function () {
+				tournaments = items;
+				finish3.call(this,row);
+			}.bind(this));
 		}.bind(this));
 	}
 	function finish3(row) {
@@ -284,6 +292,9 @@ ClientSocket.prototype.logout = function () {
 	this.userid = null;
 	this.nick = null;
 	delete this.chips;
+	for (var key in Tournament.core.activeTournaments) {
+		Tournament.core.activeTournaments[key].removeListener('handOver',this.handOverHook);
+	}
 };
 ClientSocket.prototype.eject = function () {
 	Game.handleDisconnect(this,'eject');
@@ -1165,8 +1176,9 @@ handlers[codes.scTournamentRegister] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	Tournament.core.join(params._id,this.userid,this.nick,function (code) {
+	Tournament.core.join(params._id,this.userid,this.nick,function (code,tourn) {
 		if (code == 'OK') {
+			tourn.on('handOver',this.handOverHook);
 			params.reply_status = 'tceRegisterOk';
 		} else if (code == 'full') {
 			params.reply_status = 'tceRegisterLimitReached';
@@ -1193,6 +1205,7 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 			this.reply(0,'tournament not found');
 			return;
 		} else if (code == 'OK') {
+			tourn.removeListener('handOver',this.handOverHook);
 			params.reply_status = 'tceUnregisterOk';
 		} else if (code == 'notOpen') {
 			params.reply_status = 'tceNotOpen';
