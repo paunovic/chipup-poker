@@ -281,8 +281,8 @@ Client.prototype.handle = function (code,data) {
 		}
 		break;
 	case codes.StopServer:
+		autoRestart = false;
 		if (main_server) {
-			autoRestart = false;
 			main_server.kill();
 		} else {
 			console.log('server already down');
