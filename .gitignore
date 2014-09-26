@@ -1,6 +1,7 @@
 __history
 client/bin
 client/design
+protocopier/bin
 cpp-protobuf-generator/output
 *.local
 *.fbpInf
