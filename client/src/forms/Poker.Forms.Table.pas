@@ -131,7 +131,6 @@ type
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 
-    procedure ConfigureGUI;
     procedure DefocusControls;
     procedure RefreshAll;
     procedure TableStatusUpdate;
@@ -142,6 +141,7 @@ type
   public
     constructor Create(const AInternalId: Integer); reintroduce;
     procedure ChangeGameId(const AGameId: TMongoId);
+    procedure ConfigureGUI;
   end;
 
 implementation

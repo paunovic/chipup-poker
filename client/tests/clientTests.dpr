@@ -23,13 +23,14 @@ uses
   Poker.Common.Misc in '..\src\modules\common\Poker.Common.Misc.pas',
   Poker.Interfaces.ModalForm in '..\src\interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Interfaces.FormParams in '..\src\interfaces\Poker.Interfaces.FormParams.pas',
-  Poker.Protobufs.Objects.Game in '..\src\modules\protobuf\objects\Poker.Protobufs.Objects.Game.pas',
-  Poker.Protobufs.Objects.Base in '..\src\modules\protobuf\Poker.Protobufs.Objects.Base.pas',
-  Poker.Protobufs.Reader in '..\src\modules\protobuf\Poker.Protobufs.Reader.pas',
+  Poker.Protobufs.Objects.Game in '..\src\modules\protobufs\objects\Poker.Protobufs.Objects.Game.pas',
+  Poker.Protobufs.Objects.Base in '..\src\modules\protobufs\Poker.Protobufs.Objects.Base.pas',
+  Poker.Protobufs.Reader in '..\src\modules\protobufs\Poker.Protobufs.Reader.pas',
   Poker.HandStrengthCalculator in '..\src\modules\Poker.HandStrengthCalculator.pas',
   utCards in 'utCards.pas',
   utHandStrengthCalculator in 'utHandStrengthCalculator.pas',
-  Poker.Cards in '..\src\modules\Poker.Cards.pas';
+  Poker.Cards in '..\src\modules\Poker.Cards.pas',
+  Poker.Types in '..\src\modules\Poker.Types.pas';
 
 {$R *.RES}
 

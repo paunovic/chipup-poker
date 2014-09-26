@@ -62,7 +62,7 @@ type
 
     function UpdateObjects: Boolean;
     function GetTableCaption: String;
-    procedure Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer);
+    function Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer): Boolean;
 
     property InternalId: Integer read FInternalId;
     property TableType: TTableType read FTableType;
@@ -299,12 +299,18 @@ begin
   FHidden := FALSE;
 end;
 
-procedure TTable.Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer);
+function TTable.Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer): Boolean;
 begin
   FGameId := ATournamentPlayerTransfer.GameDestination;
   if Assigned(FForm) then
     (FForm as TfrmTable).ChangeGameId(FGameId);
-  UpdateObjects;
+  result := UpdateObjects;
+  {$IFDEF DEBUG}
+  if not result then
+    DebugLn(FDebugId, 'Table player transfer: failed to update objects', ditException, SerializeObject(ATournamentPlayerTransfer))
+  else
+    DebugLn(FDebugId, 'Table player transfer succeeded', ditApplication, SerializeObject(ATournamentPlayerTransfer));
+  {$ENDIF}
 end;
 
 function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;

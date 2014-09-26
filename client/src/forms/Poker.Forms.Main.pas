@@ -1417,12 +1417,14 @@ begin
           table.Transfer(pbtransfer)
         else
           Tables.Remove(table.InternalId);
+        table.UpdateObjects;
       finally
         Tables.Unlock;
       end;
 
     if Tables.GetAndLockTable(pbtransfer.GameDestination, ttTournament, table) then
     try
+      table.UpdateObjects;
       table.Show;
     finally
       Tables.Unlock;
@@ -1743,11 +1745,29 @@ var
   proto: TPB_TournamentInfo;
   member: TPB_TournamentMember;
   self_registered: Boolean;
+  tournament: TTournamentInfo;
+  pbgame: TPB_Game;
+  table: TTable;
 begin
   if not TTypes.TryCast<TPB_TournamentInfo>(AObject, proto) then
     Exit;
 
   Tournaments.Add(proto);
+
+  if Tournaments.GetAndLock(proto.MongoId, tournament) then
+  try
+    for pbgame in tournament.Games do
+      if Tables.GetAndLockTable(pbgame.MongoId, ttTournament, table) then
+      try
+        table.UpdateObjects;
+        if Assigned(table.Form) then
+          (table.Form as TfrmTable).ConfigureGUI;
+      finally
+        Tables.Unlock;
+      end;
+  finally
+    Tournaments.Unlock;
+  end;
 
   self_registered := FALSE;
   for member in proto.Players do

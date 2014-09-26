@@ -86,7 +86,7 @@ procedure TfrmForgotPassword.acOKExecute(Sender: TObject);
 begin
   acOK.Enabled := FALSE;
   ServerSocket.ForgotPassword(edEmail.Text);
-  MessageDlg('You should soon receive password reset instructions in your inbox', mtInformation, [mbOK], 0);
+  MessageDlg('You should soon receive password reset instructions in your inbox.', mtInformation, [mbOK], 0);
   ModalResult := mrOk;
   Close;
 end;

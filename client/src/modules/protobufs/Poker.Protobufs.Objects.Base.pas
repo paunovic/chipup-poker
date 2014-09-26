@@ -38,7 +38,6 @@ type
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.SysUtils;
 
 

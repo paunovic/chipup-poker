@@ -79,7 +79,7 @@ object frmTable: TfrmTable
     Transparent = True
     Visible = False
     Height = 15
-    Width = 94
+    Width = 104
   end
   object cbSitOutNextHand: TcxCheckBox
     Left = 223
@@ -101,7 +101,7 @@ object frmTable: TfrmTable
     Transparent = True
     Visible = False
     Height = 15
-    Width = 94
+    Width = 104
   end
   object cbSitOutNextBB: TcxCheckBox
     Left = 223
@@ -123,7 +123,7 @@ object frmTable: TfrmTable
     Transparent = True
     Visible = False
     Height = 15
-    Width = 94
+    Width = 104
   end
   object seRaiseAmount: TcxSpinEdit
     Left = 404

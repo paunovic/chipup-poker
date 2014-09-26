@@ -87,13 +87,14 @@
 			<DCCReference Include="..\src\modules\common\Poker.Common.Misc.pas"/>
 			<DCCReference Include="..\src\interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="..\src\interfaces\Poker.Interfaces.FormParams.pas"/>
-			<DCCReference Include="..\src\modules\protobuf\objects\Poker.Protobufs.Objects.Game.pas"/>
-			<DCCReference Include="..\src\modules\protobuf\Poker.Protobufs.Objects.Base.pas"/>
-			<DCCReference Include="..\src\modules\protobuf\Poker.Protobufs.Reader.pas"/>
+			<DCCReference Include="..\src\modules\protobufs\objects\Poker.Protobufs.Objects.Game.pas"/>
+			<DCCReference Include="..\src\modules\protobufs\Poker.Protobufs.Objects.Base.pas"/>
+			<DCCReference Include="..\src\modules\protobufs\Poker.Protobufs.Reader.pas"/>
 			<DCCReference Include="..\src\modules\Poker.HandStrengthCalculator.pas"/>
 			<DCCReference Include="utCards.pas"/>
 			<DCCReference Include="utHandStrengthCalculator.pas"/>
 			<DCCReference Include="..\src\modules\Poker.Cards.pas"/>
+			<DCCReference Include="..\src\modules\Poker.Types.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
