@@ -205,7 +205,6 @@ type
     procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
-    procedure CSEUpdateGameObjects(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -246,7 +245,7 @@ uses
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
-  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Protobufs.Objects.UpdateGameObjects,
+  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer,
   Poker.Forms.Table;
 
 
@@ -271,7 +270,6 @@ begin
                       TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                       TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                      TServerMessageCallback.Create(seUpdateGameObjects, CSEUpdateGameObjects),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
@@ -1428,36 +1426,6 @@ begin
       table.Show;
     finally
       Tables.Unlock;
-    end;
-  end;
-end;
-
-procedure TfrmChipUpMain.CSEUpdateGameObjects(const AMethodId: Integer; const AObject: TObject);
-var
-  proto: TPB_UpdateGameObjects;
-  club: TClubInfo;
-  newgame, pbgame: TPB_Game;
-  game_info: TGameInfo;
-  tournament: TTournamentInfo;
-begin
-  if not TTypes.TryCast<TPB_UpdateGameObjects>(AObject, proto) then
-    Exit;
-
-  for newgame in proto.Games do
-  begin
-    if dmMain.SelfInfo.Clubs.GetAndLockByGame(newgame.MongoId, club, game_info) then
-    try
-      game_info.Assign(newgame);
-    finally
-      dmMain.SelfInfo.Clubs.Unlock;
-    end;
-
-    if Tournaments.GetAndLockByGame(newgame.MongoId, tournament, pbgame) then
-    try
-      pbgame.Clear;
-      pbgame.MergeFrom(newgame);
-    finally
-      Tournaments.Unlock;
     end;
   end;
 end;

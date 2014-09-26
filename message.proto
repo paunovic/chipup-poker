@@ -61,7 +61,6 @@ enum ServerCodes {
 	seUserChange = 60;
 	seTournamentPlayerFinished = 61;
 	seTournamentPlayerTransfer = 62;
-	seUpdateGameObjects = 63;
 	
 	scHello = 70;
 	scLogin = 71;
@@ -736,8 +735,4 @@ message TournamentPlayerTransfer {
 message TournamentPrize {
 	required int32 place = 1;
 	required string name = 2;
-}
-
-message UpdateGameObjects {
-	repeated Game games = 1;
 }
