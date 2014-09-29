@@ -106,6 +106,7 @@ type
     lbsTournamentDetails: TcxLabel;
     tiTournamentInfoRefresh: TTimer;
     styleTournamentNameRegistered: TcxStyle;
+    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -232,7 +233,8 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF} Poker.Sounds, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc,
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  Poker.Sounds, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc,
   Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
@@ -246,7 +248,7 @@ uses
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
   Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer,
-  Poker.Forms.Table;
+  Poker.Forms.Table, Poker.Forms.TournamentFinishDialog;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -1387,7 +1389,7 @@ begin
   end;
 
   if msg <> '' then
-    MessageDlg(msg, mtInformation, [mbOk], 0);
+    TfrmTournamentFinishDialog.RunModal(self, msg);
 
   if Tables.GetAndLockTable(proto.TableId, ttTournament, table) then
   try

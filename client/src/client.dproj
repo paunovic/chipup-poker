@@ -368,6 +368,10 @@
 			<DCCReference Include="modules\common\Poker.Common.SafeMutex.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas"/>
+			<DCCReference Include="forms\Poker.Forms.TournamentFinishDialog.pas">
+				<Form>frmTournamentFinishDialog</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
