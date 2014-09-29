@@ -12,6 +12,11 @@
 
 #include "strutil.h"
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#define snprintf _snprintf_s
+#endif
+
 using namespace std;
 using namespace google::protobuf::compiler;
 using namespace google::protobuf;

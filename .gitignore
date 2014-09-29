@@ -32,3 +32,6 @@ server/.idea
 server/logs/*
 protocopier/bin/Win32/Debug/*
 protocopier/bin/Win32/Release/dcu/*
+cpp-protobuf-generator/cpp-protobuf-generator/debug
+cpp-protobuf-generator/cpp-protobuf-generator/*.sdf
+cpp-protobuf-generator/cpp-protobuf-generator/*.suo
