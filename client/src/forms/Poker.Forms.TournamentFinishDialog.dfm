@@ -12,6 +12,7 @@ object frmTournamentFinishDialog: TfrmTournamentFinishDialog
   Font.Style = []
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   DesignSize = (
     304
     103)
@@ -40,6 +41,5 @@ object frmTournamentFinishDialog: TfrmTournamentFinishDialog
     Caption = 'OK'
     ModalResult = 1
     TabOrder = 1
-    ExplicitTop = 80
   end
 end

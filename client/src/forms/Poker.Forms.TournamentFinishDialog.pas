@@ -12,9 +12,10 @@ type
   TfrmTournamentFinishDialog = class(TForm)
     lbvText: TcxLabel;
     btOk: TcxButton;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
   public
-    class function RunModal(const AOwner: TComponent; const AText: String): Integer;
+    class procedure Run(const AOwner: TComponent; const AText: String);
 
     procedure SetText(const AText: String);
   end;
@@ -25,22 +26,23 @@ implementation
 
 { TfrmTournamentFinishDialog }
 
-class function TfrmTournamentFinishDialog.RunModal(const AOwner: TComponent; const AText: String): Integer;
+class procedure TfrmTournamentFinishDialog.Run(const AOwner: TComponent; const AText: String);
 var
   form: TfrmTournamentFinishDialog;
 begin
   form := TfrmTournamentFinishDialog.Create(AOwner);
-  try
-    form.SetText(AText);
-    result := form.ShowModal;
-  finally
-    form.Free;
-  end;
+  form.SetText(AText);
+  form.Show;
 end;
 
 procedure TfrmTournamentFinishDialog.SetText(const AText: String);
 begin
   lbvText.Caption := AText;
+end;
+
+procedure TfrmTournamentFinishDialog.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
 end;
 
 end.

@@ -106,7 +106,6 @@ type
     lbsTournamentDetails: TcxLabel;
     tiTournamentInfoRefresh: TTimer;
     styleTournamentNameRegistered: TcxStyle;
-    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -1389,7 +1388,7 @@ begin
   end;
 
   if msg <> '' then
-    TfrmTournamentFinishDialog.RunModal(self, msg);
+    TfrmTournamentFinishDialog.Run(self, msg);
 
   if Tables.GetAndLockTable(proto.TableId, ttTournament, table) then
   try
