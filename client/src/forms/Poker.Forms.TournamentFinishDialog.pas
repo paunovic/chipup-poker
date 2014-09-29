@@ -13,6 +13,7 @@ type
     lbvText: TcxLabel;
     btOk: TcxButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btOkClick(Sender: TObject);
   private
   public
     class procedure Run(const AOwner: TComponent; const AText: String);
@@ -38,6 +39,12 @@ end;
 procedure TfrmTournamentFinishDialog.SetText(const AText: String);
 begin
   lbvText.Caption := AText;
+end;
+
+procedure TfrmTournamentFinishDialog.btOkClick(Sender: TObject);
+begin
+  ModalResult := mrOk;
+  Close;
 end;
 
 procedure TfrmTournamentFinishDialog.FormClose(Sender: TObject; var Action: TCloseAction);

@@ -41,5 +41,6 @@ object frmTournamentFinishDialog: TfrmTournamentFinishDialog
     Caption = 'OK'
     ModalResult = 1
     TabOrder = 1
+    OnClick = btOkClick
   end
 end
