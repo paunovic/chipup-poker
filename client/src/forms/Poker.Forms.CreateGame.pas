@@ -30,7 +30,7 @@ type
     seBuyinMax: TcxSpinEdit;
     lbsBuyinMin: TcxLabel;
     lbsBuyinMax: TcxLabel;
-    lbsBuyinBigBlinds: TcxLabel;
+    lbsBuyinChips: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
@@ -121,15 +121,15 @@ begin
   if not GetBlinds(cbBlinds.Text, sb, bb) then
     Exit;
 
-  if seBuyinMin.Value < 5 then
+  if seBuyinMin.Value < bb * 5 then
   begin
-    err := 'Minimum lower buy-in must be atleast 5bb';
+    err := Format('Minimum lower buy-in must be atleast 5bb (%d)', [bb * 5]);
     seBuyinMin.SetFocus;
   end
   else
-    if seBuyinMax.Value < 10 then
+    if seBuyinMax.Value < bb * 10 then
     begin
-      err := 'Minimum upper buy-in must be atleast 10bb';
+      err := Format('Minimum upper buy-in must be atleast 10bb (%d)', [bb * 10]);
       seBuyinMax.SetFocus;
     end
     else
@@ -142,7 +142,7 @@ begin
         if ValidateGameName(edGameName.Text, err) then
         begin
           acOK.Enabled := FALSE;
-          ServerSocket.CreateGame(FClubId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+          ServerSocket.CreateGame(FClubId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value * 100, seBuyinMax.Value * 100, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
         end;
 
   if err <> '' then

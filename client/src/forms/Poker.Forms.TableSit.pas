@@ -114,10 +114,10 @@ begin
     else
       seat_chips := 0;
 
-    if seat_chips > table.Game.BuyinMax * table.Game.BigBlind then
+    if seat_chips > table.Game.BuyinMax then
       result := 0
     else
-      result := table.Game.BuyinMax * table.Game.BigBlind - seat_chips;
+      result := table.Game.BuyinMax - seat_chips;
   finally
     Tables.Unlock;
   end;
@@ -170,15 +170,14 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     lbvTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
-    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(table.Game.BuyinMin * table.Game.BigBlind),
-        ChipsToStr(table.Game.BuyinMax * table.Game.BigBlind)]);
+    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(table.Game.BuyinMin),
+        ChipsToStr(table.Game.BuyinMax)]);
     if table.Status.SelfSeatIndex <> -1 then
       FBuyinPhrase := 'add-on'
     else
       FBuyinPhrase := 'buy-in';
 
-    default_buyin := table.Game.BigBlind * 50;
-    default_buyin := (default_buyin div 10) * 10;
+    default_buyin := table.Game.BuyinMax;
     SetBuyin(default_buyin);
   finally
     Tables.Unlock;
@@ -202,7 +201,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    SetBuyin(table.Game.BuyinMin * table.Game.BigBlind);
+    SetBuyin(table.Game.BuyinMin);
   finally
     Tables.Unlock;
   end;
@@ -392,7 +391,7 @@ begin
     if table.game.MongoId <> pbbuyinerr.GameId then
       Exit;
 
-    if pbbuyinerr.LastCashout > table.game.BuyinMax * table.game.BigBlind then
+    if pbbuyinerr.LastCashout > table.game.BuyinMax then
       err := Format('You must buyin with equal amount of chips as your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)])
     else
       err := Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]);

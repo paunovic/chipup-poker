@@ -252,10 +252,10 @@ object frmCreateGame: TfrmCreateGame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object lbsBuyinBigBlinds: TcxLabel
+  object lbsBuyinChips: TcxLabel
     Left = 255
     Top = 127
-    Caption = 'big blinds'
+    Caption = 'chips'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
