@@ -50,7 +50,14 @@ function makeGameProtobuf(g) {
 		g.state = 'gsEmpty';
 	}
 	g.club_mongoid = g.clubid; // FIXME, rename this somewhere
-	switch (g.blinds) {
+	var data = Game.decodeBlinds(g.blinds);
+	g.big_blind = data.big_blind;
+	g.small_blind = data.small_blind;
+	return g;
+}
+Game.decodeBlinds = function (blinds) {
+	var g = {};
+	switch (blinds) {
 	case 'gb1x2':
 		g.small_blind = 100;
 		g.big_blind = 200;
@@ -77,7 +84,7 @@ function makeGameProtobuf(g) {
 		break;
 	}
 	return g;
-}
+};
 function Game(obj) {
 	this.gameinactive = false;
 	this.users = {}; // all users, even not sitting
@@ -334,8 +341,8 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					}
 				}
 				var obeymax = true;
-				var min = this.obj.buyin_min * this.obj.big_blind;
-				var max = this.obj.buyin_max * this.obj.big_blind;
+				var min = this.obj.buyin_min;
+				var max = this.obj.buyin_max;
 				var lastcashout = 0;
 				if (this.lastCashout[conn.userid]) {
 					var last = this.lastCashout[conn.userid];
@@ -1974,7 +1981,7 @@ Game.prototype.sittingCount = function () {
 	var count = 0;
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
-		if (this.members[x].chips <= 0) continue;
+		//if (this.members[x].chips <= 0) continue;
 		count++;
 	}
 	return count;

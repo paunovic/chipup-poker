@@ -133,7 +133,10 @@ function goOnline() {
 	internalHttpServer = require('./httpServer').initHttpServer();
 
 	// FIXME, improve the defaults later?
-	models.Config.findOne({_id:'installerid'},function (err,row) {
+	var prefix;
+	if (config.diffserver) prefix='dev';
+	else prefix = 'live';
+	models.Config.findOne({_id:prefix+'_installerid'},function (err,row) {
 		assert.ifError(err);
 		if (row) {
 			mdb.models.Installer.findOne({_id:row.value},function (err,row) {
@@ -143,7 +146,7 @@ function goOnline() {
 			});
 		}
 	});
-	models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
+	models.Config.findOne({_id:prefix+'_debuginstallerid'},function (err,debugrow) {
 		assert.ifError(err);
 		if (debugrow) {
 			mdb.models.Installer.findOne({_id:debugrow.value},function (err,row) {

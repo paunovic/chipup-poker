@@ -137,6 +137,12 @@ function Server(activeUsersIN) {
 	}.bind(this));
 	app.get("/redirect/install_chipuppoker.exe",function (req,res) {
 		models.Installer.findOne({name:req.query.name},function (err,row) {
+			if (!row) {
+				console.log('installer missing',req.query.name);
+				res.writeHead(500);
+				res.end();
+				return;
+			}
 			res.sendfile('installers/'+row.name);
 		});
 	}.bind(this));
@@ -522,29 +528,57 @@ Server.prototype.installers_func = function (req,res) {
 			}.bind(this));
 		}.bind(this);
 	}
-	function makeActivator(id) {
+	function pushActivate(debug,id,cb) {
+		var obj = { debug:debug, id:id };
+		var body = new Buffer(JSON.stringify(obj));
+		var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/setActive',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword},function (res) {
+			res.setEncoding('utf8');
+			res.on('data',function (chunk) {
+				console.log('chunk',chunk);
+			});
+			res.on('end',function () {
+				console.log('done activating');
+				cb();
+			});
+			res.on('error',function (err) {
+				console.log('http error sending activate:',err);
+			});
+		});
+		req.write(body);
+		req.end();
+	}
+	function makeActivator(id,server) {
 		return function (cb) {
 			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
+					var self;
+					if (config.diffserver) self='dev';
+					else self = 'live';
 					if (row.debug == 'release') {
-						models.Config.findOne({_id:'installerid'},function (err,entry) {
+						models.Config.findOne({_id:server+'_installerid'},function (err,entry) {
+							console.log({_id:server+'_installerid'},entry);
 							assert.ifError(err);
 							entry.value = new ObjectID(id);
 							entry.save(function (err) {
 								assert.ifError(err);
-								sharedconfig.latestVersion = row.version;
-								cb();
+								if (server == self) {
+									sharedconfig.latestVersion = row.version;
+									cb();
+								} else pushActivate('release',id,cb);
 							});
 						});
 					} else {
-						models.Config.findOne({_id:'debuginstallerid'},function (err,entry) {
+						models.Config.findOne({_id:server+'_debuginstallerid'},function (err,entry) {
 							assert.ifError(err);
 							entry.value = new ObjectID(id);
 							entry.save(function (err) {
 								assert.ifError(err);
-								sharedconfig.latestDebugVersion = row.version;
-								cb();
+								console.log('setting debug to',row.version);
+								if (server == self) {
+									sharedconfig.latestDebugVersion = row.version;
+									cb();
+								} else pushActivate('debug',id,cb);
 							});
 						});
 					}
@@ -554,11 +588,17 @@ Server.prototype.installers_func = function (req,res) {
 	}
 	var jobs = [];
 	if (req.body) {
-		if (req.body.activate_release) {
-			jobs.push(makeActivator.call(this,req.body.activate_release));
+		if (req.body.activate_live_release) {
+			jobs.push(makeActivator.call(this,req.body.activate_live_release,'live'));
 		}
-		if (req.body.activate_debug) {
-			jobs.push(makeActivator.call(this,req.body.activate_debug));
+		if (req.body.activate_live_debug) {
+			jobs.push(makeActivator.call(this,req.body.activate_live_debug,'live'));
+		}
+		if (req.body.activate_dev_release) {
+			jobs.push(makeActivator.call(this,req.body.activate_dev_release,'dev'));
+		}
+		if (req.body.activate_dev_debug) {
+			jobs.push(makeActivator.call(this,req.body.activate_dev_debug,'dev'));
 		}
 	}
 	for (var key in req.body) {
@@ -597,23 +637,43 @@ Server.prototype.installers_func = function (req,res) {
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
 		models.Installer.find().sort({_id:1}).exec(function(err,data) {
-			models.Config.findOne({_id:'installerid'},function (err,row) {
+			models.Config.find({_id:{$in:['live_installerid','live_debuginstallerid','dev_debuginstallerid','dev_installerid']}},function (err,configs) {
+				console.log('configs',configs);
+				var live_pubver,live_debugver;
+				var dev_pubver,dev_debugver;
+				for (var x=0; x<configs.length; x++) {
+					var y = configs[x].value.toString();
+					switch (configs[x]._id) {
+					case 'dev_installerid':
+						dev_pubver = y;
+						break;
+					case 'dev_debuginstallerid':
+						dev_debugver = y;
+						break;
+					case 'live_installerid':
+						live_pubver = y;
+						break;
+					case 'live_debuginstallerid':
+						live_debugver = y;
+					}
+				}
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
-					if (data[x]._id.toString() == row.value.toString()) {
-						console.log(data[x]);
+					if (data[x]._id.toString() == dev_pubver) {
+						console.log('debuga',data[x]);
 						activeRelease = data[x];
 					}
 					for (var y=0; y<user_stats.length; y++) {
 						if (myutils.compareObjectID(data[x]._id,user_stats[y]._id)) {
 							data[x].used_by = user_stats[y].hits;
-							console.log(data[x]);
+							//console.log('debugb',data[x]);
 						}
 					}
 				}
-				models.Config.findOne({_id:'debuginstallerid'},function (err,row2) {
-					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
-				});
+				res.render('installers',{installers:data,start:start,
+					live_pubver:live_pubver, live_debugver:live_debugver,
+					dev_pubver:dev_pubver, dev_debugver:dev_debugver,
+					activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 			}.bind(this));
 		}.bind(this));
 	}

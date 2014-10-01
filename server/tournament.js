@@ -3,7 +3,8 @@ var models = require('./db').models,
 	colors = require('colors');
 	assert = require('assert'),
 	EventEmitter = require('events').EventEmitter,
-	myutils = require('./myutils');
+	myutils = require('./myutils'),
+	profiler = require('profiler');
 
 var error = require('./error'),
 	Game = require('./game').Game,
@@ -271,7 +272,26 @@ Tournament.prototype.rerebalance = function (game) {
 	}.bind(this));
 }
 Tournament.prototype.handOver = function (game,cb) {
+	var token1 = profiler.start('tournament.handOver');
 	function saveChanges(release_tourn) {
+		var result = this.countPlayersPerTable(game);
+		if (result.active == 1) {
+			if (result.players_at_this_table > 0) {
+				console.log('final table enabled');
+				game.final_table = true;
+				this.final_table = true;
+			} else {
+				for (var x=0; x<result.counts.length; x++) {
+					if (result.counts[x] > 0) {
+						this.tables[x].final_table = true;
+						this.final_table = true;
+						console.log('final table 2');
+					}
+				}
+			}
+			//console.log(game);
+			//console.log(this);
+		}
 		this.log.save(function (err) {
 			this.obj.save(function (err) {
 				if (this.obj.state == 'tnsFinished') {
@@ -279,6 +299,7 @@ Tournament.prototype.handOver = function (game,cb) {
 					core.emit('state_changed',this);
 				}
 				this.emit('handOver',this);
+				token1.stop();
 				release_tourn();
 				cb();
 			}.bind(this));
@@ -305,7 +326,7 @@ Tournament.prototype.handOver = function (game,cb) {
 				if (myutils.compareObjectID(this.obj.players[x]._id,game.seats[y].userid)) {
 					//console.log('match',x,y,this.obj.players[x],game.members[y]);
 					if (this.obj.players[x].chips != game.members[y].chips) {
-						console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips/100,game.members[y].chips/100);
+						//console.log('player %s(%d) changed chips %d->%d',this.obj.players[x].displayname,x,this.obj.players[x].chips/100,game.members[y].chips/100);
 						var rise = game.members[y].chips > this.obj.players[x].chips;
 						this.obj.players[x].chips = game.members[y].chips;
 						if (this.fixRank(x,rise)) x = 0;
@@ -327,8 +348,8 @@ Tournament.prototype.handOver = function (game,cb) {
 		}
 		for (var key in data) {
 			var sum = 0;
-			for (var x=0; x<data[key].seats.length; x++) sum += data[key].seats[x];
-			console.log('sum:%d key:%s seats:%j',sum,key,data[key].seats);
+			for (var x=0; x<data[key].seats.length; x++) if (data[key].seats[x]) sum += data[key].seats[x];
+			//console.log('sum:%d key:%s seats:%j',sum,key,data[key].seats);
 		}
 		// debug2
 		/*var total = 0;
@@ -379,13 +400,9 @@ Tournament.prototype.handOver = function (game,cb) {
 			var minTables = Math.ceil(total/this.obj.seats_per_table);
 			var remainder = total % this.obj.seats_per_table;
 			var targetPlayers = Math.floor(total/minTables);
-			console.log('minTables:%d remainder:%d avg per table2:%d, this table:%d min:%d max:%d',minTables,remainder,targetPlayers,players_at_this_table,result.min,result.max);
+			//console.log('minTables:%d remainder:%d avg per table2:%d, this table:%d min:%d max:%d',minTables,remainder,targetPlayers,players_at_this_table,result.min,result.max);
 			this.log.records.push({ type:'counts', counts:result, thisTable:parseInt(game.obj.gamename)-1 });
 
-			if ( (result.active == 1) && (result.players_at_this_table > 0) ) {
-				game.final_table = true;
-				this.final_table = true;
-			}
 			if ((result.active > minTables) && (players_at_this_table == result.min)) {
 				game.clearOut = true;
 				console.log('begining destruction of table %s',parseInt(game.obj.gamename)-1);
@@ -417,7 +434,7 @@ Tournament.prototype.handOver = function (game,cb) {
 					}.bind(this),true);
 					return;
 				} else {
-					console.log('too many tables A, none found');
+					console.log('too many tables A, none found',result);
 					if (result.players_at_this_table == 1) {
 						this.log.records.push({type:'msg',msg:'too many tables A, none found yet'});
 						setTimeout(this.rerebalance.bind(this,game),1000);
@@ -736,7 +753,7 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 				release();
 				tourn.emit('users_changed',tourn,userid);
 				core.emit('users_changed',tourn);
-				cb('OK');
+				cb('OK',tourn);
 			}.bind(this));
 		}.bind(this));
 	}.bind(this))
