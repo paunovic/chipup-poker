@@ -114,6 +114,21 @@ function goOnline() {
 		});
 	});
 }
+function pullActiveVersions() {
+	var req = https.request({host:'chipuppoker.com',path:'/sync/getActive',auth:'sync:'+config.syncpassword},function (res) {
+		res.setEncoding('utf8');
+		res.on('data',function (chunk) {
+			console.log('chunk',chunk);
+		});
+		res.on('end',function () {
+			console.log('done');
+		});
+		res.on('error',function (err) {
+			console.log('http error sending activate:',err);
+		});
+	});
+	req.end();
+}
 
 /*MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -129,6 +144,7 @@ function goOnline() {
 		FetchQueue = collection;
 	});*/
 	profiler.setup(models.PokerProfile);
+pullActiveVersions();
 
 	internalHttpServer = require('./httpServer').initHttpServer();
 

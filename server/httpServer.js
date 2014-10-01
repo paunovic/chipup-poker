@@ -307,6 +307,28 @@ Server.prototype.addSync = function (app) {
 	app.get('/sync/assets',this.getAssets.bind(this));
 	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
 	app.get('/sync/sizes',this.getSize.bind(this));
+	app.post('/sync/setActive',this.postSetActive.bind(this));
+};
+Server.prototype.postSetActive = function (req,res) {
+	console.log(req.body);
+	if (req.body.debug == 'release') var key = 'live_installerid';
+	if (req.body.debug == 'debug') var key = 'live_debuginstallerid';
+	models.Config.findById(key,function (err,row) {
+		assert.ifError(err);
+		if (row) {
+			row.value = new ObjectID(req.body.id);
+			row.save(function (err,row) {
+				assert.ifError(err);
+				res.end('test');
+			});
+		} else {
+			models.Config.create({_id:key,value:new ObjectID(req.body.id)},function (err,row) {
+				assert.ifError(err);
+				console.log(row);
+				res.end('test2');
+			});
+		}
+	});
 };
 Server.prototype.getSize = function (req,res) {
 	models.ObjectSize.findOne({_id:req.query.hash},function (err,row) {
