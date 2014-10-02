@@ -114,6 +114,21 @@ function goOnline() {
 		});
 	});
 }
+function pullActiveVersions() {
+	var req = https.request({host:'chipuppoker.com',path:'/sync/getActive',auth:'sync:'+config.syncpassword},function (res) {
+		res.setEncoding('utf8');
+		res.on('data',function (chunk) {
+			console.log('chunk',chunk);
+		});
+		res.on('end',function () {
+			console.log('done');
+		});
+		res.on('error',function (err) {
+			console.log('http error sending activate:',err);
+		});
+	});
+	req.end();
+}
 
 /*MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -129,11 +144,15 @@ function goOnline() {
 		FetchQueue = collection;
 	});*/
 	profiler.setup(models.PokerProfile);
+pullActiveVersions();
 
 	internalHttpServer = require('./httpServer').initHttpServer();
 
 	// FIXME, improve the defaults later?
-	models.Config.findOne({_id:'installerid'},function (err,row) {
+	var prefix;
+	if (config.diffserver) prefix='dev';
+	else prefix = 'live';
+	models.Config.findOne({_id:prefix+'_installerid'},function (err,row) {
 		assert.ifError(err);
 		if (row) {
 			mdb.models.Installer.findOne({_id:row.value},function (err,row) {
@@ -143,7 +162,7 @@ function goOnline() {
 			});
 		}
 	});
-	models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
+	models.Config.findOne({_id:prefix+'_debuginstallerid'},function (err,debugrow) {
 		assert.ifError(err);
 		if (debugrow) {
 			mdb.models.Installer.findOne({_id:debugrow.value},function (err,row) {

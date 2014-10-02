@@ -6,12 +6,26 @@ tr
   td=val.revision
   td=Math.round(val.size/1024/1024)+'MB'
   td
-    input(type="radio",name="activate_"+val.debug,value=val._id)
+    input(type="radio",name="activate_live_"+val.debug,value=val._id)
   td
-    if (val.debug == 'release') && (pubver.toString() == val._id.toString())
-      | Public Version
-    else if (val.debug == 'debug') && (debugver.toString() == val._id.toString())
-      | Debug Version
-    else
-      input(class='deleteCheckbox',type="checkbox",name="delete_"+val._id)
+    input(type="radio",name="activate_dev_"+val.debug,value=val._id)
+  td
+    if (val.debug == 'release')
+      if (dev_pubver == live_pubver) && (dev_pubver == val._id)
+        | Both public
+      else if (dev_pubver == val._id)
+        | Dev Public
+      else if (live_pubver == val._id)
+        | Live Public
+      else
+        input(class='deleteCheckbox',type="checkbox",name="delete_"+val._id)
+    else if (val.debug == 'debug')
+      if (dev_debugver == live_debugver) && (dev_debugver == val._id)
+        | Both Debug
+      else if (dev_debugver == val._id)
+        | Dev Debug
+      else if (live_debugver == val._id)
+        | Live Debug
+      else
+        input(class='deleteCheckbox',type="checkbox",name="delete_"+val._id)
   td=val.used_by

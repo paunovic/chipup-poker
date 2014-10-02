@@ -119,7 +119,7 @@ function ClientSocket(socket) {
 	this.lastTourn = 0;
 	this.lastTournDetail = {};
 	this.tournDetailTimer = {};
-	this.handOverHook = this.tournChangeHandOver.bind(this);
+	this.handOverHook = this.tournChangeHandOver2.bind(this);
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
@@ -342,9 +342,13 @@ ClientSocket.prototype.goneIdle = function () {
 };
 ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles,assetsEnabled) {
 	var key1;
+	var prefix;
+	if (config.diffserver) prefix='dev';
+	else prefix = 'live';
 	//console.log('hello params',params);
 	if (params.debug) key1 = 'debuginstallerid';
 	else key1 = 'installerid';
+	key1 = prefix+'_'+key1;
 	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
 		if (!row2) {
@@ -1200,7 +1204,7 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	Tournament.core.leave(params._id,this.userid,function (code) {
+	Tournament.core.leave(params._id,this.userid,function (code,tourn) {
 		if (code == '404') {
 			this.reply(0,'tournament not found');
 			return;
@@ -1259,11 +1263,11 @@ handlers[codes.scTournamentLobbyClose] = function (args,token) {
 ClientSocket.prototype.queueDetails = function (tourn,force) {
 	if (!this.lastTournDetail[tourn.id]) this.lastTournDetail[tourn.id] = 0;
 	var elapsed = Date.now() - this.lastTournDetail[tourn.id];
-	//console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
-	if (force) elapsed = 15000;
-	if (elapsed < 15000) { // 15 sec
+	console.log('queue now:%d then:%d diff:%d',Date.now(),this.lastTournDetail[tourn.id],elapsed);
+	if (force) elapsed = 5000;
+	if (elapsed < 5000) { // 5 sec
 		if (this.tournDetailTimer[tourn.id]) clearTimeout(this.tournDetailTimer[tourn.id]);
-		this.tournDetailTimer[tourn.id] = setTimeout(this.flushTournDetail.bind(this,tourn),15000 - elapsed);
+		this.tournDetailTimer[tourn.id] = setTimeout(this.flushTournDetail.bind(this,tourn),5000 - elapsed);
 	} else {
 		this.flushTournDetail(tourn);
 	}
@@ -1281,6 +1285,9 @@ ClientSocket.prototype.tournChangeHandOver = function (tourn,userid) {
 	} else {
 		this.queueDetails(tourn);
 	}
+};
+ClientSocket.prototype.tournChangeHandOver2 = function (tourn) {
+	this.queueDetails(tourn,tourn.final_table);
 };
 ClientSocket.prototype.stateChangeHandOver = function (tourn) {
 	this.log('hook fired on user %s %j',this.nick,tourn.obj.players);

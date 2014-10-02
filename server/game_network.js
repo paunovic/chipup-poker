@@ -19,7 +19,8 @@ function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max
 	if (!game_limit) return true;
 	if (!regexLimits.gamename.exec(gamename)) return true;
 	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
-	if (5 > buyin_min) {
+	var blind_levels = Game.decodeBlinds(blinds);
+	if ((5 * blind_levels.big_blind) > buyin_min) {
 		global.log('min too low',buyin_min);
 		return true;
 	}
@@ -27,7 +28,7 @@ function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max
 		global.log('max too low');
 		return true;
 	}
-	if (10 > buyin_max) {
+	if ((10*blind_levels.big_blind) > buyin_max) {
 		global.log('max too low',buyin_max);
 		return true;
 	}
@@ -656,7 +657,7 @@ handlers[codes.scShowCards] = function (args,token) {
 					release();
 					return;
 				}
-				if ((params.chips + game.members[seatIdx].chips) > (game.obj.buyin_max * game.obj.big_blind)) {
+				if ((params.chips + game.members[seatIdx].chips) > game.obj.buyin_max) {
 					this.send(codes.srTableAddonOverLimit,game.getTableStatus(this,false,[]),'Poker.TableStatus');
 					release();
 					return;
