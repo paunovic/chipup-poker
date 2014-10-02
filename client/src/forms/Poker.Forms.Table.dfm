@@ -32,7 +32,7 @@ object frmTable: TfrmTable
   TextHeight = 24
   object edChat: TcxTextEdit
     Left = 14
-    Top = 380
+    Top = 443
     Margins.Left = 1
     Margins.Top = 0
     Margins.Right = 0
@@ -159,7 +159,7 @@ object frmTable: TfrmTable
   end
   object rvChat: TRichView
     Left = 14
-    Top = 396
+    Top = 380
     Width = 190
     Height = 63
     Color = 4539717
@@ -452,6 +452,13 @@ object frmTable: TfrmTable
         FontName = 'Arial'
         Size = 8
         Color = 11075496
+        Unicode = True
+      end
+      item
+        StyleName = 'Self Text'
+        FontName = 'Arial'
+        Size = 8
+        Color = 16753478
         Unicode = True
       end>
     ParaStyles = <

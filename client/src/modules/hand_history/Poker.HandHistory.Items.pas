@@ -135,6 +135,7 @@ type
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Cards, Poker.Common.Misc,
   Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove;
@@ -484,8 +485,9 @@ begin
   end;
 
   // fixme
-  if not Assigned(game) then
+  if FGame.MongoId.IsEmpty then
   begin
+    {$IFDEF DEBUG} DebugLn(0, 'HandHistory: Game.MongoId is emtpy', ditException); {$ENDIF}
 
   end;
 end;

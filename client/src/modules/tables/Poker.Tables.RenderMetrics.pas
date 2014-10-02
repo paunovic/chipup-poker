@@ -495,8 +495,8 @@ begin
     // chat box and editbox bounds
     wint := Round(ADXAreaSize.x / 3.15);
     hint := ADXAreaSize.y div 7;
-    FChatBoxBounds := TRect.Create(Point(FLowerIntfBorder, ADXAreaSize.y - FLowerIntfBorder - hint), wint, hint);
-    FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top - 18), FChatBoxBounds.Width, 18);
+    FChatBoxBounds := TRect.Create(Point(FLowerIntfBorder, ADXAreaSize.y - FLowerIntfBorder - hint - 18), wint, hint);
+    FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top + FChatBoxBounds.Height), FChatBoxBounds.Width, 18);
     FCheckboxesLeft := FChatBoxBounds.Right + FLowerIntfBorder;
 
     // playnow button resize ratio

@@ -704,8 +704,15 @@ begin
 end;
 
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
+var
+  msg_style: Integer;
 begin
-  AddChatMessage(Format('%s: ', [AUser]), 0, 0, AMessage, 1, -1);
+  if AUser = dmMain.SelfInfo.Displayname then
+    msg_style := 4
+  else
+    msg_style := 1;
+
+  AddChatMessage(Format('%s: ', [AUser]), 0, 0, AMessage, msg_style, -1);
 end;
 
 procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);
@@ -841,7 +848,7 @@ begin
         seRaiseAmount.BoundsRect := table.Renderer.Metrics.RaiseAmountBoxBounds;
         seRaiseAmount.Style.Font.Size := table.Renderer.Metrics.RaiseAmountBoxFontSize;
 
-        cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
+        cbSitOutNextBB.Top := edChat.Top + edChat.Height - cbSitOutNextBB.Height;
         cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
         cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
 
