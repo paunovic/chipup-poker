@@ -332,6 +332,7 @@ begin
   end;
 
   ShowWarningDialog('You can''t add-on over maximum table buy-in limit');
+  seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
 
@@ -352,6 +353,7 @@ begin
   end;
 
   ShowWarningDialog('You reached your balance limit for this club');
+  seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
 
@@ -400,6 +402,7 @@ begin
   end;
 
   ShowWarningDialog(err);
+  seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
 
@@ -420,6 +423,7 @@ begin
   end;
 
   ShowWarningDialog('Invalid buy-in amount');
+  seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
 

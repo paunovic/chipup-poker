@@ -405,6 +405,7 @@ end;
 procedure TfrmTable.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   set_raise_amount: Boolean;
+  raise_value: DWORD;
   table: TTable;
 begin
   DefocusControls;
@@ -416,8 +417,21 @@ begin
       table.Renderer.MouseDown(Button, Shift, X, Y, set_raise_amount);
 
       if set_raise_amount then
-        SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +
-            (table.Status.MaximumRaise - table.Status.MinimumRaise) * table.Renderer.RaiseThumbPosition), table.game.BigBlind), TRUE, FALSE);
+      begin
+        raise_value := RoundToNearestBB(Round(table.Status.MinimumRaise +
+                               (table.Status.MaximumRaise - table.Status.MinimumRaise) *
+                               table.Renderer.RaiseThumbPosition), table.game.BigBlind);
+
+        if raise_value > FRaiseValue then
+          raise_value := FRaiseValue + table.game.BigBlind
+        else
+          if raise_value < FRaiseValue then
+            raise_value := FRaiseValue - table.game.BigBlind
+          else
+            raise_value := FRaiseValue;
+
+        SetRaiseValue(raise_value, TRUE, FALSE);
+      end;
 
       table.Renderer.Render;
     finally
