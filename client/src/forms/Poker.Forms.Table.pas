@@ -32,7 +32,6 @@ type
     RVStyle: TRVStyle;
     rvChat: TRichView;
     lbvHandStrength: TcxLabel;
-    lbvHandHistory: TcxLabel;
     acHandHistory: TAction;
     tiHandPlayback: TTimer;
     btPlayPause: TcxButton;
@@ -44,6 +43,11 @@ type
     pbHandPlaybackProgress: TcxProgressBar;
     acHandPlaybackStepForward: TAction;
     acHandPlaybackStepBackwards: TAction;
+    acTableStats: TAction;
+    paTopLeftHeader: TPanel;
+    lbvHandHistory: TcxLabel;
+    lbsTableStats: TcxLabel;
+    beTopLeftHeaderSpacer: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -82,6 +86,8 @@ type
     procedure acHandPlaybackStepForwardExecute(Sender: TObject);
     procedure acHandPlaybackStepBackwardsExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure acTableStatsExecute(Sender: TObject);
+    procedure lbsTableStatsClick(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -156,7 +162,7 @@ uses
   Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game, Poker.Games.Game, Poker.Sounds,
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
-  Poker.Clubs.Member;
+  Poker.Clubs.Member, Poker.Forms.ClubLobby;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -201,6 +207,7 @@ begin
       edChat.Visible := FALSE;
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
+      lbsTableStats.Visible := FALSE;
 
       pbHandPlaybackProgress.Properties.Min := 0;
       if Tables.GetAndLockTable(FInternalId, table) then
@@ -630,6 +637,11 @@ begin
     Caption := cap;
 end;
 
+procedure TfrmTable.lbsTableStatsClick(Sender: TObject);
+begin
+  acTableStats.Execute;
+end;
+
 procedure TfrmTable.lbvHandHistoryClick(Sender: TObject);
 begin
   acHandHistory.Execute;
@@ -696,6 +708,18 @@ begin
     Exit;
 
   ServerSocket.TableStandUp(FGameId);
+end;
+
+procedure TfrmTable.acTableStatsExecute(Sender: TObject);
+var
+  table: TTable;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmTable.AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
@@ -835,6 +859,7 @@ begin
     acRaiseMax.Enabled := acRaise.Enabled;
     acPlayNow.Enabled := table.Status.ActionPlayNow;
     acShowCards.Enabled := table.Status.ActionShowCards;
+    acTableStats.Enabled := table.Status.ActionShowStats;
   finally
     Tables.Unlock;
   end;
@@ -869,6 +894,8 @@ begin
         cbFoldToAnyBet.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextHand.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextBB.Left := table.Renderer.Metrics.CheckboxesLeft;
+
+        lbsTableStats.Visible := acTableStats.Enabled;
 
         if table.Status.ActionSitOut then
         begin

@@ -193,37 +193,6 @@ object frmTable: TfrmTable
     Transparent = True
     AnchorX = 690
   end
-  object lbvHandHistory: TcxLabel
-    Left = 7
-    Top = 5
-    Cursor = crHandPoint
-    Caption = 'Previous Hand (#2607989742077)'
-    ParentFont = False
-    Style.Edges = []
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -8
-    Style.Font.Name = 'Sintony'
-    Style.Font.Style = [fsBold]
-    Style.Font.Quality = fqAntialiased
-    Style.HotTrack = True
-    Style.LookAndFeel.NativeStyle = True
-    Style.LookAndFeel.SkinName = ''
-    Style.TextColor = 13158600
-    Style.TextStyle = []
-    Style.TransparentBorder = True
-    Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.NativeStyle = True
-    StyleDisabled.LookAndFeel.SkinName = ''
-    StyleFocused.LookAndFeel.NativeStyle = True
-    StyleFocused.LookAndFeel.SkinName = ''
-    StyleHot.LookAndFeel.NativeStyle = True
-    StyleHot.LookAndFeel.SkinName = ''
-    StyleHot.TextColor = 27903
-    Properties.Alignment.Horz = taLeftJustify
-    Transparent = True
-    OnClick = lbvHandHistoryClick
-  end
   object btPlayPause: TcxButton
     Left = 330
     Top = 306
@@ -239,7 +208,7 @@ object frmTable: TfrmTable
     SpeedButtonOptions.AllowAllUp = True
     SpeedButtonOptions.Flat = True
     SpeedButtonOptions.Transparent = True
-    TabOrder = 8
+    TabOrder = 7
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -264,7 +233,7 @@ object frmTable: TfrmTable
     SpeedButtonOptions.AllowAllUp = True
     SpeedButtonOptions.Flat = True
     SpeedButtonOptions.Transparent = True
-    TabOrder = 9
+    TabOrder = 8
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -289,7 +258,7 @@ object frmTable: TfrmTable
     SpeedButtonOptions.AllowAllUp = True
     SpeedButtonOptions.Flat = True
     SpeedButtonOptions.Transparent = True
-    TabOrder = 10
+    TabOrder = 9
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -318,10 +287,103 @@ object frmTable: TfrmTable
     StyleFocused.LookAndFeel.NativeStyle = True
     StyleHot.BorderStyle = ebsSingle
     StyleHot.LookAndFeel.NativeStyle = True
-    TabOrder = 11
+    TabOrder = 10
     Visible = False
     Height = 8
     Width = 229
+  end
+  object paTopLeftHeader: TPanel
+    Left = 0
+    Top = 0
+    Width = 202
+    Height = 23
+    BevelOuter = bvNone
+    Color = clBlack
+    ParentBackground = False
+    TabOrder = 11
+    object beTopLeftHeaderSpacer: TBevel
+      Left = 0
+      Top = 0
+      Width = 8
+      Height = 23
+      Align = alLeft
+      Shape = bsSpacer
+    end
+    object lbvHandHistory: TcxLabel
+      Left = 8
+      Top = 0
+      Cursor = crHandPoint
+      Align = alLeft
+      AutoSize = False
+      ParentFont = False
+      Style.Edges = []
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -8
+      Style.Font.Name = 'Sintony'
+      Style.Font.Style = [fsBold]
+      Style.Font.Quality = fqAntialiased
+      Style.HotTrack = True
+      Style.LookAndFeel.NativeStyle = True
+      Style.LookAndFeel.SkinName = ''
+      Style.TextColor = 13158600
+      Style.TextStyle = []
+      Style.TransparentBorder = True
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.SkinName = ''
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.SkinName = ''
+      StyleHot.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.SkinName = ''
+      StyleHot.TextColor = 27903
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.Alignment.Vert = taVCenter
+      Transparent = True
+      OnClick = lbvHandHistoryClick
+      ExplicitLeft = 6
+      ExplicitTop = 4
+      ExplicitHeight = 14
+      Height = 23
+      Width = 126
+      AnchorY = 12
+    end
+    object lbsTableStats: TcxLabel
+      Left = 134
+      Top = 0
+      Cursor = crHandPoint
+      Align = alLeft
+      Caption = 'Table Statistics'
+      ParentFont = False
+      Style.Edges = []
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -8
+      Style.Font.Name = 'Sintony'
+      Style.Font.Style = [fsBold]
+      Style.Font.Quality = fqAntialiased
+      Style.HotTrack = True
+      Style.LookAndFeel.NativeStyle = True
+      Style.LookAndFeel.SkinName = ''
+      Style.TextColor = 13158600
+      Style.TextStyle = []
+      Style.TransparentBorder = True
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.SkinName = ''
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.SkinName = ''
+      StyleHot.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.SkinName = ''
+      StyleHot.TextColor = 27903
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.Alignment.Vert = taVCenter
+      Transparent = True
+      Visible = False
+      OnClick = lbsTableStatsClick
+      ExplicitLeft = 126
+      AnchorY = 12
+    end
   end
   object ActionManager: TActionManager
     Images = il48px
@@ -422,6 +484,11 @@ object frmTable: TfrmTable
       Hint = 'Step Backwards'
       ImageIndex = 2
       OnExecute = acHandPlaybackStepBackwardsExecute
+    end
+    object acTableStats: TAction
+      Category = 'Misc'
+      Caption = 'acTableStats'
+      OnExecute = acTableStatsExecute
     end
   end
   object RVStyle: TRVStyle

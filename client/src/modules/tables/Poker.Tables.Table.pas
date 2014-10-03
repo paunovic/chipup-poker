@@ -664,6 +664,7 @@ procedure TTable.ConfigureActions;
 var
   seat: TSeatInfo;
   fgwnd: HWND;
+  club: TClubInfo;
 begin
   FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
@@ -677,13 +678,20 @@ begin
   FStatus.ActionFoldToAny := FALSE;
   FStatus.ActionSitOutNextBB := FALSE;
   FStatus.ActionShowCards := FALSE;
+  FStatus.ActionShowStats := FALSE;
+
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    FStatus.ActionShowStats := club.OwnerId = dmMain.SelfInfo.MongoId;
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
 
   if (not (FTableType in [ttLive, ttTournament])) or
      (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
     Exit;
 
   FStatus.ActionStandUp := FTableType = ttLive;
-
   FStatus.FocusWindow := FALSE;
 
   if seat.AutoPlay then

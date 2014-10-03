@@ -2860,7 +2860,7 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridGamesSeats: TcxGridColumn
               Caption = 'Seats'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
               Width = 78

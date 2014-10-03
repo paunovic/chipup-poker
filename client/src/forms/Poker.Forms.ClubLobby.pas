@@ -246,11 +246,21 @@ begin
 end;
 
 procedure TfrmClubLobby.SetParams(const AParams: array of pointer);
+var
+  game_id: TMongoId;
 begin
   FClubId := AParams[0];
 
   btClubHome.Click;
   ConfigureGUI;
+
+  if Length(AParams) > 1 then
+  begin
+    game_id := AParams[1];
+    btStats.Click;
+    FSelectedStatsTableId := game_id;
+    ConfigureGUI;
+  end;
 
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('%s [%s]', [Name, Caption])); {$ENDIF}
 end;
@@ -851,7 +861,7 @@ begin
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%s/%s', [ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind)]));
         c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%s-%s', [ChipsToStr(game.BuyinMin), ChipsToStr(game.BuyinMax)]));
-        c.SetValue(recidx, gridGamesSeats.Index, game.Seats);
+        c.SetValue(recidx, gridGamesSeats.Index, Format('%d/%d', [game.Sitting, game.Seats]));
         c.SetValue(recidx, gridGamesTableStatus.Index, game.StateAsStr);
       end;
     finally

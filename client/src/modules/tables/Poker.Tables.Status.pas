@@ -50,6 +50,7 @@ type
     FActionFoldToAny: Boolean;
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
+    FActionShowStats: Boolean;
     FEvents: TPB_TableEventList;
 
     FCallCaption: String;
@@ -111,6 +112,7 @@ type
     property ActionFoldToAny: Boolean read FActionFoldToAny write FActionFoldToAny;
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
+    property ActionShowStats: Boolean read FActionShowStats write FActionShowStats;
     property Messages: TObjectList<TPB_TableMessage> read FMessages;
 
     property CallCaption: String read FCallCaption write FCallCaption;
