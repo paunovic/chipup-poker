@@ -415,6 +415,7 @@ handlers[codes.scShowCards] = function (args,token) {
 				game.history.players[seatIdx].muck = false;
 				game.broadcastStatus(this,true,[]);
 				game.members[seatIdx].can_show = false;
+				game.cardsShown = true;
 			}
 			token.stop();
 			release();
