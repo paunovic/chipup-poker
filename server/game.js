@@ -331,15 +331,6 @@ Game.prototype.sitDown = function (conn,params,cb) {
 	} else {
 			conn.log('state:%d %s',conn.state,conn.userid);
 			this.club.getPotentialLosses(conn.userid,function (maxLosses,unlimited,limit) {
-				if (unlimited) this.log('unlimited user');
-				else {
-					this.log('max potential losses for this user:%d/%d while buying in at %d',(-1*maxLosses)/100,limit/100,params.chips/100);
-					if (((maxLosses*-1)+params.chips) > limit) {
-						conn.send(codes.srClubBalanceReached,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
-						cb(false,events);
-						return;
-					}
-				}
 				var obeymax = true;
 				var min = this.obj.buyin_min;
 				var max = this.obj.buyin_max;
@@ -359,6 +350,15 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					}
 				}
 				if (obeymax) {
+					if (unlimited) this.log('unlimited user');
+					else {
+						this.log('max potential losses for this user:%d/%d while buying in at %d',(-1*maxLosses)/100,limit/100,params.chips/100);
+						if (((maxLosses*-1)+params.chips) > limit) {
+							conn.send(codes.srClubBalanceReached,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
+							cb(false,events);
+							return;
+						}
+					}
 					conn.log('checking that %d is between %d and %d',params.chips,min,max);
 					if ((params.chips > max) || (params.chips < min)) {
 						conn.send(codes.srInvalidTableBuyin,{game_id:this.id,last_cashout:lastcashout},'Poker.BuyinError');
