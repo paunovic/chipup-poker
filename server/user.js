@@ -482,7 +482,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 				return;
 			}
-			models.UserModel.findOne({email:params.username},function (err,row) {
+			models.UserModel.findOne({email:{$regex:new RegExp('^'+params.username+'$','i')}},function (err,row) {
 				assert.ifError(err);
 				if (row) {
 					if (row.changecode) {
@@ -504,7 +504,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 					this.doLogin(row,params.password,token);
 				} else {
-					models.UserModel.findOne({displayname:params.username},function (err,row) {
+					models.UserModel.findOne({displayname:{$regex:new RegExp('^'+params.username+'$','i')}},function (err,row) {
 						assert.ifError(err);
 						if (!row) {
 							this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
@@ -557,16 +557,15 @@ ClientSocket.prototype.handle = function (code,args) {
 				var hash = hasher.digest();
 				newuser.password = hash;
 				newuser.salt = salt;
-				// FIXME, case insensitive
-				models.UserModel.findOne({email:params.email},function (err,row) {
+				models.UserModel.findOne({email:{$regex:new RegExp('^'+params.email+'$','i')}},function (err,row) {
 					if (row) {
 						this.log('found it',row);
 						this.log('error, dup!');
 						this.send(codes.srRegisterReply,{status:'regDuplicateEmail'},'Poker.RegisterReply');
 					} else {
-						models.UserModel.findOne({displayname:params.displayName},function (err,row) {
+						models.UserModel.findOne({displayname:{$regex:new RegExp('^'+params.displayName+'$','i')}},function (err,row) {
 							if (row) {
-							this.send(codes.srRegisterReply,{status:'regDupUsername'},'Poker.RegisterReply');
+								this.send(codes.srRegisterReply,{status:'regDupUsername'},'Poker.RegisterReply');
 							} else {
 								newuser.save(function (err) {
 									if (err) {
@@ -604,7 +603,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			doc = {};
 			doc.forgotcode = uuid.v4();
 			doc.forgottime = Date.now();
-			models.UserModel.findOne({email:email},function (err,row) {
+			models.UserModel.findOne({email:{$regex:new RegExp('^'+email+'$','i')}},function (err,row) {
 				if (!row) {
 					//this.reply(codes.SR_FORGOT_PASSWORD_OK,"invalid");
 					return;
