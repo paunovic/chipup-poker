@@ -842,8 +842,8 @@ begin
         c.SetValue(recidx, gridGamesId.Index, game.MongoId.ToVariant);
         c.SetValue(recidx, gridGamesName.Index, game.Gamename);
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
-        c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-        c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.BuyinMin, game.BuyinMax]));
+        c.SetValue(recidx, gridGamesBlinds.Index, Format('%s/%s', [ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind)]));
+        c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%s-%s', [ChipsToStr(game.BuyinMin), ChipsToStr(game.BuyinMax)]));
         c.SetValue(recidx, gridGamesSeats.Index, game.Seats);
         c.SetValue(recidx, gridGamesTableStatus.Index, game.StateAsStr);
       end;

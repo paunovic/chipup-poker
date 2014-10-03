@@ -109,7 +109,7 @@ object frmHandHistory: TfrmHandHistory
   end
   object btReplayHand: TcxButton
     Left = 121
-    Top = 551
+    Top = 549
     Width = 103
     Height = 27
     Action = acReplayHand

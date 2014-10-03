@@ -734,10 +734,10 @@ begin
                 // check if our current bet is smaller than minimumbet (call/raise situation)
                 if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
                 begin
-                  if seat.Chips <= FStatus.MinimumBet then
+                  if seat.Chips <= FStatus.MinimumBet - FStatus.GetBet(seat.SeatIndex) then
                     FStatus.CallCaption := 'CALL (ALL-IN)'
                   else
-                    FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet{ - FStatus.GetBet(seat_info.SeatIndex)})]);
+                    FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet - FStatus.GetBet(seat.SeatIndex))]);
                   FStatus.ActionCall := TRUE;
 
                   // if we can call, there is a possibility that we can raise too - we check if we can raise here
