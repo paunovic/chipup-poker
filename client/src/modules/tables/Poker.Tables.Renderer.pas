@@ -605,8 +605,9 @@ begin
             mousepointf.Y := mousepoint.Y;
 
             if (seat_info.Cards.IsKnown) and
-               (System.Types.PtInRect(RectF(seat_point.x - FMetrics.SeatWidth / 2, seat_point.y - FMetrics.SeatHeight / 2,
-                      seat_point.x + FMetrics.SeatWidth / 2, seat_point.y + FMetrics.SeatHeight / 2), mousepointf)) then
+               ((System.Types.PtInRect(RectF(seat_point.x - FMetrics.SeatWidth / 2, seat_point.y - FMetrics.SeatHeight / 2,
+                       seat_point.x + FMetrics.SeatWidth / 2, seat_point.y + FMetrics.SeatHeight / 2), mousepointf)) or
+                (seat_info.CardsVisible)) then
               for C1 := 0 to seat_info.Cards.Count - 1 do
               begin
                 card_point := FMetrics.GetCardPoint(AGame, seat_info, C1);
