@@ -325,7 +325,14 @@ begin
       gridGames.Align := alClient;
     end;
 
+    btStats.Visible := admin_visible;
     btStats.Enabled := admin_visible;
+
+    if btStats.Visible then
+      btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2
+    else
+      btPrijatnaPunina.Left := btTables.Left + btTables.Width + 2;
+    btPrijatnaPunina.Width := gbTables.Left + gbTables.Width - btPrijatnaPunina.Left + 9;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
