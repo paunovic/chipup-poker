@@ -430,7 +430,7 @@ Game.prototype.handOver = function (cb,handid,reason) {
 				historyRow.cards = new Buffer(historyRow.cards);
 				var obj = {gameid:this.id, rows:[historyRow] };
 				if (this.tournament) obj.tournament_id = this.obj.tournament;
-				if (this.clubid) obj.club_id = this.clubid;
+				if (this.obj.clubid) obj.club_id = this.obj.clubid;
 				for (var x in this.users) {
 					for (var y=0; y<obj.rows[0].players.length; y++) {
 						if (obj.rows[0].players[y]) {
@@ -507,6 +507,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.nextDealer();
 		this.bets = [];
 		this.balance_changes = [];
+		this.cardsShown = false;
 		for (x=0; x<this.obj.seats; x++) {
 			this.bets[x] = 0;
 			this.balance_changes[x] = 0;
@@ -909,7 +910,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		this.log('main cb');
 		cb(rakestats);
 
-		setTimeout(function () {
+		function finish2() {
 			this.Lock.writeLock(function (release) {
 				this.saveHistory(function () {
 					if (cb3) cb3();
@@ -957,6 +958,10 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
+		}
+		setTimeout(function () {
+			if (this.cardsShown) setTimeout(finish2.bind(this),2000);
+			else finish2.call(this);
 		}.bind(this),delay);
 	}
 	var winnerObjects = [];
@@ -1016,7 +1021,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	//this.log('doWin',this.pots,this.members); // the timer breaks JSON stringify
 	this.pots = [ new Pot(this) ];
 	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
-		this.log('checking winner %j ',winnerObj,this.seats);
+		//this.log('checking winner %j ',winnerObj,this.seats);
 		var seat = winnerObj.seat;
 		var userid = this.seats[seat].userid;
 		var gain = wins[seat];
