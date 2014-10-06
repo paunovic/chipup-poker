@@ -397,7 +397,7 @@ end;
 
 procedure TfrmDebug.acRunNewInstanceExecute(Sender: TObject);
 begin
-  TInstanceController.UnregisterInstance;
+  TInstanceController.ReleaseInstance;
   ShellOpen(PChar(ParamStr(0)), nil, PChar(ParamStr(1)));
 end;
 

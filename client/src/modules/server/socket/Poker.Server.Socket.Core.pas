@@ -93,7 +93,7 @@ uses
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
   Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished,
-  Poker.Protobufs.Objects.TableMessage, Poker.Protobufs.Objects.TournamentPlayerTransfer;
+  Poker.Protobufs.Objects.TableMessage, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Protobufs.Objects.PlayerClubStatus;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -463,8 +463,7 @@ begin
     srChangePasswordOk: ;
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_User.Create(ADataPointer, ARpcMessage.DataSize);
-    srPlayerLimitOk,
-    srResetPlayerBalanceOk: ADataObject := TPB_PlayerLimitParams.Create(ADataPointer, ARpcMessage.DataSize);
+    srPlayerLimitOk: ADataObject := TPB_PlayerLimitParams.Create(ADataPointer, ARpcMessage.DataSize);
     srGetPlayers: ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
     srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
     srSetAvatarReply: ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
@@ -500,6 +499,7 @@ begin
     srSuspendPlayerOk,
     srReinstatePlayerOk,
     seClubChange,
+    srResetPlayerBalanceOk,
     seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateGameOk,
     srDeleteGameOk,
@@ -521,6 +521,7 @@ begin
     srTournamentOpenTable: ADataObject := TPB_TournamentTableStart.Create(ADataPointer, ARpcMessage.DataSize);
     seTournamentPlayerFinished: ADataObject := TPB_TournamentPlayerFinished.Create(ADataPointer, ARpcMessage.DataSize);
     seTournamentPlayerTransfer: ADataObject := TPB_TournamentPlayerTransfer.Create(ADataPointer, ARpcMessage.DataSize);
+    sePlayerClubStatus: ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
     Exit(FALSE);

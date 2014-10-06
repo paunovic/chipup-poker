@@ -269,7 +269,6 @@
 			<DCCReference Include="modules\players\Poker.Players.Player.pas"/>
 			<DCCReference Include="modules\players\Poker.Players.PlayerList.pas"/>
 			<DCCReference Include="modules\clubs\Poker.Clubs.Club.pas"/>
-			<DCCReference Include="modules\clubs\Poker.Clubs.Member.pas"/>
 			<DCCReference Include="modules\clubs\Poker.Clubs.ClubList.pas"/>
 			<DCCReference Include="modules\games\Poker.Games.Game.pas"/>
 			<DCCReference Include="modules\games\Poker.Games.GameList.pas"/>
@@ -372,6 +371,7 @@
 				<Form>frmTournamentFinishDialog</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

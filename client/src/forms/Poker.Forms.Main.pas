@@ -205,6 +205,7 @@ type
     procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEPlayerClubStatus(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -241,13 +242,13 @@ uses
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs,
   Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup,
   Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply, Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Core,
-  Poker.Forms.HandHistory, Poker.Forms.Settings, Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member,
+  Poker.Forms.HandHistory, Poker.Forms.Settings, Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo,
   Poker.Players.Player, Poker.Avatars.AvatarList, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions,
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo,
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
-  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer,
-  Poker.Forms.Table, Poker.Forms.TournamentFinishDialog;
+  Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Forms.Table, Poker.Forms.TournamentFinishDialog,
+  Poker.Protobufs.Objects.PlayerClubStatus;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -280,6 +281,7 @@ begin
                       TServerMessageCallback.Create(seTournamentPlayerFinished, CSETournamentPlayerFinished),
                       TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                       TServerMessageCallback.Create(seTournamentPlayerTransfer, CSETournamentPlayerTransfer),
+                      TServerMessageCallback.Create(sePlayerClubStatus, CSEPlayerClubStatus),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -555,7 +557,7 @@ var
   game: TGameInfo;
   club: TClubInfo;
   table: TTable;
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
   err: String;
 begin
   if not dmMain.CheckAuthed then
@@ -814,7 +816,7 @@ var
   status: String;
   rcount: Integer;
   c: TcxDataController;
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
 begin
   c := gridPrivateClubsTable.DataController;
   c.BeginFullUpdate;
@@ -1497,6 +1499,18 @@ begin
   end;
 
   RefreshAll;
+end;
+
+procedure TfrmChipUpMain.CSEPlayerClubStatus(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_PlayerClubStatus;
+begin
+  if not TTypes.TryCast<TPB_PlayerClubStatus>(AObject, proto) then
+    Exit;
+
+  if dmMain.SelfInfo.ClubStatuses.ContainsKey(proto.ClubId) then
+    dmMain.SelfInfo.ClubStatuses.Remove(proto.ClubId);
+  dmMain.SelfInfo.ClubStatuses.Add(proto.ClubId, TPB_PlayerClubStatus.Create(proto, TRUE));
 end;
 
 procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);

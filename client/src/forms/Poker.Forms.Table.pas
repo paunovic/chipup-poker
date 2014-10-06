@@ -162,7 +162,7 @@ uses
   Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game, Poker.Games.Game, Poker.Sounds,
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
-  Poker.Clubs.Member, Poker.Forms.ClubLobby;
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -508,7 +508,7 @@ var
   client_cursor_pos: TPoint;
   seat_index: Integer;
   table: TTable;
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
 begin
   client_cursor_pos := ScreenToClient(Mouse.CursorPos);
   DefocusControls;
@@ -611,7 +611,7 @@ begin
          (table.Renderer.RiverAnimations.Count = 0) then
         lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
               table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString,
-              table.Status.CurrentGame, TRUE)
+              table.Status.CurrentGame, FALSE)
     end
     else
       lbvHandStrength.Caption := '';
@@ -1105,7 +1105,7 @@ var
   seat: TSeatInfo;
   sindex: Integer;
   table: TTable;
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try

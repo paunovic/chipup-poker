@@ -88,7 +88,6 @@ uses
   Poker.Players.Player in 'modules\players\Poker.Players.Player.pas',
   Poker.Players.PlayerList in 'modules\players\Poker.Players.PlayerList.pas',
   Poker.Clubs.Club in 'modules\clubs\Poker.Clubs.Club.pas',
-  Poker.Clubs.Member in 'modules\clubs\Poker.Clubs.Member.pas',
   Poker.Clubs.ClubList in 'modules\clubs\Poker.Clubs.ClubList.pas',
   Poker.Games.Game in 'modules\games\Poker.Games.Game.pas',
   Poker.Games.GameList in 'modules\games\Poker.Games.GameList.pas',
@@ -187,7 +186,8 @@ uses
   Poker.Common.SafeMutex in 'modules\common\Poker.Common.SafeMutex.pas',
   Poker.Protobufs.Objects.TournamentPlayerTransfer in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas',
   Poker.Protobufs.Objects.TournamentPrize in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas',
-  Poker.Forms.TournamentFinishDialog in 'forms\Poker.Forms.TournamentFinishDialog.pas' {frmTournamentFinishDialog};
+  Poker.Forms.TournamentFinishDialog in 'forms\Poker.Forms.TournamentFinishDialog.pas' {frmTournamentFinishDialog},
+  Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas';
 
 procedure FocusApp;
 var
@@ -206,12 +206,11 @@ begin
   TCommandLineParams.ParseParams;
 
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
-  if not TInstanceController.IsAlphaInstance then
+  if not TInstanceController.AcquireInstance then
   begin
     FocusApp;
     Exit;
   end;
-  TInstanceController.RegisterInstance;
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
@@ -219,5 +218,5 @@ begin
   Application.CreateForm(TfrmChipUpMain, frmChipUpMain);
   Application.Run;
 
-  TInstanceController.UnregisterInstance;
+  TInstanceController.ReleaseInstance;
 end.

@@ -2529,7 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsTables
+    Properties.ActivePage = tsStats
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2764,6 +2764,22 @@ object frmClubLobby: TfrmClubLobby
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 5
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object btResetAllPlayerBalances: TcxButton
+          Left = 8
+          Top = 118
+          Width = 101
+          Height = 26
+          Action = acResetPlayerBalances
+          Anchors = [akLeft, akBottom]
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 6
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3325,6 +3341,10 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Set Limit'
       Enabled = False
       OnExecute = acSetLimitExecute
+    end
+    object acResetPlayerBalances: TAction
+      Caption = 'Reset All Balances'
+      OnExecute = acResetPlayerBalancesExecute
     end
   end
   object pmTablesStats: TPopupMenu

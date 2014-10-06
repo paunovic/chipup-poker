@@ -51,6 +51,7 @@ type
     procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
     procedure SetPlayerLimit(const AClubId, AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetPlayerBalance(const AClubId, AMemberId: TMongoId);
+    procedure ResetPlayerBalances(const AClubId: TMongoId);
     procedure QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
     procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
     procedure TournamentRegister(const ATournamentId: TMongoId);
@@ -58,6 +59,7 @@ type
     procedure OpenTournamentLobby(const ATournamentId: TMongoId);
     procedure CloseTournamentLobby(const ATournamentId: TMongoId);
     procedure QueryTournamentInfo(const ATournamentId: TMongoId);
+    procedure TableSitOpen(const AGameId: TMongoId);
   end;
 
 var
@@ -481,6 +483,19 @@ begin
   TableBoolFlag(scTableSitOutNextHand, AGameId, AFlag);
 end;
 
+procedure TServerSocket.TableSitOpen(const AGameId: TMongoId);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoId := AGameId;
+    SendProtobuf(scTableSitOpen, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 procedure TServerSocket.TableSitOutNextBB(const AGameId: TMongoId; const AFlag: Boolean);
 begin
   TableBoolFlag(scTableSitOutNextBB, AGameId, AFlag);
@@ -573,6 +588,19 @@ begin
     protobuf.Limit := 0;
     protobuf.Unlimited := FALSE;
     SendProtobuf(scResetPlayerBalance, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.ResetPlayerBalances(const AClubId: TMongoId);
+var
+  protobuf: TPB_Club;
+begin
+  protobuf := TPB_Club.Create;
+  try
+    protobuf.MongoId := AClubId;
+    SendProtobuf(scResetPlayerBalances, protobuf);
   finally
     protobuf.Free;
   end;

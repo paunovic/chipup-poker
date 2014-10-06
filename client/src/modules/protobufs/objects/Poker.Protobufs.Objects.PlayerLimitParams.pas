@@ -50,17 +50,17 @@ type
     procedure clear_Clubid;
     property Clubid: TMongoId read FClubid write SetClubid;
 
-    // required bytes Userid = 2;
+    // optional bytes Userid = 2;
     function has_Userid: Boolean;
     procedure clear_Userid;
     property Userid: TMongoId read FUserid write SetUserid;
 
-    // required uint32 Limit = 3;
+    // optional uint32 Limit = 3;
     function has_Limit: Boolean;
     procedure clear_Limit;
     property Limit: UInt32 read FLimit write SetLimit;
 
-    // required bool Unlimited = 4;
+    // optional bool Unlimited = 4;
     function has_Unlimited: Boolean;
     procedure clear_Unlimited;
     property Unlimited: Boolean read FUnlimited write SetUnlimited;
@@ -135,7 +135,7 @@ end;
 
 function TPB_PlayerLimitParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $f) <> $f then
+  if (_has_bits_ and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;

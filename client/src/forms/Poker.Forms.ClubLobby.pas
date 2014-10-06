@@ -114,6 +114,8 @@ type
     acSetLimit: TAction;
     styleCheckedRow: TcxStyle;
     styleSelectedRow: TcxStyle;
+    btResetAllPlayerBalances: TcxButton;
+    acResetPlayerBalances: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -147,6 +149,7 @@ type
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
+    procedure acResetPlayerBalancesExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -197,9 +200,9 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member,
+  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams,
   Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Tables.Table, Poker.Forms.Main;
+  Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects. ClubMember;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -230,6 +233,7 @@ begin
   btSetLimit.Top := btGiveOwnership.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btCloseTable.Top := btNewGame.Top;
+  btResetAllPlayerBalances.Top := btGiveOwnership.Top - 5 - btResetAllPlayerBalances.Height;
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -271,7 +275,7 @@ var
   player: TPlayerInfo;
   manager: String;
   admin_visible: Boolean;
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
 begin
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
@@ -578,7 +582,7 @@ var
   club: TClubInfo;
   query_players: TArray<TMongoId>;
 
-  procedure AddPlayerToGrid(const ARowIndex: Integer; AMember: TClubMemberInfo);
+  procedure AddPlayerToGrid(const ARowIndex: Integer; AMember: TPB_ClubMember);
   var
     player: TPlayerInfo;
     status: String;
@@ -953,6 +957,12 @@ begin
   end;
 end;
 
+procedure TfrmClubLobby.acResetPlayerBalancesExecute(Sender: TObject);
+begin
+  if MessageDlg('This will reset balances for all players in the club. Proceed?', mtConfirmation, mbYesNo, 0) = mrYes then
+    ServerSocket.ResetPlayerBalances(FClubId);
+end;
+
 procedure TfrmClubLobby.acSetLimitExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmClubMemberOptions, self, [FClubId.Memory, FSelectedPlayerId.Memory], ModalFormClose));
@@ -1166,17 +1176,19 @@ end;
 
 procedure TfrmClubLobby.CSRResetPlayerBalanceOk(const AMethodId: Integer; const AObject: TObject);
 var
-  pbreply: TPB_PlayerLimitParams;
+  proto: TPB_Club;
   club: TClubInfo;
+  member: TPB_ClubMember;
 begin
-  if not TTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_Club>(AObject, proto) then
     Exit;
-  if FClubId <> pbreply.Clubid then
+  if FClubId <> proto.MongoId then
     Exit;
 
-  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  if dmMain.SelfInfo.Clubs.GetAndLock(proto.MongoId, club) then
   try
-    club.ResetMemberBalance(pbreply.Userid);
+    for member in proto.Members do
+      club.SetMemberInfo(member);
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

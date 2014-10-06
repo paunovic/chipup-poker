@@ -7,7 +7,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.PlayerClubStatus;
 
 type
   TLoginStatus = (lrSuccess = 0,lrInvalid = 1);
@@ -23,6 +23,7 @@ type
       kUsersFieldNumber = 7;
       kSelfFieldNumber = 8;
       kGamesFieldNumber = 9;
+      kPlayerClubStatusesFieldNumber = 10;
 
     var
       FLoginStatus: TLoginStatus;
@@ -33,6 +34,7 @@ type
       FUsers: TList<TPB_User>;
       FSelf: TPB_User;
       FGames: TList<TPB_Game>;
+      FPlayerClubStatuses: TList<TPB_PlayerClubStatus>;
       _has_bits_: UINT32;
 
     procedure set_has_LoginStatus;
@@ -53,12 +55,15 @@ type
     procedure SetSelf(const AValue: TPB_User);
     procedure set_has_Games;
     procedure clear_has_Games;
+    procedure set_has_PlayerClubStatuses;
+    procedure clear_has_PlayerClubStatuses;
     procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
     procedure TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
     procedure RegisteredTournamentsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
     procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+    procedure PlayerClubStatusesNotifyEvent(Sender: TObject; const Item: TPB_PlayerClubStatus; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -112,6 +117,11 @@ type
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;
 
+    // repeated PlayerClubStatus PlayerClubStatuses = 10;
+    function has_PlayerClubStatuses: Boolean;
+    procedure clear_PlayerClubStatuses;
+    property PlayerClubStatuses: TList<TPB_PlayerClubStatus> read FPlayerClubStatuses;
+
   end;
 
   TPB_LoginReplyList = class(TObjectList<TPB_LoginReply>)
@@ -163,6 +173,11 @@ begin
     FGames.OnNotify := nil;
     FreeAndNil(FGames);
   end;
+  if Assigned(FPlayerClubStatuses) then
+  begin
+    FPlayerClubStatuses.OnNotify := nil;
+    FreeAndNil(FPlayerClubStatuses);
+  end;
   inherited;
 end;
 
@@ -175,6 +190,7 @@ begin
   FClubs := TObjectList<TPB_Club>.Create;
   FUsers := TObjectList<TPB_User>.Create;
   FGames := TObjectList<TPB_Game>.Create;
+  FPlayerClubStatuses := TObjectList<TPB_PlayerClubStatus>.Create;
 end;
 
 procedure TPB_LoginReply.HookNotifiers;
@@ -186,6 +202,7 @@ begin
   FClubs.OnNotify := ClubsNotifyEvent;
   FUsers.OnNotify := UsersNotifyEvent;
   FGames.OnNotify := GamesNotifyEvent;
+  FPlayerClubStatuses.OnNotify := PlayerClubStatusesNotifyEvent;
 end;
 
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -238,6 +255,11 @@ begin
         FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Games;
       end;
+      kPlayerClubStatusesFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPlayerClubStatuses.Add(TPB_PlayerClubStatus.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_PlayerClubStatuses;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -250,6 +272,7 @@ var
   pbobj4: TPB_Club;
   pbobj5: TPB_User;
   pbobj7: TPB_Game;
+  pbobj8: TPB_PlayerClubStatus;
 begin
   if AFrom.has_LoginStatus then
     SetLoginStatus(AFrom.LoginStatus);
@@ -266,6 +289,8 @@ begin
     FSelf.MergeFrom(AFrom.Self);
   for pbobj7 in AFrom.Games do
     FGames.Add(TPB_Game.Create(pbobj7));
+  for pbobj8 in AFrom.PlayerClubStatuses do
+    FPlayerClubStatuses.Add(TPB_PlayerClubStatus.Create(pbobj8));
 end;
 
 function TPB_LoginReply.IsInitialized: Boolean;
@@ -290,6 +315,9 @@ begin
     if not FSelf.IsInitialized then
       Exit(FALSE);
   for pbobj in Games do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in PlayerClubStatuses do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
@@ -585,6 +613,44 @@ begin
   end;
 end;
 
+procedure TPB_LoginReply.clear_PlayerClubStatuses;
+var
+  on_notify: TCollectionNotifyEvent<TPB_PlayerClubStatus>;
+begin
+  on_notify := FPlayerClubStatuses.OnNotify;
+  FPlayerClubStatuses.OnNotify := nil;
+  FPlayerClubStatuses.Clear;
+  FPlayerClubStatuses.OnNotify := on_notify;
+  clear_has_PlayerClubStatuses;
+end;
+
+function TPB_LoginReply.has_PlayerClubStatuses: Boolean;
+begin
+  result := (_has_bits_ and 512) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_PlayerClubStatuses;
+begin
+  _has_bits_ := _has_bits_ or 512;
+end;
+
+procedure TPB_LoginReply.clear_has_PlayerClubStatuses;
+begin
+  _has_bits_ := _has_bits_ and not 512;
+end;
+
+procedure TPB_LoginReply.PlayerClubStatusesNotifyEvent(Sender: TObject; const Item: TPB_PlayerClubStatus; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_PlayerClubStatuses;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPlayerClubStatusesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
 procedure TPB_LoginReply.Clear;
 begin
   if _has_bits_ = 0 then
@@ -598,6 +664,7 @@ begin
   clear_Users;
   clear_Self;
   clear_Games;
+  clear_PlayerClubStatuses;
 end;
 
 procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);

@@ -41,7 +41,7 @@ implementation
 
 uses
   Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Common.Misc,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Clubs.Member, Poker.DataModule;
+  Poker.Protobufs.Enum.ServerCodes, Poker.DataModule, Poker.Protobufs.Objects.ClubMember;
 
 
 procedure TfrmClubMemberOptions.FormCreate(Sender: TObject);
@@ -64,7 +64,7 @@ end;
 
 procedure TfrmClubMemberOptions.SetParams(const AParams: array of pointer);
 var
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
   club: TClubInfo;
 begin
   FClubId := AParams[0];

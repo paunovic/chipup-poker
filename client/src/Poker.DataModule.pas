@@ -67,7 +67,7 @@ uses
   Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket,
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
-  Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About, Poker.Clubs.Member,
+  Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
   Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
   Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments, Poker.Games.Game, Poker.Tournaments.Info,
   Poker.Forms.TournamentLobby;
@@ -482,8 +482,7 @@ var
   player: TPlayerInfo;
   query_users: TArray<TMongoId>;
   empty_avatar_id: TBytes;
-  member: TClubMemberInfo;
-  memberpb: TPB_ClubMember;
+  member: TPB_ClubMember;
 begin
   if AMethodId <> Integer(srClubDisbandOk) then
   begin
@@ -500,14 +499,14 @@ begin
         Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_avatar_id);
       end;
 
-      for memberpb in AClub.Members do
-        if (not Players.TryGetValue(memberpb.MongoId, player)) or
+      for member in AClub.Members do
+        if (not Players.TryGetValue(member.MongoId, player)) or
            (player.Displayname = '') or
            (Length(player.Avatar) = 0) then
         begin
           SetLength(query_users, Length(query_users) + 1);
-          query_users[Length(query_users) - 1] := memberpb.MongoId;
-          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_avatar_id);
+          query_users[Length(query_users) - 1] := member.MongoId;
+          Players.AddPlayer(member.MongoId, 'Retrieving...', '', empty_avatar_id);
         end;
 
       if Length(query_users) > 0 then

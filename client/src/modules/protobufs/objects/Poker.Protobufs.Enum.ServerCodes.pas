@@ -60,6 +60,7 @@ type
     seUserChange = 60,
     seTournamentPlayerFinished = 61,
     seTournamentPlayerTransfer = 62,
+    sePlayerClubStatus = 63,
     scHello = 70,
     scLogin = 71,
     scTournamentRegister = 72,
@@ -102,7 +103,9 @@ type
     scTournamentUnregister = 109,
     scTournamentLobbyOpen = 110,
     scTournamentLobbyClose = 111,
-    scTournamentQueryInfo = 112
+    scTournamentQueryInfo = 112,
+    scTableSitOpen = 113,
+    scResetPlayerBalances = 114
   );
 
 {$IFDEF DEBUG}
@@ -187,6 +190,7 @@ begin
     seUserChange: result := 'seUserChange';
     seTournamentPlayerFinished: result := 'seTournamentPlayerFinished';
     seTournamentPlayerTransfer: result := 'seTournamentPlayerTransfer';
+    sePlayerClubStatus: result := 'sePlayerClubStatus';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
     scTournamentRegister: result := 'scTournamentRegister';
@@ -230,6 +234,8 @@ begin
     scTournamentLobbyOpen: result := 'scTournamentLobbyOpen';
     scTournamentLobbyClose: result := 'scTournamentLobbyClose';
     scTournamentQueryInfo: result := 'scTournamentQueryInfo';
+    scTableSitOpen: result := 'scTableSitOpen';
+    scResetPlayerBalances: result := 'scResetPlayerBalances';
   end;
 end;
 {$ENDIF DEBUG}

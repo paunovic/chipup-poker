@@ -341,9 +341,6 @@ object frmTable: TfrmTable
       Properties.Alignment.Vert = taVCenter
       Transparent = True
       OnClick = lbvHandHistoryClick
-      ExplicitLeft = 6
-      ExplicitTop = 4
-      ExplicitHeight = 14
       Height = 23
       Width = 126
       AnchorY = 12
@@ -381,7 +378,6 @@ object frmTable: TfrmTable
       Transparent = True
       Visible = False
       OnClick = lbsTableStatsClick
-      ExplicitLeft = 126
       AnchorY = 12
     end
   end

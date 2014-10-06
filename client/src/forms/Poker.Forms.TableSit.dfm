@@ -153,7 +153,7 @@ object frmTableSit: TfrmTableSit
     Top = 26
     Margins.Top = 6
     AutoSize = False
-    Caption = '(min buy-in %.2f, max buyin %.2f)'
+    Caption = '(min buy-in %s, max buyin %s)'
     ParentFont = False
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
@@ -169,6 +169,29 @@ object frmTableSit: TfrmTableSit
     Width = 282
     AnchorX = 149
     AnchorY = 35
+  end
+  object lbvPlayerMaxBuyin: TcxLabel
+    AlignWithMargins = True
+    Left = 7
+    Top = 42
+    Margins.Top = 6
+    AutoSize = False
+    Caption = '(your maximum buyin: %s)'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = []
+    Style.TextStyle = [fsBold]
+    Style.IsFontAssigned = True
+    Properties.Alignment.Horz = taCenter
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    Height = 17
+    Width = 282
+    AnchorX = 148
+    AnchorY = 51
   end
   object alTableSit: TActionList
     Left = 256

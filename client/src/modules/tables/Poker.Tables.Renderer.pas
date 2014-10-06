@@ -155,7 +155,7 @@ uses
   Poker.Common.Misc, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation, System.DateUtils,
   Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table,
-  Poker.Clubs.Member, Poker.Protobufs.Objects.TableMessage, Poker.Server.Socket, Poker.Tournaments, Poker.Tournaments.Info;
+  Poker.Protobufs.Objects.TableMessage, Poker.Server.Socket, Poker.Tournaments, Poker.Tournaments.Info, Poker.Protobufs.Objects.ClubMember;
 
 { TTableRenderer }
 
@@ -465,7 +465,7 @@ var
   mousepoint: TPoint;
   mousepointf: TPointF;
   table: TTable;
-  member: TClubMemberInfo;
+  member: TPB_ClubMember;
 begin
   // get seat point
   seat_point := FMetrics.GetSeatPoint(AGame, ASeatIndex);
