@@ -61,6 +61,7 @@ enum ServerCodes {
 	seUserChange = 60;
 	seTournamentPlayerFinished = 61;
 	seTournamentPlayerTransfer = 62;
+	sePlayerClubStatus = 63;
 	
 	scHello = 70;
 	scLogin = 71;
@@ -183,6 +184,7 @@ message LoginReply {
 	repeated User users = 7;
 	optional User self = 8;
 	repeated Game games = 9;
+	repeated PlayerClubStatus player_club_statuses = 10;
 }
 
 message ClubMember {
@@ -735,4 +737,8 @@ message TournamentPlayerTransfer {
 message TournamentPrize {
 	required int32 place = 1;
 	required string name = 2;
+}
+message PlayerClubStatus {
+	required bytes clubid = 1 [(ObjectId)=true];
+	optional uint32 player_buyin_limit = 2;
 }
