@@ -591,9 +591,9 @@ message BuyinError {
 
 message PlayerLimitParams {
 	required bytes clubid = 1 [(ObjectId)=true];
-	required bytes userid = 2 [(ObjectId)=true];
-	required uint32 limit = 3;
-	required bool unlimited = 4;
+	optional bytes userid = 2 [(ObjectId)=true];
+	optional uint32 limit = 3;
+	optional bool unlimited = 4;
 }
 
 message HandHistoryReply {
