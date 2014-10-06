@@ -107,6 +107,7 @@ enum ServerCodes {
 	scTournamentLobbyClose = 111;
 	scTournamentQueryInfo = 112;
 	scTableSitOpen = 113;
+	scResetPlayerBalances = 114;
 }
 
 message StringSizes {
