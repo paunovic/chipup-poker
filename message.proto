@@ -108,6 +108,7 @@ enum ServerCodes {
 	scTournamentQueryInfo = 112;
 	scTableSitOpen = 113;
 	scResetPlayerBalances = 114;
+	scDeleteTableStats = 115;
 }
 
 message StringSizes {
@@ -741,7 +742,13 @@ message TournamentPrize {
 	required int32 place = 1;
 	required string name = 2;
 }
+
 message PlayerClubStatus {
 	required bytes clubid = 1 [(ObjectId)=true];
 	optional uint32 player_buyin_limit = 2;
+}
+
+message DeleteTableStats {
+	required bytes club_id = 1 [(ObjectId)=true];
+	repeated bytes table_id = 2 [(ObjectId)=true];
 }
