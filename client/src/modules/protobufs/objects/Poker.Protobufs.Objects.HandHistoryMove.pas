@@ -183,9 +183,9 @@ begin
   if AFrom.has_Seat then
     SetSeat(AFrom.Seat);
   for pbobj3 in AFrom.WinnerPotData do
-    FWinnerPotData.Add(TPB_Pot.Create(pbobj3));
+    FWinnerPotData.Add(TPB_Pot.Create(pbobj3, Lightweight));
   for pbobj4 in AFrom.Pots do
-    FPots.Add(TPB_Pot.Create(pbobj4));
+    FPots.Add(TPB_Pot.Create(pbobj4, Lightweight));
 end;
 
 function TPB_HandHistoryMove.IsInitialized: Boolean;

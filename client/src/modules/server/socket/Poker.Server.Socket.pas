@@ -19,12 +19,12 @@ type
     procedure Logout;
     procedure CreateAccount(const AUsername, APassword, AEMail: String);
     procedure ForgotPassword(const AEMail: String);
-    procedure CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
+    procedure CreateClub(const AName, AInvCode: String; const AClubRake: Integer; const ABuyinResetInterval: UINT32);
     procedure JoinClub(const AClubId: Int64; const ACode: String);
     procedure LeaveClub(const AClubId: TMongoId);
     procedure KickPlayer(const AClubId: TMongoId; const APlayerId: TMongoId);
     procedure GiveOwnership(const AClubId: TMongoId; const APlayerId: TMongoId);
-    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
+    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
     procedure DisbandClub(const AClubId: TMongoId);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
@@ -60,6 +60,7 @@ type
     procedure CloseTournamentLobby(const ATournamentId: TMongoId);
     procedure QueryTournamentInfo(const ATournamentId: TMongoId);
     procedure TableSitOpen(const AGameId: TMongoId);
+    procedure DeleteTableStats(const AClubId: TMongoId; const ATableIds: TList<TMongoId>);
   end;
 
 var
@@ -80,7 +81,7 @@ uses
   Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
   Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
-  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails;
+  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -145,7 +146,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
+procedure TServerSocket.CreateClub(const AName, AInvCode: String; const AClubRake: Integer; const ABuyinResetInterval: UINT32);
 var
   protobuf: TPB_Club;
 begin
@@ -154,6 +155,7 @@ begin
     protobuf.Name := AName;
     protobuf.Password := AInvCode;
     protobuf.Rake := AClubRake;
+    protobuf.BuyinReset := ABuyinResetInterval;
     SendProtobuf(scCreateClub, protobuf);
   finally
     protobuf.Free;
@@ -215,7 +217,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
+procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
 var
   protobuf: TPB_Club;
 begin
@@ -227,6 +229,7 @@ begin
     protobuf.Rake := AClubRake;
     protobuf.DefaultBalanceLimit := ADefaultPlayerLimit;
     protobuf.UnlimitedDefaultBalance := AUnlimitedDefaultBalance;
+    protobuf.BuyinReset := AResetBuyinLimits;
     SendProtobuf(scChangeClubDetails, protobuf);
   finally
     protobuf.Free;
@@ -692,6 +695,20 @@ begin
   try
     protobuf.MongoId := ATournamentId;
     SendProtobuf(scTournamentQueryInfo, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.DeleteTableStats(const AClubId: TMongoId; const ATableIds: TList<TMongoId>);
+var
+  protobuf: TPB_DeleteTableStats;
+begin
+  protobuf := TPB_DeleteTableStats.Create;
+  try
+    protobuf.ClubId := AClubId;
+    protobuf.TableId.AddRange(ATableIds);
+    SendProtobuf(scDeleteTableStats, protobuf);
   finally
     protobuf.Free;
   end;

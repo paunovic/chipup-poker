@@ -372,6 +372,7 @@
 				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

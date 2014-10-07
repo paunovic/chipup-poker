@@ -103,7 +103,7 @@ var
   pbobj0: TPB_TournamentInfo;
 begin
   for pbobj0 in AFrom.Items do
-    FItems.Add(TPB_TournamentInfo.Create(pbobj0));
+    FItems.Add(TPB_TournamentInfo.Create(pbobj0, Lightweight));
 end;
 
 function TPB_TournamentList.IsInitialized: Boolean;

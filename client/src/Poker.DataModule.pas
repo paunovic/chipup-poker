@@ -501,8 +501,7 @@ begin
 
       for member in AClub.Members do
         if (not Players.TryGetValue(member.MongoId, player)) or
-           (player.Displayname = '') or
-           (Length(player.Avatar) = 0) then
+           (player.Displayname = '') then
         begin
           SetLength(query_users, Length(query_users) + 1);
           query_users[Length(query_users) - 1] := member.MongoId;

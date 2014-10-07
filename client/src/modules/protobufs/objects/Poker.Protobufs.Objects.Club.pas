@@ -24,6 +24,7 @@ type
       kRakeFieldNumber = 9;
       kDefaultBalanceLimitFieldNumber = 10;
       kUnlimitedDefaultBalanceFieldNumber = 11;
+      kBuyinResetFieldNumber = 12;
 
     var
       FId: TMongoId;
@@ -37,6 +38,7 @@ type
       FRake: UInt32;
       FDefaultBalanceLimit: UInt32;
       FUnlimitedDefaultBalance: Boolean;
+      FBuyinReset: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -71,6 +73,9 @@ type
     procedure set_has_UnlimitedDefaultBalance;
     procedure clear_has_UnlimitedDefaultBalance;
     procedure SetUnlimitedDefaultBalance(const AValue: Boolean);
+    procedure set_has_BuyinReset;
+    procedure clear_has_BuyinReset;
+    procedure SetBuyinReset(const AValue: UInt32);
     procedure MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
 
   protected
@@ -139,6 +144,11 @@ type
     function has_UnlimitedDefaultBalance: Boolean;
     procedure clear_UnlimitedDefaultBalance;
     property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
+
+    // optional uint32 BuyinReset = 12;
+    function has_BuyinReset: Boolean;
+    procedure clear_BuyinReset;
+    property BuyinReset: UInt32 read FBuyinReset write SetBuyinReset;
 
   end;
 
@@ -243,6 +253,11 @@ begin
         FUnlimitedDefaultBalance := AProtobufReader.readBoolean;
         set_has_UnlimitedDefaultBalance;
       end;
+      kBuyinResetFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBuyinReset := AProtobufReader.readUInt32;
+        set_has_BuyinReset;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -255,7 +270,7 @@ begin
   if AFrom.has_MongoId then
     SetMongoId(AFrom.MongoId);
   for pbobj1 in AFrom.Members do
-    FMembers.Add(TPB_ClubMember.Create(pbobj1));
+    FMembers.Add(TPB_ClubMember.Create(pbobj1, Lightweight));
   if AFrom.has_Name then
     SetName(AFrom.Name);
   if AFrom.has_Owner then
@@ -274,6 +289,8 @@ begin
     SetDefaultBalanceLimit(AFrom.DefaultBalanceLimit);
   if AFrom.has_UnlimitedDefaultBalance then
     SetUnlimitedDefaultBalance(AFrom.UnlimitedDefaultBalance);
+  if AFrom.has_BuyinReset then
+    SetBuyinReset(AFrom.BuyinReset);
 end;
 
 function TPB_Club.IsInitialized: Boolean;
@@ -644,6 +661,37 @@ begin
   set_has_UnlimitedDefaultBalance;
 end;
 
+procedure TPB_Club.clear_BuyinReset;
+begin
+  FBuyinReset := 0;
+  clear_has_BuyinReset;
+end;
+
+function TPB_Club.has_BuyinReset: Boolean;
+begin
+  result := (_has_bits_ and 2048) > 0;
+end;
+
+procedure TPB_Club.set_has_BuyinReset;
+begin
+  _has_bits_ := _has_bits_ or 2048;
+end;
+
+procedure TPB_Club.clear_has_BuyinReset;
+begin
+  _has_bits_ := _has_bits_ and not 2048;
+end;
+
+procedure TPB_Club.SetBuyinReset(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_BuyinReset);
+  FBuyinReset := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBuyinResetFieldNumber, AValue);
+  set_has_BuyinReset;
+end;
+
 procedure TPB_Club.Clear;
 begin
   if _has_bits_ = 0 then
@@ -660,6 +708,7 @@ begin
   clear_Rake;
   clear_DefaultBalanceLimit;
   clear_UnlimitedDefaultBalance;
+  clear_BuyinReset;
 end;
 
 procedure TPB_ClubList.Assign(const APB_ClubList: TList<TPB_Club>);

@@ -187,7 +187,8 @@ uses
   Poker.Protobufs.Objects.TournamentPlayerTransfer in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas',
   Poker.Protobufs.Objects.TournamentPrize in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas',
   Poker.Forms.TournamentFinishDialog in 'forms\Poker.Forms.TournamentFinishDialog.pas' {frmTournamentFinishDialog},
-  Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas';
+  Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas',
+  Poker.Protobufs.Objects.DeleteTableStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas';
 
 procedure FocusApp;
 var

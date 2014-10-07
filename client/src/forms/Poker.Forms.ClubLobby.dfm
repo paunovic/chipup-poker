@@ -2537,6 +2537,8 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2581,7 +2583,7 @@ object frmClubLobby: TfrmClubLobby
           Height = 28
           Action = acShowClubChangeDetailsForm
           Anchors = [akLeft, akTop, akRight]
-          Caption = 'Change club details...'
+          Caption = 'Change club settings...'
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 1
           Font.Charset = ANSI_CHARSET
@@ -2792,6 +2794,8 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2936,7 +2940,7 @@ object frmClubLobby: TfrmClubLobby
         Left = 8
         Top = 2
         Width = 337
-        Height = 432
+        Height = 392
         Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -3239,6 +3243,22 @@ object frmClubLobby: TfrmClubLobby
           end
         end
       end
+      object btDeleteSelectedStats: TcxButton
+        Left = 8
+        Top = 406
+        Width = 124
+        Height = 28
+        Action = acDeleteTableStats
+        Anchors = [akLeft, akBottom]
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 2
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
     end
   end
   object btPrijatnaPunina: TcxButton
@@ -3345,6 +3365,11 @@ object frmClubLobby: TfrmClubLobby
     object acResetPlayerBalances: TAction
       Caption = 'Reset All Balances'
       OnExecute = acResetPlayerBalancesExecute
+    end
+    object acDeleteTableStats: TAction
+      Caption = 'Delete Selected Stats'
+      Enabled = False
+      OnExecute = acDeleteTableStatsExecute
     end
   end
   object pmTablesStats: TPopupMenu

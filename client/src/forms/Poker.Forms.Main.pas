@@ -832,10 +832,10 @@ begin
             c.SetRecordCount(rcount);
 
           c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId.ToVariant);
-          c.SetValue(rcount - 1, gridHomeClubsId.Index, club.Id);
+          c.SetValue(rcount - 1, gridHomeClubsId.Index, club.Seq);
           c.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
 
-          if dmMain.SelfInfo.MongoId = club.OwnerId then
+          if dmMain.SelfInfo.MongoId = club.Owner then
             status := 'Manager'
           else
             if club.GetMemberInfo(dmMain.SelfInfo.Mongoid, member) then
@@ -1046,7 +1046,7 @@ begin
   try
     acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.TryGetValue(FSelectedClub, club)) and
                                ((club.IsPrivate) or
-                                (club.OwnerId = dmMain.SelfInfo.MongoId));
+                                (club.Owner = dmMain.SelfInfo.MongoId));
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

@@ -176,7 +176,7 @@ begin
   if AFrom.has_Seat then
     SetSeat(AFrom.Seat);
   for pbobj2 in AFrom.Pots do
-    FPots.Add(TPB_Pot.Create(pbobj2));
+    FPots.Add(TPB_Pot.Create(pbobj2, Lightweight));
   FBets.AddRange(AFrom.Bets);
   if AFrom.has_Cards then
     SetCards(AFrom.Cards);

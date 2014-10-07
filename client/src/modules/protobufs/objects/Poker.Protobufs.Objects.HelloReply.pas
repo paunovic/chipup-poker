@@ -232,7 +232,7 @@ begin
   if (AFrom.has_MinSizes) then
     FMinSizes.MergeFrom(AFrom.MinSizes);
   for pbobj6 in AFrom.UpdateFiles do
-    FUpdateFiles.Add(TPB_UpdateFileInfo.Create(pbobj6));
+    FUpdateFiles.Add(TPB_UpdateFileInfo.Create(pbobj6, Lightweight));
   if (AFrom.has_ValidCharsRegex) then
     FValidCharsRegex.MergeFrom(AFrom.ValidCharsRegex);
 end;

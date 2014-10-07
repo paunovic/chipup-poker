@@ -105,7 +105,8 @@ type
     scTournamentLobbyClose = 111,
     scTournamentQueryInfo = 112,
     scTableSitOpen = 113,
-    scResetPlayerBalances = 114
+    scResetPlayerBalances = 114,
+    scDeleteTableStats = 115
   );
 
 {$IFDEF DEBUG}
@@ -236,6 +237,7 @@ begin
     scTournamentQueryInfo: result := 'scTournamentQueryInfo';
     scTableSitOpen: result := 'scTableSitOpen';
     scResetPlayerBalances: result := 'scResetPlayerBalances';
+    scDeleteTableStats: result := 'scDeleteTableStats';
   end;
 end;
 {$ENDIF DEBUG}

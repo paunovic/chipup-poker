@@ -630,7 +630,7 @@ begin
 
       // render upper seat text
       RenderScaleFont(seat_upper_text, seat_upper_text_color, seat_upper_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
-                      Low(TableResources.BarmenoFonts), 16, 0, FMetrics.SeatHeight * 0.36, FMetrics.SeatWidth * 0.75);
+                      Low(TableResources.BarmenoFonts), 16, 0, FMetrics.SeatHeight * 0.36, FMetrics.SeatWidth * 0.6);
 
       // render lower seat text
       RenderScaleFont(seat_lower_text, seat_lower_text_color, seat_lower_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),

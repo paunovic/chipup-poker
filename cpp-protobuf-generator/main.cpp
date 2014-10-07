@@ -904,7 +904,7 @@ class BaseGenerator : public CodeGenerator {
 					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 						printer.Print(vars2,
 							"  for pbobj$id$ in AFrom.$name$ do\n"
-							"    $pname$.Add($type$.Create(pbobj$id$));\n"
+							"    $pname$.Add($type$.Create(pbobj$id$, Lightweight));\n"
 							);
 					} else {
 						printer.Print(vars2,"  $pname$.AddRange(AFrom.$name$);\n");

@@ -120,7 +120,7 @@ begin
   if AFrom.has_Debug then
     SetDebug(AFrom.Debug);
   for pbobj1 in AFrom.Files do
-    FFiles.Add(TPB_UpdateFileInfo.Create(pbobj1));
+    FFiles.Add(TPB_UpdateFileInfo.Create(pbobj1, Lightweight));
 end;
 
 function TPB_HelloParams.IsInitialized: Boolean;

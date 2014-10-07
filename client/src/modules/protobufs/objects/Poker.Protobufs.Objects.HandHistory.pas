@@ -292,14 +292,14 @@ begin
   if AFrom.has_Totalrake then
     SetTotalrake(AFrom.Totalrake);
   for pbobj3 in AFrom.Players do
-    FPlayers.Add(TPB_PlayerHandHistory.Create(pbobj3));
+    FPlayers.Add(TPB_PlayerHandHistory.Create(pbobj3, Lightweight));
   if AFrom.has_Cards then
     SetCards(AFrom.Cards);
   if AFrom.has_Endtime then
     SetEndtime(AFrom.Endtime);
   FBalanceChanges.AddRange(AFrom.BalanceChanges);
   for pbobj7 in AFrom.Moves do
-    FMoves.Add(TPB_HandHistoryMove.Create(pbobj7));
+    FMoves.Add(TPB_HandHistoryMove.Create(pbobj7, Lightweight));
   if AFrom.has_Dealer then
     SetDealer(AFrom.Dealer);
   if (AFrom.has_Game) then

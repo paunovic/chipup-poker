@@ -470,7 +470,7 @@ begin
   if AFrom.has_TableMongoId then
     SetTableMongoId(AFrom.TableMongoId);
   for pbobj1 in AFrom.Seats do
-    FSeats.Add(TPB_SeatInfo.Create(pbobj1));
+    FSeats.Add(TPB_SeatInfo.Create(pbobj1, Lightweight));
   if AFrom.has_State then
     SetState(AFrom.State);
   if AFrom.has_Dealer then
@@ -495,9 +495,9 @@ begin
   if AFrom.has_Time then
     SetTime(AFrom.Time);
   for pbobj14 in AFrom.Events do
-    FEvents.Add(TPB_TableEvent.Create(pbobj14));
+    FEvents.Add(TPB_TableEvent.Create(pbobj14, Lightweight));
   for pbobj15 in AFrom.Pots do
-    FPots.Add(TPB_Pot.Create(pbobj15));
+    FPots.Add(TPB_Pot.Create(pbobj15, Lightweight));
   if AFrom.has_RakePercent then
     SetRakePercent(AFrom.RakePercent);
   if AFrom.has_CurrentGame then
@@ -511,7 +511,7 @@ begin
   if AFrom.has_TableType then
     SetTableType(AFrom.TableType);
   for pbobj22 in AFrom.TableMessage do
-    FTableMessage.Add(TPB_TableMessage.Create(pbobj22));
+    FTableMessage.Add(TPB_TableMessage.Create(pbobj22, Lightweight));
 end;
 
 function TPB_TableStatus.IsInitialized: Boolean;

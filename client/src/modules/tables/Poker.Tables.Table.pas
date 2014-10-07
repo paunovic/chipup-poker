@@ -682,7 +682,7 @@ begin
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
-    FStatus.ActionShowStats := club.OwnerId = dmMain.SelfInfo.MongoId;
+    FStatus.ActionShowStats := club.Owner = dmMain.SelfInfo.MongoId;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

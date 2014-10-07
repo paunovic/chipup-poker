@@ -152,7 +152,7 @@ begin
   if AFrom.has_Gameid then
     SetGameid(AFrom.Gameid);
   for pbobj2 in AFrom.Playerstats do
-    FPlayerstats.Add(TPB_TablePlayerStats.Create(pbobj2));
+    FPlayerstats.Add(TPB_TablePlayerStats.Create(pbobj2, Lightweight));
   if AFrom.has_Hands then
     SetHands(AFrom.Hands);
 end;
