@@ -209,6 +209,7 @@ message Club {
 	optional uint32 rake = 9;
 	optional uint32 default_balance_limit = 10;
 	optional bool unlimited_default_balance = 11;
+	optional uint32 buyin_reset = 12;
 }
 
 message User {
