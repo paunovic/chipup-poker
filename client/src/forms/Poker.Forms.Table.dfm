@@ -169,7 +169,7 @@ object frmTable: TfrmTable
     Style = RVStyle
   end
   object lbvHandStrength: TcxLabel
-    Left = 626
+    Left = 632
     Top = 370
     Anchors = [akRight, akBottom]
     Caption = 'Hand Strength'
@@ -191,7 +191,7 @@ object frmTable: TfrmTable
     StyleHot.LookAndFeel.NativeStyle = True
     Properties.Alignment.Horz = taRightJustify
     Transparent = True
-    AnchorX = 690
+    AnchorX = 696
   end
   object btPlayPause: TcxButton
     Left = 330

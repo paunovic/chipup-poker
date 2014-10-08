@@ -611,7 +611,7 @@ begin
          (table.Renderer.RiverAnimations.Count = 0) then
         lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
               table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString,
-              table.Status.CurrentGame, FALSE)
+              table.Status.CurrentGame, TRUE)
     end
     else
       lbvHandStrength.Caption := '';

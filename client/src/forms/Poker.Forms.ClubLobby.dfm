@@ -18,9 +18,7 @@ object frmClubLobby: TfrmClubLobby
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  DesignSize = (
-    894
-    612)
+  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
@@ -2537,8 +2535,6 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2794,8 +2790,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3266,7 +3260,6 @@ object frmClubLobby: TfrmClubLobby
     Top = 138
     Width = 500
     Height = 31
-    Anchors = [akLeft, akTop, akRight]
     Enabled = False
     LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
     SpeedButtonOptions.CanBeFocused = False

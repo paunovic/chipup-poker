@@ -87,7 +87,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 125
   end
   object btCancel: TcxButton
     Left = 289
@@ -104,7 +103,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 125
   end
   object cbDefaultPlayerLimit: TcxCheckBox
     Left = 10
@@ -130,10 +128,10 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   object seRake: TcxSpinEdit
     Left = 127
     Top = 65
+    Properties.AssignedValues.MinValue = True
     Properties.CanEdit = False
-    Properties.DisplayFormat = '#%'
+    Properties.DisplayFormat = '0%'
     Properties.MaxValue = 10.000000000000000000
-    Properties.MinValue = 1.000000000000000000
     Properties.UseDisplayFormatWhenEditing = True
     TabOrder = 2
     Value = 1

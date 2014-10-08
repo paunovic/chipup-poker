@@ -153,6 +153,7 @@ type
       AShift: TShiftState; var AHandled: Boolean);
     procedure acResetPlayerBalancesExecute(Sender: TObject);
     procedure acDeleteTableStatsExecute(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -245,6 +246,11 @@ begin
   FormsContainer.Remove(self);
 
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+end;
+
+procedure TfrmClubLobby.FormResize(Sender: TObject);
+begin
+  ConfigureGUI(FALSE);
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -354,7 +360,7 @@ begin
       btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2
     else
       btPrijatnaPunina.Left := btTables.Left + btTables.Width + 2;
-    btPrijatnaPunina.Width := gbTables.Left + gbTables.Width - btPrijatnaPunina.Left + 9;
+    btPrijatnaPunina.Width := ClientWidth - btPrijatnaPunina.Left - 8;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

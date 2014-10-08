@@ -139,7 +139,7 @@ begin
       edInvitationCode.SetFocus
     else
       if (not TryStrToInt(StringReplace(seRake.Text, '%', '', [rfReplaceAll]), rake)) or
-         (rake < 1) or (rake > 10) then
+         (rake < Round(seRake.Properties.MinValue)) or (rake > Round(seRake.Properties.MaxValue)) then
       begin
         error := 'Invalid rake';
         seRake.SetFocus;

@@ -31,7 +31,10 @@ begin
     if GetLastError = ERROR_ALREADY_EXISTS then
       result := FALSE
     else
+    begin
+      FMutexHandle := hMutex;
       result := TRUE;
+    end;
 end;
 
 class procedure TInstanceController.ReleaseInstance;
