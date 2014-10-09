@@ -14,6 +14,8 @@ type
     constructor Create(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
     destructor Destroy; override;
 
+    procedure Configure(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
+
     procedure CreateStates(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
     function CurrentState: TPB_TableStatus;
     function NextState: TPB_TableStatus;
@@ -36,13 +38,18 @@ constructor THandHistoryPlayback.Create(const AHandHistoryItems: THandHistoryIte
 begin
   FCurrentStateIndex := -1;
   FStates := TObjectList<TPB_TableStatus>.Create;
-  CreateStates(AHandHistoryItems, AHandHistoryItem);
+  Configure(AHandHistoryItems, AHandHistoryItem);
 end;
 
 destructor THandHistoryPlayback.Destroy;
 begin
   FStates.Free;
   inherited;
+end;
+
+procedure THandHistoryPlayback.Configure(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
+begin
+  CreateStates(AHandHistoryItems, AHandHistoryItem);
 end;
 
 procedure THandHistoryPlayback.CreateStates(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
@@ -228,10 +235,11 @@ begin
         pbseat.SeatIndex := player.Seat;
         pbseat.PlayerMongoId := player.MongoId;
         pbseat.Chips := current_player_chips[player.Seat];
-        if (dmMain.SelfInfo.MongoId = player.MongoId) or
-           ((not player.Muck) and
+        pbseat.Cards := player.Cards;
+{        if (dmMain.SelfInfo.MongoId = player.MongoId) or
+           ((not player.Muck) and  THIS WILL HIDE CARDS UNTIL SHOWDOWN
             (pbtablestatus.State >= tsWinning)) then
-          pbseat.Cards := player.Cards;
+          pbseat.Cards := player.Cards;}
         if (player.Status in [psFolded]) and
            (not folded[player.Seat]) then
           pbseat.Status := psInHand

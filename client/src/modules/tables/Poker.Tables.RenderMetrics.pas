@@ -58,6 +58,8 @@ type
     FPlayNowButtonHeight: Single;
     FPlayNowButtonBounds: TPoint4;
     FRaiseAmountBoxBounds: TRect;
+    FHandPlaybackPreviousHand: TRect;
+    FHandPlaybackNextHand: TRect;
     FRaiseAmountBoxFontSize: Integer;
     FChatBoxBounds: TRect;
     FChatEditBounds: TRect;
@@ -121,6 +123,8 @@ type
     property HandPlaybackPlay: TRect read FHandPlaybackPlay;
     property HandPlaybackBack: TRect read FHandPlaybackBack;
     property HandPlaybackForward: TRect read FHandPlaybackForward;
+    property HandPlaybackNextHand: TRect read FHandPlaybackNextHand;
+    property HandPlaybackPreviousHand: TRect read FHandPlaybackPreviousHand;
     property StandUpButtonBounds: TPoint4 read FStandUpButtonBounds;
     property PlayNowButtonBounds: TPoint4 read FPlayNowButtonBounds;
     property RaisePresetButtonsBounds: TArray<TPoint4> read FRaisePresetButtonsBounds;
@@ -512,7 +516,7 @@ begin
                                      FPlayNowButtonWidth, FPlayNowButtonHeight);
 
     // hand playback bounds
-    wint := ADXAreaSize.x div 3;
+    wint := Round(ADXAreaSize.x / 2.5);
     hint := 9;
     FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 5), FChatBoxBounds.Top), wint, hint);
 
@@ -525,6 +529,12 @@ begin
 
     FHandPlaybackForward := FHandPlaybackPlay;
     FHandPlaybackForward.Offset(wint + 3, 0);
+
+    FHandPlaybackPreviousHand := FHandPlaybackBack;
+    FHandPlaybackPreviousHand.Offset(-wint - 3, 0);
+
+    FHandPlaybackNextHand := FHandPlaybackForward;
+    FHandPlaybackNextHand.Offset(wint + 3, 0);
   end;
 
   // raise thumb button bounds
