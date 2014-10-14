@@ -8,7 +8,7 @@ var activeGames,activeUsers,sharedconfig;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('profiler');
-var dag = require('./dag/build/Release/dag');
+var dag = require('dag');
 var omaha2 = require('./dag2/omaha');
 dag.init();
 var getGameLock = new ReadWriteLock();
@@ -504,6 +504,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.history = {moves:[],players:[],cards:[]};
 		Game.hands = seq;
 		var oldDealer = this.dealer;
+		if (oldDealer < 0) oldDealer = 0;
 		this.nextDealer();
 		this.bets = [];
 		this.balance_changes = [];
@@ -1069,6 +1070,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.rake = this.real_rake;
 				this.log('flopping');
 				this.deck.draw(3,this.flop);
+				this.stateRow.deck = this.deck.cards;
 				this.stateRow.flop = this.flop;
 				this.history.cards = this.flop.cards;
 				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
@@ -1086,6 +1088,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
 				this.deck.draw(1,this.turn);
+				this.stateRow.deck = this.deck.cards;
 				this.stateRow.turn = this.turn;
 				this.history.cards = this.history.cards.concat(this.turn.cards);
 				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
@@ -1103,6 +1106,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
 				this.deck.draw(1,this.river);
+				this.stateRow.deck = this.deck.cards;
 				this.stateRow.river = this.river;
 				this.history.cards = this.history.cards.concat(this.river.cards);
 				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
@@ -1123,7 +1127,6 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.moveToPot('post-river',function () {
 					this.updatePotRakes();
 					//events.push(this.makeEvent('tePreWin',{pots:this.pots}));
-					this.log('events callback FIXME %s',new Error().stack);
 					token.tag += 'f';
 					token.stop();
 					this.calcWinners(cb,events,extradelay,cb3,autoending);
@@ -1399,7 +1402,6 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				cb2();
 			});
 		}.bind(this)],function () {
-			this.log('done moving to pot 1');
 			this.minBet = 0;
 			token.stop(); // 26ms avg
 			cb1();

@@ -442,6 +442,7 @@ Club.dupCheck = function (name,cb) {
 	});
 }
 Club.createClub = function (name,password,owner,rake,buyin_reset,cb) {
+	assert.equal(typeof buyin_reset,'number');
 	var doc = new mdb.models.Clubs({name:name, password:password, owner:owner, rake:rake, is_private:true, unlimited_default_balance:true, default_balance_limit:100000, buyin_reset:buyin_reset});
 	myutils.getNextSequence('club',function (seq) {
 		doc.seq = seq;
