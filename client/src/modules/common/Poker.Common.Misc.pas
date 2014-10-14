@@ -553,6 +553,8 @@ begin
 end;
 
 function ChipsToStr(const AValue: UINT32): String;
+var
+  cpos, C1: Integer;
 begin
   if AValue = 0 then
     Exit('0');
@@ -564,6 +566,14 @@ begin
     Insert('.', result, Length(result) - 1);
   if AValue < 100 then
     result := '0' + result;
+
+  cpos := Pos('.', result) - 1;
+  if cpos = -1 then
+    cpos := Length(result);
+
+  for C1 := cpos downto 2 do
+    if (cpos - C1 + 1) mod 3 = 0 then
+      Insert(',', result, C1);
 end;
 
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);

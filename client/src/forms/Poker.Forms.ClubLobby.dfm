@@ -2527,7 +2527,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsStats
+    Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2628,6 +2628,8 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          ExplicitLeft = 3
+          ExplicitTop = 5
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2690,9 +2692,9 @@ object frmClubLobby: TfrmClubLobby
           end
         end
         object btGiveOwnership: TcxButton
-          Left = 115
-          Top = 150
-          Width = 101
+          Left = 250
+          Top = 118
+          Width = 115
           Height = 26
           Action = acGiveOwnership
           Anchors = [akLeft, akBottom]
@@ -2706,9 +2708,9 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btRemovePlayerFromClub: TcxButton
-          Left = 222
+          Left = 129
           Top = 150
-          Width = 101
+          Width = 115
           Height = 26
           Action = acRemovePlayer
           Anchors = [akLeft, akBottom]
@@ -2724,7 +2726,7 @@ object frmClubLobby: TfrmClubLobby
         object btSuspendUnsuspend: TcxButton
           Left = 8
           Top = 150
-          Width = 101
+          Width = 115
           Height = 26
           Action = acSuspendPlayer
           Anchors = [akLeft, akBottom]
@@ -2738,9 +2740,9 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btResetBalance: TcxButton
-          Left = 436
-          Top = 150
-          Width = 101
+          Left = 129
+          Top = 118
+          Width = 115
           Height = 26
           Action = acResetBalance
           Anchors = [akLeft, akBottom]
@@ -2754,9 +2756,9 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btSetLimit: TcxButton
-          Left = 329
+          Left = 250
           Top = 150
-          Width = 101
+          Width = 115
           Height = 26
           Action = acSetLimit
           Anchors = [akLeft, akBottom]
@@ -2772,7 +2774,7 @@ object frmClubLobby: TfrmClubLobby
         object btResetAllPlayerBalances: TcxButton
           Left = 8
           Top = 118
-          Width = 101
+          Width = 115
           Height = 26
           Action = acResetPlayerBalances
           Anchors = [akLeft, akBottom]
@@ -3346,7 +3348,7 @@ object frmClubLobby: TfrmClubLobby
       OnExecute = acTablesStatsSelectAllExecute
     end
     object acResetBalance: TAction
-      Caption = 'Reset Balance'
+      Caption = 'Reset Player Balance'
       Enabled = False
       OnExecute = acResetBalanceExecute
     end
