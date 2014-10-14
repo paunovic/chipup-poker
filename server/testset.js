@@ -33,7 +33,7 @@ exports.club = {
 						assert(user);
 						console.log(user);
 						mdb.models.Clubs.remove({name:'clubname'},function (err) {
-							Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
+							Club.createClub('clubname','password',user._id,5,30,function (worked,clubObj) {
 								clubid = clubObj.obj.seq;
 								test.ok(worked);
 								Club.dupCheck('clubname',function (dup) {
@@ -225,10 +225,10 @@ exports.game = {
 			test.ok(opponent);
 			mdb.models.Clubs.remove({name:'clubname'},function (err) {
 				assert.ifError(err);
-				Club.createClub('clubname','password',owner._id,5,function (worked,clubObj) {
+				Club.createClub('clubname','password',owner._id,5,30,function (worked,clubObj) {
 					test.ok(worked);
 					clubid = clubObj.obj.seq;
-					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:5,buyin_max:500,rake:0,rotation:0,hands:0});
+					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:100000,buyin_max:150000,rake:0,rotation:0,hands:0});
 					gamerow.save(function (err) {
 						assert.ifError(err);
 						Game.getGame(gamerow._id,function (err,gameObj) {
@@ -362,7 +362,7 @@ exports.game = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('./profiler');
+		var profiler = require('profiler');
 		mdb.open('nodeunit');
 		Club.init(activeGames);
 		myutils.init();
@@ -376,10 +376,10 @@ exports.game = {
 			test.ok(opponent);
 			mdb.models.Clubs.remove({name:'clubname'},function (err) {
 				assert.ifError(err);
-				Club.createClub('clubname','password',owner._id,5,function (worked,clubObj) {
+				Club.createClub('clubname','password',owner._id,5,30,function (worked,clubObj) {
 					test.ok(worked);
 					clubid = clubObj.obj.seq;
-					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:5,buyin_max:500,rake:0,rotation:0,hands:0});
+					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:100000,buyin_max:150000,rake:0,rotation:0,hands:0});
 					gamerow.save(function (err) {
 						assert.ifError(err);
 						Game.getGame(gamerow._id,function (err,gameObj) {
@@ -429,6 +429,7 @@ exports.game = {
 					console.log('put1',events,offset);
 					game.putChips(opponent,200,function (events,offset) {
 						console.log('put2',events,offset);
+						assert.notEqual(game.flop.cards[0],game.turn.cards[0]);
 						phase4(owner,opponent,game,release);
 					});
 				});
@@ -462,6 +463,7 @@ exports.game = {
 		function phase5(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put5',events,offset);
+				assert.notEqual(game.flop.cards[0],game.turn.cards[0]);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put6',events,offset);
 					phase6(owner,opponent,game,release);
@@ -471,6 +473,8 @@ exports.game = {
 		function phase6(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put7',events,offset);
+				console.log(game.flop,game.turn);
+				assert.notEqual(game.flop.cards[0],game.turn.cards[0]);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put8',events,offset);
 					mdb.models.GameState.findOne({_id:game.obj._id},function (err,state) {
@@ -482,6 +486,84 @@ exports.game = {
 				});
 			});
 		}
+	},
+	headsup: function (test) {
+		test.expect(9);
+		global.activeUsers = {};
+		global.sharedconfig = {max_play_time:15,max_timebank:30};
+		global.log = console.log;
+		global.pb = Core.pb;
+		var activeGames = {};
+		var Club = require('./club').Club;
+		var Game = require('./game').Game;
+		var profiler = require('profiler');
+		mdb.open('nodeunit');
+		Club.init(activeGames);
+		myutils.init();
+		profiler.setup(mdb.models.PokerProfile);
+		Game.init(activeGames);
+		mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+			assert.ifError(err);
+			var owner = users[0];
+			var opponent = users[1];
+			test.ok(owner);
+			test.ok(opponent);
+			mdb.models.Clubs.remove({name:'clubname'},function (err) {
+				assert.ifError(err);
+				Club.createClub('clubname','password',owner._id,5,30,function (worked,clubObj) {
+					test.ok(worked);
+					clubid = clubObj.obj.seq;
+					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:2,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:100000,buyin_max:150000,rake:0,rotation:0,hands:0});
+					gamerow.save(function (err) {
+						assert.ifError(err);
+						Game.getGame(gamerow._id,function (err,gameObj) {
+							assert.ifError(err);
+							test.ok(gameObj);
+							phase2(new DummyConn(owner),new DummyConn(opponent),gameObj);
+						});
+					});
+				});
+			});
+		});
+		function phase2(owner,opponent,gameObj) {
+			owner.nick = 'owner';
+			opponent.nick = 'opponent';
+			owner.send = function (code,obj,type) {
+				console.log('owner send:',code,obj,type);
+			}
+			opponent.send = function (code,obj,type) {
+				console.log('opponent send:',code,obj,type);
+			}
+			console.log('this game is:',gameObj.id);
+			gameObj.Lock.writeLock(function (release) {
+				gameObj.join(owner,function (err) {
+					test.ifError(err);
+					gameObj.join(opponent,function (err) {
+						test.ifError(err);
+						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
+							test.ok(worked);
+							console.log(worked,events);
+							gameObj.sitDown(opponent,{chips:100000,seat_index:1},function (worked,events) {
+								test.ok(worked);
+								console.log(worked,events);
+								phase3(owner,opponent,gameObj,release);
+							});
+						});
+					});
+				});
+			});
+		}
+		function phase3(owner,opponent,game,release) {
+			game.members[0].status = 'psOutOfHand'; // FIXME, make a playnow function
+			game.members[1].status = 'psOutOfHand';
+			assert.equal(game.state,'tsIdle');
+			game.stateMachine(function (events) {
+				test.equal(events[0].event,'teDealing');
+				clearTimeout(game.timer.timerid);
+				mdb.close();
+				test.done();
+			},owner,{},[],0);
+		}
 	}
 };
 exports.user = {
@@ -489,11 +571,19 @@ exports.user = {
 		var user = require('./user');
 		mdb.open('nodeunit');
 		mdb.models.UserModel.findOne(function (err,user2) {
-			assert.ifError(err);
+			if (err) {
+				console.log(err);
+				test.done();
+				return;
+			}
 			var oldsalt = user2.salt;
 			var oldpass = user2.password;
 			user.changePassword('password',user2._id,function (err,row) {
-				assert.ifError(err);
+				if (err) {
+					console.log(err);
+					test.done();
+					return;
+				}
 				var hasher = crypto.createHash('sha256');
 				hasher.update(row.salt);
 				hasher.update('password');
@@ -543,11 +633,19 @@ exports.tournament = {
 			});
 		}
 		function dotest(users) {
-		mdb.models.Tournament.create({ "description" : "notes", "gametype" : "gtHoldem", "limit" : "glNoLimit", "maxplayers" : 20, "minplayers" : 10, "name" : "name", "registered_players" : users.length, "seats_per_table" : 9, "start_time" : 1406628000, "startingchips" : 1500, "state" : "tnsOpen", "timeperlevel" : 15,players:users },function (err,doc) {
-			console.log('tournament made',arguments);
-			Tournament.core.startTournament(doc,function () {
+			var blind_schedule = Tournament.PrintBlindStructure(5,10,1000,10,1);
+			mdb.models.Tournament.create({ "description" : "notes", "gametype" : "gtHoldem", "limit" : "glNoLimit", "maxplayers" : 20, "minplayers" : 10, "name" : "name", "registered_players" : users.length, "seats_per_table" : 9, "start_time" : 1406628000, "startingchips" : 1500, "state" : "tnsOpen", "timeperlevel" : 15,players:users, prizes:[{place:0,name:'gold'}], blind_schedule:blind_schedule, length:1, sb:5, bb:10 },function (err,doc) {
+			if (err) {
+				console.log(err);
 				test.done();
-				mdb.close();
+			}
+			console.log('tournament made',arguments);
+			Tournament.core.commonLock.writeLock(function (release) {
+				Tournament.core.startTournament(doc,function () {
+					release();
+					test.done();
+					mdb.close();
+				});
 			});
 		});
 		}
