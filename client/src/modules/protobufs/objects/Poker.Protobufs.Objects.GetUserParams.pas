@@ -126,7 +126,7 @@ var
 begin
   FUserMongoIds.AddRange(AFrom.UserMongoIds);
   for pbobj1 in AFrom.Users do
-    FUsers.Add(TPB_User.Create(pbobj1));
+    FUsers.Add(TPB_User.Create(pbobj1, Lightweight));
 end;
 
 function TPB_GetUserParams.IsInitialized: Boolean;

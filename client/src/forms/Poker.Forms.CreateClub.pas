@@ -109,7 +109,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  ServerSocket.CreateClub(edClubName.Text, edClubCode.Text, 5);
+  ServerSocket.CreateClub(edClubName.Text, edClubCode.Text, 5, 30);
 end;
 
 

@@ -152,7 +152,7 @@ begin
   if AFrom.has_Gameid then
     SetGameid(AFrom.Gameid);
   for pbobj2 in AFrom.Rows do
-    FRows.Add(TPB_HandHistory.Create(pbobj2));
+    FRows.Add(TPB_HandHistory.Create(pbobj2, Lightweight));
   if AFrom.has_TournamentId then
     SetTournamentId(AFrom.TournamentId);
 end;

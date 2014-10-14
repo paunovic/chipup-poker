@@ -103,7 +103,7 @@ var
   pbobj0: TPB_UpdateFileInfo;
 begin
   for pbobj0 in AFrom.Assets do
-    FAssets.Add(TPB_UpdateFileInfo.Create(pbobj0));
+    FAssets.Add(TPB_UpdateFileInfo.Create(pbobj0, Lightweight));
 end;
 
 function TPB_AssetList.IsInitialized: Boolean;

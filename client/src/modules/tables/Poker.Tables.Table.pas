@@ -64,6 +64,8 @@ type
     function GetTableCaption: String;
     function Transfer(const ATournamentPlayerTransfer: TPB_TournamentPlayerTransfer): Boolean;
 
+    function HandHistoryPlayback_GetHand(const AIndexOffset: Integer): Boolean;
+
     property InternalId: Integer read FInternalId;
     property TableType: TTableType read FTableType;
     property GameId: TMongoId read FGameId;
@@ -191,6 +193,39 @@ begin
       end;
     end;
   end;
+end;
+
+function TTable.HandHistoryPlayback_GetHand(const AIndexOffset: Integer): Boolean;
+var
+  hhis: THandHistoryItems;
+  hhi: THandHistoryItem;
+  index: Integer;
+begin
+  result := FALSE;
+  if not HandHistory.TryGetValue(FGameId, hhis) then
+    Exit;
+
+  if hhis.GetAndLockHand(FHandHistoryHandId, hhi) then
+  try
+    index := hhis.IndexOf(hhi) + AIndexOffset;
+    if (index >= 0) and
+       (index < hhis.Count) then
+      FHandHistoryHandId := hhis[index].HandId
+    else
+      Exit;
+  finally
+    hhis.Unlock;
+  end;
+
+  if hhis.GetAndLockHand(FHandHistoryHandId, hhi) then
+  try
+    FHandHistoryPlayback.Configure(hhis, hhi);
+  finally
+    hhis.Unlock;
+  end;
+
+  SetTableStatus(FHandHistoryPlayback.CurrentState, TRUE);
+  Exit(TRUE);
 end;
 
 procedure TTable.Hide;
@@ -682,7 +717,7 @@ begin
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
-    FStatus.ActionShowStats := club.OwnerId = dmMain.SelfInfo.MongoId;
+    FStatus.ActionShowStats := club.Owner = dmMain.SelfInfo.MongoId;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

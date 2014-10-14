@@ -277,20 +277,20 @@ begin
   if AFrom.has_LoginStatus then
     SetLoginStatus(AFrom.LoginStatus);
   for pbobj1 in AFrom.ReconnectTables do
-    FReconnectTables.Add(TPB_TableStatus.Create(pbobj1));
+    FReconnectTables.Add(TPB_TableStatus.Create(pbobj1, Lightweight));
   for pbobj2 in AFrom.TournamentInfos do
-    FTournamentInfos.Add(TPB_TournamentInfo.Create(pbobj2));
+    FTournamentInfos.Add(TPB_TournamentInfo.Create(pbobj2, Lightweight));
   FRegisteredTournaments.AddRange(AFrom.RegisteredTournaments);
   for pbobj4 in AFrom.Clubs do
-    FClubs.Add(TPB_Club.Create(pbobj4));
+    FClubs.Add(TPB_Club.Create(pbobj4, Lightweight));
   for pbobj5 in AFrom.Users do
-    FUsers.Add(TPB_User.Create(pbobj5));
+    FUsers.Add(TPB_User.Create(pbobj5, Lightweight));
   if (AFrom.has_Self) then
     FSelf.MergeFrom(AFrom.Self);
   for pbobj7 in AFrom.Games do
-    FGames.Add(TPB_Game.Create(pbobj7));
+    FGames.Add(TPB_Game.Create(pbobj7, Lightweight));
   for pbobj8 in AFrom.PlayerClubStatuses do
-    FPlayerClubStatuses.Add(TPB_PlayerClubStatus.Create(pbobj8));
+    FPlayerClubStatuses.Add(TPB_PlayerClubStatus.Create(pbobj8, Lightweight));
 end;
 
 function TPB_LoginReply.IsInitialized: Boolean;

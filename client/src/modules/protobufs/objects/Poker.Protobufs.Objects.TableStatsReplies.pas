@@ -149,11 +149,11 @@ var
   pbobj2: TPB_ClubStatsReply;
 begin
   for pbobj0 in AFrom.Reply do
-    FReply.Add(TPB_TableStatsReply.Create(pbobj0));
+    FReply.Add(TPB_TableStatsReply.Create(pbobj0, Lightweight));
   for pbobj1 in AFrom.Players do
-    FPlayers.Add(TPB_User.Create(pbobj1));
+    FPlayers.Add(TPB_User.Create(pbobj1, Lightweight));
   for pbobj2 in AFrom.ClubStats do
-    FClubStats.Add(TPB_ClubStatsReply.Create(pbobj2));
+    FClubStats.Add(TPB_ClubStatsReply.Create(pbobj2, Lightweight));
 end;
 
 function TPB_TableStatsReplies.IsInitialized: Boolean;

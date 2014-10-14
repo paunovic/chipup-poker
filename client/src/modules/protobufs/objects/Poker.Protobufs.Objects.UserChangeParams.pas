@@ -103,7 +103,7 @@ var
   pbobj0: TPB_User;
 begin
   for pbobj0 in AFrom.Users do
-    FUsers.Add(TPB_User.Create(pbobj0));
+    FUsers.Add(TPB_User.Create(pbobj0, Lightweight));
 end;
 
 function TPB_UserChangeParams.IsInitialized: Boolean;

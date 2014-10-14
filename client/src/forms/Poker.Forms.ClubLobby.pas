@@ -116,6 +116,8 @@ type
     styleSelectedRow: TcxStyle;
     btResetAllPlayerBalances: TcxButton;
     acResetPlayerBalances: TAction;
+    btDeleteSelectedStats: TcxButton;
+    acDeleteTableStats: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -150,6 +152,8 @@ type
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
     procedure acResetPlayerBalancesExecute(Sender: TObject);
+    procedure acDeleteTableStatsExecute(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -244,6 +248,11 @@ begin
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
+procedure TfrmClubLobby.FormResize(Sender: TObject);
+begin
+  ConfigureGUI(FALSE);
+end;
+
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
@@ -261,8 +270,10 @@ begin
   if Length(AParams) > 1 then
   begin
     game_id := AParams[1];
-    btStats.Click;
     FSelectedStatsTableId := game_id;
+    btStats.Click;
+    btStats.Down := TRUE;
+    btStats.OnClick(self);
     ConfigureGUI;
   end;
 
@@ -284,12 +295,12 @@ begin
     lbsHeader.Caption := club.Name;
 
     manager := '';
-    if Players.TryGetValue(club.OwnerId, player) then
+    if Players.TryGetValue(club.Owner, player) then
       manager := player.Displayname;
 
-    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
+    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Seq]);
 
-    admin_visible := club.OwnerId = dmMain.SelfInfo.MongoId;
+    admin_visible := club.Owner = dmMain.SelfInfo.MongoId;
 
     if not club.GetMemberInfo(FSelectedPlayerId, member) then
       member := nil;
@@ -301,19 +312,22 @@ begin
     acUpdateClubDetails.Enabled := admin_visible;
     btCloseClub.Visible := admin_visible;
     acCloseClub.Enabled := admin_visible;
-    btResetBalance.Visible := admin_visible;
     btSetLimit.Visible := admin_visible;
+    acResetBalance.Visible := admin_visible;
     acResetBalance.Enabled := (admin_visible) and (Assigned(member));
+    acResetPlayerBalances.Visible := admin_visible;
+    acResetPlayerBalances.Enabled := admin_visible;
     acSetLimit.Enabled := (admin_visible) and (Assigned(member));
     btGiveOwnership.Visible := admin_visible;
-    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (club.OwnerId <> FSelectedPlayerId);
+    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
     btRemovePlayerFromClub.Visible := admin_visible;
     acRemovePlayer.Enabled := acGiveOwnership.Enabled;
     btSuspendUnsuspend.Visible := admin_visible;
+    acDeleteTableStats.Enabled := admin_visible;
     if btSuspendUnsuspend.Visible then
     begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.OwnerId);
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (member.MongoId <> club.OwnerId);
+      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.Owner);
+      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (member.MongoId <> club.Owner);
       if acReinstatePlayer.Enabled then
         btSuspendUnsuspend.Action := acReinstatePlayer
       else
@@ -346,7 +360,7 @@ begin
       btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2
     else
       btPrijatnaPunina.Left := btTables.Left + btTables.Width + 2;
-    btPrijatnaPunina.Width := gbTables.Left + gbTables.Width - btPrijatnaPunina.Left + 9;
+    btPrijatnaPunina.Width := ClientWidth - btPrijatnaPunina.Left - 8;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
@@ -382,8 +396,30 @@ begin
 end;
 
 procedure TfrmClubLobby.btStatsClick(Sender: TObject);
+var
+  C1: Integer;
+  mongoid: TMongoId;
 begin
-  pcTabs.ACtivePage := tsStats;
+  pcTabs.ActivePage := tsStats;
+  if FSelectedStatsTableId.IsEmpty then
+    gridTablesTable.DataController.FocusedRecordIndex := -1
+  else
+  begin
+    gridTablesTable.DataController.BeginFullUpdate;
+    try
+      for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+      begin
+        mongoid := gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index);
+        if mongoid = FSelectedStatsTableId then
+        begin
+          gridTablesTable.DataController.FocusedRecordIndex := C1;
+          Break;
+        end;
+      end;
+    finally
+      gridTablesTable.DataController.EndFullUpdate;
+    end;
+  end;
 end;
 
 procedure TfrmClubLobby.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
@@ -408,7 +444,7 @@ begin
       FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
 
     close_table_act := (not FSelectedGameId.IsEmpty) and
-                       (club.OwnerId = dmMain.SelfInfo.MongoId) and
+                       (club.Owner = dmMain.SelfInfo.MongoId) and
                        (club.Games.TryGetValue(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
 
   finally
@@ -605,7 +641,7 @@ var
       status := '-' + ChipsToStr(AMember.BalanceLimit);
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
-    if AMember.MongoId = club.OwnerId then
+    if AMember.MongoId = club.Owner then
       status := 'Manager'
     else
       if AMember.Suspended then
@@ -1041,20 +1077,49 @@ begin
   FormsContainer.Add(RunModalForm(TfrmCloseTable, self, [FSelectedGameId.Memory], ModalFormClose));
 end;
 
+procedure TfrmClubLobby.acDeleteTableStatsExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  selectedids: TList<TMongoId>;
+  selectedid: TMongoId;
+  C1: Integer;
+  mongoid: TMongoId;
+begin
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    selectedids := TList<TMongoId>.Create;
+    try
+      if not FSelectedStatsTableId.IsEmpty then
+        selectedids.Add(FSelectedStatsTableId);
+
+      for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+        if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
+        begin
+          selectedid := gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index);
+          if not selectedids.Contains(selectedid) then
+            selectedids.Add(selectedid);
+        end;
+
+      for mongoid in selectedids do
+        TablesStats.Remove(mongoid);
+
+      ServerSocket.DeleteTableStats(FClubId, selectedids);
+    finally
+      selectedids.Free;
+    end;
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
+end;
+
 procedure TfrmClubLobby.CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_TableStatsReplies;
-  C1: Integer;
 begin
   if not TTypes.TryCast<TPB_TableStatsReplies>(AObject, pbreply) then
     Exit;
 
-  for C1 := 0 to pbreply.Reply.Count - 1 do
-    if FClubId = pbreply.Reply[C1].Clubid then
-    begin
-      ConfigureGUI;
-      Exit;
-    end;
+  ConfigureGUI;
 end;
 
 procedure TfrmClubLobby.CSETableStatus(const AMethodId: Integer; const AObject: TObject);

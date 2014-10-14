@@ -158,7 +158,7 @@ begin
     SetValue(AFrom.Value);
   FMembers.AddRange(AFrom.Members);
   for pbobj2 in AFrom.WinnerData do
-    FWinnerData.Add(TPB_WinnerData.Create(pbobj2));
+    FWinnerData.Add(TPB_WinnerData.Create(pbobj2, Lightweight));
   if AFrom.has_Rake then
     SetRake(AFrom.Rake);
 end;

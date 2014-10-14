@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxButtons, cxTextEdit,
   cxSpinEdit, cxLabel, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Tables.Table, Poker.Tables.Status,
   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game;
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game, Winapi.Messages;
 
 type
   TfrmTableSit = class(TForm, IFormParams, IModalForm)
@@ -54,6 +54,8 @@ type
     procedure ConfigureGUI;
 
     function GetMaxBuyin: UINT32;
+  protected
+    procedure WndProc(var AMessage: TMessage); override;
   public
     procedure SetParams(const AParams: array of pointer);
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
@@ -183,6 +185,16 @@ begin
   end;
   SetBuyin(GetMaxBuyin);
   ConfigureGUI;
+end;
+
+procedure TfrmTableSit.WndProc(var AMessage: TMessage);
+begin
+  // prevent ALT key from switching between forms
+  if (AMessage.Msg = WM_SYSCOMMAND) and
+     (AMessage.WParam = SC_KEYMENU) then
+    Exit;
+
+  inherited;
 end;
 
 procedure TfrmTableSit.acCancelExecute(Sender: TObject);

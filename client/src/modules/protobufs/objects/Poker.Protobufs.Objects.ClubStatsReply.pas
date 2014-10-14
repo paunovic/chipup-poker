@@ -120,7 +120,7 @@ begin
   if AFrom.has_Clubid then
     SetClubid(AFrom.Clubid);
   for pbobj1 in AFrom.PlayerStats do
-    FPlayerStats.Add(TPB_ClubPlayerStats.Create(pbobj1));
+    FPlayerStats.Add(TPB_ClubPlayerStats.Create(pbobj1, Lightweight));
 end;
 
 function TPB_ClubStatsReply.IsInitialized: Boolean;

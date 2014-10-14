@@ -423,19 +423,19 @@ begin
   if AFrom.has_StartTime then
     SetStartTime(AFrom.StartTime);
   for pbobj12 in AFrom.Players do
-    FPlayers.Add(TPB_TournamentMember.Create(pbobj12));
+    FPlayers.Add(TPB_TournamentMember.Create(pbobj12, Lightweight));
   if AFrom.has_State then
     SetState(AFrom.State);
   for pbobj14 in AFrom.Games do
-    FGames.Add(TPB_Game.Create(pbobj14));
+    FGames.Add(TPB_Game.Create(pbobj14, Lightweight));
   for pbobj15 in AFrom.BlindStructure do
-    FBlindStructure.Add(TPB_GameBlinds.Create(pbobj15));
+    FBlindStructure.Add(TPB_GameBlinds.Create(pbobj15, Lightweight));
   if AFrom.has_CurrentBlindLevel then
     SetCurrentBlindLevel(AFrom.CurrentBlindLevel);
   if AFrom.has_CurrentBlindLevelEndTime then
     SetCurrentBlindLevelEndTime(AFrom.CurrentBlindLevelEndTime);
   for pbobj18 in AFrom.Prizes do
-    FPrizes.Add(TPB_TournamentPrize.Create(pbobj18));
+    FPrizes.Add(TPB_TournamentPrize.Create(pbobj18, Lightweight));
 end;
 
 function TPB_TournamentInfo.IsInitialized: Boolean;

@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxLabel, cxTextEdit,
   cxButtons, Poker.Clubs.Club, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxSpinEdit, cxCheckBox, cxGraphics,
-  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls, Poker.Types;
+  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls, Poker.Types,
+  cxDropDownEdit;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
@@ -22,6 +23,9 @@ type
     seLimit: TcxSpinEdit;
     seRake: TcxSpinEdit;
     lbsClubRake: TcxLabel;
+    lbsResetBuyinLimits: TcxLabel;
+    cbResetBuyinLimits: TcxComboBox;
+    lbsResetBuyinMinutes: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -109,6 +113,7 @@ begin
     seRake.Value := club.Rake;
     seLimit.Value := club.DefaultBalanceLimit / 100;
     cbDefaultPlayerLimit.Checked := not club.UnlimitedDefaultBalance;
+    cbResetBuyinLimits.Text := IntToStr(club.BuyinReset);
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
@@ -134,7 +139,7 @@ begin
       edInvitationCode.SetFocus
     else
       if (not TryStrToInt(StringReplace(seRake.Text, '%', '', [rfReplaceAll]), rake)) or
-         (rake < 1) or (rake > 10) then
+         (rake < Round(seRake.Properties.MinValue)) or (rake > Round(seRake.Properties.MaxValue)) then
       begin
         error := 'Invalid rake';
         seRake.SetFocus;
@@ -156,7 +161,8 @@ begin
   limituint := Trunc(limit * 100);
 
   acOK.Enabled := FALSE;
-  ServerSocket.ChangeClubDetails(FClubId, edClubName.Text, edInvitationCode.Text, rake, limituint, not cbDefaultPlayerLimit.Checked);
+  ServerSocket.ChangeClubDetails(FClubId, edClubName.Text, edInvitationCode.Text, rake,
+      limituint, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
 end;
 
 procedure TfrmChangeClubDetails.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);

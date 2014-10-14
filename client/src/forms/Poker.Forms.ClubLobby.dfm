@@ -18,9 +18,7 @@ object frmClubLobby: TfrmClubLobby
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  DesignSize = (
-    894
-    612)
+  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
@@ -2581,7 +2579,7 @@ object frmClubLobby: TfrmClubLobby
           Height = 28
           Action = acShowClubChangeDetailsForm
           Anchors = [akLeft, akTop, akRight]
-          Caption = 'Change club details...'
+          Caption = 'Change club settings...'
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 1
           Font.Charset = ANSI_CHARSET
@@ -2936,7 +2934,7 @@ object frmClubLobby: TfrmClubLobby
         Left = 8
         Top = 2
         Width = 337
-        Height = 432
+        Height = 392
         Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -3239,6 +3237,22 @@ object frmClubLobby: TfrmClubLobby
           end
         end
       end
+      object btDeleteSelectedStats: TcxButton
+        Left = 8
+        Top = 406
+        Width = 124
+        Height = 28
+        Action = acDeleteTableStats
+        Anchors = [akLeft, akBottom]
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 2
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
     end
   end
   object btPrijatnaPunina: TcxButton
@@ -3246,7 +3260,6 @@ object frmClubLobby: TfrmClubLobby
     Top = 138
     Width = 500
     Height = 31
-    Anchors = [akLeft, akTop, akRight]
     Enabled = False
     LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
     SpeedButtonOptions.CanBeFocused = False
@@ -3345,6 +3358,11 @@ object frmClubLobby: TfrmClubLobby
     object acResetPlayerBalances: TAction
       Caption = 'Reset All Balances'
       OnExecute = acResetPlayerBalancesExecute
+    end
+    object acDeleteTableStats: TAction
+      Caption = 'Delete Selected Stats'
+      Enabled = False
+      OnExecute = acDeleteTableStatsExecute
     end
   end
   object pmTablesStats: TPopupMenu

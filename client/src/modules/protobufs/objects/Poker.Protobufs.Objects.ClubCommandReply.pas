@@ -142,7 +142,7 @@ begin
   if (AFrom.has_Club) then
     FClub.MergeFrom(AFrom.Club);
   for pbobj2 in AFrom.Games do
-    FGames.Add(TPB_Game.Create(pbobj2));
+    FGames.Add(TPB_Game.Create(pbobj2, Lightweight));
 end;
 
 function TPB_ClubCommandReply.IsInitialized: Boolean;

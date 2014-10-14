@@ -48,6 +48,10 @@ type
     lbvHandHistory: TcxLabel;
     lbsTableStats: TcxLabel;
     beTopLeftHeaderSpacer: TBevel;
+    btNextHand: TcxButton;
+    btPreviousHand: TcxButton;
+    acNextHand: TAction;
+    acPreviousHand: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -88,6 +92,8 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acTableStatsExecute(Sender: TObject);
     procedure lbsTableStatsClick(Sender: TObject);
+    procedure acNextHandExecute(Sender: TObject);
+    procedure acPreviousHandExecute(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -140,6 +146,7 @@ type
     procedure DefocusControls;
     procedure RefreshAll;
     procedure TableStatusUpdate;
+    procedure ChangeHandPlaybackHandId(const AOffset: Integer);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure WMSizing(var AMessage: TMessage); message WM_SIZING;
@@ -210,16 +217,12 @@ begin
       lbsTableStats.Visible := FALSE;
 
       pbHandPlaybackProgress.Properties.Min := 0;
-      if Tables.GetAndLockTable(FInternalId, table) then
-      try
-        pbHandPlaybackProgress.Properties.Max := table.HandHistoryPlayback.States.Count - 1;
-      finally
-        Tables.Unlock;
-      end;
       pbHandPlaybackProgress.Visible := TRUE;
       btPlayPause.Visible := TRUE;
       btStepForward.Visible := TRUE;
       btStepBackwards.Visible := TRUE;
+      btNextHand.Visible := TRUE;
+      btPreviousHand.Visible := TRUE;
     end;
   end;
 
@@ -611,7 +614,7 @@ begin
          (table.Renderer.RiverAnimations.Count = 0) then
         lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
               table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString,
-              table.Status.CurrentGame, FALSE)
+              table.Status.CurrentGame, TRUE)
     end
     else
       lbvHandStrength.Caption := '';
@@ -953,11 +956,14 @@ begin
       end;
 
       ttHandReplay: begin
+        pbHandPlaybackProgress.Properties.Max := table.HandHistoryPlayback.States.Count - 1;
         rvChat.Color := $00262626;
         pbHandPlaybackProgress.BoundsRect := table.Renderer.Metrics.HandPlaybackProgress;
         btPlayPause.BoundsRect := table.Renderer.Metrics.HandPlaybackPlay;
         btStepForward.BoundsRect := table.Renderer.Metrics.HandPlaybackForward;
         btStepBackwards.BoundsRect := table.Renderer.Metrics.HandPlaybackBack;
+        btPreviousHand.BoundsRect := table.Renderer.Metrics.HandPlaybackPreviousHand;
+        btNextHand.BoundsRect := table.Renderer.Metrics.HandPlaybackNextHand;
         pbHandPlaybackProgress.Position := table.HandHistoryPlayback.CurrentStateIndex;
       end;
     end;
@@ -1498,6 +1504,33 @@ begin
     Tables.Unlock;
   end;
 end;
+
+procedure TfrmTable.ChangeHandPlaybackHandId(const AOffset: Integer);
+var
+  table: TTable;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if table.HandHistoryPlayback_GetHand(AOffset) then
+    begin
+      tiHandPlayback.Enabled := TRUE;
+      ConfigureGUI;
+    end;
+  finally
+    Tables.Unlock;
+  end;
+end;
+
+procedure TfrmTable.acNextHandExecute(Sender: TObject);
+begin
+  ChangeHandPlaybackHandId(+1);
+end;
+
+procedure TfrmTable.acPreviousHandExecute(Sender: TObject);
+begin
+  ChangeHandPlaybackHandId(-1);
+end;
+
 
 end.
 
