@@ -1,5 +1,5 @@
 #!/bin/bash -e
 export PATH=cpp-protobuf-generator/:$PATH
 mkdir -p android/src/
-protoc message.proto -o message.desc --java_out=android/src/ --delphi_out=delphi/
+protoc common.proto backend.proto descriptor.proto extra.proto message.proto -o message.desc --java_out=android/src/ --delphi_out=delphi/
 node server/rebuild.js
