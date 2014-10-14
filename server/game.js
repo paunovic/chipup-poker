@@ -2254,6 +2254,7 @@ Game.prototype.handleDisconnect = function (conn,reason,userid,cb) {
 }
 Game.prototype.eject = function (seatIdx,userid,reason) {
 	assert(userid);
+	this.log('eject stand %s',reason);
 	this.Lock.writeLock(function (release) {
 		this.standUp(this.seats[seatIdx].conn,function eject_locked(folded,events,offset) {
 			for (var x=0; x<this.reconnect.length; x++) {
