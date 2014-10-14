@@ -230,14 +230,14 @@ begin
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
-  btGiveOwnership.Top := gbPlayers.Height - btGiveOwnership.Height - 13;
-  btRemovePlayerFromClub.Top := btGiveOwnership.Top;
-  btSuspendUnsuspend.Top := btGiveOwnership.Top;
-  btResetBalance.Top := btGiveOwnership.Top;
-  btSetLimit.Top := btGiveOwnership.Top;
+  btSuspendUnsuspend.Top := gbPlayers.Height - btGiveOwnership.Height - 13;
+  btRemovePlayerFromClub.Top := btSuspendUnsuspend.Top;
+  btSetLimit.Top := btSuspendUnsuspend.Top;
+  btResetAllPlayerBalances.Top := btSuspendUnsuspend.Top - 5 - btResetAllPlayerBalances.Height;
+  btResetBalance.Top := btResetAllPlayerBalances.Top;
+  btGiveOwnership.Top := btResetAllPlayerBalances.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btCloseTable.Top := btNewGame.Top;
-  btResetAllPlayerBalances.Top := btGiveOwnership.Top - 5 - btResetAllPlayerBalances.Height;
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);

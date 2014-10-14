@@ -4407,7 +4407,6 @@ object frmChipUpMain: TfrmChipUpMain
                   end
                   item
                     Action = acFoldChecks
-                    Caption = '&Check instead fold, whenever possible'
                   end>
                 Caption = '&Table'
               end
@@ -4556,7 +4555,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acFoldChecks: TAction
       Category = 'Options'
-      Caption = 'Check instead fold, whenever possible'
+      Caption = 'Always check/fold'
       GroupIndex = 2
       OnExecute = acFoldChecksExecute
     end
