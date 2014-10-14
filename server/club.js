@@ -6,6 +6,7 @@ var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
 var async = require('async');
 var util = require('util');
+var Game = require('./game').Game
 
 var codes = require('./ServerCodes');
 
@@ -153,6 +154,9 @@ Club.finishTableStatsPacket = function (data,cb) {
 		assert.ifError(err);
 		for (var i=0; i<playersOut.length; i++) {
 			playersOut[i]._id = playersOut[i]._id;
+			playersOut[i].email = null;
+			playersOut[i].authed = null;
+			playersOut[i].subscription_plan = null;
 		}
 		models.Game.find({_id:{$in:data.gamelist}},function (err,rawgames) {
 			for (var i=0; i<rawgames.length; i++) {
@@ -431,8 +435,11 @@ Club.prototype.setOwner = function (newowner,cb) {
 	this.joinClub(this.obj.owner,function () {
 		this.obj.owner = newowner;
 		this.Leave(newowner,function () {
-			cb();
-		});
+			this.handOver(null,function() {
+				console.log('done');
+				cb();
+			},null);
+		}.bind(this));
 	}.bind(this));
 }
 Club.dupCheck = function (name,cb) {
@@ -989,16 +996,33 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				models.Game.find({_id:{$in:gameids}},function (err,games) {
 					assert.ifError(err);
 					var toRemove = [];
+					var toReset = [];
 					for (var x=0; x<games.length; x++) {
 						console.log(games[x]);
 						if (games[x].state2 == 'gsClosed') toRemove.push(games[x]._id);
+						else toReset.push(games[x]._id);
 					}
 					console.log('toRemove:',toRemove);
 					models.Game.remove({_id:{$in:toRemove}},function (err) {
 						assert.ifError(err);
-						clubObj.handOver(null,function() {
-							console.log('done');
-						},null);
+						async.each(toReset,function (gameid,cb) {
+							Game.getGame(gameid,function (err,game) {
+								assert(game);
+								assert.ifError(err);
+								game.Lock.writeLock(function (release) {
+									game.obj.hands = 0;
+									game.obj.save(function (err) {
+										assert.ifError(err);
+										release();
+										cb();
+									});
+								});
+							});
+						},function () {
+							clubObj.handOver(null,function() {
+								console.log('done');
+							},null);
+						});
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
