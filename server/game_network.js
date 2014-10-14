@@ -399,7 +399,7 @@ handlers[codes.scShowCards] = function (args,token) {
 		if (!game) return;
 		game.Lock.writeLock(function (release) {
 			if (game.state != 'tsWinning') {
-				this.reply(0,'the game isnt over yet');
+				this.reply(0,'the game isnt over yet '+game.state);
 				this.log('state was %s',game.state);
 				release();
 				return;
@@ -416,6 +416,8 @@ handlers[codes.scShowCards] = function (args,token) {
 				game.broadcastStatus(this,true,[]);
 				game.members[seatIdx].can_show = false;
 				game.cardsShown = true;
+			} else {
+				this.reply(0,'you cant show');
 			}
 			token.stop();
 			release();
@@ -566,6 +568,13 @@ handlers[codes.scShowCards] = function (args,token) {
 						game.broadcastStatus(this,true,events); // sendEvent
 						var status = game.getTableStatus(this,true,events);
 						this.send(codes.srTableSitOk,status,'Poker.TableStatus');
+						game.club.getPotentialLosses(this.userid,function (balance,unlimited,limit) {
+							var out = { clubid:game.obj.clubid };
+							if (!unlimited) {
+								out.player_buyin_limit = limit + balance;
+							}
+							this.send(codes.sePlayerClubStatus,out,'Poker.PlayerClubStatus');
+						}.bind(this));
 					}
 					token.stop();
 					release();
@@ -665,12 +674,42 @@ handlers[codes.scShowCards] = function (args,token) {
 				}
 				if (game.club) {
 					assert.equal(this.state,2);
-					game.AddOn(this,params.chips);
+					game.club.getPotentialLosses(this.userid,function (maxLosses,unlimited,limit) {
+						console.log(arguments);
+						if (unlimited) game.AddOn(this,params.chips);
+						else {
+							if ((params.chips + (maxLosses*-1)) > limit) {
+								this.send(codes.srTableAddonOverLimit,game.getTableStatus(this,false,[]),'Poker.TableStatus');
+							} else game.AddOn(this,params.chips);
+						}
+						token.stop();
+						release();
+					}.bind(this));
 				} else {
 					this.reply(0,'trying to cheat eh?');
+					token.stop();
+					release();
 				}
-				token.stop();
-				release();
+			}.bind(this));
+		}.bind(this));
+	};
+	handlers[codes.scTableSitOpen] = function (args,token) {
+		var params,id;
+		try {
+			params = pb.Parse(args,'Poker.Game');
+			id = myutils.toMongoId(params._id);
+		} catch (e) {
+			this.error(e);
+			return;
+		}
+		Game.getGame(id,function (err,game) {
+			assert.ifError(err);
+			game.club.getPotentialLosses(this.userid,function (balance,unlimited,limit) {
+				var out = { clubid:game.obj.clubid };
+				if (!unlimited) {
+					out.player_buyin_limit = limit + balance;
+				}
+				this.send(codes.sePlayerClubStatus,out,'Poker.PlayerClubStatus');
 			}.bind(this));
 		}.bind(this));
 	};

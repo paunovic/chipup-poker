@@ -70,7 +70,8 @@ var ClubSchema = new Schema({
 	members: [ObjectId],
 	suspended: [ObjectId],
 	seq: Number,
-	testmode: Boolean
+	testmode: Boolean,
+	buyin_reset: Number
 },{collection:'clubs'});
 var AvatarSchema = new Schema({
 	_id: String,

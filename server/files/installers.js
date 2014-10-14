@@ -53,4 +53,11 @@ function masscheck() {
 	var list = document.querySelectorAll('.deleteCheckbox');
 	console.log(list);
 	for (var x=0; x<list.length; x++) list[x].checked = true;
+	checkLatest();
+}
+function checkLatest() {
+	var list = document.querySelectorAll('.installers tr:last-of-type .activate');
+	for (var x=0; x<list.length; x++) {
+		list[x].checked = true;
+	}
 }

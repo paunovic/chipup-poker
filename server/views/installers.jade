@@ -6,7 +6,7 @@ block content
   if showlist
     form(method="post")
       p Release builds:
-      table(border=1,id="release_installers")
+      table(border=1,id="release_installers",class="installers")
         tr
           th ts
           th links
@@ -21,7 +21,7 @@ block content
           if val.debug == 'release'
             include installer_row.jade
       p Debug builds:
-      table(border=1,id="debug_installers")
+      table(border=1,id="debug_installers",class="installers")
         tr
           th ts
           th links
@@ -36,6 +36,7 @@ block content
           if val.debug == 'debug'
             include installer_row.jade
       input(type="button",onclick="masscheck()",value="checkEverything")
+      input(type="button",onclick="checkLatest()",value="check latest")
       br
       input(type="submit",value="Apply")
   div

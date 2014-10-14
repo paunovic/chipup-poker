@@ -6,9 +6,9 @@ tr
   td=val.revision
   td=Math.round(val.size/1024/1024)+'MB'
   td
-    input(type="radio",name="activate_live_"+val.debug,value=val._id)
+    input(type="radio",name="activate_live_"+val.debug,value=val._id,class="activate")
   td
-    input(type="radio",name="activate_dev_"+val.debug,value=val._id)
+    input(type="radio",name="activate_dev_"+val.debug,value=val._id,class="activate")
   td
     if (val.debug == 'release')
       if (dev_pubver == live_pubver) && (dev_pubver == val._id)

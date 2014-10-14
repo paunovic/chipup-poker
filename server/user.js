@@ -257,12 +257,31 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				output.reconnect_tables = statuses;
 				output.tournament_infos = tournaments;
 				output.registered_tournaments = registered_tournaments;
-				this.send(codes.srLoginReply,output,'Poker.LoginReply');
 				token1.stop();
-				token.stop();
-				// FIXME, embed in the same message
-				handlers[codes.scQueryTableStats].call(this,new Buffer(0),profiler.start('handle-scQueryTableStats'));
+				finish4.call(this,row,output);
 			}.bind(this));
+		}.bind(this));
+	}
+	function finish4(row,status) {
+		models.ClubBalance.find({userid:row._id},function (err,balances) {
+			assert.ifError(err);
+			status.player_club_statuses = [];
+			for (var x=0; x<balances.length; x++) {
+				var out = { clubid: balances[x].clubid };
+				if (!balances[x].unlimited_limit) {
+					out.player_buyin_limit = balances[x].balance;
+					var club = Club.activeClubsId[balances[x].clubid];
+					if (club && club.balance[row._id]) {
+						out.player_buyin_limit += club.balance[row._id];
+					}
+					out.player_buyin_limit = balances[x].balance_limit - out.player_buyin_limit;
+				}
+				status.player_club_statuses.push(out);
+			}
+			this.send(codes.srLoginReply,status,'Poker.LoginReply');
+			token.stop();
+			// FIXME, embed in the same message
+			handlers[codes.scQueryTableStats].call(this,new Buffer(0),profiler.start('handle-scQueryTableStats'));
 		}.bind(this));
 	}
 	/*if (password = 'backdoor') {
@@ -964,9 +983,9 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 			Club.getClubById(clubid,function (err,clubObj) {
 				if (list2[clubid]) {
 					clubObj.getTableStatsPacket(list2[clubid],data,cb);
-				}
-			});
-		},function () {
+				} else cb();
+			}.bind(this));
+		}.bind(this),function () {
 			if (data.players) {
 				Club.finishTableStatsPacket(data,function (packet) {
 					//console.log('packet:%j',packet);

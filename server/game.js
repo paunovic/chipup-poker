@@ -339,7 +339,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					var last = this.lastCashout[conn.userid];
 					var timediff = Date.now() - last.when;
 					conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
-					if (timediff < (30 * 60 * 1000)) {
+					if (timediff < (this.club.obj.buyin_reset * 60 * 1000)) {
 						if (params.chips < last.chips) {
 							conn.send(codes.srTableBuyinLessThanCashout,{game_id:this.id,last_cashout:last.chips},'Poker.BuyinError');
 							cb(false,events);
@@ -1187,7 +1187,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 		if (this.members[x].status == 'psAllIn') allinfound = true;
 		hands.push({seat:x,hand:this.members[x].hand.cards});
 	}
-	if ((canplay == 1) && (allinfound) && autoending) {
+	if ( ((canplay == 1) && (allinfound) && autoending) || (canplay > 1) ) {
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
@@ -2318,6 +2318,7 @@ Game.prototype.startTimer = function startTimer(seat,offset) {
 				}.bind(this));
 			} else {
 				this.log('folding');
+				this.members[seat].sitOutNextRound = true;
 				this.fold(seat,function (events) {
 					this.log('folded %j',events);
 					if (this.current_seat >= 0) this.startTimer(this.current_seat,0); /// FIXME?

@@ -312,6 +312,7 @@ Client.prototype.handle = function (code,data) {
 server.listen(45508);
 cactiServer.listen(45509);
 function getLog(name) {
+	name = name.replace('/','_');
 	if (!logs[name]) {
 		logs[name] = fs.createWriteStream('logs/'+name+'.log');
 	}
