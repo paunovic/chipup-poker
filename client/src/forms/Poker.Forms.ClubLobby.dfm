@@ -2527,7 +2527,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsClubHome
+    Properties.ActivePage = tsStats
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2628,8 +2628,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 5
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2668,9 +2666,12 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridPlayersListBalance: TcxGridColumn
               Caption = 'Balance'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
             end
             object gridPlayersListLimit: TcxGridColumn
@@ -3051,7 +3052,6 @@ object frmClubLobby: TfrmClubLobby
             OptionsCustomize.ColumnGrouping = False
             OptionsCustomize.ColumnHidingOnGrouping = False
             OptionsCustomize.ColumnMoving = False
-            OptionsCustomize.ColumnSorting = False
             OptionsData.Deleting = False
             OptionsData.DeletingConfirmation = False
             OptionsData.Editing = False
@@ -3080,49 +3080,64 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridStatsTableBalance: TcxGridColumn
               Caption = 'Balance'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Styles.OnGetContentStyle = gridStatsTableBalanceStylesGetContentStyle
               Width = 67
             end
             object gridStatsTableBuyins: TcxGridColumn
               Caption = 'Buy-Ins'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               OnGetCellHint = gridStatsTableBuyinsGetCellHint
               HeaderAlignmentHorz = taCenter
               Width = 65
             end
             object gridStatsTableCashouts: TcxGridColumn
               Caption = 'Cash-Outs'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               OnGetCellHint = gridStatsTableBuyinsGetCellHint
               HeaderAlignmentHorz = taCenter
               Width = 67
             end
             object gridStatsTableRake: TcxGridColumn
               Caption = 'Rake'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 62
             end
             object gridStatsTableChipsInPlay: TcxGridColumn
               Caption = 'Chips in Play'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 77
             end
@@ -3157,6 +3172,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsCustomize.ColumnGrouping = False
             OptionsCustomize.ColumnHidingOnGrouping = False
             OptionsCustomize.ColumnMoving = False
+            OptionsCustomize.ColumnSorting = False
             OptionsData.Deleting = False
             OptionsData.DeletingConfirmation = False
             OptionsData.Editing = False
@@ -3177,46 +3193,61 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridTotalStatsBalance: TcxGridColumn
               Caption = 'Balance'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 67
             end
             object gridTotalStatsBuyins: TcxGridColumn
               Caption = 'Buy-Ins'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 65
             end
             object gridTotalStatsCashouts: TcxGridColumn
               Caption = 'Cash-Outs'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 67
             end
             object gridTotalStatsRake: TcxGridColumn
               Caption = 'Rake'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 62
             end
             object gridTotalStatsChipsInPlay: TcxGridColumn
               Caption = 'Chips in Play'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Currency'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
+              Properties.DisplayFormat = ',0.##;-,0.##'
+              Properties.EditFormat = ',0.##;-,0.##'
+              Properties.UseDisplayFormatWhenEditing = True
+              Properties.UseThousandSeparator = True
               HeaderAlignmentHorz = taCenter
               Width = 77
             end

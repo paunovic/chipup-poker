@@ -341,7 +341,6 @@ object frmTable: TfrmTable
       Properties.Alignment.Vert = taVCenter
       Transparent = True
       OnClick = lbvHandHistoryClick
-      ExplicitWidth = 131
       Height = 23
       Width = 140
       AnchorY = 12

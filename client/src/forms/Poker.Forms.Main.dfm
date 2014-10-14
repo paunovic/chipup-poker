@@ -3736,42 +3736,42 @@ object frmChipUpMain: TfrmChipUpMain
               Options.Editing = False
               SortIndex = 0
               SortOrder = soDescending
-              Width = 251
+              Width = 243
             end
             object gridGamesType: TcxGridColumn
               Caption = 'Type'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 118
+              Width = 108
             end
             object gridGamesBlinds: TcxGridColumn
               Caption = 'Stakes'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 82
+              Width = 78
             end
             object gridGamesBuyinLimits: TcxGridColumn
               Caption = 'Buy-in Limits'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 80
+              Width = 94
             end
             object gridGamesPlayers: TcxGridColumn
               Caption = 'Players'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 74
+              Width = 68
             end
             object gridGamesStatus: TcxGridColumn
               Caption = 'Status'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 90
+              Width = 83
             end
           end
           object gridGamesLevel: TcxGridLevel
@@ -4407,6 +4407,7 @@ object frmChipUpMain: TfrmChipUpMain
                   end
                   item
                     Action = acFoldChecks
+                    Caption = 'A&lways check/fold'
                   end>
                 Caption = '&Table'
               end

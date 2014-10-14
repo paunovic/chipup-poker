@@ -8,7 +8,7 @@ uses
   cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls,
   Vcl.Menus, cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
   dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit,
-  cxClasses, Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types;
+  cxClasses, Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -224,8 +224,7 @@ begin
                       TServerMessageCallback.Create(seTableStatus, CSETableStatus),
                       TServerMessageCallback.Create(srPlayerLimitOk, CSRPlayerLimitOk),
                       TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk),
-                      TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srReinstatePlayerOk, seClubDeleted,
-                                                     seClubChange, srClubDisbandOk], CSREClubOperation),
+                      TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srReinstatePlayerOk, seClubDeleted, seClubChange, srClubDisbandOk], CSREClubOperation),
                       TServerMessageCallback.Create([seGameDelete, seGameChange, seGameCreate, srCreateGameOk, srDeleteGameOk], CSREGameOperation)
                   ]);
 
