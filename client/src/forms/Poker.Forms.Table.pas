@@ -8,7 +8,8 @@ uses
   Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, Asphyre.Images, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
-  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types;
+  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types,
+  cxRadioGroup;
 
 type
   TfrmTable = class(TForm)
@@ -52,6 +53,9 @@ type
     btPreviousHand: TcxButton;
     acNextHand: TAction;
     acPreviousHand: TAction;
+    cbAutoCheck: TcxCheckBox;
+    cbAutoCheckFold: TcxCheckBox;
+    cbAutoCall: TcxCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -94,6 +98,7 @@ type
     procedure lbsTableStatsClick(Sender: TObject);
     procedure acNextHandExecute(Sender: TObject);
     procedure acPreviousHandExecute(Sender: TObject);
+    procedure cbAutoCheckPropertiesChange(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -126,12 +131,14 @@ type
     procedure RendererTimebankStarted(Sender: TObject);
     procedure RendererUpdateHandStrength(Sender: TObject);
     procedure ConfigureActions;
+    procedure ConfigureAutoPlayOptions;
     procedure AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
 
     procedure UpdateTableCaption;
     procedure UpdateHandHistoryLabel;
     procedure UpdateHandStrength;
     procedure FocusWindow;
+    procedure UncheckAutoplayOptions;
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -573,6 +580,13 @@ begin
   end;
 end;
 
+procedure TfrmTable.UncheckAutoplayOptions;
+begin
+  cbAutoCheck.Checked := FALSE;
+  cbAutoCheckFold.Checked := FALSE;
+  cbAutoCall.Checked := FALSE;
+end;
+
 procedure TfrmTable.UpdateHandHistoryLabel;
 var
   hhis: THandHistoryItems;
@@ -756,6 +770,38 @@ begin
   AddChatMessage(Format('%s: ', [AUser]), 0, 0, AMessage, msg_style, -1);
 end;
 
+procedure TfrmTable.cbAutoCheckPropertiesChange(Sender: TObject);
+var
+  checkbox_list: TObjectList<TcxCheckBox>;
+  C1, sender_index, checked_index: Integer;
+begin
+  checkbox_list := TObjectList<TcxCheckBox>.Create(FALSE);
+  try
+    checkbox_list.Add(cbAutoCheck);
+    checkbox_list.Add(cbAutoCheckFold);
+    checkbox_list.Add(cbAutoCall);
+    sender_index := checkbox_list.IndexOf(Sender as TcxCheckBox);
+    if sender_index > 0 then
+      checkbox_list.Exchange(0, sender_index);
+    checked_index := -1;
+    for C1 := 0 to checkbox_list.Count - 1 do
+      if checkbox_list[C1].Checked then
+      begin
+        checked_index := C1;
+        Break;
+      end;
+    for C1 := 0 to checkbox_list.Count - 1 do
+      if C1 <> checked_index then
+      begin
+        checkbox_list[C1].Properties.OnChange := nil;
+        checkbox_list[C1].Checked := FALSE;
+        checkbox_list[C1].Properties.OnChange := cbAutoCheckPropertiesChange;
+      end;
+  finally
+    checkbox_list.Free;
+  end;
+end;
+
 procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);
 begin
   RefreshAll;
@@ -868,6 +914,34 @@ begin
   end;
 end;
 
+procedure TfrmTable.ConfigureAutoPlayOptions;
+var
+  table: TTable;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    cbAutoCheck.Visible := table.Status.AutoCheckVisible;
+    if table.Status.AutoCheckFoldVisible then
+    begin
+      cbAutoCheckFold.Visible := TRUE;
+      cbAutoCheckFold.Caption := 'Check/Fold';
+    end
+    else
+      if table.Status.AutoFoldVisible then
+      begin
+        cbAutoCheckFold.Visible := TRUE;
+        cbAutoCheckFold.Caption := 'Fold';
+      end
+      else
+        cbAutoCheckFold.Visible := FALSE;
+
+    cbAutoCall.Caption := table.Status.AutoCallCaption;
+    cbAutoCall.Visible := table.Status.AutoCallVisible;
+  finally
+    Tables.Unlock;
+  end;
+end;
+
 procedure TfrmTable.ConfigureGUI;
 var
   hround: Integer;
@@ -897,6 +971,16 @@ begin
         cbFoldToAnyBet.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextHand.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextBB.Left := table.Renderer.Metrics.CheckboxesLeft;
+
+        cbAutoCheckFold.Top := cbSitOutNextHand.Top;
+        cbAutoCheck.Top := cbAutoCheckFold.Top;
+        cbAutoCall.Top := cbAutoCheckFold.Top;
+        cbAutoCheckFold.Left := Round(table.Renderer.Metrics.PlayNowButtonBounds[0].x);
+        cbAutoCheck.Left := cbAutoCheckFold.Left + cbAutoCheckFold.Width + 2;
+        if cbAutoCheck.Visible then
+          cbAutoCall.Left := cbAutoCheck.Left + cbAutoCheck.Width + 2
+        else
+          cbAutoCall.Left := cbAutoCheckFold.Left + cbAutoCheckFold.Width + 2;
 
         lbsTableStats.Visible := acTableStats.Enabled;
 
@@ -1040,6 +1124,8 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.SetTableStatus(pbtablestatus, FALSE);
+    if table.Status.State in [tsIdle, tsWinning, tsWinning2] then
+      UncheckAutoplayOptions;
     if (not table.Form.Visible) and
        (not table.Hidden) then
       table.Show;
@@ -1066,23 +1152,17 @@ end;
 
 procedure TfrmTable.acCallExecute(Sender: TObject);
 var
-  seat_info: TSeatInfo;
-  seat_bet: UINT32;
-  call_amount: Integer;
+  table_state: TTableState;
+  call_amount: UINT32;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    Assert(table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info));
-    seat_bet := table.Status.GetBet(seat_info.SeatIndex);
-    if seat_bet + seat_info.Chips < table.Status.MinimumBet then
-      call_amount := seat_bet + seat_info.Chips
-    else
-      call_amount := table.Status.MinimumBet;
-    ServerSocket.PutChips(FGameId, call_amount, table.Status.State);
+    call_amount := table.Status.GetCallAmount(table_state);;
   finally
     Tables.Unlock;
   end;
+  ServerSocket.PutChips(FGameId, call_amount, table_state);
 end;
 
 procedure TfrmTable.acCheckExecute(Sender: TObject);
@@ -1338,8 +1418,11 @@ end;
 procedure TfrmTable.RefreshAll;
 var
   table: TTable;
+  state: TTableState;
+  call_amount: UINT32;
 begin
   ConfigureActions;
+  ConfigureAutoPlayOptions;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.Renderer.UpdateDXAreaSize;
@@ -1347,14 +1430,40 @@ begin
     SetActionCaptions;
     table.Renderer.Render(FALSE);
 
-    if (table.Status.ActionFoldToAny) and
+    if (cbAutoCheck.Checked) and
+       (acCheck.Enabled) then
+    begin
+      acCheck.Execute;
+      table.Status.FocusWindow := FALSE;
+      UncheckAutoplayOptions;
+    end;
+
+    if (cbAutoCall.Checked) and
+       (acCall.Enabled) then
+    begin
+      call_amount := table.Status.GetCallAmount(state);
+      if call_amount = table.Status.AutoCallAmount then
+        acCall.Execute;
+      table.Status.FocusWindow := FALSE;
+      UncheckAutoplayOptions;
+    end;
+
+    if (cbAutoCheckFold.Checked) or
        (cbFoldToAnyBet.Checked) then
     begin
       if acCheck.Enabled then
-        acCheck.Execute
+      begin
+        acCheck.Execute;
+        table.Status.FocusWindow := FALSE;
+        UncheckAutoplayOptions;
+      end
       else
-        acFold.Execute;
-      table.Status.FocusWindow := FALSE;
+        if acFold.Enabled then
+        begin
+          acFold.Execute;
+          table.Status.FocusWindow := FALSE;
+          UncheckAutoplayOptions;
+        end;
     end;
   finally
     Tables.Unlock;

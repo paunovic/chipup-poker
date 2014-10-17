@@ -168,7 +168,9 @@ object frmTournamentLobby: TfrmTournamentLobby
         Properties.Alignment.Horz = taRightJustify
         Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
-        Properties.EditFormat = '$,0.##;($,0.##)'
+        Properties.EditFormat = ',0.##;(,0.##)'
+        Properties.UseDisplayFormatWhenEditing = True
+        Properties.UseThousandSeparator = True
         HeaderAlignmentHorz = taCenter
         Width = 70
       end
@@ -179,7 +181,9 @@ object frmTournamentLobby: TfrmTournamentLobby
         Properties.Alignment.Horz = taRightJustify
         Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
-        Properties.EditFormat = '$,0.##;($,0.##)'
+        Properties.EditFormat = ',0.##;(,0.##)'
+        Properties.UseDisplayFormatWhenEditing = True
+        Properties.UseThousandSeparator = True
         HeaderAlignmentHorz = taCenter
         Width = 70
       end
@@ -190,7 +194,9 @@ object frmTournamentLobby: TfrmTournamentLobby
         Properties.Alignment.Horz = taRightJustify
         Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
-        Properties.EditFormat = '$,0.##;($,0.##)'
+        Properties.EditFormat = ',0.##;(,0.##)'
+        Properties.UseDisplayFormatWhenEditing = True
+        Properties.UseThousandSeparator = True
         HeaderAlignmentHorz = taCenter
         Width = 70
       end

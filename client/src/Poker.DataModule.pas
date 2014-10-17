@@ -332,11 +332,23 @@ begin
       Tables.Lock;
       try
         for table in Tables.Values do
-          if (not dmMain.SelfInfo.Clubs.GetAndLockByGame(table.GameId, club, game)) or
-             (not Tournaments.GetAndLockByGame(table.GameId, tournament, pbgame)) then
-            tables_close.Add(table)
-          else
+        begin
+          found := FALSE;
+          if dmMain.SelfInfo.Clubs.GetAndLockByGame(table.GameId, club, game) then
+          begin
+            found := TRUE;
             dmMain.SelfInfo.Clubs.Unlock;
+          end
+          else
+            if Tournaments.GetAndLockByGame(table.GameId, tournament, pbgame) then
+            begin
+              found := TRUE;
+              Tournaments.Unlock;
+            end;
+
+          if not found then
+            tables_close.Add(table)
+        end;
       finally
         Tables.Unlock;
       end;

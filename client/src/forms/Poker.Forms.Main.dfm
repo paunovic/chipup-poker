@@ -4448,7 +4448,6 @@ object frmChipUpMain: TfrmChipUpMain
               end
               item
                 Action = acTermsAndConditions
-                Caption = '&Terms &&&& Conditions'
               end
               item
                 Caption = '-'
@@ -4540,7 +4539,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acTermsAndConditions: TAction
       Category = 'Help'
-      Caption = 'Terms &&&& Conditions'
+      Caption = 'Terms and Conditions'
       OnExecute = acTermsAndConditionsExecute
     end
     object acShowAboutForm: TAction

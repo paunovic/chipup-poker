@@ -53,10 +53,17 @@ type
     FActionShowStats: Boolean;
     FEvents: TPB_TableEventList;
 
+    FAutoCheckVisible: Boolean;
+    FAutoCheckFoldVisible: Boolean;
+    FAutoFoldVisible: Boolean;
+    FAutoCallVisible: Boolean;
+
     FCallCaption: String;
+    FAutoCallCaption: String;
     FResetRaiseValue: Boolean;
     FFocusWindow: Boolean;
     FTotalRake: UINT32;
+    FAutoCallAmount: UINT32;
   public
     constructor Create;
     destructor Destroy; override;
@@ -69,6 +76,7 @@ type
     procedure UpdateClosingTime(const AGame: TGameInfo);
     procedure UpdateCurrentPlaytime;
     procedure NewHandCleanup;
+    function GetCallAmount(out AState: TTableState): UINT32;
 
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
@@ -114,6 +122,13 @@ type
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
     property ActionShowStats: Boolean read FActionShowStats write FActionShowStats;
     property Messages: TObjectList<TPB_TableMessage> read FMessages;
+
+    property AutoCheckVisible: Boolean read FAutoCheckVisible write FAutoCheckVisible;
+    property AutoFoldVisible: Boolean read FAutoFoldVisible write FAutoFoldVisible;
+    property AutoCheckFoldVisible: Boolean read FAutoCheckFoldVisible write FAutoCheckFoldVisible;
+    property AutoCallVisible: Boolean read FAutoCallVisible write FAutoCallVisible;
+    property AutoCallAmount: UINT32 read FAutoCallAmount write FAutoCallAmount;
+    property AutoCallCaption: String read FAutoCallCaption write FAutoCallCaption;
 
     property CallCaption: String read FCallCaption write FCallCaption;
     property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;
@@ -376,5 +391,24 @@ begin
   else
     FCurrentPlaytime := Int64(FTimebarEndtime) - Int64(GetTickCount);
 end;
+
+function TTableStatus.GetCallAmount(out AState: TTableState): UINT32;
+var
+  seat_bet: UINT32;
+  call_amount: UINT32;
+  seat_info: TSeatInfo;
+begin
+  AState := tsIdle;
+  Assert(GetSeatInfo(SelfSeatIndex, seat_info));
+  AState := State;
+  seat_bet := GetBet(seat_info.SeatIndex);
+  if seat_bet + seat_info.Chips < MinimumBet then
+    call_amount := seat_bet + seat_info.Chips
+  else
+    call_amount := MinimumBet;
+  result := call_amount;
+end;
+
+
 
 end.

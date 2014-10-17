@@ -127,23 +127,14 @@ begin
     if print_it then
     begin
       result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
-
-      if p.PropertyType.TypeKind = tkClass then
-        result := result + #10;
     end;
   end;
-
-  if result <> '' then
-    if result[Length(result)] = #10 then
-      Delete(result, Length(result) - 2, 3)
-    else
-      Delete(result, Length(result) - 1, 2);
 end;
 {$ENDIF}
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 var
-  C1     : Integer;
+  C1: Integer;
   str, ac: String;
 begin
   str := LowerCase(AString);

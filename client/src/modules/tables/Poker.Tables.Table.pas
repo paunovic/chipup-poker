@@ -42,6 +42,7 @@ type
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
     procedure SeatClearCaptionTimerCallback;
     procedure ConfigureActions;
+    procedure ConfigureAutoPlayOptions;
     procedure NotifyRendererHandle;
     procedure BringToFront;
   public
@@ -496,6 +497,7 @@ begin
   dmMain.UpdateSelfInfoInPlayers;
 
   ConfigureActions;
+  ConfigureAutoPlayOptions;
 
   {$IFDEF DEBUG}
   tmp := GetEnumName(TypeInfo(TTableState), Integer(FStatus.State));
@@ -816,6 +818,45 @@ begin
                              (not seat.AutoPlay);
 end;
 
+procedure TTable.ConfigureAutoPlayOptions;
+var
+  seat: TSeatInfo;
+  state: TTableState;
+begin
+  FStatus.AutoCheckVisible := FALSE;
+  FStatus.AutoCheckFoldVisible := FALSE;
+  FStatus.AutoFoldVisible := FALSE;
+  FStatus.AutoCallVisible := FALSE;
+
+  if (not (FTableType in [ttLive, ttTournament])) or
+     (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) or
+     (FGame.State = gsClosed) or
+     (seat.Status <> psInHand) or
+     (FStatus.State in [tsIdle, tsWinning, tsWinning2]) or
+     (seat.SeatIndex = FStatus.CurrentSeat) then
+    Exit;
+
+  // check if our current bet is smaller than minimumbet (call/raise situation)
+  if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
+  begin
+    FStatus.AutoFoldVisible := TRUE;
+    FStatus.AutoCallVisible := TRUE;
+    FStatus.AutoCallAmount := FStatus.GetCallAmount(state);
+    if FStatus.AutoCallAmount > seat.Chips then
+    begin
+      FStatus.AutoCallAmount := seat.Chips;
+      FStatus.AutoCallCaption := 'Call (All-In)';
+    end
+    else
+      FStatus.AutoCallCaption := Format('Call (%s)', [ChipsToStr(FStatus.AutoCallAmount - FStatus.GetBet(seat.SeatIndex))]);
+  end
+  else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
+  begin
+    FStatus.AutoCheckFoldVisible := TRUE;
+    FStatus.AutoCheckVisible := TRUE;
+  end;
+end;
+
 procedure TTable.WndProc(var AMessage: TMessage);
 begin
   inherited;
@@ -831,6 +872,7 @@ begin
         FGameplayLocked := FALSE;
         FGameplayLockedEndTime := 0;
         ConfigureActions;
+        ConfigureAutoPlayOptions;
         FRenderer.Disable;
         NotifyRendererHandle;
       end;

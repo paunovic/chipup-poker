@@ -161,10 +161,10 @@ begin
 
   w := FBitmap.Width + PaintBox.Margins.Left + PaintBox.Margins.Right;
   h := FBitmap.Height + PaintBox.Margins.Top + PaintBox.Margins.Bottom;
-  if w > Round(Screen.Width * 0.75) then
-    w := Round(Screen.Width * 0.75);
-  if h > Round(Screen.Height * 0.8) then
-    h := Round(Screen.Height * 0.8);
+  if w > Screen.Width then
+    w := Screen.Width;
+  if h > Screen.Height then
+    h := Screen.Height;
 
   ClientWidth := w;
   ClientHeight := h;

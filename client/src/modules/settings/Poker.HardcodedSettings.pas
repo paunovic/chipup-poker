@@ -22,7 +22,7 @@ type
         DIRECTX_SWAPCHAIN_COUNT: Byte;
         TABLE_CHAT_SCROLLBACK_LINES: Word;
 
-        SERVER_CONFIG: array[0..2] of record
+        SERVER_CONFIG: array[0..1] of record
           TCPAddress: String;
           TCPPort: Word;
           URL: String;
@@ -82,8 +82,7 @@ type
         // server configs
         SERVER_CONFIG: (
           (TCPAddress: 'server.chipuppoker.com'; TCPPort: 12346; URL: 'https://www.chipuppoker.com'),
-          (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'https://dev-server.chipuppoker.com'),
-          (TCPAddress: 'localchipup'; TCPPort: 12346; URL: 'http://localchipup')
+          (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'https://dev-server.chipuppoker.com')
         );
 
         // assets paths

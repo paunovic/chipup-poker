@@ -436,6 +436,67 @@ object frmTable: TfrmTable
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object cbAutoCheck: TcxCheckBox
+    Left = 460
+    Top = 418
+    Anchors = [akLeft, akBottom]
+    Caption = 'Check'
+    ParentBackground = False
+    ParentFont = False
+    Properties.ImmediatePost = True
+    Properties.OnChange = cbAutoCheckPropertiesChange
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 13
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.IsFontAssigned = True
+    TabOrder = 14
+    Transparent = True
+    Visible = False
+    Width = 54
+  end
+  object cbAutoCheckFold: TcxCheckBox
+    Left = 376
+    Top = 418
+    Anchors = [akLeft, akBottom]
+    Caption = 'Check/Fold'
+    ParentBackground = False
+    ParentFont = False
+    Properties.ImmediatePost = True
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 13
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.IsFontAssigned = True
+    TabOrder = 15
+    Transparent = True
+    Visible = False
+    Width = 77
+  end
+  object cbAutoCall: TcxCheckBox
+    Left = 520
+    Top = 418
+    Anchors = [akLeft, akBottom]
+    Caption = 'Call'
+    ParentBackground = False
+    ParentFont = False
+    Properties.ImmediatePost = True
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 13
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.IsFontAssigned = True
+    TabOrder = 16
+    Transparent = True
+    Visible = False
+    Width = 64
+  end
   object ActionManager: TActionManager
     Images = il48px
     Left = 48
