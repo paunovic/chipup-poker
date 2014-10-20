@@ -57,6 +57,7 @@ type
     FAutoCheckFoldVisible: Boolean;
     FAutoFoldVisible: Boolean;
     FAutoCallVisible: Boolean;
+    FAutoCallAnyVisible: Boolean;
 
     FCallCaption: String;
     FAutoCallCaption: String;
@@ -129,6 +130,7 @@ type
     property AutoCallVisible: Boolean read FAutoCallVisible write FAutoCallVisible;
     property AutoCallAmount: UINT32 read FAutoCallAmount write FAutoCallAmount;
     property AutoCallCaption: String read FAutoCallCaption write FAutoCallCaption;
+    property AutoCallAnyVisible: Boolean read FAutoCallAnyVisible write FAutoCallAnyVisible;
 
     property CallCaption: String read FCallCaption write FCallCaption;
     property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;

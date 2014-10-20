@@ -56,6 +56,7 @@ type
     cbAutoCheck: TcxCheckBox;
     cbAutoCheckFold: TcxCheckBox;
     cbAutoCall: TcxCheckBox;
+    cbAutoCallAny: TcxCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -585,6 +586,7 @@ begin
   cbAutoCheck.Checked := FALSE;
   cbAutoCheckFold.Checked := FALSE;
   cbAutoCall.Checked := FALSE;
+  cbAutoCallAny.Checked := FALSE;
 end;
 
 procedure TfrmTable.UpdateHandHistoryLabel;
@@ -937,6 +939,7 @@ begin
 
     cbAutoCall.Caption := table.Status.AutoCallCaption;
     cbAutoCall.Visible := table.Status.AutoCallVisible;
+    cbAutoCallAny.Visible := table.Status.AutoCallAnyVisible;
   finally
     Tables.Unlock;
   end;
@@ -975,12 +978,14 @@ begin
         cbAutoCheckFold.Top := cbSitOutNextHand.Top;
         cbAutoCheck.Top := cbAutoCheckFold.Top;
         cbAutoCall.Top := cbAutoCheckFold.Top;
+        cbAutoCallAny.Top := cbAutoCheckFold.Top;
         cbAutoCheckFold.Left := Round(table.Renderer.Metrics.PlayNowButtonBounds[0].x);
         cbAutoCheck.Left := cbAutoCheckFold.Left + cbAutoCheckFold.Width + 2;
         if cbAutoCheck.Visible then
           cbAutoCall.Left := cbAutoCheck.Left + cbAutoCheck.Width + 2
         else
           cbAutoCall.Left := cbAutoCheckFold.Left + cbAutoCheckFold.Width + 2;
+        cbAutoCallAny.Left := cbAutoCall.Left + cbAutoCall.Width + 2;
 
         lbsTableStats.Visible := acTableStats.Enabled;
 
@@ -1156,6 +1161,7 @@ var
   call_amount: UINT32;
   table: TTable;
 begin
+  call_amount := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     call_amount := table.Status.GetCallAmount(table_state);;
@@ -1438,11 +1444,13 @@ begin
       UncheckAutoplayOptions;
     end;
 
-    if (cbAutoCall.Checked) and
+    if ((cbAutoCall.Checked) or
+        (cbAutoCallAny.Checked)) and
        (acCall.Enabled) then
     begin
       call_amount := table.Status.GetCallAmount(state);
-      if call_amount = table.Status.AutoCallAmount then
+      if (call_amount = table.Status.AutoCallAmount) or
+         (cbAutoCallAny.Checked) then
         acCall.Execute;
       table.Status.FocusWindow := FALSE;
       UncheckAutoplayOptions;

@@ -827,6 +827,7 @@ begin
   FStatus.AutoCheckFoldVisible := FALSE;
   FStatus.AutoFoldVisible := FALSE;
   FStatus.AutoCallVisible := FALSE;
+  FStatus.AutoCallAnyVisible := FALSE;
 
   if (not (FTableType in [ttLive, ttTournament])) or
      (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) or
@@ -848,7 +849,10 @@ begin
       FStatus.AutoCallCaption := 'Call (All-In)';
     end
     else
+    begin
       FStatus.AutoCallCaption := Format('Call (%s)', [ChipsToStr(FStatus.AutoCallAmount - FStatus.GetBet(seat.SeatIndex))]);
+      FStatus.AutoCallAnyVisible := TRUE;
+    end;
   end
   else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
   begin

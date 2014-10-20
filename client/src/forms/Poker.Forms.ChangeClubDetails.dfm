@@ -146,7 +146,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   object lbsResetBuyinLimits: TcxLabel
     Left = 12
     Top = 122
-    Caption = 'Reset buyin limits each'
+    Caption = 'Hit && Run rule: player must wait minimum'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
@@ -158,7 +158,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Transparent = True
   end
   object cbResetBuyinLimits: TcxComboBox
-    Left = 127
+    Left = 212
     Top = 121
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
@@ -171,7 +171,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Width = 56
   end
   object lbsResetBuyinMinutes: TcxLabel
-    Left = 184
+    Left = 270
     Top = 122
     Caption = 'minutes'
     ParentFont = False

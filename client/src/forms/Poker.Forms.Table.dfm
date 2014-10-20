@@ -497,6 +497,26 @@ object frmTable: TfrmTable
     Visible = False
     Width = 64
   end
+  object cbAutoCallAny: TcxCheckBox
+    Left = 584
+    Top = 418
+    Anchors = [akLeft, akBottom]
+    Caption = 'Call Any'
+    ParentBackground = False
+    ParentFont = False
+    Properties.ImmediatePost = True
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 13
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.IsFontAssigned = True
+    TabOrder = 17
+    Transparent = True
+    Visible = False
+    Width = 64
+  end
   object ActionManager: TActionManager
     Images = il48px
     Left = 48

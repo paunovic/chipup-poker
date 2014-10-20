@@ -142,7 +142,10 @@ begin
         if ValidateGameName(edGameName.Text, err) then
         begin
           acOK.Enabled := FALSE;
-          ServerSocket.CreateGame(FClubId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value * 100, seBuyinMax.Value * 100, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+          ServerSocket.CreateGame(FClubId, edGameName.Text, TGameType(cbGameType.ItemIndex),
+             TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex),
+             seBuyinMin.Value * 100, seBuyinMax.Value * 100,
+             StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
         end;
 
   if err <> '' then

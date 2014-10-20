@@ -214,18 +214,18 @@ object frmCreateGame: TfrmCreateGame
     Properties.MinValue = 5.000000000000000000
     TabOrder = 4
     Value = 20
-    Width = 53
+    Width = 75
   end
   object seBuyinMax: TcxSpinEdit
-    Left = 199
+    Left = 220
     Top = 126
     Properties.MinValue = 10.000000000000000000
     TabOrder = 5
     Value = 200
-    Width = 53
+    Width = 75
   end
   object lbsBuyinMin: TcxLabel
-    Left = 86
+    Left = 88
     Top = 127
     Caption = 'min'
     ParentFont = False
@@ -239,7 +239,7 @@ object frmCreateGame: TfrmCreateGame
     Transparent = True
   end
   object lbsBuyinMax: TcxLabel
-    Left = 167
+    Left = 191
     Top = 127
     Caption = ' max'
     ParentFont = False
@@ -253,7 +253,7 @@ object frmCreateGame: TfrmCreateGame
     Transparent = True
   end
   object lbsBuyinChips: TcxLabel
-    Left = 255
+    Left = 299
     Top = 127
     Caption = 'chips'
     ParentFont = False
