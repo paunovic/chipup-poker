@@ -31,7 +31,6 @@ type
     procedure set_has_Chips;
     procedure clear_has_Chips;
     procedure SetChips(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_TableSit; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

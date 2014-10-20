@@ -31,7 +31,6 @@ type
     procedure set_has_DisplayName;
     procedure clear_has_DisplayName;
     procedure SetDisplayName(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_RegisterParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

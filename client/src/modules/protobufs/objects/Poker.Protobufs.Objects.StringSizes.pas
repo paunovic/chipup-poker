@@ -51,7 +51,6 @@ type
     procedure set_has_ContactMessage;
     procedure clear_has_ContactMessage;
     procedure SetContactMessage(const AValue: Integer);
-
   public
     constructor Create(const AFrom: TPB_StringSizes; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

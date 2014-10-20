@@ -22,11 +22,9 @@ type
     procedure set_has_Assets;
     procedure clear_has_Assets;
     procedure AssetsNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_AssetList; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

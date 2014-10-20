@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TUpdateFileType = (ufFull = 0,ufDiff = 1,ufRemove = 2);
+  TUpdateFileType = (ufFull = 0, ufDiff, ufRemove);
 
   TPB_UpdateFileInfo = class(TProtobufBaseObject)
   private
@@ -43,7 +43,6 @@ type
     procedure set_has_FileSize;
     procedure clear_has_FileSize;
     procedure SetFileSize(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_UpdateFileInfo; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

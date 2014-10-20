@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds, Poker.Protobufs.Objects.TournamentPrize;
 
 type
-  TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2,tnsOnBreak = 3,tnsStarting = 4,tnsFinished = 5);
+  TTournamentState = (tnsOpen = 0, tnsInProgress, tnsCancelled, tnsOnBreak, tnsStarting, tnsFinished);
 
   TPB_TournamentInfo = class(TProtobufBaseObject)
   private
@@ -114,11 +114,9 @@ type
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
     procedure BlindStructureNotifyEvent(Sender: TObject; const Item: TPB_GameBlinds; Action: TCollectionNotification);
     procedure PrizesNotifyEvent(Sender: TObject; const Item: TPB_TournamentPrize; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_TournamentInfo; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

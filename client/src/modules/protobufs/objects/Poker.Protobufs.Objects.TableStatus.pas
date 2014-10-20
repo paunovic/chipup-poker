@@ -10,9 +10,8 @@ uses
   Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableMessage;
 
 type
-  TTableState = (tsIdle = 0,tsPreFlop = 1,tsFlop = 2,tsTurn = 3,tsRiver = 4,tsWinning = 5,tsWinning2 = 6);
-
-  TTableType = (ttLive = 0,ttTournament = 1,ttHandReplay = 2);
+  TTableState = (tsIdle = 0, tsPreFlop, tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2);
+  TTableType = (ttLive = 0, ttTournament, ttHandReplay);
 
   TPB_TableStatus = class(TProtobufBaseObject)
   private
@@ -136,11 +135,9 @@ type
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
     procedure TableMessageNotifyEvent(Sender: TObject; const Item: TPB_TableMessage; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_TableStatus; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

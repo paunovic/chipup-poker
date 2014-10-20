@@ -41,7 +41,6 @@ type
     procedure set_has_UnlimitedLimit;
     procedure clear_has_UnlimitedLimit;
     procedure SetUnlimitedLimit(const AValue: Boolean);
-
   public
     constructor Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

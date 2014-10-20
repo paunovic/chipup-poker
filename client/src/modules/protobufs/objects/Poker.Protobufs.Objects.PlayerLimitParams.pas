@@ -36,7 +36,6 @@ type
     procedure set_has_Unlimited;
     procedure clear_has_Unlimited;
     procedure SetUnlimited(const AValue: Boolean);
-
   public
     constructor Create(const AFrom: TPB_PlayerLimitParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

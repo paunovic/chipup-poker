@@ -46,7 +46,6 @@ type
     procedure set_has_SeatIndex;
     procedure clear_has_SeatIndex;
     procedure SetSeatIndex(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_TournamentMember; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -21,7 +21,6 @@ type
     procedure set_has_NewMail;
     procedure clear_has_NewMail;
     procedure SetNewMail(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_ChangeEMailParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

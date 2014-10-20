@@ -27,7 +27,6 @@ type
     procedure set_has_TableStatus;
     procedure clear_has_TableStatus;
     procedure SetTableStatus(const AValue: TPB_TableStatus);
-
   public
     constructor Create(const AFrom: TPB_TournamentTableStart; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

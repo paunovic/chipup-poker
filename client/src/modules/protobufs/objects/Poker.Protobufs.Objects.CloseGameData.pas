@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TCloseGameTime = (cgtCurrentHand = 0,cgtFiveMinutes = 1,cgtFifteenMinutes = 2);
+  TCloseGameTime = (cgtCurrentHand = 0, cgtFiveMinutes, cgtFifteenMinutes);
 
   TPB_CloseGameData = class(TProtobufBaseObject)
   private
@@ -28,7 +28,6 @@ type
     procedure set_has_Timestamp;
     procedure clear_has_Timestamp;
     procedure SetTimestamp(const AValue: TCloseGameTime);
-
   public
     constructor Create(const AFrom: TPB_CloseGameData; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -9,13 +9,10 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TGameLimit = (glNoLimit = 0,glPotLimit = 1,glFixedLimit = 2);
-
-  TGameType = (gtHoldem = 0,gtOmaha = 1,gtRotationNLHPLO = 2);
-
-  TGameState = (gsActive = 0,gsClosing = 1,gsClosed = 2,gsEmpty = 3);
-
-  TGameBlinds = (gb1x2 = 0,gb5x5 = 1,gb5x10 = 2,gb10x25 = 3,gb25x50 = 4,gb50x100 = 6,gbOther = 7);
+  TGameLimit = (glNoLimit = 0, glPotLimit, glFixedLimit);
+  TGameType = (gtHoldem = 0, gtOmaha, gtRotationNLHPLO);
+  TGameState = (gsActive = 0, gsClosing, gsClosed, gsEmpty);
+  TGameBlinds = (gb1x2 = 0, gb5x5, gb5x10, gb10x25, gb25x50, gb50x100, gbOther);
 
   TPB_Game = class(TProtobufBaseObject)
   private
@@ -114,7 +111,6 @@ type
     procedure set_has_FinalTable;
     procedure clear_has_FinalTable;
     procedure SetFinalTable(const AValue: Boolean);
-
   public
     constructor Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

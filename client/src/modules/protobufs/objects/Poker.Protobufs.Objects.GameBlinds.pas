@@ -26,7 +26,6 @@ type
     procedure set_has_Bb;
     procedure clear_has_Bb;
     procedure SetBb(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_GameBlinds; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

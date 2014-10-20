@@ -26,7 +26,6 @@ type
     procedure set_has_Name;
     procedure clear_has_Name;
     procedure SetName(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_TournamentPrize; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

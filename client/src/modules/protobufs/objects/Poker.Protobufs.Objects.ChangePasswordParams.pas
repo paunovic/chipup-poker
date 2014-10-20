@@ -21,7 +21,6 @@ type
     procedure set_has_NewPassword;
     procedure clear_has_NewPassword;
     procedure SetNewPassword(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_ChangePasswordParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

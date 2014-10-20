@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
 
 type
-  TClubStatus = (csSuccess = 0,csInvalidName = 1,csInvalidPassword = 2,csNameExists = 3,csInvalidClubId = 4,csAlreadyMember = 5,csInvalidPlayerId = 6);
+  TClubStatus = (csSuccess = 0, csInvalidName, csInvalidPassword, csNameExists, csInvalidClubId, csAlreadyMember, csInvalidPlayerId);
 
   TPB_ClubCommandReply = class(TProtobufBaseObject)
   private
@@ -34,11 +34,9 @@ type
     procedure set_has_Games;
     procedure clear_has_Games;
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_ClubCommandReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

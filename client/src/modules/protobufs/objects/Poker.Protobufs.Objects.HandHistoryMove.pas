@@ -42,11 +42,9 @@ type
     procedure CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
     procedure WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_HandHistoryMove; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

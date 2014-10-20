@@ -26,7 +26,6 @@ type
     procedure set_has_PlayerBuyinLimit;
     procedure clear_has_PlayerBuyinLimit;
     procedure SetPlayerBuyinLimit(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_PlayerClubStatus; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

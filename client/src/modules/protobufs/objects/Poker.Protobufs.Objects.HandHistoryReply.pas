@@ -37,11 +37,9 @@ type
     procedure clear_has_TournamentId;
     procedure SetTournamentId(const AValue: TMongoId);
     procedure RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_HandHistoryReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

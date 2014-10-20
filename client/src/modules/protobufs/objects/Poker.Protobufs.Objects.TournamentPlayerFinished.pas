@@ -42,7 +42,6 @@ type
     procedure set_has_TableId;
     procedure clear_has_TableId;
     procedure SetTableId(const AValue: TMongoId);
-
   public
     constructor Create(const AFrom: TPB_TournamentPlayerFinished; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -31,7 +31,6 @@ type
     procedure set_has_Token;
     procedure clear_has_Token;
     procedure SetToken(const AValue: Integer);
-
   public
     constructor Create(const AFrom: TPB_RpcMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

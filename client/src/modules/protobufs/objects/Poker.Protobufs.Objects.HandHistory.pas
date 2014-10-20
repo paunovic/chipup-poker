@@ -77,11 +77,9 @@ type
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
     procedure BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
     procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_HandHistoryMove; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_HandHistory; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -21,7 +21,6 @@ type
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TMongoId);
-
   public
     constructor Create(const AFrom: TPB_TournamentDetails; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

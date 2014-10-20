@@ -21,7 +21,6 @@ type
     procedure set_has_AvatarId;
     procedure clear_has_AvatarId;
     procedure SetAvatarId(const AValue: TBytes);
-
   public
     constructor Create(const AFrom: TPB_SetAvatarParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

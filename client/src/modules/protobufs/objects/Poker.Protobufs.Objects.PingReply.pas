@@ -26,7 +26,6 @@ type
     procedure set_has_Servertime;
     procedure clear_has_Servertime;
     procedure SetServertime(const AValue: UInt64);
-
   public
     constructor Create(const AFrom: TPB_PingReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -31,7 +31,6 @@ type
     procedure set_has_Suspended;
     procedure clear_has_Suspended;
     procedure SetSuspended(const AValue: Boolean);
-
   public
     constructor Create(const AFrom: TPB_ChangeSuspendState; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

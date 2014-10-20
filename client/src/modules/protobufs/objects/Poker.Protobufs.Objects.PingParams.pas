@@ -21,7 +21,6 @@ type
     procedure set_has_Uptime;
     procedure clear_has_Uptime;
     procedure SetUptime(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_PingParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

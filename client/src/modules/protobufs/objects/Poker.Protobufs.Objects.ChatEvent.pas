@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage;
 
 type
-  TEventType = (ceUserMessage = 0,ceServerMessage = 1);
+  TEventType = (ceUserMessage = 0, ceServerMessage);
 
   TPB_ChatEvent = class(TProtobufBaseObject)
   private
@@ -34,7 +34,6 @@ type
     procedure set_has_TableId;
     procedure clear_has_TableId;
     procedure SetTableId(const AValue: TMongoId);
-
   public
     constructor Create(const AFrom: TPB_ChatEvent; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

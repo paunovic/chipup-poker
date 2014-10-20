@@ -21,7 +21,6 @@ type
     procedure set_has_Email;
     procedure clear_has_Email;
     procedure SetEmail(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_ForgotPasswordParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

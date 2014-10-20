@@ -32,11 +32,9 @@ type
     procedure ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_TableStatsReplies; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

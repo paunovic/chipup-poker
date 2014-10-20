@@ -26,7 +26,6 @@ type
     procedure set_has_PlayerMongoId;
     procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TMongoId);
-
   public
     constructor Create(const AFrom: TPB_GiveClubOwnershipParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

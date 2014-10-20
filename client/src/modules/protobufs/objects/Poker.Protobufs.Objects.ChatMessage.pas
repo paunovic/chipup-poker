@@ -36,7 +36,6 @@ type
     procedure set_has_Timestamp;
     procedure clear_has_Timestamp;
     procedure SetTimestamp(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

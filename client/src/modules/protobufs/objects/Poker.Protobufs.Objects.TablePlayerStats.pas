@@ -56,11 +56,9 @@ type
     procedure SetHands(const AValue: UInt32);
     procedure BuyinsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure CashoutsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_TablePlayerStats; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

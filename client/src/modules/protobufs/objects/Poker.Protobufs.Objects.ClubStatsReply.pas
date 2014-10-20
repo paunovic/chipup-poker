@@ -27,11 +27,9 @@ type
     procedure set_has_PlayerStats;
     procedure clear_has_PlayerStats;
     procedure PlayerStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubPlayerStats; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_ClubStatsReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

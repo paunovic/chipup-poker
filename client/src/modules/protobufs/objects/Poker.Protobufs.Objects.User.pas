@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TPlayerSubscriptionPlan = (pspBasic = 0,pspNormal = 1,pspSuper = 2);
+  TPlayerSubscriptionPlan = (pspBasic = 0, pspNormal, pspSuper);
 
   TPB_User = class(TProtobufBaseObject)
   private
@@ -48,7 +48,6 @@ type
     procedure set_has_SubscriptionPlan;
     procedure clear_has_SubscriptionPlan;
     procedure SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
-
   public
     constructor Create(const AFrom: TPB_User; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

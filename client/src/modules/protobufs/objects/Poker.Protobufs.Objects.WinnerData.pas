@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TCardRankings = (crRoyalFlush = 0,crStraightFlush = 1,cr4OfKind = 2,crFullHouse = 3,crFlush = 4,crStraight = 5,crThreeOfKind = 6,crTwoPair = 7,crOnePair = 8,crHighCard = 9);
+  TCardRankings = (crRoyalFlush = 0, crStraightFlush, cr4OfKind, crFullHouse, crFlush, crStraight, crThreeOfKind, crTwoPair, crOnePair, crHighCard);
 
   TPB_WinnerData = class(TProtobufBaseObject)
   private
@@ -28,7 +28,6 @@ type
     procedure set_has_Msg;
     procedure clear_has_Msg;
     procedure SetMsg(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_WinnerData; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

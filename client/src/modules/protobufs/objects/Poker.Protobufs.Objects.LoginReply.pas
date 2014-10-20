@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.PlayerClubStatus;
 
 type
-  TLoginStatus = (lrSuccess = 0,lrInvalid = 1);
+  TLoginStatus = (lrSuccess = 0, lrInvalid);
 
   TPB_LoginReply = class(TProtobufBaseObject)
   private
@@ -64,11 +64,9 @@ type
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
     procedure PlayerClubStatusesNotifyEvent(Sender: TObject; const Item: TPB_PlayerClubStatus; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_LoginReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

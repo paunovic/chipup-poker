@@ -46,7 +46,6 @@ type
     procedure set_has_Gamename;
     procedure clear_has_Gamename;
     procedure SetGamename(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_ValidCharsRegex; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.Pot;
 
 type
-  TTableEventType = (teFold = 0,teSit = 1,teStandUp = 2,teWinning = 3,teDealing = 4,teCheck = 5,teCall = 6,teRaise = 7,teAllIn = 8,teFlop = 9,teTurn = 10,teRiver = 11,tePostRiver = 12,tePreWin = 13,teExistingCards = 14,teDisconnect = 15,teSB = 16,teBB = 17,teForced = 18);
+  TTableEventType = (teFold = 0, teSit, teStandUp, teWinning, teDealing, teCheck, teCall, teRaise, teAllIn, teFlop, teTurn, teRiver, tePostRiver, tePreWin, teExistingCards, teDisconnect, teSB, teBB, teForced);
 
   TPB_TableEvent = class(TProtobufBaseObject)
   private
@@ -44,11 +44,9 @@ type
     procedure SetCards(const AValue: TBytes);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_TableEvent; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

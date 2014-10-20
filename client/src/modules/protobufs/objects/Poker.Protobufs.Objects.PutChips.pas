@@ -32,7 +32,6 @@ type
     procedure set_has_CurrentState;
     procedure clear_has_CurrentState;
     procedure SetCurrentState(const AValue: TTableState);
-
   public
     constructor Create(const AFrom: TPB_PutChips; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

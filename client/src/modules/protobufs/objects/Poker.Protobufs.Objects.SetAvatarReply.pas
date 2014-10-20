@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TSetAvatarStatus = (saSuccess = 0,saNotFound = 1);
+  TSetAvatarStatus = (saSuccess = 0, saNotFound);
 
   TPB_SetAvatarReply = class(TProtobufBaseObject)
   private
@@ -23,7 +23,6 @@ type
     procedure set_has_Status;
     procedure clear_has_Status;
     procedure SetStatus(const AValue: TSetAvatarStatus);
-
   public
     constructor Create(const AFrom: TPB_SetAvatarReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

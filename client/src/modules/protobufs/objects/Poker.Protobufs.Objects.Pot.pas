@@ -37,11 +37,9 @@ type
     procedure SetRake(const AValue: UInt32);
     procedure MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
     procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_Pot; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

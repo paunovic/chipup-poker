@@ -41,7 +41,6 @@ type
     procedure set_has_SeatDestination;
     procedure clear_has_SeatDestination;
     procedure SetSeatDestination(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_TournamentPlayerTransfer; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

@@ -52,7 +52,6 @@ type
     procedure set_has_Status;
     procedure clear_has_Status;
     procedure SetStatus(const AValue: TPlayerStatus);
-
   public
     constructor Create(const AFrom: TPB_PlayerHandHistory; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

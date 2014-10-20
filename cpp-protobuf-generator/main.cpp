@@ -578,13 +578,18 @@ class BaseGenerator : public CodeGenerator {
 					,"name",enum_type->name());
 				bool tick = false;
 				for (int k=0; k<enum_type->value_count(); k++) {
-					if (tick) printer.Print(",");
+					if (tick) printer.Print(", ");
 					tick = true;
 					const EnumValueDescriptor *value = enum_type->value(k);
 					snprintf(hack,9,"%d",value->number());
-					printer.Print("$name$ = $hack$","name",value->name(),"hack",hack);
+					if (k == 0)
+						printer.Print("$name$ = $hack$", "name", value->name(), "hack", hack);
+					else
+						printer.Print("$name$", "name", value->name());
 				}
-				printer.Print(");\n\n");
+				printer.Print(");\n");
+				if (j == message->enum_type_count() - 1)
+					printer.Print("\n");
 			}
 
 			printer.Print(
@@ -625,13 +630,11 @@ class BaseGenerator : public CodeGenerator {
 			}
 			if (needsInit) {
 				printer.Print(
-					"\n"
 					"  protected\n"
 					"    procedure InitObjects; override;\n"
 					"    procedure HookNotifiers; override;\n");
 			}
-			printer.Print("\n"
-				"  public\n"
+			printer.Print("  public\n"
 				);
 			printer.Print(
 				"    constructor Create(const AFrom: TPB_$name$; const ALightweight: Boolean = FALSE); overload;\n"

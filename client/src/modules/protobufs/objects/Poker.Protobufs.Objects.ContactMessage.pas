@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TContactReason = (cmQuestions = 0,cmSuggestions = 1,cmBugReport = 2,cmOther = 3);
+  TContactReason = (cmQuestions = 0, cmSuggestions, cmBugReport, cmOther);
 
   TPB_ContactMessage = class(TProtobufBaseObject)
   private
@@ -28,7 +28,6 @@ type
     procedure set_has_Message;
     procedure clear_has_Message;
     procedure SetMessage(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_ContactMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

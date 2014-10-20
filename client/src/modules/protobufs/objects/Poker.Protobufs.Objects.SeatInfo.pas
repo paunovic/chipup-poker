@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TPlayerStatus = (psOutOfPlay = 0,psOutOfHand = 1,psInHand = 2,psFolded = 3,psAllIn = 4);
+  TPlayerStatus = (psOutOfPlay = 0, psOutOfHand, psInHand, psFolded, psAllIn);
 
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
@@ -73,7 +73,6 @@ type
     procedure set_has_Autoplay;
     procedure clear_has_Autoplay;
     procedure SetAutoplay(const AValue: Boolean);
-
   public
     constructor Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

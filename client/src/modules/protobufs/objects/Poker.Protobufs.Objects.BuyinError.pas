@@ -26,7 +26,6 @@ type
     procedure set_has_LastCashout;
     procedure clear_has_LastCashout;
     procedure SetLastCashout(const AValue: UInt32);
-
   public
     constructor Create(const AFrom: TPB_BuyinError; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

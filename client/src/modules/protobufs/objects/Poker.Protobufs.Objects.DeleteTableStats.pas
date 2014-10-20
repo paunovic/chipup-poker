@@ -26,11 +26,9 @@ type
     procedure set_has_TableId;
     procedure clear_has_TableId;
     procedure TableIdNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_DeleteTableStats; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

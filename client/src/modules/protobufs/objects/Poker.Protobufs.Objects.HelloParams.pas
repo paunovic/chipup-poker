@@ -27,11 +27,9 @@ type
     procedure set_has_Files;
     procedure clear_has_Files;
     procedure FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_HelloParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

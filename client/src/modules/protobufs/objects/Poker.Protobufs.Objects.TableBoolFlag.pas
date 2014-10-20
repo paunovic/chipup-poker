@@ -26,7 +26,6 @@ type
     procedure set_has_Flag;
     procedure clear_has_Flag;
     procedure SetFlag(const AValue: Boolean);
-
   public
     constructor Create(const AFrom: TPB_TableBoolFlag; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

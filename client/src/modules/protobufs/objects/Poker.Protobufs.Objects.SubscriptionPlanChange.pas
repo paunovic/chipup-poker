@@ -32,7 +32,6 @@ type
     procedure set_has_StripeToken;
     procedure clear_has_StripeToken;
     procedure SetStripeToken(const AValue: String);
-
   public
     constructor Create(const AFrom: TPB_SubscriptionPlanChange; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

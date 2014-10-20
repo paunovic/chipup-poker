@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TRegisterStatus = (regSuccess = 0,regDuplicateEmail = 1,regDupUsername = 2,regInvalidEmail = 3,regInvalidName = 4);
+  TRegisterStatus = (regSuccess = 0, regDuplicateEmail, regDupUsername, regInvalidEmail, regInvalidName);
 
   TPB_RegisterReply = class(TProtobufBaseObject)
   private
@@ -23,7 +23,6 @@ type
     procedure set_has_Status;
     procedure clear_has_Status;
     procedure SetStatus(const AValue: TRegisterStatus);
-
   public
     constructor Create(const AFrom: TPB_RegisterReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

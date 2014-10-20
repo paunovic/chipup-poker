@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TTableMessageType = (tmtClosing = 0,tmtTournamentBreak = 1,tmtTournamentStart = 2);
+  TTableMessageType = (tmtClosing = 0, tmtTournamentBreak, tmtTournamentStart);
 
   TPB_TableMessage = class(TProtobufBaseObject)
   private
@@ -28,7 +28,6 @@ type
     procedure set_has_EndTime;
     procedure clear_has_EndTime;
     procedure SetEndTime(const AValue: UInt64);
-
   public
     constructor Create(const AFrom: TPB_TableMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

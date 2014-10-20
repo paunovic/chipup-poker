@@ -37,11 +37,9 @@ type
     procedure clear_has_Hands;
     procedure SetHands(const AValue: UInt32);
     procedure PlayerstatsNotifyEvent(Sender: TObject; const Item: TPB_TablePlayerStats; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_TableStatsReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

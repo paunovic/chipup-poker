@@ -77,11 +77,9 @@ type
     procedure clear_has_BuyinReset;
     procedure SetBuyinReset(const AValue: UInt32);
     procedure MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_Club; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

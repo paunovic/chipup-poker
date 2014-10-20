@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TChangeMailStatus = (cmSuccess = 0,cmDuplicateMail = 1,cmInvalidEmail = 2);
+  TChangeMailStatus = (cmSuccess = 0, cmDuplicateMail, cmInvalidEmail);
 
   TPB_ChangeMailReply = class(TProtobufBaseObject)
   private
@@ -23,7 +23,6 @@ type
     procedure set_has_Status;
     procedure clear_has_Status;
     procedure SetStatus(const AValue: TChangeMailStatus);
-
   public
     constructor Create(const AFrom: TPB_ChangeMailReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

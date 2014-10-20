@@ -57,11 +57,9 @@ type
     procedure clear_has_ValidCharsRegex;
     procedure SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
     procedure UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_HelloReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

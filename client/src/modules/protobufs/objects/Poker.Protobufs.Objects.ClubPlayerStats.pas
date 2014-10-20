@@ -26,7 +26,6 @@ type
     procedure set_has_ClubBalance;
     procedure clear_has_ClubBalance;
     procedure SetClubBalance(const AValue: Integer);
-
   public
     constructor Create(const AFrom: TPB_ClubPlayerStats; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

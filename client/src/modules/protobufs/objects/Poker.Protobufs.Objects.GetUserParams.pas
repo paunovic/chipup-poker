@@ -27,11 +27,9 @@ type
     procedure clear_has_Users;
     procedure UserMongoIdsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_GetUserParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;

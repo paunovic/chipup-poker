@@ -22,11 +22,9 @@ type
     procedure set_has_Users;
     procedure clear_has_Users;
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
-
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
-
   public
     constructor Create(const AFrom: TPB_UserChangeParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
