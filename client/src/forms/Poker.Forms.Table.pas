@@ -782,16 +782,23 @@ begin
     checkbox_list.Add(cbAutoCheck);
     checkbox_list.Add(cbAutoCheckFold);
     checkbox_list.Add(cbAutoCall);
+    checkbox_list.Add(cbAutoCallAny);
+
+    // put sender as first element in list, so it doesnt get unchecked
     sender_index := checkbox_list.IndexOf(Sender as TcxCheckBox);
     if sender_index > 0 then
       checkbox_list.Exchange(0, sender_index);
     checked_index := -1;
+
+    // find checked index
     for C1 := 0 to checkbox_list.Count - 1 do
       if checkbox_list[C1].Checked then
       begin
         checked_index := C1;
         Break;
       end;
+
+    // uncheck the others
     for C1 := 0 to checkbox_list.Count - 1 do
       if C1 <> checked_index then
       begin
