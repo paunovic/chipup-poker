@@ -374,21 +374,25 @@ end;
 procedure TfrmTableSit.ConfigureGUI;
 var
   table: TTable;
-  max_buyin: UINT32;
+  min_buyin, max_buyin: UINT32;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    lbvTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
+    min_buyin := GetMinBuyin;
     max_buyin := GetMaxBuyin;
+
+    lbvTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
     lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(GetMinBuyin),
         ChipsToStr(max_buyin)]);
 {    if table.Status.SelfSeatIndex <> -1 then
       FBuyinPhrase := 'add-on'
     else
       FBuyinPhrase := 'buy-in';}
+    if UINT32(seBuyin.Value) * 100 < min_buyin then
+      seBuyin.Value := min_buyin / 100;
     if UINT32(seBuyin.Value) * 100 > max_buyin then
       seBuyin.Value := max_buyin / 100;
-  finally
+   finally
     Tables.Unlock;
   end;
 end;
