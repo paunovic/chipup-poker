@@ -23,7 +23,6 @@ type
     acMin: TAction;
     acMax: TAction;
     lbsTableBuyins: TcxLabel;
-    lbvPlayerMaxBuyin: TcxLabel;
     procedure acCancelExecute(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -39,7 +38,6 @@ type
     FInternalId: Integer;
     FSeatIndex: Integer;
     FCloseCallback: TNotifyEvent;
-    FBuyinPhrase: String;
 
     procedure SetBuyin(const ABuyin: UINT32);
     procedure CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
@@ -54,6 +52,7 @@ type
     procedure ConfigureGUI;
 
     function GetMaxBuyin: UINT32;
+    function GetMinBuyin: UINT32;
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -115,6 +114,13 @@ begin
   result := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
+    if dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto) then
+      if pcsproto.has_BuyinMax then
+      begin
+        result := pcsproto.BuyinMax;
+        Exit;
+      end;
+
     if (table.Status.SelfSeatIndex <> -1) and
        (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
       seat_chips := seat_info.Chips
@@ -125,15 +131,31 @@ begin
       result := 0
     else
       result := table.Game.BuyinMax - seat_chips;
-
-    if dmMain.SelfInfo.ClubStatuses.TryGetValue(table.ClubId, pcsproto) then
-      if (pcsproto.has_PlayerBuyinLimit) and
-         (result > pcsproto.PlayerBuyinLimit) then
-        result := pcsproto.PlayerBuyinLimit;
   finally
     Tables.Unlock;
   end;
 end;
+
+function TfrmTableSit.GetMinBuyin: UINT32;
+var
+  table: TTable;
+  pcsproto: TPB_PlayerClubStatus;
+begin
+  result := 0;
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto) then
+      if pcsproto.has_BuyinMin then
+      begin
+        result := pcsproto.BuyinMin;
+        Exit;
+      end;
+
+    result := table.Game.BuyinMin;
+  finally
+    Tables.Unlock;
+  end;
+ end;
 
 procedure TfrmTableSit.seBuyinPropertiesChange(Sender: TObject);
 var
@@ -214,7 +236,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    SetBuyin(table.Game.BuyinMin);
+    SetBuyin(GetMinBuyin);
   finally
     Tables.Unlock;
   end;
@@ -357,14 +379,13 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     lbvTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
-    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(table.Game.BuyinMin),
-        ChipsToStr(table.Game.BuyinMax)]);
-    if table.Status.SelfSeatIndex <> -1 then
+    max_buyin := GetMaxBuyin;
+    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(GetMinBuyin),
+        ChipsToStr(max_buyin)]);
+{    if table.Status.SelfSeatIndex <> -1 then
       FBuyinPhrase := 'add-on'
     else
-      FBuyinPhrase := 'buy-in';
-    max_buyin := GetMaxBuyin;
-    lbvPlayerMaxBuyin.Caption := Format('(your maximum %s: %s)', [FBuyinPhrase, ChipsToStr(max_buyin)]);
+      FBuyinPhrase := 'buy-in';}
     if UINT32(seBuyin.Value) * 100 > max_buyin then
       seBuyin.Value := max_buyin / 100;
   finally

@@ -205,7 +205,7 @@ type
     procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentPlayerTransfer(const AMethodId: Integer; const AObject: TObject);
-    procedure CSEPlayerClubStatus(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEPlayerTableStatus(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -281,7 +281,7 @@ begin
                       TServerMessageCallback.Create(seTournamentPlayerFinished, CSETournamentPlayerFinished),
                       TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                       TServerMessageCallback.Create(seTournamentPlayerTransfer, CSETournamentPlayerTransfer),
-                      TServerMessageCallback.Create(sePlayerClubStatus, CSEPlayerClubStatus),
+                      TServerMessageCallback.Create(sePlayerClubStatus, CSEPlayerTableStatus),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -1501,16 +1501,14 @@ begin
   RefreshAll;
 end;
 
-procedure TfrmChipUpMain.CSEPlayerClubStatus(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmChipUpMain.CSEPlayerTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   proto: TPB_PlayerClubStatus;
 begin
   if not TTypes.TryCast<TPB_PlayerClubStatus>(AObject, proto) then
     Exit;
 
-  if dmMain.SelfInfo.ClubStatuses.ContainsKey(proto.ClubId) then
-    dmMain.SelfInfo.ClubStatuses.Remove(proto.ClubId);
-  dmMain.SelfInfo.ClubStatuses.Add(proto.ClubId, TPB_PlayerClubStatus.Create(proto, TRUE));
+  dmMain.SelfInfo.TableStatuses.AddOrSetValue(proto.Tableid, TPB_PlayerClubStatus.Create(proto, TRUE));
 end;
 
 procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);

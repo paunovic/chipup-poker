@@ -982,7 +982,7 @@ begin
         cbSitOutNextHand.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextBB.Left := table.Renderer.Metrics.CheckboxesLeft;
 
-        cbAutoCheckFold.Top := cbSitOutNextHand.Top;
+        cbAutoCheckFold.Top := cbFoldToAnyBet.Top;
         cbAutoCheck.Top := cbAutoCheckFold.Top;
         cbAutoCall.Top := cbAutoCheckFold.Top;
         cbAutoCallAny.Top := cbAutoCheckFold.Top;
@@ -1658,3 +1658,30 @@ end;
 
 end.
 
+
+{
+        last_visible := nil;
+        cbAutoCallAny.Left := ClientWidth - cbAutoCallAny.Width - 7;
+        if cbAutoCallAny.Visible then
+          last_visible := cbAutoCallAny;
+
+        if Assigned(last_visible) then
+          cbAutoCall.Left := last_visible.Left - cbAutoCall.Width - 2
+        else
+          cbAutoCall.Left := ClientWidth - cbAutoCall.Width - 7;
+        if cbAutoCall.Visible then
+          last_visible := cbAutoCall;
+
+        if Assigned(last_visible) then
+          cbAutoCheck.Left := last_visible.Left - cbAutoCheck.Width - 2
+        else
+          cbAutoCheck.Left := ClientWidth - cbAutoCheck.Width - 7;
+        if cbAutoCheck.Visible then
+          last_visible := cbAutoCheck;
+
+        if Assigned(last_visible) then
+          cbAutoCheckFold.Left := last_visible.Left - cbAutoCheckFold.Width - 2
+        else
+          cbAutoCheckFold.Left := ClientWidth - cbAutoCheckFold.Width - 7;
+
+}

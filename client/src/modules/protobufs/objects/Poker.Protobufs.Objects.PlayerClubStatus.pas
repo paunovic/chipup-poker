@@ -13,19 +13,29 @@ type
   private
     const
       kClubidFieldNumber = 1;
-      kPlayerBuyinLimitFieldNumber = 2;
+      kTableidFieldNumber = 2;
+      kBuyinMinFieldNumber = 3;
+      kBuyinMaxFieldNumber = 4;
 
     var
       FClubid: TMongoId;
-      FPlayerBuyinLimit: UInt32;
+      FTableid: TMongoId;
+      FBuyinMin: UInt32;
+      FBuyinMax: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
     procedure SetClubid(const AValue: TMongoId);
-    procedure set_has_PlayerBuyinLimit;
-    procedure clear_has_PlayerBuyinLimit;
-    procedure SetPlayerBuyinLimit(const AValue: UInt32);
+    procedure set_has_Tableid;
+    procedure clear_has_Tableid;
+    procedure SetTableid(const AValue: TMongoId);
+    procedure set_has_BuyinMin;
+    procedure clear_has_BuyinMin;
+    procedure SetBuyinMin(const AValue: UInt32);
+    procedure set_has_BuyinMax;
+    procedure clear_has_BuyinMax;
+    procedure SetBuyinMax(const AValue: UInt32);
   public
     constructor Create(const AFrom: TPB_PlayerClubStatus; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
@@ -39,10 +49,20 @@ type
     procedure clear_Clubid;
     property Clubid: TMongoId read FClubid write SetClubid;
 
-    // optional uint32 PlayerBuyinLimit = 2;
-    function has_PlayerBuyinLimit: Boolean;
-    procedure clear_PlayerBuyinLimit;
-    property PlayerBuyinLimit: UInt32 read FPlayerBuyinLimit write SetPlayerBuyinLimit;
+    // optional bytes Tableid = 2;
+    function has_Tableid: Boolean;
+    procedure clear_Tableid;
+    property Tableid: TMongoId read FTableid write SetTableid;
+
+    // optional uint32 BuyinMin = 3;
+    function has_BuyinMin: Boolean;
+    procedure clear_BuyinMin;
+    property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
+
+    // optional uint32 BuyinMax = 4;
+    function has_BuyinMax: Boolean;
+    procedure clear_BuyinMax;
+    property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
 
   end;
 
@@ -80,10 +100,20 @@ begin
         FClubid := AProtobufReader.readMongoId;
         set_has_Clubid;
       end;
-      kPlayerBuyinLimitFieldNumber: begin
+      kTableidFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FTableid := AProtobufReader.readMongoId;
+        set_has_Tableid;
+      end;
+      kBuyinMinFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FPlayerBuyinLimit := AProtobufReader.readUInt32;
-        set_has_PlayerBuyinLimit;
+        FBuyinMin := AProtobufReader.readUInt32;
+        set_has_BuyinMin;
+      end;
+      kBuyinMaxFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBuyinMax := AProtobufReader.readUInt32;
+        set_has_BuyinMax;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -94,8 +124,12 @@ procedure TPB_PlayerClubStatus.MergeFrom(const AFrom: TPB_PlayerClubStatus);
 begin
   if AFrom.has_Clubid then
     SetClubid(AFrom.Clubid);
-  if AFrom.has_PlayerBuyinLimit then
-    SetPlayerBuyinLimit(AFrom.PlayerBuyinLimit);
+  if AFrom.has_Tableid then
+    SetTableid(AFrom.Tableid);
+  if AFrom.has_BuyinMin then
+    SetBuyinMin(AFrom.BuyinMin);
+  if AFrom.has_BuyinMax then
+    SetBuyinMax(AFrom.BuyinMax);
 end;
 
 function TPB_PlayerClubStatus.IsInitialized: Boolean;
@@ -140,35 +174,101 @@ begin
   set_has_Clubid;
 end;
 
-procedure TPB_PlayerClubStatus.clear_PlayerBuyinLimit;
+procedure TPB_PlayerClubStatus.clear_Tableid;
 begin
-  FPlayerBuyinLimit := 0;
-  clear_has_PlayerBuyinLimit;
+  FTableid.Clear;
+  clear_has_Tableid;
 end;
 
-function TPB_PlayerClubStatus.has_PlayerBuyinLimit: Boolean;
+function TPB_PlayerClubStatus.has_Tableid: Boolean;
 begin
   result := (_has_bits_ and 2) > 0;
 end;
 
-procedure TPB_PlayerClubStatus.set_has_PlayerBuyinLimit;
+procedure TPB_PlayerClubStatus.set_has_Tableid;
 begin
   _has_bits_ := _has_bits_ or 2;
 end;
 
-procedure TPB_PlayerClubStatus.clear_has_PlayerBuyinLimit;
+procedure TPB_PlayerClubStatus.clear_has_Tableid;
 begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_PlayerClubStatus.SetPlayerBuyinLimit(const AValue: UInt32);
+procedure TPB_PlayerClubStatus.SetTableid(const AValue: TMongoId);
 begin
   if not Lightweight then
-    Assert(not has_PlayerBuyinLimit);
-  FPlayerBuyinLimit := AValue;
+    Assert(not has_Tableid);
+  FTableid := AValue;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kPlayerBuyinLimitFieldNumber, AValue);
-  set_has_PlayerBuyinLimit;
+  begin
+    ProtobufOutput.writeTag(kTableidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
+  set_has_Tableid;
+end;
+
+procedure TPB_PlayerClubStatus.clear_BuyinMin;
+begin
+  FBuyinMin := 0;
+  clear_has_BuyinMin;
+end;
+
+function TPB_PlayerClubStatus.has_BuyinMin: Boolean;
+begin
+  result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_PlayerClubStatus.set_has_BuyinMin;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_PlayerClubStatus.clear_has_BuyinMin;
+begin
+  _has_bits_ := _has_bits_ and not 4;
+end;
+
+procedure TPB_PlayerClubStatus.SetBuyinMin(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_BuyinMin);
+  FBuyinMin := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBuyinMinFieldNumber, AValue);
+  set_has_BuyinMin;
+end;
+
+procedure TPB_PlayerClubStatus.clear_BuyinMax;
+begin
+  FBuyinMax := 0;
+  clear_has_BuyinMax;
+end;
+
+function TPB_PlayerClubStatus.has_BuyinMax: Boolean;
+begin
+  result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_PlayerClubStatus.set_has_BuyinMax;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_PlayerClubStatus.clear_has_BuyinMax;
+begin
+  _has_bits_ := _has_bits_ and not 8;
+end;
+
+procedure TPB_PlayerClubStatus.SetBuyinMax(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_BuyinMax);
+  FBuyinMax := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBuyinMaxFieldNumber, AValue);
+  set_has_BuyinMax;
 end;
 
 procedure TPB_PlayerClubStatus.Clear;
@@ -177,7 +277,9 @@ begin
     Exit;
 
   clear_Clubid;
-  clear_PlayerBuyinLimit;
+  clear_Tableid;
+  clear_BuyinMin;
+  clear_BuyinMax;
 end;
 
 procedure TPB_PlayerClubStatusList.Assign(const APB_PlayerClubStatusList: TList<TPB_PlayerClubStatus>);

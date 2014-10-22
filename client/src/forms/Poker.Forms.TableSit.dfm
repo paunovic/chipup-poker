@@ -4,7 +4,7 @@ object frmTableSit: TfrmTableSit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Get Chips'
-  ClientHeight = 134
+  ClientHeight = 125
   ClientWidth = 298
   Color = clWindow
   Ctl3D = False
@@ -23,13 +23,13 @@ object frmTableSit: TfrmTableSit
   OnShow = FormShow
   DesignSize = (
     298
-    134)
+    125)
   PixelsPerInch = 96
   TextHeight = 13
   object lbsChipsAmount: TcxLabel
     AlignWithMargins = True
     Left = 15
-    Top = 64
+    Top = 55
     Margins.Left = 10
     Margins.Right = 10
     Anchors = [akLeft, akBottom]
@@ -46,12 +46,13 @@ object frmTableSit: TfrmTableSit
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
+    ExplicitTop = 64
     Width = 84
-    AnchorY = 73
+    AnchorY = 64
   end
   object seBuyin: TcxSpinEdit
     Left = 102
-    Top = 63
+    Top = 54
     Anchors = [akLeft, akRight, akBottom]
     Properties.MaxValue = 99999999.000000000000000000
     Properties.MinValue = 1.000000000000000000
@@ -63,11 +64,12 @@ object frmTableSit: TfrmTableSit
     Style.TextStyle = [fsBold]
     TabOrder = 1
     Value = 100.000000000000000000
+    ExplicitTop = 63
     Width = 72
   end
   object btOK: TcxButton
     Left = 97
-    Top = 98
+    Top = 89
     Width = 93
     Height = 27
     Action = acOK
@@ -80,10 +82,11 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 98
   end
   object btCancel: TcxButton
     Left = 196
-    Top = 98
+    Top = 89
     Width = 93
     Height = 27
     Action = acCancel
@@ -96,6 +99,7 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 98
   end
   object lbvTableName: TcxLabel
     AlignWithMargins = True
@@ -117,7 +121,7 @@ object frmTableSit: TfrmTableSit
   end
   object btMin: TcxButton
     Left = 177
-    Top = 64
+    Top = 55
     Width = 55
     Height = 19
     Action = acMin
@@ -130,10 +134,11 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 64
   end
   object btMax: TcxButton
     Left = 234
-    Top = 64
+    Top = 55
     Width = 55
     Height = 19
     Action = acMax
@@ -146,6 +151,7 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 64
   end
   object lbsTableBuyins: TcxLabel
     AlignWithMargins = True
@@ -169,29 +175,6 @@ object frmTableSit: TfrmTableSit
     Width = 282
     AnchorX = 149
     AnchorY = 35
-  end
-  object lbvPlayerMaxBuyin: TcxLabel
-    AlignWithMargins = True
-    Left = 7
-    Top = 42
-    Margins.Top = 6
-    AutoSize = False
-    Caption = '(your maximum buyin: %s)'
-    ParentFont = False
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Tahoma'
-    Style.Font.Style = []
-    Style.TextStyle = [fsBold]
-    Style.IsFontAssigned = True
-    Properties.Alignment.Horz = taCenter
-    Properties.Alignment.Vert = taVCenter
-    Transparent = True
-    Height = 17
-    Width = 282
-    AnchorX = 148
-    AnchorY = 51
   end
   object alTableSit: TActionList
     Left = 256

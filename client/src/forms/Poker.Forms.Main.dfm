@@ -4448,6 +4448,7 @@ object frmChipUpMain: TfrmChipUpMain
               end
               item
                 Action = acTermsAndConditions
+                Caption = '&Terms and Conditions'
               end
               item
                 Caption = '-'

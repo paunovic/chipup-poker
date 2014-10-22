@@ -12,7 +12,7 @@ type
     FPassword: String;
     FClubs: TClubList;
     FRegisteredTournaments: TList<TMongoId>;
-    FClubStatuses: TObjectDictionary<TMongoId, TPB_PlayerClubStatus>;
+    FTableStatuses: TObjectDictionary<TMongoId, TPB_PlayerClubStatus>;
 
   public
     constructor Create;
@@ -25,7 +25,7 @@ type
     property Password: String read FPassword write FPassword;
     property Clubs: TClubList read FClubs;
     property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
-    property ClubStatuses: TObjectDictionary<TMongoId, TPB_PlayerClubStatus> read FClubStatuses;
+    property TableStatuses: TObjectDictionary<TMongoId, TPB_PlayerClubStatus> read FTableStatuses;
   end;
 
 implementation
@@ -43,12 +43,12 @@ begin
 
   FClubs := TClubList.Create;
   FRegisteredTournaments := TList<TMongoId>.Create;
-  FClubStatuses := TObjectDictionary<TMongoId, TPB_PlayerClubStatus>.Create([doOwnsValues]);
+  FTableStatuses := TObjectDictionary<TMongoId, TPB_PlayerClubStatus>.Create([doOwnsValues]);
 end;
 
 destructor TPlayerInfo.Destroy;
 begin
-  FClubStatuses.Free;
+  FTableStatuses.Free;
   FRegisteredTournaments.Free;
   FClubs.Free;
 
@@ -61,7 +61,7 @@ begin
   FClubs.Clear;
   FPassword := '';
   FRegisteredTournaments.Clear;
-  FClubStatuses.Clear;
+  FTableStatuses.Clear;
 end;
 
 procedure TPlayerInfo.LoadFromLoginReply(const ALoginReply: TPB_LoginReply);
@@ -70,9 +70,9 @@ var
 begin
   Clear;
   MergeFrom(ALoginReply.Self);
-  FClubStatuses.Clear;
+  FTableStatuses.Clear;
   for pcs in ALoginReply.PlayerClubStatuses do
-    FClubStatuses.Add(pcs.Clubid, TPB_PlayerClubStatus.Create(pcs, TRUE));
+    FTableStatuses.AddOrSetValue(pcs.Tableid, TPB_PlayerClubStatus.Create(pcs, TRUE));
 end;
 
 end.
