@@ -745,7 +745,7 @@ message TournamentPrize {
 
 message PlayerClubStatus {
 	required bytes clubid = 1 [(ObjectId)=true];
-	required bytes tableid = 2 [(ObjectId)=true];
+	optional bytes tableid = 2 [(ObjectId)=true];
 	optional uint32 buyin_min = 3;
 	optional uint32 buyin_max = 4;
 }
