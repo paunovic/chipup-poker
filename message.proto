@@ -109,6 +109,7 @@ enum ServerCodes {
 	scTableSitOpen = 113;
 	scResetPlayerBalances = 114;
 	scDeleteTableStats = 115;
+	scMutePlayer = 116;
 }
 
 message StringSizes {
@@ -196,6 +197,7 @@ message ClubMember {
 	optional uint32 balance_limit = 3;
 	optional int32 club_balance = 4;
 	optional bool unlimited_limit = 5;
+	optional bool muted = 6;
 }
 
 message Club {
@@ -425,6 +427,12 @@ message ChangeSuspendState {
 	required bytes club_mongo_id = 1 [(ObjectId)=true];
 	required bytes player_mongo_id = 3 [(ObjectId)=true];
 	required bool suspended = 2;
+}
+
+message ChangeMutedState {
+	required bytes club_mongo_id = 1 [(ObjectId)=true];
+	required bytes player_mongo_id = 2 [(ObjectId)=true];
+	required bool muted = 3;
 }
 
 message RegisterReply {
