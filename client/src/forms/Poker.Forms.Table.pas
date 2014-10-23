@@ -125,6 +125,7 @@ type
 
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure AddDealerChatMessage(const AMessage: String);
+    procedure AddSystemChatMessage(const AMessage: String);
     procedure ModalFormClose(Sender: TObject);
     procedure CheckChatScrollbackLimit;
     procedure RendererDealerChatMessage(const AMessage: String);
@@ -150,6 +151,7 @@ type
     procedure CSEGameChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEClubChange(const AMethodId: Integer; const AObject: TObject);
 
     procedure DefocusControls;
     procedure RefreshAll;
@@ -177,7 +179,7 @@ uses
   Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game, Poker.Games.Game, Poker.Sounds,
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
-  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember;
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -211,6 +213,7 @@ begin
     ttLive, ttTournament: begin
       FCallbacksId := MessageContainer.AddCallbacks([
                           TServerMessageCallback.Create(seChat, CSRChatEvent),
+                          TServerMessageCallback.Create(seClubChange, CSEClubChange),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
                           TServerMessageCallback.Create(seGameChange, CSEGameChange),
                           TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
@@ -760,6 +763,11 @@ begin
   AddChatMessage('Dealer: ', 2, 0, AMessage, 3, -1);
 end;
 
+procedure TfrmTable.AddSystemChatMessage(const AMessage: String);
+begin
+  AddChatMessage('SYSTEM: ', 5, 0, AMessage, 6, -1);
+end;
+
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 var
   msg_style: Integer;
@@ -852,6 +860,28 @@ begin
   end;
 end;
 
+procedure TfrmTable.CSEClubChange(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
+  table: TTable;
+  refresh_all: Boolean;
+begin
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
+    Exit;
+
+  refresh_all := FALSE;
+
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    refresh_all := pbclub.MongoId = table.ClubId;
+  finally
+    Tables.Unlock;
+  end;
+
+  if refresh_all then
+    RefreshAll;
+end;
+
 procedure TfrmTable.CSEGameChange(const AMethodId: Integer; const AObject: TObject);
 var
   table: TTable;
@@ -884,7 +914,7 @@ begin
       if chat_event.TableId = FGameId then
         AddUserChatMessage(chat_message.Username, chat_message.Msg);
     end;
-    ceServerMessage: ;
+    ceServerMessage: AddSystemChatMessage(chat_event.Msg.Msg);
   end;
 end;
 
@@ -956,6 +986,7 @@ procedure TfrmTable.ConfigureGUI;
 var
   hround: Integer;
   table: TTable;
+  member: TPB_ClubMember;
 begin
   if WindowState <> wsMaximized then
   begin
@@ -1049,6 +1080,22 @@ begin
         end;
 
         lbvHandStrength.Top := Round(table.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds^[0].y - lbvHandStrength.Height - 5);
+
+        if table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
+        begin
+          if member.Muted then
+          begin
+            edChat.Text := 'You have been muted';
+            edChat.Enabled := FALSE;
+          end
+          else
+            if not edChat.Enabled then
+            begin
+              edChat.Enabled := TRUE;
+              edChat.Text := '';
+              edChat.OnExit(nil);
+            end;
+        end;
       end;
 
       ttHandReplay: begin
@@ -1196,7 +1243,13 @@ begin
      (Settings.FoldChecks) then
     acCheck.Execute
   else
+  begin
+    if (Settings.FoldConfirmation) and
+       (MessageDlg('You are folding, while you can free check. Are you sure?', mtConfirmation, mbYesNo, 0) = mrNo) then
+      Exit;
+
     ServerSocket.Fold(FGameId);
+  end;
 end;
 
 procedure TfrmTable.acPlayNowExecute(Sender: TObject);
@@ -1658,30 +1711,3 @@ end;
 
 end.
 
-
-{
-        last_visible := nil;
-        cbAutoCallAny.Left := ClientWidth - cbAutoCallAny.Width - 7;
-        if cbAutoCallAny.Visible then
-          last_visible := cbAutoCallAny;
-
-        if Assigned(last_visible) then
-          cbAutoCall.Left := last_visible.Left - cbAutoCall.Width - 2
-        else
-          cbAutoCall.Left := ClientWidth - cbAutoCall.Width - 7;
-        if cbAutoCall.Visible then
-          last_visible := cbAutoCall;
-
-        if Assigned(last_visible) then
-          cbAutoCheck.Left := last_visible.Left - cbAutoCheck.Width - 2
-        else
-          cbAutoCheck.Left := ClientWidth - cbAutoCheck.Width - 7;
-        if cbAutoCheck.Visible then
-          last_visible := cbAutoCheck;
-
-        if Assigned(last_visible) then
-          cbAutoCheckFold.Left := last_visible.Left - cbAutoCheckFold.Width - 2
-        else
-          cbAutoCheckFold.Left := ClientWidth - cbAutoCheckFold.Width - 7;
-
-}

@@ -2527,7 +2527,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsStats
+    Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2781,6 +2781,22 @@ object frmClubLobby: TfrmClubLobby
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 6
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object btMuteUnmutePlayer: TcxButton
+          Left = 371
+          Top = 118
+          Width = 115
+          Height = 26
+          Action = acMuteUnmutePlayer
+          Anchors = [akLeft, akBottom]
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 7
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3396,6 +3412,10 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Delete Selected Stats'
       Enabled = False
       OnExecute = acDeleteTableStatsExecute
+    end
+    object acMuteUnmutePlayer: TAction
+      Caption = 'Mute'
+      OnExecute = acMuteUnmutePlayerExecute
     end
   end
   object pmTablesStats: TPopupMenu

@@ -4407,7 +4407,9 @@ object frmChipUpMain: TfrmChipUpMain
                   end
                   item
                     Action = acFoldChecks
-                    Caption = 'A&lways check/fold'
+                  end
+                  item
+                    Action = acConfirmationOnFold
                   end>
                 Caption = '&Table'
               end
@@ -4556,9 +4558,15 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acFoldChecks: TAction
       Category = 'Options'
-      Caption = 'Always check/fold'
+      Caption = 'Always Check/Fold'
       GroupIndex = 2
       OnExecute = acFoldChecksExecute
+    end
+    object acConfirmationOnFold: TAction
+      Category = 'Options'
+      Caption = 'Confirmation on Fold'
+      GroupIndex = 4
+      OnExecute = acConfirmationOnFoldExecute
     end
     object acHandHistory: TAction
       Category = 'Options'

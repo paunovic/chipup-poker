@@ -118,6 +118,8 @@ type
     acResetPlayerBalances: TAction;
     btDeleteSelectedStats: TcxButton;
     acDeleteTableStats: TAction;
+    btMuteUnmutePlayer: TcxButton;
+    acMuteUnmutePlayer: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -154,6 +156,7 @@ type
     procedure acResetPlayerBalancesExecute(Sender: TObject);
     procedure acDeleteTableStatsExecute(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure acMuteUnmutePlayerExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -237,6 +240,7 @@ begin
   btGiveOwnership.Top := btResetAllPlayerBalances.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btCloseTable.Top := btNewGame.Top;
+  btMuteUnmutePlayer.Top := btSuspendUnsuspend.Top;
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -323,6 +327,14 @@ begin
     acRemovePlayer.Enabled := acGiveOwnership.Enabled;
     btSuspendUnsuspend.Visible := admin_visible;
     acDeleteTableStats.Enabled := admin_visible;
+    acMuteUnmutePlayer.Visible := admin_visible;
+    acMuteUnmutePlayer.Enabled := (admin_visible) and (Assigned(member));
+    if Assigned(member) then
+      if member.Muted then
+        acMuteUnmutePlayer.Caption := 'Unmute'
+      else
+        acMuteUnmutePlayer.Caption := 'Mute';
+
     if btSuspendUnsuspend.Visible then
     begin
       acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.Owner);
@@ -647,6 +659,9 @@ var
         status := 'Suspended'
       else
         status := 'Member';
+    if AMember.Muted then
+      status := status + ' (Muted)';
+
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListStatus.Index, status);
   end;
 
@@ -956,6 +971,20 @@ procedure TfrmClubLobby.acLeaveClubExecute(Sender: TObject);
 begin
   if MessageDlg('Are you sure you want to leave this club?', mtConfirmation, mbYesNo, 0) = mrYes then
     ServerSocket.LeaveClub(FClubId);
+end;
+
+procedure TfrmClubLobby.acMuteUnmutePlayerExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  member: TPB_ClubMember;
+begin
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    if club.GetMemberInfo(FSelectedPlayerId, member) then
+      ServerSocket.ChangePlayerMutedState(FClubId, FSelectedPlayerId, not member.Muted);
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
 end;
 
 procedure TfrmClubLobby.acRemovePlayerExecute(Sender: TObject);

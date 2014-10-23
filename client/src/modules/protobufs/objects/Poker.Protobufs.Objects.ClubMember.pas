@@ -17,6 +17,7 @@ type
       kBalanceLimitFieldNumber = 3;
       kClubBalanceFieldNumber = 4;
       kUnlimitedLimitFieldNumber = 5;
+      kMutedFieldNumber = 6;
 
     var
       FId: TMongoId;
@@ -24,6 +25,7 @@ type
       FBalanceLimit: UInt32;
       FClubBalance: Integer;
       FUnlimitedLimit: Boolean;
+      FMuted: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -41,6 +43,9 @@ type
     procedure set_has_UnlimitedLimit;
     procedure clear_has_UnlimitedLimit;
     procedure SetUnlimitedLimit(const AValue: Boolean);
+    procedure set_has_Muted;
+    procedure clear_has_Muted;
+    procedure SetMuted(const AValue: Boolean);
   public
     constructor Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
@@ -73,6 +78,11 @@ type
     function has_UnlimitedLimit: Boolean;
     procedure clear_UnlimitedLimit;
     property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
+
+    // optional bool Muted = 6;
+    function has_Muted: Boolean;
+    procedure clear_Muted;
+    property Muted: Boolean read FMuted write SetMuted;
 
   end;
 
@@ -130,6 +140,11 @@ begin
         FUnlimitedLimit := AProtobufReader.readBoolean;
         set_has_UnlimitedLimit;
       end;
+      kMutedFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FMuted := AProtobufReader.readBoolean;
+        set_has_Muted;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -147,6 +162,8 @@ begin
     SetClubBalance(AFrom.ClubBalance);
   if AFrom.has_UnlimitedLimit then
     SetUnlimitedLimit(AFrom.UnlimitedLimit);
+  if AFrom.has_Muted then
+    SetMuted(AFrom.Muted);
 end;
 
 function TPB_ClubMember.IsInitialized: Boolean;
@@ -315,6 +332,37 @@ begin
   set_has_UnlimitedLimit;
 end;
 
+procedure TPB_ClubMember.clear_Muted;
+begin
+  FMuted := false;
+  clear_has_Muted;
+end;
+
+function TPB_ClubMember.has_Muted: Boolean;
+begin
+  result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_Muted;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_ClubMember.clear_has_Muted;
+begin
+  _has_bits_ := _has_bits_ and not 32;
+end;
+
+procedure TPB_ClubMember.SetMuted(const AValue: Boolean);
+begin
+  if not Lightweight then
+    Assert(not has_Muted);
+  FMuted := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kMutedFieldNumber, AValue);
+  set_has_Muted;
+end;
+
 procedure TPB_ClubMember.Clear;
 begin
   if _has_bits_ = 0 then
@@ -325,6 +373,7 @@ begin
   clear_BalanceLimit;
   clear_ClubBalance;
   clear_UnlimitedLimit;
+  clear_Muted;
 end;
 
 procedure TPB_ClubMemberList.Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);

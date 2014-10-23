@@ -19,6 +19,7 @@ type
       JSON_FOLD_CHECKS       = 'fold_checks';
       JSON_ANIMATIONS        = 'animations';
       JSON_CARD_BACKGROUND   = 'card_background';
+      JSON_FOLD_CONFIRMATION = 'fold_confirmation';
 
       JSON_DEFAULT_LOGIN             = '';
       JSON_DEFAULT_PASSWORD          = '';
@@ -30,6 +31,7 @@ type
       JSON_DEFAULT_FOLD_CHECKS       = FALSE;
       JSON_DEFAULT_ANIMATIONS        = TRUE;
       JSON_DEFAULT_CARD_BACKGROUND   = 1;
+      JSON_DEFAULT_FOLD_CONFIRMATION = FALSE;
 
     function GetJSONString(const AField, ADefaultValue: String): String;
     function GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
@@ -55,6 +57,8 @@ type
     procedure SetAnimations(const AValue: Boolean);
     function GetCardBackground: Integer;
     procedure SetCardBackground(const AValue: Integer);
+    function GetFoldConfirmation: Boolean;
+    procedure SetFoldConfirmation(const AValue: Boolean);
 
     var
       FJSON: ISuperObject;
@@ -82,6 +86,7 @@ type
     property FoldChecks: Boolean read GetFoldChecks write SetFoldChecks;
     property Animations: Boolean read GetAnimations write SetAnimations;
     property CardBackground: Integer read GetCardBackground write SetCardBackground;
+    property FoldConfirmation: Boolean read GetFoldConfirmation write SetFoldConfirmation;
   end;
 
 var
@@ -245,6 +250,11 @@ begin
   result := GetJSONBool(JSON_FOLD_CHECKS, JSON_DEFAULT_FOLD_CHECKS);
 end;
 
+function TSettings.GetFoldConfirmation: Boolean;
+begin
+  result := GetJSONBool(JSON_FOLD_CONFIRMATION, JSON_DEFAULT_FOLD_CONFIRMATION);
+end;
+
 procedure TSettings.SetLogin(const AValue: String);
 begin
   FJSON.S[JSON_LOGIN] := AValue;
@@ -293,6 +303,11 @@ end;
 procedure TSettings.SetFoldChecks(const AValue: Boolean);
 begin
   FJSON.B[JSON_FOLD_CHECKS] := AValue;
+end;
+
+procedure TSettings.SetFoldConfirmation(const AValue: Boolean);
+begin
+  FJSON.B[JSON_FOLD_CONFIRMATION] := AValue;
 end;
 
 end.

@@ -667,6 +667,21 @@ object frmTable: TfrmTable
         Size = 8
         Color = 16753478
         Unicode = True
+      end
+      item
+        StyleName = 'System'
+        FontName = 'Arial'
+        Size = 8
+        Style = [fsBold]
+        Color = clRed
+        Unicode = True
+      end
+      item
+        StyleName = 'System Text'
+        FontName = 'Arial'
+        Size = 8
+        Color = 4227327
+        Unicode = True
       end>
     ParaStyles = <
       item

@@ -106,6 +106,7 @@ type
     lbsTournamentDetails: TcxLabel;
     tiTournamentInfoRefresh: TTimer;
     styleTournamentNameRegistered: TcxStyle;
+    acConfirmationOnFold: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -156,6 +157,7 @@ type
     procedure tiTournamentInfoRefreshTimer(Sender: TObject);
     procedure gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure acConfirmationOnFoldExecute(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -455,6 +457,13 @@ begin
   Settings.Save;
 end;
 
+procedure TfrmChipUpMain.acConfirmationOnFoldExecute(Sender: TObject);
+begin
+  Settings.FoldConfirmation := not Settings.FoldConfirmation;
+  acConfirmationOnFold.Checked := Settings.FoldConfirmation;
+  Settings.Save;
+end;
+
 procedure TfrmChipUpMain.acDisconnectExecute(Sender: TObject);
 begin
   ServerSocket.Disconnect;
@@ -618,6 +627,7 @@ begin
   acSoundsOnOff.Checked := Settings.Sounds;
   acFoldChecks.Checked := Settings.FoldChecks;
   acAnimationsEnabled.Checked := Settings.Animations;
+  acConfirmationOnFold.Checked := Settings.FoldConfirmation;
 
   ActionManager.ActionBars[0].Items[3].Visible := Settings.DeveloperMode;
 end;

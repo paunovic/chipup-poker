@@ -61,6 +61,7 @@ type
     procedure QueryTournamentInfo(const ATournamentId: TMongoId);
     procedure TableSitOpen(const AGameId: TMongoId);
     procedure DeleteTableStats(const AClubId: TMongoId; const ATableIds: TList<TMongoId>);
+    procedure ChangePlayerMutedState(const AClubId, APlayerId: TMongoId; const AMuted: Boolean);
   end;
 
 var
@@ -81,7 +82,8 @@ uses
   Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
   Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
-  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats;
+  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats,
+  Poker.Protobufs.Objects.ChangeMutedState;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -422,6 +424,22 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TServerSocket.ChangePlayerMutedState(const AClubId, APlayerId: TMongoId; const AMuted: Boolean);
+var
+  protobuf: TPB_ChangeMutedState;
+begin
+  protobuf := TPB_ChangeMutedState.Create;
+  try
+    protobuf.ClubMongoId := AClubId;
+    protobuf.PlayerMongoId := APlayerId;
+    protobuf.Muted := AMuted;
+    SendProtobuf(scMutePlayer, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 procedure TServerSocket.GetUserInfos(const AMongoIds: array of TMongoId);
 var
