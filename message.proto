@@ -110,7 +110,7 @@ enum ServerCodes {
 	scResetPlayerBalances = 114;
 	scDeleteTableStats = 115;
 	scMutePlayer = 116;
-	scManagerPlayer = 117;
+	scChangePlayerManagerState = 117;
 }
 
 message StringSizes {
@@ -425,16 +425,10 @@ message SeatInfo {
 	optional bool autoplay = 11;
 }
 
-message ChangeSuspendState {
+message ChangeClubPlayerFlag {
 	required bytes club_mongo_id = 1 [(ObjectId)=true];
 	required bytes player_mongo_id = 3 [(ObjectId)=true];
-	required bool suspended = 2;
-}
-
-message ChangeMutedState {
-	required bytes club_mongo_id = 1 [(ObjectId)=true];
-	required bytes player_mongo_id = 2 [(ObjectId)=true];
-	required bool muted = 3;
+	required bool flag = 2;
 }
 
 message RegisterReply {
