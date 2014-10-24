@@ -62,7 +62,7 @@ implementation
 uses
   Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Clubs.Club, Poker.Games.Game,
   Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Tables.TableList;
+  Poker.Tables.TableList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus;
 
 { TfrmHandHistory }
 
@@ -413,7 +413,22 @@ begin
 end;
 
 procedure TfrmHandHistory.acReplayHandExecute(Sender: TObject);
+var
+  table: TTable;
 begin
+  Tables.Lock;
+  try
+   for table in Tables.Values do
+     if (table.TableType = ttHandReplay) and
+        (table.HandHistoryHandId = FSelectedHandId) then
+     begin
+       table.Show;
+       Exit;
+     end;
+  finally
+    Tables.Unlock;
+  end;
+
   Tables.AddHandPlaybackTable(FSelectedTableId, FSelectedHandId);
 end;
 

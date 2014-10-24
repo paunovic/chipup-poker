@@ -40,7 +40,6 @@ type
     procedure TablePlayNow(const AGameId: TMongoId);
     procedure TableSitOutNextHand(const AGameId: TMongoId; const AFlag: Boolean);
     procedure TableSitOutNextBB(const AGameId: TMongoId; const AFlag: Boolean);
-    procedure ChangePlayerSuspendState(const AClubId, APlayerId: TMongoId; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: array of TMongoId);
     procedure Fold(const AGameId: TMongoId);
     procedure PutChips(const AGameId: TMongoId; const AChipAmount: Integer; const ATableState: TTableState);
@@ -61,7 +60,7 @@ type
     procedure QueryTournamentInfo(const ATournamentId: TMongoId);
     procedure TableSitOpen(const AGameId: TMongoId);
     procedure DeleteTableStats(const AClubId: TMongoId; const ATableIds: TList<TMongoId>);
-    procedure ChangePlayerMutedState(const AClubId, APlayerId: TMongoId; const AMuted: Boolean);
+    procedure ChangeClubPlayerFlag(const ACommand: TServerCodes; const AClubId, APlayerId: TMongoId; const AFlag: Boolean);
   end;
 
 var
@@ -77,13 +76,12 @@ uses
   Poker.Protobufs.Objects.KickPlayerParams, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.ChangeSuspendState,
+  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.ChangeClubPlayerFlag,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
   Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
   Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
-  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats,
-  Poker.Protobufs.Objects.ChangeMutedState;
+  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -410,36 +408,20 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangePlayerSuspendState(const AClubId, APlayerId: TMongoId; const ASuspended: Boolean);
+procedure TServerSocket.ChangeClubPlayerFlag(const ACommand: TServerCodes; const AClubId, APlayerId: TMongoId; const AFlag: Boolean);
 var
-  protobuf: TPB_ChangeSuspendState;
+  protobuf: TPB_ChangeClubPlayerFlag;
 begin
-  protobuf := TPB_ChangeSuspendState.Create;
+  protobuf := TPB_ChangeClubPlayerFlag.Create;
   try
     protobuf.ClubMongoId := AClubId;
     protobuf.PlayerMongoId := APlayerId;
-    protobuf.Suspended := ASuspended;
-    SendProtobuf(scSuspendPlayer, protobuf);
+    protobuf.Flag := AFlag;
+    SendProtobuf(ACommand, protobuf);
   finally
     protobuf.Free;
   end;
 end;
-
-procedure TServerSocket.ChangePlayerMutedState(const AClubId, APlayerId: TMongoId; const AMuted: Boolean);
-var
-  protobuf: TPB_ChangeMutedState;
-begin
-  protobuf := TPB_ChangeMutedState.Create;
-  try
-    protobuf.ClubMongoId := AClubId;
-    protobuf.PlayerMongoId := APlayerId;
-    protobuf.Muted := AMuted;
-    SendProtobuf(scMutePlayer, protobuf);
-  finally
-    protobuf.Free;
-  end;
-end;
-
 
 procedure TServerSocket.GetUserInfos(const AMongoIds: array of TMongoId);
 var

@@ -846,14 +846,17 @@ begin
           c.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
 
           if dmMain.SelfInfo.MongoId = club.Owner then
-            status := 'Manager'
+            status := 'Owner'
           else
             if club.GetMemberInfo(dmMain.SelfInfo.Mongoid, member) then
             begin
               if member.Suspended then
                 status := 'Suspended'
               else
-                status := 'Member';
+                if member.Manager then
+                  status := 'Manager'
+                else
+                  status := 'Member';
             end
             else
               status := 'Unknown';

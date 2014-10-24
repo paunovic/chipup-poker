@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 438
@@ -3909,7 +3909,7 @@ object frmChipUpMain: TfrmChipUpMain
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
               SortIndex = 0
-              SortOrder = soAscending
+              SortOrder = soDescending
               Width = 62
             end
           end
@@ -4201,6 +4201,7 @@ object frmChipUpMain: TfrmChipUpMain
             Style.IsFontAssigned = True
             Properties.Alignment.Horz = taCenter
             Properties.Alignment.Vert = taVCenter
+            ExplicitLeft = -1
             Height = 24
             Width = 203
             AnchorX = 102
@@ -4407,9 +4408,11 @@ object frmChipUpMain: TfrmChipUpMain
                   end
                   item
                     Action = acFoldChecks
+                    Caption = 'A&lways Check/Fold'
                   end
                   item
                     Action = acConfirmationOnFold
+                    Caption = '&Confirmation on Fold'
                   end>
                 Caption = '&Table'
               end

@@ -2790,7 +2790,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btMuteUnmutePlayer: TcxButton
           Left = 371
-          Top = 118
+          Top = 150
           Width = 115
           Height = 26
           Action = acMuteUnmutePlayer
@@ -2804,11 +2804,29 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
+        object btPromoteToManager: TcxButton
+          Left = 371
+          Top = 118
+          Width = 115
+          Height = 26
+          Action = acPromoteDemoteUser
+          Anchors = [akLeft, akBottom]
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 8
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2946,6 +2964,8 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3416,6 +3436,10 @@ object frmClubLobby: TfrmClubLobby
     object acMuteUnmutePlayer: TAction
       Caption = 'Mute'
       OnExecute = acMuteUnmutePlayerExecute
+    end
+    object acPromoteDemoteUser: TAction
+      Caption = 'Promote to Manager'
+      OnExecute = acPromoteDemoteUserExecute
     end
   end
   object pmTablesStats: TPopupMenu

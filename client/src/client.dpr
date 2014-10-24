@@ -53,6 +53,7 @@ uses
   Poker.Forms.Subscriptions in 'forms\Poker.Forms.Subscriptions.pas' {frmSubscriptions},
   Poker.Forms.Settings in 'forms\Poker.Forms.Settings.pas' {frmSettings},
   Poker.Forms.TournamentLobby in 'forms\Poker.Forms.TournamentLobby.pas' {frmTournamentLobby},
+  Poker.Forms.TournamentFinishDialog in 'forms\Poker.Forms.TournamentFinishDialog.pas' {frmTournamentFinishDialog},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -136,7 +137,6 @@ uses
   Poker.Protobufs.Objects.TableSit in 'modules\protobufs\objects\Poker.Protobufs.Objects.TableSit.pas',
   Poker.Protobufs.Objects.TableStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.TableStatus.pas',
   Poker.Protobufs.Objects.SeatInfo in 'modules\protobufs\objects\Poker.Protobufs.Objects.SeatInfo.pas',
-  Poker.Protobufs.Objects.ChangeSuspendState in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeSuspendState.pas',
   Poker.Protobufs.Objects.RegisterReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.RegisterReply.pas',
   Poker.Protobufs.Objects.ClubCommandReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.ClubCommandReply.pas',
   Poker.Protobufs.Objects.LoginReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.LoginReply.pas',
@@ -186,10 +186,9 @@ uses
   Poker.Common.SafeMutex in 'modules\common\Poker.Common.SafeMutex.pas',
   Poker.Protobufs.Objects.TournamentPlayerTransfer in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas',
   Poker.Protobufs.Objects.TournamentPrize in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas',
-  Poker.Forms.TournamentFinishDialog in 'forms\Poker.Forms.TournamentFinishDialog.pas' {frmTournamentFinishDialog},
   Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas',
   Poker.Protobufs.Objects.DeleteTableStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas',
-  Poker.Protobufs.Objects.ChangeMutedState in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeMutedState.pas';
+  Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas';
 
 procedure FocusApp;
 var

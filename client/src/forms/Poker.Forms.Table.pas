@@ -765,7 +765,7 @@ end;
 
 procedure TfrmTable.AddSystemChatMessage(const AMessage: String);
 begin
-  AddChatMessage('SYSTEM: ', 5, 0, AMessage, 6, -1);
+  AddChatMessage('Administrator: ', 5, 0, AMessage, 6, -1);
 end;
 
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);

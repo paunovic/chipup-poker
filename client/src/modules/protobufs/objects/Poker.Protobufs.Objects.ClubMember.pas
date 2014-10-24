@@ -18,6 +18,7 @@ type
       kClubBalanceFieldNumber = 4;
       kUnlimitedLimitFieldNumber = 5;
       kMutedFieldNumber = 6;
+      kManagerFieldNumber = 7;
 
     var
       FId: TMongoId;
@@ -26,6 +27,7 @@ type
       FClubBalance: Integer;
       FUnlimitedLimit: Boolean;
       FMuted: Boolean;
+      FManager: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -46,6 +48,9 @@ type
     procedure set_has_Muted;
     procedure clear_has_Muted;
     procedure SetMuted(const AValue: Boolean);
+    procedure set_has_Manager;
+    procedure clear_has_Manager;
+    procedure SetManager(const AValue: Boolean);
   public
     constructor Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
@@ -83,6 +88,11 @@ type
     function has_Muted: Boolean;
     procedure clear_Muted;
     property Muted: Boolean read FMuted write SetMuted;
+
+    // optional bool Manager = 7;
+    function has_Manager: Boolean;
+    procedure clear_Manager;
+    property Manager: Boolean read FManager write SetManager;
 
   end;
 
@@ -145,6 +155,11 @@ begin
         FMuted := AProtobufReader.readBoolean;
         set_has_Muted;
       end;
+      kManagerFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FManager := AProtobufReader.readBoolean;
+        set_has_Manager;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -164,6 +179,8 @@ begin
     SetUnlimitedLimit(AFrom.UnlimitedLimit);
   if AFrom.has_Muted then
     SetMuted(AFrom.Muted);
+  if AFrom.has_Manager then
+    SetManager(AFrom.Manager);
 end;
 
 function TPB_ClubMember.IsInitialized: Boolean;
@@ -363,6 +380,37 @@ begin
   set_has_Muted;
 end;
 
+procedure TPB_ClubMember.clear_Manager;
+begin
+  FManager := false;
+  clear_has_Manager;
+end;
+
+function TPB_ClubMember.has_Manager: Boolean;
+begin
+  result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_Manager;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_ClubMember.clear_has_Manager;
+begin
+  _has_bits_ := _has_bits_ and not 64;
+end;
+
+procedure TPB_ClubMember.SetManager(const AValue: Boolean);
+begin
+  if not Lightweight then
+    Assert(not has_Manager);
+  FManager := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kManagerFieldNumber, AValue);
+  set_has_Manager;
+end;
+
 procedure TPB_ClubMember.Clear;
 begin
   if _has_bits_ = 0 then
@@ -374,6 +422,7 @@ begin
   clear_ClubBalance;
   clear_UnlimitedLimit;
   clear_Muted;
+  clear_Manager;
 end;
 
 procedure TPB_ClubMemberList.Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);

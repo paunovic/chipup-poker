@@ -107,7 +107,8 @@ type
     scTableSitOpen = 113,
     scResetPlayerBalances = 114,
     scDeleteTableStats = 115,
-    scMutePlayer = 116
+    scMutePlayer = 116,
+    scChangePlayerManagerState = 117
   );
 
 {$IFDEF DEBUG}
@@ -240,6 +241,7 @@ begin
     scResetPlayerBalances: result := 'scResetPlayerBalances';
     scDeleteTableStats: result := 'scDeleteTableStats';
     scMutePlayer: result := 'scMutePlayer';
+    scChangePlayerManagerState: result := 'scChangePlayerManagerState';
   end;
 end;
 {$ENDIF DEBUG}

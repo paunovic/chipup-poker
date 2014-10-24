@@ -120,6 +120,8 @@ type
     acDeleteTableStats: TAction;
     btMuteUnmutePlayer: TcxButton;
     acMuteUnmutePlayer: TAction;
+    btPromoteToManager: TcxButton;
+    acPromoteDemoteUser: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -157,6 +159,7 @@ type
     procedure acDeleteTableStatsExecute(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure acMuteUnmutePlayerExecute(Sender: TObject);
+    procedure acPromoteDemoteUserExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -241,6 +244,7 @@ begin
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btCloseTable.Top := btNewGame.Top;
   btMuteUnmutePlayer.Top := btSuspendUnsuspend.Top;
+  btPromoteToManager.Top := btGiveOwnership.Top;
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -287,8 +291,9 @@ procedure TfrmClubLobby.ConfigureGUI(const AUpdateLists: Boolean = TRUE);
 var
   club: TClubInfo;
   player: TPlayerInfo;
-  manager: String;
-  admin_visible: Boolean;
+  owner_name: String;
+  is_owner: Boolean;
+  is_manager: Boolean;
   member: TPB_ClubMember;
 begin
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
@@ -297,43 +302,60 @@ begin
 
     lbsHeader.Caption := club.Name;
 
-    manager := '';
+    owner_name := '';
     if Players.TryGetValue(club.Owner, player) then
-      manager := player.Displayname;
+      owner_name := player.Displayname;
 
-    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Seq]);
+    lbsSubheader.Caption := Format('Owner: %s           Members: %d           Club ID: %d', [owner_name, club.Members.Count, club.Seq]);
 
-    admin_visible := club.Owner = dmMain.SelfInfo.MongoId;
+    is_manager := FALSE;
+    if club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
+      is_manager := member.Manager;
 
     if not club.GetMemberInfo(FSelectedPlayerId, member) then
       member := nil;
 
-    gridPlayersListLimit.Visible := admin_visible;
-    gridPlayersListBalance.Visible := admin_visible;
-    btChangeClubDetails.Visible := admin_visible;
-    acShowClubChangeDetailsForm.Enabled := admin_visible;
-    acUpdateClubDetails.Enabled := admin_visible;
-    btCloseClub.Visible := admin_visible;
-    acCloseClub.Enabled := admin_visible;
-    btSetLimit.Visible := admin_visible;
-    acResetBalance.Visible := admin_visible;
-    acResetBalance.Enabled := (admin_visible) and (Assigned(member));
-    acResetPlayerBalances.Visible := admin_visible;
-    acResetPlayerBalances.Enabled := admin_visible;
-    acSetLimit.Enabled := (admin_visible) and (Assigned(member));
-    btGiveOwnership.Visible := admin_visible;
-    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
-    btRemovePlayerFromClub.Visible := admin_visible;
+    is_owner := club.Owner = dmMain.SelfInfo.MongoId;
+
+    if not club.GetMemberInfo(FSelectedPlayerId, member) then
+      member := nil;
+
+    gridPlayersListLimit.Visible := is_owner;
+    gridPlayersListBalance.Visible := is_owner;
+    btChangeClubDetails.Visible := is_owner;
+    acShowClubChangeDetailsForm.Enabled := is_owner;
+    acUpdateClubDetails.Enabled := is_owner;
+    btCloseClub.Visible := is_owner;
+    acCloseClub.Enabled := is_owner;
+    btSetLimit.Visible := is_owner;
+    acResetBalance.Visible := is_owner;
+    acResetBalance.Enabled := (is_owner) and (Assigned(member));
+    acResetPlayerBalances.Visible := is_owner;
+    acResetPlayerBalances.Enabled := is_owner;
+    acSetLimit.Enabled := (is_owner) and (Assigned(member));
+    btGiveOwnership.Visible := is_owner;
+    acGiveOwnership.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
+    btRemovePlayerFromClub.Visible := is_owner;
     acRemovePlayer.Enabled := acGiveOwnership.Enabled;
-    btSuspendUnsuspend.Visible := admin_visible;
-    acDeleteTableStats.Enabled := admin_visible;
-    acMuteUnmutePlayer.Visible := admin_visible;
-    acMuteUnmutePlayer.Enabled := (admin_visible) and (Assigned(member));
+    btSuspendUnsuspend.Visible := is_owner;
+    acDeleteTableStats.Enabled := is_owner;
+    acDeleteTableStats.Visible := is_owner;
+    acMuteUnmutePlayer.Visible := is_owner;
+    acMuteUnmutePlayer.Enabled := (is_owner) and (Assigned(member));
+    acPromoteDemoteUser.Visible := is_owner;
+    acPromoteDemoteUser.Enabled := (is_owner) and (Assigned(member)) and (member.MongoId <> dmMain.SelfInfo.MongoId);
     if Assigned(member) then
+    begin
       if member.Muted then
         acMuteUnmutePlayer.Caption := 'Unmute'
       else
         acMuteUnmutePlayer.Caption := 'Mute';
+
+      if member.Manager then
+        acPromoteDemoteUser.Caption := 'Demote to user'
+      else
+        acPromoteDemoteUser.Caption := 'Promote to manager';
+    end;
 
     if btSuspendUnsuspend.Visible then
     begin
@@ -344,14 +366,14 @@ begin
       else
         btSuspendUnsuspend.Action := acSuspendPlayer;
     end;
-    btNewGame.Visible := admin_visible;
-    acShowCreateGameForm.Enabled := admin_visible;
-    btCloseTable.Visible := admin_visible;
-    acCloseTable.Enabled := (admin_visible) and (not FSelectedGameId.IsEmpty);
-    Bevel1.Visible := admin_visible;
-    btLeaveClub.Visible := not admin_visible;
-    acLeaveClub.Enabled := not admin_visible;
-    if admin_visible then
+    btNewGame.Visible := is_owner;
+    acShowCreateGameForm.Enabled := is_owner;
+    btCloseTable.Visible := is_owner;
+    acCloseTable.Enabled := (is_owner) and (not FSelectedGameId.IsEmpty);
+    Bevel1.Visible := is_owner;
+    btLeaveClub.Visible := not is_owner;
+    acLeaveClub.Enabled := not is_owner;
+    if is_owner then
     begin
       gridPlayersList.Align := alTop;
       gridGames.Align := alTop;
@@ -364,8 +386,8 @@ begin
       gridGames.Align := alClient;
     end;
 
-    btStats.Visible := admin_visible;
-    btStats.Enabled := admin_visible;
+    btStats.Visible := is_owner or is_manager;
+    btStats.Enabled := is_owner or is_manager;
 
     if btStats.Visible then
       btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2
@@ -653,12 +675,15 @@ var
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
     if AMember.MongoId = club.Owner then
-      status := 'Manager'
+      status := 'Owner'
     else
       if AMember.Suspended then
         status := 'Suspended'
       else
-        status := 'Member';
+        if AMember.Manager then
+          status := 'Manager'
+        else
+          status := 'Member';
     if AMember.Muted then
       status := status + ' (Muted)';
 
@@ -981,7 +1006,21 @@ begin
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
     if club.GetMemberInfo(FSelectedPlayerId, member) then
-      ServerSocket.ChangePlayerMutedState(FClubId, FSelectedPlayerId, not member.Muted);
+      ServerSocket.ChangeClubPlayerFlag(scMutePlayer, FClubId, FSelectedPlayerId, not member.Muted);
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
+end;
+
+procedure TfrmClubLobby.acPromoteDemoteUserExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  member: TPB_ClubMember;
+begin
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    if club.GetMemberInfo(FSelectedPlayerId, member) then
+      ServerSocket.ChangeClubPlayerFlag(scChangePlayerManagerState, FClubId, FSelectedPlayerId, not member.Manager);
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
@@ -1056,7 +1095,7 @@ begin
     Exit;
   dmMain.SelfInfo.Clubs.Unlock;
 
-  ServerSocket.ChangePlayerSuspendState(FClubId, FSelectedPlayerId, TRUE);
+  ServerSocket.ChangeClubPlayerFlag(scSuspendPlayer, FClubId, FSelectedPlayerId, TRUE);
 end;
 
 procedure TfrmClubLobby.acTablesStatsSelectAllExecute(Sender: TObject);
@@ -1097,7 +1136,7 @@ begin
     Exit;
   dmMain.SelfInfo.Clubs.Unlock;
 
-  ServerSocket.ChangePlayerSuspendState(FClubId, FSelectedPlayerId, FALSE);
+  ServerSocket.ChangeClubPlayerFlag(scSuspendPlayer, FClubId, FSelectedPlayerId, FALSE);
 end;
 
 procedure TfrmClubLobby.acCloseTableExecute(Sender: TObject);

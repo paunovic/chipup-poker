@@ -92,7 +92,7 @@ uses
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Players.Player, Poker.Players.PlayerList, Poker.Seats.Seat, Poker.Cards, Poker.Sounds, Poker.Settings,
   System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo,
-  Poker.Tournaments, Poker.Tournaments.Info;
+  Poker.Tournaments, Poker.Tournaments.Info, Poker.Protobufs.Objects.ClubMember;
 
 
 { TTable }
@@ -702,6 +702,7 @@ var
   seat: TSeatInfo;
   fgwnd: HWND;
   club: TClubInfo;
+  member: TPB_ClubMember;
 begin
   FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
@@ -719,7 +720,10 @@ begin
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
-    FStatus.ActionShowStats := club.Owner = dmMain.SelfInfo.MongoId;
+    if not club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
+      member := nil;
+    FStatus.ActionShowStats := (club.Owner = dmMain.SelfInfo.MongoId) or
+                               ((Assigned(member)) and (member.Manager));
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

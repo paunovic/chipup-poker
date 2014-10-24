@@ -673,7 +673,7 @@ object frmTable: TfrmTable
         FontName = 'Arial'
         Size = 8
         Style = [fsBold]
-        Color = clRed
+        Color = 4227327
         Unicode = True
       end
       item
