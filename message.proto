@@ -110,6 +110,7 @@ enum ServerCodes {
 	scResetPlayerBalances = 114;
 	scDeleteTableStats = 115;
 	scMutePlayer = 116;
+	scManagerPlayer = 117;
 }
 
 message StringSizes {
@@ -198,6 +199,7 @@ message ClubMember {
 	optional int32 club_balance = 4;
 	optional bool unlimited_limit = 5;
 	optional bool muted = 6;
+	optional bool manager = 7;
 }
 
 message Club {
