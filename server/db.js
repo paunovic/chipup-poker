@@ -68,6 +68,8 @@ var ClubSchema = new Schema({
 	unlimited_default_balance:Boolean,
 	default_balance_limit:Number,
 	members: [ObjectId],
+	muted: [ObjectId],
+	manager: [ObjectId],
 	suspended: [ObjectId],
 	seq: Number,
 	testmode: Boolean,

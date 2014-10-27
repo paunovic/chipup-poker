@@ -14,11 +14,26 @@ var pb = global.pb; // FIXME, hack?
 
 function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds,regexLimits) {
 	assert(regexLimits);
-	if (!blinds) return true;
-	if (!game_type) return true;
-	if (!game_limit) return true;
-	if (!regexLimits.gamename.exec(gamename)) return true;
-	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
+	if (!blinds) {
+		global.log('invalid blinds');
+		return true;
+	}
+	if (!game_type) {
+		global.log('invalid game type');
+		return true;
+	}
+	if (!game_limit) {
+		global.log('missing game limit');
+		return true;
+	}
+	if (!regexLimits.gamename.exec(gamename)) {
+		global.log('invalid gamename');
+		return true;
+	}
+	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) {
+		global.log('invalid seat count');
+		return true;
+	}
 	var blind_levels = Game.decodeBlinds(blinds);
 	if ((5 * blind_levels.big_blind) > buyin_min) {
 		global.log('min too low',buyin_min);
@@ -350,10 +365,10 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 				release();
 				return;
 			}
+			game.members[seatIdx].sitOutNextRound = false;
+			game.members[seatIdx].sitOutBB = false;
+			game.members[seatIdx].autoplay = false;
 			if (game.members[seatIdx].status != 'psOutOfPlay') {
-				game.members[seatIdx].sitOutNextRound = false;
-				game.members[seatIdx].sitOutBB = false;
-				game.members[seatIdx].autoplay = false;
 				finish([]);
 				return;
 			}
@@ -568,13 +583,7 @@ handlers[codes.scShowCards] = function (args,token) {
 						game.broadcastStatus(this,true,events); // sendEvent
 						var status = game.getTableStatus(this,true,events);
 						this.send(codes.srTableSitOk,status,'Poker.TableStatus');
-						game.club.getPotentialLosses(this.userid,function (balance,unlimited,limit) {
-							var out = { clubid:game.obj.clubid };
-							if (!unlimited) {
-								out.player_buyin_limit = limit + balance;
-							}
-							this.send(codes.sePlayerClubStatus,out,'Poker.PlayerClubStatus');
-						}.bind(this));
+						this.sendClubStatus(game.club,game);
 					}
 					token.stop();
 					release();
@@ -704,13 +713,7 @@ handlers[codes.scShowCards] = function (args,token) {
 		}
 		Game.getGame(id,function (err,game) {
 			assert.ifError(err);
-			game.club.getPotentialLosses(this.userid,function (balance,unlimited,limit) {
-				var out = { clubid:game.obj.clubid };
-				if (!unlimited) {
-					out.player_buyin_limit = limit + balance;
-				}
-				this.send(codes.sePlayerClubStatus,out,'Poker.PlayerClubStatus');
-			}.bind(this));
+			this.sendClubStatus(game.club,game);
 		}.bind(this));
 	};
 };

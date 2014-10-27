@@ -122,7 +122,9 @@ function Server(activeUsersIN) {
 	app.post("/uploadAvatar",this.uploadAvatar.bind(this));
 
 	app.get("/install_chipuppoker.exe",function (req,res) {
-		models.Config.findOne({_id:'installerid'},function (err,row) {
+		if (config.diffserver) self='dev';
+		else self = 'live';
+		models.Config.findOne({_id:self+'_installerid'},function (err,row) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
 				global.log('sending installer %j',row);
@@ -251,6 +253,15 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/tournament',this.getTournament.bind(this));
 	app.post('/secure/tournament',this.postTournament.bind(this));
 	app.get('/secure/tournament_log',this.getTournamentLog.bind(this));
+	app.post('/secure/diffStats',this.getDiffStats.bind(this));
+	app.post('/secure/makeDiff',this.syncMakeDiff.bind(this));
+};
+Server.prototype.getDiffStats = function (req,res) {
+	console.log(req.body);
+	models.Diff.findOne({sourcehash:req.body.source, desthash: req.body.dest},function (err,diffRow) {
+		console.log('get diff result',diffRow);
+		res.end(JSON.stringify(diffRow));
+	});
 };
 Server.prototype.getTournaments = function (req,res) {
 	models.Tournament.find(function (err,rows) {
@@ -975,6 +986,7 @@ Server.prototype.getAvatar = function (req,res) {
 	}
 	var raw = new Buffer(id,'hex');
 	var base64 = raw.toString('base64');
+	console.log('base64 avatar',base64);
 	models.Avatars.findOne({_id:base64},function (err,row) {
 		if (!row) {
 			res.send(404);
