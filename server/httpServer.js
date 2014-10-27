@@ -122,6 +122,7 @@ function Server(activeUsersIN) {
 	app.post("/uploadAvatar",this.uploadAvatar.bind(this));
 
 	app.get("/install_chipuppoker.exe",function (req,res) {
+		var self;
 		if (config.diffserver) self='dev';
 		else self = 'live';
 		models.Config.findOne({_id:self+'_installerid'},function (err,row) {
