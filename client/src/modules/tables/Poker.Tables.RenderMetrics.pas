@@ -137,7 +137,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.Tables.Resources, Poker.Common.Misc, Poker.Tables.Table;
+  System.SysUtils, Poker.Tables.Resources, Poker.Common.Misc, Poker.Tables.Table,
+  Poker.Protobufs.Objects.TableStatus;
 
 { TTableRenderMetrics }
 
@@ -544,7 +545,8 @@ begin
                                 FRaiseTrackBounds[0].y + (FRaiseTrackBounds[2].y - FRaiseTrackBounds[0].y) / 2 - h / 2, w, h);
 
   // total rake bounds
-  if (ATable as TTable).Status.IsSitting then
+  if ((ATable as TTable).Status.IsSitting) and
+     ((ATable as TTable).TableType <> ttHandReplay) then
     FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
   else
     FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);
