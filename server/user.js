@@ -269,12 +269,12 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			for (var x=0; x<balances.length; x++) {
 				var out = { clubid: balances[x].clubid };
 				if (!balances[x].unlimited_limit) {
-					out.player_buyin_limit = balances[x].balance;
+					out.buyin_max = balances[x].balance;
 					var club = Club.activeClubsId[balances[x].clubid];
 					if (club && club.balance[row._id]) {
-						out.player_buyin_limit += club.balance[row._id];
+						out.buyin_max += club.balance[row._id];
 					}
-					out.player_buyin_limit = balances[x].balance_limit - out.player_buyin_limit;
+					out.buyin_max = balances[x].balance_limit - out.buyin_max;
 				}
 				status.player_club_statuses.push(out);
 			}
@@ -835,6 +835,32 @@ ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 		}.bind(this));
 	}.bind(this));
 };
+ClientSocket.prototype.sendClubStatus = function (club,game) {
+	club.getPotentialLosses(this.userid,function (balance,unlimited,limit) {
+		var out = { clubid:club.clubid };
+		console.log(balance,unlimited,limit);
+		if (!unlimited) {
+			out.buyin_max = limit + balance;
+		}
+		if (game) {
+			out.tableid = game.id;
+			console.log('out.max:%d game.max:%d',out.buyin_max,game.obj.buyin_max);
+			if (!out.buyin_max) out.buyin_max = game.obj.buyin_max;
+			else if (out.buyin_max > game.obj.buyin_max) out.buyin_max = game.obj.buyin_max;
+			out.buyin_min = game.obj.buyin_min;
+			if (game.lastCashout[this.userid]) {
+				var last = game.lastCashout[this.userid];
+				var timediff = Date.now() - last.when;
+				if (timediff < (club.obj.buyin_reset * 60 * 1000)) {
+					out.buyin_min = last.chips;
+					if (last.chips > out.buyin_max) out.buyin_max = last.chips;
+				}
+			}
+			console.log('after out.max:%d',out.buyin_max);
+		}
+		this.send(codes.sePlayerClubStatus,out,'Poker.PlayerClubStatus');
+	}.bind(this));
+};
 handlers[codes.scChangePassword] = function (args,token) {
 	var params;
 	try {
@@ -951,7 +977,7 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 	var list2 = {};
 	if (params.gameid.length === 0) {
 		this.log('building list from owned clubs');
-		models.Clubs.find({owner:this.userid},function (err,clubs) {
+		models.Clubs.find({$or:[ {owner:this.userid}, {manager:this.userid} ] },function (err,clubs) {
 			assert.ifError(err);
 			for (var i=0; i<clubs.length; i++) clublist.push(clubs[i]._id);
 			models.Game.find({clubid:{$in:clublist}},function (err,games) {
@@ -1063,6 +1089,12 @@ ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts,token) {
 		var game = global.activeGames[id];
 		if (!game) {
 			return;
+		}
+		if (game.club && game.club.obj.muted) {
+			if (myutils.containsObjectID(game.club.obj.muted,this.userid)) {
+				this.reply(0,'you are muted');
+				return;
+			}
 		}
 		for (var key in game.users) {
 			//if (key == this.userid) continue;

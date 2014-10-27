@@ -26,11 +26,21 @@ socket.on('new_installer',function (obj) {
 	row.insertCell(-1).textContent = obj.version;
 	row.insertCell(-1).textContent = obj.revision;
 	row.insertCell(-1).textContent = Math.floor(obj.size/1024/1024)+'MB';
+
 	var activate = document.createElement('input');
 	activate.type = 'radio';
-	activate.name = 'activate_'+obj.debug;
+	activate.name = 'activate_live_'+obj.debug;
 	activate.value = obj._id;
+	activate.className = 'activate';
 	row.insertCell(-1).appendChild(activate);
+
+	activate = document.createElement('input');
+	activate.type = 'radio';
+	activate.name = 'activate_dev_'+obj.debug;
+	activate.value = obj._id;
+	activate.className = 'activate';
+	row.insertCell(-1).appendChild(activate);
+
 	var statusDelete = document.createElement('input');
 	statusDelete.type = 'checkbox';
 	statusDelete.name = 'delete_'+obj._id;
@@ -46,7 +56,12 @@ socket.on('new_revision',function (obj) {
 socket.on('makeDiff',function (obj) {
 	console.log('makeDIff',obj);
 	var msg = 'making diff for '+obj.path;
-	if (obj.size) msg += ' it is '+obj.size+' bytes';
+	if (obj.size) {
+		msg += ' it is '+obj.size+' bytes';
+		if ( (obj.sourcehash == sourceHash) && (obj.desthash == destHash) ) {
+			checkDiff();
+		}
+	}
 	document.getElementById('diffs').textContent = msg;
 });
 function masscheck() {
@@ -60,4 +75,51 @@ function checkLatest() {
 	for (var x=0; x<list.length; x++) {
 		list[x].checked = true;
 	}
+}
+var sourceHash,destHash;
+function changeSource(hash) {
+	console.log('source',hash);
+	sourceHash = hash;
+	checkDiff();
+}
+function changeDest(hash) {
+	console.log('dest',hash);
+	destHash = hash;
+	checkDiff();
+}
+function checkDiff() {
+	// FIXME, use socket.io once ssl is fixed
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST','/secure/diffStats',true);
+	xhr.setRequestHeader("Content-Type","application/json");
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState == 4) {
+			console.log(xhr.responseText);
+			var res = JSON.parse(xhr.responseText);
+			var stats = document.getElementById('diffStats');
+			var make = document.getElementById('makeDiff');
+			if (res) {
+				stats.textContent = 'diff size:'+res.size;
+				make.style.display = 'none';
+			} else {
+				stats.textContent = '';
+				make.style.display = '';
+			}
+		}
+	}
+	var req = { source:sourceHash, dest:destHash };
+	xhr.send(JSON.stringify(req));
+}
+function makeDiff2() {
+	// FIXME, use socket.io once ssl is fixed
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST','/secure/makeDiff',true);
+	xhr.setRequestHeader("Content-Type","application/json");
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState == 4) {
+			console.log(xhr.responseText);
+		}
+	}
+	var req = { sourcehash:sourceHash, desthash:destHash, path:'chipuppoker.exe' };
+	xhr.send(JSON.stringify(req));
 }
