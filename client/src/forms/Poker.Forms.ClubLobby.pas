@@ -834,6 +834,7 @@ begin
                   if finalstats[C1].UserId = playerstats.UserId then
                   begin
                     finalstats[C1].Merge(playerstats);
+                    found := TRUE;
                     Break;
                   end;
 
