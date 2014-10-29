@@ -111,6 +111,7 @@ enum ServerCodes {
 	scDeleteTableStats = 115;
 	scMutePlayer = 116;
 	scChangePlayerManagerState = 117;
+	scSplitTableCards = 118;
 }
 
 message StringSizes {
