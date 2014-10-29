@@ -202,7 +202,8 @@ var StateMemberSchema = new Schema({
 	sitOutNextRound:Boolean,
 	SittingOutRoundsCount:Number,
 	handsPlayed:Number,
-	can_show:Boolean
+	can_show:Boolean,
+	want_split:Boolean
 },{_id:false});
 var GameStateSchema = new Schema({
 	pots:[PotSchema],
