@@ -81,6 +81,8 @@ begin
   AddImages(c100, chip_index, TableResources.Chip100Image);
   AddImages(c500, chip_index, TableResources.Chip500Image);
   AddImages(c1k, chip_index, TableResources.Chip1000Image);
+
+  // reverse:
 {
   AddImages(c1k, chip_index, TableResources.Chip1000Image);
   AddImages(c500, chip_index, TableResources.Chip500Image);

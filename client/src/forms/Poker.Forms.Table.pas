@@ -57,6 +57,7 @@ type
     cbAutoCheckFold: TcxCheckBox;
     cbAutoCall: TcxCheckBox;
     cbAutoCallAny: TcxCheckBox;
+    cbSplitTableCards: TcxCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -100,6 +101,7 @@ type
     procedure acNextHandExecute(Sender: TObject);
     procedure acPreviousHandExecute(Sender: TObject);
     procedure cbAutoCheckPropertiesChange(Sender: TObject);
+    procedure cbSplitTableCardsPropertiesChange(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -860,6 +862,14 @@ begin
   end;
 end;
 
+procedure TfrmTable.cbSplitTableCardsPropertiesChange(Sender: TObject);
+begin
+  if not cbSplitTableCards.Enabled then
+    Exit;
+
+  ServerSocket.SplitTableCards(FGameId, cbSplitTableCards.Checked);
+end;
+
 procedure TfrmTable.CSEClubChange(const AMethodId: Integer; const AObject: TObject);
 var
   pbclub: TPB_Club;
@@ -1005,15 +1015,17 @@ begin
         seRaiseAmount.BoundsRect := table.Renderer.Metrics.RaiseAmountBoxBounds;
         seRaiseAmount.Style.Font.Size := table.Renderer.Metrics.RaiseAmountBoxFontSize;
 
-        cbSitOutNextBB.Top := edChat.Top + edChat.Height - cbSitOutNextBB.Height;
+        cbSplitTableCards.Top := edChat.Top + edChat.Height - cbSitOutNextBB.Height;
+        cbSitOutNextBB.Top := cbSplitTableCards.Top - cbSitOutNextBB.Height;
         cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
         cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
 
         cbFoldToAnyBet.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextHand.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextBB.Left := table.Renderer.Metrics.CheckboxesLeft;
+        cbSplitTableCards.Left := table.Renderer.Metrics.CheckboxesLeft;
 
-        cbAutoCheckFold.Top := cbFoldToAnyBet.Top;
+        cbAutoCheckFold.Top := cbSitOutNextHand.Top;
         cbAutoCheck.Top := cbAutoCheckFold.Top;
         cbAutoCall.Top := cbAutoCheckFold.Top;
         cbAutoCallAny.Top := cbAutoCheckFold.Top;
@@ -1032,6 +1044,7 @@ begin
           cbSitOutNextHand.Visible := TRUE;
           cbSitOutNextBB.Visible := TRUE;
           cbFoldToAnyBet.Visible := TRUE;
+          cbSplitTableCards.Visible := TRUE;
 
           cbSitOutNextBB.Enabled := table.Status.ActionSitOutNextBB;
           cbFoldToAnyBet.Enabled := table.Status.ActionFoldToAny;
@@ -1047,9 +1060,11 @@ begin
           cbSitOutNextHand.Visible := FALSE;
           cbSitOutNextBB.Visible := FALSE;
           cbFoldToAnyBet.Visible := FALSE;
+          cbSplitTableCards.Visible := FALSE;
           cbSitOutNextHand.Checked := FALSE;
           cbSitOutNextBB.Checked := FALSE;
           cbFoldToAnyBet.Checked := FALSE;
+          cbSplitTableCards.Checked := FALSE;
         end;
 
         seRaiseAmount.Visible := acRaise.Enabled;

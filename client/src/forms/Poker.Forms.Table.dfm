@@ -517,6 +517,28 @@ object frmTable: TfrmTable
     Visible = False
     Width = 64
   end
+  object cbSplitTableCards: TcxCheckBox
+    Left = 223
+    Top = 434
+    Anchors = [akLeft, akBottom]
+    AutoSize = False
+    Caption = 'Do business'
+    ParentBackground = False
+    ParentFont = False
+    Properties.OnChange = cbSplitTableCardsPropertiesChange
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 13
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.IsFontAssigned = True
+    TabOrder = 18
+    Transparent = True
+    Visible = False
+    Height = 15
+    Width = 104
+  end
   object ActionManager: TActionManager
     Images = il48px
     Left = 48
