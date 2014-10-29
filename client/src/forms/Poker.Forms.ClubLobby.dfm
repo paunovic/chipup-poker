@@ -2527,7 +2527,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsClubHome
+    Properties.ActivePage = tsStats
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2964,8 +2964,6 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
