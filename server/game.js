@@ -304,7 +304,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		}.bind(this),conn);
 	}
 	function doSit() {
-		this.members[params.seat_index] = { hand: new Hand(), status:'psOutOfPlay', chips:params.chips, seat:params.seat_index, sitOutNextRound:false, SittingOutRoundsCount:0, handsPlayed:0 };
+		this.members[params.seat_index] = { hand: new Hand(), status:'psOutOfPlay', chips:params.chips, seat:params.seat_index, sitOutNextRound:false, SittingOutRoundsCount:0, handsPlayed:0, want_split:false };
 		this.logEvent('geCashin',conn.userid,params.chips);
 		if (!this.timebanks[conn.userid]) this.timebanks[conn.userid] = sharedconfig.max_timebank * 1000;
 		this.seats[params.seat_index] = { conn:conn, userid:conn.userid };
@@ -547,10 +547,12 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			}
 			if (this.ignoreOffline && this.members[x].disconnected) {
 				this.members[x].status = 'psOutOfPlay';
+				this.members[x].want_split = false;
 				continue;
 			}
 			if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
+				this.members[x].want_split = false;
 				this.updateLeaveStats(x);
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
@@ -892,7 +894,10 @@ Game.prototype.removeSuspended = function () {
 	if (!this.club) return;
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
-		if (this.club.isSuspended(this.seats[x].userid)) this.members[x].status = 'psOutOfPlay';
+		if (this.club.isSuspended(this.seats[x].userid)) {
+			this.members[x].status = 'psOutOfPlay';
+			this.members[x].want_split = false;
+		}
 	}
 }
 Game.prototype.doWin = function (cb,extradelay,cb3) {
@@ -934,6 +939,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 									this.members[x].autoplay = true;
 								} else {
 									this.members[x].status = 'psOutOfPlay';
+									this.members[x].want_split = false;
 									this.updateLeaveStats(x);
 									this.lastplayer[x] = this.seats[x].userid;
 								}
@@ -1199,6 +1205,12 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 		}
 	}
 	this.log('hands: %j',hands[0]);
+	if (autoending) {
+		for (var x=0; x<this.members.length; x++) {
+			if (!this.members[x]) continue;
+			console.log('seat:%d want-split:%j muck:%j',x,this.members[x].want_split,this.members[x].muck);
+		}
+	}
 	var forcewin = -1;
 	if (hands.length > 1) {
 		if (this.omaha) {
@@ -1423,7 +1435,7 @@ Game.prototype.updateMongoState = function (options,cb) {
 	this.stateRow.minBet = this.minBet;
 	this.stateRow.minimum_raise = this.minimum_raise;
 	if (options.members) {
-		var keys = ['hand','status','chips','seat','sitOutNextRound','SittingOutRoundsCount','handsPlayed','can_show'];
+		var keys = ['hand','status','chips','seat','sitOutNextRound','SittingOutRoundsCount','handsPlayed','can_show','want_split'];
 		while (this.stateRow.members.length) this.stateRow.members.pop();
 		for (var x=0; x<this.members.length; x++) {
 			var input = this.members[x];
@@ -1486,8 +1498,8 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 		event = 'teAllIn';
 	} else if (chips < this.minBet) { // cheater!
 		conn.reply(0,'not meeting min bet');
-		//conn.error('cheater detected, betting low '+chips+','+this.minBet);
-		//conn.destroy();
+		conn.error('cheater detected, betting low '+chips+','+this.minBet);
+		conn.destroy();
 		cb([],0);
 		return;
 	} else if (chips > this.minBet) {
@@ -1739,6 +1751,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 				havechips++;
 			} else if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
+				this.members[x].want_split = false;
 				this.updateLeaveStats(x);
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
@@ -1786,6 +1799,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 					this.members[big_blind].autoplay = true;
 				} else {
 					this.members[big_blind].status = 'psOutOfPlay';
+					this.members[big_bling].want_split = false;
 					this.updateLeaveStats(big_blind);
 					this.stateMachine(cb,null,config,events,extradelay);
 					return;
@@ -2240,6 +2254,7 @@ Game.prototype.handleDisconnect = function (conn,reason,userid,cb) {
 		if (seatIdx >= 0) {
 			conn.log('marking as offline');
 			this.members[seatIdx].disconnected = true;
+			this.members[seatIdx].want_split = false;
 			if (this.tourn) {
 				this.members[seatIdx].autoplay = true;
 			} else {
@@ -2462,7 +2477,7 @@ Game.prototype.resume = function (game,cb) {
 	if (game.members) {
 		for (var x=0; x<game.members.length; x++) {
 			var item = game.members[x];
-			var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show };
+			var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show, want_split:item.want_split };
 			pubSeat.disconnectTimer = setTimeout(this.eject.bind(this,item.seat,item.userid,'resume'),5 * 60 * 1000);
 			var privSeat = {conn:{log:lazy.ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
 			pubSeat.hand.cards = item.hand.cards;

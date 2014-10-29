@@ -856,7 +856,8 @@ ClientSocket.prototype.sendClubStatus = function (club,game) {
 					if (last.chips > out.buyin_max) out.buyin_max = last.chips;
 				}
 			}
-			console.log('after out.max:%d',out.buyin_max);
+			if (out.buyin_min < game.obj.buyin_min) out.buyin_min = game.obj.buyin_min;
+			console.log('after out.min/max:%d/%d',out.buyin_min,out.buyin_max);
 		}
 		this.send(codes.sePlayerClubStatus,out,'Poker.PlayerClubStatus');
 	}.bind(this));

@@ -716,4 +716,28 @@ handlers[codes.scShowCards] = function (args,token) {
 			this.sendClubStatus(game.club,game);
 		}.bind(this));
 	};
+	handlers[codes.scSplitTableCards] = function (args,token) {
+		var id,params;
+		try {
+			params = pb.Parse(args,'Poker.TableBoolFlag');
+			id = myutils.toMongoId(params.table_mongo_id);
+		} catch (e) {
+			this.error(e);
+			return;
+		}
+		Game.getGame(id,function (err,game) {
+			if (!game) return;
+			game.Lock.writeLock(function (release) {
+				var seatIdx = game.findSeat(this);
+				if (seatIdx === undefined) {
+					this.reply(0,'your not sitting');
+					release();
+					return;
+				}
+				game.members[seatIdx].want_split = params.flag;
+				token.stop();
+				release();
+			}.bind(this));
+		}.bind(this));
+	};
 };
