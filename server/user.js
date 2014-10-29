@@ -906,6 +906,11 @@ handlers[codes.scGetPlayers] = function (args,token) {
 	}
 	models.UserModel.find({_id:{$in:params.user_mongo_ids}},function (err,users) {
 		this.log(params.user_mongo_ids,users);
+		for (var i=0; i<users.length; i++) {
+			users[i].email = null;
+			users[i].authed = null;
+			users[i].subscription_plan = null;
+		}
 		var out = {users:users};
 		console.log('getplayers:',out);
 		this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
