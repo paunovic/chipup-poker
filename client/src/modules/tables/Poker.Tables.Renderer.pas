@@ -984,7 +984,8 @@ procedure TTableRenderer.RenderTableCards;
       if not AIsAnimated then
       begin
         AAnimationsList.Clear;
-        animation := DXTimer.AddAnimation(FInternalHWND, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0, FDXAreaSize); AAnimationsList.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FInternalHWND, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0, FDXAreaSize);
+        AAnimationsList.Add(animation.Id);
         AIsAnimated := TRUE;
       end;
 

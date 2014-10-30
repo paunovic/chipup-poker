@@ -108,7 +108,8 @@ type
     scResetPlayerBalances = 114,
     scDeleteTableStats = 115,
     scMutePlayer = 116,
-    scChangePlayerManagerState = 117
+    scChangePlayerManagerState = 117,
+    scSplitTableCards = 118
   );
 
 {$IFDEF DEBUG}
@@ -242,6 +243,7 @@ begin
     scDeleteTableStats: result := 'scDeleteTableStats';
     scMutePlayer: result := 'scMutePlayer';
     scChangePlayerManagerState: result := 'scChangePlayerManagerState';
+    scSplitTableCards: result := 'scSplitTableCards';
   end;
 end;
 {$ENDIF DEBUG}

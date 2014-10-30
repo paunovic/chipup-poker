@@ -4201,7 +4201,6 @@ object frmChipUpMain: TfrmChipUpMain
             Style.IsFontAssigned = True
             Properties.Alignment.Horz = taCenter
             Properties.Alignment.Vert = taVCenter
-            ExplicitLeft = -1
             Height = 24
             Width = 203
             AnchorX = 102

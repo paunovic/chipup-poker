@@ -40,6 +40,7 @@ type
     procedure TablePlayNow(const AGameId: TMongoId);
     procedure TableSitOutNextHand(const AGameId: TMongoId; const AFlag: Boolean);
     procedure TableSitOutNextBB(const AGameId: TMongoId; const AFlag: Boolean);
+    procedure SplitTableCards(const AGameId: TMongoId; const AFlag: Boolean);
     procedure GetUserInfos(const AMongoIds: array of TMongoId);
     procedure Fold(const AGameId: TMongoId);
     procedure PutChips(const AGameId: TMongoId; const AChipAmount: Integer; const ATableState: TTableState);
@@ -534,6 +535,11 @@ begin
   finally
     protobuf.Free;
   end;
+end;
+
+procedure TServerSocket.SplitTableCards(const AGameId: TMongoId; const AFlag: Boolean);
+begin
+  TableBoolFlag(scSplitTableCards, AGameId, AFlag);
 end;
 
 procedure TServerSocket.ContactUs(const AReason: TContactReason; const AMessage: String);

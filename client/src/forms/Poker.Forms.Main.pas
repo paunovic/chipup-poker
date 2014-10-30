@@ -505,7 +505,7 @@ begin
     if (form is TfrmClubLobby) and
        ((form as TfrmClubLobby).ClubId = FSelectedClub) then
     begin
-      form.SetFocus;
+      form.BringToFront;
       Exit;
     end;
 
@@ -578,7 +578,8 @@ begin
     if club.Games.TryGetValue(ATableId, game) then
     begin
       member := nil;
-      if (club.IsPrivate) and (not club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) then
+      if (club.IsPrivate) and
+         (not club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) then
         Exit;
 
       if (Assigned(member)) and
