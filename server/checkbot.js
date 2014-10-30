@@ -33,7 +33,7 @@ Client.prototype.log = function log(first) {
 Client.prototype.handle = function (err,code,buffer) {
 	var params;
 	assert.ifError(err);
-	if ([codes.srPong,codes.seTableStatus,codes.srHandHistoryMsg].indexOf(code) == -1) this.log(codes.reverse[code],buffer);
+	if ([codes.srPong,codes.seTableStatus,codes.srHandHistoryMsg,codes.srTableStatsReply,codes.srLoginReply].indexOf(code) == -1) this.log(codes.reverse[code],buffer);
 	switch (code) {
 	case codes.srHello:
 		this.reply(codes.scLogin,{username:this.name,password:'password'},'Poker.LoginParams');
@@ -48,7 +48,7 @@ Client.prototype.handle = function (err,code,buffer) {
 			for (var y=0; y<tbl.seats.length; y++) {
 				console.log(tbl.seats[y].player_mongo_id.toString('hex'),this.userid);
 				if (tbl.seats[y].player_mongo_id.toString('hex') == this.userid) {
-					if (tbl.seats[y].autoplay) {
+					if (tbl.seats[y].autoplay || true) {
 						console.log('need to play now');
 						this.reply(codes.scTablePlayNow,{_id:tbl.table_mongo_id},'Poker.Game');
 					}
@@ -70,9 +70,18 @@ Client.prototype.handle = function (err,code,buffer) {
 				if (activeSeat.autoplay) {
 					this.log('its me, but in auto mode');
 				} else {
-					this.reply(codes.scPutChips,{table_mongo_id:params.table_mongo_id, chip_amount:params.minimum_bet, current_state:params.state},'Poker.PutChips');
+					console.log(activeSeat);
+					console.log(params.minimum_bet);
+					console.log(params.bets);
+					if (params.minimum_bet > (activeSeat.chips + params.bets[params.current_seat]) ) params.minimum_bet = activeSeat.chips + params.bets[params.current_seat];
+					setTimeout(function () {
+						this.reply(codes.scPutChips,{table_mongo_id:params.table_mongo_id, chip_amount:params.minimum_bet, current_state:params.state},'Poker.PutChips');
+					}.bind(this),5000);
 				}
 			}
+			break;
+		case 'tsWinning':
+			//this.reply(codes.scShowCards,{_id:params.table_mongo_id},'Poker.Game');
 			break;
 		default:
 			this.log(params.state);
@@ -83,6 +92,20 @@ Client.prototype.handle = function (err,code,buffer) {
 		break;
 	case codes.seSecondaryLoginDetected:
 		this.socket.destroy();
+		break;
+	case codes.seTournamentPlayerFinished:
+		params = pb.parse(buffer,'Poker.TournamentPlayerFinished');
+		console.log(params);
+		break;
+	case codes.srTournamentDetails:
+		params = pb.parse(buffer,'Poker.TournamentInfo');
+		for (var x=0; x<params.games.length; x++) {
+			console.log('game %d count %d',x,params.games[x].sitting);
+		}
+		break;
+	case codes.seChat:
+		params = pb.parse(buffer,'Poker.ChatEvent');
+		console.log(params);
 		break;
 	}
 }

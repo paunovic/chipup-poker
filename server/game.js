@@ -296,12 +296,14 @@ Game.prototype.join = function join(conn,cb) {
 };
 Game.prototype.sitDown = function (conn,params,cb) {
 	function finish() {
-		this.club.seGameChanged(this,function () {
+		function finish2() {
 			this.club.buyin(conn.userid,params.chips);
 			this.updateMongoState({members:true},function () {
 				cb(true,events);
 			});
-		}.bind(this),conn);
+		}
+		if (this.testing) finish2.call(this)
+		else this.club.seGameChanged(this,finish2.bind(this),conn);
 	}
 	function doSit() {
 		this.members[params.seat_index] = { hand: new Hand(), status:'psOutOfPlay', chips:params.chips, seat:params.seat_index, sitOutNextRound:false, SittingOutRoundsCount:0, handsPlayed:0, want_split:false };
@@ -509,6 +511,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.bets = [];
 		this.balance_changes = [];
 		this.cardsShown = false;
+		this.doingSplit = false;
 		for (x=0; x<this.obj.seats; x++) {
 			this.bets[x] = 0;
 			this.balance_changes[x] = 0;
@@ -676,9 +679,9 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.roundEnd();
 			this.stateRow.deck = this.deck.cards;
 			this.ranOut = false;
-			this.flop = new Hand();
-			this.turn = new Hand();
-			this.river = new Hand();
+			this.flops = [ new Hand() ];
+			this.turns = [ new Hand() ];
+			this.rivers = [ new Hand() ];
 			this.log('bcast 2');
 		
 			models.HandHistory.create({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
@@ -909,11 +912,10 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	assert.equal(typeof extradelay,'number');
 	this.state = 'tsWinning';
 	var delay = 1500 + (this.pots.length * 500) + extradelay;
+	if (this.testing) delay = 100;
 	this.log('delay is %d',delay);
 	function finish() {
-		this.log('cleared seat');
 		this.current_seat = -1;
-		this.log('main cb');
 		cb(rakestats);
 
 		function finish2() {
@@ -953,11 +955,8 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 						this.removeSuspended();
 						this.state = 'tsWinning2';
 						//this.broadcastStatus(null);
-						this.log('doWin a');
 						this.stateMachine(function (events) {
-							this.log('doWin b');
 							this.updateMongoState({members:true},function () {
-								this.log('doWin c');
 								this.broadcastStatus(null,true,events); // teDeal
 								release();
 							}.bind(this));
@@ -990,37 +989,44 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		rake = rakesplit * pot.trueMembers.length;
 		pot.rake = rake;
 		this.history.WinnerPotData[y].rake = rake;
-		var split = ((pot.value-rake)/pot.winners.length);
-		// </redo>
-		//var rake = pot.value * (this.rake / 100);
-		this.log('splitting pot#%d',y);
-		//var split = Math.round((pot.value-rake) / pot.winners.length);
-		//rake = pot.value - (split * pot.winners.length);
+		this.log('pot %d initial value %d, going to %j',y,pot.value,pot.winners);
+		var bussinessSplit = ((pot.value-rake)/pot.winners.length);
+		this.log('bussiness will give %d to each side',bussinessSplit);
 		totalrake += rake;
+		for (var bussiness=0; bussiness<pot.winners.length; bussiness++) {
+			var split = (bussinessSplit/pot.winners[bussiness].length);
+			// </redo>
+			//var rake = pot.value * (this.rake / 100);
+			this.log('splitting pot#%d.%d',y,bussiness);
+			//var split = Math.round((pot.value-rake) / pot.winners.length);
+			//rake = pot.value - (split * pot.winners.length);
 		//var rakesplit = rake/pot.trueMembers.length;
-		assert(!isNaN(rake));
-		assert(!isNaN(rakesplit));
-		assert(!isNaN(split));
-		this.log('rake:%d/%d pot:%j split:%d',rake,rakesplit,pot,split);
-		for (x=0; x<pot.trueMembers.length; x++) {
-			if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit;
-			else rakestats[pot.trueMembers[x]] = { rake:rakesplit, userid: pot.trueUsers[x] };
-		}
-		for (x=0; x<pot.winners.length; x++) {
-			var priv = this.seats[pot.winners[x]];
-			if (winnerObjects.indexOf(this.members[pot.winners[x]]) == -1) {
-				winnerObjects.push(this.members[pot.winners[x]]);
-				winnerids.push(priv.userid);
+			assert(!isNaN(rake));
+			assert(!isNaN(rakesplit));
+			assert(!isNaN(split));
+			this.log('rake:%d/%d pot:%j split:%d between:%j',rake,rakesplit,pot,split,pot.winners[bussiness]);
+			for (x=0; x<pot.trueMembers.length; x++) {
+				if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit;
+				else rakestats[pot.trueMembers[x]] = { rake:rakesplit, userid: pot.trueUsers[x] };
 			}
-			//console.log('winner debug',winnerObjects[x],pot.winners[x]);
-			assert(priv,'winner must be seated');
-			addWin(pot.winners[x],split);
+			for (x=0; x<pot.winners[bussiness].length; x++) {
+				var priv = this.seats[pot.winners[bussiness][x]];
+				assert(priv);
+				if (winnerObjects.indexOf(this.members[pot.winners[bussiness][x]]) == -1) {
+					winnerObjects.push(this.members[pot.winners[bussiness][x]]);
+					winnerids.push(priv.userid);
+				}
+				//console.log('winner debug',winnerObjects[x],pot.winners[x]);
+				assert(priv,'winner must be seated');
+				addWin(pot.winners[bussiness][x],split);
+			}
 		}
 		this.log('pot#%d initialrake:%d totalrake:%d',y,rake,totalrake);
 	}
 	this.log('initialrake:%d totalrake:%d pots:%j',rake,totalrake,this.pots);
 	assert.equal(typeof totalrake,'number');
 	this.history.totalrake = totalrake;
+	console.log('MARK');
 	this.log('wins',wins,winnerids);
 	var stack = new Error().stack;
 
@@ -1028,7 +1034,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	//this.log('doWin',this.pots,this.members); // the timer breaks JSON stringify
 	this.pots = [ new Pot(this) ];
 	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
-		//this.log('checking winner %j ',winnerObj,this.seats);
+		this.log('checking winner %j ',winnerObj,this.seats);
 		var seat = winnerObj.seat;
 		var userid = this.seats[seat].userid;
 		var gain = wins[seat];
@@ -1061,25 +1067,43 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 	if (this.stateRow.keycount <= 0) {
 		var min = -1;
 		var max = 0;
+		var players = 0;
+		var wantSplitCount = 0;
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
-			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
+			
+			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue; // ignore anybody who has no impact on the game
+			
+			players++;
+			if (this.members[x].want_split) wantSplitCount++;
+			
 			if (this.bets[x] > max) max = this.bets[x];
 			if (['psAllIn'].indexOf(this.members[x].status) != -1) continue;
 			if (min == -1) min = this.bets[x];
 			if (this.bets[x] < min) min = this.bets[x];
 		}
+		this.log('split vote %d/%d',wantSplitCount,players);
+		if (wantSplitCount == players) this.doingSplit = true;
 		this.log('bet ranges min:'+min+' max:'+max+' all bets:'+JSON.stringify(this.bets));
 		if (min == -1) min = max;
 		if (min == max) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
 				this.log('flopping');
-				this.deck.draw(3,this.flop);
+				this.deck.draw(3,this.flops[0]);
+				this.history.cards = this.flops[0].cards; // FIXME
+				this.stateRow.flop.cards = this.flops[0].cards;
+				if (this.doingSplit) {
+					this.flops[1] = new Hand();
+					this.deck.draw(3,this.flops[1]);
+					this.stateRow.flop.cards = this.stateRow.flop.cards.concat(this.flops[1].cards);
+					// FIXME, 2nd flop missing from HH
+				}
 				this.stateRow.deck = this.deck.cards;
-				this.stateRow.flop = this.flop;
-				this.history.cards = this.flop.cards;
-				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
+				var ev = {bets:this.bets.slice(),oldpots:this.pots,cards:[new Buffer(this.flops[0].cards)]};
+				if (this.doingSplit) ev.cards[1] = new Buffer(this.flops[1].cards);
+				events.push(this.makeEvent('teFlop',ev));
+				console.log(ev,this.stateRow.flops);
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
 					this.updatePotRakes();
@@ -1093,11 +1117,18 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
-				this.deck.draw(1,this.turn);
+				this.deck.draw(1,this.turns[0]);
+				this.history.cards = this.history.cards.concat(this.turns[0].cards); // FIXME
+				this.stateRow.turn.cards = this.turns[0].cards;
+				if (this.doingSplit) {
+					this.turns[1] = new Hand();
+					this.deck.draw(1,this.turns[1]);
+					this.stateRow.turn.cards = this.stateRow.turn.cards.concat(this.turns[1].cards);
+				}
 				this.stateRow.deck = this.deck.cards;
-				this.stateRow.turn = this.turn;
-				this.history.cards = this.history.cards.concat(this.turn.cards);
-				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
+				var ev = {bets:this.bets.slice(),oldpots:this.pots,cards:[new Buffer(this.turns[0].cards)]};
+				if (this.doingSplit) ev.cards[1] = new Buffer(this.turns[1].cards);
+				events.push(this.makeEvent('teTurn',ev));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
 					this.updatePotRakes();
@@ -1111,11 +1142,18 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
-				this.deck.draw(1,this.river);
+				this.deck.draw(1,this.rivers[0]);
+				this.history.cards = this.history.cards.concat(this.rivers[0].cards); // FIXME
+				this.stateRow.river.cards = this.rivers[0].cards;
+				if (this.doingSplit) {
+					this.rivers[1] = new Hand();
+					this.deck.draw(1,this.rivers[1]);
+					this.stateRow.river.cards = this.stateRow.river.cards.concat(this.rivers[1].cards);
+				}
 				this.stateRow.deck = this.deck.cards;
-				this.stateRow.river = this.river;
-				this.history.cards = this.history.cards.concat(this.river.cards);
-				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
+				var ev = {bets:this.bets.slice(),oldpots:this.pots,cards:[new Buffer(this.rivers[0].cards)]}
+				if (this.doingSplit) ev.cards[1] = new Buffer(this.rivers[1].cards);
+				events.push(this.makeEvent('teRiver',ev));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
 					this.updatePotRakes();
@@ -1161,7 +1199,7 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 	}
 	async.parallel([function a(cbA) {
 		async.each(jobs,function hack(job,cb2) {
-			global.log('updating stats %j',job);
+			//global.log('updating stats %j',job);
 			models.GameStats.findOneAndUpdate(job.key,job.mods,function (err) {
 				error.handleError(err);
 				if (this.club) this.club.updateLimitPostWin(job.change,job.userid,cb2);
@@ -1214,22 +1252,32 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 	var forcewin = -1;
 	if (hands.length > 1) {
 		if (this.omaha) {
+		console.log('unfinished',events);
+		process.exit();
 			var result = omaha2.doEval(this.flop,this.turn,this.river,hands);
 		} else {
-			var result = dag.rankHands(this,hands);
+			var table = { flop: this.flops[0], turn:this.turns[0], river:this.rivers[0] };
+			var results = []
+			results[0] = dag.rankHands(table,hands);
+			console.log(results[0]);
+			if (this.flops[1]) table.flop = this.flops[1];
+			if (this.turns[1]) table.turn = this.turns[1];
+			if (this.rivers[1]) table.river = this.rivers[1];
+			results[1] = dag.rankHands(table,hands);
+			console.log(results[0]);
 		}
-		this.lastResult = result;
-		this.log('dag results:',result);
+		this.lastResult = results;
+		//this.log('dag results:',result);
 	} else {
 		forcewin = hands[0].seat;
 		this.lastResult = null;
 	}
 	// FIXME< just use a for loop?
 	async.eachSeries(this.pots,function (pot,cb1) {
-		var lowestid = -1;
-		var winningindex = -1;
-		var winner;
-		var winners = [];
+		var lowestid = [-1,-1];
+		var winningindex = [-1,-1];
+		var winner = [];
+		var winners = [[],[]];
 		var data = [];
 		if (pot.value == 0) return cb1();
 		WinnerPotData[potid] = { value:pot.value, members:pot.members };
@@ -1245,40 +1293,51 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 			}
 			data.push({seat:forcewin,msg:'default'});
 		} else {
-			for (var x=0; x<result.outputs.length; x++) {
-				if (pot.members.indexOf(result.outputs[x].seat) == -1) continue;
-				if (lowestid == -1) {
-					lowestid = result.outputs[x].id;
-					winningindex = x;
-					winner =  result.outputs[x];
-				}
-				if (result.outputs[x].id < lowestid) {
-					lowestid = result.outputs[x].id;
-					winningindex = x;
-					winner =  result.outputs[x];
+			for (var y=0; y<results.length; y++) {
+				for (var x=0; x<results[y].outputs.length; x++) {
+					if (pot.members.indexOf(results[y].outputs[x].seat) == -1) continue;
+					if (lowestid[y] == -1) {
+						lowestid[y] = results[y].outputs[x].id;
+						winningindex[y] = x;
+						winner[y] =  results[y].outputs[x];
+					}
+					if (results[y].outputs[x].id < lowestid[y]) {
+						lowestid[y] = results[y].outputs[x].id;
+						winningindex[y] = x;
+						winner[y] =  results[y].outputs[x];
+					}
 				}
 			}
 			// split pot has the same .id on multiple people
-			for (var x=0; x<result.outputs.length; x++) {
-				if (pot.members.indexOf(result.outputs[x].seat) == -1) continue;
-				if (result.outputs[x].id == lowestid) {
-					winners.push(result.outputs[x].seat);
-					this.members[result.outputs[x].seat].muck = false;
-					this.history.players[result.outputs[x].seat].muck = false;
-					this.log('output: %j',result.outputs[x]);
-					logmsg.push(this.seats[result.outputs[x].seat].conn.nick+' '+this.seats[result.outputs[x].seat].userid);
-					data.push({seat:result.outputs[x].seat,msg:result.outputs[x].desc});
+			for (var y=0; y<results.length; y++) {
+				for (var x=0; x<results[y].outputs.length; x++) {
+					if (pot.members.indexOf(results[y].outputs[x].seat) == -1) continue;
+					if (results[y].outputs[x].id == lowestid[y]) {
+						winners[y].push(results[y].outputs[x].seat);
+						this.members[results[y].outputs[x].seat].muck = false;
+						this.history.players[results[y].outputs[x].seat].muck = false;
+						this.log('output: %j',results[y].outputs[x]);
+						logmsg.push(this.seats[results[y].outputs[x].seat].conn.nick+' '+this.seats[results[y].outputs[x].seat].userid);
+						data.push({seat:results[y].outputs[x].seat,msg:results[y].outputs[x].desc});
+					}
 				}
 			}
 		}
 		WinnerPotData[potid].WinnerData = data;
-		this.log('winners of pot #'+potid,winners);
-		if (winners.length > winnercount) winnercount = winners.length;
+		this.log('winners of pot #%d == %j',potid,winners);
+		var templist = [];
+		for (var x=0; x<winners.length; x++) {
+			for (var y=0; y<winners[x].length; y++) {
+				if (templist.indexOf(winners[x][y]) == -1) templist.push(winners[x][y]);
+			}
+		}
+		if (templist.length > winnercount) winnercount = templist.length;
 		potid++;
 		pot.winners = winners;
 		cb1();
 	}.bind(this));
-		finish1.call(this);
+	
+	finish1.call(this);
 	
 	function finish1() {
 		events.push(this.makeEvent('teWinning',null,WinnerPotData));
@@ -1557,9 +1616,9 @@ Game.prototype.saveHistory = function (cb) {
 	// FIXME, reuse mongoose Document
 	models.HandHistory.findOneAndUpdate({seq:this.handid},updates,function (err,res) {
 		error.handleError(err);
-		assert(res);
+		if (!this.testing) assert(res); // FIXME, fake the data in testcase
 		cb();
-	});
+	}.bind(this));
 }
 Game.prototype.findSeat = function (conn) {
 	for (var x=0; x<this.seats.length; x++) {
@@ -1700,7 +1759,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			if (this.members[x].status == 'psOutOfPlay') continue;
-			this.log('found %d %s %d',x,this.members[x].status,this.members[x].sitTime);
+			//this.log('found %d %s %d',x,this.members[x].status,this.members[x].sitTime);
 			jobs.push(x);
 		}
 		if (this.tourn) {
@@ -1851,7 +1910,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			this.current_seat = this.getNextSeat(this.current_seat);
 			this.checkRoundPass(function (events,extradelay) {
 				assert.equal(typeof extradelay,'number');
-				this.log('player '+last+' skipped, doing state again, FIXME %d',events);
+				this.log('player '+last+' skipped, doing state again');
 				return this.stateMachine(cb,null,null,events,extradelay);
 			}.bind(this),events,extradelay,cb3,true);
 			return;
@@ -1988,9 +2047,6 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	}
 	tableStatus.dealer = this.dealer;
 	tableStatus.current_seat = this.current_seat;
-	if (['tsFlop','tsTurning','tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = new Buffer(this.flop.cards);
-	if (['tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = new Buffer(this.turn.cards);
-	if (this.state == 'tsRiver') tableStatus.river = new Buffer(this.river.cards);
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
@@ -2058,7 +2114,6 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 		$slice:-50
 	}}};
 	var key = {gameid:this.obj._id,userid:userid};
-	global.log('updating %s %s',key.gameid,key.userid);
 	models.GameStats.findOneAndUpdate(key,mods,function (err) {
 		error.handleError(err);
 		this.handOver(function () {
@@ -2487,13 +2542,25 @@ Game.prototype.resume = function (game,cb) {
 		}
 	}
 	if (game.flop) {
-		this.flop = new Hand();
-		this.turn = new Hand();
-		this.river = new Hand();
+		this.flops = [ new Hand() ];
+		this.turns = [ new Hand() ];
+		this.rivers = [ new Hand() ];
 
-		this.flop.cards = game.flop.cards;
-		this.turn.cards = game.turn.cards;
-		this.river.cards = game.river.cards;
+		this.flops[0].cards = game.flop.cards.slice(0,3);
+		if (game.flop.cards.length > 3) {
+			this.flops[1] = new Hand();
+			this.flops[1].cards = game.flop.cards.slice(4,6);
+		}
+		this.turns[0].cards = game.turn.cards.slice(0,1);
+		if (game.turn.cards.length > 1) {
+			this.turns[1] = new Hand();
+			this.turns[1].cards = game.turn.cards.slice(1,2);
+		}
+		this.rivers[0].cards = game.river.cards.slice(0,1);
+		if (game.river.cards.length > 1) {
+			this.rivers[1] = new Hand();
+			this.rivers[1].cards = game.river.cards.slice(1,2);
+		}
 	}
 	if (game.deck) {
 		this.deck.cards = game.deck;
@@ -2569,10 +2636,21 @@ Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 			this.log('finish2');
 			this.broadcastStatus(conn,true,events);
 			if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) {
-				var cards = this.flop.cards;
-				if (['tsTurn','tsRiver'].indexOf(this.state) != -1) cards = cards.concat(this.turn.cards);
-				if (this.state == 'tsRiver') cards = cards.concat(this.river.cards);
-				events.push(this.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+				var cards0 = this.flops[0].cards;
+				var cards1;
+				if (this.flops[1]) cards1 = this.flops[1].cards;
+				if (['tsTurn','tsRiver'].indexOf(this.state) != -1) {
+					cards0 = cards0.concat(this.turns[0].cards);
+					if (this.turns[1]) cards1 = cards1.concat(this.turns[1].cards);
+				}
+				if (this.state == 'tsRiver') {
+					cards0 = cards0.concat(this.rivers[0].cards);
+					if (this.rivers[1]) cards1 = cards1.concat(this.rivers[1].cards);
+				}
+				var ev = {cards:[ new Buffer(cards0) ]};
+				if (cards1) ev.cards[1] = new Buffer(cards1);
+
+				events.push(this.makeEvent('teExistingCards',ev));
 			}
 			var status = this.getTableStatus(conn,true,events);
 			release();

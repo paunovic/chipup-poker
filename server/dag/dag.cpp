@@ -91,14 +91,16 @@ Handle<Value> RankHands(const Arguments& args) {
 			return scope.Close(Undefined());
 		}
 		assert(rank);
+		Local<Object> handOut = Object::New();
 
-		hand->Set(String::NewSymbol("id"),Number::New(rank->id));
-		hand->Set(String::NewSymbol("desc"),String::New(rank->desc));
-		hand->Set(String::NewSymbol("domination"),Number::New(rank->domination));
-		hand->Set(String::NewSymbol("likelihood"),Number::New(rank->likelihood));
-		hand->Set(String::NewSymbol("cards"),String::New(rank->cards));
-		hand->Set(String::NewSymbol("input"),String::New(hand_to_str(handcards,handsize)));
-		outputs->Set(j,hand);
+		handOut->Set(String::NewSymbol("id"),Number::New(rank->id));
+		handOut->Set(String::NewSymbol("desc"),String::New(rank->desc));
+		handOut->Set(String::NewSymbol("domination"),Number::New(rank->domination));
+		handOut->Set(String::NewSymbol("likelihood"),Number::New(rank->likelihood));
+		handOut->Set(String::NewSymbol("cards"),String::New(rank->cards));
+		handOut->Set(String::NewSymbol("input"),String::New(hand_to_str(handcards,handsize)));
+		handOut->Set(String::NewSymbol("seat"),hand->Get(String::NewSymbol("seat")));
+		outputs->Set(j,handOut);
 	}
 	return scope.Close(root);
 }

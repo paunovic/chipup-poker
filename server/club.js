@@ -279,7 +279,6 @@ Club.prototype.updateLimitPostWin = function (change,userid,callback) {
 Club.prototype.buyin = function (userid,chips) {
 	if (!this.balance[userid]) this.balance[userid] = -chips;
 	else this.balance[userid] -= chips;
-	console.log('buyin balance',this.balance);
 };
 Club.prototype.cashout = function (userid,chips) {
 	this.balance[userid] += chips;

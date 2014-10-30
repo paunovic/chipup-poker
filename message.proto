@@ -514,7 +514,7 @@ message TableEvent {
 	optional int32 seat = 2;
 	repeated Pot pots = 4;
 	repeated uint32 bets = 5;
-	optional bytes cards = 6;
+	array bytes cards = 6;
 }
 
 message PutChips {
