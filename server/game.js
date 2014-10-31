@@ -1284,7 +1284,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 		this.log('this pot',potid,pot);
 
 		if (forcewin >= 0) {
-			winners = [ forcewin ];
+			winners = [ [ forcewin ] ];
 			if (winners.length > winnercount) winnercount = winners.length;
 			if (this.seats[forcewin].conn) {
 				logmsg.push(this.seats[forcewin].conn.nick+' '+this.seats[forcewin].userid);
