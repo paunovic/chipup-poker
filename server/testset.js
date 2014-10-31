@@ -577,7 +577,7 @@ exports.game = {
 			},owner,{},[],0);
 		}
 	},
-	split1: function (test) {
+	splitholdem: function (test) {
 		global.activeUsers = {};
 		global.sharedconfig = {max_play_time:15,max_timebank:30};
 		global.log = console.log;
@@ -665,6 +665,105 @@ exports.game = {
 			game.deck.cards = [1,40,17,41,29,51,48,20,9,25,13,19,46,42,10,8,16,47,0,11,18,14,31,4,2,24,32,33,6,15,12,39,21,37,30,26,34,7,22,3,35,27,44,5,36,50,49,28,23,43,38,45];
 			game.deck.draw(2,game.members[0].hand);
 			game.deck.draw(2,game.members[1].hand);
+			game.stateMachine(function (events) {
+				console.log('events',events);
+				release();
+				game.stopTimer();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},1000);
+			},owner,{},[],0);
+		}
+	},
+	splitomaha: function (test) {
+		global.activeUsers = {};
+		global.sharedconfig = {max_play_time:15,max_timebank:30};
+		global.log = console.log;
+		global.pb = Core.pb;
+		var activeGames = {};
+		var Club = require('./club').Club;
+		var Game = require('./game').Game;
+		var profiler = require('profiler');
+		mdb.open('nodeunit');
+		Club.init(activeGames);
+		myutils.init();
+		profiler.setup(mdb.models.PokerProfile);
+		Game.init(activeGames);
+		mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+			assert.ifError(err);
+			var owner = users[0];
+			var opponent = users[1];
+			test.ok(owner);
+			test.ok(opponent);
+			mdb.models.Clubs.remove({name:'clubname'},function (err) {
+				assert.ifError(err);
+				Club.createClub('clubname','password',owner._id,5,30,function (worked,clubObj) {
+					test.ok(worked);
+					clubid = clubObj.obj.seq;
+					var gamerow = new mdb.models.Game({game_type:'gtOmaha',blinds:'gb1x2',seats:6,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:100000,buyin_max:150000,rake:0,rotation:0,hands:0});
+					gamerow.save(function (err) {
+						assert.ifError(err);
+						Game.getGame(gamerow._id,function (err,gameObj) {
+							assert.ifError(err);
+							test.ok(gameObj);
+							phase2(new DummyConn(owner),new DummyConn(opponent),gameObj);
+						});
+					});
+				});
+			});
+		});
+		function phase2(owner,opponent,gameObj) {
+			owner.nick = 'owner';
+			opponent.nick = 'opponent';
+			owner.send = function (code,obj,type) {
+				//console.log('owner send:',code,obj,type);
+			}
+			opponent.send = function (code,obj,type) {
+				//console.log('opponent send:',code,obj,type);
+			}
+			console.log('this game is:',gameObj.id);
+			gameObj.Lock.writeLock(function (release) {
+				gameObj.join(owner,function (err) {
+					test.ifError(err);
+					gameObj.join(opponent,function (err) {
+						test.ifError(err);
+						gameObj.testing = true;
+						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
+							test.ok(worked);
+							console.log(worked,events);
+							gameObj.sitDown(opponent,{chips:100000,seat_index:1},function (worked,events) {
+								test.ok(worked);
+								console.log(worked,events);
+								phase3(owner,opponent,gameObj,release);
+							});
+						});
+					});
+				});
+			});
+		}
+		function phase3(owner,opponent,game,release) {
+			game.members[0].status = 'psAllIn';
+			game.members[1].status = 'psInHand';
+			game.members[0].want_split = true;
+			game.members[1].want_split = true;
+			game.members[0].hand = new Hand();
+			game.members[1].hand = new Hand();
+			game.members[0].sitOutNextRound = true;
+			game.state = 'tsPreFlop';
+			game.flops = [ new Hand() ];
+			game.turns = [ new Hand() ];
+			game.rivers = [ new Hand() ];
+			game.history = { cards:[], moves:[], players:[{},{}] };
+			game.balance_changes = [0,0];
+			game.bets = [ 100,100 ];
+			game.current_seat = 0;
+			game.dealer = 0;
+			game.rake = 0;
+			game.real_rake = 0;
+			game.deck.cards = [1,40,17,41,29,51,48,20,9,25,13,19,46,42,10,8,16,47,0,11,18,14,31,4,2,24,32,33,6,15,12,39,21,37,30,26,34,7,22,3,35,27,44,5,36,50,49,28,23,43,38,45];
+			game.deck.draw(4,game.members[0].hand);
+			game.deck.draw(4,game.members[1].hand);
 			game.stateMachine(function (events) {
 				console.log('events',events);
 				release();

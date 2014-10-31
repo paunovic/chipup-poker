@@ -51,6 +51,7 @@ Client.prototype.handle = function (err,code,buffer) {
 					if (tbl.seats[y].autoplay || true) {
 						console.log('need to play now');
 						this.reply(codes.scTablePlayNow,{_id:tbl.table_mongo_id},'Poker.Game');
+						this.reply(codes.scSplitTableCards,{table_mongo_id:tbl.table_mongo_id,flag:true},'Poker.TableBoolFlag');
 					}
 				}
 			}
@@ -58,6 +59,7 @@ Client.prototype.handle = function (err,code,buffer) {
 		break
 	case codes.seTableStatus:
 		params = pb.Parse(buffer,'Poker.TableStatus');
+		console.log('events',params.events);
 		if (params.locked) return;
 		switch (params.state) {
 		case 'tsPreFlop':
@@ -70,9 +72,9 @@ Client.prototype.handle = function (err,code,buffer) {
 				if (activeSeat.autoplay) {
 					this.log('its me, but in auto mode');
 				} else {
-					console.log(activeSeat);
-					console.log(params.minimum_bet);
-					console.log(params.bets);
+					//console.log(activeSeat);
+					//console.log(params.minimum_bet);
+					//console.log(params.bets);
 					if (params.minimum_bet > (activeSeat.chips + params.bets[params.current_seat]) ) params.minimum_bet = activeSeat.chips + params.bets[params.current_seat];
 					setTimeout(function () {
 						this.reply(codes.scPutChips,{table_mongo_id:params.table_mongo_id, chip_amount:params.minimum_bet, current_state:params.state},'Poker.PutChips');

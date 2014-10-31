@@ -213,14 +213,17 @@ function format1(card) {
 	else if (card == 10) return 'Q';
 	else if (card == 11) return 'K';
 	else if (card == 12) return 'A';
-	else throw 'invalid card:'+card;
+	else throw new Error('invalid card:'+card);
 }
 function format(cards) {
 	var out = '';
 	for (var x=0; x<cards.length; x++) out += format1(cards[x]);
 	return out;
 }
-function doEval(flop,turn,river,hands) {
+function doEval(table,hands) {
+	var flop = table.flop;
+	var turn = table.turn;
+	var river = table.river;
 	var start = Date.now();
 	var tbl = [];
 	var tsuits = [0,0,0,0];
@@ -239,6 +242,7 @@ function doEval(flop,turn,river,hands) {
 	tableraw.push(river.cards[0]);
 
 	console.log('tbl:%s %j',format(tbl));
+	var outputs = [];
 	for (var y=0; y<hands.length; y++) {
 		var p = [];
 		var player = hands[y].hand;
@@ -256,14 +260,17 @@ function doEval(flop,turn,river,hands) {
 			console.log(res2);
 			if (res2 < res) res = res2;
 		}
-		hands[y].id = res;
+		var out = {};
+		out.id = res;
+		out.seat = hands[y].seat;
 		var obj = eqc[res];
-		hands[y].desc = obj.desc;
-		hands[y].domination = obj.domination;
-		hands[y].likelihood = obj.likelyhood;
-		hands[y].cards = obj.cards;
+		out.desc = obj.desc;
+		out.domination = obj.domination;
+		out.likelihood = obj.likelihood;
+		out.cards = obj.cards;
+		outputs.push(out);
 	}
 	var end = Date.now();
 	console.log('runtime %d',end-start);
-	return {outputs:hands};
+	return {outputs:outputs};
 }
