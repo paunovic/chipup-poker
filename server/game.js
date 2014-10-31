@@ -1252,9 +1252,17 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 	var forcewin = -1;
 	if (hands.length > 1) {
 		if (this.omaha) {
-		console.log('unfinished',events);
-		process.exit();
-			var result = omaha2.doEval(this.flop,this.turn,this.river,hands);
+			var table = { flop: this.flops[0], turn:this.turns[0], river:this.rivers[0] };
+			var results = []
+			results[0] = omaha2.doEval(table,hands);
+			console.log(results[0]);
+			var temp = results[0].outputs[0].desc;
+			if (this.flops[1]) table.flop = this.flops[1];
+			if (this.turns[1]) table.turn = this.turns[1];
+			if (this.rivers[1]) table.river = this.rivers[1];
+			results[1] = omaha2.doEval(table,hands);
+			assert.equal(temp,results[0].outputs[0].desc);
+			console.log(results[1]);
 		} else {
 			var table = { flop: this.flops[0], turn:this.turns[0], river:this.rivers[0] };
 			var results = []
