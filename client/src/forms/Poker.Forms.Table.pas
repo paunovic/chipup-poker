@@ -621,6 +621,7 @@ procedure TfrmTable.UpdateHandStrength;
 var
   seat_info: TSeatInfo;
   table: TTable;
+  hs: String;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
@@ -633,9 +634,13 @@ begin
       if (table.Renderer.FlopAnimations.Count = 0) and
          (table.Renderer.TurnAnimations.Count = 0) and
          (table.Renderer.RiverAnimations.Count = 0) then
-        lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
+      begin
+        hs := '';
+// FIXME
+{        lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
               table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString,
-              table.Status.CurrentGame, TRUE)
+              table.Status.CurrentGame, TRUE)}
+      end;
     end
     else
       lbvHandStrength.Caption := '';

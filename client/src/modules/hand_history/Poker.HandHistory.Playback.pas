@@ -145,21 +145,24 @@ begin
           begin
             tablestate := tsFlop;
             pbevent.Event := teFlop;
-            pbevent.Cards := Copy(AHandHistoryItem.Cards, 0, 3);
+            for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
+              pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 0, 3));
           end
           else
             if move.ContainsEvent(teTurn) then
             begin
               tablestate := tsTurn;
               pbevent.Event := teTurn;
-              pbevent.Cards := Copy(AHandHistoryItem.Cards, 3, 1);
+              for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
+                pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 3, 1));
             end
             else
               if move.ContainsEvent(teRiver) then
               begin
                 tablestate := tsRiver;
                 pbevent.Event := teRiver;
-                pbevent.Cards := Copy(AHandHistoryItem.Cards, 4, 1);
+                for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
+                  pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 4, 1));
               end;
           pbevent.Bets.AddRange(bets);
           FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);

@@ -421,6 +421,7 @@ var
   csdbg: String;
   seatdbg: TSeatInfo;
   playerdbg: TPlayerInfo;
+  C2: Integer;
   {$ENDIF}
 begin
   FRenderer.Disable;
@@ -542,12 +543,39 @@ begin
       teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
       teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
       teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-      teFlop: events := events + Format('FLOP [%s]', [FStatus.FlopCards.AsString]);
-      teTurn: events := events + Format('TURN [%s]', [FStatus.TurnCard.AsString]);
-      teRiver: events := events + Format('RIVER [%s]', [FStatus.RiverCard.AsString]);
+      teFlop: begin
+        events := events + 'FLOP [';
+        for C2 := 0 to FStatus.FlopCards.Count - 1 do
+        begin
+          events := events + FStatus.FlopCards[C2].AsString;
+          if C1 < FStatus.FlopCards.Count - 1 then
+            events := events + ', ';
+        end;
+        events := events + ']';
+      end;
+      teTurn: begin
+        events := events + 'TURN [';
+        for C2 := 0 to FStatus.TurnCard.Count - 1 do
+        begin
+          events := events + FStatus.TurnCard[C2].AsString;
+          if C2 < FStatus.TurnCard.Count - 1 then
+            events := events + ', ';
+        end;
+        events := events + ']';
+      end;
+      teRiver: begin
+        events := events + 'RIVER [';
+        for C2 := 0 to FStatus.RiverCard.Count - 1 do
+        begin
+          events := events + FStatus.RiverCard[C2].AsString;
+          if C2 < FStatus.RiverCard.Count - 1 then
+            events := events + ', ';
+        end;
+        events := events + ']';
+      end;
       tePostRiver: events := events + 'POST RIVER';
       tePreWin: events := events + 'PRE WIN';
-      teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards)]);
+      teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards[0])]);
       teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Displayname, ChipsToStr(FStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
     else
       events := events + Format('UNHANDLED EVENT RECEIVED: %s', [GetEnumName(TypeInfo(TTableEventType), Integer(pbevent.Event))]);
@@ -564,20 +592,23 @@ procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 var
   seat_caption: String;
   seat: TSeatInfo;
-  flop: TBytes;
+  C1: Integer;
 begin
   seat_caption := '';
   case ATableEvent.Event of
     teExistingCards: begin
-      if Length(ATableEvent.Cards) >= 3 then
+      FStatus.FlopCards.Clear;
+      FStatus.TurnCard.Clear;
+      FStatus.RiverCard.Clear;
+      for C1 := 0 to ATableEvent.Cards.Count - 1 do
       begin
-        flop := Copy(ATableEvent.Cards, 0, 3);
-        FStatus.FlopCards.Assign(flop);
+        if Length(ATableEvent.Cards[C1]) >= 3 then
+          FStatus.FlopCards.Add(TCards.Create(Copy(ATableEvent.Cards[C1], 0, 3)));
+        if Length(ATableEvent.Cards[C1]) >= 4 then
+          FStatus.TurnCard.Add(TCard.Create(ATableEvent.Cards[C1][3]));
+        if Length(ATableEvent.Cards[C1]) >= 5 then
+          FStatus.RiverCard.Add(TCard.Create(ATableEvent.Cards[C1][4]));
       end;
-      if Length(ATableEvent.Cards) >= 4 then
-        FStatus.TurnCard.Assign(ATableEvent.Cards[3]);
-      if Length(ATableEvent.Cards) >= 5 then
-        FStatus.RiverCard.Assign(ATableEvent.Cards[4]);
     end;
 
     teFold: begin
@@ -635,21 +666,27 @@ begin
 
     teFlop: begin
       LockGameplay(1.5 + FRenderer.WinningFlopAniDelay);
-      FStatus.FlopCards.Assign(ATableEvent.Cards);
+      FStatus.FlopCards.Clear;
+      for C1 := 0 to ATableEvent.Cards.Count - 1 do
+        FStatus.FlopCards.Add(TCards.Create(ATableEvent.Cards[C1]));
       if FRenderer.AnimateBets(ATableEvent.Bets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
 
     teTurn: begin
       LockGameplay(1.5 + FRenderer.WinningTurnAniDelay);
-      FStatus.TurnCard.Assign(ATableEvent.Cards);
+      FStatus.TurnCard.Clear;
+      for C1 := 0 to ATableEvent.Cards.Count - 1 do
+        FStatus.TurnCard.Add(TCard.Create(ATableEvent.Cards[C1][0]));
       if FRenderer.AnimateBets(ATableEvent.Bets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
 
     teRiver: begin
       LockGameplay(1.5 + FRenderer.WinningRiverAniDelay);
-      FStatus.RiverCard.Assign(ATableEvent.Cards);
+      FStatus.RiverCard.Clear;
+      for C1 := 0 to ATableEvent.Cards.Count - 1 do
+        FStatus.RiverCard.Add(TCard.Create(ATableEvent.Cards[C1][0]));
       if FRenderer.AnimateBets(ATableEvent.Bets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;

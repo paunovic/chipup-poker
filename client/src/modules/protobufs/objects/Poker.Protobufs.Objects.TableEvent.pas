@@ -26,7 +26,7 @@ type
       FSeat: Integer;
       FPots: TList<TPB_Pot>;
       FBets: TList<UInt32>;
-      FCards: TBytes;
+      FCards: TList<TBytes>;
       _has_bits_: UINT32;
 
     procedure set_has_Event;
@@ -41,9 +41,9 @@ type
     procedure clear_has_Bets;
     procedure set_has_Cards;
     procedure clear_has_Cards;
-    procedure SetCards(const AValue: TBytes);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
+    procedure CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
@@ -75,10 +75,10 @@ type
     procedure clear_Bets;
     property Bets: TList<UInt32> read FBets;
 
-    // optional bytes Cards = 6;
+    // repeated bytes Cards = 6;
     function has_Cards: Boolean;
     procedure clear_Cards;
-    property Cards: TBytes read FCards write SetCards;
+    property Cards: TList<TBytes> read FCards;
 
   end;
 
@@ -110,6 +110,11 @@ begin
     FBets.OnNotify := nil;
     FreeAndNil(FBets);
   end;
+  if Assigned(FCards) then
+  begin
+    FCards.OnNotify := nil;
+    FreeAndNil(FCards);
+  end;
   inherited;
 end;
 
@@ -118,6 +123,7 @@ begin
   inherited;
   FPots := TObjectList<TPB_Pot>.Create;
   FBets := TList<UInt32>.Create;
+  FCards := TList<TBytes>.Create;
 end;
 
 procedure TPB_TableEvent.HookNotifiers;
@@ -125,6 +131,7 @@ begin
   inherited;
   FPots.OnNotify := PotsNotifyEvent;
   FBets.OnNotify := BetsNotifyEvent;
+  FCards.OnNotify := CardsNotifyEvent;
 end;
 
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -157,7 +164,7 @@ begin
       end;
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FCards := AProtobufReader.readBytes;
+        FCards.Add(AProtobufReader.readBytes);
         set_has_Cards;
       end;
     else
@@ -176,8 +183,7 @@ begin
   for pbobj2 in AFrom.Pots do
     FPots.Add(TPB_Pot.Create(pbobj2, Lightweight));
   FBets.AddRange(AFrom.Bets);
-  if AFrom.has_Cards then
-    SetCards(AFrom.Cards);
+  FCards.AddRange(AFrom.Cards);
 end;
 
 function TPB_TableEvent.IsInitialized: Boolean;
@@ -327,8 +333,13 @@ begin
 end;
 
 procedure TPB_TableEvent.clear_Cards;
+var
+  on_notify: TCollectionNotifyEvent<TBytes>;
 begin
-  SetLength(FCards, 0);
+  on_notify := FCards.OnNotify;
+  FCards.OnNotify := nil;
+  FCards.Clear;
+  FCards.OnNotify := on_notify;
   clear_has_Cards;
 end;
 
@@ -347,14 +358,12 @@ begin
   _has_bits_ := _has_bits_ and not 32;
 end;
 
-procedure TPB_TableEvent.SetCards(const AValue: TBytes);
+procedure TPB_TableEvent.CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
-  if not Lightweight then
-    Assert(not has_Cards);
-  FCards := Copy(AValue, 0, Length(AValue));
-  if not Lightweight then
-    ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  Assert(Action = cnAdded);
   set_has_Cards;
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kCardsFieldNumber, Item);
 end;
 
 procedure TPB_TableEvent.Clear;

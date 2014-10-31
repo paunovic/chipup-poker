@@ -617,8 +617,7 @@ begin
   cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Displayname]);
   if not dmMain.SelfInfo.Authed then
     cpt := cpt + ' (account verification pending)';
-  if cpt <> Caption then
-    Caption := cpt;
+  Caption := cpt;
 end;
 
 procedure TfrmChipUpMain.UpdateMenuActions;
