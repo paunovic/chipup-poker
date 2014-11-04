@@ -1124,6 +1124,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
 				this.deck.draw(1,this.turns[0]);
+				console.log('history is',this.history);
 				this.history.cards[0].cards = this.history.cards[0].cards.concat(this.turns[0].cards);
 				this.stateRow.turn.cards = this.turns[0].cards;
 				if (this.doingSplit) {

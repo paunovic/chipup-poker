@@ -578,6 +578,7 @@ exports.game = {
 		}
 	},
 	splitholdem: function (test) {
+		test.expect(15);
 		global.activeUsers = {};
 		global.sharedconfig = {max_play_time:15,max_timebank:30};
 		global.log = console.log;
@@ -666,7 +667,14 @@ exports.game = {
 			game.deck.draw(2,game.members[0].hand);
 			game.deck.draw(2,game.members[1].hand);
 			game.stateMachine(function (events) {
-				console.log('events',events);
+				test.equal(events.length,5);
+				test.equal(events[0].event,'teFlop');
+				test.equal(events[1].event,'teTurn');
+				test.equal(events[2].event,'teRiver');
+				test.equal(events[3].event,'tePostRiver');
+				test.equal(events[4].event,'teWinning');
+				test.equal(events[4].pots[0].value,200);
+				console.log('event 4',events[4].pots[0].WinnerData);
 				release();
 				game.stopTimer();
 				setTimeout(function () {
