@@ -172,7 +172,11 @@ var HandHistorySchema = new Schema({
 	gameid:{type:ObjectId,index:true},
 	moves:[MoveSchema],
 	players:[PlayerSchema],
-	cards:[Number],
+	cards:[
+		{
+			cards:[Number]
+		}
+	],
 	rake:Number,
 	dealer:Number,
 	current_game:String,

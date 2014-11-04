@@ -429,7 +429,10 @@ Game.prototype.handOver = function (cb,handid,reason) {
 					cb();
 				});
 			},function () {
-				historyRow.cards = new Buffer(historyRow.cards);
+				// MARK
+				for (var x=0; x<historyRow.cards.length; x++) {
+					historyRow.cards[x] = new Buffer(historyRow.cards[x].cards);
+				}
 				var obj = {gameid:this.id, rows:[historyRow] };
 				if (this.tournament) obj.tournament_id = this.obj.tournament;
 				if (this.obj.clubid) obj.club_id = this.obj.clubid;
@@ -1034,7 +1037,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	//this.log('doWin',this.pots,this.members); // the timer breaks JSON stringify
 	this.pots = [ new Pot(this) ];
 	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
-		this.log('checking winner %j ',winnerObj,this.seats);
+		//this.log('checking winner %j ',winnerObj,this.seats);
 		var seat = winnerObj.seat;
 		var userid = this.seats[seat].userid;
 		var gain = wins[seat];
@@ -1083,7 +1086,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			if (this.bets[x] < min) min = this.bets[x];
 		}
 		this.log('split vote %d/%d',wantSplitCount,players);
-		if (wantSplitCount == players) this.doingSplit = true;
+		if (wantSplitCount == players) {
+			this.doingSplit = true;
+			if (!this.history.cards[1]) this.history.cards[1] = { cards: [] };
+		}
 		this.log('bet ranges min:'+min+' max:'+max+' all bets:'+JSON.stringify(this.bets));
 		if (min == -1) min = max;
 		if (min == max) {
@@ -1091,13 +1097,13 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.rake = this.real_rake;
 				this.log('flopping');
 				this.deck.draw(3,this.flops[0]);
-				this.history.cards = this.flops[0].cards; // FIXME
+				this.history.cards[0] = { cards:this.flops[0].cards };
 				this.stateRow.flop.cards = this.flops[0].cards;
 				if (this.doingSplit) {
 					this.flops[1] = new Hand();
 					this.deck.draw(3,this.flops[1]);
 					this.stateRow.flop.cards = this.stateRow.flop.cards.concat(this.flops[1].cards);
-					// FIXME, 2nd flop missing from HH
+					this.history.cards[1].cards = this.history.cards[1].cards.concat(this.flops[1].cards);
 				}
 				this.stateRow.deck = this.deck.cards;
 				var ev = {bets:this.bets.slice(),oldpots:this.pots,cards:[new Buffer(this.flops[0].cards)]};
@@ -1118,12 +1124,13 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
 				this.deck.draw(1,this.turns[0]);
-				this.history.cards = this.history.cards.concat(this.turns[0].cards); // FIXME
+				this.history.cards[0].cards = this.history.cards[0].cards.concat(this.turns[0].cards);
 				this.stateRow.turn.cards = this.turns[0].cards;
 				if (this.doingSplit) {
 					this.turns[1] = new Hand();
 					this.deck.draw(1,this.turns[1]);
 					this.stateRow.turn.cards = this.stateRow.turn.cards.concat(this.turns[1].cards);
+					this.history.cards[1].cards = this.history.cards[1].cards.concat(this.turns[1].cards);
 				}
 				this.stateRow.deck = this.deck.cards;
 				var ev = {bets:this.bets.slice(),oldpots:this.pots,cards:[new Buffer(this.turns[0].cards)]};
@@ -1143,12 +1150,13 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
 				this.deck.draw(1,this.rivers[0]);
-				this.history.cards = this.history.cards.concat(this.rivers[0].cards); // FIXME
+				this.history.cards[0].cards = this.history.cards[0].cards.concat(this.rivers[0].cards);
 				this.stateRow.river.cards = this.rivers[0].cards;
 				if (this.doingSplit) {
 					this.rivers[1] = new Hand();
 					this.deck.draw(1,this.rivers[1]);
 					this.stateRow.river.cards = this.stateRow.river.cards.concat(this.rivers[1].cards);
+					this.history.cards[1].cards = this.history.cards[1].cards.concat(this.rivers[1].cards);
 				}
 				this.stateRow.deck = this.deck.cards;
 				var ev = {bets:this.bets.slice(),oldpots:this.pots,cards:[new Buffer(this.rivers[0].cards)]}
