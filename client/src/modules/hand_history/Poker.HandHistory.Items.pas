@@ -199,17 +199,18 @@ var
   total_pot: UINT32;
   total_rake: UINT32;
   player_line: String;
-  hand_strength: String;
   seat_winnings: TArray<UINT32>;
   fold_on: TArray<TTableState>;
   line: String;
   tablestate: TTableState;
-  C1: Integer;
+  C1, C2: Integer;
   action: String;
   last_bet: UINT32;
   parent_name: String;
   tmp: String;
   index: Integer;
+  cards_set: TBytes;
+  hand_strength: String;
 begin
   ALines.Clear;
 
@@ -341,10 +342,7 @@ begin
           if Length(FCards[C1]) = 2 then
             index := 0
           else
-            if Length(FCards[C1]) = 1 then
-              index := 0
-            else
-              index := -1;
+            index := -1;
         if index <> -1 then
           tmp := tmp + TCard.ByteToString(FCards[C1][index]) + ', ';
       end;
@@ -408,12 +406,28 @@ begin
         else
           if player.Status in [psInHand, psFolded, psAllIn] then
           begin
-            // FIXME
-//            hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
-            ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
+            tmp := Format('%s%s%s shows [%s%s%s] (%s', [
                 ATags.PlayerNick, player.Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(player.Cards, ' '),
-                ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
-            ]));
+                ATags.NormalText, ATags.HandStrength]);
+
+            SetLength(cards_set, 0);
+            for C1 := 0 to FCards.Count - 1 do
+            begin
+              if Length(cards_set) = 0 then
+                cards_set := Copy(FCards[C1], 0, Length(FCards[C1]));
+
+              for C2 := High(FCards[C1]) downto Low(FCards[C1]) do
+                cards_set[C2] := FCards[C1][C2];
+
+              hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards),
+                  TCards.BytesToString(cards_set), FCurrentGame, FALSE);
+              tmp := tmp + hand_strength;
+              if C1 < FCards.Count - 1 then
+                tmp := tmp + ATags.NormalText + ', ' + ATags.HandStrength;
+            end;
+
+            tmp := tmp + ATags.NormalText + ')';
+            ALines.Add(tmp);
           end;
       end;
 
@@ -460,13 +474,8 @@ begin
             ATags.NormalText, ATags.SeatIndex, player.Seat, ATags.NormalText, ATags.PlayerNick, player.Nick, ATags.NormalText
         ]);
 
-        hand_strength := '';
         if Length(player.Cards) > 0 then
-        begin
-//          hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
-// FIXME
           player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
-        end;
 
         if player.Status = psOutOfPlay then
           player_line := player_line + 'is sitting out '
@@ -494,8 +503,8 @@ begin
 
           player_line := player_line + Format('won %s%s%s', [ATags.Chips, ChipsToStr(seat_winnings[player.Seat]), ATags.NormalText]);
 
-          if hand_strength <> '' then
-            player_line := player_line + Format(' with %s%s', [ATags.HandStrength, hand_strength]);
+//          if hand_strength <> '' then FIXME
+   //         player_line := player_line + Format(' with %s%s', [ATags.HandStrength, hand_strength]);
         end;
 
         player_line := TrimRight(player_line);

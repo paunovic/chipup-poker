@@ -154,7 +154,11 @@ begin
               tablestate := tsTurn;
               pbevent.Event := teTurn;
               for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
-                pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 3, 1));
+                if Length(AHandHistoryItem.Cards[C3]) > 3 then
+                  pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 3, 1))
+                else
+                  if Length(AHandHistoryItem.Cards[C3]) >= 2 then
+                    pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 0, 1));
             end
             else
               if move.ContainsEvent(teRiver) then
@@ -162,7 +166,8 @@ begin
                 tablestate := tsRiver;
                 pbevent.Event := teRiver;
                 for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
-                  pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 4, 1));
+                  if Length(AHandHistoryItem.Cards[C3]) > 0 then
+                    pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], Length(AHandHistoryItem.Cards[C3]) - 1, 1));
               end;
           pbevent.Bets.AddRange(bets);
           FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);

@@ -668,7 +668,8 @@ begin
       LockGameplay(1.5 + FRenderer.WinningFlopAniDelay);
       FStatus.FlopCards.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
-        FStatus.FlopCards.Add(TCards.Create(ATableEvent.Cards[C1]));
+        if Length(ATableEvent.Cards[C1]) >= 3 then
+          FStatus.FlopCards.Add(TCards.Create(ATableEvent.Cards[C1]));
       if FRenderer.AnimateBets(ATableEvent.Bets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
@@ -677,7 +678,8 @@ begin
       LockGameplay(1.5 + FRenderer.WinningTurnAniDelay);
       FStatus.TurnCard.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
-        FStatus.TurnCard.Add(TCard.Create(ATableEvent.Cards[C1][0]));
+        if Length(ATableEvent.Cards[C1]) > 0 then
+          FStatus.TurnCard.Add(TCard.Create(ATableEvent.Cards[C1][0]));
       if FRenderer.AnimateBets(ATableEvent.Bets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
@@ -686,7 +688,8 @@ begin
       LockGameplay(1.5 + FRenderer.WinningRiverAniDelay);
       FStatus.RiverCard.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
-        FStatus.RiverCard.Add(TCard.Create(ATableEvent.Cards[C1][0]));
+        if Length(ATableEvent.Cards[C1]) > 0 then
+          FStatus.RiverCard.Add(TCard.Create(ATableEvent.Cards[C1][0]));
       if FRenderer.AnimateBets(ATableEvent.Bets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
