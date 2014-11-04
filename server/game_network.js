@@ -461,10 +461,20 @@ handlers[codes.scShowCards] = function (args,token) {
 					game.join(this,function () {
 						var events = [];
 						if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
-							var cards = game.flop.cards;
-							if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
-							if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
-							events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+							var cards0 = game.flops[0].cards;
+							var cards1;
+							if (game.flops[1]) cards1 = this.flops[1].cards;
+							if (['tsTurn','tsRiver'].indexOf(game.state) != -1) {
+								cards0 = cards0.concat(game.turn[0].cards);
+								if (game.turns[1]) cards1 = cards1.concat(game.turns[1].cards);
+							}
+							if (game.state == 'tsRiver') {
+								cards0 = cards0.concat(game.rivers[0].cards);
+								if (game.rivers[1]) cards1 = cards1.concat(game.rivers[1].cards);
+							}
+							var ev = {cards:[new Buffer(cards0)]};
+							if (cards1) ev.cards[1] = new Buffer(cards1);
+							events.push(game.makeEvent('teExistingCards',ev));
 						}
 						var status = game.getTableStatus(this,true,events);
 						this.send(codes.seTableStatus,status,'Poker.TableStatus');
