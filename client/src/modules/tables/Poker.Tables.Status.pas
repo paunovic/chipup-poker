@@ -16,9 +16,9 @@ type
     FSeats: TSeatList;
     FBets: TList<UINT32>;
     FPreviousBets: TList<UINT32>;
-    FFlopCards: TCards;
-    FTurnCard: TCard;
-    FRiverCard: TCard;
+    FFlopCards: TObjectList<TCards>;
+    FTurnCard: TObjectList<TCard>;
+    FRiverCard: TObjectList<TCard>;
     FSmallBlindSeat: Integer;
     FBigBlindSeat: Integer;
     FRakePercent: UINT32;
@@ -86,9 +86,9 @@ type
     property Bets: TList<UINT32> read FBets write FBets;
     property PreviousBets: TList<UINT32> read FPreviousBets;
     property MinimumBet: UINT32 read FMinimumBet;
-    property FlopCards: TCards read FFlopCards;
-    property TurnCard: TCard read FTurnCard;
-    property RiverCard: TCard read FRiverCard;
+    property FlopCards: TObjectList<TCards> read FFlopCards;
+    property TurnCard: TObjectList<TCard> read FTurnCard;
+    property RiverCard: TObjectList<TCard> read FRiverCard;
     property SmallBlindSeat: Integer read FSmallBlindSeat;
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
@@ -158,11 +158,12 @@ begin
 
   FPreviousPots := TPB_PotList.Create;
   FPots := TPB_PotList.Create;
-  FFlopCards := TCards.Create;
-  FTurnCard := TCard.Create;
-  FRiverCard := TCard.Create;
   FEvents := TPB_TableEventList.Create;
   FMessages := TObjectList<TPB_TableMessage>.Create;
+
+  FFlopCards := TObjectList<TCards>.Create;
+  FTurnCard := TObjectList<TCard>.Create;
+  FRiverCard := TObjectList<TCard>.Create;
 end;
 
 destructor TTableStatus.Destroy;

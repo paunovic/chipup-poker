@@ -1013,30 +1013,43 @@ procedure TTableRenderer.RenderTableCards;
     end;
   end;
 
+const
+  SPLIT_COUNT = 2;
 var
-  C1: Integer;
-  card_points_curr: array of TPoint2;
-  card_points_mid: array of TPoint2;
-  card_points_final: array of TPoint2;
-  show_cards: array of Integer; // -1 - hide completely, 0 - card face down, 1 - card face up
+  C1, C2: Integer;
+  card_points_curr: array[0..SPLIT_COUNT - 1] of array of TPoint2;
+  card_points_mid: array[0..SPLIT_COUNT - 1] of array of TPoint2;
+  card_points_final: array[0..SPLIT_COUNT - 1] of array of TPoint2;
+  show_cards: array[0..SPLIT_COUNT - 1] of array of Integer; // -1 - hide completely, 0 - card face down, 1 - card face up
   animation: TDXAnimation;
   table: TTable;
+  crow, cindex: Integer;
 begin
-  SetLength(card_points_final, 5);
-  SetLength(card_points_curr, 5);
-  SetLength(card_points_mid, 5);
-  SetLength(show_cards, 5);
   for C1 := Low(card_points_final) to High(card_points_final) do
   begin
-    card_points_final[C1].x := FMetrics.TableCenter.X - (FMetrics.CardWidth * 5) / 2 - 4 * 3 + (C1 * FMetrics.CardWidth) + (C1 * 3);
-    card_points_final[C1].y := FMetrics.TableCenter.Y - FMetrics.CardHeight / 2;
-    card_points_curr[C1] := card_points_final[C1];
-    card_points_mid[C1] := card_points_final[C1];
-    show_cards[C1] := -1;
+    SetLength(card_points_final[C1], 5);
+    SetLength(card_points_curr[C1], 5);
+    SetLength(card_points_mid[C1], 5);
+    SetLength(show_cards[C1], 5);
+    for C2 := Low(show_cards[C1]) to High(show_cards[C1]) do
+      show_cards[C1][C2] := -1;
   end;
-  card_points_mid[0].x := card_points_final[0].x - 5;
-  card_points_mid[1].x := card_points_final[0].x - 0;
-  card_points_mid[2].x := card_points_final[0].x + 5;
+      
+  for C1 := Low(card_points_final) to High(card_points_final) do
+    for C2 := Low(card_points_final[C1]) to High(card_points_final[C1]) do
+    begin 
+      card_points_final[C1][C2].x := FMetrics.TableCenter.X - (FMetrics.CardWidth * 5) / 2 - 4 * 3 + (C2 * FMetrics.CardWidth) + (C2 * 3);
+      card_points_final[C1][C2].y := FMetrics.TableCenter.Y - FMetrics.CardHeight / 2 + C1 * FMetrics.CardHeight / 3;
+      card_points_curr[C1][C2] := card_points_final[C1][C2];
+      card_points_mid[C1][C2] := card_points_final[C1][C2];
+    end;
+    
+  for C1 := Low(card_points_mid) to High(card_points_mid) do
+  begin
+    card_points_mid[C1][0].x := card_points_final[C1][0].x - 5;
+    card_points_mid[C1][1].x := card_points_final[C1][0].x - 0;
+    card_points_mid[C1][2].x := card_points_final[C1][0].x + 5;
+  end;
 //  card_points_mid[3].x := card_points_final[3].x + FCardWidth / 2;
 //  card_points_mid[4].x := card_points_final[4].x + FCardWidth / 2;
 
@@ -1049,13 +1062,16 @@ begin
       begin
         FFlopAnimations.Clear;
 
-        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[0], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
-        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[1], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
-        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[2], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
+        for C1 := 0 to table.Status.FlopCards.Count - 1 do
+        begin
+          animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][0], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][1], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][2], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
 
-        animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[0], card_points_final[0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
-        animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[1], card_points_final[1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
-        animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[2], card_points_final[2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][0], card_points_final[C1][0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][1], card_points_final[C1][1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][2], card_points_final[C1][2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
+        end;  
 
         FFlopAnimated := TRUE;
       end;
@@ -1067,39 +1083,52 @@ begin
             if (DXTimer.Find(FInternalHWND, FFlopAnimations[C1], animation)) and
                (animation.Status = asAnimating) then
             begin
-              card_points_curr[Integer(animation.Tags[ANITAG_CARD_INDEX])] := animation.GetCurrPoint(FDXAreaSize);
-              if FFlopAnimations.Count > 3 then
-                show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 0
+              crow := Integer(animation.Tags[ANITAG_CARD_INDEX]) div 5;
+              cindex := Integer(animation.Tags[ANITAG_CARD_INDEX]) mod 5;
+              card_points_curr[crow][cindex] := animation.GetCurrPoint(FDXAreaSize);
+              if FFlopAnimations.Count > table.Status.FlopCards.Count * 3 then
+                show_cards[crow][cindex] := 0
               else
-                show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 1;
+                show_cards[crow][cindex] := 1;
             end;
         end
         else
         begin
-          show_cards[0] := -1;
-          show_cards[1] := -1;
-          show_cards[2] := -1;
+          for C1 := Low(show_cards) to High(show_cards) do
+          begin
+            show_cards[C1][0] := -1;
+            show_cards[C1][1] := -1;
+            show_cards[C1][2] := -1;
+          end;
         end
       else
-      begin
-        show_cards[0] := 1;
-        show_cards[1] := 1;
-        show_cards[2] := 1;
-      end;
+        for C1 := Low(show_cards) to High(show_cards) do
+        begin
+          show_cards[C1][0] := 1;
+          show_cards[C1][1] := 1;
+          show_cards[C1][2] := 1;
+        end;
 
       for C1 := 0 to table.Status.FlopCards.Count - 1 do
-        case show_cards[C1] of
-          -1: Continue;
-           0: RenderCard(card_points_curr[C1], nil, 1);
-           1: RenderCard(card_points_curr[C1], table.Status.FlopCards[C1], 1);
-        end;
+        for C2 := 0 to table.Status.FlopCards[C1].Count - 1 do
+          case show_cards[C1][C2] of
+            -1: Continue;
+             0: RenderCard(card_points_curr[C1][C2], nil, 1);
+             1: RenderCard(card_points_curr[C1][C2], table.Status.FlopCards[C1][C2], 1);
+          end;
     end;
 
     if table.Status.State >= tsTurn then
-      RenderSingleCard(table.Status.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FMetrics.DealerPoint, card_points_final[3], 0.75 + FWinningTurnAniDelay);
+      for C1 := 0 to table.Status.TurnCard.Count - 1 do
+        RenderSingleCard(table.Status.TurnCard[C1], FTurnAnimations, FTurnAnimated,
+          card_points_curr[C1][3], show_cards[C1][3], FMetrics.DealerPoint,
+          card_points_final[C1][3], 0.75 + FWinningTurnAniDelay);
 
     if table.Status.State >= tsRiver then
-      RenderSingleCard(table.Status.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FMetrics.DealerPoint, card_points_final[4], 0.75 + FWinningRiverAniDelay);
+      for C1 := 0 to table.Status.RiverCard.Count - 1 do
+        RenderSingleCard(table.Status.RiverCard[C1], FRiverAnimations, FRiverAnimated,
+          card_points_curr[C1][4], show_cards[C1][4], FMetrics.DealerPoint,
+          card_points_final[C1][4], 0.75 + FWinningRiverAniDelay);
   finally
     Tables.Unlock;
   end;
@@ -1694,8 +1723,9 @@ begin
     begin
       if Tables.GetAndLockTable(FInternalId, table) then
       try
+        // FIXME
         if table.Status.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
-          winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString, table.Status.CurrentGame, FALSE)
+//          winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString, table.Status.CurrentGame, FALSE)
         else
          winmsg := pot.WinnerData[0].Msg;
       finally

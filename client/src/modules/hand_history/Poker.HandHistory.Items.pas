@@ -72,7 +72,7 @@ type
     FRake: Integer;
     FTotalRake: UINT32;
     FPlayers: TPlayerHandHistories;
-    FCards: TBytes;
+    FCards: TList<TBytes>;
     FStartTime: TDateTime;
     FStartTimeStr: String;
     FEndTime: TDateTime;
@@ -97,7 +97,7 @@ type
     property Rake: Integer read FRake;
     property TotalRake: UINT32 read FTotalRake;
     property Players: TPlayerHandHistories read FPlayers;
-    property Cards: TBytes read FCards;
+    property Cards: TList<TBytes> read FCards;
     property StartTime: TDateTime read FStartTime;
     property StartTimeStr: String read FStartTimeStr;
     property EndTime: TDateTime read FEndTime;
@@ -150,6 +150,7 @@ begin
 //  FLines := TStringList.Create;
   FRVLines := TStringList.Create;
   FBalanceChanges := TList<Integer>.Create;;
+  FCards := TList<TBytes>.Create;
   Assign(AHandHistory);
 end;
 
@@ -160,6 +161,7 @@ begin
   FRVLines.Free;
   FMoves.Free;
   FPlayers.Free;
+  FCards.Free;
   inherited;
 end;
 
@@ -169,7 +171,8 @@ begin
   FHandId := AHandHistory.Seq;
   FRake := AHandHistory.Rake;
   FTotalRake := AHandHistory.Totalrake;
-  FCards := Copy(AHandHistory.Cards, 0, Length(AHandHistory.Cards));
+  FCards.Clear;
+  FCards.AddRange(AHandHistory.Cards);
   FEndTime := TTimeZone.Local.ToLocalTime(UnixToDateTime(AHandHistory.Endtime));
   FBalanceChanges.Clear;
   FBalanceChanges.AddRange(AHandHistory.BalanceChanges);
@@ -205,6 +208,8 @@ var
   action: String;
   last_bet: UINT32;
   parent_name: String;
+  tmp: String;
+  index: Integer;
 begin
   ALines.Clear;
 
@@ -311,8 +316,14 @@ begin
       last_bet := 0;
       tablestate := tsFlop;
       ALines.Add('');
-      ALines.Add(Format('%s*** FLOP *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCards.BytesToString(FCards, ' ', 3), ATags.TableEvent]));
-      ALines.Add('');
+      tmp := Format('%s*** FLOP *** [%s', [ATags.TableEvent, ATags.Cards]);
+      for C1 := 0 to FCards.Count - 1 do
+        if Length(FCards[C1]) >= 3 then
+          tmp := tmp + TCards.BytesToString(FCards[C1], ' ', 3) + ', ';
+      if tmp[Length(tmp)] = ' ' then
+        Delete(tmp, Length(tmp) - 1, 2);
+      tmp := tmp + ATags.TableEvent + ']';
+      ALines.Add(tmp);
     end;
 
     if move.ContainsEvent(teTurn) then
@@ -320,7 +331,27 @@ begin
       last_bet := 0;
       tablestate := tsTurn;
       ALines.Add('');
-      ALines.Add(Format('%s*** TURN *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCard.ByteToString(FCards[3]), ATags.TableEvent]));
+
+      tmp := Format('%s*** TURN *** [%s', [ATags.TableEvent, ATags.Cards]);
+      for C1 := 0 to FCards.Count - 1 do
+      begin
+        if Length(FCards[C1]) > 3 then
+          index := 3
+        else
+          if Length(FCards[C1]) = 2 then
+            index := 0
+          else
+            if Length(FCards[C1]) = 1 then
+              index := 0
+            else
+              index := -1;
+        if index <> -1 then
+          tmp := tmp + TCard.ByteToString(FCards[C1][index]) + ', ';
+      end;
+      if tmp[Length(tmp)] = ' ' then
+        Delete(tmp, Length(tmp) - 1, 2);
+      tmp := tmp + ATags.TableEvent + ']';
+      ALines.Add(tmp);
       ALines.Add('');
     end;
 
@@ -328,8 +359,27 @@ begin
     begin
       last_bet := 0;
       tablestate := tsRiver;
-      ALines.Add('');
-      ALines.Add(Format('%s*** RIVER *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCard.ByteToString(FCards[4]), ATags.TableEvent]));
+
+      tmp := Format('%s*** RIVER *** [%s', [ATags.TableEvent, ATags.Cards]);
+      for C1 := 0 to FCards.Count - 1 do
+      begin
+        if Length(FCards[C1]) > 4 then
+          index := 4
+        else
+          if Length(FCards[C1]) = 2 then
+            index := 1
+          else
+            if Length(FCards[C1]) = 1 then
+              index := 0
+            else
+              index := -1;
+        if index <> -1 then
+          tmp := tmp + TCard.ByteToString(FCards[C1][index]) + ', ';
+      end;
+      if tmp[Length(tmp)] = ' ' then
+        Delete(tmp, Length(tmp) - 1, 2);
+      tmp := tmp + ATags.TableEvent + ']';
+      ALines.Add(tmp);
       ALines.Add('');
     end;
 
@@ -358,7 +408,8 @@ begin
         else
           if player.Status in [psInHand, psFolded, psAllIn] then
           begin
-            hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
+            // FIXME
+//            hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
             ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
                 ATags.PlayerNick, player.Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(player.Cards, ' '),
                 ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
@@ -382,8 +433,18 @@ begin
       ALines.Add(Format('%sTotal pot: %s%s%s | Rake: %s%s%s', [ATags.NormalText, ATags.Chips, ChipsToStr(total_pot - total_rake),
          ATags.NormalText, ATags.Chips, ChipsToStr(total_rake), ATags.NormalText]));
 
-      if Length(FCards) > 0 then
-        ALines.Add(Format('%sTable cards [%s%s%s]', [ATags.NormalText, ATags.Cards, TCards.BytesToString(FCards, ' '), ATags.NormalText]));
+      if FCards.Count > 0 then
+      begin
+        tmp := Format('%sTable cards [%s', [ATags.NormalText, ATags.Cards]);
+        for C1 := 0 to FCards.Count - 1 do
+        begin
+          tmp := tmp + TCards.BytesToString(FCards[C1], ' ');
+          if C1 < FCards.Count - 1 then
+            tmp := tmp + ', ';
+        end;
+        tmp := tmp + ATags.TableEvent + ']';
+        ALines.Add(tmp);
+      end;
 
       // calculate each player winning amount
       SetLength(seat_winnings, FParentItems.Game.Seats);
@@ -402,7 +463,8 @@ begin
         hand_strength := '';
         if Length(player.Cards) > 0 then
         begin
-          hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
+//          hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
+// FIXME
           player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
         end;
 

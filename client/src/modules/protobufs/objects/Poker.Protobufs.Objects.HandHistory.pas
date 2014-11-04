@@ -31,7 +31,7 @@ type
       FSeq: UInt32;
       FTotalrake: UInt32;
       FPlayers: TList<TPB_PlayerHandHistory>;
-      FCards: TBytes;
+      FCards: TList<TBytes>;
       FEndtime: UInt32;
       FBalanceChanges: TList<Integer>;
       FMoves: TList<TPB_HandHistoryMove>;
@@ -54,7 +54,6 @@ type
     procedure clear_has_Players;
     procedure set_has_Cards;
     procedure clear_has_Cards;
-    procedure SetCards(const AValue: TBytes);
     procedure set_has_Endtime;
     procedure clear_has_Endtime;
     procedure SetEndtime(const AValue: UInt32);
@@ -75,6 +74,7 @@ type
     procedure clear_has_Rake;
     procedure SetRake(const AValue: Integer);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
+    procedure CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
     procedure BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
     procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_HandHistoryMove; Action: TCollectionNotification);
   protected
@@ -108,10 +108,10 @@ type
     procedure clear_Players;
     property Players: TList<TPB_PlayerHandHistory> read FPlayers;
 
-    // required bytes Cards = 5;
+    // repeated bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
-    property Cards: TBytes read FCards write SetCards;
+    property Cards: TList<TBytes> read FCards;
 
     // required uint32 Endtime = 6;
     function has_Endtime: Boolean;
@@ -173,6 +173,11 @@ begin
     FPlayers.OnNotify := nil;
     FreeAndNil(FPlayers);
   end;
+  if Assigned(FCards) then
+  begin
+    FCards.OnNotify := nil;
+    FreeAndNil(FCards);
+  end;
   if Assigned(FBalanceChanges) then
   begin
     FBalanceChanges.OnNotify := nil;
@@ -191,6 +196,7 @@ procedure TPB_HandHistory.InitObjects;
 begin
   inherited;
   FPlayers := TObjectList<TPB_PlayerHandHistory>.Create;
+  FCards := TList<TBytes>.Create;
   FBalanceChanges := TList<Integer>.Create;
   FMoves := TObjectList<TPB_HandHistoryMove>.Create;
 end;
@@ -199,6 +205,7 @@ procedure TPB_HandHistory.HookNotifiers;
 begin
   inherited;
   FPlayers.OnNotify := PlayersNotifyEvent;
+  FCards.OnNotify := CardsNotifyEvent;
   FBalanceChanges.OnNotify := BalanceChangesNotifyEvent;
   FMoves.OnNotify := MovesNotifyEvent;
 end;
@@ -233,7 +240,7 @@ begin
       end;
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FCards := AProtobufReader.readBytes;
+        FCards.Add(AProtobufReader.readBytes);
         set_has_Cards;
       end;
       kEndtimeFieldNumber: begin
@@ -291,8 +298,7 @@ begin
     SetTotalrake(AFrom.Totalrake);
   for pbobj3 in AFrom.Players do
     FPlayers.Add(TPB_PlayerHandHistory.Create(pbobj3, Lightweight));
-  if AFrom.has_Cards then
-    SetCards(AFrom.Cards);
+  FCards.AddRange(AFrom.Cards);
   if AFrom.has_Endtime then
     SetEndtime(AFrom.Endtime);
   FBalanceChanges.AddRange(AFrom.BalanceChanges);
@@ -312,7 +318,7 @@ function TPB_HandHistory.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $937) <> $937 then
+  if (_has_bits_ and $927) <> $927 then
     Exit(FALSE);
   for pbobj in Players do
     if not pbobj.IsInitialized then
@@ -462,8 +468,13 @@ begin
 end;
 
 procedure TPB_HandHistory.clear_Cards;
+var
+  on_notify: TCollectionNotifyEvent<TBytes>;
 begin
-  SetLength(FCards, 0);
+  on_notify := FCards.OnNotify;
+  FCards.OnNotify := nil;
+  FCards.Clear;
+  FCards.OnNotify := on_notify;
   clear_has_Cards;
 end;
 
@@ -482,14 +493,12 @@ begin
   _has_bits_ := _has_bits_ and not 16;
 end;
 
-procedure TPB_HandHistory.SetCards(const AValue: TBytes);
+procedure TPB_HandHistory.CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
-  if not Lightweight then
-    Assert(not has_Cards);
-  FCards := Copy(AValue, 0, Length(AValue));
-  if not Lightweight then
-    ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  Assert(Action = cnAdded);
   set_has_Cards;
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kCardsFieldNumber, Item);
 end;
 
 procedure TPB_HandHistory.clear_Endtime;

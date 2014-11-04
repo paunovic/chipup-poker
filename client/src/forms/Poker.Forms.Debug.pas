@@ -294,8 +294,8 @@ begin
 
   Left := 0;
   Top := 0;
-  Width := Round(Screen.Monitors[0].Width / 2.9);
-  Height := Round(Screen.Monitors[0].Height / 2.6);
+  Width := Round(Screen.Monitors[0].Width / 2.7);
+  Height := Round(Screen.Monitors[0].Height / 2.3);
 
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
