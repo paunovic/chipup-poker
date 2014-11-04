@@ -1507,6 +1507,7 @@ Game.prototype.updateMongoState = function (options,cb) {
 	this.stateRow.state = this.state;
 	this.stateRow.handid = this.handid;
 	this.stateRow.history = this.history; // maybe only update it in some spots?
+	this.stateRow.markModified('history');
 	this.stateRow.balance_changes = this.balance_changes;
 	this.stateRow.rake = this.rake;
 	this.stateRow.minBet = this.minBet;

@@ -371,6 +371,9 @@ exports.game = {
 	},
 	resume: function (test) {
 		global.activeUsers = {};
+		global.sharedconfig = {max_play_time:15,max_timebank:30};
+		global.log = console.log;
+		global.pb = Core.pb;
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
@@ -418,6 +421,7 @@ exports.game = {
 					test.ifError(err);
 					gameObj.join(opponent,function (err) {
 						test.ifError(err);
+						gameObj.testing = true;
 						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
 							test.ok(worked);
 							console.log(worked,events);
@@ -452,6 +456,7 @@ exports.game = {
 			mdb.models.GameState.findOne({_id:game.obj._id}).lean(true).exec(function (err,state) {
 				Game.getGame(game.id,function (err,game2) {
 					//console.log('game2',game2);
+					test.equal(state.history.cards.length,1);
 					game2.resume(state,function () {});
 					// reconnect players to game
 					game2.reconnectUser(owner,true,0,function (status1) {
