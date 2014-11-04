@@ -1097,8 +1097,8 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.rake = this.real_rake;
 				this.log('flopping');
 				this.deck.draw(3,this.flops[0]);
-				console.log('history is',this.history);
 				this.history.cards[0] = { cards:this.flops[0].cards };
+				console.log('history is',this.history);
 				this.stateRow.flop.cards = this.flops[0].cards;
 				if (this.doingSplit) {
 					this.flops[1] = new Hand();
