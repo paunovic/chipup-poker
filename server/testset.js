@@ -360,8 +360,8 @@ exports.game = {
 				},function () {
 					// post doWin delay
 					mdb.models.HandHistory.findOne({seq:game.handid},function (err,history) {
-						test.ok(history.cards.length == 5);
-						test.ok(history.deck.length == 43);
+						test.equal(history.cards[0].cards.length,5);
+						test.equal(history.deck.length,43);
 						test.done();
 						mdb.close();
 					});
