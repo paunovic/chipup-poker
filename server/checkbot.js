@@ -59,7 +59,9 @@ Client.prototype.handle = function (err,code,buffer) {
 		break
 	case codes.seTableStatus:
 		params = pb.Parse(buffer,'Poker.TableStatus');
-		console.log('events',params.events);
+		for (var x=0; x<params.events.length; x++) {
+			console.log('event:%j',params.events[x]);
+		}
 		if (params.locked) return;
 		switch (params.state) {
 		case 'tsPreFlop':
@@ -108,6 +110,10 @@ Client.prototype.handle = function (err,code,buffer) {
 	case codes.seChat:
 		params = pb.parse(buffer,'Poker.ChatEvent');
 		console.log(params);
+		break;
+	case codes.srHandHistoryMsg:
+		params = pb.parse(buffer,'Poker.HandHistoryReply');
+		console.log('HH:',params.rows[0].cards);
 		break;
 	}
 }
