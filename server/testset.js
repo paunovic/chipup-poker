@@ -360,8 +360,8 @@ exports.game = {
 				},function () {
 					// post doWin delay
 					mdb.models.HandHistory.findOne({seq:game.handid},function (err,history) {
-						test.ok(history.cards.length == 5);
-						test.ok(history.deck.length == 43);
+						test.equal(history.cards[0].cards.length,5);
+						test.equal(history.deck.length,43);
 						test.done();
 						mdb.close();
 					});
@@ -371,6 +371,9 @@ exports.game = {
 	},
 	resume: function (test) {
 		global.activeUsers = {};
+		global.sharedconfig = {max_play_time:15,max_timebank:30};
+		global.log = console.log;
+		global.pb = Core.pb;
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
@@ -418,6 +421,7 @@ exports.game = {
 					test.ifError(err);
 					gameObj.join(opponent,function (err) {
 						test.ifError(err);
+						gameObj.testing = true;
 						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
 							test.ok(worked);
 							console.log(worked,events);
@@ -452,6 +456,7 @@ exports.game = {
 			mdb.models.GameState.findOne({_id:game.obj._id}).lean(true).exec(function (err,state) {
 				Game.getGame(game.id,function (err,game2) {
 					//console.log('game2',game2);
+					test.equal(state.history.cards.length,1);
 					game2.resume(state,function () {});
 					// reconnect players to game
 					game2.reconnectUser(owner,true,0,function (status1) {
@@ -578,6 +583,7 @@ exports.game = {
 		}
 	},
 	splitholdem: function (test) {
+		test.expect(15);
 		global.activeUsers = {};
 		global.sharedconfig = {max_play_time:15,max_timebank:30};
 		global.log = console.log;
@@ -666,7 +672,14 @@ exports.game = {
 			game.deck.draw(2,game.members[0].hand);
 			game.deck.draw(2,game.members[1].hand);
 			game.stateMachine(function (events) {
-				console.log('events',events);
+				test.equal(events.length,5);
+				test.equal(events[0].event,'teFlop');
+				test.equal(events[1].event,'teTurn');
+				test.equal(events[2].event,'teRiver');
+				test.equal(events[3].event,'tePostRiver');
+				test.equal(events[4].event,'teWinning');
+				test.equal(events[4].pots[0].value,200);
+				console.log('event 4',events[4].pots[0].WinnerData);
 				release();
 				game.stopTimer();
 				setTimeout(function () {

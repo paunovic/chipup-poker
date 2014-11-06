@@ -1098,6 +1098,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.log('flopping');
 				this.deck.draw(3,this.flops[0]);
 				this.history.cards[0] = { cards:this.flops[0].cards };
+				console.log('history is',this.history);
 				this.stateRow.flop.cards = this.flops[0].cards;
 				if (this.doingSplit) {
 					this.flops[1] = new Hand();
@@ -1124,6 +1125,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
 				this.deck.draw(1,this.turns[0]);
+				console.log('history is',this.history);
 				this.history.cards[0].cards = this.history.cards[0].cards.concat(this.turns[0].cards);
 				this.stateRow.turn.cards = this.turns[0].cards;
 				if (this.doingSplit) {
@@ -1505,6 +1507,7 @@ Game.prototype.updateMongoState = function (options,cb) {
 	this.stateRow.state = this.state;
 	this.stateRow.handid = this.handid;
 	this.stateRow.history = this.history; // maybe only update it in some spots?
+	this.stateRow.markModified('history');
 	this.stateRow.balance_changes = this.balance_changes;
 	this.stateRow.rake = this.rake;
 	this.stateRow.minBet = this.minBet;
