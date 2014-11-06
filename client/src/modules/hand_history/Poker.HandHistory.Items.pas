@@ -317,12 +317,13 @@ begin
       last_bet := 0;
       tablestate := tsFlop;
       ALines.Add('');
-      tmp := Format('%s*** FLOP *** [%s', [ATags.TableEvent, ATags.Cards]);
+      tmp := Format('%s*** FLOP *** [', [ATags.TableEvent]);
       for C1 := 0 to FCards.Count - 1 do
         if Length(FCards[C1]) >= 3 then
-          tmp := tmp + TCards.BytesToString(FCards[C1], ' ', 3) + ', ';
+          tmp := tmp + ATags.Cards + TCards.BytesToString(FCards[C1], ' ', 3) +
+               ATags.NormalText + ' | ';
       if tmp[Length(tmp)] = ' ' then
-        Delete(tmp, Length(tmp) - 1, 2);
+        Delete(tmp, Length(tmp) - 2, 3);
       tmp := tmp + ATags.TableEvent + ']';
       ALines.Add(tmp);
     end;
@@ -333,7 +334,7 @@ begin
       tablestate := tsTurn;
       ALines.Add('');
 
-      tmp := Format('%s*** TURN *** [%s', [ATags.TableEvent, ATags.Cards]);
+      tmp := Format('%s*** TURN *** [', [ATags.TableEvent]);
       for C1 := 0 to FCards.Count - 1 do
       begin
         if Length(FCards[C1]) > 3 then
@@ -344,10 +345,10 @@ begin
           else
             index := -1;
         if index <> -1 then
-          tmp := tmp + TCard.ByteToString(FCards[C1][index]) + ', ';
+          tmp := tmp + ATags.Cards + TCard.ByteToString(FCards[C1][index]) + ATags.NormalText + ' | ';
       end;
       if tmp[Length(tmp)] = ' ' then
-        Delete(tmp, Length(tmp) - 1, 2);
+        Delete(tmp, Length(tmp) - 2, 3);
       tmp := tmp + ATags.TableEvent + ']';
       ALines.Add(tmp);
       ALines.Add('');
@@ -358,7 +359,7 @@ begin
       last_bet := 0;
       tablestate := tsRiver;
 
-      tmp := Format('%s*** RIVER *** [%s', [ATags.TableEvent, ATags.Cards]);
+      tmp := Format('%s*** RIVER *** [', [ATags.TableEvent]);
       for C1 := 0 to FCards.Count - 1 do
       begin
         if Length(FCards[C1]) > 4 then
@@ -372,10 +373,10 @@ begin
             else
               index := -1;
         if index <> -1 then
-          tmp := tmp + TCard.ByteToString(FCards[C1][index]) + ', ';
+          tmp := tmp + ATags.Cards + TCard.ByteToString(FCards[C1][index]) + ATags.NormalText + ' | ';
       end;
       if tmp[Length(tmp)] = ' ' then
-        Delete(tmp, Length(tmp) - 1, 2);
+        Delete(tmp, Length(tmp) - 2, 3);
       tmp := tmp + ATags.TableEvent + ']';
       ALines.Add(tmp);
       ALines.Add('');
@@ -423,7 +424,7 @@ begin
                   TCards.BytesToString(cards_set), FCurrentGame, FALSE);
               tmp := tmp + hand_strength;
               if C1 < FCards.Count - 1 then
-                tmp := tmp + ATags.NormalText + ', ' + ATags.HandStrength;
+                tmp := tmp + ATags.NormalText + ' | ' + ATags.HandStrength;
             end;
 
             tmp := tmp + ATags.NormalText + ')';
@@ -454,9 +455,9 @@ begin
         begin
           tmp := tmp + TCards.BytesToString(FCards[C1], ' ');
           if C1 < FCards.Count - 1 then
-            tmp := tmp + ', ';
+            tmp := tmp + ATags.NormalText + ' | ' + ATags.Cards;
         end;
-        tmp := tmp + ATags.TableEvent + ']';
+        tmp := tmp + ATags.NormalText + ']';
         ALines.Add(tmp);
       end;
 

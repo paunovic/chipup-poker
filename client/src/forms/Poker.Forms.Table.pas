@@ -553,7 +553,10 @@ begin
       else // if we are not sitting and seat is not taken
         if (not table.Status.IsSitting) and
            (not table.Status.IsSeatTaken(seat_index)) then
+        begin
+          cbSplitTableCards.Checked := FALSE; // reset doing business checkbox
           FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose));
+        end;
     end;
   finally
     Tables.Unlock;
@@ -622,6 +625,8 @@ var
   seat_info: TSeatInfo;
   table: TTable;
   hs: String;
+  C1: Integer;
+  tcards: TList<String>;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
@@ -636,10 +641,34 @@ begin
          (table.Renderer.RiverAnimations.Count = 0) then
       begin
         hs := '';
-// FIXME
-{        lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
-              table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString,
-              table.Status.CurrentGame, TRUE)}
+        tcards := TList<String>.Create;
+        try
+          tcards.Add('');
+          while tcards.Count < table.Status.RiverCard.Count do
+            tcards.Add('');
+          while tcards.Count < table.Status.TurnCard.Count do
+            tcards.Add('');
+          while tcards.Count < table.Status.FlopCards.Count do
+            tcards.Add('');
+
+          for C1 := table.Status.RiverCard.Count - 1 downto 0 do
+            tcards[C1] := table.Status.RiverCard[C1].AsString;
+          for C1 := table.Status.TurnCard.Count - 1 downto 0 do
+            tcards[C1] := table.Status.TurnCard[C1].AsString + tcards[C1];
+          for C1 := table.Status.FlopCards.Count - 1 downto 0 do
+            tcards[C1] := table.Status.FlopCards[C1].AsString + tcards[C1];
+
+          for C1 := 0 to tcards.Count - 1 do
+          begin
+            hs := hs + THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
+                tcards[C1], table.Status.CurrentGame, TRUE);
+            if C1 < tcards.Count - 1 then
+              hs := hs + #10;
+          end;
+        finally
+          tcards.Free;
+        end;
+        lbvHandStrength.Caption := hs;
       end;
     end
     else
@@ -1069,7 +1098,6 @@ begin
           cbSitOutNextHand.Checked := FALSE;
           cbSitOutNextBB.Checked := FALSE;
           cbFoldToAnyBet.Checked := FALSE;
-          cbSplitTableCards.Checked := FALSE;
         end;
 
         seRaiseAmount.Visible := acRaise.Enabled;
