@@ -9,29 +9,31 @@ type
   TSettings = class(THardcodedSettings)
   private
     const
-      JSON_LOGIN             = 'login';
-      JSON_PASSWORD          = 'password';
-      JSON_REMEMBER_LOGIN    = 'remember_login';
-      JSON_REMEMBER_PASSWORD = 'remember_password';
-      JSON_DEVELOPER_MODE    = 'devmode';
-      JSON_SERVER_INDEX      = 'serverindex';
-      JSON_SOUNDS            = 'sounds';
-      JSON_FOLD_CHECKS       = 'fold_checks';
-      JSON_ANIMATIONS        = 'animations';
-      JSON_CARD_BACKGROUND   = 'card_background';
-      JSON_FOLD_CONFIRMATION = 'fold_confirmation';
+      JSON_LOGIN               = 'login';
+      JSON_PASSWORD            = 'password';
+      JSON_REMEMBER_LOGIN      = 'remember_login';
+      JSON_REMEMBER_PASSWORD   = 'remember_password';
+      JSON_DEVELOPER_MODE      = 'devmode';
+      JSON_SERVER_INDEX        = 'serverindex';
+      JSON_SOUNDS              = 'sounds';
+      JSON_FOLD_CHECKS         = 'fold_checks';
+      JSON_ANIMATIONS          = 'animations';
+      JSON_CARD_BACKGROUND     = 'card_background';
+      JSON_FOLD_CONFIRMATION   = 'fold_confirmation';
+      JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
 
-      JSON_DEFAULT_LOGIN             = '';
-      JSON_DEFAULT_PASSWORD          = '';
-      JSON_DEFAULT_REMEMBER_LOGIN    = TRUE;
-      JSON_DEFAULT_REMEMBER_PASSWORD = FALSE;
-      JSON_DEFAULT_DEVELOPER_MODE    = FALSE;
-      JSON_DEFAULT_SERVER_INDEX      = 0;
-      JSON_DEFAULT_SOUNDS            = TRUE;
-      JSON_DEFAULT_FOLD_CHECKS       = FALSE;
-      JSON_DEFAULT_ANIMATIONS        = TRUE;
-      JSON_DEFAULT_CARD_BACKGROUND   = 1;
-      JSON_DEFAULT_FOLD_CONFIRMATION = FALSE;
+      JSON_DEFAULT_LOGIN               = '';
+      JSON_DEFAULT_PASSWORD            = '';
+      JSON_DEFAULT_REMEMBER_LOGIN      = TRUE;
+      JSON_DEFAULT_REMEMBER_PASSWORD   = FALSE;
+      JSON_DEFAULT_DEVELOPER_MODE      = FALSE;
+      JSON_DEFAULT_SERVER_INDEX        = 0;
+      JSON_DEFAULT_SOUNDS              = TRUE;
+      JSON_DEFAULT_FOLD_CHECKS         = FALSE;
+      JSON_DEFAULT_ANIMATIONS          = TRUE;
+      JSON_DEFAULT_CARD_BACKGROUND     = 1;
+      JSON_DEFAULT_FOLD_CONFIRMATION   = FALSE;
+      JSON_DEFAULT_ALWAYS_RUN_IT_TWICE = FALSE;
 
     function GetJSONString(const AField, ADefaultValue: String): String;
     function GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
@@ -59,6 +61,8 @@ type
     procedure SetCardBackground(const AValue: Integer);
     function GetFoldConfirmation: Boolean;
     procedure SetFoldConfirmation(const AValue: Boolean);
+    function GetAlwaysRunItTwice: Boolean;
+    procedure SetAlwaysRunItTwice(const AValue: Boolean);
 
     var
       FJSON: ISuperObject;
@@ -87,6 +91,7 @@ type
     property Animations: Boolean read GetAnimations write SetAnimations;
     property CardBackground: Integer read GetCardBackground write SetCardBackground;
     property FoldConfirmation: Boolean read GetFoldConfirmation write SetFoldConfirmation;
+    property AlwaysRunItTwice: Boolean read GetAlwaysRunItTwice write SetAlwaysRunItTwice;
   end;
 
 var
@@ -230,6 +235,11 @@ begin
   result := GetJSONBool(JSON_SOUNDS, JSON_DEFAULT_SOUNDS);
 end;
 
+function TSettings.GetAlwaysRunItTwice: Boolean;
+begin
+  result := GetJSONBool(JSON_ALWAYS_RUN_IT_TWICE, JSON_DEFAULT_ALWAYS_RUN_IT_TWICE);
+end;
+
 function TSettings.GetAnimations: Boolean;
 begin
   result := GetJSONBool(JSON_ANIMATIONS, JSON_DEFAULT_ANIMATIONS);
@@ -283,6 +293,11 @@ end;
 procedure TSettings.SetSounds(const AValue: Boolean);
 begin
   FJSON.B[JSON_SOUNDS] := AValue;
+end;
+
+procedure TSettings.SetAlwaysRunItTwice(const AValue: Boolean);
+begin
+  FJSON.B[JSON_ALWAYS_RUN_IT_TWICE] := AValue;
 end;
 
 procedure TSettings.SetAnimations(const AValue: Boolean);

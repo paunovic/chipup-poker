@@ -4412,6 +4412,9 @@ object frmChipUpMain: TfrmChipUpMain
                   item
                     Action = acConfirmationOnFold
                     Caption = '&Confirmation on Fold'
+                  end
+                  item
+                    Action = acAlwaysRunItTwice
                   end>
                 Caption = '&Table'
               end
@@ -4621,6 +4624,12 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Options'
       Caption = 'Open Tournament'
       OnExecute = acTournamentItemOpenExecute
+    end
+    object acAlwaysRunItTwice: TAction
+      Category = 'Options'
+      Caption = 'Always Run it Twice'
+      GroupIndex = 5
+      OnExecute = acAlwaysRunItTwiceExecute
     end
   end
   object ApplicationEvents: TApplicationEvents

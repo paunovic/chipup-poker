@@ -107,6 +107,7 @@ type
     tiTournamentInfoRefresh: TTimer;
     styleTournamentNameRegistered: TcxStyle;
     acConfirmationOnFold: TAction;
+    acAlwaysRunItTwice: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -158,6 +159,7 @@ type
     procedure gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acConfirmationOnFoldExecute(Sender: TObject);
+    procedure acAlwaysRunItTwiceExecute(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -449,6 +451,13 @@ begin
   UpdateTournamentInfo;
 end;
 
+procedure TfrmChipUpMain.acAlwaysRunItTwiceExecute(Sender: TObject);
+begin
+  Settings.AlwaysRunItTwice := not Settings.AlwaysRunItTwice;
+  acAlwaysRunItTwice.Checked := Settings.AlwaysRunItTwice;
+  Settings.Save;
+end;
+
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
 begin
   Settings.Animations := not Settings.Animations;
@@ -628,6 +637,7 @@ begin
   acFoldChecks.Checked := Settings.FoldChecks;
   acAnimationsEnabled.Checked := Settings.Animations;
   acConfirmationOnFold.Checked := Settings.FoldConfirmation;
+  acAlwaysRunItTwice.Checked := Settings.AlwaysRunItTwice;
 
   ActionManager.ActionBars[0].Items[3].Visible := Settings.DeveloperMode;
 end;

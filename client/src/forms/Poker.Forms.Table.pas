@@ -553,10 +553,7 @@ begin
       else // if we are not sitting and seat is not taken
         if (not table.Status.IsSitting) and
            (not table.Status.IsSeatTaken(seat_index)) then
-        begin
-          cbSplitTableCards.Checked := FALSE; // reset doing business checkbox
           FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose));
-        end;
     end;
   finally
     Tables.Unlock;
@@ -1233,6 +1230,8 @@ begin
     table.SetTableStatus(pbtablestatus, FALSE);
     if table.Status.State in [tsIdle, tsWinning, tsWinning2] then
       UncheckAutoplayOptions;
+    if AMethodId = Integer(srTableSitOk) then
+      cbSplitTableCards.Checked := Settings.AlwaysRunItTwice; // reset doing business checkbox
     if (not table.Form.Visible) and
        (not table.Hidden) then
       table.Show;
