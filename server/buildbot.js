@@ -19,11 +19,14 @@ function forceBuild(builder,rev) {
 	for (var key in globalCookies) {
 		headers.Cookie.push(key+'='+globalCookies[key]);
 	}
-	var req = http.request({host:'buildbot.chipuppoker.com',method:'POST',path:'/builders/'+builder+'/force',headers:headers},function (reply) {
+	var req = http.request({host:'buildbot.chipuppoker.com',method:'POST',path:'/builders/'+builder+'/force',headers:headers,auth:'node:Eiwae5ah'},function (reply) {
 		console.log(reply.headers);
 		console.log(reply.statusCode);
 		req.on('data',function (chunk) {
 			console.log(chunk);
+		});
+		req.on('error',function (err) {
+			console.log('http error doing buildbot force:',err);
 		});
 	});
 	req.write(body);
@@ -31,11 +34,14 @@ function forceBuild(builder,rev) {
 }
 function doLogin(cb) {
 	var body = new Buffer('username=node&passwd='+config.bbpassword);
-	var req = http.request({host:'buildbot.chipuppoker.com',method:'POST',path:'/login',headers:{'Content-Length':body.length,'Content-Type':'application/x-www-form-urlencoded'}},function (reply) {
+	var req = http.request({host:'buildbot.chipuppoker.com',method:'POST',path:'/login',headers:{'Content-Length':body.length,'Content-Type':'application/x-www-form-urlencoded'},auth:'node:Eiwae5ah'},function (reply) {
 		console.log(reply.headers);
 		console.log(reply.statusCode);
 		req.on('data',function (chunk) {
 			console.log(chunk);
+		});
+		req.on('error',function (err) {
+			console.log('http error logging into buildbot:',err);
 		});
 		var cookies = reply.headers['set-cookie'];
 		if (!cookies) return;
