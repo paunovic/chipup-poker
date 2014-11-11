@@ -1654,6 +1654,7 @@ var
   pot: TPB_Pot;
   C1, C2: Integer;
   total_chips_val: UINT32;
+  nick_list: TStringList;
   nick, nicks: String;
   animation: TDXAnimation;
   seat: TSeatInfo;
@@ -1674,70 +1675,83 @@ begin
 
     nicks := '';
     animation := nil;
-    for C2 := 0 to pot.WinnerData.Count - 1 do
-    begin
-      if Tables.GetAndLockTable(FInternalId, table) then
-      try
-        if (table.Status.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
-           (Players.TryGetValue(seat.PlayerMongoId, player)) then
-          nick := player.Displayname
-        else
-          nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
+    nick_list := TStringList.Create;
+    try
+      nick_list.Duplicates := dupIgnore;
+      nick_list.Sorted := TRUE;
+      nick_list.CaseSensitive := FALSE;
 
-        nicks := nicks + Format('%s, ', [nick]);
+      for C2 := 0 to pot.WinnerData.Count - 1 do
+      begin
+        if Tables.GetAndLockTable(FInternalId, table) then
+        try
+          if (table.Status.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
+             (Players.TryGetValue(seat.PlayerMongoId, player)) then
+            nick := player.Displayname
+          else
+            nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
 
-        // restore bets if table is in playback mode, so values are shown
-        if FTableType = ttHandReplay then
-          table.Status.Bets[pot.WinnerData[C2].Seat] := table.Status.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
+          if nick_list.IndexOf(nick) = -1 then
+          begin
+            nick_list.Add(nick);
+            nicks := nicks + Format('%s, ', [nick]);
+          end;
 
-        bet_point := FMetrics.GetBetPoint(table.Game, pot.WinnerData[C2].Seat, table.Status.Dealer);
-      finally
-        Tables.Unlock;
+          // restore bets if table is in playback mode, so values are shown
+          if FTableType = ttHandReplay then
+            table.Status.Bets[pot.WinnerData[C2].Seat] := table.Status.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
+
+          bet_point := FMetrics.GetBetPoint(table.Game, pot.WinnerData[C2].Seat, table.Status.Dealer);
+        finally
+          Tables.Unlock;
+        end;
+
+        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.GetPotPoint(C1), bet_point,
+             Settings.Hardcoded.ANIMATION_METRICS.POTS_INITIAL_DELAY,
+             WinningAniDelay + 1.5 + C1 * Settings.Hardcoded.ANIMATION_METRICS.POTS_INBETWEEN_DELAY,
+             Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
+             FDXAreaSize);
+
+        animation.Tags.AddOrSetValue(ANITAG_POT_INDEX, C1);
+        animation.Tags.AddOrSetValue(ANITAG_SEAT, pot.WinnerData[C2].Seat);
+        animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
+        PotWinAnimations.Add(animation.Id);
+      end;
+      if nicks <> '' then
+        Delete(nicks, Length(nicks) - 1, 2);
+
+      chips_plural := '';
+      if total_chips_val <> 100 then
+        chips_plural := 's';
+
+      suffix := '';
+      if nick_list.Count > 1 then
+        suffix := 'each ';
+
+      winmsg := pot.WinnerData[0].Msg;
+      if winmsg = 'default' then
+        winmsg := ''
+      else
+      begin
+        if Tables.GetAndLockTable(FInternalId, table) then
+        try
+//          if table.Status.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
+//            winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString, table.Status.CurrentGame, FALSE)
+//          else
+//            winmsg := pot.WinnerData[0].Msg;
+        finally
+          Tables.Unlock;
+        end;
       end;
 
-      animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.GetPotPoint(C1), bet_point,
-           Settings.Hardcoded.ANIMATION_METRICS.POTS_INITIAL_DELAY,
-           WinningAniDelay + 1.5 + C1 * Settings.Hardcoded.ANIMATION_METRICS.POTS_INBETWEEN_DELAY,
-           Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
-           FDXAreaSize);
+      if winmsg <> '' then
+        winmsg := Format('(%s)', [winmsg]);
 
-      animation.Tags.AddOrSetValue(ANITAG_POT_INDEX, C1);
-      animation.Tags.AddOrSetValue(ANITAG_SEAT, pot.WinnerData[C2].Seat);
-      animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
-      PotWinAnimations.Add(animation.Id);
+      animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
+      animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(nick_list.Count)), chips_plural, suffix, winmsg]));
+    finally
+      nick_list.Free;
     end;
-    Delete(nicks, Length(nicks) - 1, 2);
-
-    chips_plural := '';
-    if total_chips_val <> 100 then
-      chips_plural := 's';
-
-    suffix := '';
-    if pot.WinnerData.Count > 1 then
-      suffix := 'each ';
-
-    winmsg := pot.WinnerData[0].Msg;
-    if winmsg = 'default' then
-      winmsg := ''
-    else
-    begin
-      if Tables.GetAndLockTable(FInternalId, table) then
-      try
-        // FIXME
-        if table.Status.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
-//          winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString, table.Status.CurrentGame, FALSE)
-        else
-         winmsg := pot.WinnerData[0].Msg;
-      finally
-        Tables.Unlock;
-      end;
-    end;
-
-    if winmsg <> '' then
-      winmsg := Format('(%s)', [winmsg]);
-
-    animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
-    animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]));
   end;
 end;
 

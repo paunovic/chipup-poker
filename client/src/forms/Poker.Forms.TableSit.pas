@@ -185,7 +185,7 @@ begin
   buyin := ABuyin;
   if buyin > GetMaxBuyin then
     buyin := GetMaxBuyin;
-  seBuyin.Value := Trunc(buyin / 100);
+  seBuyin.Value := buyin / 100;
 end;
 
 procedure TfrmTableSit.SetCloseCallback(const ACallback: TNotifyEvent);
