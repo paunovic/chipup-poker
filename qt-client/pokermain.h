@@ -20,11 +20,13 @@ public slots:
     void socket_sslErrors ( const QList<QSslError> & errors );
     void socket_ready();
     void sendMessage(Poker::ServerCodes code,google::protobuf::Message *message);
+    void socket_readyRead();
 private slots:
     void socket_connected();
 private:
     QSslSocket socket;
     static PokerMain *instance;
+    QByteArray buffer;
 };
 
 #endif // POKERMAIN_H

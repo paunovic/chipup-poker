@@ -14,6 +14,7 @@ PokerMain::PokerMain(QObject *parent) :
     connect(&socket,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(socket_state_change(QAbstractSocket::SocketState)));
     connect(&socket,SIGNAL(sslErrors(QList<QSslError>)),this,SLOT(socket_sslErrors(QList<QSslError>)));
     connect(&socket,SIGNAL(encrypted()),this,SLOT(socket_ready()));
+	connect(&socket,SIGNAL(readyRead()),this,SLOT(socket_readyRead()));
 }
 
 PokerMain *PokerMain::getInstance() {
@@ -65,23 +66,70 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
 void PokerMain::socket_ready() {
     qDebug() << "ready for handshake";
     Poker::HelloParams hp;
-    qDebug() << "1";
     hp.set_debug(false);
-    qDebug() << "2";
     sendMessage(Poker::scHello,&hp);
-    qDebug() << "3";
 }
 void PokerMain::sendMessage(Poker::ServerCodes code, google::protobuf::Message *message) {
     Poker::RpcMessage header;
     header.set_methodid(code);
     if (message->ByteSize()) header.set_datasize(message->ByteSize());
     int size = header.ByteSize()+message->ByteSize();
-    char *buffer = new char[size];
-    header.SerializeToArray(buffer,size);
+    qDebug() << "header size" << header.ByteSize();
+    unsigned char *buffer = new unsigned char[size+2];
+    buffer[0] = header.ByteSize() & 0xff;
+    buffer[1] = header.ByteSize() >> 8;
+    printf("%x %x\n",buffer[0],buffer[1]);
+    header.SerializeToArray(2+buffer,size);
     if (message->ByteSize()) {
-        message->SerializeToArray(buffer+header.ByteSize(),size-header.ByteSize());
+        message->SerializeToArray(2+buffer+header.ByteSize(),size-header.ByteSize());
     }
-    QByteArray packet(buffer,size);
+    QByteArray packet((char*)buffer,2+size);
     socket.write(packet);
     delete buffer;
+    socket.flush();
+}
+void PokerMain::socket_readyRead() {
+	unsigned int bytes;
+	
+	buffer.append(socket.readAll());
+	qDebug() << buffer.toPercentEncoding();
+	while (true) {
+		QDataStream input(buffer);
+		input.setByteOrder(QDataStream::LittleEndian);
+		quint16 headerSize;
+		input >> headerSize;
+		qDebug() << headerSize;
+		if (input.atEnd()) break;
+		char *rawheader = new char[headerSize];
+		bytes = input.readRawData(rawheader,headerSize);
+		qDebug() << bytes << headerSize;
+		if (bytes != headerSize) break;
+		RpcMessage header;
+		if (!header.ParseFromString(std::string(rawheader,headerSize))) {
+			// parse error in header, disconnect
+			socket.disconnect();
+			// TODO, emit failure event
+			break;
+		}
+		delete rawheader;
+		int datasize = header.datasize();
+		std::string data;
+		if (datasize) {
+			char *rawdata = new char[datasize];
+			bytes = input.readRawData(rawdata,datasize);
+			if (bytes != datasize) break;
+			data = std::string(rawdata,datasize);
+			delete rawdata;
+		}
+		Poker::ServerCodes code((Poker::ServerCodes)header.methodid());
+		qDebug() << "raw rpc method:" << code;
+		switch (code) {
+		case Poker::srHello:
+			Poker::HelloReply hr;
+			qDebug() << "hr parse" << hr.ParseFromString(data);
+			qDebug() << "regex info" << hr.valid_chars_regex().email().c_str();
+			break;
+		}
+		break;
+	}
 }
