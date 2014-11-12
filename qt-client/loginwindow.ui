@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoginWindow</class>
+ <widget class="QWidget" name="LoginWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>558</width>
+    <height>371</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Welcome to ChipUP Poker</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QLabel,QCheckBox {
+color: white;
+}</string>
+  </property>
+  <widget class="QWidget" name="widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>558</width>
+     <height>371</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-image: url(:/resources/login/Background.png);
+ q</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbsLogin">
+   <property name="geometry">
+    <rect>
+     <x>92</x>
+     <y>153</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Login:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbsPassword">
+   <property name="geometry">
+    <rect>
+     <x>71</x>
+     <y>184</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Password:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="edLogin">
+   <property name="geometry">
+    <rect>
+     <x>138</x>
+     <y>147</y>
+     <width>174</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="edPassword">
+   <property name="geometry">
+    <rect>
+     <x>138</x>
+     <y>178</y>
+     <width>174</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btCreateAccount">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>255</y>
+     <width>174</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Create New Account</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btForgotPassword">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>288</y>
+     <width>174</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Forgot Password</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btLogin">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>138</x>
+     <y>288</y>
+     <width>174</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Connecting...</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbRememberLogin">
+   <property name="geometry">
+    <rect>
+     <x>134</x>
+     <y>217</y>
+     <width>129</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Remember Login</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbRememberPassword">
+   <property name="geometry">
+    <rect>
+     <x>134</x>
+     <y>239</y>
+     <width>129</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Remember Password</string>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
