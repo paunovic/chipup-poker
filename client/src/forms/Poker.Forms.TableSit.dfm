@@ -46,7 +46,6 @@ object frmTableSit: TfrmTableSit
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
-    ExplicitTop = 64
     Width = 84
     AnchorY = 64
   end
@@ -64,7 +63,6 @@ object frmTableSit: TfrmTableSit
     Style.TextStyle = [fsBold]
     TabOrder = 1
     Value = 100.000000000000000000
-    ExplicitTop = 63
     Width = 72
   end
   object btOK: TcxButton
@@ -82,7 +80,6 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 98
   end
   object btCancel: TcxButton
     Left = 196
@@ -99,7 +96,6 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 98
   end
   object lbvTableName: TcxLabel
     AlignWithMargins = True
@@ -134,7 +130,6 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 64
   end
   object btMax: TcxButton
     Left = 234
@@ -151,7 +146,6 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 64
   end
   object lbsTableBuyins: TcxLabel
     AlignWithMargins = True

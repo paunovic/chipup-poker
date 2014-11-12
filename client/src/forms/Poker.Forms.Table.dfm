@@ -522,7 +522,7 @@ object frmTable: TfrmTable
     Top = 434
     Anchors = [akLeft, akBottom]
     AutoSize = False
-    Caption = 'Do business'
+    Caption = 'Run it twice'
     ParentBackground = False
     ParentFont = False
     Properties.OnChange = cbSplitTableCardsPropertiesChange

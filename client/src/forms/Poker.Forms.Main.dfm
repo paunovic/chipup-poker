@@ -3592,6 +3592,8 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           841
           438)
@@ -4412,6 +4414,10 @@ object frmChipUpMain: TfrmChipUpMain
                   item
                     Action = acConfirmationOnFold
                     Caption = '&Confirmation on Fold'
+                  end
+                  item
+                    Action = acAlwaysRunItTwice
+                    Caption = 'Al&ways Run it Twice'
                   end>
                 Caption = '&Table'
               end
@@ -4621,6 +4627,12 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Options'
       Caption = 'Open Tournament'
       OnExecute = acTournamentItemOpenExecute
+    end
+    object acAlwaysRunItTwice: TAction
+      Category = 'Options'
+      Caption = 'Always Run it Twice'
+      GroupIndex = 5
+      OnExecute = acAlwaysRunItTwiceExecute
     end
   end
   object ApplicationEvents: TApplicationEvents
