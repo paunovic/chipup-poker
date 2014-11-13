@@ -1071,7 +1071,7 @@ begin
           animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][0], card_points_final[C1][0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
           animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][1], card_points_final[C1][1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
           animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][2], card_points_final[C1][2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
-        end;  
+        end;
 
         FFlopAnimated := TRUE;
       end;

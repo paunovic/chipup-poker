@@ -252,7 +252,7 @@ uses
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
   Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Forms.Table, Poker.Forms.TournamentFinishDialog,
-  Poker.Protobufs.Objects.PlayerClubStatus;
+  Poker.Protobufs.Objects.PlayerClubStatus, Poker.Common.ModalDialogs;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -389,6 +389,7 @@ end;
 procedure TfrmChipUpMain.DoLogout;
 begin
   Application.ShowMainForm := FALSE;
+  ModalDialogs.CloseAll;
   FlushData;
   Hide;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
@@ -524,7 +525,7 @@ end;
 procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
 begin
   ServerSocket.ResendVerificationMail;
-  MessageDlg(Format('Verification mail sent to %s. Please check your inbox.', [dmMain.SelfInfo.EMail]), mtInformation, [mbOK], 0);
+  ModalDialogs.ShowInformation(Format('Verification mail sent to %s. Please check your inbox.', [dmMain.SelfInfo.EMail]));
 end;
 
 procedure TfrmChipUpMain.acSettingsExecute(Sender: TObject);
@@ -608,7 +609,7 @@ begin
   end;
 
   if err <> '' then
-    ShowWarningDialog(err);
+    ModalDialogs.ShowWarning(err);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -820,14 +821,14 @@ function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
 begin
   result := TRUE;
   if Tables.SittingCount > 0 then
-    result := MessageDlg('Closing the application will automatically leave all the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+    result := ModalDialogs.ShowConfirmation('Closing the application will automatically leave all the tables you are currently playing on. Proceed?') = mrYes;
 end;
 
 function TfrmChipUpMain.ConfirmToCloseTablesLogout: Boolean;
 begin
   result := TRUE;
   if Tables.SittingCount > 0 then
-    result := MessageDlg('Upon logout you will automatically leave all the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+    result := ModalDialogs.ShowConfirmation('Upon logout you will automatically leave all the tables you are currently playing on. Proceed?') = mrYes;
 end;
 
 procedure TfrmChipUpMain.UpdateClublist;
@@ -1625,8 +1626,8 @@ begin
       UpdateTournamentList;
       UpdateTournamentActions;
     end;
-    tceRegisterLimitReached: ShowWarningDialog('This tournament is already filled');
-    tceRegisterFailed: ShowWarningDialog('Tournament registration failed');
+    tceRegisterLimitReached: ModalDialogs.ShowWarning('This tournament is already filled');
+    tceRegisterFailed: ModalDialogs.ShowWarning('Tournament registration failed');
     tceUnregisterOk: begin
       dmMain.SelfInfo.RegisteredTournaments.Remove(proto.MongoId);
       UpdateTournamentList;

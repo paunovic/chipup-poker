@@ -55,7 +55,7 @@ implementation
 
 uses
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.Validators,
-  Poker.Protobufs.Objects.Game, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
+  Poker.Protobufs.Objects.Game, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Common.ModalDialogs;
 
 
 
@@ -149,7 +149,7 @@ begin
         end;
 
   if err <> '' then
-    ShowWarningDialog(err);
+    ModalDialogs.ShowWarning(err);
 end;
 
 procedure TfrmCreateGame.cbGameTypePropertiesChange(Sender: TObject);

@@ -41,7 +41,7 @@ implementation
 
 uses
   Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Common.Misc,
-  Poker.Protobufs.Enum.ServerCodes, Poker.DataModule, Poker.Protobufs.Objects.ClubMember;
+  Poker.Protobufs.Enum.ServerCodes, Poker.DataModule, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs;
 
 
 procedure TfrmClubMemberOptions.FormCreate(Sender: TObject);
@@ -109,7 +109,7 @@ begin
 
   if err <> '' then
   begin
-    ShowWarningDialog(err);
+    ModalDialogs.ShowWarning(err);
     Exit;
   end;
 

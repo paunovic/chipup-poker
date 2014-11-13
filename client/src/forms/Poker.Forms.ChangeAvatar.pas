@@ -49,7 +49,8 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   PNGImage, Poker.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
   Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings, Poker.Types,
-  Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList;
+  Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList,
+  Poker.Common.ModalDialogs;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
@@ -129,7 +130,7 @@ begin
   if error <> '' then
   begin
     pbUpload.Visible := FALSE;
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
     acChange.Enabled := TRUE;
   end;
 end;
@@ -186,7 +187,7 @@ begin
   if error = '' then
     FormsContainer.Add(RunModalForm(TfrmImageCrop, self, [@fname], CloseModalCallback))
   else
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
 end;
 
 procedure TfrmChangeAvatar.CloseModalCallback(Sender: TObject);
@@ -263,7 +264,7 @@ begin
       else
       begin
         FAvatarChanged := FALSE;
-        ShowWarningDialog('Invalid avatar ID');
+        ModalDialogs.ShowWarning('Invalid avatar ID');
         acChange.Enabled := TRUE;
       end;
     end;

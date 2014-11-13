@@ -50,7 +50,7 @@ implementation
 uses
   Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes, Poker.Types,
   Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.RegisterReply, Poker.Server.MessageContainer,
-  Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Common.Misc;
+  Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Common.Misc, Poker.Common.ModalDialogs;
 
 
 procedure TfrmCreateAccount.FormCreate(Sender: TObject);
@@ -126,7 +126,7 @@ begin
 
   result := error = '';
   if not result then
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
 end;
 
 procedure TfrmCreateAccount.acSignUpExecute(Sender: TObject);
@@ -147,26 +147,26 @@ begin
 
   case pbreply.Status of
    regSuccess: begin
-      MessageDlg('Account successfully created. Please check your inbox for confirmation e-mail', mtInformation, [mbOK], 0);
+      ModalDialogs.ShowInformation('Account successfully created. Please check your inbox for confirmation e-mail');
       if Settings.Login = '' then
         Settings.Login := edEMail.Text;
       ModalResult := mrOk;
       Close;
    end;
    regDuplicateEmail: begin
-     ShowWarningDialog('E-mail address already exists');
+     ModalDialogs.ShowWarning('E-mail address already exists');
      edEmail.SetFocus;
    end;
    regDupUsername: begin
-     ShowWarningDialog('Username already exists');
+     ModalDialogs.ShowWarning('Username already exists');
      edUsername.SetFocus;
    end;
    regInvalidEmail: begin
-     ShowWarningDialog('Invalid E-mail address');
+     ModalDialogs.ShowWarning('Invalid E-mail address');
      edEmail.SetFocus;
    end;
    regInvalidName: begin
-     ShowWarningDialog('Invalid username');
+     ModalDialogs.ShowWarning('Invalid username');
      edUsername.SetFocus;
    end;
   end;

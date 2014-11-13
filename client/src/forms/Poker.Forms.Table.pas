@@ -181,7 +181,7 @@ uses
   Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game, Poker.Games.Game, Poker.Sounds,
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
-  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club;
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club, Poker.Common.ModalDialogs;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -1183,7 +1183,7 @@ begin
   result := TRUE;
   if (tt = ttLive) and
      (is_sitting) then
-    result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.', mtWarning, mbYesNo, 0) = mrYes;
+    result := ModalDialogs.ShowConfirmation('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.') = mrYes;
 end;
 
 function TfrmTable.ConfirmStandUp: Boolean;
@@ -1212,7 +1212,7 @@ begin
   if (tt = ttLive) and
      (is_sitting) and
      (player_status in [psInHand, psFolded, psAllIn]) then
-    result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that you commited to current pot.', mtWarning, mbYesNo, 0) = mrYes;
+    result := ModalDialogs.ShowConfirmation('Are you sure you want to stand up? This will automatically fold your current hand and any chips that you commited to current pot.') = mrYes;
 end;
 
 procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
@@ -1292,7 +1292,7 @@ begin
   else
   begin
     if (Settings.FoldConfirmation) and
-       (MessageDlg('You are folding, while you can free check. Are you sure?', mtConfirmation, mbYesNo, 0) = mrNo) then
+       (ModalDialogs.ShowConfirmation('You are folding, while you can free check. Proceed?') = mrNo) then
       Exit;
 
     ServerSocket.Fold(FGameId);

@@ -110,13 +110,13 @@ object frmChangeAvatar: TfrmChangeAvatar
   end
   object HttpClient: TSslHttpCli
     LocalAddr = '0.0.0.0'
+    LocalAddr6 = '::'
     ProxyPort = '80'
     Agent = 'ChipUP Poker Client'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
     Connection = 'Keep-Alive'
     NoCache = False
     ContentTypePost = 'application/x-www-form-urlencoded'
-    MultiThreaded = False
     RequestVer = '1.1'
     FollowRelocation = True
     LocationChangeMaxCount = 5

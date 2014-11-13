@@ -55,7 +55,7 @@ type
 implementation
 
 uses
-  Poker.Common.FormsContainer, Poker.Common.Misc;
+  Poker.Common.FormsContainer, Poker.Common.Misc, Poker.Common.ModalDialogs;
 
 {$R *.dfm}
 
@@ -362,7 +362,7 @@ begin
   if (FSelectionBitmap.Width = 0) or
      (FSelectionBitmap.Height = 0) then
   begin
-    ShowWarningDialog('Please make a selection');
+    ModalDialogs.ShowWarning('Please make a selection');
     Exit;
   end;
 
