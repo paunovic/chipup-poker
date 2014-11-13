@@ -28,7 +28,7 @@ object frmChipUpMain: TfrmChipUpMain
   TextHeight = 14
   object imgHeader: TcxImage
     Left = -21
-    Top = 7
+    Top = 8
     AutoSize = True
     Picture.Data = {
       0B546478504E47496D61676589504E470D0A1A0A0000000D4948445200000362
@@ -4406,12 +4406,18 @@ object frmChipUpMain: TfrmChipUpMain
                     Caption = '&Animations'
                   end
                   item
+                    Caption = '-'
+                  end
+                  item
                     Action = acFoldChecks
                     Caption = 'A&lways Check/Fold'
                   end
                   item
                     Action = acConfirmationOnFold
                     Caption = '&Confirmation on Fold'
+                  end
+                  item
+                    Caption = '-'
                   end
                   item
                     Action = acAlwaysRunItTwice

@@ -50,6 +50,7 @@ end;
 
 destructor TModalDialogs.Destroy;
 begin
+  CloseAll;
   FHandles.Free;
   inherited;
 end;
@@ -62,11 +63,6 @@ begin
     SendMessage(handle, WM_CLOSE, 0, 0);
 end;
 
-function TModalDialogs.ShowConfirmation(const AConfirmation: String; const AButtons: TMsgDlgButtons = mbYesNo; const ADefaultButton: TMsgDlgBtn = mbYes): Integer;
-begin
-  result := ShowDialog(AConfirmation, mtConfirmation, AButtons, ADefaultButton);
-end;
-
 function TModalDialogs.ShowDialog(const AText: String; const AType: TMsgDlgType; const AButtons: TMsgDlgButtons; const ADefaultButton: TMsgDlgBtn): Integer;
 var
   dialog: TForm;
@@ -74,8 +70,7 @@ begin
   dialog := CreateMessageDialog(AText, AType, AButtons, ADefaultButton);
   try
     FHandles.Add(dialog.Handle);
-    dialog.ShowModal;
-    result := dialog.ModalResult;
+    result := dialog.ShowModal;
   finally
     FHandles.Remove(dialog.Handle);
     dialog.Free;
@@ -90,6 +85,11 @@ end;
 procedure TModalDialogs.ShowWarning(const AWarning: String);
 begin
   ShowDialog(AWarning, mtWarning, [mbOK], mbOK);
+end;
+
+function TModalDialogs.ShowConfirmation(const AConfirmation: String; const AButtons: TMsgDlgButtons = mbYesNo; const ADefaultButton: TMsgDlgBtn = mbYes): Integer;
+begin
+  result := ShowDialog(AConfirmation, mtConfirmation, AButtons, ADefaultButton);
 end;
 
 
