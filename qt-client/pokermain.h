@@ -13,6 +13,9 @@ public:
     explicit PokerMain(QObject *parent = 0);
     static PokerMain *getInstance();
 signals:
+	void protocol_ready(bool);
+	void login_sucess();
+	void login_failure();
 
 public slots:
     void try_connect();
@@ -21,6 +24,7 @@ public slots:
     void socket_ready();
     void sendMessage(Poker::ServerCodes code,google::protobuf::Message *message);
     void socket_readyRead();
+    void parsePacket(Poker::ServerCodes code,std::string data);
 private slots:
     void socket_connected();
 private:

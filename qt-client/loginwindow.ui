@@ -70,6 +70,9 @@ color: white;
      <height>20</height>
     </rect>
    </property>
+   <property name="text">
+    <string>set10</string>
+   </property>
   </widget>
   <widget class="QLineEdit" name="edPassword">
    <property name="geometry">
@@ -79,6 +82,12 @@ color: white;
      <width>174</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="text">
+    <string>password</string>
+   </property>
+   <property name="echoMode">
+    <enum>QLineEdit::Password</enum>
    </property>
   </widget>
   <widget class="QPushButton" name="btCreateAccount">
@@ -127,6 +136,9 @@ color: white;
    </property>
    <property name="text">
     <string>Connecting...</string>
+   </property>
+   <property name="default">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="cbRememberLogin">

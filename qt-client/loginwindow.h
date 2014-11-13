@@ -17,6 +17,10 @@ public:
 
 private:
     Ui::LoginWindow *ui;
+private slots:
+	void protocol_ready(bool);
+	void do_login();
+	void login_sucess();
 };
 
 #endif // LOGINWINDOW_H

@@ -64,7 +64,6 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "expected error" << expectedSslErrors;
 }
 void PokerMain::socket_ready() {
-    qDebug() << "ready for handshake";
     Poker::HelloParams hp;
     hp.set_debug(false);
     sendMessage(Poker::scHello,&hp);
@@ -74,11 +73,9 @@ void PokerMain::sendMessage(Poker::ServerCodes code, google::protobuf::Message *
     header.set_methodid(code);
     if (message->ByteSize()) header.set_datasize(message->ByteSize());
     int size = header.ByteSize()+message->ByteSize();
-    qDebug() << "header size" << header.ByteSize();
     unsigned char *buffer = new unsigned char[size+2];
     buffer[0] = header.ByteSize() & 0xff;
     buffer[1] = header.ByteSize() >> 8;
-    printf("%x %x\n",buffer[0],buffer[1]);
     header.SerializeToArray(2+buffer,size);
     if (message->ByteSize()) {
         message->SerializeToArray(2+buffer+header.ByteSize(),size-header.ByteSize());
@@ -92,17 +89,14 @@ void PokerMain::socket_readyRead() {
 	unsigned int bytes;
 	
 	buffer.append(socket.readAll());
-	qDebug() << buffer.toPercentEncoding();
 	while (true) {
 		QDataStream input(buffer);
 		input.setByteOrder(QDataStream::LittleEndian);
 		quint16 headerSize;
 		input >> headerSize;
-		qDebug() << headerSize;
 		if (input.atEnd()) break;
 		char *rawheader = new char[headerSize];
 		bytes = input.readRawData(rawheader,headerSize);
-		qDebug() << bytes << headerSize;
 		if (bytes != headerSize) break;
 		RpcMessage header;
 		if (!header.ParseFromString(std::string(rawheader,headerSize))) {
@@ -122,14 +116,35 @@ void PokerMain::socket_readyRead() {
 			delete rawdata;
 		}
 		Poker::ServerCodes code((Poker::ServerCodes)header.methodid());
-		qDebug() << "raw rpc method:" << code;
-		switch (code) {
-		case Poker::srHello:
-			Poker::HelloReply hr;
-			qDebug() << "hr parse" << hr.ParseFromString(data);
-			qDebug() << "regex info" << hr.valid_chars_regex().email().c_str();
-			break;
+		parsePacket(code,data);
+		buffer = buffer.right(buffer.size() - (2 + headerSize + datasize));
+	}
+}
+void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
+	Poker::HelloReply hr;
+	Poker::LoginReply lr;
+
+	switch (code) {
+	case Poker::srHello:
+		hr.ParseFromString(data);
+		emit protocol_ready(true);
+		break;
+	case Poker::srLoginReply:
+		qDebug() << "srLoginReply";
+		lr.ParseFromString(data);
+		if (lr.login_status() == LoginReply::lrSuccess) {
+			qDebug() << "sucess!";
+			// TODO, convert and use reconnect_tables,tournament_infos,registered_tournaments,clubs,users,self,games,player_club_statuses
+			emit login_sucess();
+		} else {
+			qDebug() << "failure";
+			emit login_failure();
 		}
 		break;
+	case Poker::srTableStatsReply:
+		qDebug() << "srTableStatsReply";
+		break;
+	default:
+		qDebug() << "unhandled raw rpc method:" << code;
 	}
 }

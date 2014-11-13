@@ -45,15 +45,16 @@ SOURCES += main.cpp\
     protobuf-2.5.0/src/google/protobuf/stubs/atomicops_internals_x86_gcc.cc \
     protobuf-2.5.0/src/google/protobuf/stubs/stringprintf.cc \
     protobuf-2.5.0/src/google/protobuf/descriptor_database.cc \
-    protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc
+    protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc \
+    main_window.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
-    config.h
+    config.h main_window.h
 
-FORMS    += loginwindow.ui
+FORMS    += loginwindow.ui main_window.ui
 
 RESOURCES += \
     resources.qrc
