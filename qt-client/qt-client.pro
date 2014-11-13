@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qt-client
 TEMPLATE = app
 
+CONFIG += qt.debug
+
 
 SOURCES += main.cpp\
         loginwindow.cpp \
@@ -46,13 +48,13 @@ SOURCES += main.cpp\
     protobuf-2.5.0/src/google/protobuf/stubs/stringprintf.cc \
     protobuf-2.5.0/src/google/protobuf/descriptor_database.cc \
     protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc \
-    main_window.cpp
+    main_window.cpp club.cpp game.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
-    config.h main_window.h
+    config.h main_window.h club.h game.h
 
 FORMS    += loginwindow.ui main_window.ui
 

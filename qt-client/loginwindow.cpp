@@ -25,10 +25,11 @@ LoginWindow::~LoginWindow() {
 void LoginWindow::protocol_ready(bool ready) {
 	qDebug() << "ready" << ready;
 	ui->btLogin->setEnabled(true);
-	ui->btLogin->setText(tr("Login"));
+	ui->btLogin->setText(tr("LOGIN"));
 	ui->btLogin->setDefault(true);
 	//ui->btCreateAccount->setEnabled(true);
 	//ui->btForgotPassword->setEnabled(true);
+	do_login();
 }
 void LoginWindow::do_login() {
 	QString username = ui->edLogin->text();
