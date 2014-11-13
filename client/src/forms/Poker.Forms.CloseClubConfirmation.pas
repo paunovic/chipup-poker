@@ -39,7 +39,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators, Poker.DataModule, Poker.Common.Misc;
+  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators, Poker.DataModule, Poker.Common.Misc,
+  Poker.Common.ModalDialogs;
 
 { TfrmCloseClubConfirmation }
 
@@ -103,7 +104,7 @@ begin
   end
   else
   begin
-    ShowWarningDialog('Incorrect password');
+    ModalDialogs.ShowWarning('Incorrect password');
     edPassword.SelectAll;
   end;
 end;

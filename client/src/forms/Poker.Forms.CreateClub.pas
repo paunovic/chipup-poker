@@ -42,7 +42,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Validators, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Server.MessageCallbacks, Poker.Common.FormsContainer, Poker.Types,
-  Poker.Common.Misc;
+  Poker.Common.Misc, Poker.Common.ModalDialogs;
 
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
@@ -104,7 +104,7 @@ begin
 
   if error <> '' then
   begin
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
     Exit;
   end;
 
@@ -122,19 +122,19 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      MessageDlg(Format('Club created successfully!'#10'You can invite your friends to play in your club by providing them your club ID (%d) and password.', [pbreply.Club.Seq]), mtInformation, [mbOK], 0);
+      ModalDialogs.ShowInformation(Format('Club created successfully!'#10'You can invite your friends to play in your club by providing them your club ID (%d) and password.', [pbreply.Club.Seq]));
       Close;
     end;
     csInvalidName: begin
-      ShowWarningDialog('Invalid club name');
+      ModalDialogs.ShowWarning('Invalid club name');
       edClubName.SetFocus;
     end;
     csNameExists: begin
-      ShowWarningDialog('Club name already exists');
+      ModalDialogs.ShowWarning('Club name already exists');
       edClubName.SetFocus;
     end;
     csInvalidPassword: begin
-      ShowWarningDialog('Invalid club password');
+      ModalDialogs.ShowWarning('Invalid club password');
       edClubCode.SetFocus;
     end;
   else

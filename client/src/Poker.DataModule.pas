@@ -70,7 +70,7 @@ uses
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
   Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
   Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments, Poker.Games.Game, Poker.Tournaments.Info,
-  Poker.Forms.TournamentLobby;
+  Poker.Forms.TournamentLobby, Poker.Common.ModalDialogs;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -100,6 +100,7 @@ begin
   TTablesStatsList.Initialize;
   THandHistory.Initialize;
   TTournamentList.Initialize;
+  TModalDialogs.Initialize;
 
   if (Settings.DeveloperMode) and
      (Settings.ServerIndex in [1, 2]) then
@@ -124,6 +125,7 @@ begin
   FreeAndNil(FUpdateFiles);
   FreeAndNil(FReconnectedTables);
 
+  TModalDialogs.Deinitialize;
   TFormsContainer.Deinitialize;
   TServerSocket.Deinitialize;
   TMessageContainer.Deinitialize;
@@ -158,7 +160,7 @@ function TdmMain.CheckAuthed: Boolean;
 begin
   result := FSelfInfo.Authed;
   if not result then
-    ShowWarningDialog('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.');
+    ModalDialogs.ShowWarning('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.');
 end;
 
 procedure TdmMain.OpenSiteLink;

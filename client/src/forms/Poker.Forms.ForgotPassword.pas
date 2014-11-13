@@ -36,7 +36,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Server.Socket, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.FormsContainer;
+  Poker.Server.Socket, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.FormsContainer,
+  Poker.Common.ModalDialogs;
 
 
 procedure TfrmForgotPassword.FormCreate(Sender: TObject);
@@ -86,7 +87,7 @@ procedure TfrmForgotPassword.acOKExecute(Sender: TObject);
 begin
   acOK.Enabled := FALSE;
   ServerSocket.ForgotPassword(edEmail.Text);
-  MessageDlg('You should soon receive password reset instructions in your inbox.', mtInformation, [mbOK], 0);
+  ModalDialogs.ShowInformation('You should soon receive password reset instructions in your inbox.');
   ModalResult := mrOk;
   Close;
 end;

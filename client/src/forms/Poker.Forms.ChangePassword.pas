@@ -41,7 +41,7 @@ implementation
 
 uses
   Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks,
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Common.Misc;
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Common.Misc, Poker.Common.ModalDialogs;
 
 
 procedure TfrmChangePassword.FormCreate(Sender: TObject);
@@ -104,7 +104,7 @@ begin
 
   if error <> '' then
   begin
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
     Exit;
   end;
 
@@ -114,7 +114,7 @@ end;
 
 procedure TfrmChangePassword.CSRChangePasswordOk(const AMethodId: Integer; const AObject: TObject);
 begin
-  MessageDlg('Password successfully changed', mtInformation, [mbOK], 0);
+  ModalDialogs.ShowInformation('Password successfully changed');
   dmMain.SelfInfo.Password := edNewPassword.Text;
   Close;
 end;
