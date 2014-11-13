@@ -31,8 +31,7 @@ color: white;
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-image: url(:/resources/login/Background.png);
- q</string>
+    <string notr="true">background-image: url(:/resources/login/Background.png);</string>
    </property>
   </widget>
   <widget class="QLabel" name="lbsLogin">

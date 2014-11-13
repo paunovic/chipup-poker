@@ -1,5 +1,6 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-	<file>resources/login/Background.png</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>resources/login/Background.png</file>
+        <file>resources/header/Header.png</file>
+    </qresource>
 </RCC>
