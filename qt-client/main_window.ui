@@ -74,11 +74,14 @@
        <x>0</x>
        <y>0</y>
        <width>841</width>
-       <height>438</height>
+       <height>443</height>
       </rect>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QPushButton" name="btOpenClubLobby">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -92,6 +95,9 @@
        </property>
       </widget>
       <widget class="QPushButton" name="btOpenTable">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -128,6 +134,68 @@
        </property>
        <property name="text">
         <string>Join Club...</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="btPrivateClubs">
+       <property name="geometry">
+        <rect>
+         <x>495</x>
+         <y>1</y>
+         <width>334</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>MY HOME GAMES</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="btPublicGames">
+       <property name="geometry">
+        <rect>
+         <x>155</x>
+         <y>1</y>
+         <width>334</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PUBLIC HOME GAMES</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QTreeView" name="gridGames">
+       <property name="geometry">
+        <rect>
+         <x>155</x>
+         <y>265</y>
+         <width>676</width>
+         <height>162</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QTreeView" name="listView">
+       <property name="geometry">
+        <rect>
+         <x>155</x>
+         <y>34</y>
+         <width>336</width>
+         <height>192</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QTreeView" name="gridPrivateClubs">
+       <property name="geometry">
+        <rect>
+         <x>495</x>
+         <y>34</y>
+         <width>336</width>
+         <height>192</height>
+        </rect>
        </property>
       </widget>
      </widget>
@@ -171,7 +239,7 @@
      <x>0</x>
      <y>0</y>
      <width>866</width>
-     <height>21</height>
+     <height>28</height>
     </rect>
    </property>
   </widget>

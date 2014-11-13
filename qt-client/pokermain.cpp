@@ -2,6 +2,7 @@
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
+#include "club.h"
 
 using namespace Poker;
 
@@ -15,6 +16,8 @@ PokerMain::PokerMain(QObject *parent) :
     connect(&socket,SIGNAL(sslErrors(QList<QSslError>)),this,SLOT(socket_sslErrors(QList<QSslError>)));
     connect(&socket,SIGNAL(encrypted()),this,SLOT(socket_ready()));
 	connect(&socket,SIGNAL(readyRead()),this,SLOT(socket_readyRead()));
+	connect(&pinger,SIGNAL(timeout()),this,SLOT(send_ping()));
+	uptime.start();
 }
 
 PokerMain *PokerMain::getInstance() {
@@ -67,6 +70,9 @@ void PokerMain::socket_ready() {
     Poker::HelloParams hp;
     hp.set_debug(false);
     sendMessage(Poker::scHello,&hp);
+    pinger.setSingleShot(false);
+    pinger.setInterval(30000);
+    pinger.start();
 }
 void PokerMain::sendMessage(Poker::ServerCodes code, google::protobuf::Message *message) {
     Poker::RpcMessage header;
@@ -123,10 +129,13 @@ void PokerMain::socket_readyRead() {
 void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	Poker::HelloReply hr;
 	Poker::LoginReply lr;
+	Poker::PingReply ping_reply;
+	int recv_time = uptime.elapsed();
 
 	switch (code) {
 	case Poker::srHello:
 		hr.ParseFromString(data);
+		send_ping();
 		emit protocol_ready(true);
 		break;
 	case Poker::srLoginReply:
@@ -135,7 +144,29 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		if (lr.login_status() == LoginReply::lrSuccess) {
 			qDebug() << "sucess!";
 			// TODO, convert and use reconnect_tables,tournament_infos,registered_tournaments,clubs,users,self,games,player_club_statuses
+			clubs.clear();
+			for (int i=0; i<lr.clubs_size(); i++) {
+				Poker::Club c = lr.clubs(i);
+				Data::Club c_out;
+				c_out.seq = c.seq();
+				c_out.name = c.name().c_str();
+				std::string clubid = c._id();
+				c_out.clubid = QByteArray(clubid.data(),clubid.length());
+				qDebug() << c_out.name;
+				clubs.append(c_out);
+			}
+			games.clear();
+			for (int i=0; i<lr.games_size(); i++) {
+				Poker::Game g = lr.games(i);
+				Data::Game g_out;
+				std::string clubid = g.club_mongoid();
+				g_out.gamename = g.gamename().c_str();
+				g_out.clubid = QByteArray(clubid.data(),clubid.length());
+				games.append(g_out);
+			}
 			emit login_sucess();
+			emit clubs_changed();
+			emit games_changed();
 		} else {
 			qDebug() << "failure";
 			emit login_failure();
@@ -144,7 +175,19 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::srTableStatsReply:
 		qDebug() << "srTableStatsReply";
 		break;
+	case Poker::srPong: {
+		ping_reply.ParseFromString(data);
+		int previous_uptime = ping_reply.uptime();
+		quint64 server_clock = ping_reply.servertime();
+		quint64 clock_offset = server_clock - recv_time;
+		qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
+		break; }
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
+}
+void PokerMain::send_ping() {
+	Poker::PingParams pp;
+	pp.set_uptime(uptime.elapsed());
+	sendMessage(Poker::scPing,&pp);
 }

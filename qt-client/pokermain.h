@@ -3,8 +3,12 @@
 
 #include <QSslSocket>
 #include <QObject>
+#include <QElapsedTimer>
+#include <QTimer>
 
 #include "cpp/message.pb.h"
+#include "club.h"
+#include "game.h"
 
 class PokerMain : public QObject
 {
@@ -12,10 +16,15 @@ class PokerMain : public QObject
 public:
     explicit PokerMain(QObject *parent = 0);
     static PokerMain *getInstance();
+
+	QList<Data::Club> clubs;
+	QList<Data::Game> games;
 signals:
 	void protocol_ready(bool);
 	void login_sucess();
 	void login_failure();
+	void clubs_changed();
+	void games_changed();
 
 public slots:
     void try_connect();
@@ -27,10 +36,13 @@ public slots:
     void parsePacket(Poker::ServerCodes code,std::string data);
 private slots:
     void socket_connected();
+    void send_ping();
 private:
     QSslSocket socket;
     static PokerMain *instance;
     QByteArray buffer;
+    QTimer pinger;
+    QElapsedTimer uptime;
 };
 
 #endif // POKERMAIN_H
