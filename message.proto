@@ -211,7 +211,7 @@ message Club {
 	optional string password = 5;
 	optional bool is_private = 6;
 	optional int32 seq = 7;
-	optional bool has_password = 8;
+	optional bool password_exists = 8;
 	optional uint32 rake = 9;
 	optional uint32 default_balance_limit = 10;
 	optional bool unlimited_default_balance = 11;
