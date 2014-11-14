@@ -50,6 +50,7 @@ void MainWindow::clubs_changed() {
     public_club_model.setEntries(core->public_clubs);
 }
 void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &deselected) {
+	if (selected.indexes().length() == 0) return;
     ui->gridPublicClubs->clearSelection();
 	PokerMain *core = PokerMain::getInstance();
 	int row = selected.indexes().at(0).row();
@@ -66,6 +67,7 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	game_model.setEntries(filtered);
 }
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
+	if (selected.indexes().length() == 0) return;
     ui->gridPrivateClubs->clearSelection();
     PokerMain *core = PokerMain::getInstance();
     int row = selected.indexes().at(0).row();
