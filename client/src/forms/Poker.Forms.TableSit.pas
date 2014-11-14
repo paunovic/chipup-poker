@@ -67,7 +67,8 @@ implementation
 uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList, Poker.Types, Poker.Protobufs.Objects.PlayerClubStatus;
+  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList, Poker.Types, Poker.Protobufs.Objects.PlayerClubStatus,
+  Poker.Common.ModalDialogs;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -185,7 +186,7 @@ begin
   buyin := ABuyin;
   if buyin > GetMaxBuyin then
     buyin := GetMaxBuyin;
-  seBuyin.Value := Trunc(buyin / 100);
+  seBuyin.Value := buyin / 100;
 end;
 
 procedure TfrmTableSit.SetCloseCallback(const ACallback: TNotifyEvent);
@@ -286,7 +287,7 @@ begin
   end;
 
   if err <> '' then
-    ShowWarningDialog(err);
+    ModalDialogs.ShowWarning(err);
 end;
 
 procedure TfrmTableSit.CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
@@ -325,7 +326,7 @@ begin
     Tables.Unlock;
   end;
 
-  ShowWarningDialog('Seat is already taken. Please choose another seat');
+  ModalDialogs.ShowWarning('Seat is already taken. Please choose another seat');
   ModalResult := mrClose;
   Close;
 end;
@@ -366,7 +367,7 @@ begin
     Tables.Unlock;
   end;
 
-  ShowWarningDialog('You can''t add-on over maximum table buy-in limit');
+  ModalDialogs.ShowWarning('You can''t add-on over maximum table buy-in limit');
   seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
@@ -423,7 +424,7 @@ begin
     Tables.Unlock;
   end;
 
-  ShowWarningDialog('You reached your balance limit for this club');
+  ModalDialogs.ShowWarning('You reached your balance limit for this club');
   seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
@@ -444,7 +445,7 @@ begin
     Tables.Unlock;
   end;
 
-  ShowWarningDialog('You are not sitting');
+  ModalDialogs.ShowWarning('You are not sitting');
   ModalResult := mrCancel;
   Close;
 end;
@@ -472,7 +473,7 @@ begin
     Tables.Unlock;
   end;
 
-  ShowWarningDialog(err);
+  ModalDialogs.ShowWarning(err);
   seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;
@@ -493,7 +494,7 @@ begin
     Tables.Unlock;
   end;
 
-  ShowWarningDialog('Invalid buy-in amount');
+  ModalDialogs.ShowWarning('Invalid buy-in amount');
   seBuyin.SelectAll;
   acOK.Enabled := TRUE;
 end;

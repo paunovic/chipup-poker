@@ -8,8 +8,6 @@ uses
 
 type
   TfrmAbout = class(TForm)
-    lbsClientVersion: TcxLabel;
-    lbvClientVersion: TcxLabel;
     lbsCopyright: TcxLabel;
     lbsURL: TcxLabel;
     procedure lbsURLClick(Sender: TObject);
@@ -36,7 +34,6 @@ uses
 
 procedure TfrmAbout.FormCreate(Sender: TObject);
 begin
-  lbvClientVersion.Caption := Settings.Hardcoded.VERSION;
   FLayeredForm := TfrmLayered.Create(self, 'AboutBackground');
 end;
 

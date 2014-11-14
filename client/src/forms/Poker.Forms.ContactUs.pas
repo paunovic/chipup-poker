@@ -40,7 +40,8 @@ implementation
 
 uses
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Protobufs.Objects.ContactMessage,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.Misc;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.Misc,
+  Poker.Common.ModalDialogs;
 
 
 procedure TfrmContactUs.FormCreate(Sender: TObject);
@@ -67,7 +68,7 @@ begin
 
   if error <> '' then
   begin
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
     Exit;
   end;
 
@@ -94,7 +95,7 @@ end;
 
 procedure TfrmContactUs.CSRContactUsOk(const AMethodId: Integer; const AObject: TObject);
 begin
-  MessageDlg('Ticket successfully created. Please check your inbox for more details.',  mtInformation, [mbOK], 0);
+  ModalDialogs.ShowInformation('Ticket successfully created. Please check your inbox for more details.');
   Close;
 end;
 

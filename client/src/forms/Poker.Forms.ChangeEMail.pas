@@ -42,7 +42,7 @@ implementation
 uses
   Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Types,
-  Poker.Common.Misc;
+  Poker.Common.Misc, Poker.Common.ModalDialogs;
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
 begin
@@ -112,16 +112,16 @@ begin
 
   case pbreply.Status of
     cmSuccess: begin
-      MessageDlg('E-mail address successfully changed. Please check your inbox for confirmation link.', mtInformation, [mbOK], 0);
+      ModalDialogs.ShowInformation('E-mail address successfully changed. Please check your inbox for confirmation link.');
       Close;
     end;
     cmDuplicateMail: begin
-      ShowWarningDialog('E-mail address is already in use');
+      ModalDialogs.ShowWarning('E-mail address is already in use');
       edNewMail.SetFocus;
       acOK.Enabled := TRUE;
     end;
     cmInvalidEmail: begin
-      ShowWarningDialog('Invalid E-mail address');
+      ModalDialogs.ShowWarning('Invalid E-mail address');
       edNewMail.SetFocus;
       acOK.Enabled := TRUE;
     end;

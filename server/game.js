@@ -558,7 +558,6 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			}
 			if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
-				this.members[x].want_split = false;
 				this.updateLeaveStats(x);
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
@@ -902,7 +901,6 @@ Game.prototype.removeSuspended = function () {
 		if (!this.members[x]) continue;
 		if (this.club.isSuspended(this.seats[x].userid)) {
 			this.members[x].status = 'psOutOfPlay';
-			this.members[x].want_split = false;
 		}
 	}
 }
@@ -944,7 +942,6 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 									this.members[x].autoplay = true;
 								} else {
 									this.members[x].status = 'psOutOfPlay';
-									this.members[x].want_split = false;
 									this.updateLeaveStats(x);
 									this.lastplayer[x] = this.seats[x].userid;
 								}
@@ -1072,21 +1069,24 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 		var max = 0;
 		var players = 0;
 		var wantSplitCount = 0;
+		var canplay = 0;
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			
 			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue; // ignore anybody who has no impact on the game
+			console.log('seat:%d status:%s',x,this.members[x].status);
 			
 			players++;
 			if (this.members[x].want_split) wantSplitCount++;
+			if (this.members[x].status == 'psInHand') canplay++;
 			
 			if (this.bets[x] > max) max = this.bets[x];
 			if (['psAllIn'].indexOf(this.members[x].status) != -1) continue;
 			if (min == -1) min = this.bets[x];
 			if (this.bets[x] < min) min = this.bets[x];
 		}
-		this.log('split vote %d/%d',wantSplitCount,players);
-		if (wantSplitCount == players) {
+		this.log('split vote %d/%d, canplay:%d',wantSplitCount,players,canplay);
+		if ((wantSplitCount == players) && (canplay < 2)) {
 			this.doingSplit = true;
 			if (!this.history.cards[1]) this.history.cards[1] = { cards: [] };
 		}
@@ -1098,7 +1098,6 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				this.log('flopping');
 				this.deck.draw(3,this.flops[0]);
 				this.history.cards[0] = { cards:this.flops[0].cards };
-				console.log('history is',this.history);
 				this.stateRow.flop.cards = this.flops[0].cards;
 				if (this.doingSplit) {
 					this.flops[1] = new Hand();
@@ -1829,7 +1828,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 				havechips++;
 			} else if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
-				this.members[x].want_split = false;
 				this.updateLeaveStats(x);
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
@@ -1877,7 +1875,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 					this.members[big_blind].autoplay = true;
 				} else {
 					this.members[big_blind].status = 'psOutOfPlay';
-					this.members[big_bling].want_split = false;
 					this.updateLeaveStats(big_blind);
 					this.stateMachine(cb,null,config,events,extradelay);
 					return;

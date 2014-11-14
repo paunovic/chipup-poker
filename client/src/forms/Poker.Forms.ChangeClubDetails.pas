@@ -54,7 +54,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule;
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule, Poker.Common.ModalDialogs;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -154,7 +154,7 @@ begin
 
   if error <> '' then
   begin
-    ShowWarningDialog(error);
+    ModalDialogs.ShowWarning(error);
     Exit;
   end;
 
@@ -185,7 +185,7 @@ begin
       Close;
     end;
     csNameExists: begin
-      ShowWarningDialog('Club name already exists');
+      ModalDialogs.ShowWarning('Club name already exists');
       edClubName.SetFocus;
     end;
   else

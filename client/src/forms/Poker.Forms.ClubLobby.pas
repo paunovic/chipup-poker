@@ -212,7 +212,7 @@ uses
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams,
   Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects. ClubMember;
+  Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -976,7 +976,7 @@ begin
   end;
 
   if err <> '' then
-    ShowWarningDialog(err);
+    ModalDialogs.ShowWarning(err);
 end;
 
 procedure TfrmClubLobby.acGiveOwnershipExecute(Sender: TObject);
@@ -986,7 +986,7 @@ begin
   if not Players.TryGetValue(FSelectedPlayerId, player) then
     Exit;
 
-  if MessageDlg(Format('Are you sure you want to give club ownership to %s?', [player.Displayname]), mtConfirmation, mbYesNo, 0) = mrYes then
+  if ModalDialogs.ShowConfirmation(Format('Are you sure you want to give club ownership to %s?', [player.Displayname])) = mrYes then
   begin
     if Players.TryGetValue(FSelectedPlayerId, player) then
       ServerSocket.GiveOwnership(FClubId, player.MongoId);
@@ -995,7 +995,7 @@ end;
 
 procedure TfrmClubLobby.acLeaveClubExecute(Sender: TObject);
 begin
-  if MessageDlg('Are you sure you want to leave this club?', mtConfirmation, mbYesNo, 0) = mrYes then
+  if ModalDialogs.ShowConfirmation('Are you sure you want to leave this club?') = mrYes then
     ServerSocket.LeaveClub(FClubId);
 end;
 
@@ -1034,7 +1034,7 @@ begin
   if not Players.TryGetValue(FSelectedPlayerId, player) then
     Exit;
 
-  if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Displayname]), mtConfirmation, mbYesNo, 0) = mrYes then
+  if ModalDialogs.ShowConfirmation(Format('Are you sure you want to remove %s from the club?', [player.Displayname])) = mrYes then
   begin
     if Players.TryGetValue(FSelectedPlayerId, player) then
       ServerSocket.KickPlayer(FClubId, player.MongoId);
@@ -1049,7 +1049,7 @@ begin
   if not Players.TryGetValue(FSelectedPlayerId, player) then
     Exit;
 
-  if MessageDlg(Format('Reset balance for player %s?', [player.Displayname]), mtConfirmation, mbYesNo, 0) = mrYes then
+  if ModalDialogs.ShowConfirmation(Format('Reset balance for player %s?', [player.Displayname])) = mrYes then
   begin
     if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
     try
@@ -1063,7 +1063,7 @@ end;
 
 procedure TfrmClubLobby.acResetPlayerBalancesExecute(Sender: TObject);
 begin
-  if MessageDlg('This will reset balances for all players in the club. Proceed?', mtConfirmation, mbYesNo, 0) = mrYes then
+  if ModalDialogs.ShowConfirmation('This will reset balances for all players in the club. Proceed?') = mrYes then
     ServerSocket.ResetPlayerBalances(FClubId);
 end;
 
@@ -1260,7 +1260,7 @@ begin
   if pbclub.MongoId <> FClubId then
     Exit;
 
-  ShowWarningDialog('Invalid club ID');
+  ModalDialogs.ShowWarning('Invalid club ID');
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer; const AObject: TObject);
@@ -1272,7 +1272,7 @@ begin
   if pbclub.MongoId <> FClubId then
     Exit;
 
-  ShowWarningDialog('Invalid player ID');
+  ModalDialogs.ShowWarning('Invalid player ID');
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMethodId: Integer; const AObject: TObject);
@@ -1284,7 +1284,7 @@ begin
   if pbclub.MongoId <> FClubId then
     Exit;
 
-  ShowWarningDialog('You are not manager of this club');
+  ModalDialogs.ShowWarning('You are not manager of this club');
 end;
 
 procedure TfrmClubLobby.CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);

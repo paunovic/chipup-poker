@@ -35,7 +35,6 @@ function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
 function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
-procedure ShowWarningDialog(const AError: String);
 function MinutesToString(const AMinutes: UINT32): String;
 
 implementation
@@ -683,11 +682,6 @@ begin
   finally
     pcre_dispose(pattern, nil, char_table);
   end;
-end;
-
-procedure ShowWarningDialog(const AError: String);
-begin
-  MessageDlg(AError, mtWarning, [mbOK], 0);
 end;
 
 function MinutesToString(const AMinutes: UINT32): String;

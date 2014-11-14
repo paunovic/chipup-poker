@@ -27,22 +27,6 @@ object frmAbout: TfrmAbout
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object lbsClientVersion: TcxLabel
-    Left = 142
-    Top = 165
-    Caption = 'Client Version:'
-    ParentColor = False
-    Style.Color = clBlack
-    Style.TextStyle = []
-  end
-  object lbvClientVersion: TcxLabel
-    Left = 216
-    Top = 165
-    Caption = '0.0'
-    ParentColor = False
-    Style.Color = clBlack
-    Style.TextStyle = []
-  end
   object lbsCopyright: TcxLabel
     Left = 142
     Top = 122

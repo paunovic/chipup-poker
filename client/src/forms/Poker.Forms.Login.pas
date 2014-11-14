@@ -89,7 +89,7 @@ uses
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
-  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types;
+  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
@@ -430,7 +430,7 @@ begin
       TAlphaBlendThread.CreateAlphaBlendThread(FAlphaBlendThread, AlphaBlendValue, 0, 0, 0.1, AlphaBlendThreadNotify);
     end;
     lrInvalid: begin
-      ShowWarningDialog('Invalid login/password');
+      ModalDialogs.ShowWarning('Invalid login/password');
       CurrentStatus := lsHelloOk;
       EnableGUI(TRUE);
       edLogin.SetFocus;

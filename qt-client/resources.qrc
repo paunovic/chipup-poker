@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/login/Background.png</file>
+        <file>resources/header/Header.png</file>
+	<file>resources/Button_normal.png</file>
+	<file>resources/Button_hover.png</file>
+	<file>resources/Button_common.png</file>
+	<file>resources/Button_common_hover.png</file>
+	<file>resources/Button_common_pressed.png</file>
+	<file>resources/Button_common_disabled.png</file>
+	<file>stylesheet.css</file>
+    </qresource>
+</RCC>

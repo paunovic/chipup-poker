@@ -29,7 +29,13 @@ tr
       else
         input(class='deleteCheckbox',type="checkbox",name="delete_"+val._id)
   td
-    input(type="radio",name="diff_source",onchange="changeSource('"+val.hashes['chipuppoker:exe']+"')")
+    if (val.hashes)
+      input(type="radio",name="diff_source",onchange="changeSource('"+val.hashes['chipuppoker:exe']+"')")
+    else
+      | corrupt installer
   td
-    input(type="radio",name="diff_dest",onchange="changeDest('"+val.hashes['chipuppoker:exe']+"')")
+    if (val.hashes)
+      input(type="radio",name="diff_dest",onchange="changeDest('"+val.hashes['chipuppoker:exe']+"')")
+    else
+      | corrupt installer
   td=val.used_by
