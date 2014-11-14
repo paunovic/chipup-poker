@@ -23,8 +23,9 @@ public:
 	}
 	QVariant data(const QModelIndex &index,int role) const;
 	void setEntries(const QList<Game> &entries) {
+        this->beginResetModel();
 		m_entries = entries;
-		reset();
+        this->endResetModel();
 	}
 protected:
 	QList<Game> m_entries;
