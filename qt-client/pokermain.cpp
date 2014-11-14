@@ -152,8 +152,11 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 				c_out.name = c.name().c_str();
 				std::string clubid = c._id();
 				c_out.clubid = QByteArray(clubid.data(),clubid.length());
+                c_out.is_private = c.is_private();
 				qDebug() << c_out.name;
 				clubs.append(c_out);
+                if (c_out.is_private) private_clubs.append(c_out);
+                else public_clubs.append(c_out);
 			}
 			games.clear();
 			for (int i=0; i<lr.games_size(); i++) {

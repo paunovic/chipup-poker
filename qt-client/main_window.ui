@@ -178,7 +178,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="QTreeView" name="listView">
+      <widget class="QTreeView" name="gridPublicClubs">
        <property name="geometry">
         <rect>
          <x>155</x>
@@ -239,7 +239,7 @@
      <x>0</x>
      <y>0</y>
      <width>866</width>
-     <height>28</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

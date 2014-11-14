@@ -17,7 +17,7 @@ public:
     explicit PokerMain(QObject *parent = 0);
     static PokerMain *getInstance();
 
-	QList<Data::Club> clubs;
+    QList<Data::Club> clubs,private_clubs,public_clubs;
 	QList<Data::Game> games;
 signals:
 	void protocol_ready(bool);

@@ -13,6 +13,7 @@ public:
 	int seq;
 	QString name;
 	Role role;
+    bool is_private;
 };
 
 class ClubListModel : public QAbstractListModel {
