@@ -454,7 +454,7 @@ Club.prototype.setOwner = function (newowner,cb) {
 	}.bind(this));
 }
 Club.dupCheck = function (name,cb) {
-	mdb.models.Clubs.findOne({name:{$regex:new RegExp('^'+name+'$','i')}},function (err,row) {
+	mdb.models.Clubs.findOne({name:{$regex:new RegExp('^'+name.replace('+','\\+')+'$','i')}},function (err,row) {
 		if (row) cb(true);
 		else cb(false);
 	});
