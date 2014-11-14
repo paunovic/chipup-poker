@@ -138,7 +138,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		send_ping();
 		emit protocol_ready(true);
 		break;
-	case Poker::srLoginReply:
+	case Poker::srLoginReply: // 2
 		qDebug() << "srLoginReply";
 		lr.ParseFromString(data);
 		if (lr.login_status() == LoginReply::lrSuccess) {
@@ -147,16 +147,10 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			clubs.clear();
 			for (int i=0; i<lr.clubs_size(); i++) {
 				Poker::Club c = lr.clubs(i);
-				Data::Club c_out;
-				c_out.seq = c.seq();
-				c_out.name = c.name().c_str();
-				std::string clubid = c._id();
-				c_out.clubid = QByteArray(clubid.data(),clubid.length());
-                c_out.is_private = c.is_private();
-				qDebug() << c_out.name;
-				clubs.append(c_out);
-                if (c_out.is_private) private_clubs.append(c_out);
-                else public_clubs.append(c_out);
+				Data::Club *c_out = new Data::Club;
+				c_out->update(c);
+				qDebug() << c_out->name;
+				clubs.add(c_out);
 			}
 			games.clear();
 			for (int i=0; i<lr.games_size(); i++) {
@@ -175,16 +169,66 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			emit login_failure();
 		}
 		break;
+	case Poker::srCreateClubReply: { // 4
+		Poker::ClubCommandReply ccr;
+		ccr.ParseFromString(data);
+		switch (ccr.status()) {
+		case ClubCommandReply::csSuccess: {
+			Data::Club *c = new Data::Club();
+			c->update(ccr.club());
+			clubs.add(c);
+			emit clubs_changed();
+			break;
+		}
+		default:
+			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
+		}
+		break; }
 	case Poker::srTableStatsReply:
 		qDebug() << "srTableStatsReply";
 		break;
-	case Poker::srPong: {
+	case Poker::srPong: { // 30
 		ping_reply.ParseFromString(data);
 		int previous_uptime = ping_reply.uptime();
 		quint64 server_clock = ping_reply.servertime();
 		quint64 clock_offset = server_clock - recv_time;
 		qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
 		break; }
+	case Poker::srJoinClubReply: {
+		Poker::ClubCommandReply ccr;
+		ccr.ParseFromString(data);
+		qDebug() << "status" << ccr.status();
+		switch (ccr.status()) {
+		case ClubCommandReply::csSuccess: {
+			std::string clubid1 = ccr.club()._id();
+			QByteArray clubid = QByteArray(clubid1.data(),clubid1.length());
+			qDebug() << "clubid" << clubid.toHex();
+			bool clubfound = false;
+			int i;
+			for (i=0; i<clubs.size(); i++) {
+				if (clubs.at(i)->clubid == clubid) {
+					Data::Club *c = clubs.at(i);
+					bool old_private = c->is_private;
+					c->update(ccr.club());
+					clubs.modified(c,old_private);
+					clubfound = true;
+					break;
+				}
+			}
+			if (!clubfound) {
+				// TODO
+				Data::Club *c = new Data::Club();
+				c->update(ccr.club());
+				clubs.add(c);
+			}
+			emit clubs_changed();
+			break; }
+		default:
+			// TODO
+			qDebug() << "unhandled srJoinClubReply status" << ccr.status();
+		}
+		break;
+	}
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
@@ -193,4 +237,18 @@ void PokerMain::send_ping() {
 	Poker::PingParams pp;
 	pp.set_uptime(uptime.elapsed());
 	sendMessage(Poker::scPing,&pp);
+}
+QList<Data::Club*> PokerMain::public_clubs() {
+	QList<Data::Club*> out;
+	for (int i=0; i<clubs.size(); i++) {
+		if (!clubs.at(i)->is_private) out.append(clubs.at(i));
+	}
+	return out;
+}
+QList<Data::Club*> PokerMain::private_clubs() {
+	QList<Data::Club*> out;
+	for (int i=0; i<clubs.size(); i++) {
+		if (clubs.at(i)->is_private) out.append(clubs.at(i));
+	}
+	return out;
 }

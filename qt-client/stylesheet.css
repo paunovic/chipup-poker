@@ -4,7 +4,8 @@ QPushButton#btLogin {
 }
 QPushButton#btLogin:hover {
 	border-image: url(:/resources/Button_hover.png) 0 0 0 0 stretch stretch;
-}QPushButton {
+}
+QPushButton {
 	border-image: url(:/resources/Button_common.png) 0 0 0 0 stretch stretch;
 	color: #b4b4b4;
 }
@@ -17,7 +18,7 @@ QPushButton:pressed {
 QPushButton:disabled {
 	border-image: url(:resources/Button_common_disabled.png) 0 0 0 0 stretch stretch;
 }
-QMainWindow {
+QMainWindow, QDialog {
 	background-color: black;
 }
 QTreeView {
@@ -27,4 +28,6 @@ QTreeView {
 QLabel#btPrivateClubs, QLabel#btPublicGames {
 	color: #f15a21;
 } 
-
+QLabel {
+	color: #b4b4b4;
+}
