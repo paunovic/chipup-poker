@@ -3,17 +3,22 @@
 #include <QString>
 #include <QAbstractListModel>
 #include <QDebug>
+#include "cpp/message.pb.h"
 
 namespace Data {
 
+class ClubList;
+
 class Club {
 public:
+	void update(const Poker::Club&);
+
 	enum Role { Owner, Member };
 	QByteArray clubid;
 	int seq;
 	QString name;
 	Role role;
-    bool is_private;
+	bool is_private;
 };
 
 class ClubListModel : public QAbstractListModel {
@@ -36,14 +41,36 @@ public:
 		return 3;
 	}
 	QVariant data(const QModelIndex &index,int role) const;
-	QVariant headerData(int section, Qt::Orientation p, int role) const {
+	QVariant headerData(int, Qt::Orientation, int) const {
 		return QVariant();
 	}
-	void setEntries(const QList<Club> &entries) {
-		m_entries = entries;
-		reset();
-	}
+	void modified(Club *item);
+
+	friend ClubList;
 protected:
-	QList<Club> m_entries;
+	void clear();
+	void append(Club*);
+	void remove(Club*);
+
+	QList<Club*> m_entries;
 };
+
+class ClubList : public QObject {
+Q_OBJECT
+public:
+	void add(Club*);
+	void clear();
+	int size() {
+		return clubs.size();
+	}
+	void modified(Club *item, bool old_private);
+	Club *at(int i) {
+		return clubs.at(i);
+	}
+
+	Data::ClubListModel public_club_model,private_club_model;
+private:
+	QList<Club*> clubs;
+};
+
 }

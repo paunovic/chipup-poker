@@ -1,6 +1,8 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 #include "pokermain.h"
+#include "join_club.h"
+#include "createclub.h"
 
 #include <QDebug>
 #include <QAbstractItemView>
@@ -12,16 +14,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
 	connect(ui->btTournaments,SIGNAL(clicked()),this,SLOT(tournaments()));
 	
-    public_club_selection_model = new QItemSelectionModel(&public_club_model);
-    connect(public_club_selection_model,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(public_club_selected(QItemSelection,QItemSelection)));
-    ui->gridPublicClubs->setModel(&public_club_model);
-    ui->gridPublicClubs->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->gridPublicClubs->setSelectionModel(public_club_selection_model);
-
-	private_club_selection_model = new QItemSelectionModel(&private_club_model);
+	public_club_selection_model = new QItemSelectionModel(&core->clubs.public_club_model);
+	connect(public_club_selection_model,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(public_club_selected(QItemSelection,QItemSelection)));
+	ui->gridPublicClubs->setModel(&core->clubs.public_club_model);
+	ui->gridPublicClubs->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ui->gridPublicClubs->setSelectionModel(public_club_selection_model);
+	
+	private_club_selection_model = new QItemSelectionModel(&core->clubs.private_club_model);
 	connect(core,SIGNAL(clubs_changed()),this,SLOT(clubs_changed()));
 	connect(private_club_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(private_club_selected(const QItemSelection&,const QItemSelection&)));
-	ui->gridPrivateClubs->setModel(&private_club_model);
+	ui->gridPrivateClubs->setModel(&core->clubs.private_club_model);
 	ui->gridPrivateClubs->setHeader(&private_club_header);
 	ui->gridPrivateClubs->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridPrivateClubs->setSelectionModel(private_club_selection_model);
@@ -45,21 +47,18 @@ void MainWindow::tournaments() {
 }
 void MainWindow::clubs_changed() {
 	qDebug() << "club list changing";
-	PokerMain *core = PokerMain::getInstance();
-    private_club_model.setEntries(core->private_clubs);
-    public_club_model.setEntries(core->public_clubs);
 }
-void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &deselected) {
+void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
-    ui->gridPublicClubs->clearSelection();
+	ui->gridPublicClubs->clearSelection();
 	PokerMain *core = PokerMain::getInstance();
 	int row = selected.indexes().at(0).row();
-    const Data::Club &club = core->private_clubs.at(row);
-	qDebug() << "selected:" << club.name << club.clubid.toHex();
+	const Data::Club *club = core->private_clubs().at(row);
+	qDebug() << "selected:" << club->name << club->clubid.toHex();
 	QList<Data::Game> filtered;
 	for (int i=0; i<core->games.size(); i++) {
 		qDebug() << i << core->games.at(i).clubid.toHex();
-		if (core->games.at(i).clubid == club.clubid) {
+		if (core->games.at(i).clubid == club->clubid) {
 			qDebug() << "match";
 			filtered.append(core->games.at(i));
 		}
@@ -71,15 +70,23 @@ void MainWindow::public_club_selected(const QItemSelection &selected, const QIte
     ui->gridPrivateClubs->clearSelection();
     PokerMain *core = PokerMain::getInstance();
     int row = selected.indexes().at(0).row();
-    const Data::Club &club = core->public_clubs.at(row);
-    qDebug() << "selected:" << club.name << club.clubid.toHex();
+	const Data::Club *club = core->public_clubs().at(row);
+	qDebug() << "selected:" << club->name << club->clubid.toHex();
     QList<Data::Game> filtered;
     for (int i=0; i<core->games.size(); i++) {
         qDebug() << i << core->games.at(i).clubid.toHex();
-        if (core->games.at(i).clubid == club.clubid) {
+		if (core->games.at(i).clubid == club->clubid) {
             qDebug() << "match";
             filtered.append(core->games.at(i));
         }
     }
     game_model.setEntries(filtered);
+}
+void MainWindow::on_btJoinClub_clicked() {
+	JoinClub *jc = new JoinClub(this);
+	jc->show();
+}
+void MainWindow::on_btCreateClub_clicked() {
+	CreateClub *cc = new CreateClub(this);
+	cc->show();
 }

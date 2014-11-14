@@ -14,10 +14,12 @@ class PokerMain : public QObject
 {
     Q_OBJECT
 public:
-    explicit PokerMain(QObject *parent = 0);
-    static PokerMain *getInstance();
+	explicit PokerMain(QObject *parent = 0);
+	static PokerMain *getInstance();
+	QList<Data::Club*> public_clubs();
+	QList<Data::Club*> private_clubs();
 
-    QList<Data::Club> clubs,private_clubs,public_clubs;
+	Data::ClubList clubs;
 	QList<Data::Game> games;
 signals:
 	void protocol_ready(bool);
