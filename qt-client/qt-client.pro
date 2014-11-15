@@ -12,7 +12,14 @@ TARGET = qt-client
 TEMPLATE = app
 
 CONFIG += qt.debug
+QMAKE_INFO_PLIST = Info.plist
 
+# to compile into a dmg:
+# codesign -f -s "Tox CI (jenkins) CSA" qtox.app --deep
+# cp -r qt-client.app osx_img
+# cd osx_img
+# ln -s /Applications Applications
+# hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
 
 SOURCES += main.cpp\
         loginwindow.cpp \
