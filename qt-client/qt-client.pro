@@ -48,15 +48,18 @@ SOURCES += main.cpp\
     protobuf-2.5.0/src/google/protobuf/stubs/stringprintf.cc \
     protobuf-2.5.0/src/google/protobuf/descriptor_database.cc \
     protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc \
-    main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp
+    main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
+    registerwindow.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
-    config.h main_window.h club.h game.h join_club.h createclub.h
+    config.h main_window.h club.h game.h join_club.h createclub.h \
+    registerwindow.h
 
-FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui
+FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
+    registerwindow.ui
 
 RESOURCES += \
     resources.qrc

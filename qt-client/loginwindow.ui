@@ -70,7 +70,7 @@ color: white;
     </rect>
    </property>
    <property name="text">
-    <string>set10</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLineEdit" name="edPassword">
@@ -83,7 +83,7 @@ color: white;
     </rect>
    </property>
    <property name="text">
-    <string>password</string>
+    <string/>
    </property>
    <property name="echoMode">
     <enum>QLineEdit::Password</enum>

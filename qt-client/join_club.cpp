@@ -15,6 +15,5 @@ void JoinClub::do_join() {
 	Poker::Club club;
 	club.set_seq(ui->edClubId->text().toInt());
 	club.set_password(qPrintable(ui->edClubPassword->text()));
-	PokerMain *core = PokerMain::getInstance();
 	core->sendMessage(Poker::scJoinClub,&club);
 }

@@ -1,7 +1,9 @@
-#include "loginwindow.h"
 #include <QApplication>
 #include <QFile>
 #include <QDebug>
+
+#include "loginwindow.h"
+#include "pokermain.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +19,8 @@ int main(int argc, char *argv[])
 		QString css(buffer);
 		a.setStyleSheet(css);
 	}
+    core = new PokerMain();
+
     LoginWindow w;
     w.show();
 

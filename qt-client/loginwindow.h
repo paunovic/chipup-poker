@@ -19,7 +19,8 @@ private:
     Ui::LoginWindow *ui;
 private slots:
 	void protocol_ready(bool);
-	void do_login();
+    void on_btLogin_clicked();
+    void on_btCreateAccount_clicked();
 	void login_sucess();
 };
 

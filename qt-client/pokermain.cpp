@@ -6,10 +6,10 @@
 
 using namespace Poker;
 
-PokerMain *PokerMain::instance = 0;
+PokerMain *core;
 
 PokerMain::PokerMain(QObject *parent) :
-    QObject(parent)
+    QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
 {
     connect(&socket,SIGNAL(connected()),this,SLOT(socket_connected()));
     connect(&socket,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(socket_state_change(QAbstractSocket::SocketState)));
@@ -18,11 +18,6 @@ PokerMain::PokerMain(QObject *parent) :
 	connect(&socket,SIGNAL(readyRead()),this,SLOT(socket_readyRead()));
 	connect(&pinger,SIGNAL(timeout()),this,SLOT(send_ping()));
 	uptime.start();
-}
-
-PokerMain *PokerMain::getInstance() {
-    if (!instance) instance = new PokerMain();
-    return instance;
 }
 void PokerMain::socket_connected() {
     qDebug() << "socket connected";
@@ -34,6 +29,11 @@ void PokerMain::try_connect() {
 }
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
     qDebug() << state;
+    switch (state) {
+    case QAbstractSocket::UnconnectedState:
+        // set a timer to reconnect
+        break;
+    }
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "incoming err" << errors;
@@ -135,6 +135,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	switch (code) {
 	case Poker::srHello:
 		hr.ParseFromString(data);
+        validCharacters = hr.valid_chars_regex();
 		send_ping();
 		emit protocol_ready(true);
 		break;
@@ -169,6 +170,17 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			emit login_failure();
 		}
 		break;
+    case Poker::srRegisterReply: { // 3
+        Poker::RegisterReply rr;
+        rr.ParseFromString(data);
+        switch (rr.status()) {
+        case RegisterReply::regSuccess:
+            emit register_success();
+            break;
+        default:
+            qDebug() << "srRegisterReply unhandled status" << rr.status();
+        }
+        break; }
 	case Poker::srCreateClubReply: { // 4
 		Poker::ClubCommandReply ccr;
 		ccr.ParseFromString(data);
@@ -180,6 +192,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			emit clubs_changed();
 			break;
 		}
+        case ClubCommandReply::csInvalidName:
+            emit club_create_reply(ccr.status());
+            break;
 		default:
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}

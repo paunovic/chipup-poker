@@ -10,7 +10,6 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
 	qDebug() << "doing setup";
 	ui->setupUi(this);
-	PokerMain *core = PokerMain::getInstance();
 	connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
 	connect(ui->btTournaments,SIGNAL(clicked()),this,SLOT(tournaments()));
 	
@@ -51,7 +50,6 @@ void MainWindow::clubs_changed() {
 void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
 	ui->gridPublicClubs->clearSelection();
-	PokerMain *core = PokerMain::getInstance();
 	int row = selected.indexes().at(0).row();
 	const Data::Club *club = core->private_clubs().at(row);
 	qDebug() << "selected:" << club->name << club->clubid.toHex();
@@ -68,7 +66,6 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
     ui->gridPrivateClubs->clearSelection();
-    PokerMain *core = PokerMain::getInstance();
     int row = selected.indexes().at(0).row();
 	const Data::Club *club = core->public_clubs().at(row);
 	qDebug() << "selected:" << club->name << club->clubid.toHex();
