@@ -76,3 +76,13 @@ void ClubListModel::remove(Data::Club *item) {
 		}
 	}
 }
+QVariant ClubListModel::headerData(int row, Qt::Orientation b, int role) const {
+	if (role != Qt::DisplayRole) return QVariant();
+	switch (row) {
+	case 0: return "Club ID";
+	case 1: return "Club name";
+	case 2: return "Status";
+	}
+
+	return QVariant();
+}

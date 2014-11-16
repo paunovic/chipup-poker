@@ -41,9 +41,7 @@ public:
 		return 3;
 	}
 	QVariant data(const QModelIndex &index,int role) const;
-	QVariant headerData(int, Qt::Orientation, int) const {
-		return QVariant();
-	}
+    QVariant headerData(int, Qt::Orientation, int) const;
 	void modified(Club *item);
 
 	friend ClubList;

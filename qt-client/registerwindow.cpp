@@ -21,27 +21,23 @@ RegisterWindow::~RegisterWindow() {
     delete ui;
 }
 void RegisterWindow::on_edEmail_textEdited() {
-    QString input = ui->edEmail->text();
-    bool valid = ui->edEmail->hasAcceptableInput();
-    qDebug() << input << valid;
+    //QString input = ui->edEmail->text();
+    //bool valid = ui->edEmail->hasAcceptableInput();
     checkInputs();
 }
 void RegisterWindow::on_edPassword_textEdited() {
-    QString input = ui->edPassword->text();
-    bool valid = ui->edPassword->hasAcceptableInput();
-    qDebug() << input << valid;
+    //QString input = ui->edPassword->text();
+    //bool valid = ui->edPassword->hasAcceptableInput();
     checkInputs();
 }
 void RegisterWindow::on_edConfirmPassword_textEdited() {
-    QString input = ui->edConfirmPassword->text();
-    bool valid = ui->edConfirmPassword->hasAcceptableInput();
-    qDebug() << input << valid;
+    //QString input = ui->edConfirmPassword->text();
+    //bool valid = ui->edConfirmPassword->hasAcceptableInput();
     checkInputs();
 }
 void RegisterWindow::on_edUsername_textEdited() {
-    QString input = ui->edUsername->text();
-    bool valid = ui->edUsername->hasAcceptableInput();
-    qDebug() << input << valid;
+    //QString input = ui->edUsername->text();
+    //bool valid = ui->edUsername->hasAcceptableInput();
     checkInputs();
 }
 void RegisterWindow::checkInputs() {

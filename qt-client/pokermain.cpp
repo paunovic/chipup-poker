@@ -150,7 +150,6 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 				Poker::Club c = lr.clubs(i);
 				Data::Club *c_out = new Data::Club;
 				c_out->update(c);
-				qDebug() << c_out->name;
 				clubs.add(c_out);
 			}
 			games.clear();
@@ -189,6 +188,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			Data::Club *c = new Data::Club();
 			c->update(ccr.club());
 			clubs.add(c);
+            emit club_create_reply(ccr.status());
 			emit clubs_changed();
 			break;
 		}
