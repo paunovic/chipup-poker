@@ -25,6 +25,9 @@ LoginWindow::LoginWindow(QWidget *parent) :
             ui->cbRememberPassword->setChecked(true);
         }
     }
+	if (core->socketState() == QAbstractSocket::ConnectedState) {
+		protocol_ready(true);
+	}
 }
 
 LoginWindow::~LoginWindow() {

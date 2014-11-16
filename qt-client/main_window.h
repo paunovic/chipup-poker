@@ -24,6 +24,7 @@ private slots:
 	void public_club_selected(const QItemSelection&, const QItemSelection&);
 	void on_btJoinClub_clicked();
 	void on_btCreateClub_clicked();
+	void on_actionLogout_triggered();
 private:
 	Ui::MainWindow *ui;
 	QHeaderView private_club_header,game_header;

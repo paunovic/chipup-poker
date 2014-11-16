@@ -19,6 +19,7 @@ public:
 	QList<Data::Club*> public_clubs();
 	QList<Data::Club*> private_clubs();
     QSettings& config() { return *settings; }
+	QAbstractSocket::SocketState socketState() { return socket.state(); }
 
 	Data::ClubList clubs;
 	QList<Data::Game> games;
@@ -37,7 +38,7 @@ public slots:
     void socket_state_change(QAbstractSocket::SocketState state);
     void socket_sslErrors ( const QList<QSslError> & errors );
     void socket_ready();
-    void sendMessage(Poker::ServerCodes code,google::protobuf::Message *message);
+	void sendMessage(Poker::ServerCodes code,google::protobuf::Message *message=0);
     void socket_readyRead();
     void parsePacket(Poker::ServerCodes code,std::string data);
 private slots:

@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 	}
     core = new PokerMain();
 
-    LoginWindow w;
-    w.show();
+	LoginWindow *w = new LoginWindow;
+	w->show();
 
     return a.exec();
 }

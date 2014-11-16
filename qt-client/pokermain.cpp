@@ -77,13 +77,17 @@ void PokerMain::socket_ready() {
 void PokerMain::sendMessage(Poker::ServerCodes code, google::protobuf::Message *message) {
     Poker::RpcMessage header;
     header.set_methodid(code);
-    if (message->ByteSize()) header.set_datasize(message->ByteSize());
-    int size = header.ByteSize()+message->ByteSize();
+	int messagesize = 0;
+	if (message && message->ByteSize()) {
+		messagesize = message->ByteSize();
+		header.set_datasize(messagesize);
+	}
+	int size = header.ByteSize()+messagesize;
     unsigned char *buffer = new unsigned char[size+2];
     buffer[0] = header.ByteSize() & 0xff;
     buffer[1] = header.ByteSize() >> 8;
     header.SerializeToArray(2+buffer,size);
-    if (message->ByteSize()) {
+	if (message && message->ByteSize()) {
         message->SerializeToArray(2+buffer+header.ByteSize(),size-header.ByteSize());
     }
     QByteArray packet((char*)buffer,2+size);
@@ -188,7 +192,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			Data::Club *c = new Data::Club();
 			c->update(ccr.club());
 			clubs.add(c);
-            emit club_create_reply(ccr.status());
+			emit club_create_reply(ccr.status());
 			emit clubs_changed();
 			break;
 		}
