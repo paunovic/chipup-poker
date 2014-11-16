@@ -4,13 +4,14 @@
 #include "join_club.h"
 #include "createclub.h"
 #include "loginwindow.h"
+#include "csseditor.h"
 
 #include <QDebug>
 #include <QAbstractItemView>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
-	qDebug() << "doing setup";
 	ui->setupUi(this);
+	connect(core,SIGNAL(secondary_login()),this,SLOT(secondary_login()));
 	connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
 	connect(ui->btTournaments,SIGNAL(clicked()),this,SLOT(tournaments()));
 	
@@ -98,4 +99,28 @@ void MainWindow::on_actionLogout_triggered() {
 	LoginWindow *lw = new LoginWindow;
 	lw->show();
 	close();
+	deleteLater();
+	core->delayQuit = false; // FIXME
+}
+void MainWindow::secondary_login() {
+	LoginWindow *lw = new LoginWindow;
+	lw->show();
+	close();
+	deleteLater();
+	core->delayQuit = false; // FIXME
+}
+
+bool MainWindow::event(QEvent *event) {
+	if (event->type() == QEvent::Close) {
+		qDebug() << "close detected";
+		core->delayQuit = true;
+		core->sendMessage(Poker::scLogout);
+		return true;
+	} else {
+		return QMainWindow::event(event);
+	}
+}
+void MainWindow::on_actionCSS_Editor_triggered() {
+	CssEditor *css = new CssEditor;
+	css->show();
 }

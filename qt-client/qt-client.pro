@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qt-client
 TEMPLATE = app
 
-CONFIG += qt.debug
+CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
 
 # to compile into a dmg:
@@ -56,17 +56,20 @@ SOURCES += main.cpp\
     protobuf-2.5.0/src/google/protobuf/descriptor_database.cc \
     protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc \
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
-    registerwindow.cpp
+    registerwindow.cpp \
+    csseditor.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
     config.h main_window.h club.h game.h join_club.h createclub.h \
-    registerwindow.h
+    registerwindow.h \
+    csseditor.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
-    registerwindow.ui
+    registerwindow.ui \
+    csseditor.ui
 
 RESOURCES += \
     resources.qrc

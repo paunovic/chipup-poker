@@ -16,6 +16,8 @@ Q_OBJECT
 public:
 	MainWindow(QWidget *parent=0);
 	~MainWindow();
+	bool event(QEvent *event);
+
 private slots:
 	void homeGames();
 	void tournaments();
@@ -25,6 +27,9 @@ private slots:
 	void on_btJoinClub_clicked();
 	void on_btCreateClub_clicked();
 	void on_actionLogout_triggered();
+	void on_actionCSS_Editor_triggered();
+	void secondary_login();
+
 private:
 	Ui::MainWindow *ui;
 	QHeaderView private_club_header,game_header;

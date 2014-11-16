@@ -19,6 +19,9 @@
   <property name="windowTitle">
    <string>ChipUP Poker</string>
   </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="header" native="true">
     <property name="geometry">
@@ -289,9 +292,16 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_ChipUPPoker"/>
    </widget>
+   <widget class="QMenu" name="menuDev">
+    <property name="title">
+     <string>Dev</string>
+    </property>
+    <addaction name="actionCSS_Editor"/>
+   </widget>
    <addaction name="menuAccount"/>
    <addaction name="menuOptions"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuDev"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionChange_E_mail_address">
@@ -365,6 +375,11 @@
   <action name="action_Open_All_Tables">
    <property name="text">
     <string>&amp;Open All Tables</string>
+   </property>
+  </action>
+  <action name="actionCSS_Editor">
+   <property name="text">
+    <string>CSS Editor</string>
    </property>
   </action>
  </widget>

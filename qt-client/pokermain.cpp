@@ -11,6 +11,7 @@ PokerMain *core;
 PokerMain::PokerMain(QObject *parent) :
     QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
 {
+	delayQuit = false;
     connect(&socket,SIGNAL(connected()),this,SLOT(socket_connected()));
     connect(&socket,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(socket_state_change(QAbstractSocket::SocketState)));
     connect(&socket,SIGNAL(sslErrors(QList<QSslError>)),this,SLOT(socket_sslErrors(QList<QSslError>)));
@@ -203,6 +204,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}
 		break; }
+	case Poker::srLogout:
+		delayQuit = false;
+		break;
 	case Poker::srTableStatsReply:
 		qDebug() << "srTableStatsReply";
 		break;
@@ -213,6 +217,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		quint64 clock_offset = server_clock - recv_time;
 		qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
 		break; }
+	case Poker::seSecondaryLoginDetected:
+		emit secondary_login();
+		break;
 	case Poker::srJoinClubReply: {
 		Poker::ClubCommandReply ccr;
 		ccr.ParseFromString(data);

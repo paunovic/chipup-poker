@@ -20,9 +20,16 @@ int main(int argc, char *argv[])
 		a.setStyleSheet(css);
 	}
     core = new PokerMain();
+	core->app = &a;
 
 	LoginWindow *w = new LoginWindow;
 	w->show();
 
-    return a.exec();
+	int ret = a.exec();
+	while (core->delayQuit) {
+		//qDebug() << "delaying quit?" << core->delayQuit;
+		a.processEvents(QEventLoop::AllEvents,10000);
+	}
+	qDebug() << "ret code" << ret;
+	return ret;
 }

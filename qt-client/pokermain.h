@@ -11,6 +11,8 @@
 #include "club.h"
 #include "game.h"
 
+class QApplication;
+
 class PokerMain : public QObject
 {
     Q_OBJECT
@@ -24,6 +26,8 @@ public:
 	Data::ClubList clubs;
 	QList<Data::Game> games;
     Poker::ValidCharsRegex validCharacters;
+	bool delayQuit;
+	QApplication *app;
 signals:
 	void protocol_ready(bool);
 	void login_sucess();
@@ -32,6 +36,7 @@ signals:
 	void games_changed();
     void register_success();
     void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
+	void secondary_login();
 
 public slots:
     void try_connect();
