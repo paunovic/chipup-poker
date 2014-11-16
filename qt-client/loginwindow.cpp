@@ -71,4 +71,5 @@ void LoginWindow::login_sucess() {
     MainWindow *mw = new MainWindow();
 	mw->show();
 	close();
+	deleteLater();
 }
