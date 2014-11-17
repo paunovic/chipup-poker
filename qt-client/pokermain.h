@@ -24,7 +24,8 @@ public:
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
 
 	Data::ClubList clubs;
-	QList<Data::Game> games;
+	Data::GameListModel game_model;
+	QList<Data::Game*> games;
     Poker::ValidCharsRegex validCharacters;
 	bool delayQuit;
 	QApplication *app;
@@ -50,6 +51,10 @@ private slots:
     void socket_connected();
     void send_ping();
 private:
+	void seGameChange(std::string data);
+	void seGameCreate(std::string data);
+	void seGameDelete(std::string data);
+
     QSslSocket socket;
     QByteArray buffer;
     QTimer pinger;

@@ -43,6 +43,7 @@ public:
 	QVariant data(const QModelIndex &index,int role) const;
     QVariant headerData(int, Qt::Orientation, int) const;
 	void modified(Club *item);
+	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
 	friend ClubList;
 protected:
