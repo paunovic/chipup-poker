@@ -71,6 +71,7 @@ uses
   Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
   Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
   Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas',
+  Poker.Common.ModalDialogs in 'modules\common\Poker.Common.ModalDialogs.pas',
   Poker.HardcodedSettings in 'modules\settings\Poker.HardcodedSettings.pas',
   Poker.Settings in 'modules\settings\Poker.Settings.pas',
   Poker.Server.Settings in 'modules\server\Poker.Server.Settings.pas',
@@ -86,6 +87,7 @@ uses
   Poker.DirectX.Animation in 'modules\directx\Poker.DirectX.Animation.pas',
   Poker.DirectX.Button in 'modules\directx\Poker.DirectX.Button.pas',
   Poker.DirectX.Animations in 'modules\directx\Poker.DirectX.Animations.pas',
+  Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas',
   Poker.Players.Player in 'modules\players\Poker.Players.Player.pas',
   Poker.Players.PlayerList in 'modules\players\Poker.Players.PlayerList.pas',
   Poker.Clubs.Club in 'modules\clubs\Poker.Clubs.Club.pas',
@@ -117,6 +119,10 @@ uses
   Poker.Database.Core in 'modules\database\Poker.Database.Core.pas',
   Poker.Types in 'modules\Poker.Types.pas',
   Poker.Tournaments in 'modules\tournaments\Poker.Tournaments.pas',
+  Poker.Tournaments.Info in 'modules\tournaments\Poker.Tournaments.Info.pas',
+  Poker.SoftExceptions in 'modules\Poker.SoftExceptions.pas',
+  Poker.Protobufs.Objects.Base in 'modules\protobufs\Poker.Protobufs.Objects.Base.pas',
+  Poker.Protobufs.Objects.SoftException in 'modules\protobufs\objects\Poker.Protobufs.Objects.SoftException.pas',
   Poker.Protobufs.Reader in 'modules\protobufs\Poker.Protobufs.Reader.pas',
   Poker.Protobufs.Enum.ServerCodes in 'modules\protobufs\objects\Poker.Protobufs.Enum.ServerCodes.pas',
   Poker.Protobufs.Objects.RpcMessage in 'modules\protobufs\objects\Poker.Protobufs.Objects.RpcMessage.pas',
@@ -174,8 +180,6 @@ uses
   Poker.Protobufs.Objects.TournamentInfo in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentInfo.pas',
   Poker.Protobufs.Objects.TournamentList in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentList.pas',
   Poker.Protobufs.Objects.TournamentDetails in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentDetails.pas',
-  Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas',
-  Poker.Tournaments.Info in 'modules\tournaments\Poker.Tournaments.Info.pas',
   Poker.Protobufs.Objects.TournamentMember in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentMember.pas',
   Poker.Protobufs.Objects.TournamentTableStart in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas',
   Poker.Protobufs.Objects.HandHistoryReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas',
@@ -187,11 +191,7 @@ uses
   Poker.Protobufs.Objects.TournamentPrize in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas',
   Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas',
   Poker.Protobufs.Objects.DeleteTableStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas',
-  Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas',
-  Poker.Common.ModalDialogs in 'modules\common\Poker.Common.ModalDialogs.pas',
-  Poker.Protobufs.Objects.Base in 'modules\protobufs\Poker.Protobufs.Objects.Base.pas',
-  Poker.Protobufs.Objects.SoftException in 'modules\protobufs\objects\Poker.Protobufs.Objects.SoftException.pas',
-  Poker.SoftExceptions in 'modules\Poker.SoftExceptions.pas';
+  Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas';
 
 procedure FocusApp;
 var
