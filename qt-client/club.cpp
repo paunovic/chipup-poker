@@ -86,3 +86,6 @@ QVariant ClubListModel::headerData(int row, Qt::Orientation b, int role) const {
 
 	return QVariant();
 }
+void ClubListModel::sort(int column, Qt::SortOrder order) {
+
+}
