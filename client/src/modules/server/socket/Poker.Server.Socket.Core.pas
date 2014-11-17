@@ -523,7 +523,7 @@ begin
   if (Assigned(ADataObject)) and
      (not (ADataObject as TProtobufBaseObject).IsInitialized) then
   begin
-    SoftException(Format('MethodId: %s; ADataObject not initialized', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
+    SoftException(Format('MethodId: %d; ADataObject not initialized', [ARpcMessage.MethodId]));
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;
