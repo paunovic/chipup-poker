@@ -138,7 +138,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Cards, Poker.Common.Misc,
   Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove;
+  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove, Poker.SoftExceptions;
 
 { THandHistoryItem }
 
@@ -559,8 +559,7 @@ begin
   // fixme
   if FGame.MongoId.IsEmpty then
   begin
-    {$IFDEF DEBUG} DebugLn(0, 'HandHistory: Game.MongoId is emtpy', ditException); {$ENDIF}
-
+    SoftException('HandHistory: Game.MongoId is emtpy');
   end;
 end;
 

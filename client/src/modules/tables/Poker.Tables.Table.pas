@@ -16,7 +16,6 @@ type
       TIMER_ID_GAMEPLAY_LOCK = 3;
 
     var
-      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
       FInternalId: Integer;
       FInternalHWND: HWND;
       FTableType: TTableType;
@@ -92,14 +91,13 @@ uses
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Players.Player, Poker.Players.PlayerList, Poker.Seats.Seat, Poker.Cards, Poker.Sounds, Poker.Settings,
   System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo,
-  Poker.Tournaments, Poker.Tournaments.Info, Poker.Protobufs.Objects.ClubMember;
+  Poker.Tournaments, Poker.Tournaments.Info, Poker.Protobufs.Objects.ClubMember, Poker.SoftExceptions;
 
 
 { TTable }
 
 constructor TTable.Create(const AInternalId: Integer);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Table #%d', [AInternalId])); {$ENDIF}
   FFirstStatusSet := FALSE;
   FInternalId := AInternalId;
   FInternalHWND := AllocateHWnd(WndProc);
@@ -129,8 +127,6 @@ begin
   FreeAndNil(FGame);
   FreeAndNil(FClub);
   DeallocateHWnd(FInternalHWND);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
   inherited;
 end;
@@ -341,12 +337,14 @@ begin
   if Assigned(FForm) then
     (FForm as TfrmTable).ChangeGameId(FGameId);
   result := UpdateObjects;
-  {$IFDEF DEBUG}
   if not result then
-    DebugLn(FDebugId, 'Table player transfer: failed to update objects', ditException, SerializeObject(ATournamentPlayerTransfer))
+    SoftException('Table player transfer: failed to update objects', SerializeObject(ATournamentPlayerTransfer))
   else
-    DebugLn(FDebugId, 'Table player transfer succeeded', ditApplication, SerializeObject(ATournamentPlayerTransfer));
-  {$ENDIF}
+  begin
+   {$IFDEF DEBUG}
+    DebugLn('Table player transfer succeeded', ditApplication, SerializeObject(ATournamentPlayerTransfer));
+   {$ENDIF}
+  end;
 end;
 
 function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
@@ -582,7 +580,7 @@ begin
     end;
   end;
 
-  DebugLn(FDebugId, tstatusdbg, ditApplication, events);
+  DebugLn(tstatusdbg, ditApplication, events);
   {$ENDIF}
 
   NotifyRendererHandle;

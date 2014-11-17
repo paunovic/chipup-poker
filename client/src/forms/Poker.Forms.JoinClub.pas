@@ -30,8 +30,6 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FCallbacksId: Integer;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
-
     procedure CSRJoinClub(const AMethodId: Integer; const AObject: TObject);
   protected
   public
@@ -46,13 +44,11 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Server.Validators, Poker.Types, Poker.Common.Misc,
-  Poker.Common.ModalDialogs;
+  Poker.Common.ModalDialogs, Poker.SoftExceptions;
 
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('frmJoinClub'); {$ENDIF}
-
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub)
                   ]);
@@ -63,8 +59,6 @@ procedure TfrmJoinClub.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmJoinClub.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -169,7 +163,7 @@ begin
       edClubPassword.SelectAll;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRJoinClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    SoftException(Format('CSRJoinClub: invalid status received [%d]]', [Integer(pbreply.Status)]));
   end;
 
   acOK.Enabled := TRUE;

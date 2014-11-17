@@ -16,7 +16,6 @@ type
       TIMER_ID_INACTIVITY_PING = 3;
 
     var
-      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
       FSocket: TSslWSocket;
       FInternalHWND: HWND;
       FServer: String;
@@ -87,7 +86,7 @@ uses
   Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams,
   Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
-  Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
+  Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.SoftExceptions,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
@@ -98,8 +97,6 @@ uses
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Socket [%s:%d]', [AServer, APort])); {$ENDIF}
-
   FServer := AServer;
   FPort := APort;
 
@@ -123,7 +120,7 @@ end;
 
 destructor TServerSocketCore.Destroy;
 begin
-  {$IFDEF DEBUG} DebugLn(FDebugId, 'Destroying socket...', ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn('Destroying socket...', ditSocket); {$ENDIF}
 
   Disconnect;
 
@@ -132,8 +129,6 @@ begin
   FreeAndNil(FSocket);
 
   DeallocateHWnd(FInternalHWND);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
   inherited;
 end;
@@ -144,7 +139,7 @@ begin
      (Assigned(FSocketConnectThread)) then
     Exit;
 
-  {$IFDEF DEBUG} DebugLn(FDebugId, Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
   FreeReceiveBuffer;
 
@@ -180,7 +175,7 @@ begin
   KillPingTimeoutTimer;
   if FSocket.State <> TSocketState.wsClosed then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, 'Closing socket...', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
     FSocket.Flush;
     FSocket.CloseDelayed;
   end;
@@ -192,7 +187,7 @@ procedure TServerSocketCore.SocketSessionConnected(Sender: TObject; ErrCode: Wor
 begin
   if ErrCode = 0 then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, 'Starting SSL handshake...', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('Starting SSL handshake...', ditSocket); {$ENDIF}
     FSocket.StartSslHandshake;
   end
   else
@@ -204,7 +199,7 @@ end;
 
 procedure TServerSocketCore.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn(FDebugId, Format('Session closed [%d]', [ErrCode]), ditException); {$ENDIF}
+  SoftException(Format('Session closed [%d]', [ErrCode]));
   Disconnect;
 end;
 
@@ -215,7 +210,7 @@ begin
     FSSLHandshakeDone := TRUE;
     ResetInactivityPingTimer;
     ResetPingTimer;
-    {$IFDEF DEBUG} DebugLn(FDebugId, 'SSL handshake done', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('SSL handshake done', ditSocket); {$ENDIF}
   end
   else
   begin
@@ -227,14 +222,12 @@ end;
 
 procedure TServerSocketCore.SocketSslVerifyPeer(Sender: TObject; var Ok: Integer; Cert: TX509Base);
 begin
-  {$IFDEF DEBUG}
   case Ok of
-    0: DebugLn(FDebugId, 'SSL peer not verified', ditException);
-    1: DebugLn(FDebugId, 'SSL peer successfully verified', ditSocket);
+    0: SoftException('SSL peer not verified');
+    1: {$IFDEF DEBUG} DebugLn('SSL peer successfully verified', ditSocket) {$ENDIF};
   else
-    DebugLn(FDebugId, Format('SSL verify peer result: %d', [Ok]), ditException);
+    SoftException(Format('SSL verify peer result: %d', [Ok]));
   end;
-  {$ENDIF}
 end;
 
 procedure TServerSocketCore.WndProc(var AMessage: TMessage);
@@ -245,7 +238,7 @@ begin
     WM_TIMER: case AMessage.WParam of
       TIMER_ID_PING, TIMER_ID_INACTIVITY_PING: Ping;
       TIMER_ID_PING_TIMEOUT: begin
-        {$IFDEF DEBUG} DebugLn(FDebugId, 'Ping timeout', ditException); {$ENDIF}
+        SoftException('Ping timeout');
         Disconnect;
       end;
     end;
@@ -264,7 +257,7 @@ begin
     dbgtype := ADebugType;
 
   if ARpcMessage.DataSize = 0 then
-    DebugLn(FDebugId, Format('Method: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype)
+    DebugLn(Format('Method: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype)
   else
   begin
     if (IsDebugFormAssigned) and
@@ -274,9 +267,9 @@ begin
       serialized_object := '';
 
     if AStreamSize = 0 then
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
+      DebugLn(Format('Method: %s; DataSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
     else
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
   end;
 end;
 {$ENDIF}
@@ -326,7 +319,7 @@ begin
   try
     if not rpc_message.IsInitialized then
     begin
-      {$IFDEF DEBUG} DebugLn(FDebugId, 'RPC message not initialized', ditException); {$ENDIF}
+      SoftException('RPC message not initialized');
       Exit;
     end;
 
@@ -384,7 +377,7 @@ begin
   {$IFDEF DEBUG}
   last_err := FSocket.LastError;
   if last_err <> WSAEWOULDBLOCK then // ignore WSAEWOULDBLOCK
-    DebugLn(FDebugId, Format('Socket error [%d]: %s', [last_err, WSocketErrorDesc(last_err)]), ditException);
+    SoftException(Format('Socket error [%d]: %s', [last_err, WSocketErrorDesc(last_err)]));
   {$ENDIF}
 
   case FSocket.State of
@@ -448,14 +441,14 @@ begin
 
   if not valid_sc then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
+    SoftException(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]));
     Exit(FALSE);
   end;
 
   case TServerCodes(ARpcMessage.MethodId) of
     srNotImplemented: begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
-      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Received not implemented method id: %s', [err]), ditException); {$ENDIF}
+      SoftException(Format('Received not implemented method id: %s', [err]));
     end;
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
@@ -523,14 +516,14 @@ begin
     seTournamentPlayerTransfer: ADataObject := TPB_TournamentPlayerTransfer.Create(ADataPointer, ARpcMessage.DataSize);
     sePlayerClubStatus: ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
+    SoftException(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]));
     Exit(FALSE);
   end;
 
   if (Assigned(ADataObject)) and
      (not (ADataObject as TProtobufBaseObject).IsInitialized) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('MethodId: %s; ADataObject not initialized', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), ditException); {$ENDIF}
+    SoftException(Format('MethodId: %d; ADataObject not initialized', [ARpcMessage.MethodId]));
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;

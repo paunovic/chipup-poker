@@ -8,7 +8,6 @@ uses
 type
   TAvatar = class
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FId: TBytes;
     FIdAsString: String;
     FImage: TJPEGImage;
@@ -43,13 +42,13 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule, Poker.Settings, Poker.Server.SSLCerts;
+  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
+  Poker.Settings, Poker.Server.SSLCerts, Poker.SoftExceptions;
 
 { TAvatar }
 
 constructor TAvatar.Create(const AId: TBytes; const AImage: TJPEGImage);
 begin
-  {$IFDEF DEBUG} RegisterDebugObject('Avatar'); {$ENDIF}
   FDXImage := TAsphyreImage.Create;
 
   SetId(AId);
@@ -73,8 +72,6 @@ begin
   FreeAndNil(FImage);
   FreeAndNil(FDXImage);
 
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
-
   inherited;
 end;
 
@@ -97,17 +94,13 @@ begin
         FHTTP.RcvdStream.Position := 0;
         FImage.LoadFromStream(FHTTP.RcvdStream);
         Save;
-        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc); {$ENDIF}
+        {$IFDEF DEBUG} DebugLn(Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc); {$ENDIF}
       end
       else
-      begin
-        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar is not JPEG stream [%s]', [FIdAsString]), ditException); {$ENDIF}
-      end;
+        SoftException(Format('Avatar is not JPEG stream [%s]', [FIdAsString]));
     end
     else
-    begin
-      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar not downloaded [%s] [ErrCode: %d; StatusCode: %d]', [FIdAsString, ErrCode, FHTTP.StatusCode]), ditException); {$ENDIF}
-    end;
+      SoftException(Format('Avatar not downloaded [%s] [ErrCode: %d; StatusCode: %d]', [FIdAsString, ErrCode, FHTTP.StatusCode]));
 
     FHTTP.RcvdStream.Free;
     FHTTP.RcvdStream := nil;
@@ -135,7 +128,7 @@ begin
   FHTTP.SslContext.TrustCert(SSLCert_OfficialServer);
   FHTTP.SslContext.TrustCert(SSLCert_DevServer);
   FHTTP.GetAsync;
-  {$IFDEF DEBUG} DebugLn(FDebugId, Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc); {$ENDIF}
 end;
 
 function TAvatar.GetImage: TJPEGImage;

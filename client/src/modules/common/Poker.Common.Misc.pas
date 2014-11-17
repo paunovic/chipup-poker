@@ -5,9 +5,7 @@ interface
 uses
   Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, Asphyre.Types, Vcl.Controls;
 
-{$IFDEF DEBUG}
 function SerializeObject(const AObject: TObject): String;
-{$ENDIF}
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
                    const AShowCmd: Integer = SW_SHOWNORMAL; const AVerb: String = 'open'; const AMask: DWORD = SEE_MASK_FLAG_NO_UI; const AHWND: HWND = 0): Boolean;
@@ -40,11 +38,10 @@ function MinutesToString(const AMinutes: UINT32): String;
 implementation
 
 uses
-  {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
+  System.Rtti, System.TypInfo,
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, System.Generics.Collections, System.RegularExpressionsAPI,
   Vcl.Dialogs;
 
-{$IFDEF DEBUG}
 function ValueToStr(const AProperty: TRttiProperty; const AValue: TValue): String;
 var
   C1: Integer;
@@ -129,7 +126,6 @@ begin
     end;
   end;
 end;
-{$ENDIF}
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 var

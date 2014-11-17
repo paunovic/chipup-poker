@@ -32,7 +32,6 @@ type
     FAvatarId: TBytes;
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CloseModalCallback(Sender: TObject);
     procedure CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
@@ -57,8 +56,6 @@ procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
 var
   avatar: TAvatar;
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
-
   FCallbacksId := MessageContainer.AddCallbacks([
                      TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
   ]);
@@ -83,8 +80,6 @@ begin
 
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -121,7 +116,7 @@ begin
     HttpClient.RcvdStream.Position := 0;
     SetLength(FAvatarId, HttpClient.RcvdStream.Size);
     Move((HttpClient.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], HttpClient.RcvdStream.Size);
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar received [%s]', [BytesToHex(FAvatarId)]), ditNetInc); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(Format('Avatar received [%s]', [BytesToHex(FAvatarId)]), ditNetInc); {$ENDIF}
     ServerSocket.SetAvatar(FAvatarId);
   end
   else
@@ -165,7 +160,7 @@ begin
   HttpClient.OnRequestDone := HTTPRequestDone;
   HttpClient.PostASync;
 
-  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar [size: %.2fkb]', [HttpClient.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
+  {$IFDEF DEBUG}  DebugLn(Format('Uploading avatar [size: %.2fkb]', [HttpClient.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);

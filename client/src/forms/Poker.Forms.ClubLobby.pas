@@ -166,7 +166,6 @@ type
     FSelectedPlayerId: TMongoId;
     FSelectedGameId: TMongoId;
     FSelectedStatsTableId: TMongoId;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure ConfigureGUI(const AUpdateLists: Boolean = TRUE);
 
@@ -212,7 +211,7 @@ uses
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams,
   Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs;
+  Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs, Poker.SoftExceptions;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -251,8 +250,6 @@ procedure TfrmClubLobby.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmClubLobby.FormResize(Sender: TObject);
@@ -283,8 +280,6 @@ begin
     btStats.OnClick(self);
     ConfigureGUI;
   end;
-
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('%s [%s]', [Name, Caption])); {$ENDIF}
 end;
 
 procedure TfrmClubLobby.ConfigureGUI(const AUpdateLists: Boolean = TRUE);
@@ -1213,7 +1208,7 @@ begin
     csSuccess: ConfigureGUI;
     csNameExists: ;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    SoftException(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]));
   end;
 end;
 
@@ -1230,7 +1225,7 @@ begin
     csSuccess: Close;
     csInvalidClubId: ;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    SoftException(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]));
   end;
 end;
 
@@ -1247,7 +1242,7 @@ begin
     csSuccess: ConfigureGUI;
     csInvalidClubId: ;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    SoftException(Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]));
   end;
 end;
 

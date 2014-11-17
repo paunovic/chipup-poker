@@ -10,7 +10,6 @@ type
 
   TTableRenderMetrics = class
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FLastDXAreaSize: TPoint2px;
     FTableResizeRatio: Single;
     FRawTableBounds: TPoint4;
@@ -74,9 +73,6 @@ type
       CARD_HIDDEN_PERC = 0.35;
       CARD_FOLDED_PERC = 0.55;
 
-    constructor Create;
-    destructor Destroy; override;
-
     function GetTableSector(const APoint: TPoint2): TTableSector;
     function GetSeatPoint(const AGame: TGameInfo; const ASeatIndex: Integer): TPoint2;
     function GetCardPoint(const AGame: TGameInfo; const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
@@ -136,23 +132,10 @@ type
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.SysUtils, Poker.Tables.Resources, Poker.Common.Misc, Poker.Tables.Table,
-  Poker.Protobufs.Objects.TableStatus;
+  Poker.Protobufs.Objects.TableStatus, Poker.SoftExceptions;
 
 { TTableRenderMetrics }
-
-constructor TTableRenderMetrics.Create;
-begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('TableRenderMetrics'); {$ENDIF}
-end;
-
-destructor TTableRenderMetrics.Destroy;
-begin
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
-  inherited;
-end;
-
 
 function TTableRenderMetrics.GetTableSector(const APoint: TPoint2): TTableSector;
 var
@@ -284,7 +267,7 @@ begin
   if (AGame.Seats < Low(TableResources.SEAT_POINTS)) or
      (AGame.Seats > High(TableResources.SEAT_POINTS)) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid AGame.Seats number [%d]', [AGame.Seats]), ditException); {$ENDIF}
+    SoftException(Format('Invalid AGame.Seats number [%d]', [AGame.Seats]));
     Exit(Point2(0, 0));
   end;
 

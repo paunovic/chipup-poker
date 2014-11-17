@@ -112,6 +112,7 @@ enum ServerCodes {
 	scMutePlayer = 116;
 	scChangePlayerManagerState = 117;
 	scSplitTableCards = 118;
+	scSoftException = 119;
 }
 
 message StringSizes {
@@ -758,4 +759,9 @@ message PlayerClubStatus {
 message DeleteTableStats {
 	required bytes club_id = 1 [(ObjectId)=true];
 	repeated bytes table_id = 2 [(ObjectId)=true];
+}
+
+message SoftException {
+	required string exception = 1;
+	optional string data = 2;
 }

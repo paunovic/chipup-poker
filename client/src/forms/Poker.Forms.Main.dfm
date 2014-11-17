@@ -4476,6 +4476,10 @@ object frmChipUpMain: TfrmChipUpMain
           item
             Items = <
               item
+                Action = acLaunchNewInstance
+                Caption = '&Launch New Instance'
+              end
+              item
                 Action = acDisconnect
                 Caption = '&Disconnect'
               end>
@@ -4637,6 +4641,11 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Always Run it Twice'
       GroupIndex = 5
       OnExecute = acAlwaysRunItTwiceExecute
+    end
+    object acLaunchNewInstance: TAction
+      Category = 'Dev'
+      Caption = 'Launch New Instance'
+      OnExecute = acLaunchNewInstanceExecute
     end
   end
   object ApplicationEvents: TApplicationEvents
