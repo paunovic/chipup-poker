@@ -37,7 +37,6 @@ type
     FCallbacksId: Integer;
     FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
   protected
@@ -52,15 +51,13 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule, Poker.Common.ModalDialogs;
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule, Poker.Common.ModalDialogs,
+  Poker.SoftExceptions;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
-
   FCallbacksId := MessageContainer.AddCallbacks([
                      TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange)
                   ])
@@ -70,8 +67,6 @@ procedure TfrmChangeClubDetails.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChangeClubDetails.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -189,7 +184,7 @@ begin
       edClubName.SetFocus;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    SoftException(Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]));
   end;
 
   acOK.Enabled := TRUE;

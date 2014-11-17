@@ -353,7 +353,6 @@
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.AssetList.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryMove.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas"/>
-			<DCCReference Include="modules\protobufs\Poker.Protobufs.Objects.Base.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentCommandParams.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentInfo.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentList.pas"/>
@@ -373,6 +372,9 @@
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas"/>
 			<DCCReference Include="modules\common\Poker.Common.ModalDialogs.pas"/>
+			<DCCReference Include="modules\protobufs\Poker.Protobufs.Objects.Base.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SoftException.pas"/>
+			<DCCReference Include="modules\Poker.SoftExceptions.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

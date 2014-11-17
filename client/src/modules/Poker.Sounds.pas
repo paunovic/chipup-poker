@@ -8,7 +8,6 @@ uses
 type
   TSounds = class
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FWavePlayer: TWavePlayer;
   public
     const
@@ -38,7 +37,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.SysUtils, Poker.Common.WavePlayer.DirectSoundBuffer;
+  Winapi.Windows, System.SysUtils, Poker.Common.WavePlayer.DirectSoundBuffer, Poker.SoftExceptions;
 
 
 class procedure TSounds.Initialize(const AHandle: THandle);
@@ -53,14 +52,12 @@ end;
 
 constructor TSounds.Create(const AHandle: THandle);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
   FWavePlayer := TWavePlayer.Create(AHandle);
 end;
 
 destructor TSounds.Destroy;
 begin
   FreeAndNil(FWavePlayer);
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
 
@@ -72,9 +69,7 @@ begin
             (buffer.PlayBuffer);
 
   if not result then
-  begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to play sound [%s]', [ASound]), ditException); {$ENDIF}
-  end;
+    SoftException(Format('Failed to play sound [%s]', [ASound]));
 end;
 
 procedure TSounds.StopAll;

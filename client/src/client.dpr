@@ -170,7 +170,6 @@ uses
   Poker.Protobufs.Objects.AssetList in 'modules\protobufs\objects\Poker.Protobufs.Objects.AssetList.pas',
   Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryMove.pas',
   Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobufs\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas',
-  Poker.Protobufs.Objects.Base in 'modules\protobufs\Poker.Protobufs.Objects.Base.pas',
   Poker.Protobufs.Objects.TournamentCommandParams in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentCommandParams.pas',
   Poker.Protobufs.Objects.TournamentInfo in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentInfo.pas',
   Poker.Protobufs.Objects.TournamentList in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentList.pas',
@@ -189,7 +188,10 @@ uses
   Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas',
   Poker.Protobufs.Objects.DeleteTableStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas',
   Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas',
-  Poker.Common.ModalDialogs in 'modules\common\Poker.Common.ModalDialogs.pas';
+  Poker.Common.ModalDialogs in 'modules\common\Poker.Common.ModalDialogs.pas',
+  Poker.Protobufs.Objects.Base in 'modules\protobufs\Poker.Protobufs.Objects.Base.pas',
+  Poker.Protobufs.Objects.SoftException in 'modules\protobufs\objects\Poker.Protobufs.Objects.SoftException.pas',
+  Poker.SoftExceptions in 'modules\Poker.SoftExceptions.pas';
 
 procedure FocusApp;
 var
@@ -199,7 +201,10 @@ begin
   if window_handle = 0 then
     window_handle := FindWindow('TfrmChipUpMain', nil);
   if window_handle <> 0 then
+  begin
+    ShowWindow(window_handle, SW_SHOWNORMAL);
     SetForegroundWindow(window_handle);
+  end;
 end;
 
 begin
@@ -207,14 +212,14 @@ begin
 
   TCommandLineParams.ParseParams;
 
-  TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
-  if not TInstanceController.AcquireInstance then
+  if not TInstanceController.AcquireInstance(Settings.Hardcoded.INSTANCE_MUTEX_NAME) then
   begin
     FocusApp;
     Exit;
   end;
 
   Application.Initialize;
+  Application.Title := 'ChipUP Poker';
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfrmChipUpMain, frmChipUpMain);

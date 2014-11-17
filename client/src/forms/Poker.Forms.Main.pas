@@ -108,6 +108,7 @@ type
     styleTournamentNameRegistered: TcxStyle;
     acConfirmationOnFold: TAction;
     acAlwaysRunItTwice: TAction;
+    acLaunchNewInstance: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -160,6 +161,7 @@ type
       AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acConfirmationOnFoldExecute(Sender: TObject);
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
+    procedure acLaunchNewInstanceExecute(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -252,7 +254,8 @@ uses
   Poker.Tournaments, Poker.Forms.TournamentLobby, Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info,
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
   Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Forms.Table, Poker.Forms.TournamentFinishDialog,
-  Poker.Protobufs.Objects.PlayerClubStatus, Poker.Common.ModalDialogs;
+  Poker.Protobufs.Objects.PlayerClubStatus, Poker.Common.ModalDialogs, Poker.Common.InstanceController,
+  Poker.SoftExceptions;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -489,6 +492,12 @@ end;
 procedure TfrmChipUpMain.acHandHistoryExecute(Sender: TObject);
 begin
   FormsContainer.RunForm(TfrmHandHistory, self, [nil, nil], FALSE);
+end;
+
+procedure TfrmChipUpMain.acLaunchNewInstanceExecute(Sender: TObject);
+begin
+  TInstanceController.ReleaseInstance;
+  ShellOpen(PChar(ParamStr(0)), nil, PChar(ParamStr(1)));
 end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);

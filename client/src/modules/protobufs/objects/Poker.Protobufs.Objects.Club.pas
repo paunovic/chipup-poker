@@ -20,7 +20,7 @@ type
       kPasswordFieldNumber = 5;
       kIsPrivateFieldNumber = 6;
       kSeqFieldNumber = 7;
-      kHasPasswordFieldNumber = 8;
+      kPasswordExistsFieldNumber = 8;
       kRakeFieldNumber = 9;
       kDefaultBalanceLimitFieldNumber = 10;
       kUnlimitedDefaultBalanceFieldNumber = 11;
@@ -34,7 +34,7 @@ type
       FPassword: String;
       FIsPrivate: Boolean;
       FSeq: Integer;
-      FHasPassword: Boolean;
+      FPasswordExists: Boolean;
       FRake: UInt32;
       FDefaultBalanceLimit: UInt32;
       FUnlimitedDefaultBalance: Boolean;
@@ -61,9 +61,9 @@ type
     procedure set_has_Seq;
     procedure clear_has_Seq;
     procedure SetSeq(const AValue: Integer);
-    procedure set_has_HasPassword;
-    procedure clear_has_HasPassword;
-    procedure SetHasPassword(const AValue: Boolean);
+    procedure set_has_PasswordExists;
+    procedure clear_has_PasswordExists;
+    procedure SetPasswordExists(const AValue: Boolean);
     procedure set_has_Rake;
     procedure clear_has_Rake;
     procedure SetRake(const AValue: UInt32);
@@ -123,10 +123,10 @@ type
     procedure clear_Seq;
     property Seq: Integer read FSeq write SetSeq;
 
-    // optional bool HasPassword = 8;
-    function has_HasPassword: Boolean;
-    procedure clear_HasPassword;
-    property HasPassword: Boolean read FHasPassword write SetHasPassword;
+    // optional bool PasswordExists = 8;
+    function has_PasswordExists: Boolean;
+    procedure clear_PasswordExists;
+    property PasswordExists: Boolean read FPasswordExists write SetPasswordExists;
 
     // optional uint32 Rake = 9;
     function has_Rake: Boolean;
@@ -231,10 +231,10 @@ begin
         FSeq := AProtobufReader.readInt32;
         set_has_Seq;
       end;
-      kHasPasswordFieldNumber: begin
+      kPasswordExistsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FHasPassword := AProtobufReader.readBoolean;
-        set_has_HasPassword;
+        FPasswordExists := AProtobufReader.readBoolean;
+        set_has_PasswordExists;
       end;
       kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -279,8 +279,8 @@ begin
     SetIsPrivate(AFrom.IsPrivate);
   if AFrom.has_Seq then
     SetSeq(AFrom.Seq);
-  if AFrom.has_HasPassword then
-    SetHasPassword(AFrom.HasPassword);
+  if AFrom.has_PasswordExists then
+    SetPasswordExists(AFrom.PasswordExists);
   if AFrom.has_Rake then
     SetRake(AFrom.Rake);
   if AFrom.has_DefaultBalanceLimit then
@@ -535,35 +535,35 @@ begin
   set_has_Seq;
 end;
 
-procedure TPB_Club.clear_HasPassword;
+procedure TPB_Club.clear_PasswordExists;
 begin
-  FHasPassword := false;
-  clear_has_HasPassword;
+  FPasswordExists := false;
+  clear_has_PasswordExists;
 end;
 
-function TPB_Club.has_HasPassword: Boolean;
+function TPB_Club.has_PasswordExists: Boolean;
 begin
   result := (_has_bits_ and 128) > 0;
 end;
 
-procedure TPB_Club.set_has_HasPassword;
+procedure TPB_Club.set_has_PasswordExists;
 begin
   _has_bits_ := _has_bits_ or 128;
 end;
 
-procedure TPB_Club.clear_has_HasPassword;
+procedure TPB_Club.clear_has_PasswordExists;
 begin
   _has_bits_ := _has_bits_ and not 128;
 end;
 
-procedure TPB_Club.SetHasPassword(const AValue: Boolean);
+procedure TPB_Club.SetPasswordExists(const AValue: Boolean);
 begin
   if not Lightweight then
-    Assert(not has_HasPassword);
-  FHasPassword := AValue;
+    Assert(not has_PasswordExists);
+  FPasswordExists := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBoolean(kHasPasswordFieldNumber, AValue);
-  set_has_HasPassword;
+    ProtobufOutput.writeBoolean(kPasswordExistsFieldNumber, AValue);
+  set_has_PasswordExists;
 end;
 
 procedure TPB_Club.clear_Rake;
@@ -702,7 +702,7 @@ begin
   clear_Password;
   clear_IsPrivate;
   clear_Seq;
-  clear_HasPassword;
+  clear_PasswordExists;
   clear_Rake;
   clear_DefaultBalanceLimit;
   clear_UnlimitedDefaultBalance;

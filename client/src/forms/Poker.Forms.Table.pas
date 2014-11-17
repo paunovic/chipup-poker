@@ -120,7 +120,6 @@ type
       FDXBCall: Integer;
       FDXBRaise: Integer;
       FDXBRaisePresets: array[0..3] of Integer;
-      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure SetActionCaptions;
     procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
@@ -203,7 +202,6 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('frmTable: %s', [table.GetTableCaption])); {$ENDIF}
     FTableType := table.TableType;
     FGameId := table.GameId;
   finally
@@ -287,8 +285,6 @@ begin
     MessageContainer.RemoveCallbacks(FCallbacksId);
 
   DXTimer.RemoveAnimations(Handle);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmTable.FormPaint(Sender: TObject);

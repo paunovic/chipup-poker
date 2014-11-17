@@ -17,7 +17,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Winapi.Windows;
+  System.SysUtils, Winapi.Windows, Poker.SoftExceptions;
 
 { TSafeCriticalSection }
 
@@ -27,19 +27,15 @@ var
 begin
   res := WaitFor(INFINITE);
   result := res <> wrError;
-  {$IFDEF DEBUG}
   if not result then
-    DebugLn(0, Format('Error while attempting to acquire mutex object [err: %d; handle: %d]', [Integer(res), Handle]), ditException);
-  {$ENDIF}
+    SoftException(Format('Error while attempting to acquire mutex object [err: %d; handle: %d]', [Integer(res), Handle]));
 end;
 
 function TSafeMutex.Release: Boolean;
 begin
   result := ReleaseMutex(FHandle);
-  {$IFDEF DEBUG}
   if not result then
-    DebugLn(0, Format('Error while attempting to release mutex object [handle: %d]', [Handle]), ditException);
-  {$ENDIF}
+    SoftException(Format('Error while attempting to release mutex object [handle: %d]', [Handle]));
 end;
 
 end.

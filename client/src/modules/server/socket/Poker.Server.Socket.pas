@@ -62,6 +62,7 @@ type
     procedure TableSitOpen(const AGameId: TMongoId);
     procedure DeleteTableStats(const AClubId: TMongoId; const ATableIds: TList<TMongoId>);
     procedure ChangeClubPlayerFlag(const ACommand: TServerCodes; const AClubId, APlayerId: TMongoId; const AFlag: Boolean);
+    procedure SoftException(const AException, AData: String);
   end;
 
 var
@@ -82,7 +83,8 @@ uses
   Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
   Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
-  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats;
+  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails, Poker.Protobufs.Objects.DeleteTableStats,
+  Poker.Protobufs.Objects.SoftException;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -532,6 +534,20 @@ begin
   try
     protobuf.MongoId := AGameId;
     SendProtobuf(scShowCards, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.SoftException(const AException, AData: String);
+var
+  protobuf: TPB_SoftException;
+begin
+  protobuf := TPB_SoftException.Create;
+  try
+    protobuf.Exception := AException;
+    protobuf.Data := AData;
+    SendProtobuf(scSoftException, protobuf);
   finally
     protobuf.Free;
   end;
