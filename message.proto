@@ -762,5 +762,6 @@ message DeleteTableStats {
 }
 
 message SoftException {
-	required string data = 1;
+	required string exception = 1;
+	optional string data = 2;
 }
