@@ -13,6 +13,10 @@
 
 class QApplication;
 
+namespace Data {
+class TableStatus;
+}
+
 class PokerMain : public QObject
 {
     Q_OBJECT
@@ -38,6 +42,7 @@ signals:
     void register_success();
     void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
 	void secondary_login();
+	void table_status(const Data::TableStatus &ts);
 
 public slots:
     void try_connect();
@@ -54,6 +59,7 @@ private:
 	void seGameChange(std::string data);
 	void seGameCreate(std::string data);
 	void seGameDelete(std::string data);
+	void seTableStatus(std::string data);
 
     QSslSocket socket;
     QByteArray buffer;

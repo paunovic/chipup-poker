@@ -318,7 +318,6 @@ background-repeat: no-repeat;</string>
      <string>Dev</string>
     </property>
     <addaction name="actionCSS_Editor"/>
-    <addaction name="actionOpen_Table"/>
    </widget>
    <addaction name="menuAccount"/>
    <addaction name="menuOptions"/>

@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QFile>
 #include <QDebug>
+#include <QResource>
 
 #include "loginwindow.h"
 #include "pokermain.h"
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
 		QString css(buffer);
 		a.setStyleSheet(css);
 	}
+	QResource::registerResource("scripts.rcc");
     core = new PokerMain();
 	core->app = &a;
 

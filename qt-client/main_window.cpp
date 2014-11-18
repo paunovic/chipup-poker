@@ -113,7 +113,13 @@ void MainWindow::on_actionCSS_Editor_triggered() {
 	CssEditor *css = new CssEditor;
 	css->show();
 }
-void MainWindow::on_actionOpen_Table_triggered() {
+void MainWindow::on_gridGames_doubleClicked(const QModelIndex &index) {
+	qDebug() << "double click" << index.row();
+	const Data::Game *game = core->game_model.getGame(index);
+	Poker::Game g;
+	g.set__id(game->gameid.data(),game->gameid.length());
+	core->sendMessage(Poker::scTableJoin,&g);
 	Table *t = new Table();
+	t->setGame(game);
 	t->show();
 }

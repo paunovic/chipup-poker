@@ -136,3 +136,7 @@ void GameListModel::remove(const Game *g) {
 		}
 	}
 }
+const Game *GameListModel::getGame(const QModelIndex &index) const {
+	int row = index.row();
+	return m_entries.at(row);
+}

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -58,7 +58,14 @@ SOURCES += main.cpp\
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
     registerwindow.cpp \
     csseditor.cpp \
-    table.cpp
+    table.cpp \
+    tableprivate.cpp \
+    tablestatus.cpp \
+    data/seatinfo.cpp \
+    data/tableevent.cpp \
+    data/pot.cpp \
+    data/tablemessage.cpp \
+    data/hand.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -67,7 +74,14 @@ HEADERS  += loginwindow.h \
     config.h main_window.h club.h game.h join_club.h createclub.h \
     registerwindow.h \
     csseditor.h \
-    table.h
+    table.h \
+    tableprivate.h \
+    tablestatus.h \
+    data/seatinfo.h \
+    data/tableevent.h \
+    data/pot.h \
+    data/tablemessage.h \
+    data/hand.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
@@ -77,5 +91,5 @@ FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
 RESOURCES += \
     resources.qrc
 
-OTHER_FILES += \
-    resources/login/Background.png
+OTHER_FILES += scripts.qrc \
+    table.js

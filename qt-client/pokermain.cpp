@@ -3,6 +3,7 @@
 #include "pokermain.h"
 #include "cpp/message.pb.h"
 #include "club.h"
+#include "tablestatus.h"
 
 using namespace Poker;
 
@@ -263,6 +264,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::seGameDelete: // 57
 		seGameDelete(data);
 		break;
+	case Poker::seTableStatus: // 58
+		seTableStatus(data);
+		break;
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
@@ -328,4 +332,11 @@ void PokerMain::seGameDelete(std::string data) {
 			break;
 		}
 	}
+}
+void PokerMain::seTableStatus(std::string data) {
+	Poker::TableStatus ts;
+	ts.ParseFromString(data);
+	Data::TableStatus out;
+	out.update(ts);
+	emit table_status(out);
 }

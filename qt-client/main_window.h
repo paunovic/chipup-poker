@@ -28,7 +28,7 @@ private slots:
 	void on_actionLogout_triggered();
 	void on_actionCSS_Editor_triggered();
 	void secondary_login();
-	void on_actionOpen_Table_triggered();
+	void on_gridGames_doubleClicked(const QModelIndex &index);
 
 private:
 	Ui::MainWindow *ui;

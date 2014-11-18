@@ -46,6 +46,8 @@ public:
 	void updated(const Game *g);
 	void add(const Game *g);
 	void remove(const Game *g);
+	const Game *getGame(const QModelIndex &index) const;
+
 protected:
 	QList<const Game*> m_entries;
 	const Data::Club *filteredClub;
