@@ -67,3 +67,39 @@ QPushButton:checked#btHomeGames, QPushButton:checked#btTournaments {
 	color: #f5682c;
 	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3a2425, stop: 1 #9f2f2f);
 }
+
+
+
+QCheckBox {
+	color:#b4b4b4;
+}
+QLineEdit#teChatInput {
+	background-color: #262626;
+	color: #808080;
+	border: none;
+}
+QTextEdit#teChat {
+	background-color: #454545;
+	border: none;
+}
+
+QMainWindow#Table {
+	border-image: url(e:/poker/poker/qt-client/resources/table/RoomBackground.png) 0 0 0 0 stretch stretch;
+}
+QWidget#center {
+	border-image: url(:/resources/table/Table.png);
+}
+QPushButton#btMin,QPushButton#btMax,QPushButton#btPot,QPushButton#bt3BB {
+	border-top: 1px solid #626668;
+	border-left: 1px solid #394041;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #333939, stop: 1 #171a17);
+	border-image: none;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+QPushButton#btMin:pressed,QPushButton#btMax:pressed,QPushButton#btPot:pressed,QPushButton#bt3BB:pressed {
+	border-top: 1px solid #714848;
+	border-left: 1px solid #751414;
+	border-bottom: 1px solid #540000;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3f0000, stop: 1 #900000);
+}

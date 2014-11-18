@@ -57,7 +57,8 @@ SOURCES += main.cpp\
     protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc \
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
     registerwindow.cpp \
-    csseditor.cpp
+    csseditor.cpp \
+    table.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -65,11 +66,13 @@ HEADERS  += loginwindow.h \
     cpp/message.pb.h \
     config.h main_window.h club.h game.h join_club.h createclub.h \
     registerwindow.h \
-    csseditor.h
+    csseditor.h \
+    table.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
-    csseditor.ui
+    csseditor.ui \
+    table.ui
 
 RESOURCES += \
     resources.qrc

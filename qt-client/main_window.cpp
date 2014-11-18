@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QAbstractItemView>
 
+#include "table.h"
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
 	ui->setupUi(this);
 	connect(core,SIGNAL(secondary_login()),this,SLOT(secondary_login()));
@@ -110,4 +112,8 @@ bool MainWindow::event(QEvent *event) {
 void MainWindow::on_actionCSS_Editor_triggered() {
 	CssEditor *css = new CssEditor;
 	css->show();
+}
+void MainWindow::on_actionOpen_Table_triggered() {
+	Table *t = new Table();
+	t->show();
 }

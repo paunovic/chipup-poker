@@ -15,5 +15,7 @@
         <file>resources/button_mainform_pressed.png</file>
         <file>resources/mainform/Arrow.png</file>
         <file>resources/mainform/Star.png</file>
+        <file>resources/table/Table.png</file>
+        <file>resources/table/ActionButtonNormal.png</file>
     </qresource>
 </RCC>
