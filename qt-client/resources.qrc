@@ -2,12 +2,18 @@
     <qresource prefix="/">
         <file>resources/login/Background.png</file>
         <file>resources/header/Header.png</file>
-	<file>resources/Button_normal.png</file>
-	<file>resources/Button_hover.png</file>
-	<file>resources/Button_common.png</file>
-	<file>resources/Button_common_hover.png</file>
-	<file>resources/Button_common_pressed.png</file>
-	<file>resources/Button_common_disabled.png</file>
-	<file>stylesheet.css</file>
+        <file>resources/Button_normal.png</file>
+        <file>resources/Button_hover.png</file>
+        <file>resources/Button_common.png</file>
+        <file>resources/Button_common_hover.png</file>
+        <file>resources/Button_common_pressed.png</file>
+        <file>resources/Button_common_disabled.png</file>
+        <file>stylesheet.css</file>
+        <file>resources/button_mainform_disabled.png</file>
+        <file>resources/button_mainform_hot.png</file>
+        <file>resources/button_mainform_normal.png</file>
+        <file>resources/button_mainform_pressed.png</file>
+        <file>resources/mainform/Arrow.png</file>
+        <file>resources/mainform/Star.png</file>
     </qresource>
 </RCC>

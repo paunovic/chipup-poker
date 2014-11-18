@@ -160,10 +160,8 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			games.clear();
 			for (int i=0; i<lr.games_size(); i++) {
 				Poker::Game g = lr.games(i);
-				Data::Game g_out;
-				std::string clubid = g.club_mongoid();
-				g_out.gamename = g.gamename().c_str();
-				g_out.clubid = QByteArray(clubid.data(),clubid.length());
+				Data::Game *g_out = new Data::Game;
+				g_out->update(g);
 				games.append(g_out);
 			}
 			emit login_sucess();
@@ -211,16 +209,17 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		qDebug() << "srTableStatsReply";
 		break;
 	case Poker::srPong: { // 30
-		ping_reply.ParseFromString(data);
-		int previous_uptime = ping_reply.uptime();
-		quint64 server_clock = ping_reply.servertime();
-		quint64 clock_offset = server_clock - recv_time;
-		qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
+		//ping_reply.ParseFromString(data);
+		//int previous_uptime = ping_reply.uptime();
+		//quint64 server_clock = ping_reply.servertime();
+		//quint64 clock_offset = server_clock - recv_time;
+		//qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
 		break; }
 	case Poker::seSecondaryLoginDetected:
 		emit secondary_login();
 		break;
 	case Poker::srJoinClubReply: {
+		// TODO, parse games in ccr
 		Poker::ClubCommandReply ccr;
 		ccr.ParseFromString(data);
 		qDebug() << "status" << ccr.status();
@@ -255,6 +254,15 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		}
 		break;
 	}
+	case Poker::seGameChange: // 55
+		seGameChange(data);
+		break;
+	case Poker::seGameCreate: // 56
+		seGameCreate(data);
+		break;
+	case Poker::seGameDelete: // 57
+		seGameDelete(data);
+		break;
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
@@ -277,4 +285,47 @@ QList<Data::Club*> PokerMain::private_clubs() {
 		if (clubs.at(i)->is_private) out.append(clubs.at(i));
 	}
 	return out;
+}
+void PokerMain::seGameChange(std::string data) {
+	Poker::Game g;
+	g.ParseFromString(data);
+
+	std::string gameid2 = g._id();
+	QByteArray gameid(gameid2.data(),gameid2.length());
+
+	for (int i=0; i<games.size(); i++) {
+		if (games.at(i)->gameid == gameid) {
+			Data::Game *g2 = games[i];
+			g2->update(g);
+			game_model.updated(g2);
+			break;
+		}
+	}
+}
+void PokerMain::seGameCreate(std::string data) {
+	Poker::Game g;
+	g.ParseFromString(data);
+
+	qDebug() << "seGameCreate";
+
+	Data::Game *g2 = new Data::Game;
+	g2->update(g);
+	games.append(g2);
+	game_model.add(g2);
+}
+void PokerMain::seGameDelete(std::string data) {
+	Poker::Game g;
+	g.ParseFromString(data);
+
+	qDebug() << "seGameDelete";
+
+	std::string rawid = g._id();
+	QByteArray gameid(rawid.data(),rawid.length());
+	for (int i=0; i<games.size(); i++) {
+		if (games.at(i)->gameid == gameid) {
+			game_model.remove(games[i]);
+			games.removeAt(i);
+			break;
+		}
+	}
 }

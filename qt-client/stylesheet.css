@@ -6,17 +6,19 @@ QPushButton#btLogin:hover {
 	border-image: url(:/resources/Button_hover.png) 0 0 0 0 stretch stretch;
 }
 QPushButton {
-	border-image: url(:/resources/Button_common.png) 0 0 0 0 stretch stretch;
+	border-image: url(:/resources/button_mainform_normal.png) 0 0 0 0 stretch stretch;
 	color: #b4b4b4;
+	font: bold;
 }
 QPushButton:hover {
-	border-image: url(:/resources/Button_common_hover.png) 0 0 0 0 stretch stretch;
+	border-image: url(:/resources/button_mainform_hot.png) 0 0 0 0 stretch stretch;
 }
 QPushButton:pressed {
-	border-image: url(:/resources/Button_common_pressed.png) 0 0 0 0 stretch stretch;
+	border-image: url(:/resources/button_mainform_pressed.png) 0 0 0 0 stretch stretch;
 }
 QPushButton:disabled {
-	border-image: url(:resources/Button_common_disabled.png) 0 0 0 0 stretch stretch;
+	border-image: url(:resources/button_mainform_disabled.png) 0 0 0 0 stretch stretch;
+	color: #6e6e6e;
 }
 QMainWindow, QDialog {
 	background-color: black;
@@ -26,11 +28,10 @@ QTreeView {
 	color: #b4b4b4;
 }
 QTreeView::item:selected {
-	color: black;
-	background-color: grey;
+	background-color: #321010;
 }
-QTreeView::item:hover {
-	color: black;
+QTreeView::item:selected:!active {
+	color: white;
 }
 QHeaderView::section {
 	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
@@ -50,4 +51,19 @@ QLabel#btPrivateClubs, QLabel#btPublicGames {
 } 
 QLabel {
 	color: #b4b4b4;
+}
+QPushButton#btHomeGames, QPushButton#btTournaments {
+	border-image: none;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #343a3c, stop: 1 #171717);
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #202223, stop: 1 #4b5152);
+}
+QPushButton#btHomeGames:hover, QPushButton#btTournaments:hover {
+	border-image: none;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #404749, stop: 1 #22241c);
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #202223, stop: 1 #4b5152);
+}
+QPushButton:checked#btHomeGames, QPushButton:checked#btTournaments {
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #780b0b, stop: 1 #221212);
+	color: #f5682c;
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3a2425, stop: 1 #9f2f2f);
 }

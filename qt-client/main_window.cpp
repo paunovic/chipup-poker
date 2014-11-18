@@ -25,18 +25,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	ui->gridPublicClubs->hideColumn(2);
 	
 	private_club_selection_model = new QItemSelectionModel(&core->clubs.private_club_model);
-	connect(core,SIGNAL(clubs_changed()),this,SLOT(clubs_changed()));
 	connect(private_club_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(private_club_selected(const QItemSelection&,const QItemSelection&)));
 	ui->gridPrivateClubs->setModel(&core->clubs.private_club_model);
 	ui->gridPrivateClubs->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridPrivateClubs->setSelectionModel(private_club_selection_model);
 	ui->gridPrivateClubs->setRootIsDecorated(false);
-	ui->gridPrivateClubs->setSortingEnabled(true);
+	//ui->gridPrivateClubs->setSortingEnabled(true);
 
-	game_selection_model = new QItemSelectionModel(&game_model);
-	connect(core,SIGNAL(games_changed()),this,SLOT(games_changed()));
+	core->game_model.setFilter(NULL);
+
+	game_selection_model = new QItemSelectionModel(&core->game_model);
 	connect(game_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(game_selected(const QItemSelection&,const QItemSelection&)));
-	ui->gridGames->setModel(&game_model);
+	ui->gridGames->setModel(&core->game_model);
 	ui->gridGames->setHeader(&game_header);
 	ui->gridGames->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridGames->setSelectionModel(game_selection_model);
@@ -47,12 +47,13 @@ MainWindow::~MainWindow() {
 }
 void MainWindow::homeGames() {
 	ui->stackedWidget->setCurrentIndex(0);
+	ui->btTournaments->setChecked(false);
+	ui->btHomeGames->setChecked(true);
 }
 void MainWindow::tournaments() {
 	ui->stackedWidget->setCurrentIndex(1);
-}
-void MainWindow::clubs_changed() {
-	qDebug() << "club list changing";
+	ui->btTournaments->setChecked(true);
+	ui->btHomeGames->setChecked(false);
 }
 void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
@@ -60,15 +61,8 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	int row = selected.indexes().at(0).row();
 	const Data::Club *club = core->private_clubs().at(row);
 	qDebug() << "selected:" << club->name << club->clubid.toHex();
-	QList<Data::Game> filtered;
-	for (int i=0; i<core->games.size(); i++) {
-		qDebug() << i << core->games.at(i).clubid.toHex();
-		if (core->games.at(i).clubid == club->clubid) {
-			qDebug() << "match";
-			filtered.append(core->games.at(i));
-		}
-	}
-	game_model.setEntries(filtered);
+
+	core->game_model.setFilter(club);
 }
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
@@ -76,15 +70,8 @@ void MainWindow::public_club_selected(const QItemSelection &selected, const QIte
     int row = selected.indexes().at(0).row();
 	const Data::Club *club = core->public_clubs().at(row);
 	qDebug() << "selected:" << club->name << club->clubid.toHex();
-    QList<Data::Game> filtered;
-    for (int i=0; i<core->games.size(); i++) {
-        qDebug() << i << core->games.at(i).clubid.toHex();
-		if (core->games.at(i).clubid == club->clubid) {
-            qDebug() << "match";
-            filtered.append(core->games.at(i));
-        }
-    }
-    game_model.setEntries(filtered);
+
+	core->game_model.setFilter(club);
 }
 void MainWindow::on_btJoinClub_clicked() {
 	JoinClub *jc = new JoinClub(this);
