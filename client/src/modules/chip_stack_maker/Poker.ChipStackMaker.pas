@@ -28,12 +28,17 @@ end;
 function TChipStackMaker.MakeStack(const AValue: UINT32): TChipStack;
 var
   chip_stack: TChipStack;
+  val: UINT32;
 begin
-  if TryGetValue(AValue, chip_stack) then
+  val := AValue;
+  if val > 1000000 then
+    val := 1000000;
+
+  if TryGetValue(val, chip_stack) then
     Exit(chip_stack);
 
-  chip_stack := TChipStack.Create(AValue);
-  Add(AValue, chip_stack);
+  chip_stack := TChipStack.Create(val);
+  Add(val, chip_stack);
   Exit(chip_stack);
 end;
 
