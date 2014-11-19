@@ -17,3 +17,6 @@
 #define HASH_MAP_H <tr1/unordered_map>
 #define HASH_NAMESPACE std::tr1
 #define HASH_SET_CLASS unordered_set
+
+
+#define QT_SHAREDPOINTER_TRACK_POINTERS

@@ -15,14 +15,23 @@ class TableStatus : public QObject
 {
 	Q_OBJECT
 public:
-	explicit TableStatus(QObject *parent = 0);
+	TableStatus(QObject *parent = 0);
+	~TableStatus();
 	void update(const Poker::TableStatus &in);
 
+#define X(type,name) Q_PROPERTY(QString name READ get ## name )\
+type name;\
+QString get ## name();
+#define Y(type,name) Q_PROPERTY(type name READ get ## name )\
+type name;\
+type get ## name() { return name; }
+
+
 	QByteArray gameid;
-	QList<Data::SeatInfo> seats;
-	Poker::TableStatus::TableState state;
-	int dealer;
-	int current_seat;
+	QList<Data::SeatInfo*> seats;
+	X(Poker::TableStatus::TableState,state)
+	Y(int,dealer)
+	Y(int,current_seat)
 	QList<int> bets;
 	bool locked;
 	int seq;
@@ -41,7 +50,8 @@ public:
 signals:
 
 public slots:
-
+	QObject *readSeat(int index);
+	int seatCount() { return seats.length(); }
 };
 
 } // namespace Data

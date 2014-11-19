@@ -336,7 +336,7 @@ void PokerMain::seGameDelete(std::string data) {
 void PokerMain::seTableStatus(std::string data) {
 	Poker::TableStatus ts;
 	ts.ParseFromString(data);
-	Data::TableStatus out;
-	out.update(ts);
+	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+	out->update(ts);
 	emit table_status(out);
 }

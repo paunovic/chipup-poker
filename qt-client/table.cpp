@@ -13,7 +13,7 @@ Table::Table(QWidget *parent) :
 	ui->setupUi(this);
 	p = new TablePrivate;
 	qDebug() << "table create";
-	connect(core,SIGNAL(table_status(const Data::TableStatus&)),this,SLOT(table_status(const Data::TableStatus&)));
+	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
 }
 
 Table::~Table() {
@@ -31,6 +31,7 @@ bool Table::event(QEvent *event) {
 	}
 	return QMainWindow::event(event);
 }
-void Table::table_status(const Data::TableStatus &ts) {
-
+void Table::table_status(QSharedPointer<Data::TableStatus> ts) {
+	lastTableStatus = ts;
+	p->table_status(ts);
 }

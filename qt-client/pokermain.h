@@ -1,21 +1,21 @@
 #ifndef POKERMAIN_H
 #define POKERMAIN_H
 
+#include "config.h"
+
 #include <QSslSocket>
 #include <QObject>
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QSettings>
+#include <QSharedPointer>
 
 #include "cpp/message.pb.h"
 #include "club.h"
 #include "game.h"
+#include "tablestatus.h"
 
 class QApplication;
-
-namespace Data {
-class TableStatus;
-}
 
 class PokerMain : public QObject
 {
@@ -42,7 +42,7 @@ signals:
     void register_success();
     void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
 	void secondary_login();
-	void table_status(const Data::TableStatus &ts);
+	void table_status(QSharedPointer<Data::TableStatus> ts);
 
 public slots:
     void try_connect();

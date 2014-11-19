@@ -27,11 +27,12 @@ public:
 	}
 
 private slots:
-	void table_status(const Data::TableStatus &ts);
+	void table_status(QSharedPointer<Data::TableStatus> ts);
 private:
 	Ui::Table *ui;
 	TablePrivate *p;
 	const Data::Game *game;
+	QSharedPointer<Data::TableStatus> lastTableStatus;
 };
 
 #endif // TABLE_H
