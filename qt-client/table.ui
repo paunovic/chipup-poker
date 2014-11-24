@@ -23,7 +23,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="center" native="true"/>
+     <widget class="QWidget" name="centerWrap" native="true">
+      <layout class="QHBoxLayout" name="center"/>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -231,11 +233,23 @@
      <x>0</x>
      <y>0</y>
      <width>677</width>
-     <height>21</height>
+     <height>28</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionReload"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionReload">
+   <property name="text">
+    <string>Reload</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

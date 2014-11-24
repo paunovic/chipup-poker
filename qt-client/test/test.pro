@@ -7,7 +7,10 @@ TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += .
+QT += script
+INCLUDEPATH += ../
+LIBS += -lprotobuf
 
 # Input
-HEADERS += test.h
-SOURCES += test.cpp
+HEADERS += test.h   ../tableprivate.h   ../tablestatus.h   ../data/pot.h   ../data/tableevent.h   ../data/tablemessage.h   ../data/seatinfo.h
+SOURCES += test.cpp ../tableprivate.cpp ../tablestatus.cpp ../data/pot.cpp ../data/tableevent.cpp ../data/tablemessage.cpp ../data/seatinfo.cpp ../data/hand.cpp root.cpp

@@ -17,5 +17,6 @@
         <file>resources/mainform/Star.png</file>
         <file>resources/table/Table.png</file>
         <file>resources/table/ActionButtonNormal.png</file>
+	<file>resources/seats/SeatRight.png</file>
     </qresource>
 </RCC>

@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>381</width>
+     <width>803</width>
      <height>221</height>
     </rect>
    </property>
@@ -103,7 +103,13 @@
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
         <property name="text">
-         <string>Terms and Conditions</string>
+         <string>&lt;a href=&quot;https://www.google.com&quot;&gt;Terms and Conditions&lt;/a&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

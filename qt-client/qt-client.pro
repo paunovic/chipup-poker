@@ -71,9 +71,8 @@ HEADERS  += loginwindow.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
-    config.h main_window.h club.h game.h join_club.h createclub.h \
-    registerwindow.h \
-    csseditor.h \
+    config.h main_window.h club.h game.h join_club.h createclub.h registerwindow.h \
+    csseditor.h table/game_wrap.h \
     table.h \
     tableprivate.h \
     tablestatus.h \

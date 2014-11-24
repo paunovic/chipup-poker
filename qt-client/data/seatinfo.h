@@ -2,6 +2,7 @@
 #define DATA_SEATINFO_H
 
 #include <QObject>
+#include <QDebug>
 
 #include "cpp/message.pb.h"
 
@@ -15,8 +16,11 @@ public:
 
 #define Y(type,name) Q_PROPERTY(type name READ get ## name )\
 type name;\
-type get ## name() { return name; }
-	Y(int,seat_index)
+type get ## name() { qDebug() << "read field";return name; }
+#undef Y
+	int seat_index;
+	int getSeatIndex() { return seat_index; }
+	Q_PROPERTY(int seat_index READ getSeatIndex)
 };
 
 } // namespace Data

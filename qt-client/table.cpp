@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QFile>
 
 #include "table.h"
 #include "ui_table.h"
@@ -12,6 +13,7 @@ Table::Table(QWidget *parent) :
 {
 	ui->setupUi(this);
 	p = new TablePrivate;
+	p->setupUi(this->ui->centerWrap,this->ui->center);
 	qDebug() << "table create";
 	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
 }
@@ -34,4 +36,20 @@ bool Table::event(QEvent *event) {
 void Table::table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
 	p->table_status(ts);
+}
+void Table::setGame(const Data::Game *game) {
+	this->game = game;
+	p->setGame(game);
+	p->loadJsFromResource();
+}
+void Table::on_actionReload_triggered() {
+	QFile input("table.js");
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		p->loadJs(code,"table.js");
+	}
 }

@@ -210,10 +210,10 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		qDebug() << "srTableStatsReply";
 		break;
 	case Poker::srPong: { // 30
-		//ping_reply.ParseFromString(data);
-		//int previous_uptime = ping_reply.uptime();
-		//quint64 server_clock = ping_reply.servertime();
-		//quint64 clock_offset = server_clock - recv_time;
+		ping_reply.ParseFromString(data);
+		int previous_uptime = ping_reply.uptime();
+		quint64 server_clock = ping_reply.servertime();
+		quint64 clock_offset = server_clock - recv_time;
 		//qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
 		break; }
 	case Poker::seSecondaryLoginDetected:
