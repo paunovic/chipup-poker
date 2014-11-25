@@ -76,7 +76,7 @@ void ClubListModel::remove(Data::Club *item) {
 		}
 	}
 }
-QVariant ClubListModel::headerData(int row, Qt::Orientation b, int role) const {
+QVariant ClubListModel::headerData(int row, Qt::Orientation, int role) const {
 	if (role != Qt::DisplayRole) return QVariant();
 	switch (row) {
 	case 0: return "Club ID";
@@ -86,6 +86,6 @@ QVariant ClubListModel::headerData(int row, Qt::Orientation b, int role) const {
 
 	return QVariant();
 }
-void ClubListModel::sort(int column, Qt::SortOrder order) {
+void ClubListModel::sort(int, Qt::SortOrder) {
 
 }

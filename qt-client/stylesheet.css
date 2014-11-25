@@ -86,9 +86,6 @@ QTextEdit#teChat {
 QMainWindow#Table {
 	border-image: url(e:/poker/poker/qt-client/resources/table/RoomBackground.png) 0 0 0 0 stretch stretch;
 }
-QWidget#centerWrap {
-	border-image: url(:/resources/table/Table.png);
-}
 QPushButton#btMin,QPushButton#btMax,QPushButton#btPot,QPushButton#bt3BB {
 	border-top: 1px solid #626668;
 	border-left: 1px solid #394041;
@@ -102,4 +99,7 @@ QPushButton#btMin:pressed,QPushButton#btMax:pressed,QPushButton#btPot:pressed,QP
 	border-left: 1px solid #751414;
 	border-bottom: 1px solid #540000;
 	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3f0000, stop: 1 #900000);
+}
+QWidget {
+border: 1px solid red;
 }

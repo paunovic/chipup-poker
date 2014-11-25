@@ -13,7 +13,7 @@ Table::Table(QWidget *parent) :
 {
 	ui->setupUi(this);
 	p = new TablePrivate;
-	p->setupUi(this->ui->centerWrap,this->ui->center);
+	p->setupUi(ui->centerWrap,ui->center);
 	qDebug() << "table create";
 	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
 }
@@ -52,4 +52,17 @@ void Table::on_actionReload_triggered() {
 		input.close();
 		p->loadJs(code,"table.js");
 	}
+}
+void Table::on_teChatInput_returnPressed() {
+	QString message = ui->teChatInput->text();
+	ui->teChatInput->setText("");
+	ui->teChat->append(p->eval(message).toString());
+	QGridLayout *layout = ui->center;
+	qDebug() << layout->cellRect(0,0);
+	qDebug() << layout->cellRect(1,0);
+
+}
+void Table::resizeEvent(QResizeEvent *event) {
+	qDebug() << height();
+	QMainWindow::resizeEvent(event);
 }

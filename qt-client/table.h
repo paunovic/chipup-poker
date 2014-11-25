@@ -27,6 +27,9 @@ public:
 private slots:
 	void table_status(QSharedPointer<Data::TableStatus> ts);
 	void on_actionReload_triggered();
+	void on_teChatInput_returnPressed();
+protected:
+	void resizeEvent(QResizeEvent *event);
 private:
 	Ui::Table *ui;
 	TablePrivate *p;

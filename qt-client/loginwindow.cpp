@@ -45,12 +45,18 @@ void LoginWindow::protocol_ready(bool ready) {
 void LoginWindow::on_btLogin_clicked() {
 	QString username = ui->edLogin->text();
 	QString password = ui->edPassword->text();
-	qDebug() << "doing login" << username << password;
 	Poker::LoginParams lp;
 	lp.set_username(qPrintable(username));
 	lp.set_password(qPrintable(password));
 	core->sendMessage(Poker::scLogin,&lp);
 }
+void LoginWindow::on_edLogin_returnPressed() {
+	on_btLogin_clicked();
+}
+void LoginWindow::on_edPassword_returnPressed() {
+	on_btLogin_clicked();
+}
+
 void LoginWindow::on_btCreateAccount_clicked() {
     RegisterWindow *rw = new RegisterWindow(this);
     rw->exec();

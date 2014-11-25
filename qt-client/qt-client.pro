@@ -65,7 +65,10 @@ SOURCES += main.cpp\
     data/tableevent.cpp \
     data/pot.cpp \
     data/tablemessage.cpp \
-    data/hand.cpp
+    data/hand.cpp \
+    table/visible_seat.cpp \
+    table/game_object.cpp \
+    table/table_ui.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \

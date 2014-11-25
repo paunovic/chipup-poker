@@ -7,6 +7,7 @@
 #include <QScriptEngine>
 #include <QWidget>
 #include <QHBoxLayout>
+#include <QPixmap>
 
 #include "tablestatus.h"
 #include "table/game_wrap.h"
@@ -19,22 +20,28 @@ public:
 	TableUi(QWidget *parent=0);
 	QSize sizeHint() const;
 	void addElement(GameObjectUi *element);
+	int heightForWidth(int w) const;
 private slots:
 	void element_deleted(QObject *element);
 protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
+
 	QList<GameObjectUi*> uiElements;
+	QPixmap pix;
 };
 class GameObjectUi : public QWidget {
 Q_OBJECT
 public:
 	GameObjectUi(TableUi *parent=0);
-	void setSize(float w, float h);
+	void setSize(float w);
 	QSize sizeHint() const;
 	void moveRatio(float x, float y);
+	int heightForWidth(int w) const;
 
-	float w,h, x,y;
+	float w, x,y;
+protected:
+	QPixmap pix;
 private:
 	TableUi *tbl;
 };
@@ -67,10 +74,10 @@ public:
 	void table_status(QSharedPointer<Data::TableStatus> ts);
 	void loadJs(QString code,QString file);
 	void loadJsFromResource();
-	void setupUi(QWidget *parent, QHBoxLayout *layout);
+	void setupUi(QWidget *parent, QGridLayout *layout);
 	TableUi *getUi() { return tableui; }
 	void setGame(const Data::Game *game);
-
+	QScriptValue eval(QString code);
 signals:
 
 public slots:
@@ -85,7 +92,7 @@ public:
 	GameObject(TablePrivate *parent);
 public slots:
 	void setPosition(float x, float y);
-	void setSize(float w, float h);
+	void setSize(float w);
 protected:
 	GameObjectUi *internal;
 };
