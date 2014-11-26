@@ -84,6 +84,10 @@ QScriptValue TablePrivate::eval(QString code) {
 	return engine.evaluate(code,"chat");
 }
 void TablePrivate::editJs(QString newcode) {
-	tableui->clearElements();
 	eval(newcode);
+	if (engine.hasUncaughtException()) {
+		qDebug() << engine.uncaughtExceptionBacktrace();
+		qDebug() << engine.uncaughtException().toString();
+		engine.clearExceptions();
+	}
 }

@@ -54,8 +54,3 @@ QSize TableUi::sizeHint() const {
 /*int TableUi::heightForWidth( int width ) const {
 	return ((qreal)pix.height()*width)/pix.width();
 }*/
-void TableUi::clearElements() {
-	while (uiElements.count()) {
-		delete uiElements.takeAt(0);
-	}
-}

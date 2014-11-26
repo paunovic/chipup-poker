@@ -23,7 +23,6 @@ public:
 	void addElement(GameObjectUi *element);
 //	int heightForWidth(int w) const;
 	int rootHeight();
-	void clearElements();
 private slots:
 	void element_deleted(QObject *element);
 protected:
