@@ -20,7 +20,8 @@ QSize GameObjectUi::sizeHint() const {
 void GameObjectUi::moveRatio(float x, float y) {
 	this->x = x;
 	this->y = y;
-	move(tbl->width() * x, tbl->height() * y);
+	int rootheight = tbl->rootHeight();
+	move(tbl->width() * x, rootheight * y);
 }
 void GameObjectUi::setSize(float w) {
 	qDebug() << "updating object size" << w;

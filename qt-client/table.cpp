@@ -6,6 +6,7 @@
 #include "tableprivate.h"
 #include "game.h"
 #include "pokermain.h"
+#include "jseditor.h"
 
 Table::Table(QWidget *parent) :
 	QMainWindow(parent),
@@ -16,6 +17,8 @@ Table::Table(QWidget *parent) :
 	p->setupUi(ui->centerWrap,ui->center);
 	qDebug() << "table create";
 	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
+	debuger = new JsEditor(this);
+	debuger->show();
 }
 
 Table::~Table() {
@@ -63,6 +66,9 @@ void Table::on_teChatInput_returnPressed() {
 
 }
 void Table::resizeEvent(QResizeEvent *event) {
-	qDebug() << height();
+	//qDebug() << height();
 	QMainWindow::resizeEvent(event);
+}
+void Table::editJs(QString newcode) {
+	p->editJs(newcode);
 }

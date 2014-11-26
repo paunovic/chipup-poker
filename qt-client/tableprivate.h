@@ -13,6 +13,7 @@
 #include "table/game_wrap.h"
 
 class GameObjectUi;
+class SeatObject;
 
 class TableUi : public QWidget {
 Q_OBJECT
@@ -21,6 +22,8 @@ public:
 	QSize sizeHint() const;
 	void addElement(GameObjectUi *element);
 //	int heightForWidth(int w) const;
+	int rootHeight();
+	void clearElements();
 private slots:
 	void element_deleted(QObject *element);
 protected:
@@ -48,11 +51,14 @@ private:
 class VisibleSeat : public GameObjectUi {
 Q_OBJECT
 public:
-	VisibleSeat(TableUi *parent);
+	VisibleSeat(TableUi *parent, SeatObject *jsobj);
 protected:
 	void paintEvent(QPaintEvent *event);
+	void mousePressEvent(QMouseEvent *);
+	void mouseReleaseEvent(QMouseEvent *);
 private:
 	QPixmap seatRight,seatRightEmpty;
+	SeatObject *jsobj;
 };
 class CardObjectUi : public GameObjectUi {
 Q_OBJECT
@@ -78,6 +84,7 @@ public:
 	TableUi *getUi() { return tableui; }
 	void setGame(const Data::Game *game);
 	QScriptValue eval(QString code);
+	void editJs(QString newcode);
 signals:
 
 public slots:
@@ -101,8 +108,13 @@ class SeatObject : public GameObject {
 Q_OBJECT
 public:
 	SeatObject(TablePrivate *parent);
+
+	Q_PROPERTY(int seat READ getSeat WRITE setSeat)
+	int getSeat() { return seatIndex; }
+	void setSeat(int in) { seatIndex = in; }
 private:
 	VisibleSeat *seat;
+	int seatIndex;
 };
 
 class CardObject : public GameObject {

@@ -10,12 +10,16 @@ void TableUi::resizeEvent(QResizeEvent *) {
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);
 		int new_width = width()*el->w;
-		el->setGeometry(width() * el->x,height()*el->y, new_width,el->heightForWidth(new_width));
+		el->setGeometry(width() * el->x,rootHeight()*el->y, new_width,el->heightForWidth(new_width));
 	}
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Preferred);
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
 }
+int TableUi::rootHeight() {
+	return ((float)pix.height()*width())/pix.width();
+}
+
 void TableUi::paintEvent(QPaintEvent *) {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -25,7 +29,7 @@ void TableUi::paintEvent(QPaintEvent *) {
 	//painter.drawRect(0,0,width(),height());
 	//QRectF ring(width()*0.08,height()*0.1,width()*0.835,height()*0.67);
 	// round part of table should be ~400x200
-	QRectF ring((width()-400)/2,0,400,200);
+	QRectF ring((width()-400)/2,30,400,200);
 	painter.save();
 	painter.translate(60,0);
 	float scale = 0.81;
@@ -50,3 +54,8 @@ QSize TableUi::sizeHint() const {
 /*int TableUi::heightForWidth( int width ) const {
 	return ((qreal)pix.height()*width)/pix.width();
 }*/
+void TableUi::clearElements() {
+	while (uiElements.count()) {
+		delete uiElements.takeAt(0);
+	}
+}

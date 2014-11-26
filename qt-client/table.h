@@ -6,6 +6,7 @@
 #include "tablestatus.h"
 
 class TablePrivate;
+class JsEditor;
 
 namespace Ui {
 class Table;
@@ -23,6 +24,7 @@ public:
 	~Table();
 	bool event(QEvent *event);
 	void setGame(const Data::Game *game);
+	void editJs(QString newcode);
 
 private slots:
 	void table_status(QSharedPointer<Data::TableStatus> ts);
@@ -35,6 +37,7 @@ private:
 	TablePrivate *p;
 	const Data::Game *game;
 	QSharedPointer<Data::TableStatus> lastTableStatus;
+	JsEditor *debuger;
 };
 
 #endif // TABLE_H

@@ -83,3 +83,7 @@ void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
 QScriptValue TablePrivate::eval(QString code) {
 	return engine.evaluate(code,"chat");
 }
+void TablePrivate::editJs(QString newcode) {
+	tableui->clearElements();
+	eval(newcode);
+}

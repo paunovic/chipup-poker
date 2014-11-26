@@ -2,7 +2,7 @@
 
 #include "tableprivate.h"
 
-VisibleSeat::VisibleSeat(TableUi *parent) : GameObjectUi(parent) {
+VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(parent), jsobj(jsobj) {
 	qDebug() << __func__;
 	seatRight = QPixmap(":/resources/seats/SeatRight.png");
 	seatRightEmpty = QPixmap(":/resources/seats/SeatRightEmpty.png");
@@ -17,7 +17,16 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 }
 SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
-	internal = seat = new VisibleSeat(root->getUi());
+	internal = seat = new VisibleSeat(root->getUi(),this);
 	root->getUi()->addElement(internal);
 	qDebug() << "seat info" << internal->size() << internal->pos() << internal->isVisible() << internal->isHidden();
+}
+void VisibleSeat::mousePressEvent(QMouseEvent *) {
+	pix = seatRight;
+	update();
+	qDebug() << jsobj->getSeat();
+}
+void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
+	pix = seatRightEmpty;
+	update();
 }
