@@ -74,10 +74,10 @@ void TablePrivate::setGame(const Data::Game *game) {
 void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
 	qDebug() << __func__;
 	tableui = new TableUi(parent);
-	layout->setRowStretch(1,1);
+	//layout->setRowStretch(1,1);
 	layout->addWidget(tableui,0,0);
-	layout->addWidget(new QWidget(parent),1,0);
-	qDebug() << "rows" << layout->rowCount();
+	//layout->addWidget(new QWidget(parent),1,0);
+	//qDebug() << "rows" << layout->rowCount();
 }
 
 QScriptValue TablePrivate::eval(QString code) {

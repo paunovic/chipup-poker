@@ -20,7 +20,7 @@ public:
 	TableUi(QWidget *parent=0);
 	QSize sizeHint() const;
 	void addElement(GameObjectUi *element);
-	int heightForWidth(int w) const;
+//	int heightForWidth(int w) const;
 private slots:
 	void element_deleted(QObject *element);
 protected:
@@ -52,7 +52,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent *event);
 private:
-	QPixmap seatRight;
+	QPixmap seatRight,seatRightEmpty;
 };
 class CardObjectUi : public GameObjectUi {
 Q_OBJECT

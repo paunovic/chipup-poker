@@ -52,8 +52,8 @@ color: white;
     <rect>
      <x>71</x>
      <y>184</y>
-     <width>46</width>
-     <height>13</height>
+     <width>61</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
@@ -145,7 +145,7 @@ color: white;
     <rect>
      <x>134</x>
      <y>217</y>
-     <width>171</width>
+     <width>191</width>
      <height>17</height>
     </rect>
    </property>

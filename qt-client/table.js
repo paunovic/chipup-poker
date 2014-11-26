@@ -30,6 +30,13 @@ function initSeats() {
 }
 //initSeats();
 seat_objects[0] = new SeatObject();
-seat_objects[0].setSize(0.2);
-seat_objects[0].setPosition(0.5,0.38);
-gc();
+seat_objects[0].setSize(0.16);
+seat_objects[0].setPosition(0.62,0.02); // #1
+seat_objects[1] = new SeatObject();
+seat_objects[1].setSize(0.16);
+seat_objects[1].setPosition(0.78,0.18); // #2
+seat_objects[2] = new SeatObject();
+seat_objects[2].setSize(0.16);
+seat_objects[2].setPosition(0.82,0.45); // #3
+
+// seat images should be 90x32 by default

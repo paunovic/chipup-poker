@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>677</width>
-    <height>524</height>
+    <width>600</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Table - FIXME</string>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,4,1">
@@ -232,8 +235,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>677</width>
-     <height>28</height>
+     <width>600</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
