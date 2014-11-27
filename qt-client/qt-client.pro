@@ -5,4 +5,4 @@
 TEMPLATE = subdirs
 
 # Directories
-SUBDIRS += protobuf client
+SUBDIRS += protobuf client test
