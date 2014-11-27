@@ -28,6 +28,8 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	pendingReply = 0;
 	left_ = false;
+	empty = true;
+	tournament = false;
 	connect(core->manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
 	qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();

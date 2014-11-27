@@ -10,6 +10,7 @@
 namespace Data {
 class Game {
 public:
+	Game();
 	void update(Poker::Game &in);
 
 	QString gamename;

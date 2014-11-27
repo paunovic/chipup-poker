@@ -6,7 +6,7 @@ CardObject::CardObject(TablePrivate *parent) :GameObject(parent) {
 	internal = card = new CardObjectUi(parent->getUi(),this);
 	parent->getUi()->addElement(internal);
 }
-CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) {
+CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(parent) {
 
 }
 void CardObjectUi::paintEvent(QPaintEvent *event) {

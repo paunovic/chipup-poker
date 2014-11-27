@@ -4,6 +4,9 @@
 #include "pokermain.h"
 
 using namespace Data;
+Game::Game() {
+	seats = 2;
+}
 void Game::update(Poker::Game &in) {
 	std::string gameid = in._id();
 	this->gameid = QByteArray(gameid.data(),gameid.length());

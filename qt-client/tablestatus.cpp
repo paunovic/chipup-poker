@@ -14,7 +14,7 @@ void TableStatus::update(const Poker::TableStatus &in) {
 
 	gameid = QByteArray(rawid.data(),rawid.size());
 	for (i=0; i<in.seats_size(); i++) {
-		Data::SeatInfo *seat = new Data::SeatInfo;
+		Data::SeatInfo *seat = new Data::SeatInfo(this);
 		seat->update(in.seats(i));
 		seats.append(seat);
 	}
@@ -62,10 +62,10 @@ QString TableStatus::getstate() {
 }
 TableStatus::~TableStatus() {
 	// TODO, try setting the parent of the seats
-	while (!seats.isEmpty()) {
-		Data::SeatInfo *x = seats.takeFirst();
-		delete x;
-	}
+	//while (!seats.isEmpty()) {
+	//	Data::SeatInfo *x = seats.takeFirst();
+	//	delete x;
+	//}
 }
 QObject *TableStatus::readSeat(int index) {
 	return seats.at(index);

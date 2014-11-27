@@ -36,17 +36,20 @@ TablePrivate::TablePrivate(QObject *parent) :
 	tableui = 0;
 }
 TablePrivate::~TablePrivate() {
-	delete tableui;
+	// tableui is a child of the QWidget in the window, it will die with the parent
+	delete game;
 }
-void TablePrivate::loadJs(QString code,QString file) {
+bool TablePrivate::loadJs(QString code,QString file) {
 	engine.evaluate(code,file);
 	if (engine.hasUncaughtException()) {
 		qDebug() << engine.uncaughtExceptionBacktrace();
 		qDebug() << engine.uncaughtExceptionLineNumber();
 		qDebug() << "uncaught excepion" << engine.uncaughtException().toString();
 		engine.clearExceptions();
+		return false;
 	} else {
 		qDebug() << "JS loaded";
+		return true;
 	}
 }
 void TablePrivate::loadJsFromResource() {
@@ -60,11 +63,11 @@ void TablePrivate::loadJsFromResource() {
 		loadJs(code,"table.js");
 	}
 }
-void TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
+bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 	QScriptValue func = engine.globalObject().property("tableStatus");
 	if (!func.isFunction()) {
 		qDebug() << "tableStatus isnt a function!";
-		return;
+		return false;
 	}
 	QScriptValueList args;
 	args.append(engine.newQObject(ts.data()));
@@ -73,11 +76,12 @@ void TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		qDebug() << engine.uncaughtExceptionBacktrace();
 		qDebug() << engine.uncaughtException().toString();
 		engine.clearExceptions();
+		return false;
 	}
 	QScriptValue func2 = engine.globalObject().property("tableEvent");
 	if (!func2.isFunction()) {
 		qDebug() << "tableEvent isnt a function";
-		return;
+		return false;
 	}
 	QList<QSharedPointer<Data::TableEvent> >::Iterator i;
 	for (i=ts->events.begin(); i!=ts->events.end(); ++i) {
@@ -86,7 +90,14 @@ void TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		QScriptValueList args;
 		args.append(event);
 		func2.call(engine.globalObject(),args);
+		if (engine.hasUncaughtException()) {
+			qDebug() << engine.uncaughtExceptionBacktrace();
+			qDebug() << engine.uncaughtException().toString();
+			engine.clearExceptions();
+			return false;
+		}
 	}
+	return true;
 }
 void TablePrivate::setGame(const Data::Game *game) {
 	this->game = new GameWrap(game);

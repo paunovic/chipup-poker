@@ -35,7 +35,7 @@ protected:
 class GameObjectUi : public QWidget {
 Q_OBJECT
 public:
-	GameObjectUi(TableUi *parent=0);
+	GameObjectUi(TableUi *parent);
 	void setSize(float w);
 	QSize sizeHint() const;
 	void moveRatio(float x, float y);
@@ -53,11 +53,11 @@ class TablePrivate : public QObject
 public:
 	explicit TablePrivate(QObject *parent = 0);
 	~TablePrivate();
-	void table_status(QSharedPointer<Data::TableStatus> ts);
-	void loadJs(QString code,QString file);
+	bool table_status(QSharedPointer<Data::TableStatus> ts);
+	bool loadJs(QString code,QString file);
 	void loadJsFromResource();
 	void setupUi(QWidget *parent, QGridLayout *layout);
-	TableUi *getUi() { return tableui; }
+	TableUi *getUi() { Q_ASSERT(tableui); return tableui; }
 	void setGame(const Data::Game *game);
 	QScriptValue eval(QString code);
 	void editJs(QString newcode);

@@ -30,7 +30,7 @@ public:
 	explicit PokerMain(QObject *parent = 0);
 	QList<Data::Club*> public_clubs();
 	QList<Data::Club*> private_clubs();
-    QSettings& config() { return *settings; }
+	QSettings& config() { return *settings; }
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
 	Data::User *findUser(QByteArray userid);
 	QNetworkAccessManager *manager();
@@ -38,7 +38,7 @@ public:
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
 	QList<Data::Game*> games;
-    Poker::ValidCharsRegex validCharacters;
+	Poker::ValidCharsRegex validCharacters;
 	bool delayQuit;
 	QApplication *app;
 	QList<Data::User*> users;

@@ -1,5 +1,7 @@
 #include "test.h"
 #include "tableprivate.h"
+#include "../data/seatinfo.h"
+#include "../data/user.h"
 
 void TestCase::testsomething_data() {
 	//QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
@@ -10,26 +12,44 @@ void TestCase::testsomething_data() {
 	QTest::newRow("two") << 2;
 }
 void TestCase::testsomething() {
+	int result;
 	TablePrivate p;
+	PokerMain pm;
+	core = &pm;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
+	QWidget root;
+	QGridLayout grid;
+	root.setLayout(&grid);
+	p.setupUi(&root,&grid);
 	QFETCH(int,seats);
+	Data::Game g;
+	p.setGame(&g);
 	QFile input("../table.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
+		QVERIFY(false);
 	} else {
 		QTextStream stream(&input);
 		QString code = stream.readAll();
 		input.close();
-		p.loadJs(code,"table.js");
+		result = p.loadJs(code,"table.js");
+		QVERIFY(result);
 	}
 	for (int i=0; i<seats; i++) {
-		Data::SeatInfo *seat = new Data::SeatInfo;
+		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
 		seat->seat_index = i;
+		QByteArray id;
+		id[0] = i;
+		seat->userid = id;
 		QCOMPARE(seat->property("seat_index").isNull(),false);
 		QCOMPARE(seat->property("seat_index").toInt(),i);
 		ts->seats.append(seat);
+		Data::User *u = new Data::User(&pm);
+		u->id = id;
+		pm.users.append(u);
 	}
-	p.table_status(ts);
-	QVERIFY(true);
+	result = p.table_status(ts);
+	QVERIFY(result);
 	QCOMPARE(5,5);
+	core = 0;
 }
