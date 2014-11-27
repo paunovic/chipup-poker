@@ -2,14 +2,16 @@
 #define DATA_TABLESTATUS_H
 
 #include <QObject>
+#include <QSharedPointer>
 
 #include "cpp/message.pb.h"
-#include "data/seatinfo.h"
+//#include "data/seatinfo.h"
 #include "data/tableevent.h"
 #include "data/pot.h"
 #include "data/tablemessage.h"
 
 namespace Data {
+class SeatInfo;
 
 class TableStatus : public QObject
 {
@@ -39,7 +41,7 @@ type get ## name() { return name; }
 	int sb,bb;
 	int handid;
 	quint64 time;
-	QList<Data::TableEvent> events;
+	QList<QSharedPointer<Data::TableEvent> > events;
 	QList<Data::Pot> pots;
 	int rake_percent;
 	Poker::Game::GameType current_game;

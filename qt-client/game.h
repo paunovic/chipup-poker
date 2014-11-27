@@ -13,7 +13,7 @@ public:
 	void update(Poker::Game &in);
 
 	QString gamename;
-	QByteArray clubid,gameid;
+	QByteArray clubid,gameid,tournamentid;
 	Poker::Game::GameType type;
 	Poker::Game::GameBlinds blinds;
 	Poker::Game::GameState state;

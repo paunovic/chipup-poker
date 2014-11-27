@@ -16,6 +16,12 @@
 #include "tablestatus.h"
 
 class QApplication;
+class QNetworkAccessManager;
+class QNetworkReply;
+
+namespace Data {
+class User;
+}
 
 class PokerMain : public QObject
 {
@@ -26,6 +32,8 @@ public:
 	QList<Data::Club*> private_clubs();
     QSettings& config() { return *settings; }
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
+	Data::User *findUser(QByteArray userid);
+	QNetworkAccessManager *manager();
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
@@ -33,6 +41,7 @@ public:
     Poker::ValidCharsRegex validCharacters;
 	bool delayQuit;
 	QApplication *app;
+	QList<Data::User*> users;
 signals:
 	void protocol_ready(bool);
 	void login_sucess();
@@ -52,10 +61,12 @@ public slots:
 	void sendMessage(Poker::ServerCodes code,google::protobuf::Message *message=0);
     void socket_readyRead();
     void parsePacket(Poker::ServerCodes code,std::string data);
+	void replyFinished(QNetworkReply *reply);
 private slots:
     void socket_connected();
     void send_ping();
 private:
+	void srLoginReply(std::string data);
 	void seGameChange(std::string data);
 	void seGameCreate(std::string data);
 	void seGameDelete(std::string data);
@@ -66,6 +77,7 @@ private:
     QTimer pinger;
     QElapsedTimer uptime;
     QSettings *settings;
+	QNetworkAccessManager *manager_;
 };
 
 extern PokerMain *core;

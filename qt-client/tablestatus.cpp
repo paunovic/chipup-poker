@@ -1,4 +1,5 @@
 #include "tablestatus.h"
+#include "data/seatinfo.h"
 
 namespace Data {
 
@@ -33,8 +34,8 @@ void TableStatus::update(const Poker::TableStatus &in) {
 	handid = in.handid();
 	time = in.time();
 	for (i=0; i<in.events_size(); i++) {
-		Data::TableEvent e;
-		e.update(in.events(i));
+		QSharedPointer<Data::TableEvent> e(new Data::TableEvent);
+		e->update(in.events(i));
 		events.append(e);
 	}
 	for (i=0; i<in.pots_size(); i++) {

@@ -4,6 +4,8 @@
 #include <QPainter>
 
 #include "tableprivate.h"
+#include "table/visible_seat.h"
+#include "table/card.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << "JS:" << context->argument(0).toString();
@@ -13,6 +15,11 @@ static QScriptValue NewSeatObject(QScriptContext *, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	SeatObject *seatobj = new SeatObject(parent);
 	return engine->newQObject(seatobj, QScriptEngine::ScriptOwnership);
+}
+static QScriptValue NewCardObject(QScriptContext*, QScriptEngine *engine) {
+	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
+	CardObject *cardobj = new CardObject(parent);
+	return engine->newQObject(cardobj,QScriptEngine::ScriptOwnership);
 }
 
 TablePrivate::TablePrivate(QObject *parent) :
@@ -24,6 +31,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 	QScriptValue metaObject = engine.newQMetaObject(&SeatObject::staticMetaObject, ctor);
 	engine.globalObject().setProperty("SeatObject",metaObject);
 
+	engine.globalObject().setProperty("Card",engine.newQMetaObject(&CardObject::staticMetaObject,engine.newFunction(NewCardObject)));
 	engine.globalObject().setProperty("root",engine.newQObject(this));
 	tableui = 0;
 }
@@ -58,13 +66,26 @@ void TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		qDebug() << "tableStatus isnt a function!";
 		return;
 	}
-	QScriptValueList  args;
+	QScriptValueList args;
 	args.append(engine.newQObject(ts.data()));
 	func.call(engine.globalObject(),args);
 	if (engine.hasUncaughtException()) {
 		qDebug() << engine.uncaughtExceptionBacktrace();
 		qDebug() << engine.uncaughtException().toString();
 		engine.clearExceptions();
+	}
+	QScriptValue func2 = engine.globalObject().property("tableEvent");
+	if (!func2.isFunction()) {
+		qDebug() << "tableEvent isnt a function";
+		return;
+	}
+	QList<QSharedPointer<Data::TableEvent> >::Iterator i;
+	for (i=ts->events.begin(); i!=ts->events.end(); ++i) {
+		QSharedPointer<Data::TableEvent> e = *i;
+		QScriptValue event = engine.newQObject(e.data());
+		QScriptValueList args;
+		args.append(event);
+		func2.call(engine.globalObject(),args);
 	}
 }
 void TablePrivate::setGame(const Data::Game *game) {

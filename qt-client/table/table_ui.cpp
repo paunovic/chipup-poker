@@ -29,15 +29,15 @@ void TableUi::paintEvent(QPaintEvent *) {
 	//painter.drawRect(0,0,width(),height());
 	//QRectF ring(width()*0.08,height()*0.1,width()*0.835,height()*0.67);
 	// round part of table should be ~400x200
-	QRectF ring((width()-400)/2,30,400,200);
+	//QRectF ring((width()-400)/2,30,400,200);
 	painter.save();
-	painter.translate(60,0);
+	//painter.translate(60,0);
 	float scale = 0.81;
 	float w = (float)width() * scale;
 	float h = (((float)pix.height() * width()) / pix.width()) * scale;
-	painter.drawPixmap(0,0,w,h,pix);
+	painter.drawPixmap(60,0,w,h,pix);
 	painter.restore();
-	painter.drawEllipse(ring);
+	//painter.drawEllipse(ring);
 }
 void TableUi::addElement(GameObjectUi *element) {
 	uiElements.append(element);

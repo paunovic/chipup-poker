@@ -47,29 +47,6 @@ protected:
 private:
 	TableUi *tbl;
 };
-class VisibleSeat : public GameObjectUi {
-Q_OBJECT
-public:
-	VisibleSeat(TableUi *parent, SeatObject *jsobj);
-protected:
-	void paintEvent(QPaintEvent *event);
-	void mousePressEvent(QMouseEvent *);
-	void mouseReleaseEvent(QMouseEvent *);
-private:
-	QPixmap seatRight,seatRightEmpty;
-	SeatObject *jsobj;
-};
-class CardObjectUi : public GameObjectUi {
-Q_OBJECT
-public:
-	CardObjectUi(QWidget *parent);
-};
-class ChipObjectUi : public GameObjectUi {
-Q_OBJECT
-public:
-	ChipObjectUi(QWidget *parent);
-};
-
 class TablePrivate : public QObject
 {
 	Q_OBJECT
@@ -103,32 +80,4 @@ protected:
 	GameObjectUi *internal;
 };
 
-class SeatObject : public GameObject {
-Q_OBJECT
-public:
-	SeatObject(TablePrivate *parent);
-
-	Q_PROPERTY(int seat READ getSeat WRITE setSeat)
-	int getSeat() { return seatIndex; }
-	void setSeat(int in) { seatIndex = in; }
-private:
-	VisibleSeat *seat;
-	int seatIndex;
-};
-
-class CardObject : public GameObject {
-Q_OBJECT
-public:
-	CardObject(TablePrivate *parent);
-private:
-	CardObjectUi *card;
-};
-
-class ChipObject : public GameObject {
-Q_OBJECT
-public:
-	ChipObject(TablePrivate *);
-private:
-	ChipObjectUi *chips;
-};
 #endif // TABLEPRIVATE_H

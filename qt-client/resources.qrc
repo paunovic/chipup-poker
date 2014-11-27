@@ -19,5 +19,9 @@
         <file>resources/table/ActionButtonNormal.png</file>
         <file>resources/seats/SeatRight.png</file>
         <file>resources/seats/SeatRightEmpty.png</file>
+        <file>resources/seats/SeatRightEmptyTournament.png</file>
+        <file>resources/seats/SeatLeftEmpty.png</file>
+        <file>resources/seats/SeatLeftEmptyTournament.png</file>
+        <file>resources/seats/SeatLeft.png</file>
     </qresource>
 </RCC>

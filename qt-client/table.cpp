@@ -17,8 +17,10 @@ Table::Table(QWidget *parent) :
 	p->setupUi(ui->centerWrap,ui->center);
 	qDebug() << "table create";
 	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
+#ifdef JSDEBUG
 	debuger = new JsEditor(this);
 	debuger->show();
+#endif
 }
 
 Table::~Table() {

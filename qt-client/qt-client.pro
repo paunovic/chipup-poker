@@ -69,7 +69,9 @@ SOURCES += main.cpp\
     table/visible_seat.cpp \
     table/game_object.cpp \
     table/table_ui.cpp \
-    jseditor.cpp
+    jseditor.cpp \
+    data/user.cpp \
+    table/card.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -85,7 +87,11 @@ HEADERS  += loginwindow.h \
     data/pot.h \
     data/tablemessage.h \
     data/hand.h \
-    jseditor.h
+    jseditor.h \
+    table/visible_seat.h \
+    table/card.h \
+    table/chip.h \
+    data/user.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \

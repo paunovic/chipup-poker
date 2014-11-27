@@ -1,6 +1,8 @@
 #ifndef TABLE_H
 #define TABLE_H
 
+#define JSDEBUG
+
 #include <QMainWindow>
 
 #include "tablestatus.h"
@@ -37,7 +39,9 @@ private:
 	TablePrivate *p;
 	const Data::Game *game;
 	QSharedPointer<Data::TableStatus> lastTableStatus;
+#ifdef JSDEBUG
 	JsEditor *debuger;
+#endif
 };
 
 #endif // TABLE_H

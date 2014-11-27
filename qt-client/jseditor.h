@@ -3,11 +3,12 @@
 
 #include <QMainWindow>
 
+#include "table.h"
+
 namespace Ui {
 class JsEditor;
 }
-class Table;
-
+#ifdef JSDEBUG
 class JsEditor : public QMainWindow
 {
 	Q_OBJECT
@@ -22,5 +23,5 @@ private:
 	Ui::JsEditor *ui;
 	Table *tbl;
 };
-
+#endif
 #endif // JSEDITOR_H

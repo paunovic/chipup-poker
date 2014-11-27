@@ -11,6 +11,9 @@ void Game::update(Poker::Game &in) {
 	std::string clubid = in.club_mongoid();
 	this->clubid = QByteArray(clubid.data(),clubid.length());
 
+	std::string tournid = in.tournament();
+	this->tournamentid = QByteArray(tournid.data(),tournid.length());
+
 	gamename = in.gamename().c_str();
 	type = in.game_type();
 	blinds = in.blinds();

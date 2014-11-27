@@ -6,8 +6,7 @@
 #include "loginwindow.h"
 #include "pokermain.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 	QFile styles(":/stylesheet.css");
 	if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
