@@ -1,7 +1,7 @@
 #include "test.h"
 #include "tableprivate.h"
-#include "../data/seatinfo.h"
-#include "../data/user.h"
+#include "../client/data/seatinfo.h"
+#include "../client/data/user.h"
 
 void TestCase::testsomething_data() {
 	//QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
@@ -24,7 +24,7 @@ void TestCase::testsomething() {
 	QFETCH(int,seats);
 	Data::Game g;
 	p.setGame(&g);
-	QFile input("../table.js");
+	QFile input("../client/table.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
 		QVERIFY(false);
