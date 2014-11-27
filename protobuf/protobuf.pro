@@ -3,6 +3,7 @@
 ######################################################################
 
 TEMPLATE = lib
+INCLUDEPATH += .
 
 SOURCES += protobuf-2.5.0/src/google/protobuf/message_lite.cc \
     protobuf-2.5.0/src/google/protobuf/descriptor.pb.cc \
