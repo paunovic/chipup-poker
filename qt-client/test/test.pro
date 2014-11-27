@@ -9,7 +9,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 QT += script network
 INCLUDEPATH += ../
-LIBS += -lprotobuf
+LIBS += -L../../protobuf/ -lprotobuf
 
 # Input
 HEADERS += test.h   ../tableprivate.h   ../tablestatus.h   ../data/pot.h   ../data/tableevent.h   ../data/tablemessage.h   ../data/seatinfo.h ../table/card.h ../table/visible_seat.h ../club.h ../pokermain.h ../game.h ../data/user.h ../table/game_wrap.h
