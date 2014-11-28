@@ -6,10 +6,14 @@
 void TestCase::testsomething_data() {
 	//QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
 	//QTest::addColumn<Data::TableStatus>("tableStatus");
+	QTest::addColumn<int>("filled");
+	QTest::addColumn<QString>("output");
 	QTest::addColumn<int>("seats");
-	QTest::newRow("empty") << 0;
-	QTest::newRow("one") << 1;
-	QTest::newRow("two") << 2;
+	QTest::newRow("empty") << 0 << "zero" << 15;
+	QTest::newRow("one") << 1 << "one" << 2;
+	QTest::newRow("two") << 2 << "two" << 2;
+	QTest::newRow("five") << 2 << "five" << 5;
+	QTest::newRow("ten") << 2 << "ten" << 10;
 }
 void TestCase::testsomething() {
 	int result;
@@ -21,10 +25,18 @@ void TestCase::testsomething() {
 	QGridLayout grid;
 	root.setLayout(&grid);
 	p.setupUi(&root,&grid);
+	root.resize(586,300);
+	QFETCH(int,filled);
+	QFETCH(QString,output);
 	QFETCH(int,seats);
 	Data::Game g;
+	g.seats = seats;
 	p.setGame(&g);
+#ifdef WIN32
+	QFile input("../../qt-client/client/table.js");
+#else
 	QFile input("../client/table.js");
+#endif
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
 		QVERIFY(false);
@@ -35,7 +47,7 @@ void TestCase::testsomething() {
 		result = p.loadJs(code,"table.js");
 		QVERIFY(result);
 	}
-	for (int i=0; i<seats; i++) {
+	for (int i=0; i<filled; i++) {
 		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
 		seat->seat_index = i;
 		QByteArray id;
@@ -50,6 +62,16 @@ void TestCase::testsomething() {
 	}
 	result = p.table_status(ts);
 	QVERIFY(result);
+
+	QPixmap image(root.size());
+	root.render(&image);
+	image.save(output+".png");
+
+	/*root.resize(1000,600);
+	QPixmap bigger(root.size());
+	root.render(&bigger);
+	bigger.save(output+"-bigger.png");*/
+
 	QCOMPARE(5,5);
 	core = 0;
 }

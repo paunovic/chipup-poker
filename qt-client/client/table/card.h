@@ -13,6 +13,10 @@ public:
 	CardObjectUi(TableUi *parent, CardObject *jsobj);
 protected:
 	void paintEvent(QPaintEvent *event);
+private:
+	QPixmap loadFace(QString name);
+
+	QPixmap face;
 };
 class CardObject : public GameObject {
 Q_OBJECT

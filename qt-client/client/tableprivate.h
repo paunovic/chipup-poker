@@ -15,6 +15,12 @@
 class GameObjectUi;
 class SeatObject;
 
+typedef enum {
+	Left=0,
+	Right,
+	Top
+} AlignmentSide;
+
 class TableUi : public QWidget {
 Q_OBJECT
 public:
@@ -23,11 +29,14 @@ public:
 	void addElement(GameObjectUi *element);
 //	int heightForWidth(int w) const;
 	int rootHeight();
+
+	int yoffset;
 private slots:
 	void element_deleted(QObject *element);
 protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
+	void drawCross(QPainter &p);
 
 	QList<GameObjectUi*> uiElements;
 	QPixmap pix;
@@ -40,8 +49,10 @@ public:
 	QSize sizeHint() const;
 	void moveRatio(float x, float y);
 	int heightForWidth(int w) const;
+	QPoint getPosition();
 
 	float w, x,y;
+	AlignmentSide keyside;
 protected:
 	QPixmap pix;
 private:
@@ -73,9 +84,11 @@ class GameObject : public QObject {
 Q_OBJECT
 public:
 	GameObject(TablePrivate *parent);
+
 public slots:
 	void setPosition(float x, float y);
 	void setSize(float w);
+	void setSide(int side);
 protected:
 	GameObjectUi *internal;
 };

@@ -23,5 +23,59 @@
         <file>resources/seats/SeatLeftEmpty.png</file>
         <file>resources/seats/SeatLeftEmptyTournament.png</file>
         <file>resources/seats/SeatLeft.png</file>
+        <file>resources/cards/Background.png</file>
+        <file>resources/cards/CardFrontBackground.png</file>
+        <file>resources/cards/artworks/CardArtwork2c.png</file>
+        <file>resources/cards/artworks/CardArtwork2d.png</file>
+        <file>resources/cards/artworks/CardArtwork2h.png</file>
+        <file>resources/cards/artworks/CardArtwork2s.png</file>
+        <file>resources/cards/artworks/CardArtwork3c.png</file>
+        <file>resources/cards/artworks/CardArtwork3d.png</file>
+        <file>resources/cards/artworks/CardArtwork3h.png</file>
+        <file>resources/cards/artworks/CardArtwork3s.png</file>
+        <file>resources/cards/artworks/CardArtwork4c.png</file>
+        <file>resources/cards/artworks/CardArtwork4d.png</file>
+        <file>resources/cards/artworks/CardArtwork4h.png</file>
+        <file>resources/cards/artworks/CardArtwork4s.png</file>
+        <file>resources/cards/artworks/CardArtwork5c.png</file>
+        <file>resources/cards/artworks/CardArtwork5d.png</file>
+        <file>resources/cards/artworks/CardArtwork5h.png</file>
+        <file>resources/cards/artworks/CardArtwork5s.png</file>
+        <file>resources/cards/artworks/CardArtwork6c.png</file>
+        <file>resources/cards/artworks/CardArtwork6d.png</file>
+        <file>resources/cards/artworks/CardArtwork6h.png</file>
+        <file>resources/cards/artworks/CardArtwork6s.png</file>
+        <file>resources/cards/artworks/CardArtwork7c.png</file>
+        <file>resources/cards/artworks/CardArtwork7d.png</file>
+        <file>resources/cards/artworks/CardArtwork7h.png</file>
+        <file>resources/cards/artworks/CardArtwork7s.png</file>
+        <file>resources/cards/artworks/CardArtwork8c.png</file>
+        <file>resources/cards/artworks/CardArtwork8d.png</file>
+        <file>resources/cards/artworks/CardArtwork8h.png</file>
+        <file>resources/cards/artworks/CardArtwork8s.png</file>
+        <file>resources/cards/artworks/CardArtwork9c.png</file>
+        <file>resources/cards/artworks/CardArtwork9d.png</file>
+        <file>resources/cards/artworks/CardArtwork9h.png</file>
+        <file>resources/cards/artworks/CardArtwork9s.png</file>
+        <file>resources/cards/artworks/CardArtworkAc.png</file>
+        <file>resources/cards/artworks/CardArtworkAd.png</file>
+        <file>resources/cards/artworks/CardArtworkAh.png</file>
+        <file>resources/cards/artworks/CardArtworkAs.png</file>
+        <file>resources/cards/artworks/CardArtworkJc.png</file>
+        <file>resources/cards/artworks/CardArtworkJd.png</file>
+        <file>resources/cards/artworks/CardArtworkJh.png</file>
+        <file>resources/cards/artworks/CardArtworkJs.png</file>
+        <file>resources/cards/artworks/CardArtworkKc.png</file>
+        <file>resources/cards/artworks/CardArtworkKd.png</file>
+        <file>resources/cards/artworks/CardArtworkKh.png</file>
+        <file>resources/cards/artworks/CardArtworkKs.png</file>
+        <file>resources/cards/artworks/CardArtworkQc.png</file>
+        <file>resources/cards/artworks/CardArtworkQd.png</file>
+        <file>resources/cards/artworks/CardArtworkQh.png</file>
+        <file>resources/cards/artworks/CardArtworkQs.png</file>
+        <file>resources/cards/artworks/CardArtworkTc.png</file>
+        <file>resources/cards/artworks/CardArtworkTd.png</file>
+        <file>resources/cards/artworks/CardArtworkTh.png</file>
+        <file>resources/cards/artworks/CardArtworkTs.png</file>
     </qresource>
 </RCC>

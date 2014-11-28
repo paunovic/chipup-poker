@@ -7,10 +7,17 @@ TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 	pix = QPixmap(":/resources/table/Table.png");
 }
 void TableUi::resizeEvent(QResizeEvent *) {
+	qDebug() << "tableui resize";
+
+	float h = rootHeight();
+	yoffset = h * 0.14;
+
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);
-		int new_width = width()*el->w;
-		el->setGeometry(width() * el->x,rootHeight()*el->y, new_width,el->heightForWidth(new_width));
+		qDebug() << "layout out" << el << el->x << el->y << el->w << (int)el->keyside;
+		int new_width = width() * el->w;
+		QPoint pos = el->getPosition();
+		el->setGeometry(pos.x(),pos.y(), new_width,el->heightForWidth(new_width));
 	}
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Preferred);
 	qsp.setHeightForWidth(true);
@@ -21,6 +28,7 @@ int TableUi::rootHeight() {
 }
 
 void TableUi::paintEvent(QPaintEvent *) {
+	qDebug() << "tableui paint";
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	//painter.setPen(Qt::NoPen);
@@ -35,10 +43,19 @@ void TableUi::paintEvent(QPaintEvent *) {
 	float scale = 0.81;
 	float w = (float)width() * scale;
 	float h = (((float)pix.height() * width()) / pix.width()) * scale;
-	painter.drawPixmap(60,0,w,h,pix);
+	qDebug() << w << h << width();
+	painter.drawPixmap(55,0,w,h,pix);
 	painter.restore();
 	//painter.drawEllipse(ring);
+	drawCross(painter);
 }
+void TableUi::drawCross(QPainter &p) {
+	int w = width();
+	int h = ((float)pix.height() * width()) / pix.width();
+	p.drawLine(0,(h/2)-yoffset,w,(h/2)-yoffset);
+	p.drawLine(w/2,0,w/2,h);
+}
+
 void TableUi::addElement(GameObjectUi *element) {
 	uiElements.append(element);
 	connect(element,SIGNAL(destroyed(QObject*)),this,SLOT(element_deleted(QObject*)));
