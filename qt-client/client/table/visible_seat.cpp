@@ -6,7 +6,7 @@
 #include "pokermain.h"
 
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(parent), jsobj(jsobj) {
-	qDebug() << __func__;
+	qDebug() << __func__ << "create" << parent;
 	seatRight = QPixmap(":/resources/seats/SeatRight.png");
 	seatRightEmpty = QPixmap(":/resources/seats/SeatRightEmpty.png");
 	seatRightEmptyTournament = QPixmap(":/resources/seats/SeatRightEmptyTournament.png");
@@ -16,6 +16,7 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(pare
 	updateSeat();
 }
 void VisibleSeat::paintEvent(QPaintEvent *) {
+	qDebug() << "drawing seat";
 	QPainter painter(this);
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));

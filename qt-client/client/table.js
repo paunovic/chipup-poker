@@ -52,8 +52,12 @@ function adjustSeats() {
 		var rawx = Math.sin(fakeindex*interval);
 		var rawy = Math.cos(fakeindex*interval);
 		seat_objects[i].left = rawx < 0;
-		var x = ((rawx/2)+0.5)*0.81;
-		var y = ((rawy/2)-0.5)*-0.65;
+		if (rawy < -0.5) seat_objects[i].setSide(2);
+		else if (rawx < 0) seat_objects[i].setSide(1);
+		else seat_objects[i].setSide(0);
+		
+		var x = ((rawx/2)*0.7)+0.5;
+		var y = ((rawy/2)*-0.62)+0.45;
 		log("seat:"+i+" angle:"+(i*interval)+" x:"+rawx+" y:"+rawy);
 		seat_objects[i].setPosition(x,y);
 	}
@@ -62,6 +66,6 @@ function adjustSeats() {
 initSeats();
 dump(game);
 var testcard = new Card();
-testcard.setPosition(0,0);
-testcard.setSize(0.5);
+testcard.setPosition(0.5,0.5);
+testcard.setSize(0.1);
 // seat images should be 90x32 by default
