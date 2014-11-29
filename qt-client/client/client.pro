@@ -8,7 +8,7 @@ QT       += core gui network script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = qt-client
+TARGET = client
 TEMPLATE = app
 
 CONFIG += qt.debug debug
@@ -22,7 +22,7 @@ INCLUDEPATH += ../protobuf/
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
 
-LIBS += -L../../protobuf/ -lprotobuf
+LIBS += -L../../protobuf/ -L../protobuf/ -lprotobuf
 
 SOURCES += main.cpp\
         loginwindow.cpp \

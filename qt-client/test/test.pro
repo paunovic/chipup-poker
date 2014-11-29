@@ -9,7 +9,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 QT += script network gui testlib widgets
 INCLUDEPATH += ../client/ ../protobuf/
-LIBS += -L../../protobuf/ -lprotobuf
+LIBS += -L../../protobuf/ -L../protobuf/ -lprotobuf
 
 # Input
 HEADERS += test.h   ../client/tableprivate.h   ../client/tablestatus.h   ../client/data/pot.h   ../client/data/tableevent.h   ../client/data/tablemessage.h   ../client/data/seatinfo.h ../client/table/card.h ../client/table/visible_seat.h ../client/club.h ../client/pokermain.h ../client/game.h ../client/data/user.h ../client/table/game_wrap.h

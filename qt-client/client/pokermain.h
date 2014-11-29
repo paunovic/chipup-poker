@@ -9,6 +9,11 @@
 #include <QTimer>
 #include <QSettings>
 #include <QSharedPointer>
+#include <QAbstractSocket>
+
+#ifdef QT_NO_SSL
+#error SSL disabled in QT!
+#endif
 
 #include "cpp/message.pb.h"
 #include "club.h"
