@@ -1,7 +1,7 @@
 #ifndef TABLE_H
 #define TABLE_H
 
-#define JSDEBUG
+//#define JSDEBUG
 
 #include <QMainWindow>
 

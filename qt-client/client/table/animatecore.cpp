@@ -10,7 +10,7 @@ AnimateCore::AnimateCore(bool testing) :
 		time = 0;
 	} else {
 		connect(&timer,SIGNAL(timeout()),this,SLOT(tick()));
-		timer.setInterval(100);
+		timer.setInterval(16);
 		timer.start();
 	}
 }

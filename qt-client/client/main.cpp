@@ -6,6 +6,7 @@
 
 #include "loginwindow.h"
 #include "pokermain.h"
+#include "table/animatecore.h"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
@@ -22,8 +23,9 @@ int main(int argc, char *argv[]) {
 	}
 	QResource::registerResource("scripts.rcc");
 	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
-    core = new PokerMain();
+	core = new PokerMain();
 	core->app = &a;
+	animateCore = new AnimateCore(false);
 
 	LoginWindow *w = new LoginWindow;
 	w->show();
