@@ -199,7 +199,6 @@ uses
   System.Types, Poker.SoftExceptions;
 
 
-
 class procedure TTableResources.Initialize(const ADXCanvas: TAsphyreCanvas);
 begin
   TableResources := TTableResources.Create(ADXCanvas);
@@ -210,10 +209,9 @@ begin
   FreeAndNil(TableResources);
 end;
 
-
 constructor TTableResources.Create(const ADXCanvas: TAsphyreCanvas);
 var
-  C1 : Integer;
+  C1: Integer;
   CCV: TCardValue;
   CCS: TCardSuit;
 begin
@@ -354,10 +352,7 @@ procedure TTableResources.DesaturateImage(const AImage: TAsphyreImage);
 type
   PPixelRec = ^TPixelRec;
   TPixelRec = packed record
-    B: Byte;
-    G: Byte;
-    R: Byte;
-    A: Byte;
+    B, G, R, A: Byte;
   end;
 var
   C1, x, y: Integer;
