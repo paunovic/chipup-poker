@@ -14,7 +14,6 @@ static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 }
 static QScriptValue NewSeatObject(QScriptContext *, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
-	qDebug() << "creating seat for obj" << parent->getUi();
 	SeatObject *seatobj = new SeatObject(parent);
 	return engine->newQObject(seatobj, QScriptEngine::ScriptOwnership);
 }

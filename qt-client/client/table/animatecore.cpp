@@ -14,6 +14,7 @@ AnimateCore::AnimateCore(bool testing) :
 		timer.start();
 	}
 }
+// TODO, delete animations when the window is closed
 void AnimateCore::tick() {
 	int now;
 	if (testing) now = time;
@@ -34,7 +35,6 @@ void AnimateCore::addAnimation(Animation *ani) {
 	animations.append(ani);
 }
 void AnimateCore::over(QObject *obj) {
-	qDebug() << "removing animation " << obj;
 	Animation *a = static_cast<Animation*>(obj);
 	animations.removeOne(a);
 }

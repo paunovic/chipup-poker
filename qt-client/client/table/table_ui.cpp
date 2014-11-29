@@ -40,7 +40,6 @@ void TableUi::paintEvent(QPaintEvent *) {
 	float scale = 0.81;
 	float w = (float)width() * scale;
 	float h = (((float)pix.height() * width()) / pix.width()) * scale;
-	qDebug() << w << h << width();
 	painter.drawPixmap(55,0,w,h,pix);
 	painter.restore();
 	//painter.drawEllipse(ring);

@@ -6,6 +6,14 @@
 #include "../client/data/user.h"
 #include "table/animatecore.h"
 
+int fontid;
+void TestCase::initTestCase() {
+	fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+}
+void TestCase::cleanupTestCase() {
+	QFontDatabase::removeApplicationFont(fontid);
+	QApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+}
 void TestCase::testsomething_data() {
 	//QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
 	//QTest::addColumn<Data::TableStatus>("tableStatus");
@@ -19,7 +27,6 @@ void TestCase::testsomething_data() {
 	QTest::newRow("ten") << 2 << "ten" << 10;
 }
 void TestCase::rendercards() {
-	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
 	int result;
 	TablePrivate p;
 	PokerMain pm;
@@ -53,10 +60,8 @@ void TestCase::rendercards() {
 	image.save("cards.png");
 
 	core = 0;
-	QFontDatabase::removeApplicationFont(fontid);
 }
 void TestCase::animate() {
-	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
 	int result;
 	TablePrivate p;
 	PokerMain pm;
@@ -100,17 +105,20 @@ void TestCase::animate() {
 	ac.tick();
 	root.render(&image);
 	image.save("frame2.png");
+	
+	QApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+	QCOMPARE(0,ac.animationCount());
 
 	core = 0;
 	animateCore = 0;
-	QFontDatabase::removeApplicationFont(fontid);
 }
 void TestCase::testsomething() {
-	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
 	int result;
 	TablePrivate p;
 	PokerMain pm;
 	core = &pm;
+	AnimateCore ac(true);
+	animateCore = &ac;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
 	QWidget root;
 	QGridLayout grid;
@@ -165,5 +173,5 @@ void TestCase::testsomething() {
 
 	QCOMPARE(5,5);
 	core = 0;
-	QFontDatabase::removeApplicationFont(fontid);
+	animateCore = 0;
 }
