@@ -4,6 +4,7 @@
 #include "tableprivate.h"
 #include "../client/data/seatinfo.h"
 #include "../client/data/user.h"
+#include "table/animatecore.h"
 
 void TestCase::testsomething_data() {
 	//QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
@@ -54,7 +55,56 @@ void TestCase::rendercards() {
 	core = 0;
 	QFontDatabase::removeApplicationFont(fontid);
 }
+void TestCase::animate() {
+	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+	int result;
+	TablePrivate p;
+	PokerMain pm;
+	core = &pm;
+	AnimateCore ac(true);
+	animateCore = &ac;
+	QWidget root;
+	QGridLayout grid;
+	root.setLayout(&grid);
+	p.setupUi(&root,&grid);
+	root.resize(586,300);
+	Data::Game g;
+	g.seats = 5;
+	p.setGame(&g);
+#ifdef WIN32
+	QFile input("../../qt-client/test/animate.js");
+#else
+	QFile input("../test/animate.js");
+#endif
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+		QVERIFY(false);
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		result = p.loadJs(code,"cards.js");
+		QVERIFY(result);
+	}
 
+	QPixmap image(root.size());
+	root.render(&image);
+	image.save("frame0.png");
+
+	ac.setTime(100);
+	ac.tick();
+	root.render(&image);
+	image.save("frame1.png");
+
+	ac.setTime(1001);
+	ac.tick();
+	root.render(&image);
+	image.save("frame2.png");
+
+	core = 0;
+	animateCore = 0;
+	QFontDatabase::removeApplicationFont(fontid);
+}
 void TestCase::testsomething() {
 	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
 	int result;

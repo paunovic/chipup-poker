@@ -38,9 +38,9 @@ static inline QColor getSuitColor(int card) {
 }
 
 CardObject::CardObject(TablePrivate *parent) :GameObject(parent) {
+	card_ = 0;
 	internal = card = new CardObjectUi(parent->getUi(),this);
 	parent->getUi()->addElement(internal);
-	card_ = 0;
 }
 CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(parent),
 	jsobj(jsobj) {
@@ -80,4 +80,5 @@ QPoint CardObjectUi::getPosition() {
 void CardObjectUi::updateFace() {
 	int card = jsobj->getCard();
 	face = loadFace(QString("CardArtwork%1%2").arg(getValue(card)).arg(getSuit(card)));
+	update();
 }

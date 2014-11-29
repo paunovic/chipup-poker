@@ -83,6 +83,8 @@ class GameObject : public QObject {
 Q_OBJECT
 public:
 	GameObject(TablePrivate *parent);
+	float x() { return internal->x; }
+	float y() { return internal->y; }
 
 public slots:
 	void setPosition(float x, float y);

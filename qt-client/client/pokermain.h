@@ -39,6 +39,7 @@ public:
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
 	Data::User *findUser(QByteArray userid);
 	QNetworkAccessManager *manager();
+	qint64 getUptime() { return uptime.elapsed(); }
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;

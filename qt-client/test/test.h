@@ -6,4 +6,5 @@ private slots:
 	void testsomething_data();
 	void testsomething();
 	void rendercards();
+	void animate();
 };

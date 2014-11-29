@@ -45,7 +45,9 @@ SOURCES += main.cpp\
     table/table_ui.cpp \
     jseditor.cpp \
     data/user.cpp \
-    table/card.cpp
+    table/card.cpp \
+    table/animation.cpp \
+    table/animatecore.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -65,7 +67,9 @@ HEADERS  += loginwindow.h \
     table/visible_seat.h \
     table/card.h \
     table/chip.h \
-    data/user.h
+    data/user.h \
+    table/animation.h \
+    table/animatecore.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \

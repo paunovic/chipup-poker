@@ -6,6 +6,7 @@
 #include "tableprivate.h"
 #include "table/visible_seat.h"
 #include "table/card.h"
+#include "table/animation.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << "JS:" << context->argument(0).toString();
@@ -22,12 +23,20 @@ static QScriptValue NewCardObject(QScriptContext*, QScriptEngine *engine) {
 	CardObject *cardobj = new CardObject(parent);
 	return engine->newQObject(cardobj,QScriptEngine::ScriptOwnership);
 }
+static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
+	GameObject *object = static_cast<GameObject*>(context->argument(0).toQObject());
+	float endx = context->argument(1).toNumber();
+	float endy = context->argument(2).toNumber();
+	float seconds = context->argument(3).toNumber();
+	Animation *a = new Animation(object,endx,endy,seconds);
+	return engine->undefinedValue();
+}
 
 TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
 
 	engine.globalObject().setProperty("log",engine.newFunction(js_log,1));
-
+	engine.globalObject().setProperty("Animate",engine.newFunction(Animate,4));
 	QScriptValue ctor = engine.newFunction(NewSeatObject);
 	QScriptValue metaObject = engine.newQMetaObject(&SeatObject::staticMetaObject, ctor);
 	engine.globalObject().setProperty("SeatObject",metaObject);

@@ -65,13 +65,11 @@ function adjustSeats() {
 
 initSeats();
 dump(game);
-var cards = [];
-for (var x=0; x<52; x++) {
-	var row = x%4;
-	var col = Math.floor(x/4);
-	cards[x] = new Card();
-	cards[x].setPosition(0.2 + (0.05*col),0.5 + (0.1*row));
-	cards[x].setSize(0.1);
-	cards[x].card = x;
-}
+
 // seat images should be 90x32 by default
+card = new Card();
+card.setPosition(0.2,0.25);
+card.setSize(0.1);
+card.card = 0;
+
+Animate(card,0.5,0.5,1);
