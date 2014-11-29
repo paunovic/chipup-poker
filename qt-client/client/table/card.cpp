@@ -67,7 +67,7 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 	p.drawText(5,0,80,30,0,getValue(card));
 }
 QPixmap CardObjectUi::loadFace(QString name) {
-	qDebug() << "loading " << name;
+	//qDebug() << "loading " << name;
 	return QPixmap(":/resources/cards/artworks/"+name+".png");
 }
 QPoint CardObjectUi::getPosition() {

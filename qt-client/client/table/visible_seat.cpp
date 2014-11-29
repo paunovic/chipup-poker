@@ -6,7 +6,7 @@
 #include "pokermain.h"
 
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(parent), jsobj(jsobj) {
-	qDebug() << __func__ << "create" << parent;
+	//qDebug() << __func__ << "create" << parent;
 	seatRight = QPixmap(":/resources/seats/SeatRight.png");
 	seatRightEmpty = QPixmap(":/resources/seats/SeatRightEmpty.png");
 	seatRightEmptyTournament = QPixmap(":/resources/seats/SeatRightEmptyTournament.png");
@@ -32,10 +32,10 @@ SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	tournament = false;
 	connect(core->manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
-	qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
+	//qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
 	internal = seat = new VisibleSeat(root->getUi(),this);
 	root->getUi()->addElement(internal);
-	qDebug() << "seat info" << internal->size() << internal->pos() << internal->isVisible() << internal->isHidden();
+	//qDebug() << "seat info" << internal->size() << internal->pos() << internal->isVisible() << internal->isHidden();
 }
 void VisibleSeat::mousePressEvent(QMouseEvent *) {
 	qDebug() << jsobj->getSeat();

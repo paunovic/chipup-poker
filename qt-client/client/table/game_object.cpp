@@ -3,7 +3,7 @@
 GameObject::GameObject(TablePrivate *) {
 }
 void GameObject::setPosition(float x, float y) {
-	qDebug() << __func__ << x << y;
+	//qDebug() << __func__ << x << y;
 	internal->moveRatio(x,y);
 	internal->show();
 }
@@ -14,7 +14,6 @@ GameObjectUi::GameObjectUi(TableUi *parent) : QWidget(parent), tbl(parent) {
 	keyside = Left;
 }
 QSize GameObjectUi::sizeHint() const {
-	qDebug() << "gameobject resize" << __func__;
 	int new_width = tbl->width() * w;
 	return QSize(new_width,heightForWidth(new_width));
 }
@@ -43,7 +42,6 @@ QPoint GameObjectUi::getPosition() {
 }
 
 void GameObjectUi::setSize(float w) {
-	qDebug() << "updating object size" << w;
 	this->w = w;
 	int new_width = tbl->width() * w;
 	resize(new_width,heightForWidth(new_width));

@@ -14,6 +14,7 @@ public:
 	void addAnimation(Animation *ani);
 	qint64 getTime();
 	void setTime(qint64 in) { time = in; }
+	int animationCount() { return animations.length(); }
 
 signals:
 
