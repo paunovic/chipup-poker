@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QResource>
+#include <QFontDatabase>
 
 #include "loginwindow.h"
 #include "pokermain.h"
@@ -20,6 +21,7 @@ int main(int argc, char *argv[]) {
 		a.setStyleSheet(css);
 	}
 	QResource::registerResource("scripts.rcc");
+	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
     core = new PokerMain();
 	core->app = &a;
 

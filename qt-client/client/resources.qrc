@@ -77,5 +77,6 @@
         <file>resources/cards/artworks/CardArtworkTd.png</file>
         <file>resources/cards/artworks/CardArtworkTh.png</file>
         <file>resources/cards/artworks/CardArtworkTs.png</file>
+        <file>resources/cards/CardCharacters.TTF</file>
     </qresource>
 </RCC>

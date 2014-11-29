@@ -7,14 +7,12 @@ TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 	pix = QPixmap(":/resources/table/Table.png");
 }
 void TableUi::resizeEvent(QResizeEvent *) {
-	qDebug() << "tableui resize";
-
 	float h = rootHeight();
 	yoffset = h * 0.14;
 
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);
-		qDebug() << "layout out" << el << el->x << el->y << el->w << (int)el->keyside;
+		//qDebug() << "layout out" << el << el->x << el->y << el->w << (int)el->keyside;
 		int new_width = width() * el->w;
 		QPoint pos = el->getPosition();
 		el->setGeometry(pos.x(),pos.y(), new_width,el->heightForWidth(new_width));
@@ -28,7 +26,6 @@ int TableUi::rootHeight() {
 }
 
 void TableUi::paintEvent(QPaintEvent *) {
-	qDebug() << "tableui paint";
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	//painter.setPen(Qt::NoPen);
@@ -65,7 +62,6 @@ void TableUi::element_deleted(QObject *item) {
 	uiElements.removeOne(static_cast<GameObjectUi*>(item));
 }
 QSize TableUi::sizeHint() const {
-	qDebug() << "table" << __func__;
 	return QSize(300,200);
 }
 /*int TableUi::heightForWidth( int width ) const {

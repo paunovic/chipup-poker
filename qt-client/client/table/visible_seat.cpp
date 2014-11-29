@@ -16,7 +16,6 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(pare
 	updateSeat();
 }
 void VisibleSeat::paintEvent(QPaintEvent *) {
-	qDebug() << "drawing seat";
 	QPainter painter(this);
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));

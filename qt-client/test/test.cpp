@@ -1,3 +1,5 @@
+#include <QFontDatabase>
+
 #include "test.h"
 #include "tableprivate.h"
 #include "../client/data/seatinfo.h"
@@ -15,7 +17,46 @@ void TestCase::testsomething_data() {
 	QTest::newRow("five") << 2 << "five" << 5;
 	QTest::newRow("ten") << 2 << "ten" << 10;
 }
+void TestCase::rendercards() {
+	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+	int result;
+	TablePrivate p;
+	PokerMain pm;
+	core = &pm;
+	QWidget root;
+	QGridLayout grid;
+	root.setLayout(&grid);
+	p.setupUi(&root,&grid);
+	root.resize(586,300);
+	Data::Game g;
+	g.seats = 5;
+	p.setGame(&g);
+#ifdef WIN32
+	QFile input("../../qt-client/test/cards.js");
+#else
+	QFile input("../test/cards.js");
+#endif
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+		QVERIFY(false);
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		result = p.loadJs(code,"cards.js");
+		QVERIFY(result);
+	}
+
+	QPixmap image(root.size());
+	root.render(&image);
+	image.save("cards.png");
+
+	core = 0;
+	QFontDatabase::removeApplicationFont(fontid);
+}
+
 void TestCase::testsomething() {
+	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
 	int result;
 	TablePrivate p;
 	PokerMain pm;
@@ -74,4 +115,5 @@ void TestCase::testsomething() {
 
 	QCOMPARE(5,5);
 	core = 0;
+	QFontDatabase::removeApplicationFont(fontid);
 }

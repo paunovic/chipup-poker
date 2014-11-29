@@ -49,13 +49,12 @@ public:
 	QSize sizeHint() const;
 	void moveRatio(float x, float y);
 	int heightForWidth(int w) const;
-	QPoint getPosition();
+	virtual QPoint getPosition();
 
 	float w, x,y;
 	AlignmentSide keyside;
 protected:
 	QPixmap pix;
-private:
 	TableUi *tbl;
 };
 class TablePrivate : public QObject

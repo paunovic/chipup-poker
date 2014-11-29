@@ -2,4 +2,4 @@
 
 //#define QApplication QCoreApplication
 
-QTEST_MAIN(TestCase);
+QTEST_MAIN(TestCase)
