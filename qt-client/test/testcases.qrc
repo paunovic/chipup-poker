@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>animate.js</file>
+        <file>cards.js</file>
+    </qresource>
+</RCC>

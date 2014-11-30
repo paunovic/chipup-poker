@@ -39,11 +39,7 @@ void TestCase::rendercards() {
 	Data::Game g;
 	g.seats = 5;
 	p.setGame(&g);
-#ifdef WIN32
-	QFile input("../../qt-client/test/cards.js");
-#else
-	QFile input("../test/cards.js");
-#endif
+	QFile input(":/cards.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
 		QVERIFY(false);
@@ -76,11 +72,7 @@ void TestCase::animate() {
 	Data::Game g;
 	g.seats = 5;
 	p.setGame(&g);
-#ifdef WIN32
-	QFile input("../../qt-client/test/animate.js");
-#else
-	QFile input("../test/animate.js");
-#endif
+	QFile input(":/animate.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
 		QVERIFY(false);
