@@ -9,7 +9,7 @@ function tableStatus(ts) {
 		//log("index:"+i+" seat#:"+seat.seat_index);
 		seat_objects[seat.seat_index].empty = false;
 		var user = seat.getUser();
-		seat_objects[i].avatar = user.avatar;
+		seat_objects[seat.seat_index].avatar = user.avatar;
 	}
 }
 function tableEvent(event) {

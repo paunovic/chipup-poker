@@ -6,7 +6,9 @@
 #include "tableprivate.h"
 #include "table/visible_seat.h"
 #include "table/card.h"
+#include "table/chip.h"
 #include "table/animation.h"
+#include "table/animatecore.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << "JS:" << context->argument(0).toString();
@@ -22,17 +24,26 @@ static QScriptValue NewCardObject(QScriptContext*, QScriptEngine *engine) {
 	CardObject *cardobj = new CardObject(parent);
 	return engine->newQObject(cardobj,QScriptEngine::ScriptOwnership);
 }
+static QScriptValue NewChipStack(QScriptContext*,QScriptEngine *engine) {
+	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
+	ChipObject *stack = new ChipObject(parent);
+	return engine->newQObject(stack,QScriptEngine::ScriptOwnership);
+}
+
 static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 	GameObject *object = static_cast<GameObject*>(context->argument(0).toQObject());
 	float endx = context->argument(1).toNumber();
 	float endy = context->argument(2).toNumber();
 	float seconds = context->argument(3).toNumber();
 	Animation *a = new Animation(object,endx,endy,seconds);
+	animateCore->addAnimation(a);
 	return engine->undefinedValue();
 }
 
 TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
+
+	QScriptValue global = engine.globalObject();
 
 	engine.globalObject().setProperty("log",engine.newFunction(js_log,1));
 	engine.globalObject().setProperty("Animate",engine.newFunction(Animate,4));
@@ -41,6 +52,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 	engine.globalObject().setProperty("SeatObject",metaObject);
 
 	engine.globalObject().setProperty("Card",engine.newQMetaObject(&CardObject::staticMetaObject,engine.newFunction(NewCardObject)));
+	global.setProperty("ChipStack",engine.newQMetaObject(&ChipObject::staticMetaObject,engine.newFunction(NewChipStack)));
 	engine.globalObject().setProperty("root",engine.newQObject(this));
 	tableui = 0;
 }

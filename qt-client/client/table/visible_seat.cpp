@@ -16,12 +16,19 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(pare
 	updateSeat();
 }
 void VisibleSeat::paintEvent(QPaintEvent *) {
+	qDebug() << "seat redraw" << jsobj->getSeat();
 	QPainter painter(this);
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));
-	//painter.drawRect(5,4,23,23);
-	if (avatar.width()) {
-		painter.drawPixmap(5,4,23,23,avatar);
+	//if (keyside == Right) painter.drawRect(62,4,23,23);
+	if (!jsobj->getEmpty()) {
+		if (avatar.width()) {
+			qDebug() << "with avatar";
+			int x;
+			if (keyside == Right) x = 62;
+			else x = 5;
+			painter.drawPixmap(x,4,23,23,avatar);
+		} else qWarning("avatar missing from a seat");
 	}
 	painter.drawPixmap(0,0,width(),height(),pix);
 }
@@ -61,14 +68,14 @@ void VisibleSeat::updateSeat() {
 void SeatObject::setAvatar(QString in) {
 	if (in.length() == 0) in = "default";
 	if (in != avatar_) {
-		qDebug() << "fetching avatar?" << in;
+		qDebug() << "fetching avatar?" << in << "for seat" << getSeat();
 		avatar_ = in;
 		pendingReply = core->manager()->get(QNetworkRequest("https://chipuppoker.com/getavatar?id="+in));
 	}
 }
 void SeatObject::replyFinished(QNetworkReply *reply) {
 	if (reply == pendingReply) {
-		qDebug() << "got reply";
+		qDebug() << "got reply for seat" << getSeat();
 		QByteArray image = reply->readAll();
 		seat->avatar.loadFromData(image);
 		seat->update();

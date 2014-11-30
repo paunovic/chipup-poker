@@ -12,9 +12,10 @@ void TableUi::resizeEvent(QResizeEvent *) {
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);
 		//qDebug() << "layout out" << el << el->x << el->y << el->w << (int)el->keyside;
-		int new_width = width() * el->w;
+		//int new_width = width() * el->w;
 		QPoint pos = el->getPosition();
-		el->setGeometry(pos.x(),pos.y(), new_width,el->heightForWidth(new_width));
+		QSize size = el->sizeHint();
+		el->setGeometry(pos.x(),pos.y(), size.width(),size.height());
 	}
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Preferred);
 	qsp.setHeightForWidth(true);

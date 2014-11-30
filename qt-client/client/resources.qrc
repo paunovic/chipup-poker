@@ -78,5 +78,11 @@
         <file>resources/cards/artworks/CardArtworkTh.png</file>
         <file>resources/cards/artworks/CardArtworkTs.png</file>
         <file>resources/cards/CardCharacters.TTF</file>
+        <file>resources/chips/1.png</file>
+        <file>resources/chips/5.png</file>
+        <file>resources/chips/25.png</file>
+        <file>resources/chips/100.png</file>
+        <file>resources/chips/500.png</file>
+        <file>resources/chips/1000.png</file>
     </qresource>
 </RCC>

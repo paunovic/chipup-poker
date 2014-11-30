@@ -23,22 +23,19 @@ void GameObjectUi::moveRatio(float x, float y) {
 	move(getPosition());
 }
 QPoint GameObjectUi::getPosition() {
+	int width;
 	int rootheight = tbl->rootHeight();
 	switch (keyside) {
 	case Left:
+	default:
 		return QPoint(tbl->width() * x, (rootheight * y) - tbl->yoffset);
 	case Right:
-	{
-		int width = tbl->width() * w;
+		width = tbl->width() * w;
 		return QPoint((tbl->width() * x) - width, (rootheight * y) - tbl->yoffset);
-	}
 	case Top:
-	{
-		int width = tbl->width() * w;
+		width = tbl->width() * w;
 		return QPoint((tbl->width() * x) - (width/2), (rootheight * y) - tbl->yoffset);
 	}
-	}
-
 }
 
 void GameObjectUi::setSize(float w) {

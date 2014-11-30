@@ -71,6 +71,7 @@ public:
 	void setGame(const Data::Game *game);
 	QScriptValue eval(QString code);
 	void editJs(QString newcode);
+	QScriptValue global() { return engine.globalObject(); }
 signals:
 
 public slots:

@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     data/user.cpp \
     table/card.cpp \
     table/animation.cpp \
-    table/animatecore.cpp
+    table/animatecore.cpp \
+    table/chip.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \

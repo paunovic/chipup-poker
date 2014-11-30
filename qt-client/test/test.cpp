@@ -6,6 +6,10 @@
 #include "../client/data/user.h"
 #include "table/animatecore.h"
 
+#ifndef QFINDTESTDATA
+#define QFINDTESTDATA(x) x
+#endif
+
 int fontid;
 void TestCase::initTestCase() {
 	fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
@@ -25,6 +29,45 @@ void TestCase::testsomething_data() {
 	QTest::newRow("two") << 2 << "two" << 2;
 	QTest::newRow("five") << 2 << "five" << 5;
 	QTest::newRow("ten") << 2 << "ten" << 10;
+}
+void TestCase::renderChips_data() {
+	QTest::addColumn<QString>("value");
+	QTest::newRow("one") << "1,5,25,100,500,1000";
+}
+void TestCase::renderChips() {
+	int result;
+	TablePrivate p;
+	PokerMain pm;
+	core = &pm;
+	QWidget root;
+	QGridLayout grid;
+	root.setLayout(&grid);
+	p.setupUi(&root,&grid);
+	root.resize(586,300);
+	Data::Game g;
+	g.seats = 5;
+	p.setGame(&g);
+
+	QFETCH(QString,value);
+	p.global().setProperty("input_data",value);
+
+	QFile input(QFINDTESTDATA("chips.js"));
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+		QVERIFY(false);
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		result = p.loadJs(code,"cards.js");
+		QVERIFY(result);
+	}
+
+	QPixmap image(root.size());
+	root.render(&image);
+	image.save("chips.png");
+
+	core = 0;
 }
 void TestCase::rendercards() {
 	int result;
@@ -125,7 +168,7 @@ void TestCase::testsomething() {
 #ifdef WIN32
 	QFile input("../../qt-client/client/table.js");
 #else
-	QFile input("../client/table.js");
+	QFile input("../../qt-client/client/table.js");
 #endif
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";

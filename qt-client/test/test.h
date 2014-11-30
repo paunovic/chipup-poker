@@ -9,4 +9,6 @@ private slots:
 	void testsomething();
 	void rendercards();
 	void animate();
+	void renderChips_data();
+	void renderChips();
 };
