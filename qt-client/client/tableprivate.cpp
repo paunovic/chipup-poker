@@ -57,7 +57,7 @@ bool TablePrivate::loadJs(QString code,QString file) {
 		engine.clearExceptions();
 		return false;
 	} else {
-		qDebug() << "JS loaded";
+		//qDebug() << "JS loaded";
 		return true;
 	}
 }
@@ -113,7 +113,6 @@ void TablePrivate::setGame(const Data::Game *game) {
 	engine.globalObject().setProperty("game",engine.newQObject(this->game));
 }
 void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
-	qDebug() << __func__;
 	tableui = new TableUi(parent);
 	//layout->setRowStretch(1,1);
 	layout->addWidget(tableui,0,0);

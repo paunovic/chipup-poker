@@ -15,5 +15,4 @@ LIBS += -L../../protobuf/ -L../protobuf/ -lprotobuf
 HEADERS += test.h   ../client/tableprivate.h   ../client/tablestatus.h   ../client/data/pot.h   ../client/data/tableevent.h   ../client/data/tablemessage.h   ../client/data/seatinfo.h ../client/table/card.h ../client/table/visible_seat.h ../client/club.h ../client/pokermain.h ../client/game.h ../client/data/user.h ../client/table/game_wrap.h ../client/table/animation.h ../client/table/animatecore.h
 SOURCES += test.cpp ../client/tableprivate.cpp ../client/tablestatus.cpp ../client/data/pot.cpp ../client/data/tableevent.cpp ../client/data/tablemessage.cpp ../client/data/seatinfo.cpp ../client/data/hand.cpp root.cpp ../client/table/game_object.cpp ../client/table/table_ui.cpp ../client/table/visible_seat.cpp fake_pokermain.cpp ../client/club.cpp ../client/cpp/message.pb.cc ../client/table/card.cpp ../client/cpp/common.pb.cc ../client/game.cpp ../client/data/user.cpp ../client/table/animation.cpp ../client/table/animatecore.cpp
 
-RESOURCES += ../client/resources.qrc \
-    testcases.qrc
+RESOURCES += ../client/resources.qrc

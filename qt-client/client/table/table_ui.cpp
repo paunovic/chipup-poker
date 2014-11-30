@@ -3,7 +3,6 @@
 #include "tableprivate.h"
 
 TableUi::TableUi(QWidget *parent) : QWidget(parent) {
-	qDebug() << __func__;
 	pix = QPixmap(":/resources/table/Table.png");
 }
 void TableUi::resizeEvent(QResizeEvent *) {
