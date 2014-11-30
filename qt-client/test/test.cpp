@@ -85,19 +85,18 @@ void TestCase::animate() {
 	}
 
 	QPixmap image(root.size());
+
 	root.render(&image);
 	image.save("frame0.png");
+	int x = 1;
+	for (int time=10; time < 1020; time+=20) {
+		root.render(&image);
+		ac.setTime(time);
+		ac.tick();
+		image.save(QString("frame%1.png").arg(x));
+		x++;
+	}
 
-	ac.setTime(100);
-	ac.tick();
-	root.render(&image);
-	image.save("frame1.png");
-
-	ac.setTime(1001);
-	ac.tick();
-	root.render(&image);
-	image.save("frame2.png");
-	
 	QApplication::sendPostedEvents(0, QEvent::DeferredDelete);
 	QCOMPARE(0,ac.animationCount());
 
