@@ -209,3 +209,80 @@ void TestCase::testsomething() {
 	core = 0;
 	animateCore = 0;
 }
+void TestCase::simplegame() {
+	int result;
+	TablePrivate p;
+	PokerMain pm;
+	core = &pm;
+	AnimateCore ac(true);
+	animateCore = &ac;
+	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
+	QWidget root;
+	QGridLayout grid;
+	root.setLayout(&grid);
+	p.setupUi(&root,&grid);
+	root.resize(586,300);
+	Data::Game g;
+	g.seats = 3;
+	p.setGame(&g);
+#ifdef WIN32
+	QFile input("../../qt-client/client/table.js");
+#else
+	QFile input("../../qt-client/client/table.js");
+#endif
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+		QVERIFY(false);
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		result = p.loadJs(code,"table.js");
+		QVERIFY(result);
+	}
+	for (int i=0; i<2; i++) {
+		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
+		if (i == 1) seat->seat_index = 2;
+		else seat->seat_index = 0;
+		seat->setCard_count(0);
+		seat->setStatus(Poker::SeatInfo::psOutOfPlay);
+		QByteArray id;
+		id[0] = i;
+		seat->userid = id;
+		ts->seats.append(seat);
+		Data::User *u = new Data::User(&pm);
+		u->id = id;
+		pm.users.append(u);
+	}
+	result = p.table_status(ts);
+	QVERIFY(result);
+
+	for (int x=0; x<10; x++) {
+		QApplication::sendPostedEvents();
+		QTest::qSleep(200);
+	}
+
+	QPixmap image(root.size());
+	root.render(&image);
+	image.save("simplegame0.png");
+
+	ts->setState(Poker::TableStatus::tsPreFlop);
+	ts->seats[0]->setCard_count(2);
+	ts->seats[1]->setCard_count(2);
+	ts->seats[0]->setStatus(Poker::SeatInfo::psInHand);
+	ts->seats[1]->setStatus(Poker::SeatInfo::psInHand);
+	result = p.table_status(ts);
+	QVERIFY(result);
+
+	root.render(&image);
+	image.save("simplegame1.png");
+
+	/*root.resize(1000,600);
+	QPixmap bigger(root.size());
+	root.render(&bigger);
+	bigger.save(output+"-bigger.png");*/
+
+	QCOMPARE(5,5);
+	core = 0;
+	animateCore = 0;
+}

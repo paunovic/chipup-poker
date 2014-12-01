@@ -16,14 +16,13 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(pare
 	updateSeat();
 }
 void VisibleSeat::paintEvent(QPaintEvent *) {
-	qDebug() << "seat redraw" << jsobj->getSeat();
+	//qDebug() << "seat redraw" << jsobj->getSeat();
 	QPainter painter(this);
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));
 	//if (keyside == Right) painter.drawRect(62,4,23,23);
 	if (!jsobj->getEmpty()) {
 		if (avatar.width()) {
-			qDebug() << "with avatar";
 			int x;
 			if (keyside == Right) x = 62;
 			else x = 5;

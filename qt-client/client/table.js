@@ -2,14 +2,23 @@ print("LOAD!");
 var seat_objects = [];
 
 function tableStatus(ts) {
-	//log("TS hook");
+	log("TS hook:"+ts.state);
 	var max = ts.seatCount();
 	for (var i=0; i<max; i++) {
 		var seat = ts.readSeat(i);
-		//log("index:"+i+" seat#:"+seat.seat_index);
+		var local = seat_objects[seat.seat_index];
+		log("index:"+i+" seat#:"+seat.seat_index);
+		log(JSON.stringify(seat));
 		seat_objects[seat.seat_index].empty = false;
 		var user = seat.getUser();
 		seat_objects[seat.seat_index].avatar = user.avatar;
+		if (local.cards.length != seat.card_count) {
+			log("local:"+local.cards.length+" remote:"+seat.card_count);
+			card = new Card();
+			card.setPosition(0.2,0.25);
+			card.setSize(0.1);
+			card.card = 0;
+		}
 	}
 }
 function tableEvent(event) {
@@ -34,6 +43,7 @@ function initSeats() {
 		seat.seat = i;
 		seat.tournament = false;
 		seat.empty = true;
+		seat.cards = [];
 		seat_objects[i] = seat;
 	}
 	adjustSeats();

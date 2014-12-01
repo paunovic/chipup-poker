@@ -6,9 +6,9 @@
 PokerMain *core;
 
 PokerMain::PokerMain(QObject *parent) {
+	manager_ = new QNetworkAccessManager(this);
 }
 QNetworkAccessManager *PokerMain::manager() {
-	manager_ = new QNetworkAccessManager(this);
 	return manager_;
 }
 Data::User *PokerMain::findUser(QByteArray userid) {

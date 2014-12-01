@@ -18,7 +18,7 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		seat->update(in.seats(i));
 		seats.append(seat);
 	}
-	state = in.state();
+	state_ = in.state();
 	dealer = in.dealer();
 	current_seat = in.current_seat();
 	for (i=0; i<in.bets_size(); i++) {
@@ -54,9 +54,10 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		table_message.append(m);
 	}
 }
-QString TableStatus::getstate() {
-	switch (state) {
+QString TableStatus::getState() {
+	switch (state_) {
 	case Poker::TableStatus::tsIdle: return "tsIdle";
+	case Poker::TableStatus::tsPreFlop: return "tsPreFlop";
 	default: return "err";
 	}
 }

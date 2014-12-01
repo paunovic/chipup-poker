@@ -20,6 +20,9 @@ public:
 	TableStatus(QObject *parent = 0);
 	~TableStatus();
 	void update(const Poker::TableStatus &in);
+	QString getState();
+	Poker::TableStatus::TableState state() { return state_; }
+	void setState(Poker::TableStatus::TableState in) { state_ = in; }
 
 #define X(type,name) Q_PROPERTY(QString name READ get ## name )\
 type name;\
@@ -31,7 +34,7 @@ type get ## name() { return name; }
 
 	QByteArray gameid;
 	QList<Data::SeatInfo*> seats;
-	X(Poker::TableStatus::TableState,state)
+	Q_PROPERTY(QString state READ getState)
 	Y(int,dealer)
 	Y(int,current_seat)
 	QList<int> bets;
@@ -54,6 +57,8 @@ signals:
 public slots:
 	QObject *readSeat(int index);
 	int seatCount() { return seats.length(); }
+private:
+	Poker::TableStatus::TableState state_;
 };
 
 } // namespace Data
