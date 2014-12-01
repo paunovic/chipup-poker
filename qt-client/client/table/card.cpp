@@ -1,6 +1,7 @@
 #include <QPainter>
 
 #include "card.h"
+#include "table/visible_seat.h"
 
 static QString getValue(int card) {
 	int x = card/4;
@@ -45,6 +46,7 @@ CardObject::CardObject(TablePrivate *parent) :GameObject(parent) {
 CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(parent),
 	jsobj(jsobj) {
 	pix = QPixmap(":/resources/cards/CardFrontBackground.png");
+	back = QPixmap(":/resources/cards/Background.png");
 	font = QFont("Card Characters");
 	updateFace();
 }
@@ -54,17 +56,21 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 	p.setBrush(QColor(127,0,0));
 	//p.drawRect(0,0,width(),height());
 
-	p.drawPixmap(0,0,width(),height(),pix);
-	int target_width = (qreal)width() * 0.5;
-	int target_height = ((qreal)face.height()*target_width)/face.width();
-	int target_x = (width() - target_width) /2;
-	int target_y = (height() - target_height) / 2;
-	p.drawPixmap(target_x,target_y,target_width,target_height,face);
-
 	int card = jsobj->getCard();
-	p.setPen(getSuitColor(card));
-	p.setFont(font);
-	p.drawText(5,0,80,30,0,getValue(card));
+	if (card == -1) {
+		p.drawPixmap(0,0,width(),height(),back);
+	} else {
+		p.drawPixmap(0,0,width(),height(),pix);
+		int target_width = (qreal)width() * 0.5;
+		int target_height = ((qreal)face.height()*target_width)/face.width();
+		int target_x = (width() - target_width) /2;
+		int target_y = (height() - target_height) / 2;
+		p.drawPixmap(target_x,target_y,target_width,target_height,face);
+
+		p.setPen(getSuitColor(card));
+		p.setFont(font);
+		p.drawText(5,0,80,30,0,getValue(card));
+	}
 }
 QPixmap CardObjectUi::loadFace(QString name) {
 	//qDebug() << "loading " << name;
@@ -81,4 +87,7 @@ void CardObjectUi::updateFace() {
 	int card = jsobj->getCard();
 	face = loadFace(QString("CardArtwork%1%2").arg(getValue(card)).arg(getSuit(card)));
 	update();
+}
+void CardObject::stackUnder(SeatObject *seat) {
+	card->stackUnder(seat->getSeatUi());
 }

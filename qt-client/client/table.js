@@ -14,10 +14,20 @@ function tableStatus(ts) {
 		seat_objects[seat.seat_index].avatar = user.avatar;
 		if (local.cards.length != seat.card_count) {
 			log("local:"+local.cards.length+" remote:"+seat.card_count);
-			card = new Card();
-			card.setPosition(0.2,0.25);
-			card.setSize(0.1);
-			card.card = 0;
+			for (var j=0; j<seat.card_count; j++) {
+				if (local.cards[j]) {
+					local.cards[j].card = -1;
+					local.cards[j].visible = true;
+				} else {
+					card = new Card();
+					var pos = calcCardPosition(seat.seat_index,j);
+					card.setPosition(pos.x, pos.y);
+					card.setSize(0.1);
+					card.card = -1;
+					local.cards[j] = card;
+				}
+				local.cards[j].stackUnder(local);
+			}
 		}
 	}
 }
@@ -53,23 +63,37 @@ function setInput(x) {
 	input = x;
 	adjustSeats();
 }
+function calcSeatPosition(index) {
+	var interval = (Math.PI*2) / game.seats;
+	var fakeindex = index+0.5;
+	log("index "+index+" goes in slot "+fakeindex);
+	var rawx = Math.sin(fakeindex*interval);
+	var rawy = Math.cos(fakeindex*interval);
+	
+	var x = ((rawx/2)*0.7)+0.5;
+	var y = ((rawy/2)*-0.62)+0.45;
+	log("seat:"+index+" angle:"+(index*interval)+" x:"+rawx+" y:"+rawy);
+
+	return { rawx:rawx, rawy:rawy, x:x, y:y };
+}
+function calcCardPosition(seat,card) {
+	dump(seat_objects[seat]);
+	var seatpos = seat_objects[seat].renderPosition();
+	return { x:seatpos.x + (card*25), y:seatpos.y + 10 };
+}
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
 	log("splitting ring into "+game.seats+" pieces");
 	for (var i=0; i<game.seats; i++) {
+		var pos = calcSeatPosition(i);
 		var fakeindex = i+0.5;
-		log("index "+i+" goes in slot "+fakeindex);
-		var rawx = Math.sin(fakeindex*interval);
-		var rawy = Math.cos(fakeindex*interval);
-		seat_objects[i].left = rawx < 0;
-		if (rawy < -0.5) seat_objects[i].setSide(2);
-		else if (rawx < 0) seat_objects[i].setSide(1);
+		seat_objects[i].left = pos.rawx < 0;
+
+		if (pos.rawy < -0.5) seat_objects[i].setSide(2);
+		else if (pos.rawx < 0) seat_objects[i].setSide(1);
 		else seat_objects[i].setSide(0);
 		
-		var x = ((rawx/2)*0.7)+0.5;
-		var y = ((rawy/2)*-0.62)+0.45;
-		log("seat:"+i+" angle:"+(i*interval)+" x:"+rawx+" y:"+rawy);
-		seat_objects[i].setPosition(x,y);
+		seat_objects[i].setPosition(pos.x,pos.y);
 	}
 }
 
@@ -77,9 +101,9 @@ initSeats();
 dump(game);
 
 // seat images should be 90x32 by default
-card = new Card();
-card.setPosition(0.2,0.25);
-card.setSize(0.1);
-card.card = 0;
+//card = new Card();
+//card.setPosition(0.2,0.25);
+//card.setSize(0.1);
+//card.card = 0;
 
-Animate(card,0.5,0.5,1);
+//Animate(card,0.5,0.5,1);

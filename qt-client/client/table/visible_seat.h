@@ -40,6 +40,7 @@ public:
 	QString avatar() { return avatar_; }
 	bool left() { return left_; }
 	void setLeft(bool in) { left_ = in; seat->updateSeat(); }
+	VisibleSeat *getSeatUi() { return seat; }
 private slots:
 	void replyFinished(QNetworkReply *reply);
 private:

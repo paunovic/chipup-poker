@@ -14,15 +14,26 @@ static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << "JS:" << context->argument(0).toString();
 	return engine->undefinedValue();
 }
+static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engine) {
+	SeatObject *seatobj = static_cast<SeatObject*>(context->thisObject().toQObject());
+	QPoint pos = seatobj->getSeatUi()->getPosition();
+	QScriptValue ret = engine->newObject();
+	ret.setProperty("x",pos.x());
+	ret.setProperty("y",pos.y());
+	return ret;
+}
 static QScriptValue NewSeatObject(QScriptContext *, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	SeatObject *seatobj = new SeatObject(parent);
-	return engine->newQObject(seatobj, QScriptEngine::ScriptOwnership);
+	QScriptValue jsobj = engine->newQObject(seatobj, QScriptEngine::ScriptOwnership);
+	jsobj.setProperty("renderPosition",engine->newFunction(renderPosition,0));
+	return jsobj;
 }
 static QScriptValue NewCardObject(QScriptContext*, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	CardObject *cardobj = new CardObject(parent);
-	return engine->newQObject(cardobj,QScriptEngine::ScriptOwnership);
+	QScriptValue jsobj = engine->newQObject(cardobj,QScriptEngine::ScriptOwnership);
+	return jsobj;
 }
 static QScriptValue NewChipStack(QScriptContext*,QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());

@@ -18,7 +18,7 @@ protected:
 private:
 	QPixmap loadFace(QString name);
 
-	QPixmap face;
+	QPixmap face,back;
 	CardObject *jsobj;
 	QFont font;
 };
@@ -30,6 +30,8 @@ public:
 	Q_PROPERTY(int card READ getCard WRITE setCard)
 	int getCard() { return card_; }
 	void setCard(int in) { card_ = in; card->updateFace(); }
+public slots:
+	void stackUnder(SeatObject *seat);
 private:
 	CardObjectUi *card;
 	int card_;

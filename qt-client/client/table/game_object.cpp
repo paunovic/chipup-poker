@@ -25,16 +25,20 @@ void GameObjectUi::moveRatio(float x, float y) {
 QPoint GameObjectUi::getPosition() {
 	int width;
 	int rootheight = tbl->rootHeight();
-	switch (keyside) {
-	case Left:
-	default:
-		return QPoint(tbl->width() * x, (rootheight * y) - tbl->yoffset);
-	case Right:
-		width = tbl->width() * w;
-		return QPoint((tbl->width() * x) - width, (rootheight * y) - tbl->yoffset);
-	case Top:
-		width = tbl->width() * w;
-		return QPoint((tbl->width() * x) - (width/2), (rootheight * y) - tbl->yoffset);
+	if ( (x > 1) && (y > 1) && (keyside == Left) ) {
+		return QPoint(x,y);
+	} else {
+		switch (keyside) {
+		case Left:
+		default:
+			return QPoint(tbl->width() * x, (rootheight * y) - tbl->yoffset);
+		case Right:
+			width = tbl->width() * w;
+			return QPoint((tbl->width() * x) - width, (rootheight * y) - tbl->yoffset);
+		case Top:
+			width = tbl->width() * w;
+			return QPoint((tbl->width() * x) - (width/2), (rootheight * y) - tbl->yoffset);
+		}
 	}
 }
 
