@@ -45,7 +45,7 @@ public:
 	void modified(Club *item);
 	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
-	friend ClubList;
+	friend class ClubList;
 protected:
 	void clear();
 	void append(Club*);
