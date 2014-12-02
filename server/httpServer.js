@@ -30,7 +30,7 @@ var models = require('./db').models;
 var user = require('./user');
 var codes = require('./ServerCodes');
 var SmtpConnection = require('./smtp');
-var dag = require('./dag/build/Release/dag');
+var dag = require('dag');
 var error = require('./error');
 var Tournament = require('./tournament');
 

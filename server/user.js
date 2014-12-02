@@ -279,6 +279,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				status.player_club_statuses.push(out);
 			}
 			this.send(codes.srLoginReply,status,'Poker.LoginReply');
+			this.loginProcessing = false;
 			token.stop();
 			// FIXME, embed in the same message
 			handlers[codes.scQueryTableStats].call(this,new Buffer(0),profiler.start('handle-scQueryTableStats'));
@@ -495,6 +496,8 @@ ClientSocket.prototype.handle = function (code,args) {
 		switch (code) {
 		case codes.scLogin:
 			if (args.length > 1000) return this.error('message too big');
+			if (this.loginProcessing) return this.reply(0,'login in progress');
+			this.loginProcessing = true;
 			try {
 				params = pb.Parse(args,'Poker.LoginParams');
 			} catch (e) {
@@ -517,6 +520,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							return;
 						} else {
 							this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
+							this.loginProcessing = false;
 							token.stop();
 						}
 						return;
@@ -527,6 +531,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						assert.ifError(err);
 						if (!row) {
 							this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
+							this.loginProcessing = false;
 							token.stop();
 							return;
 						}
