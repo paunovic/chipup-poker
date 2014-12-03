@@ -1,6 +1,7 @@
 #include "tableprivate.h"
 
-GameObject::GameObject(TablePrivate *) {
+GameObject::GameObject(TablePrivate *table) {
+	this->table = table;
 }
 void GameObject::setPosition(float x, float y) {
 	//qDebug() << __func__ << x << y;

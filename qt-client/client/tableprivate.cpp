@@ -132,6 +132,7 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 	return true;
 }
 void TablePrivate::setGame(const Data::Game *game) {
+	rawgame = game;
 	this->game = new GameWrap(game);
 	engine.globalObject().setProperty("game",engine.newQObject(this->game));
 }

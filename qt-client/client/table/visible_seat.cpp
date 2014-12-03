@@ -4,8 +4,10 @@
 
 #include "table/visible_seat.h"
 #include "pokermain.h"
+#include "table_sit.h"
 
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj) : GameObjectUi(parent), jsobj(jsobj) {
+	sitwindow = NULL;
 	//qDebug() << __func__ << "create" << parent;
 	seatRight = QPixmap(":/resources/seats/SeatRight.png");
 	seatRightEmpty = QPixmap(":/resources/seats/SeatRightEmpty.png");
@@ -48,6 +50,8 @@ void VisibleSeat::mousePressEvent(QMouseEvent *) {
 }
 void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 	qDebug() << "release";
+	sitwindow = new TableSit(jsobj->getTable()->getRawGame());
+	sitwindow->show();
 }
 void VisibleSeat::updateSeat() {
 	if (jsobj->getEmpty()) {

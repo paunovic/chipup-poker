@@ -69,6 +69,7 @@ public:
 	void setupUi(QWidget *parent, QGridLayout *layout);
 	TableUi *getUi() { Q_ASSERT(tableui); return tableui; }
 	void setGame(const Data::Game *game);
+	const Data::Game *getRawGame() const { return rawgame; }
 	QScriptValue eval(QString code);
 	void editJs(QString newcode);
 	QScriptValue global() { return engine.globalObject(); }
@@ -79,13 +80,15 @@ private:
 	QScriptEngine engine;
 	TableUi *tableui;
 	GameWrap *game;
+	const Data::Game *rawgame;
 };
 class GameObject : public QObject {
 Q_OBJECT
 public:
-	GameObject(TablePrivate *parent);
+	GameObject(TablePrivate *table);
 	float x() { return internal->x; }
 	float y() { return internal->y; }
+	TablePrivate *getTable() { return table; }
 
 public slots:
 	void setPosition(float x, float y);
@@ -93,6 +96,7 @@ public slots:
 	void setSide(int side);
 protected:
 	GameObjectUi *internal;
+	TablePrivate *table;
 };
 
 #endif // TABLEPRIVATE_H

@@ -4,6 +4,7 @@
 #include "tableprivate.h"
 
 class QNetworkReply;
+class TableSit;
 
 class VisibleSeat : public GameObjectUi {
 Q_OBJECT
@@ -19,6 +20,7 @@ private:
 	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament;
 	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament;
 	SeatObject *jsobj;
+	TableSit *sitwindow;
 };
 class SeatObject : public GameObject {
 Q_OBJECT

@@ -61,11 +61,7 @@ QVariant GameListModel::data(const QModelIndex &index,int role) const {
 		switch (index.column()) {
 		case 0: return g.gamename;
 		case 1:
-			switch (g.type) {
-			case Poker::Game::gtHoldem: return "NLH";
-			case Poker::Game::gtOmaha: return "NLO";
-			case Poker::Game::gtRotationNLHPLO: return "Rotation NLH/NLO";
-			}
+			return g.typeToString();
 		case 2: return QString("%1/%2").arg(g.sb).arg(g.bb);
 		case 3: return "limits";
 		case 4: return QString("%1/%2").arg(g.sitting).arg(g.seats);
@@ -81,6 +77,14 @@ QVariant GameListModel::data(const QModelIndex &index,int role) const {
 	}
 	return QVariant();
 }
+QString Game::typeToString() const {
+	switch (type) {
+	case Poker::Game::gtHoldem: return "NLH";
+	case Poker::Game::gtOmaha: return "NLO";
+	case Poker::Game::gtRotationNLHPLO: return "Rotation NLH/NLO";
+	}
+}
+
 QVariant GameListModel::headerData(int row, Qt::Orientation, int role) const {
 	if (role == Qt::SizeHintRole) return QVariant(); // QSize
 	if (role != Qt::DisplayRole) return QVariant();

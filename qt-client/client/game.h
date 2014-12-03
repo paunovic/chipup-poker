@@ -12,6 +12,7 @@ class Game {
 public:
 	Game();
 	void update(Poker::Game &in);
+	QString typeToString() const;
 
 	QString gamename;
 	QByteArray clubid,gameid,tournamentid;
