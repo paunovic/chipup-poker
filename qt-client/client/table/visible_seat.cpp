@@ -33,10 +33,19 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			else x = 5;
 			painter.drawPixmap(x,4,23,23,avatar);
 		} else qWarning("avatar missing from a seat");
-		QRect dn = fontMetric.boundingRect(displayname);
-		qDebug() << dn;
 	}
 	painter.drawPixmap(0,0,width(),height(),pix);
+	if (!jsobj->getEmpty()) {
+		painter.setPen(QColor(255,0,0));
+		QRect dn = fontMetric.boundingRect(displayname);
+		int offset;
+		if (keyside == Right) offset = 35;
+		else offset = 60;
+		offset -= dn.width() / 2;
+		dn.translate(offset,20);
+		qDebug() << dn << displayname;
+		painter.drawText(dn,displayname);
+	}
 }
 SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	pendingReply = 0;
