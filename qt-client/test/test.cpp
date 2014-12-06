@@ -248,6 +248,7 @@ void TestCase::simplegame() {
 		else seat->seat_index = 0;
 		seat->setCard_count(0);
 		seat->setStatus(Poker::SeatInfo::psOutOfPlay);
+		seat->setChips(20000);
 		QByteArray id;
 		id[0] = i;
 		seat->userid = id;

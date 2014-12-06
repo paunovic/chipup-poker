@@ -21,6 +21,9 @@ public:
 	int getSeatIndex() { return seat_index; }
 	void setStatus(Poker::SeatInfo::PlayerStatus in) { status_ = in; }
 	QString status();
+	Poker::SeatInfo::PlayerStatus rawStatus() { return status_; }
+	int chips() { return chips_; }
+	void setChips(int in) { chips_ = in; }
 
 	int seat_index;
 	QByteArray userid;
@@ -34,7 +37,7 @@ public slots:
 	QByteArray getUserid() { return userid; }
 	QObject *getUser();
 private:
-	int card_count_;
+	int card_count_,chips_;
 	Poker::SeatInfo::PlayerStatus status_;
 };
 

@@ -9,7 +9,10 @@
 #include "data/user.h"
 
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
-	: GameObjectUi(parent), jsobj(jsobj), fontMetric(QFont("Barmeno")) {
+	: GameObjectUi(parent), jsobj(jsobj), font("Barmeno") {
+	font.setPointSize(7);
+	font.setBold(true);
+	fontMetric = new QFontMetrics(font);
 	sitwindow = NULL;
 	//qDebug() << __func__ << "create" << parent;
 	seatRight = QPixmap(":/resources/seats/SeatRight.png");
@@ -20,9 +23,13 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	seatLeftEmptyTournament = QPixmap(":/resources/seats/SeatLeftEmptyTournament.png");
 	updateSeat();
 }
+VisibleSeat::~VisibleSeat() {
+	delete fontMetric;
+}
 void VisibleSeat::paintEvent(QPaintEvent *) {
 	//qDebug() << "seat redraw" << jsobj->getSeat();
 	QPainter painter(this);
+	painter.setFont(font);
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));
 	//if (keyside == Right) painter.drawRect(62,4,23,23);
@@ -36,15 +43,36 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	}
 	painter.drawPixmap(0,0,width(),height(),pix);
 	if (!jsobj->getEmpty()) {
-		painter.setPen(QColor(255,0,0));
-		QRect dn = fontMetric.boundingRect(displayname);
+		painter.setPen(QColor(255,0,0)); // FIXME, light grey
+		QRect dn = fontMetric->boundingRect(displayname);
+		dn.setWidth(dn.width()+5);
 		int offset;
 		if (keyside == Right) offset = 35;
 		else offset = 60;
 		offset -= dn.width() / 2;
-		dn.translate(offset,20);
+		dn.translate(offset,15);
 		qDebug() << dn << displayname;
 		painter.drawText(dn,displayname);
+
+		QString bottomline;
+		painter.setPen(QColor(0,255,0)); // FIXME
+		switch (status) {
+		case Poker::SeatInfo::psOutOfPlay:
+			bottomline = tr("Sitting Out");
+			break;
+		case Poker::SeatInfo::psInHand:
+			bottomline = QString("%1").arg((float)chips/100);
+		}
+		if (bottomline.length() > 0) {
+			QRect bb = fontMetric->boundingRect(bottomline);
+			bb.setWidth(bb.width()+5);
+			if (keyside == Right) offset = 35;
+			else offset = 60;
+			offset -= bb.width()/2;
+			bb.translate(offset,30);
+			qDebug() << bb;
+			painter.drawText(bb,bottomline);
+		}
 	}
 }
 SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
@@ -87,8 +115,7 @@ void VisibleSeat::updateSeat() {
 			Data::SeatInfo *seat = *i;
 			if (seat->getSeatIndex() == seatindex) {
 				qDebug() << "finding self" << jsobj->getSeat() << seat->getSeatIndex();
-				Data::User *u = static_cast<Data::User*>(seat->getUser());
-				displayname = u->displayName();
+				updateInfo(seat);
 			}
 		}
 	}
@@ -111,4 +138,13 @@ void SeatObject::replyFinished(QNetworkReply *reply) {
 		pendingReply->deleteLater();
 		pendingReply = 0;
 	}
+}
+void SeatObject::updateInfo(Data::SeatInfo *info) {
+	seat->updateInfo(info);
+}
+void VisibleSeat::updateInfo(Data::SeatInfo *info) {
+	Data::User *u = static_cast<Data::User*>(info->getUser());
+	displayname = u->displayName();
+	status = info->rawStatus();
+	chips = info->chips();
 }

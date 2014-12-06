@@ -9,6 +9,7 @@ function tableStatus(ts) {
 		var local = seat_objects[seat.seat_index];
 		log("index:"+i+" seat#:"+seat.seat_index);
 		log(JSON.stringify(seat));
+		local.updateInfo(seat);
 		seat_objects[seat.seat_index].empty = false;
 		var user = seat.getUser();
 		seat_objects[seat.seat_index].avatar = user.avatar;

@@ -12,8 +12,10 @@ class VisibleSeat : public GameObjectUi {
 Q_OBJECT
 public:
 	VisibleSeat(TableUi *parent, SeatObject *jsobj);
+	~VisibleSeat();
 	void updateSeat();
 	QPixmap avatar;
+	void updateInfo(Data::SeatInfo *info);
 protected:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *);
@@ -23,8 +25,13 @@ private:
 	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament;
 	SeatObject *jsobj;
 	TableSit *sitwindow;
-	QFontMetrics fontMetric;
+	QFontMetrics *fontMetric;
+
+	// cached from SeatInfo/User
 	QString displayname;
+	int chips;
+	Poker::SeatInfo::PlayerStatus status;
+	QFont font;
 };
 class SeatObject : public GameObject {
 Q_OBJECT
@@ -47,6 +54,8 @@ public:
 	bool left() { return left_; }
 	void setLeft(bool in) { left_ = in; seat->updateSeat(); }
 	VisibleSeat *getSeatUi() { return seat; }
+public slots:
+	void updateInfo(Data::SeatInfo *info);
 private slots:
 	void replyFinished(QNetworkReply *reply);
 private:
