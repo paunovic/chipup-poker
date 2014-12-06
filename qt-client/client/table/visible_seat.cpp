@@ -61,6 +61,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			bottomline = tr("Sitting Out");
 			break;
 		case Poker::SeatInfo::psInHand:
+		case Poker::SeatInfo::psOutOfHand:
 			bottomline = QString("%1").arg((float)chips/100);
 		}
 		if (bottomline.length() > 0) {
