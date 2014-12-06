@@ -186,11 +186,13 @@ void TestCase::testsomething() {
 		QByteArray id;
 		id[0] = i;
 		seat->userid = id;
+		seat->setCard_count(0);
 		QCOMPARE(seat->property("seat_index").isNull(),false);
 		QCOMPARE(seat->property("seat_index").toInt(),i);
 		ts->seats.append(seat);
 		Data::User *u = new Data::User(&pm);
 		u->id = id;
+		u->setDisplayName(QString("seat %1").arg(i));
 		pm.users.append(u);
 	}
 	result = p.table_status(ts);
@@ -252,6 +254,7 @@ void TestCase::simplegame() {
 		ts->seats.append(seat);
 		Data::User *u = new Data::User(&pm);
 		u->id = id;
+		u->setDisplayName(QString("seat %1").arg(i));
 		pm.users.append(u);
 	}
 	result = p.table_status(ts);

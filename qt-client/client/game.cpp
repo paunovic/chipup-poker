@@ -52,6 +52,9 @@ void Game::update(Poker::Game &in) {
 	sitting = in.sitting();
 	seats = in.seats();
 	state = in.state();
+
+	buyin_min = in.buyin_min();
+	buyin_max = in.buyin_max();
 }
 
 QVariant GameListModel::data(const QModelIndex &index,int role) const {
@@ -80,6 +83,13 @@ QVariant GameListModel::data(const QModelIndex &index,int role) const {
 QString Game::typeToString() const {
 	switch (type) {
 	case Poker::Game::gtHoldem: return "NLH";
+	case Poker::Game::gtOmaha: return "NLO";
+	case Poker::Game::gtRotationNLHPLO: return "Rotation NLH/NLO";
+	}
+}
+QString Game::typeToLongString() const {
+	switch (type) {
+	case Poker::Game::gtHoldem: return "No Limit Hold'em";
 	case Poker::Game::gtOmaha: return "NLO";
 	case Poker::Game::gtRotationNLHPLO: return "Rotation NLH/NLO";
 	}

@@ -190,11 +190,11 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}
 		break; }
-	case Poker::srLogout:
+	case Poker::srLogout: // 8
 		delayQuit = false;
 		break;
-	case Poker::srTableStatsReply:
-		qDebug() << "srTableStatsReply";
+	case Poker::srTableSitOk: // 27
+		srTableSitOk(data);
 		break;
 	case Poker::srPong: { // 30
 		ping_reply.ParseFromString(data);
@@ -203,6 +203,12 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		quint64 clock_offset = server_clock - recv_time;
 		//qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
 		break; }
+	case Poker::srTableStatsReply: // 35
+		qDebug() << "srTableStatsReply";
+		break;
+	case Poker::srInvalidTableBuyin: // 38
+		srInvalidTableBuyin(data);
+		break;
 	case Poker::seSecondaryLoginDetected:
 		emit secondary_login();
 		break;
@@ -372,4 +378,17 @@ void PokerMain::srLoginReply(std::string data) {
 		qDebug() << "failure";
 		emit login_failure();
 	}
+}
+void PokerMain::srInvalidTableBuyin(std::string data) {
+	Poker::BuyinError be;
+	be.ParseFromString(data);
+	qDebug() << "invalid buyin";
+}
+void PokerMain::srTableSitOk(std::string data) {
+	Poker::TableStatus ts;
+	ts.ParseFromString(data);
+	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+	out->update(ts);
+	emit table_status(out);
+	emit sit_ok(out->gameid);
 }

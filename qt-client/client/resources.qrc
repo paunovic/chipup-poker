@@ -84,5 +84,8 @@
         <file>resources/chips/100.png</file>
         <file>resources/chips/500.png</file>
         <file>resources/chips/1000.png</file>
+        <file>resources/table/StandupButtonNormal.png</file>
+        <file>resources/table/StandupButtonPressed.png</file>
+        <file>resources/seats/Barmeno-Bold.ttf</file>
     </qresource>
 </RCC>

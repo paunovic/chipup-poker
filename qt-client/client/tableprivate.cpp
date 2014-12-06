@@ -96,6 +96,7 @@ void TablePrivate::loadJsFromResource() {
 	}
 }
 bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
+	lastTs = ts;
 	QScriptValue func = engine.globalObject().property("tableStatus");
 	if (!func.isFunction()) {
 		qDebug() << "tableStatus isnt a function!";

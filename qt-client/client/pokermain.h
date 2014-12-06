@@ -58,6 +58,7 @@ signals:
     void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
 	void secondary_login();
 	void table_status(QSharedPointer<Data::TableStatus> ts);
+	void sit_ok(QByteArray gameid);
 
 public slots:
     void try_connect();
@@ -77,6 +78,8 @@ private:
 	void seGameCreate(std::string data);
 	void seGameDelete(std::string data);
 	void seTableStatus(std::string data);
+	void srInvalidTableBuyin(std::string data);
+	void srTableSitOk(std::string data);
 
     QSslSocket socket;
     QByteArray buffer;

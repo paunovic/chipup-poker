@@ -12,5 +12,6 @@ void User::update(Poker::User in) {
 
 	std::string id = in._id();
 	this->id = QByteArray(id.data(),id.length());
+	displayname_ = in.displayname().c_str();
 }
 } // namespace Data

@@ -13,8 +13,8 @@ QPushButton {
 #TableSit QPushButton {
 	padding-left: 30px;
 	padding-right: 30px;
-	padding-top: 20px;
-	padding-bottom: 20px;
+	padding-top: 15px;
+	padding-bottom: 15px;
 }
 QPushButton:hover {
 	border-image: url(:/resources/button_mainform_hot.png) 0 0 0 0 stretch stretch;
@@ -108,4 +108,15 @@ QPushButton#btMin:pressed,QPushButton#btMax:pressed,QPushButton#btPot:pressed,QP
 }
 QWidget#test {
 border: 1px solid red;
+}
+
+#lbsTableName {
+	color: white;
+	font: bold;
+}
+#lbsTableBuyins {
+	font: bold;
+}
+#btStandUp {
+border-image: url(":/resources/table/StandupButtonNormal.png");
 }

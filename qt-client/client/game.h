@@ -13,6 +13,7 @@ public:
 	Game();
 	void update(Poker::Game &in);
 	QString typeToString() const;
+	QString typeToLongString() const;
 
 	QString gamename;
 	QByteArray clubid,gameid,tournamentid;
@@ -21,6 +22,7 @@ public:
 	Poker::Game::GameState state;
 	int sb,bb;
 	int sitting,seats;
+	int buyin_min,buyin_max;
 };
 class GameListModel : public QAbstractListModel {
 Q_OBJECT

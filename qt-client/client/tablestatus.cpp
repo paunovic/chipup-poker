@@ -53,6 +53,7 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		m.update(in.table_message(i));
 		table_message.append(m);
 	}
+
 }
 QString TableStatus::getState() {
 	switch (state_) {

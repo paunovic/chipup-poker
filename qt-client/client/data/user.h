@@ -14,6 +14,8 @@ public:
 	void update(Poker::User in);
 	QByteArray avatar() { return avatar_; }
 	QString avatarHex() { return avatar_.toHex(); }
+	QString displayName() { return displayname_; }
+	void setDisplayName(QString in) { displayname_ = in; }
 
 	Q_PROPERTY(QString avatar READ avatarHex)
 
@@ -23,6 +25,7 @@ signals:
 public slots:
 private:
 	QByteArray avatar_;
+	QString displayname_;
 };
 
 } // namespace Data

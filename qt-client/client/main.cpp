@@ -22,7 +22,8 @@ int main(int argc, char *argv[]) {
 		a.setStyleSheet(css);
 	}
 	QResource::registerResource("scripts.rcc");
-	int fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+	QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+	QFontDatabase::addApplicationFont(":/resources/seats/Barmeno-Bold.ttf");
 	core = new PokerMain();
 	core->app = &a;
 	animateCore = new AnimateCore(false);

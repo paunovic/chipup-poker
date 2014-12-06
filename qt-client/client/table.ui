@@ -18,12 +18,41 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,4,1">
+    <property name="topMargin">
+     <number>0</number>
+    </property>
     <item>
-     <widget class="QLabel" name="lbStats">
-      <property name="text">
-       <string>Table Statistics</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+      <item>
+       <widget class="QLabel" name="lbStats">
+        <property name="text">
+         <string>Table Statistics</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btStandUp">
+        <property name="minimumSize">
+         <size>
+          <width>98</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>98</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="accessibleName">
+         <string>Stand Up</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QWidget" name="centerWrap" native="true">

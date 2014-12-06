@@ -1,6 +1,8 @@
 #ifndef VISIBLE_SEAT_H
 #define VISIBLE_SEAT_H
 
+#include <QFontMetrics>
+
 #include "tableprivate.h"
 
 class QNetworkReply;
@@ -21,6 +23,8 @@ private:
 	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament;
 	SeatObject *jsobj;
 	TableSit *sitwindow;
+	QFontMetrics fontMetric;
+	QString displayname;
 };
 class SeatObject : public GameObject {
 Q_OBJECT

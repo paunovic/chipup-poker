@@ -73,6 +73,7 @@ public:
 	QScriptValue eval(QString code);
 	void editJs(QString newcode);
 	QScriptValue global() { return engine.globalObject(); }
+	QSharedPointer<Data::TableStatus> getLastTs() { return lastTs; }
 signals:
 
 public slots:
@@ -81,6 +82,7 @@ private:
 	TableUi *tableui;
 	GameWrap *game;
 	const Data::Game *rawgame;
+	QSharedPointer<Data::TableStatus> lastTs;
 };
 class GameObject : public QObject {
 Q_OBJECT
