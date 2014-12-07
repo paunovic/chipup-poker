@@ -33,5 +33,6 @@ private slots:
 private:
 	Ui::MainWindow *ui;
 	QHeaderView private_club_header,game_header;
-    QItemSelectionModel *public_club_selection_model,*private_club_selection_model, *game_selection_model;
+	QItemSelectionModel *public_club_selection_model,*private_club_selection_model, *game_selection_model;
+	Data::Club *currentClub;
 };

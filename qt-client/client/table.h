@@ -15,6 +15,7 @@ class Table;
 }
 namespace Data {
 class Game;
+class Club;
 }
 
 class Table : public QMainWindow
@@ -25,7 +26,7 @@ public:
 	explicit Table(QWidget *parent = 0);
 	~Table();
 	bool event(QEvent *event);
-	void setGame(const Data::Game *game);
+	void setGame(const Data::Game *game, const Data::Club *club);
 	void editJs(QString newcode);
 
 private slots:

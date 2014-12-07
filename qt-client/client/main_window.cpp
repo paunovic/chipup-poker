@@ -12,6 +12,8 @@
 #include "table.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
+	currentClub = 0;
+
 	ui->setupUi(this);
 	connect(core,SIGNAL(secondary_login()),this,SLOT(secondary_login()));
 	connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
@@ -61,19 +63,19 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	if (selected.indexes().length() == 0) return;
 	ui->gridPublicClubs->clearSelection();
 	int row = selected.indexes().at(0).row();
-	const Data::Club *club = core->private_clubs().at(row);
-	qDebug() << "selected:" << club->name << club->clubid.toHex();
+	currentClub = core->private_clubs().at(row);
+	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
-	core->game_model.setFilter(club);
+	core->game_model.setFilter(currentClub);
 }
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
-    ui->gridPrivateClubs->clearSelection();
-    int row = selected.indexes().at(0).row();
-	const Data::Club *club = core->public_clubs().at(row);
-	qDebug() << "selected:" << club->name << club->clubid.toHex();
+	ui->gridPrivateClubs->clearSelection();
+	int row = selected.indexes().at(0).row();
+	currentClub = core->public_clubs().at(row);
+	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
-	core->game_model.setFilter(club);
+	core->game_model.setFilter(currentClub);
 }
 void MainWindow::on_btJoinClub_clicked() {
 	JoinClub *jc = new JoinClub(this);
@@ -120,6 +122,6 @@ void MainWindow::on_gridGames_doubleClicked(const QModelIndex &index) {
 	g.set__id(game->gameid.data(),game->gameid.length());
 	core->sendMessage(Poker::scTableJoin,&g);
 	Table *t = new Table();
-	t->setGame(game);
+	t->setGame(game,currentClub);
 	t->show();
 }
