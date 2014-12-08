@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "user.h"
 
 namespace Data {
@@ -5,6 +7,10 @@ namespace Data {
 User::User(QObject *parent) :
 	QObject(parent)
 {
+	qDebug() << this << "user make";
+}
+User::~User() {
+	qDebug() << this << "user destroy";
 }
 void User::update(Poker::User in) {
 	std::string avatar = in.avatar();

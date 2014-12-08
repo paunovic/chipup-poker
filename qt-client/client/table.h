@@ -33,6 +33,7 @@ private slots:
 	void table_status(QSharedPointer<Data::TableStatus> ts);
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();
+	void on_btStandUp_clicked();
 protected:
 	void resizeEvent(QResizeEvent *event);
 private:

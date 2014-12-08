@@ -19,14 +19,12 @@
 #include "club.h"
 #include "game.h"
 #include "tablestatus.h"
+#include "data/user.h"
 
 class QApplication;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-namespace Data {
-class User;
-}
 
 class PokerMain : public QObject
 {
@@ -40,6 +38,7 @@ public:
 	Data::User *findUser(QByteArray userid);
 	QNetworkAccessManager *manager();
 	qint64 getUptime() { return uptime.elapsed(); }
+	Data::User *self() { return self_; }
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
@@ -54,11 +53,12 @@ signals:
 	void login_failure();
 	void clubs_changed();
 	void games_changed();
-    void register_success();
-    void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
+	void register_success();
+	void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
 	void secondary_login();
 	void table_status(QSharedPointer<Data::TableStatus> ts);
 	void sit_ok(QByteArray gameid);
+	void seat_taken(QByteArray gameid);
 
 public slots:
     void try_connect();
@@ -80,6 +80,8 @@ private:
 	void seTableStatus(std::string data);
 	void srInvalidTableBuyin(std::string data);
 	void srTableSitOk(std::string data);
+	void srTableStandUpOk(std::string data);
+	void srTableSitSeatTaken(std::string data);
 
     QSslSocket socket;
     QByteArray buffer;
@@ -87,6 +89,7 @@ private:
     QElapsedTimer uptime;
     QSettings *settings;
 	QNetworkAccessManager *manager_;
+	Data::User *self_;
 };
 
 extern PokerMain *core;

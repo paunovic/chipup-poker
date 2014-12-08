@@ -11,7 +11,7 @@ void TableEvent::update(const Poker::TableEvent &in) {
 		bets.append(in.bets(i));
 	}
 	for (i=0; i<in.cards_size(); i++) {
-		cards.append(Hand(in.cards(i)));
+		cards.append(new Hand(in.cards(i)));
 	}
 }
 QString TableEvent::getEvent() {
@@ -32,5 +32,11 @@ QString TableEvent::getEvent() {
 	default:
 		return QString("FIXME:%1").arg(event);
 	}
+}
+int TableEvent::getCardCount() {
+	return cards.length();
+}
+QObject *TableEvent::getCard(int index) {
+	return cards.at(index);
 }
 } // namespace Data

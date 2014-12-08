@@ -7,6 +7,7 @@
 #include "game.h"
 #include "pokermain.h"
 #include "jseditor.h"
+#include "data/seatinfo.h"
 
 Table::Table(QWidget *parent) :
 	QMainWindow(parent),
@@ -41,6 +42,16 @@ bool Table::event(QEvent *event) {
 void Table::table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
 	p->table_status(ts);
+	QList<Data::SeatInfo*>::Iterator i;
+	bool self_found = false;
+	for (i=ts->seats.begin(); i!=ts->seats.end(); ++i) {
+		Data::SeatInfo *seat = *i;
+		if (seat->getUserid() == core->self()->id) {
+			self_found = true;
+			break;
+		}
+	}
+	ui->btStandUp->setVisible(self_found);
 }
 void Table::setGame(const Data::Game *game, const Data::Club *club) {
 	this->game = game;
@@ -74,4 +85,9 @@ void Table::resizeEvent(QResizeEvent *event) {
 }
 void Table::editJs(QString newcode) {
 	p->editJs(newcode);
+}
+void Table::on_btStandUp_clicked() {
+	Poker::Game g;
+	g.set__id(game->gameid.data(),game->gameid.length());
+	core->sendMessage(Poker::scTableStandUp,&g);
 }

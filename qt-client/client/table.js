@@ -1,5 +1,6 @@
 print("LOAD!");
 var seat_objects = [];
+var localFlop = [];
 
 function tableStatus(ts) {
 	log("TS hook:"+ts.state);
@@ -37,8 +38,21 @@ function tableEvent(event) {
 	switch (event.event) {
 	case "teStandUp":
 		seat_objects[event.seat].empty = true;
+	case "teFlop":
+		for (var i=0; i<event.getCardCount(); i++) {
+			var card = event.getCard(i);
+			for (var x=0; x<3; x++) {
+				if (!localFlop[x]) localFlop[x] = new Card();
+				localFlop[x].setSize(0.063);
+				localFlop[x].card = card.cards[x];
+			}
+			localFlop[0].setPosition(0.318,0.477);
+			localFlop[1].setPosition(0.387,0.477);
+			localFlop[2].setPosition(0.5,0.477);
+		}
+		break;
 	default:
-		//dump(event);
+		dump(event);
 	}
 }
 function dump(i) {

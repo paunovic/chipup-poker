@@ -25,6 +25,7 @@ private slots:
 	void on_btCancel_clicked();
 	void on_seBuyin_textEdited();
 	void sit_ok(QByteArray gameid);
+	void seat_taken(QByteArray gameid);
 private:
 	float GetBuyinMin();
 	float GetBuyinMax();

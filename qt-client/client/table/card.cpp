@@ -19,9 +19,9 @@ static inline QString getSuit(int card) {
 	int x = card % 4;
 	switch (x) {
 	case 0: return "h";
-	case 1: return "s";
+	case 1: return "d";
 	case 2: return "c";
-	case 3: return "d";
+	case 3: return "s";
 	default: return "error";
 	}
 }
@@ -61,15 +61,17 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 		p.drawPixmap(0,0,width(),height(),back);
 	} else {
 		p.drawPixmap(0,0,width(),height(),pix);
-		int target_width = (qreal)width() * 0.5;
+		int target_width = (qreal)width() * 0.6;
 		int target_height = ((qreal)face.height()*target_width)/face.width();
-		int target_x = (width() - target_width) /2;
-		int target_y = (height() - target_height) / 2;
-		p.drawPixmap(target_x,target_y,target_width,target_height,face);
+		int target_x = (width() - (target_width+2));
+		int target_y = 1;
+		QRectF faceLocation(target_x,target_y,target_width,target_height);
+		p.drawPixmap(faceLocation,face,QRectF());
 
 		p.setPen(getSuitColor(card));
 		p.setFont(font);
-		p.drawText(5,0,80,30,0,getValue(card));
+		QRectF rank(2,0,80,30);
+		p.drawText(rank,0,getValue(card));
 	}
 }
 QPixmap CardObjectUi::loadFace(QString name) {

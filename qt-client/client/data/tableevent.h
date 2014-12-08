@@ -20,10 +20,13 @@ public:
 	int seat;
 	// pots
 	QList<int> bets;
-	QList<Hand> cards;
+	QList<Hand*> cards;
 
 	Q_PROPERTY(QString event READ getEvent)
 	Q_PROPERTY(int seat READ getSeat)
+public slots:
+	int getCardCount();
+	QObject *getCard(int index);
 };
 
 } // namespace Data

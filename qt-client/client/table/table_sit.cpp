@@ -16,6 +16,7 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	ui->lbsTableBuyins->setText(QString("(min buyin-in %1, max buyin, %2)").arg(buyinmin).arg(buyinmax));
 	ui->seBuyin->setText(QString("%1").arg(buyinmax));
 	connect(core,SIGNAL(sit_ok(QByteArray)),this,SLOT(sit_ok(QByteArray)));
+	connect(core,SIGNAL(seat_taken(QByteArray)),this,SLOT(seat_taken(QByteArray)));
 }
 
 TableSit::~TableSit() {
@@ -55,4 +56,7 @@ void TableSit::sit_ok(QByteArray gameid) {
 		close();
 		deleteLater();
 	}
+}
+void TableSit::seat_taken(QByteArray gameid) {
+	qDebug() << "FIXME, seat taken";
 }

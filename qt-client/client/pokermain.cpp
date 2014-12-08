@@ -17,6 +17,7 @@ PokerMain::PokerMain(QObject *parent) :
 {
 	delayQuit = false;
 	manager_ = new QNetworkAccessManager(this);
+	self_ = new Data::User(this);
 	connect(manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
     connect(&socket,SIGNAL(connected()),this,SLOT(socket_connected()));
@@ -196,6 +197,12 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::srTableSitOk: // 27
 		srTableSitOk(data);
 		break;
+	case Poker::srTableSitSeatTaken: // 28
+		srTableSitSeatTaken(data);
+		break;
+	case Poker::srTableStandUpOk: // 29
+		srTableStandUpOk(data);
+		break;
 	case Poker::srPong: { // 30
 		ping_reply.ParseFromString(data);
 		int previous_uptime = ping_reply.uptime();
@@ -371,6 +378,8 @@ void PokerMain::srLoginReply(std::string data) {
 			u_out->update(u);
 			users.append(u_out);
 		}
+		Poker::User self = lr.self();
+		self_->update(self);
 		emit login_sucess();
 		emit clubs_changed();
 		emit games_changed();
@@ -391,4 +400,19 @@ void PokerMain::srTableSitOk(std::string data) {
 	out->update(ts);
 	emit table_status(out);
 	emit sit_ok(out->gameid);
+}
+void PokerMain::srTableStandUpOk(std::string data) {
+	Poker::TableStatus ts;
+	ts.ParseFromString(data);
+	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+	out->update(ts);
+	emit table_status(out);
+}
+void PokerMain::srTableSitSeatTaken(std::string data) {
+	Poker::TableStatus ts;
+	ts.ParseFromString(data);
+	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+	out->update(ts);
+	emit table_status(out);
+	emit seat_taken(out->gameid);
 }

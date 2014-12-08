@@ -5,17 +5,20 @@
 #include "../client/data/seatinfo.h"
 #include "../client/data/user.h"
 #include "table/animatecore.h"
+#include "../client/data/tableevent.h"
 
 #ifndef QFINDTESTDATA
 #define QFINDTESTDATA(x) x
 #endif
 
-int fontid;
+int font1,font2;
 void TestCase::initTestCase() {
-	fontid = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+	font1 = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
+	font2 = QFontDatabase::addApplicationFont(":/resources/seats/Barmeno-Bold.ttf");
 }
 void TestCase::cleanupTestCase() {
-	QFontDatabase::removeApplicationFont(fontid);
+	QFontDatabase::removeApplicationFont(font1);
+	QFontDatabase::removeApplicationFont(font2);
 	QApplication::sendPostedEvents(0, QEvent::DeferredDelete);
 }
 void TestCase::testsomething_data() {
@@ -78,7 +81,7 @@ void TestCase::rendercards() {
 	QGridLayout grid;
 	root.setLayout(&grid);
 	p.setupUi(&root,&grid);
-	root.resize(586,300);
+	root.resize(586*2,300*2);
 	Data::Game g;
 	g.seats = 5;
 	p.setGame(&g);
@@ -225,7 +228,7 @@ void TestCase::simplegame() {
 	p.setupUi(&root,&grid);
 	root.resize(586,300);
 	Data::Game g;
-	g.seats = 3;
+	g.seats = 6;
 	p.setGame(&g);
 #ifdef WIN32
 	QFile input("../../qt-client/client/table.js");
@@ -266,8 +269,9 @@ void TestCase::simplegame() {
 		QTest::qSleep(200);
 	}
 
-	QPixmap image(root.size());
-	root.render(&image);
+	QPixmap image(QSize(600,444));
+	image.fill(QColor(255,255,255));
+	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
 	image.save("simplegame0.png");
 
 	ts->setState(Poker::TableStatus::tsPreFlop);
@@ -278,8 +282,22 @@ void TestCase::simplegame() {
 	result = p.table_status(ts);
 	QVERIFY(result);
 
-	root.render(&image);
+	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
 	image.save("simplegame1.png");
+
+	QSharedPointer<Data::TableEvent> flop(new Data::TableEvent);
+	flop->event = Poker::TableEvent::teFlop;
+	char floparr[3] = { 0x2a,0x13,0x12 };
+	std::string flopraw((char*)&floparr,3);
+	Data::Hand *flopcards = new Data::Hand(flopraw);
+	flop->cards.append(flopcards);
+	ts->events.clear();
+	ts->events.append(flop);
+
+	result = p.table_status(ts);
+	QVERIFY(result);
+	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
+	image.save("simplegame2.png");
 
 	/*root.resize(1000,600);
 	QPixmap bigger(root.size());

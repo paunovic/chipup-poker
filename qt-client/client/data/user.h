@@ -11,6 +11,7 @@ class User : public QObject
 	Q_OBJECT
 public:
 	explicit User(QObject *parent = 0);
+	~User();
 	void update(Poker::User in);
 	QByteArray avatar() { return avatar_; }
 	QString avatarHex() { return avatar_.toHex(); }
