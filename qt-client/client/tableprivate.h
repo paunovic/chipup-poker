@@ -91,7 +91,9 @@ public:
 	float x() { return internal->x; }
 	float y() { return internal->y; }
 	TablePrivate *getTable() { return table; }
+	bool visible() { return internal->isVisible(); }
 
+	Q_PROPERTY(bool visible READ visible WRITE setVisible)
 public slots:
 	void setPosition(float x, float y);
 	void setSize(float w);
@@ -99,6 +101,8 @@ public slots:
 protected:
 	GameObjectUi *internal;
 	TablePrivate *table;
+private:
+	void setVisible(bool in) { internal->setVisible(in); }
 };
 
 #endif // TABLEPRIVATE_H

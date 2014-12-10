@@ -7,9 +7,9 @@ TEMPLATE = app
 TARGET = test
 DEPENDPATH += .
 INCLUDEPATH += .
-QT += script network gui testlib widgets
+QT += script network gui testlib widgets uitools
 INCLUDEPATH += ../client/ ../protobuf/
-LIBS += -L../../protobuf/ -L../protobuf/ -lprotobuf
+LIBS += -L../../protobuf/ -L../protobuf/ -L../protobuf/release/ -lprotobuf
 
 # Input
 HEADERS += test.h   ../client/tableprivate.h   ../client/tablestatus.h   ../client/data/pot.h   ../client/data/tableevent.h   ../client/data/tablemessage.h   ../client/data/seatinfo.h ../client/table/card.h ../client/table/visible_seat.h ../client/club.h ../client/pokermain.h ../client/game.h ../client/data/user.h ../client/table/game_wrap.h ../client/table/animation.h ../client/table/animatecore.h ../client/table/chip.h ../client/table/table_sit.h ../client/data/hand.h

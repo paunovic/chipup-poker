@@ -1,6 +1,8 @@
 print("LOAD!");
 var seat_objects = [];
 var localFlop = [];
+var localTurn = [];
+var localRiver = [];
 
 function tableStatus(ts) {
 	log("TS hook:"+ts.state);
@@ -48,8 +50,39 @@ function tableEvent(event) {
 			}
 			localFlop[0].setPosition(0.318,0.477);
 			localFlop[1].setPosition(0.387,0.477);
-			localFlop[2].setPosition(0.5,0.477);
+			localFlop[2].setPosition(0.454,0.477);
 		}
+		break;
+	case "teTurn":
+		for (var i=0; i<event.getCardCount(); i++) {
+			var card = event.getCard(i);
+			if (!localTurn[0]) localTurn[0] = new Card();
+			localTurn[0].setSize(0.063);
+			localTurn[0].card = card.cards[0];
+			localTurn[0].setPosition(0.523,0.477);
+		}
+		break;
+	case "teRiver":
+		for (var i=0; i<event.getCardCount(); i++) {
+			var card = event.getCard(i);
+			if (!localRiver[0]) localRiver[0] = new Card();
+			localRiver[0].setSize(0.063);
+			localRiver[0].card = card.cards[0];
+			localRiver[0].setPosition(0.592,0.477);
+		}
+		break;
+	case "teExistingCards":
+		for (var i=0; i<event.getCardCount(); i++) {
+			var card = event.getCard(i);
+			dump(card.cards);
+		}
+		break;
+	case "teWinning":
+		localFlop[0].visible = false;
+		localFlop[1].visible = false;
+		localFlop[2].visible = false;
+		localTurn[0].visible = false;
+		localRiver[0].visible = false;
 		break;
 	default:
 		dump(event);

@@ -14,9 +14,11 @@ class LoginWindow : public QWidget
 public:
     explicit LoginWindow(QWidget *parent = 0);
     ~LoginWindow();
-
+protected:
+	void paintEvent(QPaintEvent *e);
 private:
     Ui::LoginWindow *ui;
+	QPixmap background;
 private slots:
 	void protocol_ready(bool);
     void on_btLogin_clicked();

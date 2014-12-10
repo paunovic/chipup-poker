@@ -12,4 +12,6 @@ private slots:
 	void renderChips_data();
 	void renderChips();
 	void simplegame();
+	void render_bare_form_data();
+	void render_bare_form();
 };

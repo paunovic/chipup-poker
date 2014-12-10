@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = client
 TEMPLATE = app
 
-CONFIG += qt.debug debug
+#CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
 INCLUDEPATH += ../protobuf/
 
@@ -22,7 +22,7 @@ INCLUDEPATH += ../protobuf/
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
 
-LIBS += -L../../protobuf/ -L../protobuf/ -lprotobuf
+LIBS += -L../../protobuf/ -L../protobuf/release/ -L../protobuf/ -lprotobuf
 
 SOURCES += main.cpp\
         loginwindow.cpp \

@@ -120,3 +120,11 @@ border: 1px solid red;
 #btStandUp {
 border-image: url(":/resources/table/StandupButtonNormal.png");
 }
+
+#LoginWindow #main {
+border-image: url(":/resources/login/Background.png");
+}
+
+#LoginWindow QLabel, #LoginWindow QCheckBox {
+color: white;
+}

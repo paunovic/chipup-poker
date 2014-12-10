@@ -1,3 +1,5 @@
+#include <QPainter>
+
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
 #include "pokermain.h"
@@ -9,7 +11,7 @@
 //
 LoginWindow::LoginWindow(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::LoginWindow)
+	ui(new Ui::LoginWindow), background(":/resources/login/Background.png")
 {
     ui->setupUi(this);
     core->try_connect();
@@ -78,4 +80,8 @@ void LoginWindow::login_sucess() {
 	mw->show();
 	close();
 	deleteLater();
+}
+void LoginWindow::paintEvent(QPaintEvent *e) {
+	QPainter p(this);
+	p.drawPixmap(0,0,width(),height(),background);
 }

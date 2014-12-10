@@ -1,4 +1,5 @@
 #include <QFontDatabase>
+#include <QtUiTools>
 
 #include "test.h"
 #include "tableprivate.h"
@@ -285,14 +286,31 @@ void TestCase::simplegame() {
 	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
 	image.save("simplegame1.png");
 
+	ts->events.clear();
+
 	QSharedPointer<Data::TableEvent> flop(new Data::TableEvent);
 	flop->event = Poker::TableEvent::teFlop;
 	char floparr[3] = { 0x2a,0x13,0x12 };
 	std::string flopraw((char*)&floparr,3);
 	Data::Hand *flopcards = new Data::Hand(flopraw);
 	flop->cards.append(flopcards);
-	ts->events.clear();
 	ts->events.append(flop);
+
+	QSharedPointer<Data::TableEvent> turn(new Data::TableEvent);
+	turn->event = Poker::TableEvent::teTurn;
+	char turnarr[1] = {0x14};
+	std::string turnraw((char*)&turnarr,1);
+	Data::Hand *turncards = new Data::Hand(turnraw);
+	turn->cards.append(turncards);
+	ts->events.append(turn);
+
+	QSharedPointer<Data::TableEvent> river(new Data::TableEvent);
+	river->event = Poker::TableEvent::teRiver;
+	char riverarr[1] = {0x15};
+	std::string riverraw((char*)&riverarr,1);
+	Data::Hand *rivercards = new Data::Hand(riverraw);
+	river->cards.append(rivercards);
+	ts->events.append(river);
 
 	result = p.table_status(ts);
 	QVERIFY(result);
@@ -307,4 +325,21 @@ void TestCase::simplegame() {
 	QCOMPARE(5,5);
 	core = 0;
 	animateCore = 0;
+}
+void TestCase::render_bare_form_data() {
+	QTest::addColumn<QString>("formname");
+	QTest::newRow("formname") << "../client/loginwindow.ui";
+}
+void TestCase::render_bare_form() {
+	QFETCH(QString,formname);
+	QUiLoader loader;
+
+	QFile input(QFINDTESTDATA(formname));
+	input.open(QFile::ReadOnly);
+	QWidget *formWidget = loader.load(&input);
+	input.close();
+
+	QPixmap output(formWidget->size());
+	formWidget->render(&output);
+	output.save("bareform.png");
 }

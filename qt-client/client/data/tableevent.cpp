@@ -29,6 +29,7 @@ QString TableEvent::getEvent() {
 	case Poker::TableEvent::teTurn: return "teTurn"; // 10
 	case Poker::TableEvent::teRiver: return "teRiver"; // 11
 	case Poker::TableEvent::tePostRiver: return "tePostRiver"; // 12
+	case Poker::TableEvent::teExistingCards: return "teExistingCards"; // 14
 	default:
 		return QString("FIXME:%1").arg(event);
 	}
