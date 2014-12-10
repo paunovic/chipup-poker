@@ -543,6 +543,9 @@ procedure TServerSocket.SoftException(const AException, AData: String);
 var
   protobuf: TPB_SoftException;
 begin
+  if not IsConnected then
+    Exit;
+
   protobuf := TPB_SoftException.Create;
   try
     protobuf.Exception := AException;
