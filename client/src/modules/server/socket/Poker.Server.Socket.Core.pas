@@ -112,7 +112,7 @@ begin
   FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
   FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_PEER];
   FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE];
-  FSocket.SslContext.SslVersionMethod := sslV3;
+//  FSocket.SslContext.SslVersionMethod := sslV3;
   FSocket.SslContext.InitContext;
   FSocket.SslContext.TrustCert(SSLCert_DevServer);
   FSocket.SslContext.TrustCert(SSLCert_OfficialServer);
