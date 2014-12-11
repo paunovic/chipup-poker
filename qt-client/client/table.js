@@ -5,7 +5,7 @@ var localTurn = [];
 var localRiver = [];
 
 function tableStatus(ts) {
-	log("TS hook:"+ts.state);
+	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
 	var max = ts.seatCount();
 	for (var i=0; i<max; i++) {
 		var seat = ts.readSeat(i);
@@ -13,33 +13,50 @@ function tableStatus(ts) {
 		log("index:"+i+" seat#:"+seat.seat_index);
 		log(JSON.stringify(seat));
 		local.updateInfo(seat);
+		log("index:"+seat.seat_index+" current:"+ts.current_seat);
 		seat_objects[seat.seat_index].empty = false;
+		local.active = (seat.seat_index == ts.current_seat); // FIXME, ignore when idle?
 		var user = seat.getUser();
 		seat_objects[seat.seat_index].avatar = user.avatar;
-		if (local.cards.length != seat.card_count) {
 			log("local:"+local.cards.length+" remote:"+seat.card_count);
-			for (var j=0; j<seat.card_count; j++) {
-				if (local.cards[j]) {
-					local.cards[j].card = -1;
-					local.cards[j].visible = true;
-				} else {
-					card = new Card();
-					var pos = calcCardPosition(seat.seat_index,j);
-					card.setPosition(pos.x, pos.y);
-					card.setSize(0.1);
-					card.card = -1;
-					local.cards[j] = card;
+			if (seat.card_count >= local.cards.length) {
+				for (var j=0; j<seat.card_count; j++) {
+					if (local.cards[j]) {
+						local.cards[j].card = -1;
+						local.cards[j].visible = true;
+					} else {
+						card = new Card();
+						var pos = calcCardPosition(seat.seat_index,j);
+						log('placing card at:'+JSON.stringify(pos));
+						card.setSize(0.1);
+						card.setPosition(pos.x, pos.y);
+						card.card = -1;
+						local.cards[j] = card;
+					}
+					if (seat.hand.cards.length) local.cards[j].card = seat.hand.cards[j];
+					local.cards[j].stackUnder(local);
 				}
-				local.cards[j].stackUnder(local);
+			} else {
+				for (var j=0; j<local.cards.length; j++) {
+					if (local.cards[j]) local.cards[j].visible = false;
+					delete local.cards[j];
+				}
 			}
-		}
 	}
 }
 function tableEvent(event) {
 	log('EVENT:'+event.event);
 	switch (event.event) {
+	case "teSit":
+		break;
 	case "teStandUp":
+		var local = seat_objects[event.seat];
+		for (var x=0; x<local.cards.length; x++) {
+			if (local.cards[x]) local.cards[x].visible = false;
+			delete local.cards[x];
+		}
 		seat_objects[event.seat].empty = true;
+		break;
 	case "teFlop":
 		for (var i=0; i<event.getCardCount(); i++) {
 			var card = event.getCard(i);
@@ -78,11 +95,13 @@ function tableEvent(event) {
 		}
 		break;
 	case "teWinning":
-		localFlop[0].visible = false;
-		localFlop[1].visible = false;
-		localFlop[2].visible = false;
-		localTurn[0].visible = false;
-		localRiver[0].visible = false;
+		if (localFlop[0]) {
+			localFlop[0].visible = false;
+			localFlop[1].visible = false;
+			localFlop[2].visible = false;
+		}
+		if (localTurn[0]) localTurn[0].visible = false;
+		if (localRiver[0]) localRiver[0].visible = false;
 		break;
 	default:
 		dump(event);
@@ -118,7 +137,7 @@ function calcSeatPosition(index) {
 	var rawx = Math.sin(fakeindex*interval);
 	var rawy = Math.cos(fakeindex*interval);
 	
-	var x = ((rawx/2)*0.7)+0.5;
+	var x = ((rawx/2)*0.65)+0.495;
 	var y = ((rawy/2)*-0.62)+0.45;
 	log("seat:"+index+" angle:"+(index*interval)+" x:"+rawx+" y:"+rawy);
 
@@ -126,6 +145,7 @@ function calcSeatPosition(index) {
 }
 function calcCardPosition(seat,card) {
 	var seatpos = seat_objects[seat].renderPosition();
+	log('seat pos is:'+JSON.stringify(seatpos));
 	return { x:seatpos.x + (card*25), y:seatpos.y + 10 };
 }
 function adjustSeats() {

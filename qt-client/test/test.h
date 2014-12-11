@@ -14,4 +14,5 @@ private slots:
 	void simplegame();
 	void render_bare_form_data();
 	void render_bare_form();
+	void render_login_form();
 };

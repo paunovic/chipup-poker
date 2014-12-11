@@ -16,7 +16,6 @@ Table::Table(QWidget *parent) :
 	ui->setupUi(this);
 	p = new TablePrivate;
 	p->setupUi(ui->centerWrap,ui->center);
-	qDebug() << "table create";
 	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
 #ifdef JSDEBUG
 	debuger = new JsEditor(this);
@@ -27,11 +26,9 @@ Table::Table(QWidget *parent) :
 Table::~Table() {
 	delete ui;
 	delete p;
-	qDebug() << "table destroy";
 }
 bool Table::event(QEvent *event) {
 	if (event->type() == QEvent::Close) {
-		qDebug() << "table close detected";
 		Poker::Game g;
 		g.set__id(game->gameid.data(),game->gameid.length());
 		core->sendMessage(Poker::scTableLeave,&g);
@@ -39,25 +36,73 @@ bool Table::event(QEvent *event) {
 	}
 	return QMainWindow::event(event);
 }
-void Table::table_status(QSharedPointer<Data::TableStatus> ts) {
+bool Table::table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
-	p->table_status(ts);
+	bool result = p->table_status(ts);
 	QList<Data::SeatInfo*>::Iterator i;
 	bool self_found = false;
+	Data::SeatInfo *seat = 0;
 	for (i=ts->seats.begin(); i!=ts->seats.end(); ++i) {
-		Data::SeatInfo *seat = *i;
+		seat = *i;
 		if (seat->getUserid() == core->self()->id) {
 			self_found = true;
 			break;
 		}
 	}
 	ui->btStandUp->setVisible(self_found);
+	if (!self_found) { // not sitting, cant play now
+		qDebug() << "self not found";
+		ui->btPlayNow->setVisible(false);
+		ui->btDouble->setVisible(false);
+		ui->cbSitOutBB->setVisible(false);
+		ui->btSitOut->setVisible(false);
+		ui->cbFoldAny->setVisible(false);
+	} else { // sitting, play now may be needed
+		switch (seat->rawStatus()) {
+		case Poker::SeatInfo::psOutOfHand:
+			ui->btDouble->setVisible(true);
+			ui->cbSitOutBB->setVisible(true);
+			ui->btSitOut->setVisible(true);
+			ui->cbFoldAny->setVisible(true);
+			ui->btPlayNow->setVisible(false);
+			break;
+		case Poker::SeatInfo::psOutOfPlay:
+			ui->btPlayNow->setVisible(true);
+			ui->stackedWidget->setCurrentIndex(0);
+			break;
+		case Poker::SeatInfo::psInHand:
+			qDebug() << QString("i am in hand, current seat:%1, myself:%2, minbet:%3, mybet:%4").arg(ts->current_seat).arg(seat->seat_index).arg(ts->minimum_bet).arg(ts->bets[seat->seat_index]);
+			if (ts->current_seat == seat->seat_index) {
+				qDebug() << "stack change";
+				ui->stackedWidget->setCurrentIndex(1);
+				if (ts->minimum_bet == ts->bets[seat->seat_index]) {
+					ui->btCheck->setText(tr("CHECK"));
+				} else {
+					ui->btCheck->setText(tr("CALL (%1)").arg((ts->minimum_bet - ts->bets[seat->seat_index])/100));
+				}
+			}
+			break;
+		}
+	}
+	return result;
+}
+void Table::on_btCheck_clicked() {
+	Poker::PutChips pc;
+	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	pc.set_current_state(lastTableStatus->state());
+	pc.set_chip_amount(lastTableStatus->minimum_bet);
+	core->sendMessage(Poker::scPutChips,&pc);
 }
 void Table::setGame(const Data::Game *game, const Data::Club *club) {
 	this->game = game;
 	p->setGame(game);
 	setWindowTitle(QString(tr("%1 (%2/%3 %4) - %5")).arg(game->gamename).arg(game->sb).arg(game->bb).arg(game->typeToString()).arg(club->name));
 	p->loadJsFromResource();
+}
+bool Table::setGameForTesting(const Data::Game *game, QString jscode) {
+	this->game = game;
+	p->setGame(game);
+	return p->loadJs(jscode,"table.js");
 }
 void Table::on_actionReload_triggered() {
 	QFile input("table.js");
@@ -90,4 +135,9 @@ void Table::on_btStandUp_clicked() {
 	Poker::Game g;
 	g.set__id(game->gameid.data(),game->gameid.length());
 	core->sendMessage(Poker::scTableStandUp,&g);
+}
+void Table::on_btPlayNow_clicked() {
+	Poker::Game g;
+	g.set__id(game->gameid.data(),game->gameid.length());
+	core->sendMessage(Poker::scTablePlayNow,&g);
 }

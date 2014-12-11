@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>629</width>
     <height>450</height>
    </rect>
   </property>
@@ -79,7 +79,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="groupOptions">
         <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
@@ -125,6 +125,33 @@
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="page_3">
+         <layout class="QHBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QPushButton" name="btPlayNow">
+            <property name="text">
+             <string>Play Now</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
@@ -200,7 +227,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_3">
+             <widget class="QPushButton" name="btCheck">
               <property name="text">
                <string>CHECK</string>
               </property>
@@ -264,8 +291,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
-     <height>21</height>
+     <width>629</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

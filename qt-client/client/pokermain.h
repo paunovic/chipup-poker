@@ -38,7 +38,7 @@ public:
 	Data::User *findUser(QByteArray userid);
 	QNetworkAccessManager *manager();
 	qint64 getUptime() { return uptime.elapsed(); }
-	Data::User *self() { return self_; }
+	Data::User *self() { Q_ASSERT(self_); return self_; }
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;

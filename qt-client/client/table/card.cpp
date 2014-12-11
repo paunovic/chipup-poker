@@ -93,8 +93,11 @@ QPixmap CardObjectUi::loadFace(QString name) {
 }
 QPoint CardObjectUi::getPosition() {
 	QPoint out = GameObjectUi::getPosition();
+	Q_ASSERT(out.y() < 10000);
 	int newwidth = tbl->width() * w;
+	Q_ASSERT(newwidth);
 	int new_height = heightForWidth(newwidth);
+	Q_ASSERT(new_height);
 	out.setY(out.y() - (new_height/2));
 	return out;
 }

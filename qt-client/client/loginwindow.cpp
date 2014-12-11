@@ -17,19 +17,22 @@ LoginWindow::LoginWindow(QWidget *parent) :
     core->try_connect();
 	connect(core,SIGNAL(protocol_ready(bool)),this,SLOT(protocol_ready(bool)));
 	connect(core,SIGNAL(login_sucess()),this,SLOT(login_sucess()));
-    QString username = core->config().value("login/username").toString();
-    if (username.size()>0) {
-        ui->edLogin->setText(username);
-        ui->cbRememberLogin->setChecked(true);
-        QString password = core->config().value("login/password").toString();
-        if (password.size() > 0) {
-            ui->edPassword->setText(password);
-            ui->cbRememberPassword->setChecked(true);
-        }
-    }
+#ifndef testcase
+	qDebug() << "loading config";
+	QString username = core->config().value("login/username").toString();
+	if (username.size()>0) {
+		ui->edLogin->setText(username);
+		ui->cbRememberLogin->setChecked(true);
+		QString password = core->config().value("login/password").toString();
+		if (password.size() > 0) {
+			ui->edPassword->setText(password);
+			ui->cbRememberPassword->setChecked(true);
+		}
+	}
 	if (core->socketState() == QAbstractSocket::ConnectedState) {
 		protocol_ready(true);
 	}
+#endif
 }
 
 LoginWindow::~LoginWindow() {
@@ -60,8 +63,10 @@ void LoginWindow::on_edPassword_returnPressed() {
 }
 
 void LoginWindow::on_btCreateAccount_clicked() {
-    RegisterWindow *rw = new RegisterWindow(this);
-    rw->exec();
+#ifndef testcase
+	RegisterWindow *rw = new RegisterWindow(this);
+	rw->exec();
+#endif
 }
 void LoginWindow::login_sucess() {
     QString username = ui->edLogin->text();
@@ -76,12 +81,19 @@ void LoginWindow::login_sucess() {
         core->config().remove("login/username");
         core->config().remove("login/password");
     }
-    MainWindow *mw = new MainWindow();
+#ifndef testcase
+	MainWindow *mw = new MainWindow();
 	mw->show();
+#endif
 	close();
 	deleteLater();
 }
 void LoginWindow::paintEvent(QPaintEvent *e) {
 	QPainter p(this);
-	p.drawPixmap(0,0,width(),height(),background);
+	int targetHeight = ((qreal)background.height()*width())/background.width();
+	p.drawPixmap(0,0,width(),targetHeight,background);
+	QRect extra(0,targetHeight,width(),height()-targetHeight);
+	p.setBrush(QColor(0,0,0));
+	p.setPen(Qt::NoPen);
+	p.drawRect(extra);
 }

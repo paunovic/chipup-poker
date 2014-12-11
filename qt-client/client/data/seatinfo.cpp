@@ -11,6 +11,7 @@ void SeatInfo::update(const Poker::SeatInfo &in) {
 	card_count_ = in.card_count();
 	status_ = in.status();
 	chips_ = in.chips();
+	cards = new Hand(in.cards());
 }
 QObject *SeatInfo::getUser() {
 	return core->findUser(userid);

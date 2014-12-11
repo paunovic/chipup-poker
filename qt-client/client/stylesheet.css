@@ -122,9 +122,9 @@ border-image: url(":/resources/table/StandupButtonNormal.png");
 }
 
 #LoginWindow #main {
-border-image: url(":/resources/login/Background.png");
+	border-image: url(":/resources/login/Background.png") 0 0 0 0 stretch stretch;
 }
 
 #LoginWindow QLabel, #LoginWindow QCheckBox {
-color: white;
+	color: white;
 }

@@ -14,15 +14,17 @@ public:
 	VisibleSeat(TableUi *parent, SeatObject *jsobj);
 	~VisibleSeat();
 	void updateSeat();
-	QPixmap avatar;
 	void updateInfo(Data::SeatInfo *info);
+	
+	QPixmap avatar;
+	bool active;
 protected:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *);
 	void mouseReleaseEvent(QMouseEvent *);
 private:
-	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament;
-	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament;
+	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament,seatRightActive;
+	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament,seatLeftActive;
 	SeatObject *jsobj;
 	TableSit *sitwindow;
 	QFontMetrics *fontMetric;
@@ -37,12 +39,15 @@ class SeatObject : public GameObject {
 Q_OBJECT
 public:
 	SeatObject(TablePrivate *parent);
+	bool active() { return seat->active; }
+	void setActive(bool in) { qDebug() << "setting active" << in; seat->active = in; seat->updateSeat(); };
 
 	Q_PROPERTY(int seat READ getSeat WRITE setSeat)
 	Q_PROPERTY(bool tournament READ getTourn WRITE setTourn)
 	Q_PROPERTY(bool empty READ getEmpty WRITE setEmpty)
 	Q_PROPERTY(QString avatar READ avatar WRITE setAvatar)
 	Q_PROPERTY(bool left READ left WRITE setLeft)
+	Q_PROPERTY(bool active READ active WRITE setActive)
 	int getSeat() { return seatIndex; }
 	void setSeat(int in) { seatIndex = in; }
 	bool getTourn() { return tournament; }

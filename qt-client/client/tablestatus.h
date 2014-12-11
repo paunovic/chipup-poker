@@ -23,6 +23,7 @@ public:
 	QString getState();
 	Poker::TableStatus::TableState state() { return state_; }
 	void setState(Poker::TableStatus::TableState in) { state_ = in; }
+	int getCurrentSeat() { return current_seat; }
 
 #define X(type,name) Q_PROPERTY(QString name READ get ## name )\
 type name;\
@@ -32,11 +33,13 @@ type name;\
 type get ## name() { return name; }
 
 
+	Q_PROPERTY(QString state READ getState)
+	Q_PROPERTY(int current_seat READ getCurrentSeat)
+	Y(int,dealer)
+	
 	QByteArray gameid;
 	QList<Data::SeatInfo*> seats;
-	Q_PROPERTY(QString state READ getState)
-	Y(int,dealer)
-	Y(int,current_seat)
+	int current_seat;
 	QList<int> bets;
 	bool locked;
 	int seq;

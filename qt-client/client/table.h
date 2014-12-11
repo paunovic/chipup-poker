@@ -18,22 +18,23 @@ class Game;
 class Club;
 }
 
-class Table : public QMainWindow
-{
+class Table : public QMainWindow {
 	Q_OBJECT
-
 public:
 	explicit Table(QWidget *parent = 0);
 	~Table();
 	bool event(QEvent *event);
 	void setGame(const Data::Game *game, const Data::Club *club);
+	bool setGameForTesting(const Data::Game *game, QString jscode);
 	void editJs(QString newcode);
-
+public slots:
+	bool table_status(QSharedPointer<Data::TableStatus> ts);
 private slots:
-	void table_status(QSharedPointer<Data::TableStatus> ts);
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();
 	void on_btStandUp_clicked();
+	void on_btPlayNow_clicked();
+	void on_btCheck_clicked();
 protected:
 	void resizeEvent(QResizeEvent *event);
 private:

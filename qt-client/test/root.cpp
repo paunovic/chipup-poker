@@ -2,8 +2,9 @@
 
 //#define QApplication QCoreApplication
 
-//QTEST_MAIN(TestCase)
-
+#if 1
+QTEST_MAIN(TestCase)
+#else
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
 	QFile styles(":/stylesheet.css");
@@ -15,10 +16,12 @@ int main(int argc, char *argv[]) {
 			buffer.append(styles.readAll());
 		}
 		QString css(buffer);
-		app.setStyle(css);
+		qDebug() << css;
+		app.setStyleSheet(css);
 	}
 	app.setAttribute(Qt::AA_Use96Dpi, true);
 	QTEST_DISABLE_KEYPAD_NAVIGATION
 	TestCase tc;
 	return QTest::qExec(&tc, argc, argv);
 }
+#endif

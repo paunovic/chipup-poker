@@ -10,11 +10,17 @@
     <height>371</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>558</width>
+    <height>371</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Welcome to ChipUP Poker</string>
   </property>
   <property name="autoFillBackground">
-   <bool>true</bool>
+   <bool>false</bool>
   </property>
   <property name="styleSheet">
    <string notr="true"/>

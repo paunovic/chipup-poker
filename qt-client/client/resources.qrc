@@ -18,11 +18,13 @@
         <file>resources/table/Table.png</file>
         <file>resources/table/ActionButtonNormal.png</file>
         <file>resources/seats/SeatRight.png</file>
+        <file>resources/seats/SeatRightActive.png</file>
         <file>resources/seats/SeatRightEmpty.png</file>
         <file>resources/seats/SeatRightEmptyTournament.png</file>
         <file>resources/seats/SeatLeftEmpty.png</file>
         <file>resources/seats/SeatLeftEmptyTournament.png</file>
         <file>resources/seats/SeatLeft.png</file>
+        <file>resources/seats/SeatLeftActive.png</file>
         <file>resources/cards/Background.png</file>
         <file>resources/cards/CardFrontBackground.png</file>
         <file>resources/cards/artworks/CardArtwork2c.png</file>

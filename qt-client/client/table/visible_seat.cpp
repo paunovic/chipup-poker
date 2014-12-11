@@ -9,16 +9,18 @@
 #include "data/user.h"
 
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
-	: GameObjectUi(parent), jsobj(jsobj), font("Barmeno") {
+	: GameObjectUi(parent), active(false), jsobj(jsobj), font("Barmeno") {
 	font.setPointSize(7);
 	font.setBold(true);
 	fontMetric = new QFontMetrics(font);
 	sitwindow = NULL;
 	//qDebug() << __func__ << "create" << parent;
 	seatRight = QPixmap(":/resources/seats/SeatRight.png");
+	seatRightActive = QPixmap(":/resources/seats/SeatRightActive.png");
 	seatRightEmpty = QPixmap(":/resources/seats/SeatRightEmpty.png");
 	seatRightEmptyTournament = QPixmap(":/resources/seats/SeatRightEmptyTournament.png");
 	seatLeft = QPixmap(":/resources/seats/SeatLeft.png");
+	seatLeftActive = QPixmap(":/resources/seats/SeatLeftActive.png");
 	seatLeftEmpty = QPixmap(":/resources/seats/SeatLeftEmpty.png");
 	seatLeftEmptyTournament = QPixmap(":/resources/seats/SeatLeftEmptyTournament.png");
 	updateSeat();
@@ -107,8 +109,13 @@ void VisibleSeat::updateSeat() {
 			else pix = seatRightEmpty;
 		}
 	} else {
-		if (jsobj->left()) pix = seatLeft;
-		else pix = seatRight;
+		if (active) {
+			if (jsobj->left()) pix = seatLeftActive;
+			else pix = seatRightActive;
+		} else {
+			if (jsobj->left()) pix = seatLeft;
+			else pix = seatRight;
+		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		QList<Data::SeatInfo*>::Iterator i;
 		int seatindex = jsobj->getSeat();

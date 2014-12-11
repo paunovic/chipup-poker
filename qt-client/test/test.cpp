@@ -1,15 +1,16 @@
 #include <QFontDatabase>
-#include <QtUiTools>
+#include <QUiLoader>
 
 #include "test.h"
-#include "tableprivate.h"
+#include "table.h"
 #include "../client/data/seatinfo.h"
 #include "../client/data/user.h"
 #include "table/animatecore.h"
 #include "../client/data/tableevent.h"
+#include "../client/loginwindow.h"
 
 #ifndef QFINDTESTDATA
-#define QFINDTESTDATA(x) x
+#define QFINDTESTDATA(x) QString("../../qt-client/test/") + x
 #endif
 
 int font1,font2;
@@ -217,20 +218,32 @@ void TestCase::testsomething() {
 }
 void TestCase::simplegame() {
 	int result;
-	TablePrivate p;
+	Table tbl;
 	PokerMain pm;
+
+	QByteArray selfid;
+	selfid[0] = 1;
+	pm.self()->id = selfid;
+	
+	QFile styles(":/stylesheet.css");
+	if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load css";
+	} else {
+		QByteArray buffer;
+		while (!styles.atEnd()) {
+			buffer.append(styles.readAll());
+		}
+		QString css(buffer);
+		tbl.setStyleSheet(css);
+	}
+
 	core = &pm;
 	AnimateCore ac(true);
 	animateCore = &ac;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
-	QWidget root;
-	QGridLayout grid;
-	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
-	root.resize(586,300);
+	tbl.resize(600,500);
 	Data::Game g;
 	g.seats = 6;
-	p.setGame(&g);
 #ifdef WIN32
 	QFile input("../../qt-client/client/table.js");
 #else
@@ -243,26 +256,30 @@ void TestCase::simplegame() {
 		QTextStream stream(&input);
 		QString code = stream.readAll();
 		input.close();
-		result = p.loadJs(code,"table.js");
+		result = tbl.setGameForTesting(&g,code);
 		QVERIFY(result);
 	}
 	for (int i=0; i<2; i++) {
-		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
-		if (i == 1) seat->seat_index = 2;
-		else seat->seat_index = 0;
-		seat->setCard_count(0);
-		seat->setStatus(Poker::SeatInfo::psOutOfPlay);
-		seat->setChips(20000);
 		QByteArray id;
 		id[0] = i;
-		seat->userid = id;
+		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
+		Poker::SeatInfo source;
+
+		source.set_player_mongo_id(id.data(),id.length());
+		if (i == 1) source.set_seat_index(4);
+		else source.set_seat_index(0);
+		source.set_card_count(0);
+		source.set_status(Poker::SeatInfo::psOutOfPlay);
+		source.set_chips(20000);
+		seat->update(source);
 		ts->seats.append(seat);
 		Data::User *u = new Data::User(&pm);
 		u->id = id;
 		u->setDisplayName(QString("seat %1").arg(i));
 		pm.users.append(u);
 	}
-	result = p.table_status(ts);
+	ts->current_seat = -1;
+	result = tbl.table_status(ts);
 	QVERIFY(result);
 
 	for (int x=0; x<10; x++) {
@@ -270,9 +287,9 @@ void TestCase::simplegame() {
 		QTest::qSleep(200);
 	}
 
-	QPixmap image(QSize(600,444));
+	QPixmap image(tbl.size());
 	image.fill(QColor(255,255,255));
-	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
+	tbl.render(&image);
 	image.save("simplegame0.png");
 
 	ts->setState(Poker::TableStatus::tsPreFlop);
@@ -280,11 +297,19 @@ void TestCase::simplegame() {
 	ts->seats[1]->setCard_count(2);
 	ts->seats[0]->setStatus(Poker::SeatInfo::psInHand);
 	ts->seats[1]->setStatus(Poker::SeatInfo::psInHand);
-	result = p.table_status(ts);
+	ts->current_seat = 4;
+	ts->bets.append(200);
+	ts->bets.append(0);
+	ts->bets.append(0);
+	ts->bets.append(0);
+	ts->bets.append(100);
+	ts->minimum_bet = 200;
+	result = tbl.table_status(ts);
 	QVERIFY(result);
 
-	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
+	tbl.render(&image);
 	image.save("simplegame1.png");
+	qDebug() << "end of phase 1";
 
 	ts->events.clear();
 
@@ -312,9 +337,9 @@ void TestCase::simplegame() {
 	river->cards.append(rivercards);
 	ts->events.append(river);
 
-	result = p.table_status(ts);
+	result = tbl.table_status(ts);
 	QVERIFY(result);
-	root.render(&image,QPoint(10,69),QRegion(),QWidget::DrawChildren);
+	tbl.render(&image);
 	image.save("simplegame2.png");
 
 	/*root.resize(1000,600);
@@ -328,18 +353,41 @@ void TestCase::simplegame() {
 }
 void TestCase::render_bare_form_data() {
 	QTest::addColumn<QString>("formname");
-	QTest::newRow("formname") << "../client/loginwindow.ui";
+	QTest::addColumn<QString>("outname");
+	QTest::newRow("formname") << "../client/loginwindow.ui" << "loginwindow";
+	QTest::newRow("formname") << "../client/table.ui" << "table";
 }
 void TestCase::render_bare_form() {
 	QFETCH(QString,formname);
+	QFETCH(QString,outname);
 	QUiLoader loader;
 
 	QFile input(QFINDTESTDATA(formname));
 	input.open(QFile::ReadOnly);
 	QWidget *formWidget = loader.load(&input);
 	input.close();
+	
+	QFile styles(":/stylesheet.css");
+	if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load css";
+	} else {
+		QByteArray buffer;
+		while (!styles.atEnd()) {
+			buffer.append(styles.readAll());
+		}
+		QString css(buffer);
+		formWidget->setStyleSheet(css);
+	}
 
 	QPixmap output(formWidget->size());
 	formWidget->render(&output);
-	output.save("bareform.png");
+	output.save(outname+".png");
+}
+void TestCase::render_login_form() {
+	QUiLoader loader;
+
+	LoginWindow *lw = new LoginWindow();
+	QPixmap output(lw->size());
+	lw->render(&output);
+	output.save("loginwindow.png");
 }
