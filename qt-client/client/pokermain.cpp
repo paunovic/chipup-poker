@@ -7,6 +7,7 @@
 #include "club.h"
 #include "tablestatus.h"
 #include "data/user.h"
+#include "data/playerclubstatus.h"
 
 using namespace Poker;
 
@@ -15,6 +16,7 @@ PokerMain *core;
 PokerMain::PokerMain(QObject *parent) :
     QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
 {
+	setObjectName("core");
 	delayQuit = false;
 	manager_ = new QNetworkAccessManager(this);
 	self_ = new Data::User(this);
@@ -85,6 +87,7 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
 void PokerMain::socket_ready() {
     Poker::HelloParams hp;
     hp.set_debug(false);
+	qDebug() << "sending hello";
     sendMessage(Poker::scHello,&hp);
     pinger.setSingleShot(false);
     pinger.setInterval(30000);
@@ -213,6 +216,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::srTableStatsReply: // 35
 		qDebug() << "srTableStatsReply";
 		break;
+	case Poker::srTableBuyinLessThanCashout: // 37
+		srTableBuyinLessThanCashout(data);
+		break;
 	case Poker::srInvalidTableBuyin: // 38
 		srInvalidTableBuyin(data);
 		break;
@@ -266,6 +272,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		break;
 	case Poker::seTableStatus: // 58
 		seTableStatus(data);
+		break;
+	case Poker::sePlayerClubStatus: // 63
+		sePlayerClubStatus(data);
 		break;
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
@@ -391,7 +400,7 @@ void PokerMain::srLoginReply(std::string data) {
 void PokerMain::srInvalidTableBuyin(std::string data) {
 	Poker::BuyinError be;
 	be.ParseFromString(data);
-	qDebug() << "invalid buyin";
+	qDebug() << "invalid buyin" << be.last_cashout();
 }
 void PokerMain::srTableSitOk(std::string data) {
 	Poker::TableStatus ts;
@@ -415,4 +424,16 @@ void PokerMain::srTableSitSeatTaken(std::string data) {
 	out->update(ts);
 	emit table_status(out);
 	emit seat_taken(out->gameid);
+}
+void PokerMain::srTableBuyinLessThanCashout(std::string data) {
+	Poker::BuyinError be;
+	be.ParseFromString(data);
+	qDebug() << "invalid buyin#2" << be.last_cashout();
+}
+void PokerMain::sePlayerClubStatus(std::string data) {
+	Poker::PlayerClubStatus pcs;
+	pcs.ParseFromString(data);
+	Data::PlayerClubStatus out;
+	out.update(pcs);
+	emit PlayerClubStatus(out);
 }

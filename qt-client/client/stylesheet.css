@@ -128,3 +128,12 @@ border-image: url(":/resources/table/StandupButtonNormal.png");
 #LoginWindow QLabel, #LoginWindow QCheckBox {
 	color: white;
 }
+#raiseSection {
+border-image:url(":/resources/table/RaiseSliderBackground.png");
+}
+QSlider::handle:horizontal {
+image: url(":/resources/table/RaiseSliderButton.png");
+padding: -3px;
+}
+QSlider::groove:horizontal {
+}

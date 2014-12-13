@@ -89,5 +89,10 @@
         <file>resources/table/StandupButtonNormal.png</file>
         <file>resources/table/StandupButtonPressed.png</file>
         <file>resources/seats/Barmeno-Bold.ttf</file>
+        <file>resources/table/RaisePresetButtonHot.png</file>
+        <file>resources/table/RaisePresetButtonNormal.png</file>
+        <file>resources/table/RaisePresetButtonPressed.png</file>
+        <file>resources/table/RaiseSliderBackground.png</file>
+        <file>resources/table/RaiseSliderButton.png</file>
     </qresource>
 </RCC>

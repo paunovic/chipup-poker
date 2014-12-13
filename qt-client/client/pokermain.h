@@ -25,6 +25,9 @@ class QApplication;
 class QNetworkAccessManager;
 class QNetworkReply;
 
+namespace Data {
+class PlayerClubStatus;
+}
 
 class PokerMain : public QObject
 {
@@ -59,6 +62,7 @@ signals:
 	void table_status(QSharedPointer<Data::TableStatus> ts);
 	void sit_ok(QByteArray gameid);
 	void seat_taken(QByteArray gameid);
+	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
 
 public slots:
     void try_connect();
@@ -82,6 +86,8 @@ private:
 	void srTableSitOk(std::string data);
 	void srTableStandUpOk(std::string data);
 	void srTableSitSeatTaken(std::string data);
+	void srTableBuyinLessThanCashout(std::string data);
+	void sePlayerClubStatus(std::string data);
 
     QSslSocket socket;
     QByteArray buffer;

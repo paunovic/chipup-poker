@@ -53,7 +53,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 		else offset = 60;
 		offset -= dn.width() / 2;
 		dn.translate(offset,15);
-		qDebug() << dn << displayname;
+		//qDebug() << dn << displayname;
 		painter.drawText(dn,displayname);
 
 		QString bottomline;
@@ -73,7 +73,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			else offset = 60;
 			offset -= bb.width()/2;
 			bb.translate(offset,30);
-			qDebug() << bb;
+			//qDebug() << bb;
 			painter.drawText(bb,bottomline);
 		}
 	}

@@ -28,7 +28,7 @@ void GameObjectUi::moveRatio(float x, float y) {
 QPoint GameObjectUi::getPosition() {
 	int width;
 	int rootheight = tbl->rootHeight();
-	qDebug() << "root height" << rootheight;
+	//qDebug() << "root height" << rootheight;
 	if ( (x > 1) && (y > 1) && (keyside == Left) ) {
 		return QPoint(x,y);
 	} else {

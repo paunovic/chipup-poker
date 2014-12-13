@@ -35,6 +35,11 @@ private slots:
 	void on_btStandUp_clicked();
 	void on_btPlayNow_clicked();
 	void on_btCheck_clicked();
+	void on_btFold_clicked();
+	void on_raiseSlider_valueChanged(int value);
+	void on_btRaise_clicked();
+	void on_btMin_clicked();
+	void on_btMax_clicked();
 protected:
 	void resizeEvent(QResizeEvent *event);
 private:

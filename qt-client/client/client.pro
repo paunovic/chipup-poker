@@ -21,9 +21,10 @@ INCLUDEPATH += ../protobuf/
 # cd osx_img
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
-
-LIBS += -L../../protobuf/ -L../protobuf/release/ -L../protobuf/ -lprotobuf
-
+win32 {
+LIBS += -L../protobuf/release/ -L../protobuf/debug/
+}
+LIBS += -lprotobuf
 SOURCES += main.cpp\
         loginwindow.cpp \
     pokermain.cpp \
@@ -49,7 +50,8 @@ SOURCES += main.cpp\
     table/animation.cpp \
     table/animatecore.cpp \
     table/chip.cpp \
-    table/table_sit.cpp
+    table/table_sit.cpp \
+    data/playerclubstatus.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -72,7 +74,8 @@ HEADERS  += loginwindow.h \
     data/user.h \
     table/animation.h \
     table/animatecore.h \
-    table/table_sit.h
+    table/table_sit.h \
+    data/playerclubstatus.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
@@ -86,3 +89,5 @@ RESOURCES += \
 
 OTHER_FILES += scripts.qrc \
     table.js
+
+TRANSLATIONS += chipuppoker_ru.ts

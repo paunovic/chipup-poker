@@ -38,6 +38,7 @@ bool Table::event(QEvent *event) {
 }
 bool Table::table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
+	qDebug() << QString("minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);
 	QList<Data::SeatInfo*>::Iterator i;
 	bool self_found = false;
@@ -57,6 +58,7 @@ bool Table::table_status(QSharedPointer<Data::TableStatus> ts) {
 		ui->cbSitOutBB->setVisible(false);
 		ui->btSitOut->setVisible(false);
 		ui->cbFoldAny->setVisible(false);
+		ui->stackedWidget->setCurrentIndex(0);
 	} else { // sitting, play now may be needed
 		switch (seat->rawStatus()) {
 		case Poker::SeatInfo::psOutOfHand:
@@ -80,12 +82,24 @@ bool Table::table_status(QSharedPointer<Data::TableStatus> ts) {
 				} else {
 					ui->btCheck->setText(tr("CALL (%1)").arg((ts->minimum_bet - ts->bets[seat->seat_index])/100));
 				}
+				ui->raiseSlider->setMinimum(ts->minimum_raise);
+				ui->raiseSlider->setMaximum(ts->maximum_raise);
+				ui->raiseSlider->setValue(ts->minimum_raise);
+			} else {
+				ui->stackedWidget->setCurrentIndex(2);
 			}
 			break;
 		}
 	}
 	return result;
 }
+void Table::on_btMin_clicked() {
+	ui->raiseSlider->setValue(lastTableStatus->minimum_raise);
+}
+void Table::on_btMax_clicked() {
+	ui->raiseSlider->setValue(lastTableStatus->maximum_raise);
+}
+
 void Table::on_btCheck_clicked() {
 	Poker::PutChips pc;
 	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
@@ -140,4 +154,20 @@ void Table::on_btPlayNow_clicked() {
 	Poker::Game g;
 	g.set__id(game->gameid.data(),game->gameid.length());
 	core->sendMessage(Poker::scTablePlayNow,&g);
+}
+void Table::on_btFold_clicked() {
+	Poker::Game g;
+	g.set__id(game->gameid.data(),game->gameid.length());
+	core->sendMessage(Poker::scFold,&g);
+}
+void Table::on_raiseSlider_valueChanged(int value) {
+	ui->lbRaiseAmount->setText(QString("%1").arg((float)value/100));
+	ui->btRaise->setText(QString("BET (%1)").arg((float)value/100));
+}
+void Table::on_btRaise_clicked() {
+	Poker::PutChips pc;
+	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	pc.set_current_state(lastTableStatus->state());
+	pc.set_chip_amount(ui->raiseSlider->value());
+	core->sendMessage(Poker::scPutChips,&pc);
 }

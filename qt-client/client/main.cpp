@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QResource>
 #include <QFontDatabase>
+#include <QTranslator>
 
 #include "loginwindow.h"
 #include "pokermain.h"
@@ -10,6 +11,16 @@
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+
+	QTranslator translator;
+#if 0
+	translator.load("chipuppoker_ru");
+#else
+	QString locale = QLocale::system().name();
+	translator.load("chipuppoker_"+locale);
+#endif
+	a.installTranslator(&translator);
+
 	QFile styles(":/stylesheet.css");
 	if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load css";
