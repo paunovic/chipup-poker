@@ -8,12 +8,10 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	ui->setupUi(this);
 	updateLimits();
 	ui->lbsTableName->setText(tr("%1 (%2/%3 %4)").arg(g->gamename).arg(g->sb).arg(g->bb).arg(g->typeToLongString()));
-	connect(core,SIGNAL(sit_ok(QByteArray)),this,SLOT(sit_ok(QByteArray)));
-	connect(core,SIGNAL(seat_taken(QByteArray)),this,SLOT(seat_taken(QByteArray)));
 	Poker::Game g;
 	g.set__id(gamein->gameid.data(),gamein->gameid.length());
 	core->sendMessage(Poker::scTableSitOpen,&g);
-	connect(core,SIGNAL(PlayerClubStatus(Data::PlayerClubStatus&)),this,SLOT(on_PlayerClubStatus(Data::PlayerClubStatus&)));
+	core->RegisterListener(this);
 }
 void TableSit::updateLimits() {
 	float buyinmin = GetBuyinMin();
@@ -58,16 +56,16 @@ void TableSit::on_btMax_clicked() {
 void TableSit::on_seBuyin_textEdited() {
 	ui->btOK->setEnabled(ui->seBuyin->hasAcceptableInput());
 }
-void TableSit::sit_ok(QByteArray gameid) {
+void TableSit::On_sit_ok(QByteArray gameid) {
 	if (gameid == g->gameid) {
 		close();
 		deleteLater();
 	}
 }
-void TableSit::seat_taken(QByteArray gameid) {
+void TableSit::On_seat_taken(QByteArray gameid) {
 	qDebug() << "FIXME, seat taken";
 }
-void TableSit::on_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
+void TableSit::On_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
 	qDebug() << pcs.buyin_min << pcs.buyin_max;
 	lastPcs = pcs;
 	updateLimits();

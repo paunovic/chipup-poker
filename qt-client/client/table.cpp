@@ -16,7 +16,7 @@ Table::Table(QWidget *parent) :
 	ui->setupUi(this);
 	p = new TablePrivate;
 	p->setupUi(ui->centerWrap,ui->center);
-	connect(core,SIGNAL(table_status(QSharedPointer<Data::TableStatus>)),this,SLOT(table_status(QSharedPointer<Data::TableStatus>)));
+	core->RegisterListener(this);
 #ifdef JSDEBUG
 	debuger = new JsEditor(this);
 	debuger->show();
@@ -36,7 +36,7 @@ bool Table::event(QEvent *event) {
 	}
 	return QMainWindow::event(event);
 }
-bool Table::table_status(QSharedPointer<Data::TableStatus> ts) {
+bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
 	qDebug() << QString("minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);

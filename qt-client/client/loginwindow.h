@@ -20,12 +20,12 @@ private:
     Ui::LoginWindow *ui;
 	QPixmap background;
 private slots:
-	void protocol_ready(bool);
+	void On_protocol_ready(bool);
     void on_btLogin_clicked();
     void on_btCreateAccount_clicked();
 	void on_edLogin_returnPressed();
 	void on_edPassword_returnPressed();
-	void login_sucess();
+	void On_login_sucess();
 };
 
 #endif // LOGINWINDOW_H

@@ -15,7 +15,7 @@ RegisterWindow::RegisterWindow(QWidget *parent) :
     ui->edPassword->setValidator(pw_validator);
     ui->edConfirmPassword->setValidator(pw_validator);
     ui->edUsername->setValidator(new QRegExpValidator(QRegExp(core->validCharacters.username().c_str()),this));
-    connect(core,SIGNAL(register_success()),this,SLOT(register_success()));
+	core->RegisterListener(this);
 }
 RegisterWindow::~RegisterWindow() {
     delete ui;
@@ -66,6 +66,6 @@ void RegisterWindow::on_btSignUp_clicked() {
     rp.set_displayname(qPrintable(ui->edUsername->text()));
     core->sendMessage(Poker::scRegister,&rp);
 }
-void RegisterWindow::register_success() {
+void RegisterWindow::On_register_success() {
     done(0);
 }

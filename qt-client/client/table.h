@@ -28,7 +28,7 @@ public:
 	bool setGameForTesting(const Data::Game *game, QString jscode);
 	void editJs(QString newcode);
 public slots:
-	bool table_status(QSharedPointer<Data::TableStatus> ts);
+	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();

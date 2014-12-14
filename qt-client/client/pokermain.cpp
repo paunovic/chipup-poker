@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QMetaMethod>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -436,4 +437,19 @@ void PokerMain::sePlayerClubStatus(std::string data) {
 	Data::PlayerClubStatus out;
 	out.update(pcs);
 	emit PlayerClubStatus(out);
+}
+void PokerMain::RegisterListener(QObject *listener) {
+	const QMetaObject *mo = listener->metaObject();
+	for (int i = 0; i < mo->methodCount(); ++i) {
+		const char *slot = mo->method(i).signature();
+		Q_ASSERT(slot);
+		if (slot[0] != 'O' || slot[1] != 'n' || slot[2] != '_') continue;
+		bool foundIt = false;
+		int sigIndex = metaObject()->indexOfSignal(slot + 3);
+		qDebug() << sigIndex << slot << (slot+3);
+		if (sigIndex < 0) continue;
+		qDebug() << metaObject()->method(sigIndex).signature();
+		if (connect(core,qPrintable(QString("2%1").arg(metaObject()->method(sigIndex).signature())),listener,qPrintable(QString("1%1").arg(slot)))) {
+		} else qWarning("QMetaObject::connectSlotsByName: No matching signal for %s", slot);
+	}
 }

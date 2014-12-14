@@ -13,10 +13,9 @@ LoginWindow::LoginWindow(QWidget *parent) :
     QWidget(parent),
 	ui(new Ui::LoginWindow), background(":/resources/login/Background.png")
 {
-    ui->setupUi(this);
-    core->try_connect();
-	connect(core,SIGNAL(protocol_ready(bool)),this,SLOT(protocol_ready(bool)));
-	connect(core,SIGNAL(login_sucess()),this,SLOT(login_sucess()));
+	ui->setupUi(this);
+	core->try_connect();
+	core->RegisterListener(this);
 #ifndef testcase
 	qDebug() << "loading config";
 	QString username = core->config().value("login/username").toString();
@@ -30,7 +29,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 		}
 	}
 	if (core->socketState() == QAbstractSocket::ConnectedState) {
-		protocol_ready(true);
+		On_protocol_ready(true);
 	}
 #endif
 }
@@ -38,7 +37,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 LoginWindow::~LoginWindow() {
 	delete ui;
 }
-void LoginWindow::protocol_ready(bool ready) {
+void LoginWindow::On_protocol_ready(bool ready) {
 	qDebug() << "ready" << ready;
 	ui->btLogin->setEnabled(true);
 	ui->btLogin->setText(tr("LOGIN"));
@@ -68,7 +67,7 @@ void LoginWindow::on_btCreateAccount_clicked() {
 	rw->exec();
 #endif
 }
-void LoginWindow::login_sucess() {
+void LoginWindow::On_login_sucess() {
     QString username = ui->edLogin->text();
     QString password = ui->edPassword->text();
     bool saveuser = ui->cbRememberLogin->isChecked();

@@ -24,7 +24,7 @@ private slots:
     void on_cb18Years_stateChanged();
     void on_cbTOS_stateChanged();
     void on_btSignUp_clicked();
-    void register_success();
+    void On_register_success();
 
 private:
     Ui::RegisterWindow *ui;

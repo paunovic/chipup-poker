@@ -6,7 +6,7 @@
 
 CreateClub::CreateClub(QWidget *parent) : QDialog(parent), ui(new Ui::CreateClub) {
 	ui->setupUi(this);
-    connect(core,SIGNAL(club_create_reply(Poker::ClubCommandReply::ClubStatus)),this,SLOT(club_create_reply(Poker::ClubCommandReply::ClubStatus)));
+	core->RegisterListener(this);
 }
 
 void CreateClub::on_btOk_clicked() {
@@ -24,7 +24,7 @@ void CreateClub::on_btCancel_clicked() {
 CreateClub::~CreateClub() {
 	delete ui;
 }
-void CreateClub::club_create_reply(Poker::ClubCommandReply::ClubStatus status) {
+void CreateClub::On_club_create_reply(Poker::ClubCommandReply::ClubStatus status) {
     QMessageBox alert;
     switch (status) {
     case Poker::ClubCommandReply::csSuccess:

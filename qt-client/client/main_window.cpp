@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	currentClub = 0;
 
 	ui->setupUi(this);
-	connect(core,SIGNAL(secondary_login()),this,SLOT(secondary_login()));
 	connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
 	connect(ui->btTournaments,SIGNAL(clicked()),this,SLOT(tournaments()));
 	
@@ -45,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	ui->gridGames->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridGames->setSelectionModel(game_selection_model);
 	ui->gridGames->setRootIsDecorated(false);
+	core->RegisterListener(this);
 }
 MainWindow::~MainWindow() {
 	delete ui;
@@ -93,7 +93,7 @@ void MainWindow::on_actionLogout_triggered() {
 	deleteLater();
 	core->delayQuit = false; // FIXME
 }
-void MainWindow::secondary_login() {
+void MainWindow::On_secondary_login() {
 	LoginWindow *lw = new LoginWindow;
 	lw->show();
 	close();

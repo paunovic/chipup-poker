@@ -16,7 +16,7 @@ public:
 private slots:
     void on_btOk_clicked();
     void on_btCancel_clicked();
-    void club_create_reply(Poker::ClubCommandReply::ClubStatus status);
+    void On_club_create_reply(Poker::ClubCommandReply::ClubStatus status);
 
 private:
 	Ui::CreateClub *ui;
