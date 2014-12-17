@@ -441,15 +441,26 @@ void PokerMain::sePlayerClubStatus(std::string data) {
 void PokerMain::RegisterListener(QObject *listener) {
 	const QMetaObject *mo = listener->metaObject();
 	for (int i = 0; i < mo->methodCount(); ++i) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+		QByteArray slot_raw = mo->method(i).methodSignature();
+		const char *slot = slot_raw.data();
+#else
 		const char *slot = mo->method(i).signature();
+#endif
 		Q_ASSERT(slot);
 		if (slot[0] != 'O' || slot[1] != 'n' || slot[2] != '_') continue;
-		bool foundIt = false;
 		int sigIndex = metaObject()->indexOfSignal(slot + 3);
-		qDebug() << sigIndex << slot << (slot+3);
+		//qDebug() << sigIndex << slot << (slot+3);
 		if (sigIndex < 0) continue;
-		qDebug() << metaObject()->method(sigIndex).signature();
-		if (connect(core,qPrintable(QString("2%1").arg(metaObject()->method(sigIndex).signature())),listener,qPrintable(QString("1%1").arg(slot)))) {
-		} else qWarning("QMetaObject::connectSlotsByName: No matching signal for %s", slot);
+		const char *signal;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+		QByteArray signal_raw = metaObject()->method(sigIndex).methodSignature();
+		signal = signal_raw.data();
+#else
+		signal = metaObject()->method(sigIndex).signature();
+#endif
+		qDebug() << "connecting" << signal << "to" << slot;
+		if (connect(core,qPrintable(QString("2%1").arg(signal)),listener,qPrintable(QString("1%1").arg(slot)))) {
+		} else qWarning("PokerMain::RegisterListener: No matching signal for %s", slot);
 	}
 }

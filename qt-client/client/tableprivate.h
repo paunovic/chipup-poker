@@ -50,6 +50,7 @@ public:
 	void moveRatio(float x, float y);
 	int heightForWidth(int w) const;
 	virtual QPoint getPosition();
+	float getRenderHeight() const;
 
 	float w, x,y;
 	AlignmentSide keyside;
@@ -94,6 +95,7 @@ public:
 	bool visible() { return internal->isVisible(); }
 
 	Q_PROPERTY(bool visible READ visible WRITE setVisible)
+	Q_PROPERTY(float renderHeight READ getRenderHeight)
 public slots:
 	void setPosition(float x, float y);
 	void setSize(float w);
@@ -103,6 +105,7 @@ protected:
 	TablePrivate *table;
 private:
 	void setVisible(bool in) { internal->setVisible(in); }
+	float getRenderHeight() const;
 };
 
 #endif // TABLEPRIVATE_H

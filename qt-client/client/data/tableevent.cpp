@@ -25,6 +25,7 @@ QString TableEvent::getEvent() {
 	case Poker::TableEvent::teDealing: return "teDealing"; // 4
 	case Poker::TableEvent::teCheck: return "teCheck"; // 5
 	case Poker::TableEvent::teCall: return "teCall"; // 6
+	case Poker::TableEvent::teRaise: return "teRaise"; // 7
 	case Poker::TableEvent::teFlop: return "teFlop"; // 9
 	case Poker::TableEvent::teTurn: return "teTurn"; // 10
 	case Poker::TableEvent::teRiver: return "teRiver"; // 11

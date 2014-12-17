@@ -28,8 +28,8 @@ private slots:
 	void On_seat_taken(QByteArray gameid);
 	void On_PlayerClubStatus(Data::PlayerClubStatus &pcs);
 private:
-	float GetBuyinMin();
-	float GetBuyinMax();
+	double GetBuyinMin();
+	double GetBuyinMax();
 	void updateLimits();
 
 	Ui::TableSit *ui;

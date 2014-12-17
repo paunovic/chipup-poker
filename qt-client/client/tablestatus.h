@@ -24,6 +24,7 @@ public:
 	Poker::TableStatus::TableState state() { return state_; }
 	void setState(Poker::TableStatus::TableState in) { state_ = in; }
 	int getCurrentSeat() { return current_seat; }
+	QList<int> bets() { return bets_; }
 
 #define X(type,name) Q_PROPERTY(QString name READ get ## name )\
 type name;\
@@ -36,11 +37,11 @@ type get ## name() { return name; }
 	Q_PROPERTY(QString state READ getState)
 	Q_PROPERTY(int current_seat READ getCurrentSeat)
 	Y(int,dealer)
+	Q_PROPERTY(QList<int> bets READ bets)
 	
 	QByteArray gameid;
 	QList<Data::SeatInfo*> seats;
 	int current_seat;
-	QList<int> bets;
 	bool locked;
 	int seq;
 	int minimum_bet, maximum_raise, minimum_raise;
@@ -61,6 +62,7 @@ public slots:
 	QObject *readSeat(int index);
 	int seatCount() { return seats.length(); }
 private:
+	QList<int> bets_;
 	Poker::TableStatus::TableState state_;
 };
 

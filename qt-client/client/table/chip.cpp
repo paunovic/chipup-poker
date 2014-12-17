@@ -22,7 +22,7 @@ ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(pa
 }
 
 void ChipObjectUi::updateValue() {
-	int v = jsobj->value();
+	int v = jsobj->value()/100;
 	chips.clear();
 	while (v) {
 		if (v >= 1000) {
@@ -45,6 +45,8 @@ void ChipObjectUi::updateValue() {
 			v -= 1;
 		}
 	}
+	update();
+	updateGeometry();
 }
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight) {
 	float scale = 0.6;
@@ -69,7 +71,7 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 
 	p.setPen(QColor(255,255,255));
 	int chipwidth = pix.width()*0.6;
-	p.drawText(chipwidth,height()/2,width() - chipwidth,height(),0,QString("%1").arg(jsobj->value()));
+	p.drawText(chipwidth,height()/2,width() - chipwidth,height(),0,QString("%1").arg((float)jsobj->value()/100));
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;

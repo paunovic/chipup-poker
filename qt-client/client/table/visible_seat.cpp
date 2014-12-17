@@ -64,7 +64,8 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			break;
 		case Poker::SeatInfo::psInHand:
 		case Poker::SeatInfo::psOutOfHand:
-			bottomline = QString("%1").arg((float)chips/100);
+		case Poker::SeatInfo::psFolded:
+			bottomline = QString("%1").arg((double)chips/100);
 		}
 		if (bottomline.length() > 0) {
 			QRect bb = fontMetric->boundingRect(bottomline);
@@ -122,7 +123,7 @@ void VisibleSeat::updateSeat() {
 		for (i=ts->seats.begin(); i!=ts->seats.end(); ++i) {
 			Data::SeatInfo *seat = *i;
 			if (seat->getSeatIndex() == seatindex) {
-				qDebug() << "finding self" << jsobj->getSeat() << seat->getSeatIndex();
+				//qDebug() << "finding self" << jsobj->getSeat() << seat->getSeatIndex();
 				updateInfo(seat);
 			}
 		}

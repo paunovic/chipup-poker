@@ -14,8 +14,8 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	core->RegisterListener(this);
 }
 void TableSit::updateLimits() {
-	float buyinmin = GetBuyinMin();
-	float buyinmax = GetBuyinMax();
+	double buyinmin = GetBuyinMin();
+	double buyinmax = GetBuyinMax();
 	ui->seBuyin->setValidator(new QDoubleValidator(buyinmin,buyinmax,2));
 	// minbuyin is on tablestatus or game, ts takes priority
 	// maxbuyin is based on chips at a seat
@@ -28,20 +28,22 @@ TableSit::~TableSit() {
 }
 void TableSit::on_btOK_clicked() {
 	Poker::TableSit ts;
+	int chips = ui->seBuyin->text().toDouble()*100;
+	qDebug() << ui->seBuyin->text() << chips;
 	ts.set_game_id(g->gameid.data(),g->gameid.length());
-	ts.set_chips(ui->seBuyin->text().toFloat()*100);
+	ts.set_chips(chips);
 	ts.set_seat_index(seat);
 	core->sendMessage(Poker::scTableSit,&ts);
 }
-float TableSit::GetBuyinMin() {
+double TableSit::GetBuyinMin() {
 	// FIXME, also fetch via PlayerTableStatus
-	if (lastPcs.buyin_min > 0) return lastPcs.buyin_min / 100;
-	return g->buyin_min/100;
+	if (lastPcs.buyin_min > 0) return (double)lastPcs.buyin_min / 100;
+	return (double)g->buyin_min/100;
 }
-float TableSit::GetBuyinMax() {
+double TableSit::GetBuyinMax() {
 	// FIXME also fetch via several means
-	if (lastPcs.buyin_max > 0) return lastPcs.buyin_max/100;
-	return g->buyin_max/100;
+	if (lastPcs.buyin_max > 0) return (double)lastPcs.buyin_max/100;
+	return (double)g->buyin_max/100;
 }
 void TableSit::on_btCancel_clicked() {
 	close();

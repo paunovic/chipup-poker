@@ -279,7 +279,7 @@ void TestCase::simplegame() {
 		pm.users.append(u);
 	}
 	ts->current_seat = -1;
-	result = tbl.table_status(ts);
+	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 
 	for (int x=0; x<10; x++) {
@@ -298,13 +298,13 @@ void TestCase::simplegame() {
 	ts->seats[0]->setStatus(Poker::SeatInfo::psInHand);
 	ts->seats[1]->setStatus(Poker::SeatInfo::psInHand);
 	ts->current_seat = 4;
-	ts->bets.append(200);
-	ts->bets.append(0);
-	ts->bets.append(0);
-	ts->bets.append(0);
-	ts->bets.append(100);
+	ts->bets().append(200);
+	ts->bets().append(0);
+	ts->bets().append(0);
+	ts->bets().append(0);
+	ts->bets().append(100);
 	ts->minimum_bet = 200;
-	result = tbl.table_status(ts);
+	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 
 	tbl.render(&image);
@@ -337,7 +337,7 @@ void TestCase::simplegame() {
 	river->cards.append(rivercards);
 	ts->events.append(river);
 
-	result = tbl.table_status(ts);
+	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 	tbl.render(&image);
 	image.save("simplegame2.png");

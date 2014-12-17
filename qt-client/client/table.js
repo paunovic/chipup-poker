@@ -4,7 +4,19 @@ var localFlop = [];
 var localTurn = [];
 var localRiver = [];
 
+var idleChips = [];
+function getChipStack() {
+	if (idleChips.length) return idleChips.pop();
+	else return new ChipStack();
+}
+function hideChips(input) {
+	input.visible = false;
+	idleChips.push(input);
+}
+
+var lastTS;
 function tableStatus(ts) {
+	lastTS = ts;
 	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
 	var max = ts.seatCount();
 	for (var i=0; i<max; i++) {
@@ -18,7 +30,7 @@ function tableStatus(ts) {
 		local.active = (seat.seat_index == ts.current_seat); // FIXME, ignore when idle?
 		var user = seat.getUser();
 		seat_objects[seat.seat_index].avatar = user.avatar;
-			log("local:"+local.cards.length+" remote:"+seat.card_count);
+			//log("local:"+local.cards.length+" remote:"+seat.card_count);
 			if (seat.card_count >= local.cards.length) {
 				for (var j=0; j<seat.card_count; j++) {
 					if (local.cards[j]) {
@@ -56,6 +68,10 @@ function tableEvent(event) {
 			delete local.cards[x];
 		}
 		seat_objects[event.seat].empty = true;
+		if (seat_objects[event.seat].bet) {
+			hideChips(seat_objects[event.seat].bet);
+			seat_objects[event.seat].bet = null;
+		}
 		break;
 	case "teFlop":
 		for (var i=0; i<event.getCardCount(); i++) {
@@ -95,6 +111,7 @@ function tableEvent(event) {
 		}
 		break;
 	case "teWinning":
+		updateBets();
 		if (localFlop[0]) {
 			localFlop[0].visible = false;
 			localFlop[1].visible = false;
@@ -103,8 +120,40 @@ function tableEvent(event) {
 		if (localTurn[0]) localTurn[0].visible = false;
 		if (localRiver[0]) localRiver[0].visible = false;
 		break;
+	case 'teDealing':
+		updateBets();
+		break;
+	case 'teCall':
+		updateBets();
+		break;
+	case 'teCheck':
+		updateBets();
+		break;
+	case 'teRaise':
+		updateBets();
+		break;
 	default:
 		dump(event);
+	}
+}
+function updateBets() {
+	for (var i=0; i<lastTS.seatCount(); i++) {
+		var remote = lastTS.readSeat(i);
+		var local = seat_objects[remote.seat_index];
+		if (lastTS.bets[remote.seat_index] == 0) {
+			if (local.bet) {
+				hideChips(local.bet);
+				local.bet = null;
+			}
+			log("hiding chips for "+remote.seat_index);
+			continue;
+		}
+		if (!local.bet) local.bet = getChipStack();
+		var pos = calcSeatPosition(remote.seat_index);
+		local.bet.setPosition(pos.x-0.1,pos.y);
+		local.bet.visible = true;
+		local.bet.value = lastTS.bets[remote.seat_index];
+		log("updating seat "+remote.seat_index+" bet to "+lastTS.bets[remote.seat_index]);
 	}
 }
 function dump(i) {
@@ -121,6 +170,7 @@ function initSeats() {
 		seat.tournament = false;
 		seat.empty = true;
 		seat.cards = [];
+		seat.bet = null;
 		seat_objects[i] = seat;
 	}
 	adjustSeats();

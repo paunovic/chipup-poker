@@ -52,7 +52,6 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	}
 	ui->btStandUp->setVisible(self_found);
 	if (!self_found) { // not sitting, cant play now
-		qDebug() << "self not found";
 		ui->btPlayNow->setVisible(false);
 		ui->btDouble->setVisible(false);
 		ui->cbSitOutBB->setVisible(false);
@@ -73,14 +72,14 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 			ui->stackedWidget->setCurrentIndex(0);
 			break;
 		case Poker::SeatInfo::psInHand:
-			qDebug() << QString("i am in hand, current seat:%1, myself:%2, minbet:%3, mybet:%4").arg(ts->current_seat).arg(seat->seat_index).arg(ts->minimum_bet).arg(ts->bets[seat->seat_index]);
+			qDebug() << QString("i am in hand, current seat:%1, myself:%2, minbet:%3, mybet:%4").arg(ts->current_seat).arg(seat->seat_index).arg(ts->minimum_bet).arg(ts->bets()[seat->seat_index]);
 			if (ts->current_seat == seat->seat_index) {
 				qDebug() << "stack change";
 				ui->stackedWidget->setCurrentIndex(1);
-				if (ts->minimum_bet == ts->bets[seat->seat_index]) {
+				if (ts->minimum_bet == ts->bets()[seat->seat_index]) {
 					ui->btCheck->setText(tr("CHECK"));
 				} else {
-					ui->btCheck->setText(tr("CALL (%1)").arg((ts->minimum_bet - ts->bets[seat->seat_index])/100));
+					ui->btCheck->setText(tr("CALL (%1)").arg((ts->minimum_bet - ts->bets()[seat->seat_index])/100));
 				}
 				ui->raiseSlider->setMinimum(ts->minimum_raise);
 				ui->raiseSlider->setMaximum(ts->maximum_raise);

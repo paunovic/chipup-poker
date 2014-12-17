@@ -55,6 +55,13 @@ int GameObjectUi::heightForWidth( int width ) const {
 	Q_ASSERT(pix.height());
 	return ((qreal)pix.height()*width)/pix.width();
 }
+float GameObjectUi::getRenderHeight() const {
+	return ((float)pix.height()*w)/pix.width();
+}
+float GameObject::getRenderHeight() const {
+	return internal->getRenderHeight();
+}
+
 void GameObject::setSide(int side){
 	internal->keyside = (AlignmentSide) side;
 }

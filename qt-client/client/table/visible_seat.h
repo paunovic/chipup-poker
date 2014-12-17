@@ -40,7 +40,7 @@ Q_OBJECT
 public:
 	SeatObject(TablePrivate *parent);
 	bool active() { return seat->active; }
-	void setActive(bool in) { qDebug() << "setting active" << in; seat->active = in; seat->updateSeat(); };
+	void setActive(bool in) { seat->active = in; seat->updateSeat(); }
 
 	Q_PROPERTY(int seat READ getSeat WRITE setSeat)
 	Q_PROPERTY(bool tournament READ getTourn WRITE setTourn)
