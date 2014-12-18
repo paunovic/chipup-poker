@@ -11,6 +11,7 @@
 
 #include "tablestatus.h"
 #include "table/game_wrap.h"
+#include "table/tablelayout.h"
 
 class GameObjectUi;
 class SeatObject;
@@ -26,20 +27,19 @@ Q_OBJECT
 public:
 	TableUi(QWidget *parent=0);
 	QSize sizeHint() const;
-	void addElement(GameObjectUi *element);
 //	int heightForWidth(int w) const;
 	int rootHeight();
+	TableInternal::TableLayout *getLayout() { return mylayout; } // FIXME?
 
 	int yoffset;
 private slots:
-	void element_deleted(QObject *element);
 protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void drawCross(QPainter &p);
 
-	QList<GameObjectUi*> uiElements;
 	QPixmap pix;
+	TableInternal::TableLayout *mylayout;
 };
 class GameObjectUi : public QWidget {
 Q_OBJECT

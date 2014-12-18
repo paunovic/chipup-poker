@@ -23,6 +23,7 @@ static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engin
 	ret.setProperty("y",pos.y());
 	return ret;
 }
+
 static QScriptValue NewSeatObject(QScriptContext *, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	SeatObject *seatobj = new SeatObject(parent);
@@ -104,7 +105,15 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		return false;
 	}
 	QScriptValueList args;
-	args.append(engine.newQObject(ts.data()));
+	QScriptValue jsts = engine.newQObject(ts.data());
+	QList<Data::Pot*>::Iterator i1;
+	QScriptValue pots = engine.newArray();
+	jsts.setProperty("pots",pots);
+	int index;
+	for (i1=ts->pots.begin(), index=0; i1!=ts->pots.end(); ++i1, index++) {
+		pots.setProperty(index,engine.newQObject(*i1));
+	}
+	args.append(jsts);
 	func.call(engine.globalObject(),args);
 	if (engine.hasUncaughtException()) {
 		qDebug() << engine.uncaughtExceptionBacktrace();
@@ -117,9 +126,9 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		qDebug() << "tableEvent isnt a function";
 		return false;
 	}
-	QList<QSharedPointer<Data::TableEvent> >::Iterator i;
-	for (i=ts->events.begin(); i!=ts->events.end(); ++i) {
-		QSharedPointer<Data::TableEvent> e = *i;
+	QList<QSharedPointer<Data::TableEvent> >::Iterator i2;
+	for (i2=ts->events.begin(); i2!=ts->events.end(); ++i2) {
+		QSharedPointer<Data::TableEvent> e = *i2;
 		QScriptValue event = engine.newQObject(e.data());
 		QScriptValueList args;
 		args.append(event);

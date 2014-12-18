@@ -87,7 +87,7 @@ void LoginWindow::On_login_sucess() {
 	close();
 	deleteLater();
 }
-void LoginWindow::paintEvent(QPaintEvent *e) {
+void LoginWindow::paintEvent(QPaintEvent *) {
 	QPainter p(this);
 	int targetHeight = ((qreal)background.height()*width())/background.width();
 	p.drawPixmap(0,0,width(),targetHeight,background);

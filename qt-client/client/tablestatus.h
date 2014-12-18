@@ -49,7 +49,7 @@ type get ## name() { return name; }
 	int handid;
 	quint64 time;
 	QList<QSharedPointer<Data::TableEvent> > events;
-	QList<Data::Pot> pots;
+	QList<Data::Pot*> pots;
 	int rake_percent;
 	Poker::Game::GameType current_game;
 	int rotation;

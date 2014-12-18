@@ -5,8 +5,8 @@
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	value_ = 1;
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
-	setSize(0.1);
-	parent->getUi()->addElement(internal);
+	setSize(0.05);
+	parent->getUi()->getLayout()->addElement(internal);
 }
 
 ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(parent),
@@ -45,6 +45,7 @@ void ChipObjectUi::updateValue() {
 			v -= 1;
 		}
 	}
+	qDebug() << "chip doing update";
 	update();
 	updateGeometry();
 }

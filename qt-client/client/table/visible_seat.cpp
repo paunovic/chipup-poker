@@ -65,6 +65,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 		case Poker::SeatInfo::psInHand:
 		case Poker::SeatInfo::psOutOfHand:
 		case Poker::SeatInfo::psFolded:
+		case Poker::SeatInfo::psAllIn:
 			bottomline = QString("%1").arg((double)chips/100);
 		}
 		if (bottomline.length() > 0) {
@@ -88,7 +89,7 @@ SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 
 	//qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
 	internal = seat = new VisibleSeat(root->getUi(),this);
-	root->getUi()->addElement(internal);
+	root->getUi()->getLayout()->addElement(internal);
 	//qDebug() << "seat info" << internal->size() << internal->pos() << internal->isVisible() << internal->isHidden();
 }
 void VisibleSeat::mousePressEvent(QMouseEvent *) {

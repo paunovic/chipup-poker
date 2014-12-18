@@ -39,8 +39,8 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		events.append(e);
 	}
 	for (i=0; i<in.pots_size(); i++) {
-		Data::Pot p;
-		p.update(in.pots(i));
+		Data::Pot *p = new Data::Pot;
+		p->update(in.pots(i));
 		pots.append(p);
 	}
 	rake_percent = in.rake_percent();
@@ -53,7 +53,6 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		m.update(in.table_message(i));
 		table_message.append(m);
 	}
-
 }
 QString TableStatus::getState() {
 	switch (state_) {

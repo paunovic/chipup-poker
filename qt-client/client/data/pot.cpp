@@ -4,10 +4,10 @@ namespace Data {
 
 void Pot::update(const Poker::Pot &in) {
 	int i;
-	value = in.value();
+	value_ = in.value();
 	for (i=0; i<in.members_size(); i++) {
-		members.append(in.members(i));
+		members_.append(in.members(i));
 	}
-	rake = in.rake();
+	rake_ = in.rake();
 }
 } // namespace Data

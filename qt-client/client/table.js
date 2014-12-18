@@ -3,6 +3,7 @@ var seat_objects = [];
 var localFlop = [];
 var localTurn = [];
 var localRiver = [];
+var localPots = [];
 
 var idleChips = [];
 function getChipStack() {
@@ -13,7 +14,17 @@ function hideChips(input) {
 	input.visible = false;
 	idleChips.push(input);
 }
-
+function updatePots() {
+	for (var i=0; i<lastTS.pots.length; i++) {
+		if (!localPots[i]) {
+			localPots[i] = getChipStack();
+		}
+		if (lastTS.pots[i].value == 0) continue;
+		localPots[i].setPosition(0.35 + (0.1*i),0.3);
+		localPots[i].visible = true;
+		localPots[i].value = lastTS.pots[i].value;
+	}
+}
 var lastTS;
 function tableStatus(ts) {
 	lastTS = ts;
@@ -85,6 +96,7 @@ function tableEvent(event) {
 			localFlop[1].setPosition(0.387,0.477);
 			localFlop[2].setPosition(0.454,0.477);
 		}
+		updatePots();
 		break;
 	case "teTurn":
 		for (var i=0; i<event.getCardCount(); i++) {
@@ -94,6 +106,7 @@ function tableEvent(event) {
 			localTurn[0].card = card.cards[0];
 			localTurn[0].setPosition(0.523,0.477);
 		}
+		updatePots();
 		break;
 	case "teRiver":
 		for (var i=0; i<event.getCardCount(); i++) {
@@ -103,6 +116,7 @@ function tableEvent(event) {
 			localRiver[0].card = card.cards[0];
 			localRiver[0].setPosition(0.592,0.477);
 		}
+		updatePots();
 		break;
 	case "teExistingCards":
 		for (var i=0; i<event.getCardCount(); i++) {
