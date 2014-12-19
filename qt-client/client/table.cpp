@@ -22,7 +22,6 @@ Table::Table(QWidget *parent) :
 	debuger->show();
 #endif
 }
-
 Table::~Table() {
 	delete ui;
 	delete p;

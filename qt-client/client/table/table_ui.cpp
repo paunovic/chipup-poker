@@ -1,16 +1,24 @@
 #include <QPainter>
+#include <QEvent>
 
 #include "tableprivate.h"
 
 TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 	pix = QPixmap(":/resources/table/Table.png");
-	qDebug() << "layout was" << layout();
-	mylayout = new TableInternal::TableLayout(this);
-	setLayout(mylayout);
-	qDebug() << "now" << layout();
+	yoffset = 0;
 }
 void TableUi::resizeEvent(QResizeEvent *) {
-	qDebug() << "tableui resize";
+	float h = rootHeight();
+	yoffset = h * 0.14;
+
+	for (int i=0; i<uiElements.length(); i++) {
+		GameObjectUi *el = uiElements.at(i);
+		//qDebug() << "layout out" << el << el->x << el->y << el->w << (int)el->keyside;
+		//int new_width = width() * el->w;
+		QPoint pos = el->getPosition();
+		QSize size = el->sizeHint();
+		el->setGeometry(pos.x(),pos.y(), size.width(),size.height());
+	}
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Preferred);
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
@@ -45,10 +53,24 @@ void TableUi::drawCross(QPainter &p) {
 	p.drawLine(0,(h/2)-yoffset,w,(h/2)-yoffset);
 	p.drawLine(w/2,0,w/2,h);
 }
-
-
+void TableUi::addElement(GameObjectUi *element) {
+	uiElements.append(element);
+	connect(element,SIGNAL(destroyed(QObject*)),this,SLOT(element_deleted(QObject*)));
+}
+void TableUi::element_deleted(QObject *item) {
+	qDebug() << "element deleting" << item;
+	uiElements.removeOne(static_cast<GameObjectUi*>(item));
+}
 QSize TableUi::sizeHint() const {
 	return QSize(300,200);
+}
+bool TableUi::event(QEvent *event) {
+	if (event->type() == QEvent::LayoutRequest) {
+		resizeEvent(NULL);
+		return true;
+	} else {
+		return QWidget::event(event);
+	}
 }
 /*int TableUi::heightForWidth( int width ) const {
 	return ((qreal)pix.height()*width)/pix.width();

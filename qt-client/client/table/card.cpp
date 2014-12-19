@@ -53,7 +53,7 @@ static inline QColor getSuitColor(int card) {
 CardObject::CardObject(TablePrivate *parent) :GameObject(parent) {
 	card_ = 0;
 	internal = card = new CardObjectUi(parent->getUi(),this);
-	parent->getUi()->getLayout()->addElement(internal);
+	parent->getUi()->addElement(internal);
 }
 CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(parent),
 	jsobj(jsobj) {

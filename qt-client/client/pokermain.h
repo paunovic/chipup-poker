@@ -41,6 +41,7 @@ public:
 	Data::User *findUser(QByteArray userid);
 	QNetworkAccessManager *manager();
 	qint64 getUptime() { return uptime.elapsed(); }
+	qint64 getServerTime() { return clock_offset + uptime.elapsed(); }
 	Data::User *self() { Q_ASSERT(self_); return self_; }
 	void RegisterListener(QObject *listener);
 
@@ -51,6 +52,7 @@ public:
 	bool delayQuit;
 	QApplication *app;
 	QList<Data::User*> users;
+	int max_play_time;
 signals:
 	void protocol_ready(bool);
 	void login_sucess();
@@ -97,6 +99,9 @@ private:
     QSettings *settings;
 	QNetworkAccessManager *manager_;
 	Data::User *self_;
+	quint64 clock_offset;
+	bool first_ping;
+	int totalError;
 };
 
 extern PokerMain *core;

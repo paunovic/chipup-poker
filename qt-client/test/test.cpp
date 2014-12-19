@@ -218,8 +218,9 @@ void TestCase::testsomething() {
 }
 void TestCase::simplegame() {
 	int result;
-	Table tbl;
 	PokerMain pm;
+	core = &pm;
+	Table tbl;
 
 	QByteArray selfid;
 	selfid[0] = 1;
@@ -237,7 +238,6 @@ void TestCase::simplegame() {
 		tbl.setStyleSheet(css);
 	}
 
-	core = &pm;
 	AnimateCore ac(true);
 	animateCore = &ac;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
@@ -292,17 +292,21 @@ void TestCase::simplegame() {
 	tbl.render(&image);
 	image.save("simplegame0.png");
 
-	ts->setState(Poker::TableStatus::tsPreFlop);
+	Poker::TableStatus initial;
+	initial.set_current_seat(4);
+	initial.set_state(Poker::TableStatus::tsPreFlop);
+	initial.add_bets(200);
+	initial.add_bets(0);
+	initial.add_bets(0);
+	initial.add_bets(0);
+	initial.add_bets(100);
+	ts->update(initial);
+
 	ts->seats[0]->setCard_count(2);
 	ts->seats[1]->setCard_count(2);
 	ts->seats[0]->setStatus(Poker::SeatInfo::psInHand);
 	ts->seats[1]->setStatus(Poker::SeatInfo::psInHand);
-	ts->current_seat = 4;
-	ts->bets().append(200);
-	ts->bets().append(0);
-	ts->bets().append(0);
-	ts->bets().append(0);
-	ts->bets().append(100);
+	qDebug() << "bets" << ts->bets();
 	ts->minimum_bet = 200;
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);

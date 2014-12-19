@@ -23,7 +23,12 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	seatLeftActive = QPixmap(":/resources/seats/SeatLeftActive.png");
 	seatLeftEmpty = QPixmap(":/resources/seats/SeatLeftEmpty.png");
 	seatLeftEmptyTournament = QPixmap(":/resources/seats/SeatLeftEmptyTournament.png");
+	timebar = QPixmap(":/resources/table/Timebar.png");
+	timebank = QPixmap(":/resources/table/Timebank.png");
 	updateSeat();
+	ticker.setSingleShot(false);
+	ticker.setInterval(100);
+	connect(&ticker,SIGNAL(timeout()),this,SLOT(tick()));
 }
 VisibleSeat::~VisibleSeat() {
 	delete fontMetric;
@@ -32,6 +37,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	//qDebug() << "seat redraw" << jsobj->getSeat();
 	QPainter painter(this);
 	painter.setFont(font);
+	painter.setRenderHints(QPainter::SmoothPixmapTransform);
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));
 	//if (keyside == Right) painter.drawRect(62,4,23,23);
@@ -43,7 +49,8 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			painter.drawPixmap(x,4,23,23,avatar);
 		} else qWarning("avatar missing from a seat");
 	}
-	painter.drawPixmap(0,0,width(),height(),pix);
+	int targetheight = heightForWidth(width());
+	painter.drawPixmap(0,0,width(),targetheight,pix);
 	if (!jsobj->getEmpty()) {
 		painter.setPen(QColor(255,0,0)); // FIXME, light grey
 		QRect dn = fontMetric->boundingRect(displayname);
@@ -79,6 +86,25 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			painter.drawText(bb,bottomline);
 		}
 	}
+	painter.setPen(QColor(255,0,0));
+	painter.setBrush(QColor(0,255,0));
+	QRectF timebarSize(0,targetheight-1,width(),timebarHeight(width()));
+	QRectF source(0,0,timebar.width(),timebar.height());
+	if (timebarPercent > 0) {
+		timebarSize.setWidth(timebarSize.width() * timebarPercent);
+		source.setWidth(source.width() * timebarPercent);
+		painter.drawPixmap(timebarSize,timebar,source);
+	}
+	//painter.drawRect(timebarSize);
+}
+QSize VisibleSeat::sizeHint() const {
+	QSize oldsize = GameObjectUi::sizeHint();
+	oldsize.setHeight(oldsize.height() + timebarHeight(oldsize.width()));
+	return oldsize;
+}
+float VisibleSeat::timebarHeight(int w) const {
+	//qDebug() << timebar.height() << w << timebar.width();
+	return ((float)timebar.height()*w)/timebar.width();
 }
 SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	pendingReply = 0;
@@ -89,11 +115,11 @@ SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 
 	//qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
 	internal = seat = new VisibleSeat(root->getUi(),this);
-	root->getUi()->getLayout()->addElement(internal);
+	root->getUi()->addElement(internal);
 	//qDebug() << "seat info" << internal->size() << internal->pos() << internal->isVisible() << internal->isHidden();
 }
 void VisibleSeat::mousePressEvent(QMouseEvent *) {
-	qDebug() << jsobj->getSeat();
+	qDebug() << __func__ << jsobj->getSeat();
 }
 void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 	qDebug() << "release";
@@ -102,7 +128,11 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 	sitwindow->show();
 }
 void VisibleSeat::updateSeat() {
+	Q_ASSERT(jsobj);
 	if (jsobj->getEmpty()) {
+		ticker.stop();
+		keytime = 0;
+		timebarPercent = 0;
 		if (jsobj->getTourn()) {
 			if (jsobj->left()) pix = seatLeftEmptyTournament;
 			else pix = seatRightEmptyTournament;
@@ -152,9 +182,29 @@ void SeatObject::replyFinished(QNetworkReply *reply) {
 void SeatObject::updateInfo(Data::SeatInfo *info) {
 	seat->updateInfo(info);
 }
+void VisibleSeat::tick() {
+	int diff = keytime - core->getServerTime();
+	if (diff > 0) {
+		timebarPercent = (float)diff / (core->max_play_time*1000);
+		if (timebarPercent > 1) timebarPercent = 1;
+		update();
+	} else {
+		qDebug() << "timebank debug" << diff;
+	}
+}
 void VisibleSeat::updateInfo(Data::SeatInfo *info) {
+	QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
+	if (ts->current_seat == info->seat_index) {
+		keytime = ts->time;
+		ticker.start();
+	} else {
+		ticker.stop();
+		keytime = 0;
+		timebarPercent = 0;
+	}
 	Data::User *u = static_cast<Data::User*>(info->getUser());
 	displayname = u->displayName();
 	status = info->rawStatus();
 	chips = info->chips();
+	update();
 }

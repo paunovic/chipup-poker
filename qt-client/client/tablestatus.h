@@ -47,7 +47,7 @@ type get ## name() { return name; }
 	int minimum_bet, maximum_raise, minimum_raise;
 	int sb,bb;
 	int handid;
-	quint64 time;
+	qint64 time;
 	QList<QSharedPointer<Data::TableEvent> > events;
 	QList<Data::Pot*> pots;
 	int rake_percent;

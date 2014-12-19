@@ -6,7 +6,7 @@ ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	value_ = 1;
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
 	setSize(0.05);
-	parent->getUi()->getLayout()->addElement(internal);
+	parent->getUi()->addElement(internal);
 }
 
 ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(parent),
@@ -76,7 +76,6 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
-	qDebug() << new_width;
 	int height = (chips.length() * 5) + (pix.height() * 0.6);
 	return QSize(new_width+40,height);
 }

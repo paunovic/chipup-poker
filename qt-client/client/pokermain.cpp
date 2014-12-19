@@ -86,6 +86,7 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "expected error" << expectedSslErrors;
 }
 void PokerMain::socket_ready() {
+	first_ping = true;
     Poker::HelloParams hp;
     hp.set_debug(false);
 	qDebug() << "sending hello";
@@ -158,7 +159,8 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	switch (code) {
 	case Poker::srHello:
 		hr.ParseFromString(data);
-        validCharacters = hr.valid_chars_regex();
+		validCharacters = hr.valid_chars_regex();
+		max_play_time = hr.max_play_time();
 		send_ping();
 		emit protocol_ready(true);
 		break;
@@ -210,9 +212,17 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::srPong: { // 30
 		ping_reply.ParseFromString(data);
 		int previous_uptime = ping_reply.uptime();
-		quint64 server_clock = ping_reply.servertime();
-		quint64 clock_offset = server_clock - recv_time;
-		//qDebug() << "ping:" << (recv_time - previous_uptime) << "server clock:" << server_clock << "offset:" << clock_offset;
+		quint64 ping = recv_time - previous_uptime;
+		quint64 server_clock = ping_reply.servertime() + (ping/2);
+		qint64 diff = server_clock - getServerTime();
+		clock_offset = server_clock - recv_time;
+		if (first_ping) {
+			first_ping = false;
+			totalError = 0;
+			diff = 0;
+		}
+		totalError += diff;
+		qDebug() << "ping:" << ping << "server clock:" << server_clock << "offset:" << clock_offset << "diff:" << diff << totalError;
 		break; }
 	case Poker::srTableStatsReply: // 35
 		qDebug() << "srTableStatsReply";

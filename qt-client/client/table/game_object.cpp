@@ -4,13 +4,13 @@ GameObject::GameObject(TablePrivate *table) {
 	this->table = table;
 }
 void GameObject::setPosition(float x, float y) {
-	//qDebug() << __func__ << x << y;
 	Q_ASSERT(x > 0);
 	Q_ASSERT(y > 0);
 	internal->moveRatio(x,y);
 	internal->show();
 }
 void GameObject::setSize(float w) {
+	Q_ASSERT(internal);
 	internal->setSize(w);
 }
 GameObjectUi::GameObjectUi(TableUi *parent) : QWidget(parent), tbl(parent) {
@@ -28,7 +28,7 @@ void GameObjectUi::moveRatio(float x, float y) {
 QPoint GameObjectUi::getPosition() {
 	int width;
 	int rootheight = tbl->rootHeight();
-	//qDebug() << "root height" << rootheight;
+	//qDebug() << "root height" << rootheight << x << y << tbl->yoffset;
 	if ( (x > 1) && (y > 1) && (keyside == Left) ) {
 		return QPoint(x,y);
 	} else {

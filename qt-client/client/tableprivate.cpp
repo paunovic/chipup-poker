@@ -18,6 +18,7 @@ static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engin
 	SeatObject *seatobj = static_cast<SeatObject*>(context->thisObject().toQObject());
 	QPoint pos = seatobj->getSeatUi()->getPosition();
 	QScriptValue ret = engine->newObject();
+	qDebug() << pos;
 	Q_ASSERT(pos.y() > 0);
 	ret.setProperty("x",pos.x());
 	ret.setProperty("y",pos.y());

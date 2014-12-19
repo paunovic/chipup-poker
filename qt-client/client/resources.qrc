@@ -94,5 +94,7 @@
         <file>resources/table/RaisePresetButtonPressed.png</file>
         <file>resources/table/RaiseSliderBackground.png</file>
         <file>resources/table/RaiseSliderButton.png</file>
+	<file>resources/table/Timebank.png</file>
+	<file>resources/table/Timebar.png</file>
     </qresource>
 </RCC>

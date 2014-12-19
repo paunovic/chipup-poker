@@ -2,6 +2,7 @@
 #define VISIBLE_SEAT_H
 
 #include <QFontMetrics>
+#include <QTimer>
 
 #include "tableprivate.h"
 
@@ -15,16 +16,21 @@ public:
 	~VisibleSeat();
 	void updateSeat();
 	void updateInfo(Data::SeatInfo *info);
+	QSize sizeHint() const;
 	
 	QPixmap avatar;
 	bool active;
+private slots:
+	void tick();
 protected:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *);
 	void mouseReleaseEvent(QMouseEvent *);
 private:
+	float timebarHeight(int w) const;
 	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament,seatRightActive;
 	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament,seatLeftActive;
+	QPixmap timebar,timebank;
 	SeatObject *jsobj;
 	TableSit *sitwindow;
 	QFontMetrics *fontMetric;
@@ -34,6 +40,9 @@ private:
 	int chips;
 	Poker::SeatInfo::PlayerStatus status;
 	QFont font;
+	QTimer ticker;
+	qint64 keytime;
+	float timebarPercent;
 };
 class SeatObject : public GameObject {
 Q_OBJECT
