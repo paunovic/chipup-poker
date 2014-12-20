@@ -24,6 +24,7 @@ public:
 	Poker::SeatInfo::PlayerStatus rawStatus() { return status_; }
 	int chips() { return chips_; }
 	void setChips(int in) { chips_ = in; }
+	int timebank() { return timebank_; }
 
 	int seat_index;
 	QByteArray userid;
@@ -39,9 +40,11 @@ public slots:
 	QObject *getUser();
 private:
 	QObject *getHand() { return cards; }
+
 	int card_count_,chips_;
 	Poker::SeatInfo::PlayerStatus status_;
 	Data::Hand *cards;
+	int timebank_;
 };
 
 } // namespace Data

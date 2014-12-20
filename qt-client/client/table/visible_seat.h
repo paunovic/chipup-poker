@@ -41,7 +41,7 @@ private:
 	Poker::SeatInfo::PlayerStatus status;
 	QFont font;
 	QTimer ticker;
-	qint64 keytime;
+	qint64 keytime,maxtimebank;
 	float timebarPercent;
 };
 class SeatObject : public GameObject {

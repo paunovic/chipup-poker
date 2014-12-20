@@ -94,6 +94,12 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 		timebarSize.setWidth(timebarSize.width() * timebarPercent);
 		source.setWidth(source.width() * timebarPercent);
 		painter.drawPixmap(timebarSize,timebar,source);
+	} else if (timebarPercent < 0) {
+		float newpercent = timebarPercent + 1;
+		if (newpercent < 0) newpercent = 0;
+		timebarSize.setWidth(timebarSize.width() * newpercent);
+		source.setWidth(source.width() * newpercent);
+		painter.drawPixmap(timebarSize,timebank,source);
 	}
 	//painter.drawRect(timebarSize);
 }
@@ -189,13 +195,16 @@ void VisibleSeat::tick() {
 		if (timebarPercent > 1) timebarPercent = 1;
 		update();
 	} else {
-		qDebug() << "timebank debug" << diff;
+		timebarPercent = (float)diff / maxtimebank;
+		qDebug() << "timebank debug" << diff << timebarPercent;
+		update();
 	}
 }
 void VisibleSeat::updateInfo(Data::SeatInfo *info) {
 	QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 	if (ts->current_seat == info->seat_index) {
 		keytime = ts->time;
+		maxtimebank = info->timebank();
 		ticker.start();
 	} else {
 		ticker.stop();
