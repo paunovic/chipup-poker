@@ -11,7 +11,7 @@ class CardObjectUi : public GameObjectUi {
 Q_OBJECT
 public:
 	CardObjectUi(TableUi *parent, CardObject *jsobj);
-	virtual QPoint getPosition();
+	virtual QPoint getPosition() const;
 	void updateFace();
 protected:
 	void paintEvent(QPaintEvent *event);

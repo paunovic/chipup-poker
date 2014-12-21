@@ -25,12 +25,12 @@ void GameObjectUi::moveRatio(float x, float y) {
 	this->y = y;
 	move(getPosition());
 }
-QPoint GameObjectUi::getPosition() {
+QPoint GameObjectUi::getPosition() const {
 	int width;
 	int rootheight = tbl->rootHeight();
 	//qDebug() << "root height" << rootheight << x << y << tbl->yoffset;
 	if ( (x > 1) && (y > 1) && (keyside == Left) ) {
-		return QPoint(x,y);
+		return QPoint(x,y); // FIXME, remove this mode
 	} else {
 		switch (keyside) {
 		case Left:

@@ -50,7 +50,7 @@ void ChipObjectUi::updateValue() {
 	updateGeometry();
 }
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight) {
-	float scale = 0.6;
+	float scale = 0.45;
 	p.drawPixmap(x,rootheight-(y+(chip.height()*scale)),chip.width()*scale,chip.height()*scale,chip);
 }
 

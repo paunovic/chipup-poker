@@ -91,7 +91,7 @@ QPixmap CardObjectUi::loadFace(QString name) {
 	//qDebug() << "loading " << name;
 	return QPixmap(":/resources/cards/artworks/"+name+".png");
 }
-QPoint CardObjectUi::getPosition() {
+QPoint CardObjectUi::getPosition() const {
 	QPoint out = GameObjectUi::getPosition();
 	Q_ASSERT(out.y() < 10000);
 	int newwidth = tbl->width() * w;

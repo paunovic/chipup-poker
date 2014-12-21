@@ -300,6 +300,9 @@ void TestCase::simplegame() {
 	initial.add_bets(0);
 	initial.add_bets(0);
 	initial.add_bets(100);
+	QSharedPointer<Data::TableEvent> check(new Data::TableEvent);
+	check->event = Poker::TableEvent::teCheck;
+	ts->events.append(check);
 	ts->update(initial);
 
 	ts->seats[0]->setCard_count(2);

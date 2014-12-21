@@ -96,5 +96,6 @@
         <file>resources/table/RaiseSliderButton.png</file>
 	<file>resources/table/Timebank.png</file>
 	<file>resources/table/Timebar.png</file>
+	<file>resources/table/DealerButton.png</file>
     </qresource>
 </RCC>

@@ -51,7 +51,8 @@ SOURCES += main.cpp\
     table/animatecore.cpp \
     table/chip.cpp \
     table/table_sit.cpp \
-    data/playerclubstatus.cpp
+    data/playerclubstatus.cpp \
+    table/dealerbutton.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -75,7 +76,8 @@ HEADERS  += loginwindow.h \
     table/animation.h \
     table/animatecore.h \
     table/table_sit.h \
-    data/playerclubstatus.h
+    data/playerclubstatus.h \
+    table/dealerbutton.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \

@@ -19,7 +19,7 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		seats.append(seat);
 	}
 	state_ = in.state();
-	dealer = in.dealer();
+	dealer_ = in.dealer();
 	current_seat = in.current_seat();
 	for (i=0; i<in.bets_size(); i++) {
 		bets_.append(in.bets(i));

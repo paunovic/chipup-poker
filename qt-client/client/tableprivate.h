@@ -14,7 +14,9 @@
 
 class GameObjectUi;
 class SeatObject;
-
+namespace TableInternal {
+class DealerButton;
+}
 typedef enum {
 	Left=0,
 	Right,
@@ -50,7 +52,7 @@ public:
 	QSize sizeHint() const;
 	void moveRatio(float x, float y);
 	int heightForWidth(int w) const;
-	virtual QPoint getPosition();
+	virtual QPoint getPosition() const;
 	float getRenderHeight() const;
 
 	float w, x,y;
@@ -85,6 +87,7 @@ private:
 	GameWrap *game;
 	const Data::Game *rawgame;
 	QSharedPointer<Data::TableStatus> lastTs;
+	TableInternal::DealerButton *db;
 };
 class GameObject : public QObject {
 Q_OBJECT

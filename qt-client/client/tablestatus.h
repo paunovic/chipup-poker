@@ -25,6 +25,7 @@ public:
 	void setState(Poker::TableStatus::TableState in) { state_ = in; }
 	int getCurrentSeat() { return current_seat; }
 	QList<int> bets() { return bets_; }
+	int dealer() { return dealer_; }
 
 #define X(type,name) Q_PROPERTY(QString name READ get ## name )\
 type name;\
@@ -36,8 +37,8 @@ type get ## name() { return name; }
 
 	Q_PROPERTY(QString state READ getState)
 	Q_PROPERTY(int current_seat READ getCurrentSeat)
-	Y(int,dealer)
 	Q_PROPERTY(QList<int> bets READ bets)
+	Q_PROPERTY(int dealer READ dealer)
 	
 	QByteArray gameid;
 	QList<Data::SeatInfo*> seats;
@@ -64,6 +65,7 @@ public slots:
 private:
 	QList<int> bets_;
 	Poker::TableStatus::TableState state_;
+	int dealer_;
 };
 
 } // namespace Data

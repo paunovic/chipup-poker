@@ -9,6 +9,7 @@
 #include "table/chip.h"
 #include "table/animation.h"
 #include "table/animatecore.h"
+#include "table/dealerbutton.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << "JS:" << context->argument(0).toString();
@@ -154,6 +155,8 @@ void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
 	layout->addWidget(tableui,0,0);
 	//layout->addWidget(new QWidget(parent),1,0);
 	//qDebug() << "rows" << layout->rowCount();
+	db = new TableInternal::DealerButton(this);
+	engine.globalObject().setProperty("DealerButton",engine.newQObject(db));
 }
 
 QScriptValue TablePrivate::eval(QString code) {

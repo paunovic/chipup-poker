@@ -29,6 +29,7 @@ var lastTS;
 function tableStatus(ts) {
 	lastTS = ts;
 	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
+	updateDealer(ts.dealer);
 	var max = ts.seatCount();
 	for (var i=0; i<max; i++) {
 		var seat = ts.readSeat(i);
@@ -163,8 +164,8 @@ function updateBets() {
 			continue;
 		}
 		if (!local.bet) local.bet = getChipStack();
-		var pos = calcSeatPosition(remote.seat_index);
-		local.bet.setPosition(pos.x-0.1,pos.y);
+		var pos = calcBetLocation(remote.seat_index);
+		local.bet.setPosition(pos.x,pos.y);
 		local.bet.visible = true;
 		local.bet.value = lastTS.bets[remote.seat_index];
 		log("updating seat "+remote.seat_index+" bet to "+lastTS.bets[remote.seat_index]);
@@ -226,6 +227,34 @@ function adjustSeats() {
 		
 		seat_objects[i].setPosition(pos.x,pos.y);
 	}
+}
+function updateDealer(seat) {
+	if (seat == -1) {
+		DealerButton.visible = false;
+		return;
+	} else DealerButton.visible = true;
+	var interval = (Math.PI*2) / game.seats;
+	var fakeindex = seat+0.5;
+	var rawx = Math.sin(fakeindex*interval);
+	var rawy = Math.cos(fakeindex*interval);
+
+	var scale = 0.77;
+	var x = ((rawx/2)*0.65*scale)+0.495;
+	var y = ((rawy/2)*-0.62*scale)+0.45;
+	DealerButton.setPosition(x,y);
+}
+function calcBetLocation(seat) {
+	var interval = (Math.PI*2) / game.seats;
+	var fakeindex = seat+0.5;
+	var rawx = Math.sin(fakeindex*interval);
+	var rawy = Math.cos(fakeindex*interval);
+
+	var scale = 0.8;
+	if (lastTS.dealer == seat) scale = 0.6;
+	log("bet #"+seat+" scale:"+scale);
+	var x = (((rawx/2)*0.77)*scale)+0.495;
+	var y = (((rawy/2)*-0.62)*scale)+0.45;
+	return {x:x, y:y};
 }
 
 initSeats();
