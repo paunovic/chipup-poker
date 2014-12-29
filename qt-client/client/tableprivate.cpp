@@ -44,6 +44,11 @@ static QScriptValue NewChipStack(QScriptContext*,QScriptEngine *engine) {
 	ChipObject *stack = new ChipObject(parent);
 	return engine->newQObject(stack,QScriptEngine::ScriptOwnership);
 }
+static QScriptValue NewDealerButton(QScriptContext *,QScriptEngine *engine) {
+	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
+	TableInternal::DealerButton *db = new TableInternal::DealerButton(parent);
+	return engine->newQObject(db,QScriptEngine::ScriptOwnership);
+}
 
 static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 	GameObject *object = static_cast<GameObject*>(context->argument(0).toQObject());
@@ -68,6 +73,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 
 	engine.globalObject().setProperty("Card",engine.newQMetaObject(&CardObject::staticMetaObject,engine.newFunction(NewCardObject)));
 	global.setProperty("ChipStack",engine.newQMetaObject(&ChipObject::staticMetaObject,engine.newFunction(NewChipStack)));
+	global.setProperty("DealerButton",engine.newQMetaObject(&TableInternal::DealerButton::staticMetaObject,engine.newFunction(NewDealerButton)));
 	engine.globalObject().setProperty("root",engine.newQObject(this));
 	tableui = 0;
 }
@@ -155,12 +161,16 @@ void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
 	layout->addWidget(tableui,0,0);
 	//layout->addWidget(new QWidget(parent),1,0);
 	//qDebug() << "rows" << layout->rowCount();
-	db = new TableInternal::DealerButton(this);
-	engine.globalObject().setProperty("DealerButton",engine.newQObject(db));
 }
 
 QScriptValue TablePrivate::eval(QString code) {
-	return engine.evaluate(code,"chat");
+	QScriptValue ret = engine.evaluate(code,"chat");
+	if (engine.hasUncaughtException()) {
+		qDebug() << engine.uncaughtExceptionBacktrace();
+		qDebug() << engine.uncaughtException().toString();
+		engine.clearExceptions();
+	}
+	return ret;
 }
 void TablePrivate::editJs(QString newcode) {
 	eval(newcode);

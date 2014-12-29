@@ -162,10 +162,48 @@ void Table::on_raiseSlider_valueChanged(int value) {
 	ui->lbRaiseAmount->setText(QString("%1").arg((float)value/100));
 	ui->btRaise->setText(QString("BET (%1)").arg((float)value/100));
 }
+void Table::on_bt3BB_clicked() {
+	int val = lastTableStatus->minimum_bet;
+	qDebug() << "3bb min bet" << val;
+	if (val == 0) val = game->bb;
+	qDebug() << "3bb final" << val;
+	ui->lbRaiseAmount->setText(QString("%1").arg((float)val/100));
+	ui->btRaise->setText(QString("BET (%1)").arg((float)val/100));
+	ui->raiseSlider->setValue(val);
+}
+void Table::on_btPot_clicked() {
+	int raise_value;
+	int seat_bet = -1;
+	QList<Data::SeatInfo*>::Iterator i;
+	Data::SeatInfo *seat;
+	for (i=lastTableStatus->seats.begin(); i!=lastTableStatus->seats.end(); ++i) {
+		seat = *i;
+		if (seat->getUserid() == core->self()->id) {
+			seat_bet = lastTableStatus->bets()[seat->seat_index];
+		}
+	}
+	raise_value = lastTableStatus->minimum_bet - seat_bet;
+
+	QList<Data::Pot*>::Iterator i2;
+	for (i2=lastTableStatus->pots.begin(); i2!=lastTableStatus->pots.end(); ++i2) {
+		Data::Pot *pot = *i2;
+		raise_value += pot->value() - pot->rake();
+	}
+	for (int x=0; x<lastTableStatus->bets().length(); x++) {
+		raise_value += lastTableStatus->bets()[x];
+	}
+	raise_value += lastTableStatus->minimum_bet;
+	ui->lbRaiseAmount->setText(QString("%1").arg((float)raise_value/100));
+	ui->btRaise->setText(QString("BET (%1)").arg((float)raise_value/100));
+	ui->raiseSlider->setValue(raise_value);
+}
 void Table::on_btRaise_clicked() {
 	Poker::PutChips pc;
 	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
 	pc.set_current_state(lastTableStatus->state());
 	pc.set_chip_amount(ui->raiseSlider->value());
 	core->sendMessage(Poker::scPutChips,&pc);
+}
+void Table::eval(QString code) {
+	p->eval(code);
 }

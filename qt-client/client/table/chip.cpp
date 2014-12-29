@@ -45,7 +45,6 @@ void ChipObjectUi::updateValue() {
 			v -= 1;
 		}
 	}
-	qDebug() << "chip doing update";
 	update();
 	updateGeometry();
 }
@@ -73,9 +72,12 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	p.setPen(QColor(255,255,255));
 	int chipwidth = pix.width()*0.6;
 	p.drawText(chipwidth,height()/2,width() - chipwidth,height(),0,QString("%1").arg((float)jsobj->value()/100));
+	drawDebug(p);
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
 	int height = (chips.length() * 5) + (pix.height() * 0.6);
-	return QSize(new_width+40,height);
+	QSize ret(new_width+40,height);
+	if (jsobj->value() == 300) qDebug() << "chip size" << ret;
+	return ret;
 }

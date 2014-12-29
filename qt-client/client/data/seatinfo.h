@@ -14,7 +14,7 @@ class User;
 class SeatInfo : public QObject {
 Q_OBJECT
 public:
-	SeatInfo(QObject *parent=0) :QObject(parent) { cards=0; }
+	SeatInfo(QObject *parent=0);
 	void update(const Poker::SeatInfo &in);
 	int card_count() { return card_count_; }
 	void setCard_count(int in) { card_count_ = in; }

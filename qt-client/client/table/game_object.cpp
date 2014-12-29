@@ -1,11 +1,13 @@
+#include <QPainter>
+
 #include "tableprivate.h"
 
 GameObject::GameObject(TablePrivate *table) {
 	this->table = table;
 }
 void GameObject::setPosition(float x, float y) {
-	Q_ASSERT(x > 0);
-	Q_ASSERT(y > 0);
+	Q_ASSERT(x >= 0);
+	Q_ASSERT(y >= 0);
 	internal->moveRatio(x,y);
 	internal->show();
 }
@@ -15,6 +17,7 @@ void GameObject::setSize(float w) {
 }
 GameObjectUi::GameObjectUi(TableUi *parent) : QWidget(parent), tbl(parent) {
 	keyside = Left;
+	x = y = 0;
 }
 QSize GameObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
@@ -42,6 +45,12 @@ QPoint GameObjectUi::getPosition() const {
 		case Top:
 			width = tbl->width() * w;
 			return QPoint((tbl->width() * x) - (width/2), (rootheight * y) - tbl->yoffset);
+		case Bottom:
+			width = tbl->width() * w;
+			QSize size = sizeHint();
+			QPoint ret((tbl->width() * x) - (width/2),( (rootheight * y) - tbl->yoffset ) - size.height());
+			qDebug() << "chip" << ret;
+			return ret;
 		}
 	}
 }
@@ -63,5 +72,28 @@ float GameObject::getRenderHeight() const {
 }
 
 void GameObject::setSide(int side){
+	qDebug() << "chip" << internal << side;
 	internal->keyside = (AlignmentSide) side;
+	internal->updateGeometry();
+}
+void GameObjectUi::drawDebug(QPainter &p) {
+	switch (keyside) {
+	case Top:
+		p.setBrush(QColor(255,0,0));
+		break;
+	case Bottom:
+		p.setBrush(QColor(0,255,0));
+		break;
+	case Left:
+		p.setBrush(QColor(0,0,255));
+		break;
+	case Right:
+		p.setBrush(QColor(255,255,0));
+		break;
+	case Center:
+		p.setBrush(QColor(255,255,255));
+		break;
+	}
+	p.setPen(Qt::NoPen);
+	p.drawRect(0,0,width(),height());
 }

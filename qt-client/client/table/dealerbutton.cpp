@@ -15,7 +15,6 @@ DealerButtonUi::DealerButtonUi(TableUi *parent, DealerButton *jsobj): GameObject
 	pix = dealer = QPixmap(":/resources/table/DealerButton.png");
 }
 void DealerButtonUi::paintEvent(QPaintEvent *event) {
-	qDebug() << "dealer paint" << getPosition() << sizeHint();
 	QPainter p(this);
 	p.setRenderHints(QPainter::SmoothPixmapTransform);
 	p.drawPixmap(0,0,width(),height(),pix);

@@ -15,4 +15,6 @@ private slots:
 	void render_bare_form_data();
 	void render_bare_form();
 	void render_login_form();
+	void alignment_data();
+	void alignment();
 };

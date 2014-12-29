@@ -6,6 +6,8 @@ namespace Data {
 TableStatus::TableStatus(QObject *parent) :
 	QObject(parent)
 {
+	state_ = Poker::TableStatus::tsIdle;
+	current_seat = -1;
 }
 
 void TableStatus::update(const Poker::TableStatus &in) {

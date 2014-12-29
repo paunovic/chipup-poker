@@ -179,7 +179,7 @@
             <item>
              <widget class="QPushButton" name="bt3BB">
               <property name="text">
-               <string>300</string>
+               <string>3BB</string>
               </property>
              </widget>
             </item>

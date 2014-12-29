@@ -14,13 +14,13 @@
 
 class GameObjectUi;
 class SeatObject;
-namespace TableInternal {
-class DealerButton;
-}
+
 typedef enum {
 	Left=0,
 	Right,
-	Top
+	Top,
+	Bottom,
+	Center
 } AlignmentSide;
 
 class TableUi : public QWidget {
@@ -58,6 +58,8 @@ public:
 	float w, x,y;
 	AlignmentSide keyside;
 protected:
+	void drawDebug(QPainter &p);
+
 	QPixmap pix;
 	TableUi *tbl;
 };
@@ -87,7 +89,6 @@ private:
 	GameWrap *game;
 	const Data::Game *rawgame;
 	QSharedPointer<Data::TableStatus> lastTs;
-	TableInternal::DealerButton *db;
 };
 class GameObject : public QObject {
 Q_OBJECT

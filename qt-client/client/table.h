@@ -27,6 +27,7 @@ public:
 	void setGame(const Data::Game *game, const Data::Club *club);
 	bool setGameForTesting(const Data::Game *game, QString jscode);
 	void editJs(QString newcode);
+	void eval(QString code);
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
 private slots:
@@ -40,6 +41,8 @@ private slots:
 	void on_btRaise_clicked();
 	void on_btMin_clicked();
 	void on_btMax_clicked();
+	void on_bt3BB_clicked();
+	void on_btPot_clicked();
 protected:
 	void resizeEvent(QResizeEvent *event);
 private:

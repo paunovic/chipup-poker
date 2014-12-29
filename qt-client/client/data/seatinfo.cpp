@@ -4,6 +4,10 @@
 
 namespace Data {
 
+SeatInfo::SeatInfo(QObject *parent):QObject(parent) {
+	cards = 0;
+	status_ = Poker::SeatInfo::psOutOfHand;
+}
 void SeatInfo::update(const Poker::SeatInfo &in) {
 	std::string id = in.player_mongo_id();
 	userid = QByteArray(id.data(),id.length());

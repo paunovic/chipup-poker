@@ -37,7 +37,7 @@ void TestCase::testsomething_data() {
 }
 void TestCase::renderChips_data() {
 	QTest::addColumn<QString>("value");
-	QTest::newRow("one") << "1,5,25,100,500,1000";
+	QTest::newRow("one") << "100,500,2500,10000,50000,100000";
 }
 void TestCase::renderChips() {
 	int result;
@@ -104,6 +104,94 @@ void TestCase::rendercards() {
 	image.save("cards.png");
 
 	core = 0;
+}
+void TestCase::alignment_data() {
+	QTest::addColumn<int>("seats");
+	QTest::addColumn<bool>("withDealer");
+	QTest::addColumn<bool>("withBet");
+	QTest::addColumn<QString>("filename");
+	QTest::newRow("all10") << 10 << true << true << "all10.png";
+	QTest::newRow("all5") << 5 << true << true << "all5.png";
+}
+void TestCase::alignment() {
+	QFETCH(int,seats);
+	QFETCH(bool,withDealer);
+	QFETCH(bool,withBet);
+	QFETCH(QString,filename);
+	int result;
+	PokerMain pm;
+	core = &pm;
+
+	Table tbl;
+
+	QByteArray selfid;
+	selfid[0] = 1;
+	pm.self()->id = selfid;
+
+	QFile styles(":/stylesheet.css");
+	if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load css";
+	} else {
+		QByteArray buffer;
+		while (!styles.atEnd()) {
+			buffer.append(styles.readAll());
+		}
+		QString css(buffer);
+		tbl.setStyleSheet(css);
+	}
+
+	AnimateCore ac(true);
+	animateCore = &ac;
+	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
+	tbl.resize(600,500);
+	Data::Game g;
+	g.seats = seats;
+	QFile input("../../qt-client/client/table.js");
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+		QVERIFY(false);
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		result = tbl.setGameForTesting(&g,code);
+		QVERIFY(result);
+	}
+	for (int i=0; i<seats; i++) {
+		QByteArray id;
+		id[0] = i;
+		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
+		Poker::SeatInfo source;
+
+		source.set_player_mongo_id(id.data(),id.length());
+		source.set_seat_index(i);
+		source.set_card_count(0);
+		source.set_status(Poker::SeatInfo::psInHand);
+		source.set_chips(20000);
+		seat->update(source);
+		ts->seats.append(seat);
+		Data::User *u = new Data::User(&pm);
+		u->id = id;
+		u->setDisplayName(QString("seat %1").arg(i));
+		pm.users.append(u);
+	}
+	Poker::TableStatus initial;
+	initial.set_current_seat(4);
+	initial.set_state(Poker::TableStatus::tsPreFlop);
+	for (int i=0; i<seats; i++) {
+		if (i == 2) initial.add_bets(300);
+		else initial.add_bets(200);
+	}
+	ts->update(initial);
+	result = tbl.On_table_status(ts);
+	QVERIFY(result);
+	tbl.eval("alignment();");
+	QPixmap image(tbl.size());
+	tbl.render(&image);
+	image.save(filename);
+	
+	core = 0;
+	animateCore = 0;
 }
 void TestCase::animate() {
 	int result;
@@ -391,10 +479,12 @@ void TestCase::render_bare_form() {
 	output.save(outname+".png");
 }
 void TestCase::render_login_form() {
-	QUiLoader loader;
+	PokerMain pm;
+	core = &pm;
 
 	LoginWindow *lw = new LoginWindow();
 	QPixmap output(lw->size());
 	lw->render(&output);
 	output.save("loginwindow.png");
+	core = 0;
 }

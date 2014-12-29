@@ -4,6 +4,7 @@ var localFlop = [];
 var localTurn = [];
 var localRiver = [];
 var localPots = [];
+var db = new DealerButton();
 
 var idleChips = [];
 function getChipStack() {
@@ -168,6 +169,7 @@ function updateBets() {
 		local.bet.setPosition(pos.x,pos.y);
 		local.bet.visible = true;
 		local.bet.value = lastTS.bets[remote.seat_index];
+		local.bet.setSide(pos.keyside);
 		log("updating seat "+remote.seat_index+" bet to "+lastTS.bets[remote.seat_index]);
 	}
 }
@@ -230,18 +232,30 @@ function adjustSeats() {
 }
 function updateDealer(seat) {
 	if (seat == -1) {
-		DealerButton.visible = false;
+		db.visible = false;
 		return;
-	} else DealerButton.visible = true;
+	} else db.visible = true;
+	moveDealer(db,seat);
+}
+function moveDealer(button,index) {
 	var interval = (Math.PI*2) / game.seats;
-	var fakeindex = seat+0.5;
+	var fakeindex = index+0.5;
 	var rawx = Math.sin(fakeindex*interval);
 	var rawy = Math.cos(fakeindex*interval);
 
-	var scale = 0.77;
-	var x = ((rawx/2)*0.65*scale)+0.495;
-	var y = ((rawy/2)*-0.62*scale)+0.45;
-	DealerButton.setPosition(x,y);
+	var x = ((rawx/2)*0.58)+0.485;
+	var y = ((rawy/2)*-0.45)+0.45;
+	button.setPosition(x,y);
+}
+var test = [];
+var alignment_test = false;
+function alignment() {
+	alignment_test = true;
+	for (var i=1; i<game.seats; i++) {
+		test[i] = new DealerButton();
+		moveDealer(test[i],i);
+	}
+	updateBets();
 }
 function calcBetLocation(seat) {
 	var interval = (Math.PI*2) / game.seats;
@@ -250,11 +264,17 @@ function calcBetLocation(seat) {
 	var rawy = Math.cos(fakeindex*interval);
 
 	var scale = 0.8;
-	if (lastTS.dealer == seat) scale = 0.6;
+	if (alignment_test || (lastTS.dealer == seat) ) scale = 0.6;
 	log("bet #"+seat+" scale:"+scale);
 	var x = (((rawx/2)*0.77)*scale)+0.495;
 	var y = (((rawy/2)*-0.62)*scale)+0.45;
-	return {x:x, y:y};
+	var keyside;
+	if ( (rawy < 0.25) && (rawy > -0.25) ) {
+		if (rawx > 0) keyside = 0;
+		else keyside = 1;
+	} else if (rawy > 0) keyside = 2;
+	else if (rawy < 0) keyside = 3;
+	return {x:x, y:y, keyside:keyside };
 }
 
 initSeats();
