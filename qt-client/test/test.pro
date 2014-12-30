@@ -27,6 +27,9 @@ SOURCES += test.cpp ../client/tableprivate.cpp ../client/tablestatus.cpp ../clie
 HEADERS += ../client/loginwindow.h ../client/table.h ../client/table/dealerbutton.h
 SOURCES += ../client/loginwindow.cpp ../client/table.cpp ../client/data/playerclubstatus.cpp ../client/table/dealerbutton.cpp
 
+HEADERS += ../client/sound_effects.h
+SOURCES += ../client/sound_effects.cpp
+
 RESOURCES += ../client/resources.qrc
 
 FORMS += ../client/table/table_sit.ui ../client/loginwindow.ui ../client/table.ui

@@ -9,6 +9,7 @@
 #include "tablestatus.h"
 #include "data/user.h"
 #include "data/playerclubstatus.h"
+#include "sound_effects.h"
 
 using namespace Poker;
 
@@ -20,6 +21,7 @@ PokerMain::PokerMain(QObject *parent) :
 	setObjectName("core");
 	delayQuit = false;
 	manager_ = new QNetworkAccessManager(this);
+	effects_ = new SoundEffects(this);
 	self_ = new Data::User(this);
 	connect(manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 

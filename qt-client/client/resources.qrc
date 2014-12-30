@@ -97,5 +97,6 @@
 	<file>resources/table/Timebank.png</file>
 	<file>resources/table/Timebar.png</file>
 	<file>resources/table/DealerButton.png</file>
+	<file>resources/sounds/Dealing.wav</file>
     </qresource>
 </RCC>

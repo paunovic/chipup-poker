@@ -29,6 +29,8 @@ namespace Data {
 class PlayerClubStatus;
 }
 
+class SoundEffects;
+
 class PokerMain : public QObject
 {
     Q_OBJECT
@@ -44,6 +46,7 @@ public:
 	qint64 getServerTime() { return clock_offset + uptime.elapsed(); }
 	Data::User *self() { Q_ASSERT(self_); return self_; }
 	void RegisterListener(QObject *listener);
+	SoundEffects *effects() { return effects_; }
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
@@ -102,6 +105,7 @@ private:
 	quint64 clock_offset;
 	bool first_ping;
 	int totalError;
+	SoundEffects *effects_;
 };
 
 extern PokerMain *core;

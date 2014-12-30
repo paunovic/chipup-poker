@@ -79,6 +79,9 @@ HEADERS  += loginwindow.h \
     data/playerclubstatus.h \
     table/dealerbutton.h
 
+SOURCES += sound_effects.cpp
+HEADERS += sound_effects.h
+
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
     csseditor.ui \

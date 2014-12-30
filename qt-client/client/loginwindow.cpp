@@ -5,6 +5,7 @@
 #include "pokermain.h"
 #include "main_window.h"
 #include "registerwindow.h"
+#include "sound_effects.h"
 
 // TODO, enforce regex on user/pass
 // catch login failure
@@ -32,6 +33,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 		On_protocol_ready(true);
 	}
 #endif
+	core->effects()->PlaySound(SoundEffects::Dealing);
 }
 
 LoginWindow::~LoginWindow() {
