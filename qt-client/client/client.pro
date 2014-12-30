@@ -24,6 +24,9 @@ INCLUDEPATH += ../protobuf/
 win32 {
 LIBS += -L../protobuf/release/ -L../protobuf/debug/
 }
+unix {
+LIBS += -L../protobuf/
+}
 LIBS += -lprotobuf
 SOURCES += main.cpp\
         loginwindow.cpp \
