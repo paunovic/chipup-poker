@@ -69,6 +69,11 @@ function tableStatus(ts) {
 			}
 	}
 }
+var actions = [];
+function queueAction(action) {
+	actions.push(action);
+	if (actions.length == 1) actions[0].begin();
+}
 function tableEvent(event) {
 	log('EVENT:'+event.event);
 	switch (event.event) {
@@ -93,10 +98,11 @@ function tableEvent(event) {
 				if (!localFlop[x]) localFlop[x] = new Card();
 				localFlop[x].setSize(0.063);
 				localFlop[x].card = card.cards[x];
+				localFlop[x].visible = false;
 			}
-			localFlop[0].setPosition(0.318,0.477);
-			localFlop[1].setPosition(0.387,0.477);
-			localFlop[2].setPosition(0.454,0.477);
+			queueAction(new DealCard(0.318,0.477,localFlop[0]));
+			queueAction(new DealCard(0.387,0.477,localFlop[1]));
+			queueAction(new DealCard(0.454,0.477,localFlop[2]));
 		}
 		updatePots();
 		break;
@@ -106,7 +112,8 @@ function tableEvent(event) {
 			if (!localTurn[0]) localTurn[0] = new Card();
 			localTurn[0].setSize(0.063);
 			localTurn[0].card = card.cards[0];
-			localTurn[0].setPosition(0.523,0.477);
+			localTurn[0].visible = false;
+			queueAction(new DealCard(0.523,0.477,localTurn[0]));
 		}
 		updatePots();
 		break;
@@ -116,7 +123,8 @@ function tableEvent(event) {
 			if (!localRiver[0]) localRiver[0] = new Card();
 			localRiver[0].setSize(0.063);
 			localRiver[0].card = card.cards[0];
-			localRiver[0].setPosition(0.592,0.477);
+			localRiver[0].visible = false;
+			queueAction(new DealCard(0.592,0.477,localRiver[0]))
 		}
 		updatePots();
 		break;
@@ -275,6 +283,21 @@ function calcBetLocation(seat) {
 	} else if (rawy > 0) keyside = 2;
 	else if (rawy < 0) keyside = 3;
 	return {x:x, y:y, keyside:keyside };
+}
+function DealCard(destx,desty,cardobj) {
+	this.destx = destx;
+	this.desty = desty;
+	this.cardobj = cardobj;
+}
+DealCard.prototype.begin = function DealCardBegin() {
+	this.cardobj.visible = true;
+	this.cardobj.setPosition(0.1,0.1);
+	Animate(this.cardobj, this.destx,this.desty, 5,this.done);
+}
+DealCard.prototype.done = function DealCardDone() {
+	log('card delt, doing next');
+	var self = actions.shift();
+	if (actions.length > 0) actions[0].begin();
 }
 
 initSeats();

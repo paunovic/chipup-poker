@@ -57,7 +57,8 @@ static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 	float endx = context->argument(1).toNumber();
 	float endy = context->argument(2).toNumber();
 	float seconds = context->argument(3).toNumber();
-	Animation *a = new Animation(object,endx,endy,seconds);
+	QScriptValue callback = context->argument(4);
+	Animation *a = new Animation(object,endx,endy,seconds,callback);
 	animateCore->addAnimation(a);
 	return engine->undefinedValue();
 }
@@ -72,8 +73,8 @@ TablePrivate::TablePrivate(QObject *parent) :
 	QScriptValue global = engine.globalObject();
 
 	engine.globalObject().setProperty("log",engine.newFunction(js_log,1));
-	engine.globalObject().setProperty("Animate",engine.newFunction(Animate,4));
 	global.setProperty("PlaySound",engine.newFunction(PlaySound,1));
+	engine.globalObject().setProperty("Animate",engine.newFunction(Animate,5));
 	QScriptValue ctor = engine.newFunction(NewSeatObject);
 	QScriptValue metaObject = engine.newQMetaObject(&SeatObject::staticMetaObject, ctor);
 	engine.globalObject().setProperty("SeatObject",metaObject);
