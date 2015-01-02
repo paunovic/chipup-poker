@@ -11,7 +11,7 @@ class Animation : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Animation(GameObject *obj, float endx, float endy, float duration);
+	explicit Animation(GameObject *obj, float endx, float endy, float duration, QScriptValue callback);
 
 signals:
 
@@ -22,6 +22,7 @@ private:
 	int duration;
 	float startx,starty, endx,endy, xdiff,ydiff;
 	GameObject *obj;
+	QScriptValue callback;
 };
 
 #endif // ANIMATION_H
