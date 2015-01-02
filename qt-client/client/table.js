@@ -292,7 +292,8 @@ function DealCard(destx,desty,cardobj) {
 DealCard.prototype.begin = function DealCardBegin() {
 	this.cardobj.visible = true;
 	this.cardobj.setPosition(0.1,0.1);
-	Animate(this.cardobj, this.destx,this.desty, 5,this.done);
+	Animate(this.cardobj, this.destx,this.desty, 0.25,this.done);
+	PlaySound(0);
 }
 DealCard.prototype.done = function DealCardDone() {
 	log('card delt, doing next');

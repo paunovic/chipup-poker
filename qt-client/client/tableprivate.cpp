@@ -65,6 +65,7 @@ static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 static QScriptValue PlaySound(QScriptContext *context, QScriptEngine *engine) {
 	float id = context->argument(1).toNumber();
 	core->effects()->PlaySound((SoundEffects::SoundId)id);
+	return engine->undefinedValue();
 }
 
 TablePrivate::TablePrivate(QObject *parent) :

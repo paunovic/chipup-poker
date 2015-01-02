@@ -28,8 +28,8 @@ void Animation::tick(int now) {
 		return;
 	}
 	float progress = (float)elapsed / duration;
-	float currentx = startx+(xdiff*progress);
-	float currenty = starty+(ydiff*progress);
+	//float currentx = startx+(xdiff*progress);
+	//float currenty = starty+(ydiff*progress);
 	//qDebug() << QString("start:%1-%2 current:%3-%4 end:%5-%6 progress:%7 diff:%8-%9").arg(startx).arg(starty).arg(currentx).arg(currenty).arg(endx).arg(endy).arg(progress).arg(xdiff).arg(ydiff);
 	obj->setPosition(startx+(xdiff*progress),starty+(ydiff*progress));
 }

@@ -56,6 +56,7 @@ static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheig
 void ChipObjectUi::paintEvent(QPaintEvent *) {
 	// TODO, draw text on left or right
 	QPainter p(this);
+	drawDebug(p);
 	p.setBrush(QColor(127,0,0));
 	p.setPen(Qt::NoPen);
 	//p.drawRect(0,0,width(),height());
@@ -72,7 +73,6 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	p.setPen(QColor(255,255,255));
 	int chipwidth = pix.width()*0.6;
 	p.drawText(chipwidth,height()/2,width() - chipwidth,height(),0,QString("%1").arg((float)jsobj->value()/100));
-	drawDebug(p);
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
