@@ -2,7 +2,7 @@
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QSoundEffect>
-#error finish this code
+#define SOUND_TYPE QSoundEffect
 #else
 #include <QSound>
 #define SOUND_TYPE QSound

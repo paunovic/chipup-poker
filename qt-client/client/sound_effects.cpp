@@ -1,12 +1,17 @@
 #include "sound_effects.h"
 
 #include <QDebug>
+#include <QUrl>
 
 SoundEffects::SoundEffects(QObject *parent): QObject(parent) {
 	qDebug() << "loading sound";
-	dealing = new SOUND_TYPE(":/resources/sounds/Dealing.wav",this);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	dealing = new QSoundEffect(this);
+	dealing->setSource(QUrl("qrc:/resources/sounds/Dealing.wav"));
+#else
+	dealing = new QSound(":/resources/sounds/Dealing.wav",this);
+#endif
 	qDebug() << "loaded";
-	dealing->setLoops(-1);
 }
 void SoundEffects::PlaySound(enum SoundId soundId) {
 	qDebug() << "starting sound";

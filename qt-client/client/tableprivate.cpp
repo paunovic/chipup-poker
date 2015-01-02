@@ -10,6 +10,8 @@
 #include "table/animation.h"
 #include "table/animatecore.h"
 #include "table/dealerbutton.h"
+#include "sound_effects.h"
+#include "pokermain.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << "JS:" << context->argument(0).toString();
@@ -59,6 +61,10 @@ static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 	animateCore->addAnimation(a);
 	return engine->undefinedValue();
 }
+static QScriptValue PlaySound(QScriptContext *context, QScriptEngine *engine) {
+	float id = context->argument(1).toNumber();
+	core->effects()->PlaySound((SoundEffects::SoundId)id);
+}
 
 TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
@@ -67,6 +73,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 
 	engine.globalObject().setProperty("log",engine.newFunction(js_log,1));
 	engine.globalObject().setProperty("Animate",engine.newFunction(Animate,4));
+	global.setProperty("PlaySound",engine.newFunction(PlaySound,1));
 	QScriptValue ctor = engine.newFunction(NewSeatObject);
 	QScriptValue metaObject = engine.newQMetaObject(&SeatObject::staticMetaObject, ctor);
 	engine.globalObject().setProperty("SeatObject",metaObject);
