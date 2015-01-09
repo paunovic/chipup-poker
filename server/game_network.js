@@ -465,7 +465,7 @@ handlers[codes.scShowCards] = function (args,token) {
 							var cards1;
 							if (game.flops[1]) cards1 = this.flops[1].cards;
 							if (['tsTurn','tsRiver'].indexOf(game.state) != -1) {
-								cards0 = cards0.concat(game.turn[0].cards);
+								cards0 = cards0.concat(game.turns[0].cards);
 								if (game.turns[1]) cards1 = cards1.concat(game.turns[1].cards);
 							}
 							if (game.state == 'tsRiver') {
