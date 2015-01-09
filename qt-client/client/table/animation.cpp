@@ -12,6 +12,7 @@ Animation::Animation(GameObject *obj, float endx, float endy, float duration, QS
 }
 void Animation::tick(int now) {
 	qint64 elapsed = now - start;
+	if (elapsed < 0) elapsed = 0;
 	if (elapsed > duration) {
 		if (callback.isFunction()) {
 			QScriptValueList args;

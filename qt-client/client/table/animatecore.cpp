@@ -15,21 +15,18 @@ AnimateCore::AnimateCore(bool testing) :
 }
 // TODO, delete animations when the window is closed
 void AnimateCore::tick() {
-	int now;
-	if (testing) now = time;
-	else now = core->getUptime();
+	int now = getTime();
 	qDebug() << "uptime" << now;
 
-	QList<Animation*>::Iterator i;
-	for (i=animations.begin(); i!=animations.end(); ++i) {
-		Animation *a = *i;
+	Animation *a;
+	foreach (a,animations) {
 		a->tick(now);
 	}
 	if (animations.length() == 0) timer.stop();
 }
 qint64 AnimateCore::getTime() {
 	if (testing) return time;
-	else return core->getUptime();
+	else return core->getUptime()/4;
 }
 void AnimateCore::addAnimation(Animation *ani) {
 	connect(ani,SIGNAL(destroyed(QObject*)),this,SLOT(over(QObject*)));

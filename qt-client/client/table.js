@@ -252,6 +252,7 @@ function calcSeatPosition(index) {
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
 function calcCardPosition(seat,card) {
+	// TODO, switch to float based positioning
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
 	return { x:seatpos.x + (card*25), y:seatpos.y + 10 };

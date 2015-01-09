@@ -14,6 +14,8 @@ SoundEffects::SoundEffects(QObject *parent): QObject(parent) {
 	timebank->setSource(QUrl("qrc:/resources/sounds/Timebank.wav"));
 #else
 	dealing = new QSound(":/resources/sounds/Dealing.wav",this);
+	putChipsSmall = new QSound("fixme",this);
+	timebank = new QSound("fixme",this);
 #endif
 	qDebug() << "loaded";
 }
