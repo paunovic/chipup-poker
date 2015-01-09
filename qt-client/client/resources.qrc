@@ -94,9 +94,12 @@
         <file>resources/table/RaisePresetButtonPressed.png</file>
         <file>resources/table/RaiseSliderBackground.png</file>
         <file>resources/table/RaiseSliderButton.png</file>
-	<file>resources/table/Timebank.png</file>
-	<file>resources/table/Timebar.png</file>
-	<file>resources/table/DealerButton.png</file>
-	<file>resources/sounds/Dealing.wav</file>
+        <file>resources/table/Timebank.png</file>
+        <file>resources/table/Timebar.png</file>
+        <file>resources/table/DealerButton.png</file>
+        <file>resources/sounds/Dealing.wav</file>
+        <file>resources/sounds/MoveChips.wav</file>
+        <file>resources/sounds/PutChipsSmall.wav</file>
+        <file>resources/sounds/Timebank.wav</file>
     </qresource>
 </RCC>

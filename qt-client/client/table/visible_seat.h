@@ -3,6 +3,7 @@
 
 #include <QFontMetrics>
 #include <QTimer>
+#include <QByteArray>
 
 #include "tableprivate.h"
 
@@ -36,6 +37,7 @@ private:
 	QFontMetrics *fontMetric;
 
 	// cached from SeatInfo/User
+	QByteArray userid;
 	QString displayname;
 	int chips;
 	Poker::SeatInfo::PlayerStatus status;
@@ -43,6 +45,8 @@ private:
 	QTimer ticker;
 	qint64 keytime,maxtimebank;
 	float timebarPercent;
+	enum Timebarmode { tbmIdle,tbmTimebar,tbmTimebank };
+	Timebarmode lastTimebarMode;
 };
 class SeatObject : public GameObject {
 Q_OBJECT

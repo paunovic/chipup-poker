@@ -7,6 +7,7 @@
 #include "table_sit.h"
 #include "data/seatinfo.h"
 #include "data/user.h"
+#include "sound_effects.h"
 
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	: GameObjectUi(parent), active(false), jsobj(jsobj), font("Barmeno") {
@@ -29,6 +30,7 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	ticker.setSingleShot(false);
 	ticker.setInterval(100);
 	connect(&ticker,SIGNAL(timeout()),this,SLOT(tick()));
+	lastTimebarMode = tbmIdle;
 }
 VisibleSeat::~VisibleSeat() {
 	delete fontMetric;
@@ -94,12 +96,21 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 		timebarSize.setWidth(timebarSize.width() * timebarPercent);
 		source.setWidth(source.width() * timebarPercent);
 		painter.drawPixmap(timebarSize,timebar,source);
+		lastTimebarMode = tbmTimebar;
 	} else if (timebarPercent < 0) {
+		if (lastTimebarMode == tbmTimebar) {
+			if (core->self()->id == userid) {
+				core->effects()->PlaySound(SoundEffects::TimeBank);
+			}
+		}
 		float newpercent = timebarPercent + 1;
 		if (newpercent < 0) newpercent = 0;
 		timebarSize.setWidth(timebarSize.width() * newpercent);
 		source.setWidth(source.width() * newpercent);
 		painter.drawPixmap(timebarSize,timebank,source);
+		lastTimebarMode = tbmTimebank;
+	} else {
+		lastTimebarMode = tbmIdle;
 	}
 	//painter.drawRect(timebarSize);
 }
@@ -139,6 +150,7 @@ void VisibleSeat::updateSeat() {
 		ticker.stop();
 		keytime = 0;
 		timebarPercent = 0;
+		userid.clear();
 		if (jsobj->getTourn()) {
 			if (jsobj->left()) pix = seatLeftEmptyTournament;
 			else pix = seatRightEmptyTournament;
@@ -215,5 +227,6 @@ void VisibleSeat::updateInfo(Data::SeatInfo *info) {
 	displayname = u->displayName();
 	status = info->rawStatus();
 	chips = info->chips();
+	userid = info->userid;
 	update();
 }

@@ -7,7 +7,8 @@ TEMPLATE = app
 TARGET = test
 DEPENDPATH += .
 INCLUDEPATH += .
-QT += script network gui testlib widgets uitools
+QT += script network gui testlib uitools
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
 INCLUDEPATH += ../client/ ../protobuf/
 win32 {
 LIBS += -L../../protobuf/ -L../protobuf/release/ -L../protobuf/debug/

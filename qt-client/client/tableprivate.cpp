@@ -63,9 +63,13 @@ static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 	return engine->undefinedValue();
 }
 static QScriptValue PlaySound(QScriptContext *context, QScriptEngine *engine) {
-	float id = context->argument(1).toNumber();
+	int id = context->argument(0).toNumber();
 	core->effects()->PlaySound((SoundEffects::SoundId)id);
 	return engine->undefinedValue();
+}
+static QScriptValue NewTimer(QScriptContext *,QScriptEngine *engine) {
+	QTimer *t = new QTimer();
+	return engine->newQObject(t,QScriptEngine::ScriptOwnership);
 }
 
 TablePrivate::TablePrivate(QObject *parent) :
@@ -73,17 +77,18 @@ TablePrivate::TablePrivate(QObject *parent) :
 
 	QScriptValue global = engine.globalObject();
 
-	engine.globalObject().setProperty("log",engine.newFunction(js_log,1));
+	global.setProperty("log",engine.newFunction(js_log,1));
 	global.setProperty("PlaySound",engine.newFunction(PlaySound,1));
-	engine.globalObject().setProperty("Animate",engine.newFunction(Animate,5));
+	global.setProperty("Animate",engine.newFunction(Animate,5));
 	QScriptValue ctor = engine.newFunction(NewSeatObject);
 	QScriptValue metaObject = engine.newQMetaObject(&SeatObject::staticMetaObject, ctor);
-	engine.globalObject().setProperty("SeatObject",metaObject);
+	global.setProperty("SeatObject",metaObject);
 
-	engine.globalObject().setProperty("Card",engine.newQMetaObject(&CardObject::staticMetaObject,engine.newFunction(NewCardObject)));
+	global.setProperty("Card",engine.newQMetaObject(&CardObject::staticMetaObject,engine.newFunction(NewCardObject)));
 	global.setProperty("ChipStack",engine.newQMetaObject(&ChipObject::staticMetaObject,engine.newFunction(NewChipStack)));
 	global.setProperty("DealerButton",engine.newQMetaObject(&TableInternal::DealerButton::staticMetaObject,engine.newFunction(NewDealerButton)));
-	engine.globalObject().setProperty("root",engine.newQObject(this));
+	global.setProperty("root",engine.newQObject(this));
+	global.setProperty("QTimer",engine.newQMetaObject(&QTimer::staticMetaObject,engine.newFunction(NewTimer)));
 	tableui = 0;
 }
 TablePrivate::~TablePrivate() {

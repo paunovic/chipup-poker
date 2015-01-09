@@ -14,11 +14,13 @@ public:
 	SoundEffects(QObject *parent);
 
 	enum SoundId {
-		Dealing=0
+		Dealing=0,
+		PutChipsSmall,
+		TimeBank
 	};
 
 	void PlaySound(enum SoundId soundId);
 
 private:
-	SOUND_TYPE *dealing;
+	SOUND_TYPE *dealing,*putChipsSmall,*timebank;
 };

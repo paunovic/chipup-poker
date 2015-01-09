@@ -56,7 +56,7 @@ static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheig
 void ChipObjectUi::paintEvent(QPaintEvent *) {
 	// TODO, draw text on left or right
 	QPainter p(this);
-	drawDebug(p);
+	//drawDebug(p);
 	p.setBrush(QColor(127,0,0));
 	p.setPen(Qt::NoPen);
 	//p.drawRect(0,0,width(),height());

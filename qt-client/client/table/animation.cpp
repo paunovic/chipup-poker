@@ -8,6 +8,7 @@ Animation::Animation(GameObject *obj, float endx, float endy, float duration, QS
 	starty = obj->y();
 	xdiff = endx - startx;
 	ydiff = endy - starty;
+	qDebug() << "uptime" << this << start;
 }
 void Animation::tick(int now) {
 	qint64 elapsed = now - start;
@@ -28,8 +29,8 @@ void Animation::tick(int now) {
 		return;
 	}
 	float progress = (float)elapsed / duration;
-	//float currentx = startx+(xdiff*progress);
-	//float currenty = starty+(ydiff*progress);
-	//qDebug() << QString("start:%1-%2 current:%3-%4 end:%5-%6 progress:%7 diff:%8-%9").arg(startx).arg(starty).arg(currentx).arg(currenty).arg(endx).arg(endy).arg(progress).arg(xdiff).arg(ydiff);
+	float currentx = startx+(xdiff*progress);
+	float currenty = starty+(ydiff*progress);
+	qDebug() << this << QString("start:%1x%2 current:%3x%4 end:%5x%6 progress:%7 diff:%8x%9 elapsed:%10").arg(startx).arg(starty).arg(currentx).arg(currenty).arg(endx).arg(endy).arg(progress).arg(xdiff).arg(ydiff).arg(elapsed);
 	obj->setPosition(startx+(xdiff*progress),starty+(ydiff*progress));
 }

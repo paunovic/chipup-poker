@@ -6,7 +6,7 @@
 
 QT       += core gui network script
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
 
 TARGET = client
 TEMPLATE = app
