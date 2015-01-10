@@ -152,6 +152,8 @@ void Table::on_btPlayNow_clicked() {
 	Poker::Game g;
 	g.set__id(game->gameid.data(),game->gameid.length());
 	core->sendMessage(Poker::scTablePlayNow,&g);
+
+	ui->btSitOut->setChecked(false);
 }
 void Table::on_btFold_clicked() {
 	Poker::Game g;
@@ -206,4 +208,14 @@ void Table::on_btRaise_clicked() {
 }
 void Table::eval(QString code) {
 	p->eval(code);
+}
+void Table::on_btSitOut_stateChanged(int state) {
+	qDebug() << __func__ << state;
+	Poker::TableBoolFlag tbf;
+	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	tbf.set_flag(state);
+	core->sendMessage(Poker::scTableSitOutNextHand,&tbf);
+}
+void Table::On_sit_ok(QByteArray gameid) {
+	if (gameid != game->gameid) return;
 }

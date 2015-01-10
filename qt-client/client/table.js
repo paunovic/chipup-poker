@@ -156,6 +156,7 @@ function tableEvent(event) {
 		break;
 	case "teWinning":
 		updateBets();
+		AnimateCards();
 		if (localFlop[0]) {
 			localFlop[0].visible = false;
 			localFlop[1].visible = false;
@@ -325,13 +326,14 @@ function DealCard(destx,desty,cardobj) {
 	cardobj.visible = false;
 }
 DealCard.prototype.begin = function DealCardBegin() {
+	log("starting card animation");
 	this.cardobj.visible = true;
 	this.cardobj.setPosition(0.5,0.1);
 	Animate(this.cardobj, this.destx,this.desty, 0.25,eventDone);
 	PlaySound(0);
 }
 function eventDone() {
-	log('event done, doing next');
+	log('event done, doing next:'+actions.length);
 	var self = actions.shift();
 	if (actions.length > 0) actions[0].begin();
 }

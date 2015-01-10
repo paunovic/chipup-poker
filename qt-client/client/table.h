@@ -30,6 +30,7 @@ public:
 	void eval(QString code);
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
+	void On_sit_ok(QByteArray gameid);
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();
@@ -43,6 +44,7 @@ private slots:
 	void on_btMax_clicked();
 	void on_bt3BB_clicked();
 	void on_btPot_clicked();
+	void on_btSitOut_stateChanged(int state);
 protected:
 	void resizeEvent(QResizeEvent *event);
 private:

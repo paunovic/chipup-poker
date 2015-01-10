@@ -14,7 +14,7 @@
 #include "pokermain.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
-	qDebug() << "JS:" << context->argument(0).toString();
+	qDebug() << /*QDateTime::currentDateTime() <<*/ "JS:" << context->argument(0).toString();
 	return engine->undefinedValue();
 }
 static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engine) {
