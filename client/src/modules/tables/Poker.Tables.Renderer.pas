@@ -1064,6 +1064,14 @@ begin
 
         for C1 := 0 to table.Status.FlopCards.Count - 1 do
         begin
+          animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][0], 2.15, 0.9, 1.05, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][1], 2.15, 0.9, 1.05, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][2], 2.15, 0.9, 1.05, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
+
+          animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][0], card_points_final[C1][0], 2.2, 4.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][1], card_points_final[C1][1], 2.2, 4.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
+          animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][2], card_points_final[C1][2], 2.2, 4.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
+          {
           animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][0], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
           animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][1], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
           animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[C1][2], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
@@ -1071,6 +1079,7 @@ begin
           animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][0], card_points_final[C1][0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 0); FFlopAnimations.Add(animation.Id);
           animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][1], card_points_final[C1][1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 1); FFlopAnimations.Add(animation.Id);
           animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[C1][2], card_points_final[C1][2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, C1 * 5 + 2); FFlopAnimations.Add(animation.Id);
+          }
         end;
 
         FFlopAnimated := TRUE;
