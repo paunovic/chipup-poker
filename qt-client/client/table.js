@@ -31,6 +31,16 @@ function tableStatus(ts) {
 	updateSeats(ts);
 	lastTS = ts;
 	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
+	if (ts.state == 'tsIdle') {
+		for (var x=0; x<seat_objects.length; x++) {
+			var local = seat_objects[x];
+			if (!local) continue;
+			for (var y=0; y<local.cards.length; y++) {
+				if (local.cards[y]) queueAction(new HideCard(local.cards[y]));
+				delete local.cards[y];
+			}
+		}
+	}
 }
 function updateSeats(ts,opts) {
 	var max = ts.seatCount();
@@ -86,6 +96,55 @@ function queueAction(action) {
 	actions.push(action);
 	if (actions.length == 1) actions[0].begin();
 }
+function AnimateFlop(cards) {
+	this.cards = cards;
+	this.secondDone = false;
+	this.thirdDone = false;
+	log("starting flop animation for:"+cards);
+}
+AnimateFlop.prototype.begin = function () {
+	for (var x=0; x<3; x++) {
+		if (!localFlop[x]) localFlop[x] = new Card();
+		localFlop[x].visible = false;
+		localFlop[x].setSize(0.063);
+	}
+	localFlop[0].card = -1;
+	localFlop[0].setPosition(0.5,0.1);
+	localFlop[0].visible = true;
+	PlaySound(0);
+	var that = this;
+	Animate(localFlop[0], 0.318,0.477, 0.25,once(function () { that.reveal(); }));
+}
+AnimateFlop.prototype.reveal = function () {
+	for (var x=0; x<3; x++) {
+		localFlop[x].card = this.cards[x];
+	}
+	localFlop[1].setPosition(0.318,0.477);
+	localFlop[2].setPosition(0.318,0.477);
+	localFlop[1].visible = true;
+	localFlop[2].visible = true;
+	var that = this;
+	Animate(localFlop[1],0.387,0.477,0.25,once(function () { that.second(); }));
+	Animate(localFlop[2],0.454,0.477,0.25,once(function () { that.third(); }));
+}
+AnimateFlop.prototype.second = function () {
+	this.secondDone = true;
+	this.check();
+}
+AnimateFlop.prototype.third = function () {
+	this.thirdDone = true;
+	this.check();
+}
+AnimateFlop.prototype.check = function () {
+	if (this.secondDone && this.thirdDone) eventDone();
+}
+function HideCard(obj) {
+	this.card = obj;
+}
+HideCard.prototype.begin = function () {
+	this.card.visible = false;
+	eventDone();
+}
 function tableEvent(event) {
 	log('EVENT:'+event.event);
 	switch (event.event) {
@@ -120,9 +179,7 @@ function tableEvent(event) {
 				localFlop[x].visible = false;
 			}
 			log("queueing flop reveal");
-			queueAction(new DealCard(0.318,0.477,localFlop[0]));
-			queueAction(new DealCard(0.387,0.477,localFlop[1]));
-			queueAction(new DealCard(0.454,0.477,localFlop[2]));
+			queueAction(new AnimateFlop(card.cards));
 		}
 		updatePots();
 		break;
@@ -158,12 +215,12 @@ function tableEvent(event) {
 		updateBets();
 		AnimateCards();
 		if (localFlop[0]) {
-			localFlop[0].visible = false;
-			localFlop[1].visible = false;
-			localFlop[2].visible = false;
+			queueAction(new HideCard(localFlop[0]));
+			queueAction(new HideCard(localFlop[1]));
+			queueAction(new HideCard(localFlop[2]));
 		}
-		if (localTurn[0]) localTurn[0].visible = false;
-		if (localRiver[0]) localRiver[0].visible = false;
+		if (localTurn[0]) queueAction(new HideCard(localTurn[0]));
+		if (localRiver[0]) queueAction(new HideCard(localRiver[0]));
 		var p;
 		while (p=localPots.shift()) {
 			hideChips(p);
@@ -354,6 +411,14 @@ function setTimeout(cb,delay) {
 	timer.timeout.connect(this,cb);
 	timer.start();
 	return timer;
+}
+function once(fn) {
+	var done = false;
+	return function () {
+		if (done) return;
+		done = true;
+		fn();
+	}
 }
 initSeats();
 dump(game);
