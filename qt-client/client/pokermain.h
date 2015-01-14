@@ -107,6 +107,7 @@ private:
 	int totalError;
 	SoundEffects *effects_;
 };
+int parseValue(QString input);
 
 extern PokerMain *core;
 

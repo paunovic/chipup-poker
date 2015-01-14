@@ -476,3 +476,7 @@ void PokerMain::RegisterListener(QObject *listener) {
 		} else qWarning("PokerMain::RegisterListener: No matching signal for %s", slot);
 	}
 }
+int parseValue(QString input) {
+	QString x = input.section('.', 0, 0) + input.section('.', 1, 1).leftJustified(2, '0');
+	return x.toInt();
+}

@@ -54,7 +54,7 @@ function updateSeats(ts,opts) {
 		seat_objects[seat.seat_index].avatar = user.avatar;
 	}
 }
-function AnimateCards() {
+function AnimateCards(opts) {
 	var max = lastTS.seatCount();
 	for (var i=0; i<max; i++) {
 		var seat = lastTS.readSeat(i);
@@ -69,14 +69,23 @@ function AnimateCards() {
 				if (seat.hand.cards.length) cardvalue = seat.hand.cards[j];
 				var pos = calcCardPosition(seat.seat_index,j);
 				if (local.cards[j]) {
-					if (local.cards[j].card != cardvalue) {
-						local.cards[j].card = cardvalue;
-						queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
+					var skip = false;
+					if (opts && opts.reveal) {
+						if (local.cards[j].card != cardvalue) {
+							queueAction(new RevealCard(local.cards[j],cardvalue));
+							skip = true;
+						}
+					}
+					if (!skip) {
+						if (local.cards[j].card != cardvalue) {
+							local.cards[j].card = cardvalue;
+							queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
+						}
 					}
 				} else {
 					card = new Card();
 					log('placing card at:'+JSON.stringify(pos));
-					card.setSize(0.1);
+					card.setSize(0.063);
 					card.card = cardvalue;
 					local.cards[j] = card;
 					queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
@@ -213,7 +222,7 @@ function tableEvent(event) {
 		break;
 	case "teWinning":
 		updateBets();
-		AnimateCards();
+		AnimateCards({reveal:true});
 		if (localFlop[0]) {
 			queueAction(new HideCard(localFlop[0]));
 			queueAction(new HideCard(localFlop[1]));
@@ -228,8 +237,8 @@ function tableEvent(event) {
 		break;
 	case 'teDealing':
 		updateDealer(lastTS.dealer);
-		AnimateCards();
 		updateBets({sound:true});
+		AnimateCards();
 		break;
 	case 'teCall':
 		updateBets({sound:true});
@@ -388,6 +397,14 @@ DealCard.prototype.begin = function DealCardBegin() {
 	this.cardobj.setPosition(0.5,0.1);
 	Animate(this.cardobj, this.destx,this.desty, 0.25,eventDone);
 	PlaySound(0);
+}
+function RevealCard(obj,value) {
+	this.obj = obj;
+	this.value = value;
+}
+RevealCard.prototype.begin = function () {
+	this.obj.card = this.value;
+	eventDone();
 }
 function eventDone() {
 	log('event done, doing next:'+actions.length);
