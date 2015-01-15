@@ -617,7 +617,7 @@ begin
     teWinning: begin
       FRenderer.WinningAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + FRenderer.WinningRiverAniDelay + 0.2;
       if FStatus.RiverCard.Count > 1 then
-        FRenderer.WinningAniDelay := FRenderer.WinningAniDelay + 4.5;
+        FRenderer.WinningAniDelay := FRenderer.WinningAniDelay + 2.5;
 
       LockGameplay(FRenderer.WinningAniDelay + ATableEvent.Pots.Count * 0.5);
       FStatus.Pots.Assign(ATableEvent.Pots);
