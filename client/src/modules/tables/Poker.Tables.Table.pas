@@ -38,7 +38,7 @@ type
       FReceivedStatus: Boolean;
 
     procedure WndProc(var AMessage: TMessage);
-    procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
+    procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent; const AWinning: Boolean);
     procedure SeatClearCaptionTimerCallback;
     procedure ConfigureActions;
     procedure ConfigureAutoPlayOptions;
@@ -404,7 +404,7 @@ end;
 
 procedure TTable.SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
 var
-  C1: Integer;
+  C1, C2: Integer;
   player: TPlayerInfo;
   query_users: TArray<TMongoId>;
   empty_avatar_id: TBytes;
@@ -419,7 +419,6 @@ var
   csdbg: String;
   seatdbg: TSeatInfo;
   playerdbg: TPlayerInfo;
-  C2: Integer;
   {$ENDIF}
 begin
   FRenderer.Disable;
@@ -460,20 +459,9 @@ begin
       Break;
     end;
 
-  // ...and if it is, make animation delays
-  // this is required if everyone goes all in pre-flop for example, so it shows cards one by one (flop > turn > river), with proper delays
-  if winning then
-    for C1 := 0 to ATableStatus.Events.Count - 1 do
-      case ATableStatus.Events[C1].Event of
-        teFlop: FRenderer.WinningFlopAniDelay := 0.2;
-        teTurn: FRenderer.WinningTurnAniDelay := FRenderer.WinningFlopAniDelay + 1;
-        teRiver: FRenderer.WinningRiverAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + 1;
-        teWinning: FRenderer.WinningAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + FRenderer.WinningRiverAniDelay + 0.2;
-      end;
-
   // process table events
   for C1 := 0 to FStatus.Events.Count - 1 do
-    ProcessTableEvent(FStatus.Events[C1]);
+    ProcessTableEvent(FStatus.Events[C1], winning);
 
   // get user infos that we dont have
   SetLength(query_users, 0);
@@ -586,7 +574,7 @@ begin
   NotifyRendererHandle;
 end;
 
-procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
+procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent; const AWinning: Boolean);
 var
   seat_caption: String;
   seat: TSeatInfo;
@@ -627,7 +615,11 @@ begin
     end;
 
     teWinning: begin
-      LockGameplay(2 + ATableEvent.Pots.Count * 0.5);
+      FRenderer.WinningAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + FRenderer.WinningRiverAniDelay + 0.2;
+      if FStatus.RiverCard.Count > 1 then
+        FRenderer.WinningAniDelay := FRenderer.WinningAniDelay + 4.5;
+
+      LockGameplay(FRenderer.WinningAniDelay + ATableEvent.Pots.Count * 0.5);
       FStatus.Pots.Assign(ATableEvent.Pots);
       if FRenderer.AnimateBets(FStatus.PreviousBets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
@@ -663,6 +655,7 @@ begin
     end;
 
     teFlop: begin
+      FRenderer.WinningFlopAniDelay := 0.2;
       LockGameplay(1.5 + FRenderer.WinningFlopAniDelay);
       FStatus.FlopCards.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
@@ -673,6 +666,7 @@ begin
     end;
 
     teTurn: begin
+      FRenderer.WinningTurnAniDelay := FRenderer.WinningFlopAniDelay + 1;
       LockGameplay(1.5 + FRenderer.WinningTurnAniDelay);
       FStatus.TurnCard.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
@@ -683,6 +677,7 @@ begin
     end;
 
     teRiver: begin
+      FRenderer.WinningRiverAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + 1;
       LockGameplay(1.5 + FRenderer.WinningRiverAniDelay);
       FStatus.RiverCard.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
