@@ -9,6 +9,7 @@ Animation::Animation(GameObject *obj, float endx, float endy, float duration, QS
 	xdiff = endx - startx;
 	ydiff = endy - starty;
 	qDebug() << "starting animation" << this << "at" << start << "with delay" << duration;
+	connect(obj,SIGNAL(destroyed(QObject*)),this,SLOT(object_deleted(QObject*)));
 }
 void Animation::tick(int now) {
 	qint64 elapsed = now - start;
@@ -36,4 +37,8 @@ void Animation::tick(int now) {
 	//float currenty = starty+(ydiff*progress);
 	//qDebug() << this << QString("start:%1x%2 current:%3x%4 end:%5x%6 progress:%7 diff:%8x%9 elapsed:%10").arg(startx).arg(starty).arg(currentx).arg(currenty).arg(endx).arg(endy).arg(progress).arg(xdiff).arg(ydiff).arg(elapsed);
 	obj->setPosition(startx+(xdiff*progress),starty+(ydiff*progress));
+}
+void Animation::object_deleted(QObject *) {
+	animateCore->over(this);
+	deleteLater();
 }

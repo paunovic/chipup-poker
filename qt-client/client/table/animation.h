@@ -17,6 +17,8 @@ signals:
 
 public slots:
 	void tick(int now);
+private slots:
+	void object_deleted(QObject *);
 private:
 	qint64 start;
 	int duration;
