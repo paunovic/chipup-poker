@@ -82,15 +82,15 @@ HEADERS  += loginwindow.h \
     data/playerclubstatus.h \
     table/dealerbutton.h
 
-SOURCES += sound_effects.cpp
-HEADERS += sound_effects.h
+SOURCES += sound_effects.cpp selftest.cpp
+HEADERS += sound_effects.h selftest.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
     csseditor.ui \
     table.ui \
     jseditor.ui \
-    table/table_sit.ui
+    table/table_sit.ui selftest.ui
 
 RESOURCES += \
     resources.qrc

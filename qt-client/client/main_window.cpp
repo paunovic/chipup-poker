@@ -10,6 +10,7 @@
 #include <QAbstractItemView>
 
 #include "table.h"
+#include "selftest.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
 	currentClub = 0;
@@ -114,6 +115,10 @@ bool MainWindow::event(QEvent *event) {
 void MainWindow::on_actionCSS_Editor_triggered() {
 	CssEditor *css = new CssEditor;
 	css->show();
+}
+void MainWindow::on_actionSelf_Tests_triggered() {
+	SelfTests *st = new SelfTests;
+	st->show();
 }
 void MainWindow::on_gridGames_doubleClicked(const QModelIndex &index) {
 	qDebug() << "double click" << index.row();

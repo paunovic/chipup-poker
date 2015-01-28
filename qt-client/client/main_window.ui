@@ -27,16 +27,7 @@
     <property name="spacing">
      <number>0</number>
     </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>0</number>
     </property>
     <item>
@@ -263,7 +254,7 @@ background-repeat: no-repeat;</string>
      <x>0</x>
      <y>0</y>
      <width>866</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAccount">
@@ -318,6 +309,7 @@ background-repeat: no-repeat;</string>
      <string>Dev</string>
     </property>
     <addaction name="actionCSS_Editor"/>
+    <addaction name="actionSelf_Tests"/>
    </widget>
    <addaction name="menuAccount"/>
    <addaction name="menuOptions"/>
@@ -406,6 +398,11 @@ background-repeat: no-repeat;</string>
   <action name="actionOpen_Table">
    <property name="text">
     <string>Open Table</string>
+   </property>
+  </action>
+  <action name="actionSelf_Tests">
+   <property name="text">
+    <string>Self-Tests</string>
    </property>
   </action>
  </widget>
