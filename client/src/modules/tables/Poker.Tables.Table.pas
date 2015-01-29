@@ -404,13 +404,14 @@ end;
 
 procedure TTable.SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
 var
-  C1, C2: Integer;
+  C1: Integer;
   player: TPlayerInfo;
   query_users: TArray<TMongoId>;
   empty_avatar_id: TBytes;
   seat: TSeatInfo;
   winning: Boolean;
   {$IFDEF DEBUG}
+  C2: Integer;
   pbevent: TPB_TableEvent;
   events: String;
   tmp: String;
