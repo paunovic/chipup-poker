@@ -16,7 +16,7 @@ begin
   DebugLn(AException, ditException, AData);
   {$ENDIF}
 
-  ServerSocket.SoftException(AException, AData);
+  if Assigned(ServerSocket) then ServerSocket.SoftException(AException, AData);
 end;
 
 end.
