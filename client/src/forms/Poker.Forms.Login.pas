@@ -152,6 +152,11 @@ end;
 
 procedure TfrmChipUpLogin.FormShow(Sender: TObject);
 begin
+  if DXCore.Device.IsAtFault then
+    MessageDlg('Failed to initialize DirectX.'#10 +
+      'Please check that your graphic drivers are up-to-date and that your system meets the minimum requirements.',
+      mtError, [mbOK], 0);
+
   case ServerSocket.Socket.State of
     wsClosed: begin
       CurrentStatus := lsConnecting;
@@ -309,7 +314,7 @@ end;
 
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
 begin
-  acLogin.Enabled := AEnable;
+  acLogin.Enabled := (AEnable) and (not DXCore.Device.IsAtFault);
   acShowCreateAccountForm.Enabled := AEnable;
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
