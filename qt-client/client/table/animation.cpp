@@ -16,6 +16,7 @@ void Animation::tick(int now) {
 	if (elapsed < 0) elapsed = 0;
 	if (elapsed > duration) {
 		qDebug() << this << "animation done";
+		obj->setPosition(endx,endy);
 		if (callback.isFunction()) {
 			QScriptValueList args;
 			callback.call(callback.engine()->globalObject(),args);
@@ -29,7 +30,6 @@ void Animation::tick(int now) {
 		}
 		animateCore->over(this);
 		deleteLater();
-		obj->setPosition(endx,endy);
 		return;
 	}
 	float progress = (float)elapsed / duration;

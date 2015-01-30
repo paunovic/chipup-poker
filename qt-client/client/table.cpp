@@ -224,6 +224,14 @@ void Table::on_cbSitOutBB_stateChanged(int state) {
 	tbf.set_flag(state);
 	core->sendMessage(Poker::scTableSitOutNextBB,&tbf);
 }
+void Table::on_btDouble_stateChanged(int state) {
+	qDebug() << __func__ << state;
+	Poker::TableBoolFlag tbf;
+	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	tbf.set_flag(state);
+	core->sendMessage(Poker::scSplitTableCards,&tbf);
+}
+
 void Table::On_sit_ok(QByteArray gameid) {
 	if (gameid != game->gameid) return;
 }

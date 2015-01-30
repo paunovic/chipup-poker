@@ -46,6 +46,7 @@ private slots:
 	void on_btPot_clicked();
 	void on_btSitOut_stateChanged(int state);
 	void on_cbSitOutBB_stateChanged(int state);
+	void on_btDouble_stateChanged(int state);
 protected:
 	void resizeEvent(QResizeEvent *event);
 private:

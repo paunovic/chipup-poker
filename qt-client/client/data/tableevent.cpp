@@ -26,13 +26,14 @@ QString TableEvent::getEvent() {
 	case Poker::TableEvent::teCheck: return "teCheck"; // 5
 	case Poker::TableEvent::teCall: return "teCall"; // 6
 	case Poker::TableEvent::teRaise: return "teRaise"; // 7
+	case Poker::TableEvent::teAllIn: return "teAllIn"; // 8;
 	case Poker::TableEvent::teFlop: return "teFlop"; // 9
 	case Poker::TableEvent::teTurn: return "teTurn"; // 10
 	case Poker::TableEvent::teRiver: return "teRiver"; // 11
 	case Poker::TableEvent::tePostRiver: return "tePostRiver"; // 12
 	case Poker::TableEvent::teExistingCards: return "teExistingCards"; // 14
-	default:
-		return QString("FIXME:%1").arg(event);
+//	default:
+//		return QString("FIXME:%1").arg(event);
 	}
 }
 int TableEvent::getCardCount() {
