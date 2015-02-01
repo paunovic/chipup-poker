@@ -71,7 +71,12 @@ TableStatus::~TableStatus() {
 	//	delete x;
 	//}
 }
-QObject *TableStatus::readSeat(int index) {
-	return seats.at(index);
+QObject *TableStatus::readSeatBySeat(int seat) {
+	QList<SeatInfo*>::Iterator i;
+	for (i=seats.begin(); i!=seats.end(); ++i) {
+		SeatInfo *seatinfo = *i;
+		if (seatinfo->seat_index == seat) return seatinfo;
+	}
+	return NULL;
 }
 } // namespace Data

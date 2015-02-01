@@ -60,8 +60,7 @@ type get ## name() { return name; }
 signals:
 
 public slots:
-	QObject *readSeat(int index);
-	int seatCount() { return seats.length(); }
+	QObject *readSeatBySeat(int seat);
 private:
 	QList<int> bets_;
 	Poker::TableStatus::TableState state_;

@@ -43,7 +43,8 @@ function tableStatus(ts) {
 	}
 	var sets = [];
 	for (var i=0; i<ts.events.length; i++) {
-		tableEvent(ts.events[i]);
+		var event = ts.events[i];
+		tableEvent(event);
 		switch (ts.events[i].event) {
 		case "teFlop":
 			for (var i=0; i<event.getCardCount(); i++) {
@@ -90,9 +91,8 @@ function tableStatus(ts) {
 	
 }
 function updateSeats(ts,opts) {
-	var max = ts.seatCount();
-	for (var i=0; i<max; i++) {
-		var seat = ts.readSeat(i);
+	for (var i=0; i<ts.seats.length; i++) {
+		var seat = ts.seats[i];
 		var local = seat_objects[seat.seat_index];
 		local.updateInfo(seat);
 		seat_objects[seat.seat_index].empty = false;
@@ -102,9 +102,8 @@ function updateSeats(ts,opts) {
 	}
 }
 function AnimateCards(opts) {
-	var max = lastTS.seatCount();
-	for (var i=0; i<max; i++) {
-		var seat = lastTS.readSeat(i);
+	for (var i=0; i<lastTS.seats.length; i++) {
+		var seat = lastTS.seats[i];
 		var local = seat_objects[seat.seat_index];
 		//log("index:"+i+" seat#:"+seat.seat_index);
 		//log(JSON.stringify(seat));
@@ -208,7 +207,7 @@ function tableEvent(event) {
 	log('EVENT:'+event.event);
 	switch (event.event) {
 	case "teSit":
-		var seat = lastTS.readSeat(event.seat);
+		var seat = lastTS.readSeatBySeat(event.seat);
 		var local = seat_objects[event.seat];
 		local.updateInfo(seat);
 		seat_objects[event.seat].empty = false;
@@ -275,8 +274,8 @@ function tableEvent(event) {
 	}
 }
 function updateBets(opts) {
-	for (var i=0; i<lastTS.seatCount(); i++) {
-		var remote = lastTS.readSeat(i);
+	for (var i=0; i<lastTS.seats.length; i++) {
+		var remote = lastTS.seats[i];
 		var local = seat_objects[remote.seat_index];
 		if (lastTS.bets[remote.seat_index] == 0) {
 			if (local.bet) {

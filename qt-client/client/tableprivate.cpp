@@ -10,6 +10,7 @@
 #include "table/animation.h"
 #include "table/animatecore.h"
 #include "table/dealerbutton.h"
+#include "data/seatinfo.h"
 #include "sound_effects.h"
 #include "pokermain.h"
 
@@ -146,6 +147,16 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		j++;
 	}
 	jsts.setProperty("events",events);
+
+	QList<Data::SeatInfo*>::Iterator i3;
+	QScriptValue seats = engine.newArray();
+	j = 0;
+	for (i3=ts->seats.begin(); i3!=ts->seats.end(); ++i3) {
+		Data::SeatInfo *seat = *i3;
+		seats.setProperty(j,engine.newQObject(seat));
+		j++;
+	}
+	jsts.setProperty("seats",seats);
 
 	args.append(jsts);
 	func.call(engine.globalObject(),args);
