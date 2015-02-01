@@ -135,6 +135,18 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 	for (i1=ts->pots.begin(), index=0; i1!=ts->pots.end(); ++i1, index++) {
 		pots.setProperty(index,engine.newQObject(*i1));
 	}
+
+	QList<QSharedPointer<Data::TableEvent> >::Iterator i2;
+	QScriptValue events = engine.newArray();
+	int j=0;
+	for (i2=ts->events.begin(); i2!=ts->events.end(); ++i2) {
+		QSharedPointer<Data::TableEvent> e = *i2;
+		QScriptValue event = engine.newQObject(e.data());
+		events.setProperty(j,event);
+		j++;
+	}
+	jsts.setProperty("events",events);
+
 	args.append(jsts);
 	func.call(engine.globalObject(),args);
 	if (engine.hasUncaughtException()) {
@@ -142,25 +154,6 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		qDebug() << engine.uncaughtException().toString();
 		engine.clearExceptions();
 		return false;
-	}
-	QScriptValue func2 = engine.globalObject().property("tableEvent");
-	if (!func2.isFunction()) {
-		qDebug() << "tableEvent isnt a function";
-		return false;
-	}
-	QList<QSharedPointer<Data::TableEvent> >::Iterator i2;
-	for (i2=ts->events.begin(); i2!=ts->events.end(); ++i2) {
-		QSharedPointer<Data::TableEvent> e = *i2;
-		QScriptValue event = engine.newQObject(e.data());
-		QScriptValueList args;
-		args.append(event);
-		func2.call(engine.globalObject(),args);
-		if (engine.hasUncaughtException()) {
-			qDebug() << engine.uncaughtExceptionBacktrace();
-			qDebug() << engine.uncaughtException().toString();
-			engine.clearExceptions();
-			return false;
-		}
 	}
 	return true;
 }

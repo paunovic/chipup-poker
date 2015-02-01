@@ -60,7 +60,8 @@ QString TableStatus::getState() {
 	switch (state_) {
 	case Poker::TableStatus::tsIdle: return "tsIdle";
 	case Poker::TableStatus::tsPreFlop: return "tsPreFlop";
-	default: return QString("err:%1").arg((int)state_);
+	case Poker::TableStatus::tsWinning: return "tsWinning"; // 5
+	//default: return QString("err:%1").arg((int)state_);
 	}
 }
 TableStatus::~TableStatus() {

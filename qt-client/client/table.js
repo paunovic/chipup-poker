@@ -41,6 +41,53 @@ function tableStatus(ts) {
 			}
 		}
 	}
+	var sets = [];
+	for (var i=0; i<ts.events.length; i++) {
+		tableEvent(ts.events[i]);
+		switch (ts.events[i].event) {
+		case "teFlop":
+			for (var i=0; i<event.getCardCount(); i++) {
+				var card = event.getCard(i);
+				var offset = i*3;
+				for (var x=0; x<3; x++) {
+					if (!localFlop[x+offset]) localFlop[x+offset] = new Card();
+					localFlop[x+offset].setSize(0.063);
+					localFlop[x+offset].card = card.cards[x];
+					localFlop[x+offset].visible = false;
+				}
+				log("queueing flop reveal");
+				if (!sets[i]) sets[i] = [];
+				sets[i].push(new AnimateFlop(card.cards,offset));
+			}
+			updatePots();
+			break;
+		case "teTurn":
+			for (var i=0; i<event.getCardCount(); i++) {
+				var card = event.getCard(i);
+				if (!localTurn[i]) localTurn[i] = new Card();
+				localTurn[i].setSize(0.063);
+				localTurn[i].visible = false;
+				if (!sets[i]) sets[i] = [];
+				sets[i].push(new DealCard(0.523,0.477,localTurn[i]));
+				sets[i].push(new RevealCard(localTurn[i],card.cards[0]));
+			}
+			updatePots();
+			break;
+		case "teRiver":
+			for (var i=0; i<event.getCardCount(); i++) {
+				var card = event.getCard(i);
+				if (!localRiver[i]) localRiver[i] = new Card();
+				localRiver[i].setSize(0.063);
+				localRiver[i].visible = false;
+				if (!sets[i]) sets[i] = [];
+				sets[i].push(new DealCard(0.592,0.477,localRiver[i]));
+				sets[i].push(new RevealCard(localRiver[i],card.cards[0]));
+			}
+			updatePots();
+			break;
+		}
+	}
+	
 }
 function updateSeats(ts,opts) {
 	var max = ts.seatCount();
@@ -180,43 +227,6 @@ function tableEvent(event) {
 			hideChips(seat_objects[event.seat].bet);
 			seat_objects[event.seat].bet = null;
 		}
-		break;
-	case "teFlop":
-		for (var i=0; i<event.getCardCount(); i++) {
-			var card = event.getCard(i);
-			var offset = i*3;
-			for (var x=0; x<3; x++) {
-				if (!localFlop[x+offset]) localFlop[x+offset] = new Card();
-				localFlop[x+offset].setSize(0.063);
-				localFlop[x+offset].card = card.cards[x];
-				localFlop[x+offset].visible = false;
-			}
-			log("queueing flop reveal");
-			queueAction(new AnimateFlop(card.cards,offset));
-		}
-		updatePots();
-		break;
-	case "teTurn":
-		for (var i=0; i<event.getCardCount(); i++) {
-			var card = event.getCard(i);
-			if (!localTurn[i]) localTurn[i] = new Card();
-			localTurn[i].setSize(0.063);
-			localTurn[i].visible = false;
-			queueAction(new DealCard(0.523,0.477,localTurn[i]));
-			queueAction(new RevealCard(localTurn[i],card.cards[0]));
-		}
-		updatePots();
-		break;
-	case "teRiver":
-		for (var i=0; i<event.getCardCount(); i++) {
-			var card = event.getCard(i);
-			if (!localRiver[i]) localRiver[i] = new Card();
-			localRiver[i].setSize(0.063);
-			localRiver[i].visible = false;
-			queueAction(new DealCard(0.592,0.477,localRiver[i]));
-			queueAction(new RevealCard(localRiver[i],card.cards[0]));
-		}
-		updatePots();
 		break;
 	case "teExistingCards":
 		for (var i=0; i<event.getCardCount(); i++) {
