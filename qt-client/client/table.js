@@ -42,10 +42,11 @@ function tableStatus(ts) {
 		}
 	}
 	var sets = [];
-	for (var i=0; i<ts.events.length; i++) {
-		var event = ts.events[i];
+	for (var j=0; j<ts.events.length; j++) {
+		log("event:"+j+" out of "+ts.events.length);
+		var event = ts.events[j];
 		tableEvent(event);
-		switch (ts.events[i].event) {
+		switch (event.event) {
 		case "teFlop":
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
