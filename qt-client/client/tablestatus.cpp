@@ -1,0 +1,87 @@
+#include "tablestatus.h"
+#include "data/seatinfo.h"
+
+namespace Data {
+
+TableStatus::TableStatus(QObject *parent) :
+	QObject(parent)
+{
+	state_ = Poker::TableStatus::tsIdle;
+	current_seat = -1;
+}
+
+void TableStatus::update(const Poker::TableStatus &in) {
+	std::string rawid = in.table_mongo_id();
+	int i;
+
+	gameid = QByteArray(rawid.data(),rawid.size());
+	for (i=0; i<in.seats_size(); i++) {
+		Data::SeatInfo *seat = new Data::SeatInfo(this);
+		seat->update(in.seats(i));
+		seats.append(seat);
+	}
+	state_ = in.state();
+	dealer_ = in.dealer();
+	current_seat = in.current_seat();
+	for (i=0; i<in.bets_size(); i++) {
+		bets_.append(in.bets(i));
+	}
+	locked = in.locked();
+	seq = in.seq();
+	minimum_bet = in.minimum_bet();
+	maximum_raise = in.maximum_raise();
+	minimum_raise = in.minimum_raise();
+	sb = in.small_blind();
+	bb = in.big_blind();
+	handid = in.handid();
+	time = in.time();
+	for (i=0; i<in.events_size(); i++) {
+		QSharedPointer<Data::TableEvent> e(new Data::TableEvent);
+		e->update(in.events(i));
+		events.append(e);
+	}
+	for (i=0; i<in.pots_size(); i++) {
+		Data::Pot *p = new Data::Pot;
+		p->update(in.pots(i));
+		pots.append(p);
+	}
+	rake_percent = in.rake_percent();
+	current_game = in.current_game();
+	rotation = in.rotation();
+	game_limit = in.game_limit();
+	table_type = in.table_type();
+	for (i=0; i<in.table_message_size(); i++) {
+		Data::TableMessage m;
+		m.update(in.table_message(i));
+		table_message.append(m);
+	}
+}
+QString TableStatus::getState() {
+	switch (state_) {
+	case Poker::TableStatus::tsIdle: return "tsIdle";
+	case Poker::TableStatus::tsPreFlop: return "tsPreFlop";
+	case Poker::TableStatus::tsFlop: return "tsFlop";
+	case Poker::TableStatus::tsTurn: return "tsTurn";
+	case Poker::TableStatus::tsRiver: return "tsRiver";
+	case Poker::TableStatus::tsWinning: return "tsWinning";
+	case Poker::TableStatus::tsWinning2: return "tsWinning2";
+	//default: return QString("err:%1").arg((int)state_);
+	}
+	return "error";
+}
+TableStatus::~TableStatus() {
+	// TODO, try setting the parent of the seats
+	//while (!seats.isEmpty()) {
+	//	Data::SeatInfo *x = seats.takeFirst();
+	//	delete x;
+	//}
+}
+QObject *TableStatus::readSeatBySeat(int seat) {
+	QList<SeatInfo*>::Iterator i;
+	for (i=seats.begin(); i!=seats.end(); ++i) {
+		SeatInfo *seatinfo = *i;
+		if (seatinfo->seat_index == seat) return seatinfo;
+	}
+	return NULL;
+}
+} // namespace Data

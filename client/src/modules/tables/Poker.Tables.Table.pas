@@ -16,7 +16,6 @@ type
       TIMER_ID_GAMEPLAY_LOCK = 3;
 
     var
-      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
       FInternalId: Integer;
       FInternalHWND: HWND;
       FTableType: TTableType;
@@ -39,7 +38,7 @@ type
       FReceivedStatus: Boolean;
 
     procedure WndProc(var AMessage: TMessage);
-    procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
+    procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent; const AWinning: Boolean);
     procedure SeatClearCaptionTimerCallback;
     procedure ConfigureActions;
     procedure ConfigureAutoPlayOptions;
@@ -92,14 +91,13 @@ uses
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Players.Player, Poker.Players.PlayerList, Poker.Seats.Seat, Poker.Cards, Poker.Sounds, Poker.Settings,
   System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo,
-  Poker.Tournaments, Poker.Tournaments.Info, Poker.Protobufs.Objects.ClubMember;
+  Poker.Tournaments, Poker.Tournaments.Info, Poker.Protobufs.Objects.ClubMember, Poker.SoftExceptions;
 
 
 { TTable }
 
 constructor TTable.Create(const AInternalId: Integer);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Table #%d', [AInternalId])); {$ENDIF}
   FFirstStatusSet := FALSE;
   FInternalId := AInternalId;
   FInternalHWND := AllocateHWnd(WndProc);
@@ -129,8 +127,6 @@ begin
   FreeAndNil(FGame);
   FreeAndNil(FClub);
   DeallocateHWnd(FInternalHWND);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
   inherited;
 end;
@@ -341,12 +337,14 @@ begin
   if Assigned(FForm) then
     (FForm as TfrmTable).ChangeGameId(FGameId);
   result := UpdateObjects;
-  {$IFDEF DEBUG}
   if not result then
-    DebugLn(FDebugId, 'Table player transfer: failed to update objects', ditException, SerializeObject(ATournamentPlayerTransfer))
+    SoftException('Table player transfer: failed to update objects', SerializeObject(ATournamentPlayerTransfer))
   else
-    DebugLn(FDebugId, 'Table player transfer succeeded', ditApplication, SerializeObject(ATournamentPlayerTransfer));
-  {$ENDIF}
+  begin
+   {$IFDEF DEBUG}
+    DebugLn('Table player transfer succeeded', ditApplication, SerializeObject(ATournamentPlayerTransfer));
+   {$ENDIF}
+  end;
 end;
 
 function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
@@ -413,6 +411,7 @@ var
   seat: TSeatInfo;
   winning: Boolean;
   {$IFDEF DEBUG}
+  C2: Integer;
   pbevent: TPB_TableEvent;
   events: String;
   tmp: String;
@@ -421,7 +420,6 @@ var
   csdbg: String;
   seatdbg: TSeatInfo;
   playerdbg: TPlayerInfo;
-  C2: Integer;
   {$ENDIF}
 begin
   FRenderer.Disable;
@@ -462,20 +460,9 @@ begin
       Break;
     end;
 
-  // ...and if it is, make animation delays
-  // this is required if everyone goes all in pre-flop for example, so it shows cards one by one (flop > turn > river), with proper delays
-  if winning then
-    for C1 := 0 to ATableStatus.Events.Count - 1 do
-      case ATableStatus.Events[C1].Event of
-        teFlop: FRenderer.WinningFlopAniDelay := 0.2;
-        teTurn: FRenderer.WinningTurnAniDelay := FRenderer.WinningFlopAniDelay + 1;
-        teRiver: FRenderer.WinningRiverAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + 1;
-        teWinning: FRenderer.WinningAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + FRenderer.WinningRiverAniDelay + 0.2;
-      end;
-
   // process table events
   for C1 := 0 to FStatus.Events.Count - 1 do
-    ProcessTableEvent(FStatus.Events[C1]);
+    ProcessTableEvent(FStatus.Events[C1], winning);
 
   // get user infos that we dont have
   SetLength(query_users, 0);
@@ -582,13 +569,13 @@ begin
     end;
   end;
 
-  DebugLn(FDebugId, tstatusdbg, ditApplication, events);
+  DebugLn(tstatusdbg, ditApplication, events);
   {$ENDIF}
 
   NotifyRendererHandle;
 end;
 
-procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
+procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent; const AWinning: Boolean);
 var
   seat_caption: String;
   seat: TSeatInfo;
@@ -629,7 +616,11 @@ begin
     end;
 
     teWinning: begin
-      LockGameplay(2 + ATableEvent.Pots.Count * 0.5);
+      FRenderer.WinningAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + FRenderer.WinningRiverAniDelay + 0.2;
+      if FStatus.RiverCard.Count > 1 then
+        FRenderer.WinningAniDelay := FRenderer.WinningAniDelay + 2.5;
+
+      LockGameplay(FRenderer.WinningAniDelay + ATableEvent.Pots.Count * 0.5);
       FStatus.Pots.Assign(ATableEvent.Pots);
       if FRenderer.AnimateBets(FStatus.PreviousBets) then
         PlaySound(Sounds.SOUND_MOVE_CHIPS);
@@ -665,6 +656,7 @@ begin
     end;
 
     teFlop: begin
+      FRenderer.WinningFlopAniDelay := 0.2;
       LockGameplay(1.5 + FRenderer.WinningFlopAniDelay);
       FStatus.FlopCards.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
@@ -675,6 +667,7 @@ begin
     end;
 
     teTurn: begin
+      FRenderer.WinningTurnAniDelay := FRenderer.WinningFlopAniDelay + 1;
       LockGameplay(1.5 + FRenderer.WinningTurnAniDelay);
       FStatus.TurnCard.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do
@@ -685,6 +678,7 @@ begin
     end;
 
     teRiver: begin
+      FRenderer.WinningRiverAniDelay := FRenderer.WinningFlopAniDelay + FRenderer.WinningTurnAniDelay + 1;
       LockGameplay(1.5 + FRenderer.WinningRiverAniDelay);
       FStatus.RiverCard.Clear;
       for C1 := 0 to ATableEvent.Cards.Count - 1 do

@@ -1,0 +1,139 @@
+QPushButton#btLogin {
+	border-image: url(:/resources/Button_normal.png) 0 0 0 0 stretch stretch;
+	color: white;
+}
+QPushButton#btLogin:hover {
+	border-image: url(:/resources/Button_hover.png) 0 0 0 0 stretch stretch;
+}
+QPushButton {
+	border-image: url(:/resources/button_mainform_normal.png) 0 0 0 0 stretch stretch;
+	color: #b4b4b4;
+	font: bold;
+}
+#TableSit QPushButton {
+	padding-left: 30px;
+	padding-right: 30px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+QPushButton:hover {
+	border-image: url(:/resources/button_mainform_hot.png) 0 0 0 0 stretch stretch;
+}
+QPushButton:pressed {
+	border-image: url(:/resources/button_mainform_pressed.png) 0 0 0 0 stretch stretch;
+}
+QPushButton:disabled {
+	border-image: url(:resources/button_mainform_disabled.png) 0 0 0 0 stretch stretch;
+	color: #6e6e6e;
+}
+QMainWindow, QDialog, QWidget#TableSit {
+	background-color: black;
+}
+QTreeView {
+	background-color: #505050;
+	color: #b4b4b4;
+}
+QTreeView::item:selected {
+	background-color: #321010;
+}
+QTreeView::item:selected:!active {
+	color: white;
+}
+QHeaderView::section {
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+									  stop:0 #616161, stop: 0.5 #505050,
+									  stop: 0.6 #434343, stop:1 #656565);
+	color: white;
+	padding-left: 4px;
+	border: 1px solid #6c6c6c;
+}
+
+QHeaderView::section:checked
+{
+	background-color: red;
+}
+QLabel#btPrivateClubs, QLabel#btPublicGames {
+	color: #f15a21;
+} 
+QLabel {
+	color: #b4b4b4;
+}
+QPushButton#btHomeGames, QPushButton#btTournaments {
+	border-image: none;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #343a3c, stop: 1 #171717);
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #202223, stop: 1 #4b5152);
+}
+QPushButton#btHomeGames:hover, QPushButton#btTournaments:hover {
+	border-image: none;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #404749, stop: 1 #22241c);
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #202223, stop: 1 #4b5152);
+}
+QPushButton:checked#btHomeGames, QPushButton:checked#btTournaments {
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #780b0b, stop: 1 #221212);
+	color: #f5682c;
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3a2425, stop: 1 #9f2f2f);
+}
+
+
+
+QCheckBox {
+	color:#b4b4b4;
+}
+QLineEdit#teChatInput {
+	background-color: #262626;
+	color: #808080;
+	border: none;
+}
+QTextEdit#teChat {
+	background-color: #454545;
+	border: none;
+}
+
+QMainWindow#Table {
+	border-image: url(e:/poker/poker/qt-client/resources/table/RoomBackground.png) 0 0 0 0 stretch stretch;
+}
+QPushButton#btMin,QPushButton#btMax,QPushButton#btPot,QPushButton#bt3BB {
+	border-top: 1px solid #626668;
+	border-left: 1px solid #394041;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #333939, stop: 1 #171a17);
+	border-image: none;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+QPushButton#btMin:pressed,QPushButton#btMax:pressed,QPushButton#btPot:pressed,QPushButton#bt3BB:pressed {
+	border-top: 1px solid #714848;
+	border-left: 1px solid #751414;
+	border-bottom: 1px solid #540000;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3f0000, stop: 1 #900000);
+}
+QWidget#test {
+border: 1px solid red;
+}
+
+#lbsTableName {
+	color: white;
+	font: bold;
+}
+#lbsTableBuyins {
+	font: bold;
+}
+#btStandUp {
+border-image: url(":/resources/table/StandupButtonNormal.png");
+}
+
+#LoginWindow #main {
+	border-image: url(":/resources/login/Background.png") 0 0 0 0 stretch stretch;
+}
+
+#LoginWindow QLabel, #LoginWindow QCheckBox {
+	color: white;
+}
+#raiseSection {
+border-image:url(":/resources/table/RaiseSliderBackground.png");
+}
+QSlider::handle:horizontal {
+image: url(":/resources/table/RaiseSliderButton.png");
+padding: -3px;
+}
+QSlider::groove:horizontal {
+}

@@ -17,7 +17,7 @@ type
     alTableSit: TActionList;
     acOK: TAction;
     acCancel: TAction;
-    lbvTableName: TcxLabel;
+    lbsTableName: TcxLabel;
     btMin: TcxButton;
     btMax: TcxButton;
     acMin: TAction;
@@ -382,8 +382,8 @@ begin
     min_buyin := GetMinBuyin;
     max_buyin := GetMaxBuyin;
 
-    lbvTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
-    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(GetMinBuyin),
+    lbsTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
+    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(min_buyin),
         ChipsToStr(max_buyin)]);
 {    if table.Status.SelfSeatIndex <> -1 then
       FBuyinPhrase := 'add-on'

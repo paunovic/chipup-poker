@@ -83,7 +83,6 @@ type
     procedure gridBlindsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridAllPlayersPlaceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTournamentId: TMongoId;
     FSelectedTableId: TMongoId;
     FCallbacksId: Integer;
@@ -117,7 +116,7 @@ uses
   Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Tournaments.Info, Poker.DataModule, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Tables.TableList, Poker.Protobufs.Objects.GameBlinds,
   Poker.Protobufs.Objects.TournamentList, Poker.Tables.Table, Poker.Protobufs.Objects.TableStatus, System.DateUtils, Poker.Common.Misc,
-  Poker.Games.Game, Poker.Forms.Main, Poker.Protobufs.Objects.TournamentPrize;
+  Poker.Games.Game, Poker.Forms.Main, Poker.Protobufs.Objects.TournamentPrize, Poker.SoftExceptions;
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
@@ -132,14 +131,11 @@ procedure TfrmTournamentLobby.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmTournamentLobby.SetParams(const AParams: array of pointer);
 begin
   FTournamentId := AParams[0];
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Tournament Lobby [%s]', [FTournamentId.ToString])); {$ENDIF}
   ServerSocket.OpenTournamentLobby(FTournamentId);
   RefreshAll;
 end;
@@ -265,7 +261,7 @@ begin
         else
         begin
           lbvSubHeader.Caption := '';
-          {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid current blind level: %d', [tournament.CurrentBlindLevel]), ditException); {$ENDIF}
+          SoftException(Format('Invalid current blind level: %d', [tournament.CurrentBlindLevel]));
         end;
         subvisible := TRUE;
       end;

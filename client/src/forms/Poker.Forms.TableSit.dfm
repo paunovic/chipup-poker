@@ -97,7 +97,7 @@ object frmTableSit: TfrmTableSit
     Font.Style = []
     ParentFont = False
   end
-  object lbvTableName: TcxLabel
+  object lbsTableName: TcxLabel
     AlignWithMargins = True
     Left = 3
     Top = 6

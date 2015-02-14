@@ -6,14 +6,11 @@ type
   TInstanceController = class
   private
     class var
-      FMutexName: String;
       FMutexHandle: THandle;
 
   public
-    class function AcquireInstance: Boolean;
+    class function AcquireInstance(const AMutexName: String): Boolean;
     class procedure ReleaseInstance;
-
-    class property MutexName: String read FMutexName write FMutexName;
   end;
 
 implementation
@@ -21,12 +18,12 @@ implementation
 uses
   Winapi.Windows;
 
-class function TInstanceController.AcquireInstance: Boolean;
+class function TInstanceController.AcquireInstance(const AMutexName: String): Boolean;
 var
   hMutex: THandle;
 begin
   result := FALSE;
-  hMutex := CreateMutex(nil, FALSE, PChar(FMutexName));
+  hMutex := CreateMutex(nil, FALSE, PChar(AMutexName));
   if hMutex <> 0 then
     if GetLastError = ERROR_ALREADY_EXISTS then
       result := FALSE

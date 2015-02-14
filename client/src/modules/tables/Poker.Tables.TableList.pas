@@ -10,7 +10,6 @@ uses
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FLock: TSafeMutex;
     FNextTableInternalId: Integer;
   public
@@ -50,9 +49,8 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
-  Poker.HandHistory.Core;
+  Poker.HandHistory.Core, Poker.SoftExceptions;
 
 { TTableList }
 
@@ -68,8 +66,6 @@ end;
 
 constructor TTableList.Create;
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Tables'); {$ENDIF}
-
   FLock := TSafeMutex.Create;
   FNextTableInternalId := 0;
 
@@ -86,7 +82,6 @@ begin
   end;
   inherited;
   FreeAndNil(FLock);
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TTableList.Lock;
@@ -143,7 +138,7 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to setup live table', ditException); {$ENDIF}
+    SoftException('Failed to setup live table');
     Remove(FNextTableInternalId);
   end;
 end;
@@ -172,7 +167,7 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to setup tournament table', ditException); {$ENDIF}
+    SoftException('Failed to setup tournament table');
     Remove(FNextTableInternalId);
   end;
 end;
@@ -322,7 +317,7 @@ begin
   if not result then
   begin
     FLock.Release;
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Cannot find table with internal id: %d', [AId]), ditException); {$ENDIF}
+    SoftException(Format('Cannot find table with internal id: %d', [AId]));
   end;
 end;
 

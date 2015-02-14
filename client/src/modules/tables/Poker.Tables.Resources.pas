@@ -80,8 +80,6 @@ type
       FPlayNowButtonAspectRatio: Single;
       FSeatActionFrameAspectRatio: Single;
 
-      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
-
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
     procedure AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
@@ -197,9 +195,8 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.DataModule, Poker.Settings, Asphyre.Colors, Asphyre.Types, System.Types;
-
+  System.SysUtils, Poker.DataModule, Poker.Settings, Asphyre.Colors, Asphyre.Types,
+  System.Types, Poker.SoftExceptions;
 
 
 class procedure TTableResources.Initialize(const ADXCanvas: TAsphyreCanvas);
@@ -212,15 +209,12 @@ begin
   FreeAndNil(TableResources);
 end;
 
-
 constructor TTableResources.Create(const ADXCanvas: TAsphyreCanvas);
 var
-  C1 : Integer;
+  C1: Integer;
   CCV: TCardValue;
   CCS: TCardSuit;
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('TableResources'); {$ENDIF}
-
   ArchiveTypeAccess := ataAnyFile;
   FDXMediaFile := TAsphyreArchive.Create;
   FDXMediaFile.OpenMode := aomReadOnly;
@@ -295,8 +289,6 @@ begin
   FDXFonts.Free;
   FDXImages.Free;
   FDXMediaFile.Free;
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single);
@@ -312,7 +304,7 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to load DX image resource: %s', [AName]), ditException); {$ENDIF}
+    SoftException(Format('Failed to load DX image resource: %s', [AName]));
   end;
 end;
 
@@ -333,7 +325,7 @@ begin
     AReceiver := FDXFonts[id]
   else
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to insert DX font resource: %s', [AName]), ditException); {$ENDIF}
+    SoftException(Format('Failed to insert DX font resource: %s', [AName]));
   end;
 end;
 
@@ -360,10 +352,7 @@ procedure TTableResources.DesaturateImage(const AImage: TAsphyreImage);
 type
   PPixelRec = ^TPixelRec;
   TPixelRec = packed record
-    B: Byte;
-    G: Byte;
-    R: Byte;
-    A: Byte;
+    B, G, R, A: Byte;
   end;
 var
   C1, x, y: Integer;

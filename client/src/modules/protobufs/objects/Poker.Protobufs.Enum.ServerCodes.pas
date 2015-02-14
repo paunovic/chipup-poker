@@ -109,7 +109,8 @@ type
     scDeleteTableStats = 115,
     scMutePlayer = 116,
     scChangePlayerManagerState = 117,
-    scSplitTableCards = 118
+    scSplitTableCards = 118,
+    scSoftException = 119
   );
 
 {$IFDEF DEBUG}
@@ -244,6 +245,7 @@ begin
     scMutePlayer: result := 'scMutePlayer';
     scChangePlayerManagerState: result := 'scChangePlayerManagerState';
     scSplitTableCards: result := 'scSplitTableCards';
+    scSoftException: result := 'scSoftException';
   end;
 end;
 {$ENDIF DEBUG}

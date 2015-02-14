@@ -5,7 +5,6 @@ interface
 uses
   System.Classes, System.SysUtils;
 
-
 function SHA256Stream(const AStream: TStream): RawByteString;
 function SHA256Bytes(const ABytes: TBytes): RawByteString;
 function SHA256String(const AString: String): RawByteString;
@@ -19,8 +18,6 @@ implementation
 
 uses
   DECCipher, DECHash, DECUtil, DECFmt;
-
-
 
 function SHA256Stream(const AStream: TStream): RawByteString;
 var
@@ -87,9 +84,9 @@ function AES256EncryptStream(const AInStream: TStream; const AOutStream: TStream
   end;
 
 var
-  ASalt : Binary;
-  AData : Binary;
-  APass : Binary;
+  ASalt: Binary;
+  AData: Binary;
+  APass: Binary;
   sha256: RawByteString;
 begin
   with ValidCipher(TCipher_Rijndael).Create, Context do
@@ -154,9 +151,9 @@ function AES256DecryptStream(const AInStream: TStream; const AOutStream: TStream
   end;
 
 var
-  ASalt : Binary;
-  AData : Binary;
-  APass : Binary;
+  ASalt: Binary;
+  AData: Binary;
+  APass: Binary;
   sha256: RawByteString;
 begin
   with ValidCipher(TCipher_Rijndael).Create, Context do

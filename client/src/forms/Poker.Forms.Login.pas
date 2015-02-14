@@ -48,7 +48,6 @@ type
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
     FAlphaBlendThread: TAlphaBlendThread;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure ApplySettings;
     procedure SaveSettings;
@@ -89,13 +88,11 @@ uses
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
-  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs;
+  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
-
   AlphaBlendValue := 0;
 
   FCallbacksId := MessageContainer.AddCallbacks([
@@ -120,8 +117,6 @@ begin
   SaveSettings;
 
   TAlphaBlendThread.FreeAlpaBlendThread(FAlphaBlendThread);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -157,6 +152,11 @@ end;
 
 procedure TfrmChipUpLogin.FormShow(Sender: TObject);
 begin
+  if DXCore.Device.IsAtFault then
+    MessageDlg('Failed to initialize DirectX.'#10 +
+      'Please check that your graphic drivers are up-to-date and that your system meets the minimum requirements.',
+      mtError, [mbOK], 0);
+
   case ServerSocket.Socket.State of
     wsClosed: begin
       CurrentStatus := lsConnecting;
@@ -314,7 +314,7 @@ end;
 
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
 begin
-  acLogin.Enabled := AEnable;
+  acLogin.Enabled := (AEnable) and (not DXCore.Device.IsAtFault);
   acShowCreateAccountForm.Enabled := AEnable;
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
@@ -392,7 +392,7 @@ begin
   begin
     {$IFDEF DEBUG}
     if TCommandLineParams.NoUpdateFlag then
-      DebugLn(FDebugId, 'Skipping update, -noupdate parameter found', ditApplication);
+      DebugLn('Ignoring update (-noupdate parameter found)', ditApplication);
     {$ENDIF}
   end;
 
@@ -436,7 +436,7 @@ begin
       edLogin.SetFocus;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.LoginStatus)]), ditException); {$ENDIF}
+    SoftException(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.LoginStatus)]));
     edLogin.SetFocus;
   end;
 

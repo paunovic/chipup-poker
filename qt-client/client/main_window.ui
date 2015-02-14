@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>866</width>
+    <height>620</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>ChipUP Poker</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="header" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>438</width>
+        <height>144</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-image: url(:/resources/header/Header.png);
+background-repeat: no-repeat;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="paMain" native="true">
+      <widget class="QPushButton" name="btHomeGames">
+       <property name="geometry">
+        <rect>
+         <x>11</x>
+         <y>34</y>
+         <width>143</width>
+         <height>56</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>HOME GAMES</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btTournaments">
+       <property name="geometry">
+        <rect>
+         <x>11</x>
+         <y>92</y>
+         <width>143</width>
+         <height>56</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>TOURNAMENTS</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QStackedWidget" name="stackedWidget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>841</width>
+         <height>443</height>
+        </rect>
+       </property>
+       <widget class="QWidget" name="page">
+        <widget class="QPushButton" name="btOpenClubLobby">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>278</y>
+           <width>143</width>
+           <height>35</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Open Club Lobby</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btOpenTable">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>316</y>
+           <width>143</width>
+           <height>35</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Open Table</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btCreateClub">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>354</y>
+           <width>143</width>
+           <height>35</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Create Club...</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btJoinClub">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>392</y>
+           <width>143</width>
+           <height>35</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Join Club...</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="btPrivateClubs">
+         <property name="geometry">
+          <rect>
+           <x>495</x>
+           <y>1</y>
+           <width>334</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>MY HOME GAMES</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="btPublicGames">
+         <property name="geometry">
+          <rect>
+           <x>155</x>
+           <y>1</y>
+           <width>334</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>PUBLIC HOME GAMES</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QTreeView" name="gridGames">
+         <property name="geometry">
+          <rect>
+           <x>155</x>
+           <y>265</y>
+           <width>676</width>
+           <height>162</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QTreeView" name="gridPublicClubs">
+         <property name="geometry">
+          <rect>
+           <x>155</x>
+           <y>34</y>
+           <width>336</width>
+           <height>221</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QTreeView" name="gridPrivateClubs">
+         <property name="geometry">
+          <rect>
+           <x>495</x>
+           <y>34</y>
+           <width>336</width>
+           <height>221</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="page_2">
+        <widget class="QPushButton" name="btTournamentRegister">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>354</y>
+           <width>143</width>
+           <height>35</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Register</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btTournamentLobby">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>392</y>
+           <width>143</width>
+           <height>35</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Tournament Lobby</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+      <zorder>stackedWidget</zorder>
+      <zorder>btHomeGames</zorder>
+      <zorder>btTournaments</zorder>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>866</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuAccount">
+    <property name="title">
+     <string>&amp;Account</string>
+    </property>
+    <addaction name="actionChange_E_mail_address"/>
+    <addaction name="actionChange_password"/>
+    <addaction name="actionChange_Avatar"/>
+    <addaction name="separator"/>
+    <addaction name="actionLogout"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>&amp;Options</string>
+    </property>
+    <widget class="QMenu" name="menu_Table">
+     <property name="title">
+      <string>&amp;Table</string>
+     </property>
+     <addaction name="actionSounds"/>
+     <addaction name="actionAnimations"/>
+     <addaction name="separator"/>
+     <addaction name="actionAlways_Check_Fold"/>
+     <addaction name="actionConfirmation_on_fold"/>
+     <addaction name="separator"/>
+     <addaction name="actionAl_ways_Run_it_Twice"/>
+    </widget>
+    <widget class="QMenu" name="menuT_ournaments">
+     <property name="title">
+      <string>T&amp;ournaments</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="action_Open_All_Tables"/>
+    </widget>
+    <addaction name="menu_Table"/>
+    <addaction name="menuT_ournaments"/>
+    <addaction name="separator"/>
+    <addaction name="actionHand_History"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionContact_Us"/>
+    <addaction name="actionTerms_and_Conditions"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout_ChipUPPoker"/>
+   </widget>
+   <widget class="QMenu" name="menuDev">
+    <property name="title">
+     <string>Dev</string>
+    </property>
+    <addaction name="actionCSS_Editor"/>
+    <addaction name="actionSelf_Tests"/>
+   </widget>
+   <addaction name="menuAccount"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuDev"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionChange_E_mail_address">
+   <property name="text">
+    <string>Change &amp;E-mail address...</string>
+   </property>
+  </action>
+  <action name="actionChange_password">
+   <property name="text">
+    <string>Change &amp;Password...</string>
+   </property>
+  </action>
+  <action name="actionChange_Avatar">
+   <property name="text">
+    <string>Change &amp;Avatar</string>
+   </property>
+  </action>
+  <action name="actionLogout">
+   <property name="text">
+    <string>&amp;Logout</string>
+   </property>
+  </action>
+  <action name="actionHand_History">
+   <property name="text">
+    <string>&amp;Hand History</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionSounds">
+   <property name="text">
+    <string>&amp;Sounds</string>
+   </property>
+  </action>
+  <action name="actionAnimations">
+   <property name="text">
+    <string>&amp;Animations</string>
+   </property>
+  </action>
+  <action name="actionAlways_Check_Fold">
+   <property name="text">
+    <string>Always &amp;Check/Fold</string>
+   </property>
+  </action>
+  <action name="actionContact_Us">
+   <property name="text">
+    <string>&amp;Contact Us</string>
+   </property>
+  </action>
+  <action name="actionTerms_and_Conditions">
+   <property name="text">
+    <string>&amp;Terms and Conditions</string>
+   </property>
+  </action>
+  <action name="actionAbout_ChipUPPoker">
+   <property name="text">
+    <string>&amp;About ChipUPPoker...</string>
+   </property>
+  </action>
+  <action name="actionConfirmation_on_fold">
+   <property name="text">
+    <string>&amp;Confirmation on Fold</string>
+   </property>
+  </action>
+  <action name="actionAl_ways_Run_it_Twice">
+   <property name="text">
+    <string>Al&amp;ways Run it Twice</string>
+   </property>
+  </action>
+  <action name="action_Open_All_Tables">
+   <property name="text">
+    <string>&amp;Open All Tables</string>
+   </property>
+  </action>
+  <action name="actionCSS_Editor">
+   <property name="text">
+    <string>CSS Editor</string>
+   </property>
+  </action>
+  <action name="actionOpen_Table">
+   <property name="text">
+    <string>Open Table</string>
+   </property>
+  </action>
+  <action name="actionSelf_Tests">
+   <property name="text">
+    <string>Self-Tests</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

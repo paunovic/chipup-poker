@@ -35,7 +35,6 @@ type
     FCurrentDownloadedSize: UINT32;
     FFullInstaller: Boolean;
     FRequiresReboot: Boolean;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     function PatchNonRebootFiles: Integer;
     function ProcessNextFile: Boolean;
@@ -58,15 +57,13 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Settings, Poker.DataModule, Poker.Protobufs.Objects.UpdateFileInfo,
-  Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi, Poker.Server.SSLCerts;
+  Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi, Poker.Server.SSLCerts, Poker.SoftExceptions;
 
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
 var
   ufi: TPB_UpdateFileInfo;
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('frmUpdater'); {$ENDIF}
-
   dmMain.il20px.GetImage(0, imgClose.Picture.Bitmap);
   dmMain.il20px.GetImage(2, imgMinimize.Picture.Bitmap);
 
@@ -97,8 +94,6 @@ begin
 
   if Assigned(FCloseCallback) then
     FCloseCallback(self);
-
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmUpdater.CreateParams(var AParams: TCreateParams);
@@ -272,7 +267,7 @@ begin
     DeleteFile(ABatchFile);
     if FileExists(ABatchFile) then
     begin
-      {$IFDEF DEBUG} DebugLn(FDebugId, 'Error while deleting old batch file', ditException); {$ENDIF}
+      SoftException('Error while deleting old batch file');
       Exit(2);
     end;
 
@@ -281,12 +276,12 @@ begin
     if FileExists(ABatchFile) then
     begin
       result := 1;
-      {$IFDEF DEBUG} DebugLn(FDebugId, 'Batch file saved', ditApplication); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn('Batch file saved', ditApplication); {$ENDIF}
     end
     else
     begin
       result := 2;
-      {$IFDEF DEBUG} DebugLn(FDebugId, 'Error while saving batch file', ditException); {$ENDIF}
+      SoftException('Error while saving batch file');
     end;
   finally
     batch.Free;
@@ -309,17 +304,19 @@ begin
   DeleteFile(fname);
   if FileExists(fname) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Error while storing file [%d/%d]: cannot delete old file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditException); {$ENDIF}
+    SoftException(Format('Error while storing file [%d/%d]: cannot delete old file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]));
     Exit(FALSE);
   end;
   (HttpClient.RcvdStream as TMemoryStream).SaveToFile(fname);
   res := FileExists(fname);
-  {$IFDEF DEBUG}
   if res then
-    DebugLn(FDebugId, Format('File [%d/%d] saved', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication)
+  begin
+    {$IFDEF DEBUG}
+    DebugLn(Format('File [%d/%d] saved', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication)
+    {$ENDIF}
+  end
   else
-    DebugLn(FDebugId, Format('Error while storing file [%d/%d]: cannot save file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditException);
-  {$ENDIF}
+    SoftException(Format('Error while storing file [%d/%d]: cannot save file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]));
   Exit(res);
 end;
 
@@ -340,7 +337,7 @@ begin
       ufRemove: result := ProcessNextFile;
     else
       HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
-      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Downloading update file [%d/%d] [%s] [%.2fMB] %s',
+      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB] %s',
           [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].Path,
            dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
       HttpClient.GetASync;

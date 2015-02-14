@@ -88,6 +88,12 @@ begin
   LoadFonts;
 
   TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  if (Settings.DeveloperMode) and
+     (Settings.ServerIndex in [1, 2]) then
+    server_index := Settings.ServerIndex
+  else
+    server_index := 0;
+  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
   TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
@@ -101,14 +107,6 @@ begin
   THandHistory.Initialize;
   TTournamentList.Initialize;
   TModalDialogs.Initialize;
-
-  if (Settings.DeveloperMode) and
-     (Settings.ServerIndex in [1, 2]) then
-    server_index := Settings.ServerIndex
-  else
-    server_index := 0;
-
-  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
 
   FSelfInfo := TPlayerInfo.Create;
 
@@ -149,10 +147,12 @@ begin
   TfrmDebug.Deinitialize;
   {$ENDIF}
 
-  if (FUpdaterInstallerFile <> '') and (FileExists(FUpdaterInstallerFile)) then
+  if (FUpdaterInstallerFile <> '') and
+     (FileExists(FUpdaterInstallerFile)) then
     ShellOpen(PChar(FUpdaterInstallerFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
 
-  if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
+  if (FUpdaterBatchFile <> '') and
+     (FileExists(FUpdaterBatchFile)) then
     ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_HIDE);
 end;
 
@@ -191,19 +191,10 @@ end;
 procedure TdmMain.StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
 var
   ufi: TPB_UpdateFileInfo;
-  C1: Integer;
 begin
   FUpdateFiles.Clear;
-  for C1 := 0 to AFiles.Count - 1 do
-  begin
-    ufi := TPB_UpdateFileInfo.Create;
-    ufi.Path := AFiles[C1].Path;
-    ufi.Hash := AFiles[C1].Hash;
-    ufi.Url := AFiles[C1].Url;
-    ufi.FileType := AFiles[C1].FileType;
-    ufi.FileSize := AFiles[C1].FileSize;
-    FUpdateFiles.Add(ufi);
-  end;
+  for ufi in AFiles do
+    FUpdateFiles.Add(TPB_UpdateFileInfo.Create(ufi, TRUE));
 end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;

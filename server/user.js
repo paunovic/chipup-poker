@@ -50,7 +50,7 @@ function getAssets() {
 }
 function changePassword(new_password,userid,cb) {
 	// FIXME, refactor into a dedicated function and add a test
-	deck.getRandom(16,function changePw_cb1(salt) {
+	deck.getRandom(200,function changePw_cb1(salt) {
 		var hasher = crypto.createHash('sha256');
 		hasher.update(salt);
 		hasher.update(new_password);
@@ -279,6 +279,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				status.player_club_statuses.push(out);
 			}
 			this.send(codes.srLoginReply,status,'Poker.LoginReply');
+			this.loginProcessing = false;
 			token.stop();
 			// FIXME, embed in the same message
 			handlers[codes.scQueryTableStats].call(this,new Buffer(0),profiler.start('handle-scQueryTableStats'));
@@ -505,6 +506,8 @@ ClientSocket.prototype.handle = function (code,args) {
 		switch (code) {
 		case codes.scLogin:
 			if (args.length > 1000) return this.error('message too big');
+			if (this.loginProcessing) return this.reply(0,'login in progress');
+			this.loginProcessing = true;
 			try {
 				params = pb.Parse(args,'Poker.LoginParams');
 			} catch (e) {
@@ -527,6 +530,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							return;
 						} else {
 							this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
+							this.loginProcessing = false;
 							token.stop();
 						}
 						return;
@@ -537,6 +541,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						assert.ifError(err);
 						if (!row) {
 							this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
+							this.loginProcessing = false;
 							token.stop();
 							return;
 						}
@@ -579,7 +584,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(0,"password too long");
 				return;
 			}
-			deck.getRandom(16,function (salt) {
+			deck.getRandom(200,function (salt) {
 				var hasher = crypto.createHash('sha256');
 				hasher.update(salt);
 				hasher.update(params.password);
