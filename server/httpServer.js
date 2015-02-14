@@ -30,7 +30,7 @@ var models = require('./db').models;
 var user = require('./user');
 var codes = require('./ServerCodes');
 var SmtpConnection = require('./smtp');
-var dag = require('./dag/build/Release/dag');
+var dag = require('dag');
 var error = require('./error');
 var Tournament = require('./tournament');
 
@@ -182,8 +182,9 @@ function Server(activeUsersIN) {
 	}.bind(this));
 	//app.get('/fetchhands',this.fetchHands.bind(this));
 	app.post('/secure/buildbot',function (req,res) {
-		console.log(req.body);
+		console.log('buildbot post body',req.body);
 		buildbot.doLogin(function () {
+			console.log('post-login');
 			buildbot.forceBuild('debug-win32',req.body.revision);
 			buildbot.forceBuild('release-win32',req.body.revision);
 			res.end(JSON.stringify('OK'));
@@ -220,6 +221,10 @@ Server.prototype.profile = function (req,res) {
 };
 Server.prototype.syncMakeDiff = function (req,res) {
 	var t = req.body;
+	if (!t.sourcehash || !t.desthash) {
+		res.end('hash missing');
+		return;
+	}
 	differ.makeDiff(t.sourcehash,t.desthash,t.path);
 	res.end('STARTED');
 };
@@ -512,7 +517,9 @@ Server.prototype.secureLogout = function (req,res) {
 Server.prototype.bugList = function (req,res) {
 	var start = Date.now();
 	models.Bugs.find({},function (err,data) {
-		res.render('bugs',{bugs:data,start:start});
+		models.SoftException.find({},function (err,errors) {
+			res.render('bugs',{bugs:data,start:start,minor:errors});
+		});
 	});
 }
 Server.prototype.ServerBugsList = function (req,res) {
