@@ -28,9 +28,9 @@ function updatePots() {
 }
 var lastTS;
 function tableStatus(ts) {
+	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
 	updateSeats(ts);
 	lastTS = ts;
-	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
 	if (ts.state == 'tsIdle') {
 		for (var x=0; x<seat_objects.length; x++) {
 			var local = seat_objects[x];
@@ -45,7 +45,6 @@ function tableStatus(ts) {
 	for (var j=0; j<ts.events.length; j++) {
 		log("event:"+j+" out of "+ts.events.length);
 		var event = ts.events[j];
-		tableEvent(event);
 		switch (event.event) {
 		case "teFlop":
 			for (var i=0; i<event.getCardCount(); i++) {
@@ -89,7 +88,16 @@ function tableStatus(ts) {
 			break;
 		}
 	}
-	
+	for (var j=0; j<sets.length; j++) {
+		for (var i=0; i<sets[j].length; i++) {
+			queueAction(sets[j][i]);
+		}
+	}
+	for (var j=0; j<ts.events.length; j++) {
+		log("event:"+j+" out of "+ts.events.length);
+		var event = ts.events[j];
+		tableEvent(event);
+	}
 }
 function updateSeats(ts,opts) {
 	for (var i=0; i<ts.seats.length; i++) {
@@ -238,7 +246,10 @@ function tableEvent(event) {
 		updateBets();
 		AnimateCards({reveal:true});
 		for (var i=0; i<localFlop.length; i++) {
-			if (localFlop[i]) queueAction(new HideCard(localFlop[i]));
+			if (localFlop[i]) {
+				log("hiding flop:"+i);
+				queueAction(new HideCard(localFlop[i]));
+			}
 		}
 		for (var i=0; i<localTurn.length; i++) {
 			if (localTurn[i]) queueAction(new HideCard(localTurn[i]));
@@ -307,6 +318,7 @@ function dump(i) {
 	}
 }
 function initSeats() {
+	log("doing init seats");
 	for (var i=0; i<game.seats; i++) {
 		var seat = new SeatObject();
 		seat.setSize(0.16);

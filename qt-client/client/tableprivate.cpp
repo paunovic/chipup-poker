@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QStringList>
 #include <QPainter>
+#include <QScriptEngineDebugger>
+#include <QMainWindow>
 
 #include "tableprivate.h"
 #include "table/visible_seat.h"
@@ -76,6 +78,14 @@ static QScriptValue NewTimer(QScriptContext *,QScriptEngine *engine) {
 TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
 
+	agent = new ScriptAgent(&engine);
+	engine.setAgent(agent);
+	//QScriptEngineDebugger *debuger = new QScriptEngineDebugger(this);
+	//debuger->setAutoShowStandardWindow(true);
+	//debuger->attachTo(&engine);
+	//QMainWindow *debugWindow = debuger->standardWindow();
+	//debugWindow->show();
+
 	QScriptValue global = engine.globalObject();
 
 	global.setProperty("log",engine.newFunction(js_log,1));
@@ -97,15 +107,16 @@ TablePrivate::~TablePrivate() {
 	delete game;
 }
 bool TablePrivate::loadJs(QString code,QString file) {
+	agent->setCode(code);
 	engine.evaluate(code,file);
 	if (engine.hasUncaughtException()) {
 		qDebug() << engine.uncaughtExceptionBacktrace();
 		qDebug() << engine.uncaughtExceptionLineNumber();
-		qDebug() << "uncaught excepion" << engine.uncaughtException().toString();
+		qDebug() << "uncaught excepion while loading js" << engine.uncaughtException().toString();
 		engine.clearExceptions();
 		return false;
 	} else {
-		//qDebug() << "JS loaded";
+		qDebug() << "JS loaded";
 		return true;
 	}
 }

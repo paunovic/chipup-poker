@@ -5,6 +5,7 @@
 #include "createclub.h"
 #include "loginwindow.h"
 #include "csseditor.h"
+#include "clublobby.h"
 
 #include <QDebug>
 #include <QAbstractItemView>
@@ -63,6 +64,7 @@ void MainWindow::tournaments() {
 void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
 	ui->gridPublicClubs->clearSelection();
+	ui->btOpenClubLobby->setEnabled(true);
 	int row = selected.indexes().at(0).row();
 	currentClub = core->private_clubs().at(row);
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
@@ -72,6 +74,7 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
 	ui->gridPrivateClubs->clearSelection();
+	ui->btOpenClubLobby->setEnabled(false);
 	int row = selected.indexes().at(0).row();
 	currentClub = core->public_clubs().at(row);
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
@@ -129,4 +132,25 @@ void MainWindow::on_gridGames_doubleClicked(const QModelIndex &index) {
 	Table *t = new Table();
 	t->setGame(game,currentClub);
 	t->show();
+}
+void MainWindow::on_gridPrivateClubs_doubleClicked(const QModelIndex &index) {
+	qDebug() << "priv club click" << index.row();
+	const Data::Club *club = core->clubs.private_club_model.getClub(index);
+	qDebug() << club->name;
+	clubTriggered(club);
+}
+void MainWindow::on_gridPublicClubs_doubleClicked(const QModelIndex &index) {
+	qDebug() << "priv club click" << index.row();
+	const Data::Club *club = core->clubs.public_club_model.getClub(index);
+	qDebug() << club->name;
+	clubTriggered(club);
+}
+void MainWindow::on_btOpenClubLobby_clicked() {
+	clubTriggered(currentClub);
+}
+void MainWindow::clubTriggered(const Data::Club *club) {
+	// TODO, if its a public club, dont let you open the lobby for some reason??
+	ClubLobby *cl = new ClubLobby();
+	cl->setClub(club);
+	cl->show();
 }

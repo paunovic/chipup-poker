@@ -37,7 +37,7 @@ bool Table::event(QEvent *event) {
 }
 bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
-	qDebug() << QString("minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
+	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);
 	QList<Data::SeatInfo*>::Iterator i;
 	bool self_found = false;

@@ -44,6 +44,7 @@ public:
     QVariant headerData(int, Qt::Orientation, int) const;
 	void modified(Club *item);
 	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+	const Club* getClub(const QModelIndex index) { return m_entries.at(index.row()); }
 
 	friend class ClubList;
 protected:

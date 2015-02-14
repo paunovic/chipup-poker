@@ -11,6 +11,7 @@
 
 #include "tablestatus.h"
 #include "table/game_wrap.h"
+#include "table/scriptagent.h"
 
 class GameObjectUi;
 class SeatObject;
@@ -89,6 +90,7 @@ private:
 	GameWrap *game;
 	const Data::Game *rawgame;
 	QSharedPointer<Data::TableStatus> lastTs;
+	ScriptAgent *agent;
 };
 class GameObject : public QObject {
 Q_OBJECT

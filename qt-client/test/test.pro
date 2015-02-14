@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = test
 DEPENDPATH += .
 INCLUDEPATH += .
-QT += script network gui testlib
+QT += script network gui testlib scripttools
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia uitools
 lessThan(QT_MAJOR_VERSION,5): CONFIG += uitools
 INCLUDEPATH += ../client/ ../protobuf/
@@ -28,8 +28,8 @@ SOURCES += test.cpp ../client/tableprivate.cpp ../client/tablestatus.cpp ../clie
 HEADERS += ../client/loginwindow.h ../client/table.h ../client/table/dealerbutton.h
 SOURCES += ../client/loginwindow.cpp ../client/table.cpp ../client/data/playerclubstatus.cpp ../client/table/dealerbutton.cpp
 
-HEADERS += ../client/sound_effects.h
-SOURCES += ../client/sound_effects.cpp
+HEADERS += ../client/sound_effects.h ../client/table/scriptagent.h
+SOURCES += ../client/sound_effects.cpp ../client/table/scriptagent.cpp
 
 RESOURCES += ../client/resources.qrc
 

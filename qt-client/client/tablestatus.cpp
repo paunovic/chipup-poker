@@ -60,9 +60,14 @@ QString TableStatus::getState() {
 	switch (state_) {
 	case Poker::TableStatus::tsIdle: return "tsIdle";
 	case Poker::TableStatus::tsPreFlop: return "tsPreFlop";
-	case Poker::TableStatus::tsWinning: return "tsWinning"; // 5
+	case Poker::TableStatus::tsFlop: return "tsFlop";
+	case Poker::TableStatus::tsTurn: return "tsTurn";
+	case Poker::TableStatus::tsRiver: return "tsRiver";
+	case Poker::TableStatus::tsWinning: return "tsWinning";
+	case Poker::TableStatus::tsWinning2: return "tsWinning2";
 	//default: return QString("err:%1").arg((int)state_);
 	}
+	return "error";
 }
 TableStatus::~TableStatus() {
 	// TODO, try setting the parent of the seats
