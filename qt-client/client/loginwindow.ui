@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>449</width>
-    <height>279</height>
+    <width>554</width>
+    <height>370</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,11 @@
    <bool>false</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QPushButton {
+padding-top: 0.5em;
+padding-bottom:0.5em;
+min-width:13em;
+}</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <item>
@@ -117,7 +121,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Ignored</enum>
+          <enum>QSizePolicy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -132,7 +136,7 @@
          <item>
           <widget class="QWidget" name="widget_3" native="true">
            <property name="styleSheet">
-            <string notr="true">min-width: 7em;</string>
+            <string notr="true">min-width: 9em;</string>
            </property>
           </widget>
          </item>
@@ -142,6 +146,11 @@
             <widget class="QPushButton" name="btLogin">
              <property name="enabled">
               <bool>false</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">	border-image: url(:/resources/Button_normal.png) 0 0 0 0 stretch stretch;
+	color: white;
+</string>
              </property>
              <property name="text">
               <string>Connecting...</string>
@@ -205,7 +214,7 @@
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">min-width: 11em;</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Create New Account</string>
