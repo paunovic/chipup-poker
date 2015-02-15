@@ -69,7 +69,9 @@ function tableStatus(ts) {
 				localTurn[i].setSize(0.063);
 				localTurn[i].visible = false;
 				if (!sets[i]) sets[i] = [];
-				sets[i].push(new DealCard(0.523,0.477,localTurn[i]));
+				if (i == 0) height = 0.477;
+				else height = 0.55;
+				sets[i].push(new DealCard(0.523,height,localTurn[i]));
 				sets[i].push(new RevealCard(localTurn[i],card.cards[0]));
 			}
 			updatePots();
@@ -81,7 +83,9 @@ function tableStatus(ts) {
 				localRiver[i].setSize(0.063);
 				localRiver[i].visible = false;
 				if (!sets[i]) sets[i] = [];
-				sets[i].push(new DealCard(0.592,0.477,localRiver[i]));
+				if (i == 0) height = 0.477;
+				else height = 0.55;
+				sets[i].push(new DealCard(0.592,height,localRiver[i]));
 				sets[i].push(new RevealCard(localRiver[i],card.cards[0]));
 			}
 			updatePots();
@@ -166,7 +170,7 @@ function AnimateFlop(cards,offset) {
 	this.thirdDone = false;
 	this.offset = offset;
 	if (offset == 0) this.y = 0.477;
-	else this.y = 0.5;
+	else this.y = 0.55;
 	log("starting flop animation for:"+cards);
 }
 AnimateFlop.prototype.begin = function () {
@@ -243,6 +247,7 @@ function tableEvent(event) {
 		}
 		break;
 	case "teWinning":
+		queueAction(new SimpleDelay(2000));
 		updateBets();
 		AnimateCards({reveal:true});
 		for (var i=0; i<localFlop.length; i++) {
@@ -284,6 +289,12 @@ function tableEvent(event) {
 	default:
 		dump(event);
 	}
+}
+function SimpleDelay(delay) {
+	this.delay = delay;
+}
+SimpleDelay.prototype.begin = function () {
+	this.timer = setTimeout(eventDone,this.delay);
 }
 function updateBets(opts) {
 	for (var i=0; i<lastTS.seats.length; i++) {

@@ -22,6 +22,13 @@ void Club::update(const Poker::Club &in) {
 	std::string clubid = in._id();
 	this->clubid = QByteArray(clubid.data(),clubid.length());
 	is_private = in.is_private();
+	std::string ownerid = in.owner();
+	owner = QByteArray(ownerid.data(),ownerid.length());
+	for (int i=0; i<in.members_size(); i++) {
+		Poker::ClubMember member = in.members(i);
+		Data::ClubMember *out = new Data::ClubMember();
+		//out->update(member);
+	}
 }
 void ClubList::clear() {
 	public_club_model.beginResetModel();

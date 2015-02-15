@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QDebug>
 #include "cpp/message.pb.h"
+#include "data/clubmember.h"
 
 namespace Data {
 
@@ -14,11 +15,12 @@ public:
 	void update(const Poker::Club&);
 
 	enum Role { Owner, Member };
-	QByteArray clubid;
+	QByteArray clubid,owner;
 	int seq;
 	QString name;
 	Role role;
 	bool is_private;
+	QList<Data::ClubMember> members;
 };
 
 class ClubListModel : public QAbstractListModel {

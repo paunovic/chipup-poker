@@ -15,4 +15,6 @@ ClubLobby::~ClubLobby()
 
 void ClubLobby::setClub(const Data::Club *club) {
 	this->club = club;
+	ui->lbClubName->setText(club->name);
+	ui->lbOwner->setText(QString(tr("Owner:%1")).arg(QString(club->owner.toHex())));
 }

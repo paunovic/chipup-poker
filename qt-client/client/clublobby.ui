@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="lbClubName">
       <property name="text">
        <string>Club Name</string>
       </property>
@@ -41,7 +41,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="lbOwner">
         <property name="text">
          <string>Owner:</string>
         </property>
@@ -131,14 +131,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="btClubSettings">
             <property name="text">
              <string>Change Club Settings...</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_5">
+           <widget class="QPushButton" name="btCloseClub">
             <property name="text">
              <string>Close Club...</string>
             </property>
@@ -174,58 +174,58 @@
           <item>
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="1">
-             <widget class="QPushButton" name="pushButton_8">
+             <widget class="QPushButton" name="btResetPlayerBalance">
               <property name="text">
-               <string>PushButton</string>
+               <string>Reset Player Balance</string>
               </property>
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QPushButton" name="pushButton_9">
+             <widget class="QPushButton" name="btGiveOwnership">
               <property name="text">
-               <string>PushButton</string>
+               <string>Give Ownership</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QPushButton" name="pushButton_7">
+             <widget class="QPushButton" name="btSuspend">
               <property name="text">
-               <string>PushButton</string>
+               <string>Suspend</string>
               </property>
              </widget>
             </item>
             <item row="0" column="0">
-             <widget class="QPushButton" name="pushButton_6">
+             <widget class="QPushButton" name="btResetBalances">
               <property name="text">
-               <string>PushButton</string>
+               <string>Reset All Balances</string>
               </property>
              </widget>
             </item>
             <item row="0" column="3">
-             <widget class="QPushButton" name="pushButton_10">
+             <widget class="QPushButton" name="btPromoteToManager">
               <property name="text">
-               <string>PushButton</string>
+               <string>Promote to Manager</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QPushButton" name="pushButton_11">
+             <widget class="QPushButton" name="btRemove">
               <property name="text">
-               <string>PushButton</string>
+               <string>Remove</string>
               </property>
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QPushButton" name="pushButton_12">
+             <widget class="QPushButton" name="btSetLimit">
               <property name="text">
-               <string>PushButton</string>
+               <string>Set Limit</string>
               </property>
              </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QPushButton" name="pushButton_13">
+             <widget class="QPushButton" name="btMute">
               <property name="text">
-               <string>PushButton</string>
+               <string>Mute</string>
               </property>
              </widget>
             </item>

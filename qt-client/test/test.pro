@@ -28,8 +28,8 @@ SOURCES += test.cpp ../client/tableprivate.cpp ../client/tablestatus.cpp ../clie
 HEADERS += ../client/loginwindow.h ../client/table.h ../client/table/dealerbutton.h
 SOURCES += ../client/loginwindow.cpp ../client/table.cpp ../client/data/playerclubstatus.cpp ../client/table/dealerbutton.cpp
 
-HEADERS += ../client/sound_effects.h ../client/table/scriptagent.h
-SOURCES += ../client/sound_effects.cpp ../client/table/scriptagent.cpp
+HEADERS += ../client/sound_effects.h ../client/table/scriptagent.h ../client/data/clubmember.h
+SOURCES += ../client/sound_effects.cpp ../client/table/scriptagent.cpp ../client/data/clubmember.cpp
 
 RESOURCES += ../client/resources.qrc
 

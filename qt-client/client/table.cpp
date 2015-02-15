@@ -21,6 +21,7 @@ Table::Table(QWidget *parent) :
 	debuger = new JsEditor(this);
 	debuger->show();
 #endif
+	ui->statusbar->setVisible(false);
 }
 Table::~Table() {
 	delete ui;

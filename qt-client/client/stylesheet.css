@@ -99,6 +99,7 @@ QPushButton#btMin,QPushButton#btMax,QPushButton#btPot,QPushButton#bt3BB {
 	border-image: none;
 	padding-left: 6px;
 	padding-right: 6px;
+	font-size: 6pt;
 }
 QPushButton#btMin:pressed,QPushButton#btMax:pressed,QPushButton#btPot:pressed,QPushButton#bt3BB:pressed {
 	border-top: 1px solid #714848;
@@ -136,4 +137,17 @@ image: url(":/resources/table/RaiseSliderButton.png");
 padding: -3px;
 }
 QSlider::groove:horizontal {
+}
+#btFold,#btCheck,#btRaise {
+height: 37px;
+width: 90px;
+}
+#cbSitOutBB,#btDouble,#btSitOut,#cbFoldAny {
+	font-size: 7pt;
+}
+#btCloseClub {
+min-width: 13em;
+}
+#btSuspend,#btMute,#btRemove {
+min-width: 10em;
 }
