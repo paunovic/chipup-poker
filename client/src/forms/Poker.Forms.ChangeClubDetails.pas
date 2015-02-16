@@ -26,6 +26,8 @@ type
     lbsResetBuyinLimits: TcxLabel;
     cbResetBuyinLimits: TcxComboBox;
     lbsResetBuyinMinutes: TcxLabel;
+    lbsMaxRakePerHand: TcxLabel;
+    seMaxRakePerHand: TcxSpinEdit;
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -106,6 +108,7 @@ begin
     edClubName.Text := club.Name;
     edInvitationCode.Text := club.Password;
     seRake.Value := club.Rake;
+    seMaxRakePerHand.Value := club.MaxRakePerHand;
     seLimit.Value := club.DefaultBalanceLimit / 100;
     cbDefaultPlayerLimit.Checked := not club.UnlimitedDefaultBalance;
     cbResetBuyinLimits.Text := IntToStr(club.BuyinReset);
@@ -157,7 +160,7 @@ begin
 
   acOK.Enabled := FALSE;
   ServerSocket.ChangeClubDetails(FClubId, edClubName.Text, edInvitationCode.Text, rake,
-      limituint, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
+      limituint, seMaxRakePerHand.Value, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
 end;
 
 procedure TfrmChangeClubDetails.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
