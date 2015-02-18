@@ -3,11 +3,10 @@ unit Poker.Forms.CreateAccount;
 interface
 
 uses
-  Winapi.Windows, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxContainer, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList,
-   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.Menus, Vcl.StdCtrls;
+  Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
+  cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList, Poker.Interfaces.ModalForm,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmCreateAccount = class(TForm, IModalForm)

@@ -3,8 +3,8 @@ unit Poker.Tables.StatsList;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Types;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats,
+  Poker.Protobufs.Objects.TableStatsReply, Poker.Types;
 
 type
   TTablesStatsList = class(TObjectDictionary<TMongoId, TPB_TableStatsReply>)

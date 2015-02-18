@@ -3,9 +3,11 @@ unit Poker.Forms.Updater;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel,
-  cxProgressBar, cxImage, OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
-  ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses, Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel, cxProgressBar, cxImage,
+  OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
+  dxSkinsCore, ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses,
+  Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger;
 
 type
   TfrmUpdater = class(TForm, IModalForm)

@@ -3,7 +3,8 @@ unit Poker.Common.WavePlayer.DirectSoundBufferNotificationThread;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer;
+  Winapi.Windows, System.Classes, System.Generics.Collections,
+  Poker.Common.WavePlayer.DirectSoundBuffer;
 
 type
   TDirectSoundBufferDoneEvent = procedure(const ADirectSoundBuffer: TDirectSoundBuffer) of object;

@@ -5,12 +5,16 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
-  cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan, ChipUpPokerDarkSkin, cxPC,
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles,
-  cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses,
-  cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ActnList,
+  Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel,
+  cxGrid, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login,
+  Poker.Games.Game, cxImage, Vcl.ActnMan, ChipUpPokerDarkSkin, cxPC, cxGraphics,
+  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
+  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage,
+  cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls,
+  cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls,
+  Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
   Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar, dxBevel;
 
 type

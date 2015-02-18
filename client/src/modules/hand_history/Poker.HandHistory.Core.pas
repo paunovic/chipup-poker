@@ -3,8 +3,8 @@ unit Poker.HandHistory.Core;
 interface
 
 uses
-  System.Classes, System.SysUtils, Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Items, Poker.Types,
-  System.Generics.Collections, Poker.Common.SafeMutex;
+  System.Classes, System.SysUtils, Poker.Protobufs.Objects.HandHistoryReply,
+  Poker.HandHistory.Items, Poker.Types, System.Generics.Collections, Poker.Common.SafeMutex;
 
 type
   THandHistory = class(TObjectDictionary<TMongoId, THandHistoryItems>)

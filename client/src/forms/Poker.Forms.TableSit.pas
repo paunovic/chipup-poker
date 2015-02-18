@@ -3,10 +3,12 @@ unit Poker.Forms.TableSit;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxButtons, cxTextEdit,
-  cxSpinEdit, cxLabel, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Tables.Table, Poker.Tables.Status,
-  Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game, Winapi.Messages;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls,
+  Vcl.Forms, Vcl.Dialogs, cxButtons, cxTextEdit, cxSpinEdit, cxLabel, Vcl.ActnList,
+  Poker.Interfaces.FormParams, Poker.Tables.Table, Poker.Tables.Status,
+  Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
+  Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game, Winapi.Messages;
 
 type
   TfrmTableSit = class(TForm, IFormParams, IModalForm)

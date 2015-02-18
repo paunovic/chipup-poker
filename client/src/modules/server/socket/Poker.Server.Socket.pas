@@ -3,9 +3,11 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core, Poker.Protobufs.Objects.User, Poker.Types,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.Base;
+  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core,
+  Poker.Protobufs.Objects.User, Poker.Types, Poker.Protobufs.Objects.Game,
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ContactMessage,
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.Base;
 
 type
   TServerSocket = class(TServerSocketCore)

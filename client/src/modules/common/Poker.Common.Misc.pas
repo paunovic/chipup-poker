@@ -3,7 +3,8 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, Asphyre.Types, Vcl.Controls;
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms,
+  cxImage, Vcl.Imaging.JPEG, Asphyre.Types, Vcl.Controls;
 
 function SerializeObject(const AObject: TObject): String;
 function IsValidString(const AString, AAllowedChars: String): Boolean;

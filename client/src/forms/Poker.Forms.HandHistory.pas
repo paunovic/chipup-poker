@@ -1,12 +1,14 @@
-
 unit Poker.Forms.HandHistory;
 
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Poker.Types, Vcl.Controls, Vcl.Forms, cxEdit, cxLabel, cxDropDownEdit,
-  cxButtons, Vcl.ActnList, Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls, cxGraphics,
-  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxTextEdit, cxMaskEdit;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Poker.Types,
+  Vcl.Controls, Vcl.Forms, cxEdit, cxLabel, cxDropDownEdit, cxButtons, Vcl.ActnList,
+  Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle,
+  Vcl.ExtCtrls, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxTextEdit,
+  cxMaskEdit;
 
 type
   TfrmHandHistory = class(TForm, IFormParams)

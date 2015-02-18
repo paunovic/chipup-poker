@@ -3,8 +3,9 @@ unit Poker.Avatars.AvatarList;
 interface
 
 uses
-  Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, Asphyre.Images, Poker.Avatars.Avatar,
-  OverbyteIcsHttpProt, OverbyteIcsWSocket;
+  Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes,
+  System.SysUtils, Asphyre.Images, Poker.Avatars.Avatar, OverbyteIcsHttpProt,
+  OverbyteIcsWSocket;
 
 type
   TAvatarList = class(TObjectDictionary<TBytes, TAvatar>)

@@ -5,10 +5,13 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player,
-  Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
-  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections,
+  Poker.Players.Player, Vcl.Forms, dxSkinsForm, Poker.Clubs.Club,
+  Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
+  dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
+  Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
+  Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
 
 type
   TdmMain = class(TDataModule)

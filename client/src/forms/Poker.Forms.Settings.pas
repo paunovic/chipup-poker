@@ -3,10 +3,13 @@ unit Poker.Forms.Settings;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin,
-  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxPC, Vcl.StdCtrls, dximctrl, cxContainer, cxEdit, cxGroupBox, Vcl.ImgList, cxListBox, cxLabel,
-  dxGDIPlusClasses, cxImage, cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit, cxDropDownEdit, Vcl.ExtCtrls;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls,
+  cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin,
+  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxPC, Vcl.StdCtrls, dximctrl, cxContainer,
+  cxEdit, cxGroupBox, Vcl.ImgList, cxListBox, cxLabel, dxGDIPlusClasses, cxImage,
+  cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit,
+  cxDropDownEdit, Vcl.ExtCtrls;
 
 type
   TfrmSettings = class(TForm)

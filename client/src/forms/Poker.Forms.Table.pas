@@ -3,13 +3,16 @@ unit Poker.Forms.Table;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.Generics.Collections,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, cxContainer, cxEdit, Poker.Tables.Status, Poker.DirectX.Animation, Asphyre.Math,
-  Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, Asphyre.Images, cxGraphics, cxControls,
-  cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
-  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types,
-  cxRadioGroup;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, System.Generics.Collections, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ExtCtrls, cxContainer, cxEdit, Poker.Tables.Status, Poker.DirectX.Animation,
+  Asphyre.Math, Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan,
+  cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView,
+  Asphyre.Images, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList,
+  Vcl.PlatformDefaultStyleActnCtrls, cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit,
+  dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types, cxRadioGroup;
 
 type
   TfrmTable = class(TForm)
@@ -221,6 +224,7 @@ begin
                           TServerMessageCallback.Create([seTableStatus, srTableSitOk, srTableAddonOk, srTableStandUpOk], CSRETableStatus)
                       ]);
     end;
+
     ttHandReplay: begin
       edChat.Visible := FALSE;
       lbvHandHistory.Visible := FALSE;

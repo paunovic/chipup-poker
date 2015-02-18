@@ -3,8 +3,9 @@ unit Poker.Tables.Status;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
+  Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus,
+  Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Seats.SeatList, Poker.Games.Game,
+  Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
   Poker.Protobufs.Objects.TableMessage;
 
 type

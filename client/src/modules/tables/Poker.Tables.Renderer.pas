@@ -3,10 +3,12 @@ unit Poker.Tables.Renderer;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Asphyre.Math, Asphyre.Types, Asphyre.Fonts,
-  Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, Asphyre.Images, Poker.Seats.Seat, Poker.Cards,
-  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils,
-  Poker.Protobufs.Objects.Pot, Poker.DirectX.Animations, Poker.Protobufs.Objects.TableStatus;
+  Winapi.Windows, System.Classes, System.Generics.Collections, System.Types,
+  Asphyre.Math, Asphyre.Types, Asphyre.Fonts, Poker.Tables.RenderMetrics, Vcl.ActnList,
+  Poker.Games.Game, Poker.Tables.Status, Asphyre.Images, Poker.Seats.Seat, Poker.Cards,
+  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls,
+  Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot,
+  Poker.DirectX.Animations, Poker.Protobufs.Objects.TableStatus;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;

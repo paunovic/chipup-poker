@@ -3,7 +3,8 @@ unit Poker.Server.MessageContainer;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket, Poker.Common.SafeMutex, Poker.Server.MessageCallbacks;
+  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket,
+  Poker.Common.SafeMutex, Poker.Server.MessageCallbacks;
 
 type
   TMessageContainer = class

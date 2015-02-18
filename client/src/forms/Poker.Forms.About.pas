@@ -3,8 +3,9 @@ unit Poker.Forms.About;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Controls, Vcl.Forms, cxLabel, Poker.Forms.LayeredForm, cxGraphics, cxControls,
-  cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin;
+  Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Controls, Vcl.Forms, cxLabel,
+  Poker.Forms.LayeredForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin;
 
 type
   TfrmAbout = class(TForm)

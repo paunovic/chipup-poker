@@ -3,9 +3,11 @@ unit Poker.Tables.Table;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.TournamentPlayerTransfer;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, Poker.Games.Game,
+  Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms, Poker.HandHistory.Items,
+  Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status,
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TableEvent,
+  Poker.Protobufs.Objects.TournamentPlayerTransfer;
 
 type
   TTable = class

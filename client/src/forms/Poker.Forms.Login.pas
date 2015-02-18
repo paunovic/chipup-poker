@@ -5,11 +5,13 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
-  Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
-  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin,
-  System.Generics.Collections, Poker.Common.AlphaBlendThread, Vcl.Menus;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Dialogs, Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxGraphics, dxSkinsForm,
+  Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
+  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit,
+  ChipUpPokerDarkSkin, System.Generics.Collections, Poker.Common.AlphaBlendThread,
+  Vcl.Menus;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);

@@ -77,6 +77,10 @@ object frmSettings: TfrmSettings
       object tsGeneral: TcxTabSheet
         Caption = 'tsGeneral'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
       object tsThemes: TcxTabSheet
         Caption = 'tsThemes'

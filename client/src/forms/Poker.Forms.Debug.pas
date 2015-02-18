@@ -5,10 +5,13 @@
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit, cxMemo,
-  Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics,
-  cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox, Poker.Common.SafeMutex;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
+  Vcl.Dialogs, cxContainer, cxEdit, cxMemo, Vcl.ExtCtrls, Vcl.Menus, cxButtons,
+  Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore,
+  ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
+  Poker.Common.SafeMutex;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);

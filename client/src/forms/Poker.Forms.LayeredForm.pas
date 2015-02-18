@@ -3,8 +3,8 @@ unit Poker.Forms.LayeredForm;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.Types,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Imaging.PngImage;
+  Winapi.Windows, System.Classes, System.Types, Vcl.Graphics, Vcl.Controls,
+  Vcl.Forms, Vcl.Imaging.PngImage;
 
 type
   TfrmLayered = class(TForm)
