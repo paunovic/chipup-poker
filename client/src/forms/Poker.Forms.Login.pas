@@ -316,7 +316,7 @@ end;
 
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
 begin
-  acLogin.Enabled := (AEnable) and (not DXCore.Device.IsAtFault);
+  acLogin.Enabled := (AEnable);// and (not DXCore.Device.IsAtFault);
   acShowCreateAccountForm.Enabled := AEnable;
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
