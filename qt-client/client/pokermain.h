@@ -69,7 +69,7 @@ signals:
 	void sit_ok(QByteArray gameid);
 	void seat_taken(QByteArray gameid);
 	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
-
+	void club_changed(const Data::Club *);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -94,6 +94,7 @@ private:
 	void srTableSitSeatTaken(std::string data);
 	void srTableBuyinLessThanCashout(std::string data);
 	void sePlayerClubStatus(std::string data);
+	void seClubChange(std::string data);
 
     QSslSocket socket;
     QByteArray buffer;

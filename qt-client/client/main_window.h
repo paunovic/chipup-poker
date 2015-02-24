@@ -34,7 +34,7 @@ private slots:
 	void on_gridPublicClubs_doubleClicked(const QModelIndex &index);
 	void on_btOpenClubLobby_clicked();
 private:
-	void clubTriggered(const Data::Club *club);
+	void clubTriggered(Data::Club *club);
 
 	Ui::MainWindow *ui;
 	QHeaderView private_club_header,game_header;

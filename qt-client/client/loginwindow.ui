@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>557</width>
-    <height>370</height>
+    <width>423</width>
+    <height>311</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@ padding-top: 0.5em;
 padding-bottom:0.5em;
 min-width:9em;
 }
-QLabel { font-size: 7pt; } QCheckBox {font-size: 5.5pt;}</string>
+QLabel { font-size: 7pt; } QCheckBox {font-size: 5.7pt;}</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <item>

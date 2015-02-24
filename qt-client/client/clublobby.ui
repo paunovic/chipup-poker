@@ -13,6 +13,27 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QPushButton {
+border-image: url(:/resources/button_mainform_normal.png) 0 0 0 0 stretch stretch;
+color: white;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+padding-left: 0.5em;
+padding-right: 0.5em;
+}
+QPushButton:hover {
+	border-image: url(:/resources/button_mainform_hot.png) 0 0 0 0 stretch stretch;
+}
+QPushButton:pressed {
+	border-image: url(:/resources/button_mainform_pressed.png) 0 0 0 0 stretch stretch;
+}
+QPushButton:disabled {
+	border-image: url(:resources/button_mainform_disabled.png) 0 0 0 0 stretch stretch;
+	color: #6e6e6e;
+}
+</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
@@ -48,14 +69,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="lbMembers">
         <property name="text">
          <string>Members:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="lbClubSeq">
         <property name="text">
          <string>Club ID:</string>
         </property>
@@ -79,21 +100,21 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="btClubHome">
         <property name="text">
          <string>CLUB HOME</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="btTables">
         <property name="text">
          <string>TABLES</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="btStats">
         <property name="text">
          <string>STATS</string>
         </property>
@@ -169,12 +190,15 @@
            </widget>
           </item>
           <item>
-           <widget class="QTreeView" name="treeView"/>
+           <widget class="QTreeView" name="gridMembers"/>
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="1">
              <widget class="QPushButton" name="btResetPlayerBalance">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Reset Player Balance</string>
               </property>
@@ -182,6 +206,9 @@
             </item>
             <item row="0" column="2">
              <widget class="QPushButton" name="btGiveOwnership">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Give Ownership</string>
               </property>
@@ -189,6 +216,9 @@
             </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="btSuspend">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Suspend</string>
               </property>
@@ -203,6 +233,9 @@
             </item>
             <item row="0" column="3">
              <widget class="QPushButton" name="btPromoteToManager">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Promote to Manager</string>
               </property>
@@ -210,6 +243,9 @@
             </item>
             <item row="1" column="1">
              <widget class="QPushButton" name="btRemove">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Remove</string>
               </property>
@@ -217,6 +253,9 @@
             </item>
             <item row="1" column="2">
              <widget class="QPushButton" name="btSetLimit">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Set Limit</string>
               </property>
@@ -224,6 +263,9 @@
             </item>
             <item row="1" column="3">
              <widget class="QPushButton" name="btMute">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Mute</string>
               </property>
@@ -263,6 +305,7 @@
         </layout>
        </widget>
       </widget>
+      <widget class="QWidget" name="page_3"/>
      </widget>
     </item>
    </layout>

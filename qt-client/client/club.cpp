@@ -1,6 +1,11 @@
 #include "club.h"
+#include "pokermain.h"
 
 using namespace Data;
+
+Club::Club() {
+	members.setClub(this);
+}
 
 QVariant ClubListModel::data(const QModelIndex &index,int role) const {
 	if (index.row() < 0 || index.row() >= m_entries.count()) return QVariant();
@@ -11,24 +16,50 @@ QVariant ClubListModel::data(const QModelIndex &index,int role) const {
 		case 1:
 			return m_entries.at(index.row())->name;
 		case 2:
-			return "status";
+			if (m_entries.at(index.row())->owner == core->self()->id) return tr("Owner");
+			else return tr("Member");
 		}
 	}
 	return QVariant();
 }
 void Club::update(const Poker::Club &in) {
+	int i,j;
+
 	seq = in.seq();
 	name = in.name().c_str();
+	qDebug() << "updating club" << name;
 	std::string clubid = in._id();
 	this->clubid = QByteArray(clubid.data(),clubid.length());
 	is_private = in.is_private();
 	std::string ownerid = in.owner();
 	owner = QByteArray(ownerid.data(),ownerid.length());
-	for (int i=0; i<in.members_size(); i++) {
+	QList<QByteArray> valid_members;
+	for (i=0; i<in.members_size(); i++) {
 		Poker::ClubMember member = in.members(i);
-		Data::ClubMember *out = new Data::ClubMember();
-		//out->update(member);
+		Data::ClubMember *out = 0;
+
+		std::string temp = member._id();
+		QByteArray temp2(temp.data(),temp.length());
+
+		for (j=0; j<members.length(); j++) {
+			qDebug() << members.at(j)->_id.toHex() << temp2.toHex();
+			if (members.at(j)->_id == temp2) {
+				out = members.at(j);
+				break;
+			}
+		}
+		bool append = false;
+		if (out == 0) {
+			out = new Data::ClubMember();
+			append = true;
+			qDebug() << "creating new member row";
+		}
+		out->update(member);
+		if (append) members.append(out);
+		else members.modified(out);
+		valid_members.append(temp2);
 	}
+	members.checkMissing(valid_members);
 }
 void ClubList::clear() {
 	public_club_model.beginResetModel();

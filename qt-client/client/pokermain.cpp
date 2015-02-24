@@ -192,15 +192,18 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			emit clubs_changed();
 			break;
 		}
-        case ClubCommandReply::csInvalidName:
-            emit club_create_reply(ccr.status());
-            break;
+		case ClubCommandReply::csInvalidName:
+			emit club_create_reply(ccr.status());
+			break;
 		default:
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}
 		break; }
 	case Poker::srLogout: // 8
 		delayQuit = false;
+		break;
+	case Poker::srKickPlayerReply: // 11
+		qDebug() << "srKickPlayerReply";
 		break;
 	case Poker::srTableSitOk: // 27
 		srTableSitOk(data);
@@ -226,6 +229,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		totalError += diff;
 		qDebug() << "ping:" << ping << "server clock:" << server_clock << "offset:" << clock_offset << "diff:" << diff << totalError;
 		break; }
+	case Poker::srReinstatePlayerOk: // 32
+		qDebug() << "srReinstatePlayerOk";
+		break;
 	case Poker::srTableStatsReply: // 35
 		qDebug() << "srTableStatsReply";
 		break;
@@ -274,6 +280,10 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		}
 		break;
 	}
+	case Poker::seClubChange: // 53
+		qDebug() << "seClubChange";
+		seClubChange(data);
+		break;
 	case Poker::seGameChange: // 55
 		seGameChange(data);
 		break;
@@ -372,6 +382,20 @@ Data::User *PokerMain::findUser(QByteArray userid) {
 	qDebug() << "none found";
 	return 0;
 }
+void PokerMain::seClubChange(std::string data) {
+	Poker::Club input;
+	input.ParseFromString(data);
+	int seq = input.seq();
+	Data::Club *club = 0;
+	for (int i=0; i<clubs.size(); i++) {
+		club = clubs.at(i);
+		if (club->seq == seq) break;
+	}
+	Q_ASSERT(club);
+	club->update(input);
+	emit club_changed(club);
+}
+
 void PokerMain::srLoginReply(std::string data) {
 	Poker::LoginReply lr;
 	int i;

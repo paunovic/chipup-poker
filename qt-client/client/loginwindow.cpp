@@ -32,6 +32,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 		On_protocol_ready(true);
 	}
 #endif
+	setFixedSize(sizeHint());
 }
 
 LoginWindow::~LoginWindow() {

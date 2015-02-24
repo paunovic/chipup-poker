@@ -10,6 +10,10 @@ QPushButton {
 	color: #b4b4b4;
 	font: bold;
 }
+#MainWindow QPushButton {
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
 #TableSit QPushButton {
 	padding-left: 30px;
 	padding-right: 30px;
@@ -68,7 +72,7 @@ QPushButton#btHomeGames:hover, QPushButton#btTournaments:hover {
 	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #404749, stop: 1 #22241c);
 	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #202223, stop: 1 #4b5152);
 }
-QPushButton:checked#btHomeGames, QPushButton:checked#btTournaments {
+QPushButton:checked#btHomeGamesDummy, QPushButton:checked#btTournamentsDummy {
 	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #780b0b, stop: 1 #221212);
 	color: #f5682c;
 	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3a2425, stop: 1 #9f2f2f);
