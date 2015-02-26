@@ -248,6 +248,9 @@ function tableEvent(event) {
 		break;
 	case "teWinning":
 		queueAction(new SimpleDelay(2000));
+		var winnerSeat = event.seat;
+		var winnerName = lastTS.seats[winnerSeat].user.displayName;
+		queueAction(new UpdateChat(winnerName+" won ??? chips"+JSON.stringify(event.pots)));
 		updateBets();
 		AnimateCards({reveal:true});
 		for (var i=0; i<localFlop.length; i++) {
@@ -289,6 +292,13 @@ function tableEvent(event) {
 	default:
 		dump(event);
 	}
+}
+function UpdateChat(msg) {
+	this.msg = msg;
+}
+UpdateChat.prototype.begin = function () {
+	root.renderWinning(this.msg);
+	eventDone();
 }
 function SimpleDelay(delay) {
 	this.delay = delay;
@@ -364,7 +374,7 @@ function calcCardPosition(seat,card) {
 	// TODO, switch to float based positioning
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
-	return { x:seatpos.x + (card*25), y:seatpos.y + 10 };
+	return { x:seatpos.x + (card*0.03), y:seatpos.y + 0.10 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;

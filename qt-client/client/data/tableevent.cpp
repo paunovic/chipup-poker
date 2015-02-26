@@ -1,4 +1,5 @@
 #include "tableevent.h"
+#include "data/pot.h"
 
 namespace Data {
 
@@ -12,6 +13,11 @@ void TableEvent::update(const Poker::TableEvent &in) {
 	}
 	for (i=0; i<in.cards_size(); i++) {
 		cards.append(new Hand(in.cards(i)));
+	}
+	for (i=0; i<in.pots_size(); i++) {
+		Pot *p = new Pot();
+		p->update(in.pots(i));
+		pots.append(p);
 	}
 }
 QString TableEvent::getEvent() {

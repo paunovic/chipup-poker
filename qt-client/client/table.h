@@ -28,6 +28,8 @@ public:
 	bool setGameForTesting(const Data::Game *game, QString jscode);
 	void editJs(QString newcode);
 	void eval(QString code);
+	void renderWinning(QString msg);
+
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
 	void On_sit_ok(QByteArray gameid);

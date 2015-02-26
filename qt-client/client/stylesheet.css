@@ -94,7 +94,7 @@ QTextEdit#teChat {
 }
 
 QMainWindow#Table {
-	border-image: url(e:/poker/poker/qt-client/resources/table/RoomBackground.png) 0 0 0 0 stretch stretch;
+	border-image: url(e:/poker/poker/qt-client/client/resources/table/RoomBackground.png) 0 0 0 0 stretch stretch;
 }
 QPushButton#btMin,QPushButton#btMax,QPushButton#btPot,QPushButton#bt3BB {
 	border-top: 1px solid #626668;

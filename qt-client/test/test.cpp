@@ -47,7 +47,7 @@ void TestCase::renderChips() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586,300);
 	Data::Game g;
 	g.seats = 5;
@@ -82,7 +82,7 @@ void TestCase::rendercards() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586*2,300*2);
 	Data::Game g;
 	g.seats = 5;
@@ -203,7 +203,7 @@ void TestCase::animate() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586,300);
 	Data::Game g;
 	g.seats = 5;
@@ -250,7 +250,7 @@ void TestCase::testsomething() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586,300);
 	QFETCH(int,filled);
 	QFETCH(QString,output);

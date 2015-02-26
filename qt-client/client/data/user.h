@@ -19,7 +19,7 @@ public:
 	void setDisplayName(QString in) { displayname_ = in; }
 
 	Q_PROPERTY(QString avatar READ avatarHex)
-
+	Q_PROPERTY(QString displayName READ displayName())
 	QByteArray id;
 signals:
 
