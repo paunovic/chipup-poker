@@ -39,6 +39,6 @@ void Animation::tick(int now) {
 	obj->setPosition(startx+(xdiff*progress),starty+(ydiff*progress));
 }
 void Animation::object_deleted(QObject *) {
-	animateCore->over(this);
+	if (animateCore) animateCore->over(this);
 	deleteLater();
 }

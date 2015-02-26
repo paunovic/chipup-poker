@@ -158,6 +158,7 @@ void TestCase::alignment() {
 		QVERIFY(result);
 	}
 	for (int i=0; i<seats; i++) {
+		uint8_t cards[] = {0,1};
 		QByteArray id;
 		id[0] = i;
 		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
@@ -165,9 +166,10 @@ void TestCase::alignment() {
 
 		source.set_player_mongo_id(id.data(),id.length());
 		source.set_seat_index(i);
-		source.set_card_count(0);
 		source.set_status(Poker::SeatInfo::psInHand);
 		source.set_chips(20000);
+		source.set_cards(cards,2);
+		source.set_card_count(2);
 		seat->update(source);
 		ts->seats.append(seat);
 		Data::User *u = new Data::User(&pm);
@@ -182,10 +184,20 @@ void TestCase::alignment() {
 		if (i == 2) initial.add_bets(300);
 		else initial.add_bets(200);
 	}
+	Poker::TableEvent *dealing = initial.add_events();
+	dealing->set_event(Poker::TableEvent::teDealing);
+
 	ts->update(initial);
+	tbl.eval("testcase = true");
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 	tbl.eval("alignment();");
+	for (int i=0; i<25; i++) {
+		ac.setTime(i*1000);
+		ac.tick();
+		QApplication::sendPostedEvents();
+		QTest::qSleep(200);
+	}
 	QPixmap image(tbl.size());
 	tbl.render(&image);
 	image.save(filename);

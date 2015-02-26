@@ -25,7 +25,10 @@ static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engin
 	SeatObject *seatobj = static_cast<SeatObject*>(context->thisObject().toQObject());
 	//QPoint pos = seatobj->getSeatUi()->getPosition();
 	QScriptValue ret = engine->newObject();
-	ret.setProperty("x",seatobj->x());
+	float x = seatobj->x();
+	if (seatobj->getKeySide() == Right) x -= seatobj->getSeatUi()->w;
+	else if (seatobj->getKeySide() == Top) x -= (seatobj->getSeatUi()->w/2);
+	ret.setProperty("x",x);
 	ret.setProperty("y",seatobj->y());
 	ret.setProperty("keySide",seatobj->getKeySide());
 	return ret;

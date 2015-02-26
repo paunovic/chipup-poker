@@ -5,6 +5,7 @@ var localTurn = [];
 var localRiver = [];
 var localPots = [];
 var db = new DealerButton();
+var testcase = false;
 
 var idleChips = [];
 function getChipStack() {
@@ -371,10 +372,9 @@ function calcSeatPosition(index) {
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
 function calcCardPosition(seat,card) {
-	// TODO, switch to float based positioning
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
-	return { x:seatpos.x + (card*0.03), y:seatpos.y + 0.10 };
+	return { x:seatpos.x + 0.03 + (card*0.03), y:seatpos.y - 0.0 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
@@ -475,6 +475,10 @@ ShowBet.prototype.begin = function ShowBetBegin() {
 	this.timer = setTimeout(eventDone,200);
 }
 function setTimeout(cb,delay) {
+	if (testcase) {
+		cb();
+		return;
+	}
 	var timer = new QTimer();
 	timer.interval = delay;
 	timer.singleShot = true;
