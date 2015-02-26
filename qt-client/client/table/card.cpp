@@ -76,8 +76,8 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 		p.drawPixmap(0,0,width(),height(),pix);
 		int target_width = (qreal)width() * 0.6;
 		int target_height = ((qreal)face.height()*target_width)/face.width();
-		int target_x = (width() - (target_width+2));
-		int target_y = 1;
+		int target_x = (qreal)width() * 0.20;
+		int target_y = (qreal)height() * 0.056;
 		QRectF faceLocation(target_x,target_y,target_width,target_height);
 		p.drawPixmap(faceLocation,face,QRectF());
 
