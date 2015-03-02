@@ -81,7 +81,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
 
 	agent = new ScriptAgent(&engine);
-	engine.setAgent(agent);
+	//engine.setAgent(agent);
 	//QScriptEngineDebugger *debuger = new QScriptEngineDebugger(this);
 	//debuger->setAutoShowStandardWindow(true);
 	//debuger->attachTo(&engine);
@@ -168,6 +168,7 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 			int l=0;
 			foreach (Data::WinnerData *wd , p->winnerData) {
 				wda.setProperty(l,engine.newQObject((QObject*)wd));
+				l++;
 			}
 			pot.setProperty("WinnerData",wda);
 			pots.setProperty(k,pot);

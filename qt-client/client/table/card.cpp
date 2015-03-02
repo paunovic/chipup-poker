@@ -37,6 +37,17 @@ static inline QString getSuit(int card) {
 	default: return "error";
 	}
 }
+static inline QString getSuitFontCode(int card) {
+	int x = card % 4;
+	switch (x) {
+	case 0: return "{";
+	case 1: return "[";
+	case 2: return "]";
+	case 3: return "}";
+	default: return "error";
+	}
+}
+
 static inline QColor getSuitColor(int card) {
 	int x = card % 4;
 	switch (x) {
@@ -60,13 +71,15 @@ CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(pa
 	pix = QPixmap(":/resources/cards/CardFrontBackground.png");
 	back = QPixmap(":/resources/cards/Background.png");
 	font = QFont("Card Characters");
-	font.setPointSizeF(14);
+	font.setPixelSize(10);
 	updateFace();
 }
 void CardObjectUi::paintEvent(QPaintEvent *) {
 	QPainter p(this);
 	p.setPen(Qt::NoPen);
 	p.setBrush(QColor(127,0,0));
+	int pixelsize = (qreal)width() * 0.25;
+	font.setPixelSize(pixelsize);
 	//p.drawRect(0,0,width(),height());
 
 	int card = jsobj->getCard();
@@ -84,7 +97,7 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 		p.setPen(getSuitColor(card));
 		p.setFont(font);
 		QRectF rank(2,0,80,30);
-		p.drawText(rank,0,getDisplayValue(card));
+		p.drawText(rank,0,getDisplayValue(card)+"\n"+getSuitFontCode(card));
 	}
 }
 QPixmap CardObjectUi::loadFace(QString name) {

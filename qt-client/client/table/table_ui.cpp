@@ -9,7 +9,7 @@ TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 }
 void TableUi::resizeEvent(QResizeEvent *) {
 	float h = rootHeight();
-	yoffset = h * 0.14;
+	yoffset = h * 0.1;
 
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);

@@ -24,7 +24,8 @@ function updatePots() {
 		if (lastTS.pots[i].value == 0) continue;
 		localPots[i].setPosition(0.35 + (0.1*i),0.3);
 		localPots[i].visible = true;
-		localPots[i].value = lastTS.pots[i].value;
+		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
+		// TODO, render rake
 	}
 }
 var lastTS;
@@ -249,9 +250,42 @@ function tableEvent(event) {
 		break;
 	case "teWinning":
 		queueAction(new SimpleDelay(2000));
-		var winnerSeat = event.seat;
-		var winnerName = lastTS.seats[winnerSeat].user.displayName;
-		queueAction(new UpdateChat(winnerName+" won ??? chips"+JSON.stringify(event.pots)));
+		var perSeatWins = [];
+		for (var i=0; i<game.seats; i++) perSeatWins[i] = 0;
+		queueAction(new UpdateChat(JSON.stringify(event.pots)));
+		var seatMap = [];
+		for (var i=0; i<lastTS.seats.length; i++) {
+			seatMap[lastTS.seats[i].seat_index] = lastTS.seats[i];
+		}
+		for (var i=0; i<event.pots.length; i++) {
+			var winnerCount = event.pots[i].WinnerData.length;
+			for (var k=0; k<event.pots[i].WinnerData.length; k++) {
+				log("i:"+i+" k:"+k+" wd:"+JSON.stringify(event.pots[i].WinnerData[k]));
+				var winnerSeat = event.pots[i].WinnerData[k].seat;
+				var winnerName = seatMap[winnerSeat].user.displayName;
+				var potvalue = event.pots[i].value - event.pots[i].rake;
+				var gain = 0;
+				if (winnerCount == 1) {
+					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips"));
+					gain = potvalue;
+				} else {
+					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips"));
+					gain = potvalue/winnerCount;
+				}
+				// TODO, rake
+				perSeatWins[winnerSeat] += gain;
+			}
+		}
+		var p;
+		while (p=localPots.shift()) {
+			hideChips(p);
+		}
+		for (var i=0; i<game.seats; i++) {
+			var pos = calcBetLocation(i);
+			if (perSeatWins[i] == 0) continue;
+			log("seat#"+i+" won:"+perSeatWins[i]+" coords:"+JSON.stringify(pos));
+			queueAction(new AnimateChipWin(pos,perSeatWins[i]));
+		}
 		updateBets();
 		AnimateCards({reveal:true});
 		for (var i=0; i<localFlop.length; i++) {
@@ -265,10 +299,6 @@ function tableEvent(event) {
 		}
 		for (var i=0; i<localRiver.length; i++) {
 			if (localRiver[i]) queueAction(new HideCard(localRiver[i]));
-		}
-		var p;
-		while (p=localPots.shift()) {
-			hideChips(p);
 		}
 		break;
 	case 'teDealing':
@@ -293,6 +323,17 @@ function tableEvent(event) {
 	default:
 		dump(event);
 	}
+}
+function AnimateChipWin(dest,chips) {
+	this.stack = getChipStack();
+	this.dest = dest;
+	this.chips = chips;
+}
+AnimateChipWin.prototype.begin = function () {
+	this.stack.value = this.chips;
+	this.stack.setPosition(0.5,0.5);
+	var stack = this.stack;
+	Animate(this.stack, this.dest.x, this.dest.y, 0.5, function () { hideChips(stack); eventDone(); });
 }
 function UpdateChat(msg) {
 	this.msg = msg;

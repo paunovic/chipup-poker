@@ -99,11 +99,7 @@ void Table::on_btMax_clicked() {
 	ui->raiseSlider->setValue(lastTableStatus->maximum_raise);
 }
 void Table::renderWinning(QString msg) {
-	ui->teChat->insertHtml(QString("<font color='#00ff00'>Dealer:</font> <font color='#a8ff99'>%1</font>").arg(msg));
-	//ui->teChat->setTextColor(QColor(0,255,0)); // #00ff00
-	//ui->teChat->insertPlainText("Dealer:");
-	//ui->teChat->setTextColor(QColor(168,255,153)); // #a8ff99
-	//ui->teChat->append(msg+"\n");
+	ui->teChat->append(QString("<font color='#00ff00'>Dealer:</font> <font color='#a8ff99'>%1</font>").arg(msg));
 }
 void Table::on_btCheck_clicked() {
 	Poker::PutChips pc;

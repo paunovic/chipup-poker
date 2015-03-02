@@ -7,7 +7,7 @@ WinnerData::WinnerData(QObject *parent) :
 {
 }
 void WinnerData::update(const Poker::TableEvent::WinnerData &in) {
-	seat = in.seat();
-	msg = in.msg().c_str();
+	_seat = in.seat();
+	_msg = in.msg().c_str();
 }
 } // namespace Data
