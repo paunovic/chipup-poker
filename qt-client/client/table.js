@@ -128,7 +128,7 @@ function AnimateCards(opts) {
 			for (var j=0; j<seat.card_count; j++) {
 				var cardvalue = -1;
 				if (seat.hand.cards.length) cardvalue = seat.hand.cards[j];
-				var pos = calcCardPosition(seat.seat_index,j);
+				var pos = calcCardPosition(seat.seat_index,j,seat.card_count);
 				if (local.cards[j]) {
 					var skip = false;
 					if (opts && opts.reveal) {
@@ -412,10 +412,15 @@ function calcSeatPosition(index) {
 
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
-function calcCardPosition(seat,card) {
+function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
-	return { x:seatpos.x + 0.03 + (card*0.03), y:seatpos.y - 0.0 };
+	var cardWidth = 0.063;
+	var cardOffset = 0.03;
+	var seatWidth = 0.16;
+	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
+	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
+	return { x:center + (card * cardOffset), y:seatpos.y - 0.0 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
