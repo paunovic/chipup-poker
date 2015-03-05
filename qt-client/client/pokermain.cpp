@@ -2,6 +2,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QMetaMethod>
+#include <QApplication>
+#include <QWidget>
+#include <QMainWindow>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -15,17 +18,19 @@ using namespace Poker;
 
 PokerMain *core;
 
+static void flagOffline(QMainWindow *window);
+
 PokerMain::PokerMain(QObject *parent) :
     QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
 {
 	setObjectName("core");
 	delayQuit = false;
+	reconnectState = notSignedIn;
 	manager_ = new QNetworkAccessManager(this);
 	effects_ = new SoundEffects(this);
 	self_ = new Data::User(this);
 	connect(manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
-    connect(&socket,SIGNAL(connected()),this,SLOT(socket_connected()));
     connect(&socket,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(socket_state_change(QAbstractSocket::SocketState)));
     connect(&socket,SIGNAL(sslErrors(QList<QSslError>)),this,SLOT(socket_sslErrors(QList<QSslError>)));
     connect(&socket,SIGNAL(encrypted()),this,SLOT(socket_ready()));
@@ -39,22 +44,40 @@ QNetworkAccessManager *PokerMain::manager() {
 void PokerMain::replyFinished(QNetworkReply *reply) {
 	reply->deleteLater();
 }
-
-void PokerMain::socket_connected() {
-    qDebug() << "socket connected";
-}
 void PokerMain::try_connect() {
     if (socket.state() == QAbstractSocket::UnconnectedState) {
         socket.connectToHostEncrypted("server.chipuppoker.com",12346);
     }
 }
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
-    qDebug() << state;
-    switch (state) {
-    case QAbstractSocket::UnconnectedState:
-        // set a timer to reconnect
-        break;
-    }
+	qDebug() << state;
+	switch (state) {
+	case QAbstractSocket::HostLookupState:
+		break;
+	case QAbstractSocket::ConnectingState:
+		break;
+	case QAbstractSocket::ConnectedState:
+		qDebug() << "socket connected";
+		break;
+	case QAbstractSocket::ClosingState:
+		qDebug() << "socket closing";
+		break;
+	case QAbstractSocket::UnconnectedState:
+		// set a timer to reconnect
+		qDebug() << "unconnected";
+		emit protocol_ready(false);
+		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+			qDebug() << widget << widget->metaObject()->className();
+			QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget);
+			if (mainWindow) {
+				flagOffline(mainWindow);
+			}
+		}
+		try_connect();
+		break;
+	}
+}
+static void flagOffline(QMainWindow *mainWindow) {
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "incoming err" << errors;
@@ -165,6 +188,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		max_play_time = hr.max_play_time();
 		send_ping();
 		emit protocol_ready(true);
+		if (reconnectState == SignedIn) {
+			doLogin(username,password);
+		}
 		break;
 	case Poker::srLoginReply: // 2
 		srLoginReply(data);
@@ -201,6 +227,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		break; }
 	case Poker::srLogout: // 8
 		delayQuit = false;
+		reconnectState = notSignedIn;
 		break;
 	case Poker::srKickPlayerReply: // 11
 		qDebug() << "srKickPlayerReply";
@@ -403,6 +430,7 @@ void PokerMain::srLoginReply(std::string data) {
 	lr.ParseFromString(data);
 	if (lr.login_status() == LoginReply::lrSuccess) {
 		qDebug() << "sucess!";
+		reconnectState = SignedIn;
 		// TODO, convert and use reconnect_tables,tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
 		clubs.clear();
 		for (i=0; i<lr.clubs_size(); i++) {
@@ -503,4 +531,12 @@ void PokerMain::RegisterListener(QObject *listener) {
 int parseValue(QString input) {
 	QString x = input.section('.', 0, 0) + input.section('.', 1, 1).leftJustified(2, '0');
 	return x.toInt();
+}
+void PokerMain::doLogin(QString username, QString password) {
+	Poker::LoginParams lp;
+	lp.set_username(qPrintable(username));
+	lp.set_password(qPrintable(password));
+	this->username = username;
+	this->password = password;
+	core->sendMessage(Poker::scLogin,&lp);
 }

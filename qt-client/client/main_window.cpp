@@ -159,3 +159,6 @@ void MainWindow::clubTriggered(Data::Club *club) {
 	cl->setClub(club);
 	cl->show();
 }
+void MainWindow::on_actionDisconnect_triggered() {
+	core->testDisconnect();
+}

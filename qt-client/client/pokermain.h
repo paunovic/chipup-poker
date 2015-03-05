@@ -47,6 +47,8 @@ public:
 	Data::User *self() { Q_ASSERT(self_); return self_; }
 	void RegisterListener(QObject *listener);
 	SoundEffects *effects() { return effects_; }
+	void doLogin(QString username, QString password);
+	void testDisconnect() { socket.disconnectFromHost(); }
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
@@ -80,8 +82,7 @@ public slots:
     void parsePacket(Poker::ServerCodes code,std::string data);
 	void replyFinished(QNetworkReply *reply);
 private slots:
-    void socket_connected();
-    void send_ping();
+	void send_ping();
 private:
 	void srLoginReply(std::string data);
 	void seGameChange(std::string data);
@@ -96,6 +97,8 @@ private:
 	void sePlayerClubStatus(std::string data);
 	void seClubChange(std::string data);
 
+	enum ReconnectState { notSignedIn, SignedIn };
+
     QSslSocket socket;
     QByteArray buffer;
     QTimer pinger;
@@ -107,6 +110,8 @@ private:
 	bool first_ping;
 	int totalError;
 	SoundEffects *effects_;
+	QString username,password;
+	enum ReconnectState reconnectState;
 };
 int parseValue(QString input);
 

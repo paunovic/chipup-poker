@@ -13,6 +13,20 @@
 #define QFINDTESTDATA(x) QString("../../qt-client/test/") + x
 #endif
 
+// from the simulator-qt project
+static void setDpiRecursive(QObject *object, const QSize &dpi) {
+	foreach (QObject *child, object->children()) setDpiRecursive(child,dpi);
+
+	object->setProperty("_q_customDpiX",dpi.width());
+	object->setProperty("_q_customDpiY",dpi.height());
+}
+void changeDpi(const QSize &dpi) {
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+		setDpiRecursive(widget,dpi);
+	}
+}
+// </copy&paste>
+
 int font1,font2;
 void TestCase::initTestCase() {
 	font1 = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
@@ -110,14 +124,17 @@ void TestCase::alignment_data() {
 	QTest::addColumn<bool>("withDealer");
 	QTest::addColumn<bool>("withBet");
 	QTest::addColumn<QString>("filename");
-	QTest::newRow("all10") << 10 << true << true << "all10.png";
-	QTest::newRow("all5") << 5 << true << true << "all5.png";
+	QTest::addColumn<int>("cardCount");
+	QTest::newRow("all10") << 10 << true << true << "all10.png" << 2;
+	QTest::newRow("all5") << 5 << true << true << "all5.png" << 2;
+	QTest::newRow("all5Omaha") << 5 << true << true << "all5omaha.png" << 4;
 }
 void TestCase::alignment() {
 	QFETCH(int,seats);
 	QFETCH(bool,withDealer);
 	QFETCH(bool,withBet);
 	QFETCH(QString,filename);
+	QFETCH(int,cardCount);
 	int result;
 	PokerMain pm;
 	core = &pm;
@@ -158,7 +175,7 @@ void TestCase::alignment() {
 		QVERIFY(result);
 	}
 	for (int i=0; i<seats; i++) {
-		uint8_t cards[] = {0,1};
+		uint8_t cards[] = {0,1,2,3};
 		QByteArray id;
 		id[0] = i;
 		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
@@ -168,8 +185,8 @@ void TestCase::alignment() {
 		source.set_seat_index(i);
 		source.set_status(Poker::SeatInfo::psInHand);
 		source.set_chips(20000);
-		source.set_cards(cards,2);
-		source.set_card_count(2);
+		source.set_cards(cards,cardCount);
+		source.set_card_count(cardCount);
 		seat->update(source);
 		ts->seats.append(seat);
 		Data::User *u = new Data::User(&pm);
@@ -192,11 +209,12 @@ void TestCase::alignment() {
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 	tbl.eval("alignment();");
-	for (int i=0; i<25; i++) {
+	changeDpi(QSize(121,120));
+	for (int i=0; i<50; i++) {
 		ac.setTime(i*1000);
 		ac.tick();
 		QApplication::sendPostedEvents();
-		QTest::qSleep(200);
+		if (i < 30) QTest::qSleep(20);
 	}
 	QPixmap image(tbl.size());
 	tbl.render(&image);
