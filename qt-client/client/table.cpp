@@ -139,10 +139,6 @@ void Table::on_teChatInput_returnPressed() {
 	qDebug() << layout->cellRect(1,0);
 
 }
-void Table::resizeEvent(QResizeEvent *event) {
-	//qDebug() << height();
-	QMainWindow::resizeEvent(event);
-}
 void Table::editJs(QString newcode) {
 	p->editJs(newcode);
 }

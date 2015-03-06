@@ -6,6 +6,7 @@
 #include <QMainWindow>
 
 #include "tablestatus.h"
+#include "game.h"
 
 class TablePrivate;
 class JsEditor;
@@ -14,7 +15,6 @@ namespace Ui {
 class Table;
 }
 namespace Data {
-class Game;
 class Club;
 }
 
@@ -29,6 +29,7 @@ public:
 	void editJs(QString newcode);
 	void eval(QString code);
 	void renderWinning(QString msg);
+	QByteArray getGameId() const { return game->gameid; }
 
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
@@ -49,8 +50,6 @@ private slots:
 	void on_btSitOut_stateChanged(int state);
 	void on_cbSitOutBB_stateChanged(int state);
 	void on_btDouble_stateChanged(int state);
-protected:
-	void resizeEvent(QResizeEvent *event);
 private:
 	Ui::Table *ui;
 	TablePrivate *p;

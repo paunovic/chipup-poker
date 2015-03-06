@@ -47,6 +47,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	ui->gridGames->setSelectionModel(game_selection_model);
 	ui->gridGames->setRootIsDecorated(false);
 	core->RegisterListener(this);
+	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
+	ui->gridPublicClubs->setMinimumWidth(em*31);
+	ui->gridPrivateClubs->setMinimumWidth(em*31);
+	ui->gridPrivateClubs->setMinimumHeight(em*18);
+	ui->gridGames->setMinimumHeight(em*18);
 	//setFixedSize(size());
 }
 MainWindow::~MainWindow() {
@@ -161,4 +166,9 @@ void MainWindow::clubTriggered(Data::Club *club) {
 }
 void MainWindow::on_actionDisconnect_triggered() {
 	core->testDisconnect();
+}
+void MainWindow::resizeEvent(QResizeEvent *event) {
+	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
+	QSize priv = ui->gridPrivateClubs->size();
+	qDebug() << "root size" << size() << "private size" << priv << (priv/em);
 }

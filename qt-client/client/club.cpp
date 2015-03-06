@@ -127,3 +127,12 @@ QVariant ClubListModel::headerData(int row, Qt::Orientation, int role) const {
 void ClubListModel::sort(int, Qt::SortOrder) {
 
 }
+const Club *ClubList::getClub(QByteArray clubid) const {
+	foreach (Club *c, private_club_model.m_entries) {
+		if (c->clubid == clubid) return c;
+	}
+	foreach (Club *c, public_club_model.m_entries) {
+		if (c->clubid == clubid) return c;
+	}
+	return 0;
+}

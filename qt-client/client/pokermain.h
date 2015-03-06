@@ -41,6 +41,7 @@ public:
 	QSettings& config() { return *settings; }
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
 	Data::User *findUser(QByteArray userid);
+	const Data::Game *getGame(QByteArray gameid) const;
 	QNetworkAccessManager *manager();
 	qint64 getUptime() { return uptime.elapsed(); }
 	qint64 getServerTime() { return clock_offset + uptime.elapsed(); }

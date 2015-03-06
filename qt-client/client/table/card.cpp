@@ -71,6 +71,7 @@ CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(pa
 	pix = QPixmap(":/resources/cards/CardFrontBackground.png");
 	back = QPixmap(":/resources/cards/Background.png");
 	font = QFont("Card Characters");
+	font.setBold(true);
 	font.setPixelSize(10);
 	updateFace();
 }
@@ -78,7 +79,7 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 	QPainter p(this);
 	p.setPen(Qt::NoPen);
 	p.setBrush(QColor(127,0,0));
-	int pixelsize = (qreal)width() * 0.25;
+	int pixelsize = (qreal)width() * 0.35;
 	font.setPixelSize(pixelsize);
 	//p.drawRect(0,0,width(),height());
 
@@ -87,10 +88,10 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 		p.drawPixmap(0,0,width(),height(),back);
 	} else {
 		p.drawPixmap(0,0,width(),height(),pix);
-		int target_width = (qreal)width() * 0.6;
+		int target_width = (qreal)width() * 0.55;
 		int target_height = ((qreal)face.height()*target_width)/face.width();
-		int target_x = (qreal)width() * 0.20;
-		int target_y = (qreal)height() * 0.056;
+		int target_x = (width()/2) - (target_width/2);
+		int target_y = (height()/2) - (target_height/2);
 		QRectF faceLocation(target_x,target_y,target_width,target_height);
 		p.drawPixmap(faceLocation,face,QRectF());
 

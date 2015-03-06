@@ -70,6 +70,7 @@ public:
 	Club *at(int i) {
 		return clubs.at(i);
 	}
+	const Club *getClub(QByteArray clubid) const;
 
 	Data::ClubListModel public_club_model,private_club_model;
 private:

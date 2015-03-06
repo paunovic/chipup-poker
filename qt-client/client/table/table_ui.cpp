@@ -6,8 +6,13 @@
 TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 	pix = QPixmap(":/resources/table/Table.png");
 	yoffset = 0;
+	int em = fontMetrics().boundingRect("M").width();
+	setMinimumSize(85*em,41*em);
 }
 void TableUi::resizeEvent(QResizeEvent *) {
+	int em = fontMetrics().boundingRect("M").width();
+	qDebug() << "tableui size" << size() << (size()/em);
+
 	float h = rootHeight();
 	yoffset = h * 0.1;
 
@@ -22,6 +27,7 @@ void TableUi::resizeEvent(QResizeEvent *) {
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Preferred);
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
+	setMinimumHeight(((qreal)(41*em)*width())/(85*em));
 }
 int TableUi::rootHeight() {
 	return ((float)pix.height()*width())/pix.width();

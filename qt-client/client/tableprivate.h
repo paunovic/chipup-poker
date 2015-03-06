@@ -86,9 +86,11 @@ signals:
 
 public slots:
 	void renderWinning(QString msg);
+protected:
+	TableUi *tableui;
+	friend class Table;
 private:
 	QScriptEngine engine;
-	TableUi *tableui;
 	GameWrap *game;
 	const Data::Game *rawgame;
 	QSharedPointer<Data::TableStatus> lastTs;

@@ -13,6 +13,7 @@
 #include "data/user.h"
 #include "data/playerclubstatus.h"
 #include "sound_effects.h"
+#include "table.h"
 
 using namespace Poker;
 
@@ -431,7 +432,7 @@ void PokerMain::srLoginReply(std::string data) {
 	if (lr.login_status() == LoginReply::lrSuccess) {
 		qDebug() << "sucess!";
 		reconnectState = SignedIn;
-		// TODO, convert and use reconnect_tables,tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
+		// TODO, convert and use tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
 		clubs.clear();
 		for (i=0; i<lr.clubs_size(); i++) {
 			Poker::Club c = lr.clubs(i);
@@ -445,12 +446,40 @@ void PokerMain::srLoginReply(std::string data) {
 			Data::Game *g_out = new Data::Game;
 			g_out->update(g);
 			games.append(g_out);
+			qDebug() << "found game" << g_out->gameid.toHex();
 		}
 		for (i=0; i<lr.users_size(); i++) {
 			Poker::User u = lr.users(i);
 			Data::User *u_out = new Data::User;
 			u_out->update(u);
 			users.append(u_out);
+		}
+		for (i=0; i<lr.reconnect_tables_size(); i++) {
+			Poker::TableStatus ts = lr.reconnect_tables(i);
+			QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+			out->update(ts);
+			bool found = false;
+			foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+				qDebug() << widget << widget->metaObject()->className();
+				Table *tbl = qobject_cast<Table*>(widget);
+				if (tbl) {
+					if (out->gameid == tbl->getGameId()) {
+						found = true;
+						break;
+					}
+				}
+			}
+			qDebug() << "tbl found?" << found;
+			if (!found) {
+				qDebug() << "lookign for game" << out->gameid.toHex();
+				const Data::Game *game = getGame(out->gameid);
+				Q_ASSERT(game);
+				Table *t = new Table();
+				const Data::Club *club = clubs.getClub(game->clubid);
+				t->setGame(game,club);
+				t->show();
+			}
+			emit table_status(out);
 		}
 		Poker::User self = lr.self();
 		self_->update(self);
@@ -462,6 +491,14 @@ void PokerMain::srLoginReply(std::string data) {
 		emit login_failure();
 	}
 }
+const Data::Game *PokerMain::getGame(QByteArray gameid) const {
+	foreach (const Data::Game *g, games) {
+		qDebug() << "searching" << g->gameid.toHex();
+		if (g->gameid == gameid) return g;
+	}
+	return 0;
+}
+
 void PokerMain::srInvalidTableBuyin(std::string data) {
 	Poker::BuyinError be;
 	be.ParseFromString(data);

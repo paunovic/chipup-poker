@@ -416,7 +416,7 @@ function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
 	var cardWidth = 0.063;
-	var cardOffset = 0.03;
+	var cardOffset = cardWidth;
 	var seatWidth = 0.16;
 	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
 	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
