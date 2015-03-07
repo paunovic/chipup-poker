@@ -35,7 +35,7 @@ type
 
         UPDATE_FILES: array[0..7] of record
           Path: String;
-          RequiresReboot: Boolean;
+          RequiresRestart: Boolean;
         end;
 
         ANIMATION_METRICS: record
@@ -79,7 +79,7 @@ type
         DIRECTX_SWAPCHAIN_COUNT: 64; // directx swapchain count
         TABLE_CHAT_SCROLLBACK_LINES: 200; // amount of chat lines to store per table
 
-        // server configs
+        // server informations
         SERVER_CONFIG: (
           (TCPAddress: 'server.chipuppoker.com'; TCPPort: 12346; URL: 'https://www.chipuppoker.com'),
           (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'https://dev-server.chipuppoker.com')
@@ -93,14 +93,14 @@ type
 
         // check these files for update
         UPDATE_FILES: (
-          (Path: 'bspatch.exe'; RequiresReboot: TRUE),
-          (Path: 'chipuppoker.exe'; RequiresReboot: TRUE),
-          (Path: 'libeay32.dll'; RequiresReboot: TRUE),
-          (Path: 'ssleay32.dll'; RequiresReboot: TRUE),
-          (Path: 'sqlite3.dll'; RequiresReboot: TRUE),
-          (Path: 'VclStylesInno.dll'; RequiresReboot: FALSE),
-          (Path: 'Carbon.vsf'; RequiresReboot: FALSE),
-          (Path: 'assets\dxmedia.cpa'; RequiresReboot: FALSE)
+          (Path: 'bspatch.exe'; RequiresRestart: TRUE),
+          (Path: 'chipuppoker.exe'; RequiresRestart: TRUE),
+          (Path: 'libeay32.dll'; RequiresRestart: TRUE),
+          (Path: 'ssleay32.dll'; RequiresRestart: TRUE),
+          (Path: 'sqlite3.dll'; RequiresRestart: TRUE),
+          (Path: 'VclStylesInno.dll'; RequiresRestart: FALSE),
+          (Path: 'Carbon.vsf'; RequiresRestart: FALSE),
+          (Path: 'assets\dxmedia.cpa'; RequiresRestart: FALSE)
         );
 
         // animation metrics. times are in seconds

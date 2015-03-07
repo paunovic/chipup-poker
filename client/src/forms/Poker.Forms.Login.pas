@@ -197,7 +197,7 @@ begin
     if edLogin.Text = '' then
     begin
       cbRememberLogin.Checked := TRUE;
-      edLogin.Text := Settings.Login;
+      edLogin.Text := Settings.LoginUsername;
       edPassword.SetFocus;
     end;
   end;
@@ -211,10 +211,10 @@ begin
   cbRememberPassword.Checked := Settings.RememberPassword;
 
   if Settings.RememberLogin then
-    edLogin.Text := Settings.Login;
+    edLogin.Text := Settings.LoginUsername;
 
   if Settings.RememberPassword then
-    edPassword.Text := Settings.Password;
+    edPassword.Text := Settings.LoginPassword;
 end;
 
 procedure TfrmChipUpLogin.SaveSettings;
@@ -223,14 +223,14 @@ begin
   Settings.RememberPassword := cbRememberPassword.Checked;
 
   if Settings.RememberLogin then
-    Settings.Login := edLogin.Text
+    Settings.LoginUsername := edLogin.Text
   else
-    Settings.Login := '';
+    Settings.LoginUsername := '';
 
   if Settings.RememberPassword then
-    Settings.Password := edPassword.Text
+    Settings.LoginPassword := edPassword.Text
   else
-    Settings.Password := '';
+    Settings.LoginPassword := '';
 end;
 
 procedure TfrmChipUpLogin.ServerComboboxChange(Sender: TObject);
