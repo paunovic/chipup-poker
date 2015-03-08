@@ -9,60 +9,53 @@ type
   TSettings = class(THardcodedSettings)
   private
     const
-      JSON_LOGIN               = 'login';
-      JSON_PASSWORD            = 'password';
-      JSON_REMEMBER_LOGIN      = 'remember_login';
-      JSON_REMEMBER_PASSWORD   = 'remember_password';
-      JSON_DEVELOPER_MODE      = 'devmode';
-      JSON_SERVER_INDEX        = 'serverindex';
-      JSON_SOUNDS              = 'sounds';
-      JSON_FOLD_CHECKS         = 'fold_checks';
-      JSON_ANIMATIONS          = 'animations';
-      JSON_CARD_BACKGROUND     = 'card_background';
-      JSON_FOLD_CONFIRMATION   = 'fold_confirmation';
+      // property indexes
+      PROPINDEX_LOGIN_USERNAME = 1;
+      PROPINDEX_LOGIN_PASSWORD = 2;
+      PROPINDEX_SERVER_INDEX = 3;
+      PROPINDEX_REMEMBER_LOGIN = 4;
+      PROPINDEX_REMEMBER_PASSWORD = 5;
+      PROPINDEX_DEVELOPER_MODE = 6;
+      PROPINDEX_SOUNDS = 7;
+      PROPINDEX_FOLD_CHECKS = 8;
+      PROPINDEX_ANIMATIONS = 9;
+      PROPINDEX_FOLD_CONFIRMATION = 10;
+      PROPINDEX_ALWAYS_RUN_TWICE = 11;
+
+      // json field names
+      JSON_LOGIN_USERNAME = 'login_username';
+      JSON_LOGIN_PASSWORD = 'login_password';
+      JSON_SERVER_INDEX = 'server_index';
+      JSON_REMEMBER_LOGIN = 'remember_login';
+      JSON_REMEMBER_PASSWORD = 'remember_password';
+      JSON_DEVELOPER_MODE = 'devmode';
+      JSON_SOUNDS = 'sounds';
+      JSON_FOLD_CHECKS = 'fold_checks';
+      JSON_ANIMATIONS = 'animations';
+      JSON_FOLD_CONFIRMATION = 'fold_confirmation';
       JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
 
-      JSON_DEFAULT_LOGIN               = '';
-      JSON_DEFAULT_PASSWORD            = '';
-      JSON_DEFAULT_REMEMBER_LOGIN      = TRUE;
-      JSON_DEFAULT_REMEMBER_PASSWORD   = FALSE;
-      JSON_DEFAULT_DEVELOPER_MODE      = FALSE;
-      JSON_DEFAULT_SERVER_INDEX        = 0;
-      JSON_DEFAULT_SOUNDS              = TRUE;
-      JSON_DEFAULT_FOLD_CHECKS         = FALSE;
-      JSON_DEFAULT_ANIMATIONS          = TRUE;
-      JSON_DEFAULT_CARD_BACKGROUND     = 1;
-      JSON_DEFAULT_FOLD_CONFIRMATION   = FALSE;
-      JSON_DEFAULT_ALWAYS_RUN_IT_TWICE = FALSE;
+      // default values
+      DEFAULT_LOGIN_USERNAME = '';
+      DEFAULT_LOGIN_PASSWORD = '';
+      DEFAULT_REMEMBER_LOGIN = TRUE;
+      DEFAULT_REMEMBER_PASSWORD = FALSE;
+      DEFAULT_DEVELOPER_MODE = FALSE;
+      DEFAULT_SERVER_INDEX = 0;
+      DEFAULT_SOUNDS = TRUE;
+      DEFAULT_FOLD_CHECKS = FALSE;
+      DEFAULT_ANIMATIONS = TRUE;
+      DEFAULT_FOLD_CONFIRMATION = FALSE;
+      DEFAULT_ALWAYS_RUN_IT_TWICE = FALSE;
 
-    function GetJSONString(const AField, ADefaultValue: String): String;
-    function GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
-    function GetJSONBool(const AField: String; const ADefaultValue: Boolean): Boolean;
+    function GetStringValue(const AIndex: Integer): String;
+    procedure SetStringValue(const AIndex: Integer; const AValue: String);
 
-    function GetLogin: String;
-    procedure SetLogin(const AValue: String);
-    function GetPassword: String;
-    procedure SetPassword(const AValue: String);
-    function GetRememberLogin: Boolean;
-    procedure SetRememberLogin(const AValue: Boolean);
-    function GetRememberPassword: Boolean;
-    procedure SetRememberPassword(const AValue: Boolean);
-    function GetDeveloperMode: Boolean;
-    procedure SetDeveloperMode(const AValue: Boolean);
-    function GetServerIndex: Integer;
-    procedure SetServerIndex(const AValue: Integer);
-    function GetSounds: Boolean;
-    procedure SetSounds(const AValue: Boolean);
-    function GetFoldChecks: Boolean;
-    procedure SetFoldChecks(const AValue: Boolean);
-    function GetAnimations: Boolean;
-    procedure SetAnimations(const AValue: Boolean);
-    function GetCardBackground: Integer;
-    procedure SetCardBackground(const AValue: Integer);
-    function GetFoldConfirmation: Boolean;
-    procedure SetFoldConfirmation(const AValue: Boolean);
-    function GetAlwaysRunItTwice: Boolean;
-    procedure SetAlwaysRunItTwice(const AValue: Boolean);
+    function GetIntegerValue(const AIndex: Integer): Int64;
+    procedure SetIntegerValue(const AIndex: Integer; const AValue: Int64);
+
+    function GetBooleanValue(const AIndex: Integer): Boolean;
+    procedure SetBooleanValue(const AIndex: Integer; const AValue: Boolean);
 
     var
       FJSON: ISuperObject;
@@ -70,9 +63,8 @@ type
 
   public
     constructor Create(const ASettingsFile: String);
-    destructor Destroy; override;
 
-    class procedure Initialize(const APath: String);
+    class procedure Initialize(const ASettingsFile: String);
     class procedure Deinitialize;
 
     function Load: Boolean;
@@ -80,18 +72,19 @@ type
 
     property SettingsFile: String read FSettingsFile;
 
-    property Login: String read GetLogin write SetLogin;
-    property Password: String read GetPassword write SetPassword;
-    property RememberLogin: Boolean read GetRememberLogin write SetRememberLogin;
-    property RememberPassword: Boolean read GetRememberPassword write SetRememberPassword;
-    property DeveloperMode: Boolean read GetDeveloperMode write SetDeveloperMode;
-    property ServerIndex: Integer read GetServerIndex write SetServerIndex;
-    property Sounds: Boolean read GetSounds write SetSounds;
-    property FoldChecks: Boolean read GetFoldChecks write SetFoldChecks;
-    property Animations: Boolean read GetAnimations write SetAnimations;
-    property CardBackground: Integer read GetCardBackground write SetCardBackground;
-    property FoldConfirmation: Boolean read GetFoldConfirmation write SetFoldConfirmation;
-    property AlwaysRunItTwice: Boolean read GetAlwaysRunItTwice write SetAlwaysRunItTwice;
+    property LoginUsername: String index PROPINDEX_LOGIN_USERNAME read GetStringValue write SetStringValue;
+    property LoginPassword: String index PROPINDEX_LOGIN_PASSWORD read GetStringValue write SetStringValue;
+
+    property ServerIndex: Int64 index PROPINDEX_SERVER_INDEX read GetIntegerValue write SetIntegerValue;
+
+    property RememberLogin: Boolean index PROPINDEX_REMEMBER_LOGIN read GetBooleanValue write SetBooleanValue;
+    property RememberPassword: Boolean index PROPINDEX_REMEMBER_PASSWORD read GetBooleanValue write SetBooleanValue;
+    property DeveloperMode: Boolean index PROPINDEX_DEVELOPER_MODE read GetBooleanValue write SetBooleanValue;
+    property Sounds: Boolean index PROPINDEX_SOUNDS read GetBooleanValue write SetBooleanValue;
+    property FoldChecks: Boolean index PROPINDEX_FOLD_CHECKS read GetBooleanValue write SetBooleanValue;
+    property Animations: Boolean index PROPINDEX_ANIMATIONS read GetBooleanValue write SetBooleanValue;
+    property FoldConfirmation: Boolean index PROPINDEX_FOLD_CONFIRMATION read GetBooleanValue write SetBooleanValue;
+    property AlwaysRunItTwice: Boolean index PROPINDEX_ALWAYS_RUN_TWICE read GetBooleanValue write SetBooleanValue;
   end;
 
 var
@@ -101,12 +94,12 @@ var
 implementation
 
 uses
-  System.SysUtils, Poker.Common.Misc, Poker.Common.Encryption;
+  Poker.SoftExceptions, System.SysUtils, Poker.Common.Misc, Poker.Common.Encryption;
 
 
-class procedure TSettings.Initialize(const APath: String);
+class procedure TSettings.Initialize(const ASettingsFile: String);
 begin
-  Settings := TSettings.Create(APath);
+  Settings := TSettings.Create(ASettingsFile);
   Settings.Load;
 end;
 
@@ -120,11 +113,6 @@ constructor TSettings.Create(const ASettingsFile: String);
 begin
   FSettingsFile := ASettingsFile;
   FJSON := SO;
-end;
-
-destructor TSettings.Destroy;
-begin
-  inherited;
 end;
 
 function TSettings.Load: Boolean;
@@ -147,7 +135,7 @@ begin
       result := Assigned(FJSON);
       if not result then
         FJSON := SO;
-      end;
+    end;
   finally
     mstream.Free;
   end;
@@ -168,162 +156,158 @@ begin
   end;
 end;
 
-////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-function TSettings.GetJSONString(const AField, ADefaultValue: String): String;
+function TSettings.GetStringValue(const AIndex: Integer): String;
 var
   o: ISuperObject;
+  field, default_value: String;
 begin
-  o := FJSON.O[AField];
+  case AIndex of
+    PROPINDEX_LOGIN_USERNAME: begin
+      field := JSON_LOGIN_USERNAME;
+      default_value := DEFAULT_LOGIN_USERNAME;
+    end;
+    PROPINDEX_LOGIN_PASSWORD: begin
+      field := JSON_LOGIN_PASSWORD;
+      default_value := DEFAULT_LOGIN_PASSWORD;
+    end;
+  else
+    SoftException(Format('TSettings.GetStringValue(%d): index not found', [AIndex]));
+    Exit;
+  end;
+
+  o := FJSON.O[field];
   if not Assigned(o) then
-    result := ADefaultValue
+    result := default_value
   else
     result := o.AsString;
 end;
 
-function TSettings.GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
+function TSettings.GetIntegerValue(const AIndex: Integer): Int64;
 var
   o: ISuperObject;
+  field: String;
+  default_value: Integer;
 begin
-  o := FJSON.O[AField];
+  case AIndex of
+    PROPINDEX_SERVER_INDEX: begin
+      field := JSON_SERVER_INDEX;
+      default_value := DEFAULT_SERVER_INDEX;
+    end;
+  else
+    SoftException(Format('TSettings.GetIntegerValue(%d): index not found', [AIndex]));
+    Exit(0);
+  end;
+
+  o := FJSON.O[field];
   if not Assigned(o) then
-    result := ADefaultValue
+    result := default_value
   else
     result := o.AsInteger;
 end;
 
-function TSettings.GetJSONBool(const AField: String; const ADefaultValue: Boolean): Boolean;
+function TSettings.GetBooleanValue(const AIndex: Integer): Boolean;
 var
   o: ISuperObject;
+  field: String;
+  default_value: Boolean;
 begin
-  o := FJSON.O[AField];
+  case AIndex of
+    PROPINDEX_REMEMBER_LOGIN: begin
+      field := JSON_REMEMBER_LOGIN;
+      default_value := DEFAULT_REMEMBER_LOGIN;
+    end;
+    PROPINDEX_REMEMBER_PASSWORD: begin
+      field := JSON_REMEMBER_PASSWORD;
+      default_value := DEFAULT_REMEMBER_PASSWORD;
+    end;
+    PROPINDEX_DEVELOPER_MODE: begin
+      field := JSON_DEVELOPER_MODE;
+      default_value := DEFAULT_DEVELOPER_MODE;
+    end;
+    PROPINDEX_SOUNDS: begin
+      field := JSON_SOUNDS;;
+      default_value := DEFAULT_SOUNDS;
+    end;
+    PROPINDEX_FOLD_CHECKS: begin
+      field := JSON_FOLD_CHECKS;
+      default_value := DEFAULT_FOLD_CHECKS;
+    end;
+    PROPINDEX_ANIMATIONS: begin
+      field := JSON_ANIMATIONS;
+      default_value := DEFAULT_ANIMATIONS;
+    end;
+    PROPINDEX_FOLD_CONFIRMATION: begin
+      field := JSON_FOLD_CONFIRMATION;
+      default_value := DEFAULT_FOLD_CONFIRMATION;
+    end;
+    PROPINDEX_ALWAYS_RUN_TWICE: begin
+      field := JSON_ALWAYS_RUN_IT_TWICE;
+      default_value := DEFAULT_ALWAYS_RUN_IT_TWICE;
+    end;
+  else
+    SoftException(Format('TSettings.GetBooleanValue(%d): index not found', [AIndex]));
+    Exit(FALSE);
+  end;
+
+  o := FJSON.O[field];
   if not Assigned(o) then
-    result := ADefaultValue
+    result := default_value
   else
     result := o.AsBoolean;
 end;
 
-////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-function TSettings.GetLogin: String;
+procedure TSettings.SetStringValue(const AIndex: Integer; const AValue: String);
+var
+  field_name: String;
 begin
-  result := GetJSONString(JSON_LOGIN, JSON_DEFAULT_LOGIN);
+  case AIndex of
+    PROPINDEX_LOGIN_USERNAME: field_name := JSON_LOGIN_USERNAME;
+    PROPINDEX_LOGIN_PASSWORD: field_name := JSON_LOGIN_PASSWORD;
+  else
+    SoftException(Format('TSettings.SetStringValue(%d, %s): index not found', [AIndex, AValue]));
+    Exit;
+  end;
+
+  FJSON.S[field_name] := AValue;
 end;
 
-function TSettings.GetPassword: String;
+procedure TSettings.SetIntegerValue(const AIndex: Integer; const AValue: Int64);
+var
+  field_name: String;
 begin
-  result := GetJSONString(JSON_PASSWORD, JSON_DEFAULT_PASSWORD);
+  case AIndex of
+    PROPINDEX_SERVER_INDEX: field_name := JSON_SERVER_INDEX;
+  else
+    SoftException(Format('TSettings.SetIntegerValue(%d, %d): index not found', [AIndex, AValue]));
+    Exit;
+  end;
+
+  FJSON.I[field_name] := AValue;
 end;
 
-function TSettings.GetRememberLogin: Boolean;
+procedure TSettings.SetBooleanValue(const AIndex: Integer; const AValue: Boolean);
+var
+  field_name: String;
 begin
-  result := GetJSONBool(JSON_REMEMBER_LOGIN, JSON_DEFAULT_REMEMBER_LOGIN);
-end;
+  case AIndex of
+    PROPINDEX_REMEMBER_LOGIN: field_name := JSON_REMEMBER_LOGIN;
+    PROPINDEX_REMEMBER_PASSWORD: field_name:= JSON_REMEMBER_PASSWORD;
+    PROPINDEX_DEVELOPER_MODE: field_name:= JSON_DEVELOPER_MODE;
+    PROPINDEX_SOUNDS: field_name:= JSON_SOUNDS;
+    PROPINDEX_FOLD_CHECKS: field_name:= JSON_FOLD_CHECKS;
+    PROPINDEX_ANIMATIONS: field_name:= JSON_ANIMATIONS;
+    PROPINDEX_FOLD_CONFIRMATION: field_name:= JSON_FOLD_CONFIRMATION;
+    PROPINDEX_ALWAYS_RUN_TWICE: field_name:= JSON_ALWAYS_RUN_IT_TWICE;
+  else
+    SoftException(Format('TSettings.SetIntegerValue(%d, %s): index not found', [AIndex, BoolToStr(AValue, TRUE)]));
+    Exit;
+  end;
 
-function TSettings.GetRememberPassword: Boolean;
-begin
-  result := GetJSONBool(JSON_REMEMBER_PASSWORD, JSON_DEFAULT_REMEMBER_PASSWORD);
-end;
-
-function TSettings.GetServerIndex: Integer;
-begin
-  result := GetJSONInt(JSON_SERVER_INDEX, JSON_DEFAULT_SERVER_INDEX);
-end;
-
-function TSettings.GetSounds: Boolean;
-begin
-  result := GetJSONBool(JSON_SOUNDS, JSON_DEFAULT_SOUNDS);
-end;
-
-function TSettings.GetAlwaysRunItTwice: Boolean;
-begin
-  result := GetJSONBool(JSON_ALWAYS_RUN_IT_TWICE, JSON_DEFAULT_ALWAYS_RUN_IT_TWICE);
-end;
-
-function TSettings.GetAnimations: Boolean;
-begin
-  result := GetJSONBool(JSON_ANIMATIONS, JSON_DEFAULT_ANIMATIONS);
-end;
-
-function TSettings.GetCardBackground: Integer;
-begin
-  result := GetJSONInt(JSON_CARD_BACKGROUND, JSON_DEFAULT_CARD_BACKGROUND);
-end;
-
-function TSettings.GetDeveloperMode: Boolean;
-begin
-  result := GetJSONBool(JSON_DEVELOPER_MODE, JSON_DEFAULT_DEVELOPER_MODE);
-end;
-
-function TSettings.GetFoldChecks: Boolean;
-begin
-  result := GetJSONBool(JSON_FOLD_CHECKS, JSON_DEFAULT_FOLD_CHECKS);
-end;
-
-function TSettings.GetFoldConfirmation: Boolean;
-begin
-  result := GetJSONBool(JSON_FOLD_CONFIRMATION, JSON_DEFAULT_FOLD_CONFIRMATION);
-end;
-
-procedure TSettings.SetLogin(const AValue: String);
-begin
-  FJSON.S[JSON_LOGIN] := AValue;
-end;
-
-procedure TSettings.SetPassword(const AValue: String);
-begin
-  FJSON.S[JSON_PASSWORD] := AValue;
-end;
-
-procedure TSettings.SetRememberLogin(const AValue: Boolean);
-begin
-  FJSON.B[JSON_REMEMBER_LOGIN] := AValue;
-end;
-
-procedure TSettings.SetRememberPassword(const AValue: Boolean);
-begin
-  FJSON.B[JSON_REMEMBER_PASSWORD] := AValue;
-end;
-
-procedure TSettings.SetServerIndex(const AValue: Integer);
-begin
-  FJSON.I[JSON_SERVER_INDEX] := AValue;
-end;
-
-procedure TSettings.SetSounds(const AValue: Boolean);
-begin
-  FJSON.B[JSON_SOUNDS] := AValue;
-end;
-
-procedure TSettings.SetAlwaysRunItTwice(const AValue: Boolean);
-begin
-  FJSON.B[JSON_ALWAYS_RUN_IT_TWICE] := AValue;
-end;
-
-procedure TSettings.SetAnimations(const AValue: Boolean);
-begin
-  FJSON.B[JSON_ANIMATIONS] := AValue;
-end;
-
-procedure TSettings.SetCardBackground(const AValue: Integer);
-begin
-  FJSON.I[JSON_CARD_BACKGROUND] := AValue;
-end;
-
-procedure TSettings.SetDeveloperMode(const AValue: Boolean);
-begin
-  FJSON.B[JSON_DEVELOPER_MODE] := AValue;
-end;
-
-procedure TSettings.SetFoldChecks(const AValue: Boolean);
-begin
-  FJSON.B[JSON_FOLD_CHECKS] := AValue;
-end;
-
-procedure TSettings.SetFoldConfirmation(const AValue: Boolean);
-begin
-  FJSON.B[JSON_FOLD_CONFIRMATION] := AValue;
+  FJSON.B[field_name] := AValue;
 end;
 
 end.
-

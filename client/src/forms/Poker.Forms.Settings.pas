@@ -56,7 +56,7 @@ procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
   pcSettings.ActivePageIndex := 0;
   lbOptions.Selected[0] := TRUE;
-  cbCardBackground.ItemIndex := Settings.CardBackground;
+//  cbCardBackground.ItemIndex := Settings.CardBackground;
 end;
 
 procedure TfrmSettings.FormDestroy(Sender: TObject);
@@ -79,7 +79,7 @@ procedure TfrmSettings.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if ModalResult = mrOk then
   begin
-    Settings.CardBackground := cbCardBackground.ItemIndex;
+//    Settings.CardBackground := cbCardBackground.ItemIndex;
     Settings.Save;
   end;
 end;

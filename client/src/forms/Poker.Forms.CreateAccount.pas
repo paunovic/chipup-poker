@@ -147,8 +147,8 @@ begin
   case pbreply.Status of
    regSuccess: begin
       ModalDialogs.ShowInformation('Account successfully created. Please check your inbox for confirmation e-mail');
-      if Settings.Login = '' then
-        Settings.Login := edEMail.Text;
+      if Settings.LoginUsername = '' then
+        Settings.LoginUsername := edEMail.Text;
       ModalResult := mrOk;
       Close;
    end;
