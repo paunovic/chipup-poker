@@ -316,7 +316,7 @@ begin
   if FReceiveBufferSize < SizeOf(rpc_size) + rpc_size then
     Exit;
 
-  rpc_message := TPB_RpcMessage.Create(pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
+  rpc_message := TPB_RpcMessage.Create(pointer(NativeUInt(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
   try
     if not rpc_message.IsInitialized then
     begin
@@ -327,14 +327,14 @@ begin
     if rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize then
       Exit;
 
-    if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
+    if ParseRpcMessage(rpc_message, pointer(NativeUInt(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
       {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj); {$ENDIF}
       PostMessage(MessageContainer.HWND, WM_MESSAGE_CALLBACK_PROTO, NativeUInt(data_obj), rpc_message.MethodId);
     end;
 
-    ptmp := pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
+    ptmp := pointer(NativeInt(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
     Dec(FReceiveBufferSize, SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
     Move(ptmp^, FReceiveBuffer, FReceiveBufferSize);
     ReallocMem(FReceiveBuffer, FReceiveBufferSize);

@@ -135,7 +135,7 @@ function TfrmUpdater.PatchNonRebootFiles: Integer;
 }
 var
   ufi: TPB_UpdateFileInfo;
-  requires_reboot: Boolean;
+  requires_restart: Boolean;
   ufipath: String;
   newfile, oldfile: String;
   exec_info: TShellExecuteInfo;
@@ -145,15 +145,15 @@ begin
 
   for ufi in dmMain.UpdateFiles do
   begin
-    requires_reboot := TRUE;
+    requires_restart := TRUE;
     for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
       if LowerCase(Settings.Hardcoded.UPDATE_FILES[C1].Path) = LowerCase(ufi.Path) then
       begin
-        requires_reboot := Settings.Hardcoded.UPDATE_FILES[C1].RequiresReboot;
+        requires_restart := Settings.Hardcoded.UPDATE_FILES[C1].RequiresRestart;
         Break;
       end;
 
-    if not requires_reboot then
+    if not requires_restart then
     begin
       ufipath := StringReplace(ufi.Path, '/', '\', [rfReplaceAll]);
       case ufi.FileType of
@@ -219,7 +219,7 @@ var
   newfile: String;
   oldfile: String;
   batch: TStringList;
-  requires_reboot: Boolean;
+  requires_restart: Boolean;
   C1: Integer;
 begin
   result := 0;
@@ -228,15 +228,15 @@ begin
     batch.Add('PING 127.0.0.1 -n 2');
     for ufi in dmMain.UpdateFiles do
     begin
-      requires_reboot := TRUE;
+      requires_restart := TRUE;
       for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
         if LowerCase(Settings.Hardcoded.UPDATE_FILES[C1].Path) = LowerCase(ufi.Path) then
         begin
-          requires_reboot := Settings.Hardcoded.UPDATE_FILES[C1].RequiresReboot;
+          requires_restart := Settings.Hardcoded.UPDATE_FILES[C1].RequiresRestart;
           Break;
         end;
 
-      if not requires_reboot then
+      if not requires_restart then
         Continue;
 
       ufipath := StringReplace(ufi.Path, '/', '\', [rfReplaceAll]);
