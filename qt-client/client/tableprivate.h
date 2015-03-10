@@ -41,6 +41,7 @@ protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void drawCross(QPainter &p);
+	void drawGrid(QPainter &p);
 	virtual bool event(QEvent *event);
 
 	QList<GameObjectUi*> uiElements;

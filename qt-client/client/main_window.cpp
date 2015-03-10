@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	ui->gridPrivateClubs->setMinimumWidth(em*31);
 	ui->gridPrivateClubs->setMinimumHeight(em*18);
 	ui->gridGames->setMinimumHeight(em*18);
+	for (int i=0; i<6; i++) {
+		ui->gridGames->resizeColumnToContents(i);
+	}
 	//setFixedSize(size());
 }
 MainWindow::~MainWindow() {
@@ -80,6 +83,9 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
 	core->game_model.setFilter(currentClub);
+	for (int i=0; i<6; i++) {
+		ui->gridGames->resizeColumnToContents(i);
+	}
 }
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
@@ -90,6 +96,9 @@ void MainWindow::public_club_selected(const QItemSelection &selected, const QIte
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
 	core->game_model.setFilter(currentClub);
+	for (int i=0; i<6; i++) {
+		ui->gridGames->resizeColumnToContents(i);
+	}
 }
 void MainWindow::on_btJoinClub_clicked() {
 	JoinClub *jc = new JoinClub(this);

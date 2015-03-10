@@ -48,10 +48,10 @@ void TableUi::paintEvent(QPaintEvent *) {
 	float scale = 0.81;
 	float w = (float)width() * scale;
 	float h = (((float)pix.height() * width()) / pix.width()) * scale;
-	painter.drawPixmap(55,0,w,h,pix);
+	painter.drawPixmap(0.095*width(),0,w,h,pix);
 	painter.restore();
 	//painter.drawEllipse(ring);
-	drawCross(painter);
+	drawGrid(painter);
 }
 void TableUi::drawCross(QPainter &p) {
 	int w = width();
@@ -59,6 +59,16 @@ void TableUi::drawCross(QPainter &p) {
 	p.drawLine(0,(h/2)-yoffset,w,(h/2)-yoffset);
 	p.drawLine(w/2,0,w/2,h);
 }
+void TableUi::drawGrid(QPainter &p) {
+	for (int x=0; x<101; x=x+10) {
+		float x1 = ((float)x/100)*width();
+		p.drawLine(x1,0,x1,height());
+
+		float y1 = ((float)x/100)*rootHeight();
+		p.drawLine(0,y1,width(),y1);
+	}
+}
+
 void TableUi::addElement(GameObjectUi *element) {
 	uiElements.append(element);
 	connect(element,SIGNAL(destroyed(QObject*)),this,SLOT(element_deleted(QObject*)));

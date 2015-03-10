@@ -1,4 +1,5 @@
 #include <QPainter>
+#include <QFontMetrics>
 
 #include "card.h"
 #include "table/visible_seat.h"
@@ -73,6 +74,7 @@ CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(pa
 	font = QFont("Card Characters");
 	font.setBold(true);
 	font.setPixelSize(10);
+	fm = new QFontMetrics(font);
 	updateFace();
 }
 void CardObjectUi::paintEvent(QPaintEvent *) {
@@ -97,8 +99,11 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 
 		p.setPen(getSuitColor(card));
 		p.setFont(font);
-		QRectF rank(2,0,80,30);
-		p.drawText(rank,0,getDisplayValue(card)+"\n"+getSuitFontCode(card));
+		QString value = getDisplayValue(card)+"\n"+getSuitFontCode(card);
+		QRectF rank(fm->boundingRect(value));
+		rank.moveTo(0,0.01*width());
+		qDebug() << rank;
+		p.drawText(rank,0,value);
 	}
 }
 QPixmap CardObjectUi::loadFace(QString name) {

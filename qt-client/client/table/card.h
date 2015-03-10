@@ -6,6 +6,7 @@
 #include "tableprivate.h"
 
 class CardObject;
+class QFontMetrics;
 
 class CardObjectUi : public GameObjectUi {
 Q_OBJECT
@@ -21,6 +22,7 @@ private:
 	QPixmap face,back;
 	CardObject *jsobj;
 	QFont font;
+	QFontMetrics *fm;
 };
 class CardObject : public GameObject {
 Q_OBJECT
