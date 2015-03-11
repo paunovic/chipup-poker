@@ -102,6 +102,7 @@ class TournamentPlayerTransfer;
 class TournamentPrize;
 class PlayerClubStatus;
 class DeleteTableStats;
+class SoftException;
 
 enum UpdateFileInfo_UpdateFileType {
   UpdateFileInfo_UpdateFileType_ufFull = 0,
@@ -693,11 +694,12 @@ enum ServerCodes {
   scDeleteTableStats = 115,
   scMutePlayer = 116,
   scChangePlayerManagerState = 117,
-  scSplitTableCards = 118
+  scSplitTableCards = 118,
+  scSoftException = 119
 };
 bool ServerCodes_IsValid(int value);
 const ServerCodes ServerCodes_MIN = srNotImplemented;
-const ServerCodes ServerCodes_MAX = scSplitTableCards;
+const ServerCodes ServerCodes_MAX = scSoftException;
 const int ServerCodes_ARRAYSIZE = ServerCodes_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ServerCodes_descriptor();
@@ -2263,6 +2265,13 @@ class Club : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 buyin_reset() const;
   inline void set_buyin_reset(::google::protobuf::uint32 value);
 
+  // optional uint32 max_rake_per_hand = 13;
+  inline bool has_max_rake_per_hand() const;
+  inline void clear_max_rake_per_hand();
+  static const int kMaxRakePerHandFieldNumber = 13;
+  inline ::google::protobuf::uint32 max_rake_per_hand() const;
+  inline void set_max_rake_per_hand(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:Poker.Club)
  private:
   inline void set_has__id();
@@ -2287,6 +2296,8 @@ class Club : public ::google::protobuf::Message {
   inline void clear_has_unlimited_default_balance();
   inline void set_has_buyin_reset();
   inline void clear_has_buyin_reset();
+  inline void set_has_max_rake_per_hand();
+  inline void clear_has_max_rake_per_hand();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2302,9 +2313,10 @@ class Club : public ::google::protobuf::Message {
   ::google::protobuf::uint32 rake_;
   ::google::protobuf::uint32 default_balance_limit_;
   ::google::protobuf::uint32 buyin_reset_;
+  ::google::protobuf::uint32 max_rake_per_hand_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -4600,6 +4612,13 @@ class TableStatus : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Poker::TableMessage >*
       mutable_table_message();
 
+  // optional int32 queue_position = 29;
+  inline bool has_queue_position() const;
+  inline void clear_queue_position();
+  static const int kQueuePositionFieldNumber = 29;
+  inline ::google::protobuf::int32 queue_position() const;
+  inline void set_queue_position(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Poker.TableStatus)
  private:
   inline void set_has_table_mongo_id();
@@ -4638,6 +4657,8 @@ class TableStatus : public ::google::protobuf::Message {
   inline void clear_has_minimum_raise();
   inline void set_has_table_type();
   inline void clear_has_table_type();
+  inline void set_has_queue_position();
+  inline void clear_has_queue_position();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4664,9 +4685,10 @@ class TableStatus : public ::google::protobuf::Message {
   ::google::protobuf::uint32 minimum_raise_;
   int table_type_;
   ::google::protobuf::RepeatedPtrField< ::Poker::TableMessage > table_message_;
+  ::google::protobuf::int32 queue_position_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(23 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(24 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -9589,6 +9611,108 @@ class DeleteTableStats : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static DeleteTableStats* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class SoftException : public ::google::protobuf::Message {
+ public:
+  SoftException();
+  virtual ~SoftException();
+
+  SoftException(const SoftException& from);
+
+  inline SoftException& operator=(const SoftException& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SoftException& default_instance();
+
+  void Swap(SoftException* other);
+
+  // implements Message ----------------------------------------------
+
+  SoftException* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SoftException& from);
+  void MergeFrom(const SoftException& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string exception = 1;
+  inline bool has_exception() const;
+  inline void clear_exception();
+  static const int kExceptionFieldNumber = 1;
+  inline const ::std::string& exception() const;
+  inline void set_exception(const ::std::string& value);
+  inline void set_exception(const char* value);
+  inline void set_exception(const char* value, size_t size);
+  inline ::std::string* mutable_exception();
+  inline ::std::string* release_exception();
+  inline void set_allocated_exception(::std::string* exception);
+
+  // optional string data = 2;
+  inline bool has_data() const;
+  inline void clear_data();
+  static const int kDataFieldNumber = 2;
+  inline const ::std::string& data() const;
+  inline void set_data(const ::std::string& value);
+  inline void set_data(const char* value);
+  inline void set_data(const char* value, size_t size);
+  inline ::std::string* mutable_data();
+  inline ::std::string* release_data();
+  inline void set_allocated_data(::std::string* data);
+
+  // @@protoc_insertion_point(class_scope:Poker.SoftException)
+ private:
+  inline void set_has_exception();
+  inline void clear_has_exception();
+  inline void set_has_data();
+  inline void clear_has_data();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* exception_;
+  ::std::string* data_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_message_2eproto();
+  friend void protobuf_AssignDesc_message_2eproto();
+  friend void protobuf_ShutdownFile_message_2eproto();
+
+  void InitAsDefaultInstance();
+  static SoftException* default_instance_;
+};
 // ===================================================================
 
 
@@ -12073,6 +12197,28 @@ inline ::google::protobuf::uint32 Club::buyin_reset() const {
 inline void Club::set_buyin_reset(::google::protobuf::uint32 value) {
   set_has_buyin_reset();
   buyin_reset_ = value;
+}
+
+// optional uint32 max_rake_per_hand = 13;
+inline bool Club::has_max_rake_per_hand() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void Club::set_has_max_rake_per_hand() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void Club::clear_has_max_rake_per_hand() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void Club::clear_max_rake_per_hand() {
+  max_rake_per_hand_ = 0u;
+  clear_has_max_rake_per_hand();
+}
+inline ::google::protobuf::uint32 Club::max_rake_per_hand() const {
+  return max_rake_per_hand_;
+}
+inline void Club::set_max_rake_per_hand(::google::protobuf::uint32 value) {
+  set_has_max_rake_per_hand();
+  max_rake_per_hand_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -15017,6 +15163,28 @@ TableStatus::table_message() const {
 inline ::google::protobuf::RepeatedPtrField< ::Poker::TableMessage >*
 TableStatus::mutable_table_message() {
   return &table_message_;
+}
+
+// optional int32 queue_position = 29;
+inline bool TableStatus::has_queue_position() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void TableStatus::set_has_queue_position() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void TableStatus::clear_has_queue_position() {
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline void TableStatus::clear_queue_position() {
+  queue_position_ = 0;
+  clear_has_queue_position();
+}
+inline ::google::protobuf::int32 TableStatus::queue_position() const {
+  return queue_position_;
+}
+inline void TableStatus::set_queue_position(::google::protobuf::int32 value) {
+  set_has_queue_position();
+  queue_position_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -20683,6 +20851,150 @@ DeleteTableStats::table_id() const {
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 DeleteTableStats::mutable_table_id() {
   return &table_id_;
+}
+
+// -------------------------------------------------------------------
+
+// SoftException
+
+// required string exception = 1;
+inline bool SoftException::has_exception() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SoftException::set_has_exception() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SoftException::clear_has_exception() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SoftException::clear_exception() {
+  if (exception_ != &::google::protobuf::internal::kEmptyString) {
+    exception_->clear();
+  }
+  clear_has_exception();
+}
+inline const ::std::string& SoftException::exception() const {
+  return *exception_;
+}
+inline void SoftException::set_exception(const ::std::string& value) {
+  set_has_exception();
+  if (exception_ == &::google::protobuf::internal::kEmptyString) {
+    exception_ = new ::std::string;
+  }
+  exception_->assign(value);
+}
+inline void SoftException::set_exception(const char* value) {
+  set_has_exception();
+  if (exception_ == &::google::protobuf::internal::kEmptyString) {
+    exception_ = new ::std::string;
+  }
+  exception_->assign(value);
+}
+inline void SoftException::set_exception(const char* value, size_t size) {
+  set_has_exception();
+  if (exception_ == &::google::protobuf::internal::kEmptyString) {
+    exception_ = new ::std::string;
+  }
+  exception_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftException::mutable_exception() {
+  set_has_exception();
+  if (exception_ == &::google::protobuf::internal::kEmptyString) {
+    exception_ = new ::std::string;
+  }
+  return exception_;
+}
+inline ::std::string* SoftException::release_exception() {
+  clear_has_exception();
+  if (exception_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = exception_;
+    exception_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftException::set_allocated_exception(::std::string* exception) {
+  if (exception_ != &::google::protobuf::internal::kEmptyString) {
+    delete exception_;
+  }
+  if (exception) {
+    set_has_exception();
+    exception_ = exception;
+  } else {
+    clear_has_exception();
+    exception_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string data = 2;
+inline bool SoftException::has_data() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SoftException::set_has_data() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SoftException::clear_has_data() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SoftException::clear_data() {
+  if (data_ != &::google::protobuf::internal::kEmptyString) {
+    data_->clear();
+  }
+  clear_has_data();
+}
+inline const ::std::string& SoftException::data() const {
+  return *data_;
+}
+inline void SoftException::set_data(const ::std::string& value) {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  data_->assign(value);
+}
+inline void SoftException::set_data(const char* value) {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  data_->assign(value);
+}
+inline void SoftException::set_data(const char* value, size_t size) {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  data_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftException::mutable_data() {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  return data_;
+}
+inline ::std::string* SoftException::release_data() {
+  clear_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = data_;
+    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftException::set_allocated_data(::std::string* data) {
+  if (data_ != &::google::protobuf::internal::kEmptyString) {
+    delete data_;
+  }
+  if (data) {
+    set_has_data();
+    data_ = data;
+  } else {
+    clear_has_data();
+    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 
