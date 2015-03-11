@@ -27,14 +27,17 @@ private slots:
 	void on_btCreateClub_clicked();
 	void on_actionLogout_triggered();
 	void on_actionCSS_Editor_triggered();
+	void on_actionDisconnect_triggered();
 	void on_actionSelf_Tests_triggered();
 	void On_secondary_login();
 	void on_gridGames_doubleClicked(const QModelIndex &index);
 	void on_gridPrivateClubs_doubleClicked(const QModelIndex &index);
 	void on_gridPublicClubs_doubleClicked(const QModelIndex &index);
 	void on_btOpenClubLobby_clicked();
+protected:
+	void resizeEvent(QResizeEvent *event);
 private:
-	void clubTriggered(const Data::Club *club);
+	void clubTriggered(Data::Club *club);
 
 	Ui::MainWindow *ui;
 	QHeaderView private_club_header,game_header;

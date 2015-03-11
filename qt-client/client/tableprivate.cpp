@@ -15,6 +15,7 @@
 #include "data/seatinfo.h"
 #include "sound_effects.h"
 #include "pokermain.h"
+#include "table.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << /*QDateTime::currentDateTime() <<*/ "JS:" << context->argument(0).toString();
@@ -22,15 +23,16 @@ static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 }
 static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engine) {
 	SeatObject *seatobj = static_cast<SeatObject*>(context->thisObject().toQObject());
-	QPoint pos = seatobj->getSeatUi()->getPosition();
+	//QPoint pos = seatobj->getSeatUi()->getPosition();
 	QScriptValue ret = engine->newObject();
-	qDebug() << pos;
-	Q_ASSERT(pos.y() > 0);
-	ret.setProperty("x",pos.x());
-	ret.setProperty("y",pos.y());
+	float x = seatobj->x();
+	if (seatobj->getKeySide() == Right) x -= seatobj->getSeatUi()->w;
+	else if (seatobj->getKeySide() == Top) x -= (seatobj->getSeatUi()->w/2);
+	ret.setProperty("x",x);
+	ret.setProperty("y",seatobj->y());
+	ret.setProperty("keySide",seatobj->getKeySide());
 	return ret;
 }
-
 static QScriptValue NewSeatObject(QScriptContext *, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	SeatObject *seatobj = new SeatObject(parent);
@@ -79,7 +81,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
 
 	agent = new ScriptAgent(&engine);
-	engine.setAgent(agent);
+	//engine.setAgent(agent);
 	//QScriptEngineDebugger *debuger = new QScriptEngineDebugger(this);
 	//debuger->setAutoShowStandardWindow(true);
 	//debuger->attachTo(&engine);
@@ -120,6 +122,10 @@ bool TablePrivate::loadJs(QString code,QString file) {
 		return true;
 	}
 }
+void TablePrivate::renderWinning(QString msg) {
+	rootwindow->renderWinning(msg);
+}
+
 void TablePrivate::loadJsFromResource() {
 	QFile input(":/table.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -150,10 +156,25 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 
 	QList<QSharedPointer<Data::TableEvent> >::Iterator i2;
 	QScriptValue events = engine.newArray();
-	int j=0;
+	int j=0,k;
 	for (i2=ts->events.begin(); i2!=ts->events.end(); ++i2) {
 		QSharedPointer<Data::TableEvent> e = *i2;
 		QScriptValue event = engine.newQObject(e.data());
+		QScriptValue pots = engine.newArray();
+		k = 0;
+		foreach (Data::Pot *p, e->pots) {
+			QScriptValue pot = engine.newQObject(p);
+			QScriptValue wda = engine.newArray();
+			int l=0;
+			foreach (Data::WinnerData *wd , p->winnerData) {
+				wda.setProperty(l,engine.newQObject((QObject*)wd));
+				l++;
+			}
+			pot.setProperty("WinnerData",wda);
+			pots.setProperty(k,pot);
+			k++;
+		}
+		event.setProperty("pots",pots);
 		events.setProperty(j,event);
 		j++;
 	}
@@ -184,8 +205,9 @@ void TablePrivate::setGame(const Data::Game *game) {
 	this->game = new GameWrap(game);
 	engine.globalObject().setProperty("game",engine.newQObject(this->game));
 }
-void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
+void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout, Table *rootwindow) {
 	tableui = new TableUi(parent);
+	this->rootwindow = rootwindow;
 	//layout->setRowStretch(1,1);
 	layout->addWidget(tableui,0,0);
 	//layout->addWidget(new QWidget(parent),1,0);

@@ -5,6 +5,9 @@ var localTurn = [];
 var localRiver = [];
 var localPots = [];
 var db = new DealerButton();
+var testcase = false;
+
+var cardWidth = 0.05;
 
 var idleChips = [];
 function getChipStack() {
@@ -23,7 +26,8 @@ function updatePots() {
 		if (lastTS.pots[i].value == 0) continue;
 		localPots[i].setPosition(0.35 + (0.1*i),0.3);
 		localPots[i].visible = true;
-		localPots[i].value = lastTS.pots[i].value;
+		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
+		// TODO, render rake
 	}
 }
 var lastTS;
@@ -52,7 +56,7 @@ function tableStatus(ts) {
 				var offset = i*3;
 				for (var x=0; x<3; x++) {
 					if (!localFlop[x+offset]) localFlop[x+offset] = new Card();
-					localFlop[x+offset].setSize(0.063);
+					localFlop[x+offset].setSize(cardWidth);
 					localFlop[x+offset].card = card.cards[x];
 					localFlop[x+offset].visible = false;
 				}
@@ -66,10 +70,12 @@ function tableStatus(ts) {
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localTurn[i]) localTurn[i] = new Card();
-				localTurn[i].setSize(0.063);
+				localTurn[i].setSize(cardWidth);
 				localTurn[i].visible = false;
 				if (!sets[i]) sets[i] = [];
-				sets[i].push(new DealCard(0.523,0.477,localTurn[i]));
+				if (i == 0) height = 0.477;
+				else height = 0.55;
+				sets[i].push(new DealCard(0.523,height,localTurn[i]));
 				sets[i].push(new RevealCard(localTurn[i],card.cards[0]));
 			}
 			updatePots();
@@ -78,10 +84,12 @@ function tableStatus(ts) {
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localRiver[i]) localRiver[i] = new Card();
-				localRiver[i].setSize(0.063);
+				localRiver[i].setSize(cardWidth);
 				localRiver[i].visible = false;
 				if (!sets[i]) sets[i] = [];
-				sets[i].push(new DealCard(0.592,0.477,localRiver[i]));
+				if (i == 0) height = 0.477;
+				else height = 0.55;
+				sets[i].push(new DealCard(0.592,height,localRiver[i]));
 				sets[i].push(new RevealCard(localRiver[i],card.cards[0]));
 			}
 			updatePots();
@@ -122,7 +130,7 @@ function AnimateCards(opts) {
 			for (var j=0; j<seat.card_count; j++) {
 				var cardvalue = -1;
 				if (seat.hand.cards.length) cardvalue = seat.hand.cards[j];
-				var pos = calcCardPosition(seat.seat_index,j);
+				var pos = calcCardPosition(seat.seat_index,j,seat.card_count);
 				if (local.cards[j]) {
 					var skip = false;
 					if (opts && opts.reveal) {
@@ -140,7 +148,7 @@ function AnimateCards(opts) {
 				} else {
 					card = new Card();
 					log('placing card at:'+JSON.stringify(pos));
-					card.setSize(0.063);
+					card.setSize(cardWidth);
 					local.cards[j] = card;
 					queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
 					queueAction(new RevealCard(local.cards[j],cardvalue));
@@ -166,14 +174,14 @@ function AnimateFlop(cards,offset) {
 	this.thirdDone = false;
 	this.offset = offset;
 	if (offset == 0) this.y = 0.477;
-	else this.y = 0.5;
+	else this.y = 0.55;
 	log("starting flop animation for:"+cards);
 }
 AnimateFlop.prototype.begin = function () {
 	for (var x=0; x<3; x++) {
 		if (!localFlop[x+this.offset]) localFlop[x+this.offset] = new Card();
 		localFlop[x+this.offset].visible = false;
-		localFlop[x+this.offset].setSize(0.063);
+		localFlop[x+this.offset].setSize(cardWidth);
 	}
 	localFlop[0+this.offset].card = -1;
 	localFlop[0+this.offset].setPosition(0.5,0.1);
@@ -243,6 +251,43 @@ function tableEvent(event) {
 		}
 		break;
 	case "teWinning":
+		queueAction(new SimpleDelay(2000));
+		var perSeatWins = [];
+		for (var i=0; i<game.seats; i++) perSeatWins[i] = 0;
+		queueAction(new UpdateChat(JSON.stringify(event.pots)));
+		var seatMap = [];
+		for (var i=0; i<lastTS.seats.length; i++) {
+			seatMap[lastTS.seats[i].seat_index] = lastTS.seats[i];
+		}
+		for (var i=0; i<event.pots.length; i++) {
+			var winnerCount = event.pots[i].WinnerData.length;
+			for (var k=0; k<event.pots[i].WinnerData.length; k++) {
+				log("i:"+i+" k:"+k+" wd:"+JSON.stringify(event.pots[i].WinnerData[k]));
+				var winnerSeat = event.pots[i].WinnerData[k].seat;
+				var winnerName = seatMap[winnerSeat].user.displayName;
+				var potvalue = event.pots[i].value - event.pots[i].rake;
+				var gain = 0;
+				if (winnerCount == 1) {
+					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips"));
+					gain = potvalue;
+				} else {
+					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips"));
+					gain = potvalue/winnerCount;
+				}
+				// TODO, rake
+				perSeatWins[winnerSeat] += gain;
+			}
+		}
+		var p;
+		while (p=localPots.shift()) {
+			hideChips(p);
+		}
+		for (var i=0; i<game.seats; i++) {
+			var pos = calcBetLocation(i);
+			if (perSeatWins[i] == 0) continue;
+			log("seat#"+i+" won:"+perSeatWins[i]+" coords:"+JSON.stringify(pos));
+			queueAction(new AnimateChipWin(pos,perSeatWins[i]));
+		}
 		updateBets();
 		AnimateCards({reveal:true});
 		for (var i=0; i<localFlop.length; i++) {
@@ -256,10 +301,6 @@ function tableEvent(event) {
 		}
 		for (var i=0; i<localRiver.length; i++) {
 			if (localRiver[i]) queueAction(new HideCard(localRiver[i]));
-		}
-		var p;
-		while (p=localPots.shift()) {
-			hideChips(p);
 		}
 		break;
 	case 'teDealing':
@@ -284,6 +325,30 @@ function tableEvent(event) {
 	default:
 		dump(event);
 	}
+}
+function AnimateChipWin(dest,chips) {
+	this.stack = getChipStack();
+	this.dest = dest;
+	this.chips = chips;
+}
+AnimateChipWin.prototype.begin = function () {
+	this.stack.value = this.chips;
+	this.stack.setPosition(0.5,0.5);
+	var stack = this.stack;
+	Animate(this.stack, this.dest.x, this.dest.y, 0.5, function () { hideChips(stack); eventDone(); });
+}
+function UpdateChat(msg) {
+	this.msg = msg;
+}
+UpdateChat.prototype.begin = function () {
+	root.renderWinning(this.msg);
+	eventDone();
+}
+function SimpleDelay(delay) {
+	this.delay = delay;
+}
+SimpleDelay.prototype.begin = function () {
+	this.timer = setTimeout(eventDone,this.delay);
 }
 function updateBets(opts) {
 	for (var i=0; i<lastTS.seats.length; i++) {
@@ -349,11 +414,14 @@ function calcSeatPosition(index) {
 
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
-function calcCardPosition(seat,card) {
-	// TODO, switch to float based positioning
+function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
-	return { x:seatpos.x + (card*25), y:seatpos.y + 10 };
+	var cardOffset = cardWidth;
+	var seatWidth = 0.16;
+	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
+	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
+	return { x:center + (card * cardOffset), y:seatpos.y - 0.0 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
@@ -419,11 +487,12 @@ function calcBetLocation(seat) {
 function DealCard(destx,desty,cardobj) {
 	this.destx = destx;
 	this.desty = desty;
+	if (this.destx < 0) throw "invalid x pos";
 	this.cardobj = cardobj;
 	//cardobj.visible = false;
 }
 DealCard.prototype.begin = function DealCardBegin() {
-	log("starting card animation");
+	log("starting card animation "+this.destx+" "+this.desty);
 	this.cardobj.card = -1;
 	this.cardobj.visible = true;
 	this.cardobj.setPosition(0.5,0.1);
@@ -454,6 +523,10 @@ ShowBet.prototype.begin = function ShowBetBegin() {
 	this.timer = setTimeout(eventDone,200);
 }
 function setTimeout(cb,delay) {
+	if (testcase) {
+		cb();
+		return;
+	}
 	var timer = new QTimer();
 	timer.interval = delay;
 	timer.singleShot = true;

@@ -3,7 +3,8 @@ unit Poker.Players.PlayerList;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.User, Poker.Players.Player, Poker.Types;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.User,
+  Poker.Players.Player, Poker.Types;
 
 type
   TPlayerList = class(TObjectDictionary<TMongoId, TPlayerInfo>)

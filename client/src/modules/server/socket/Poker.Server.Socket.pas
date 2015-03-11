@@ -3,9 +3,11 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core, Poker.Protobufs.Objects.User, Poker.Types,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.Base;
+  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core,
+  Poker.Protobufs.Objects.User, Poker.Types, Poker.Protobufs.Objects.Game,
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ContactMessage,
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.Base;
 
 type
   TServerSocket = class(TServerSocketCore)
@@ -24,7 +26,7 @@ type
     procedure LeaveClub(const AClubId: TMongoId);
     procedure KickPlayer(const AClubId: TMongoId; const APlayerId: TMongoId);
     procedure GiveOwnership(const AClubId: TMongoId; const APlayerId: TMongoId);
-    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
+    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const AMaxRakePerHand: UINT32; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
     procedure DisbandClub(const AClubId: TMongoId);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
@@ -220,7 +222,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
+procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const AMaxRakePerHand: UINT32; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
 var
   protobuf: TPB_Club;
 begin
@@ -230,6 +232,7 @@ begin
     protobuf.Name := AClubName;
     protobuf.Password := AClubCode;
     protobuf.Rake := AClubRake;
+    protobuf.MaxRakePerHand := AMaxRakePerHand;
     protobuf.DefaultBalanceLimit := ADefaultPlayerLimit;
     protobuf.UnlimitedDefaultBalance := AUnlimitedDefaultBalance;
     protobuf.BuyinReset := AResetBuyinLimits;

@@ -3,12 +3,15 @@ unit Poker.Forms.ClubLobby;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams,
-  Poker.Clubs.Club, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
-  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls,
-  Vcl.Menus, cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
-  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit,
-  cxClasses, Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls,
+  Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams, Poker.Clubs.Club, cxControls,
+  cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
+  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid,
+  Poker.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls, Vcl.Menus, cxStyles,
+  cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
+  ChipUpPokerDarkSkin, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage,
+  cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
+  Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)

@@ -59,6 +59,11 @@ type
       FSeatActionFold: TAsphyreImage;
       FSeatActionRaise: TAsphyreImage;
       FSeatActionDisconnected: TAsphyreImage;
+      FJoinWaitingListNormal: TAsphyreImage;
+      FJoinWaitingListPressed: TAsphyreImage;
+      FLeaveWaitingListNormal: TAsphyreImage;
+      FLeaveWaitingListPressed: TAsphyreImage;
+
       FGrayscaleImages: TObjectDictionary<TAsphyreImage, TAsphyreImage>;
 
       FBarmenoFonts: TBarmenoFonts;
@@ -79,6 +84,8 @@ type
       FStandUpButtonAspectRatio: Single;
       FPlayNowButtonAspectRatio: Single;
       FSeatActionFrameAspectRatio: Single;
+      FJoinWaitingListButtonAspectRatio: Single;
+      FLeaveWaitingListButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -168,6 +175,10 @@ type
     property SeatActionFold: TAsphyreImage read FSeatActionFold;
     property SeatActionRaise: TAsphyreImage read FSeatActionRaise;
     property SeatActionDisconnected: TAsphyreImage read FSeatActionDisconnected;
+    property JoinWaitingListNormal: TAsphyreImage read FJoinWaitingListNormal;
+    property JoinWaitingListPressed: TAsphyreImage read FJoinWaitingListPressed;
+    property LeaveWaitingListNormal: TAsphyreImage read FLeaveWaitingListNormal;
+    property LeaveWaitingListPressed: TAsphyreImage read FLeaveWaitingListPressed;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -187,6 +198,8 @@ type
     property StandUpButtonAspectRatio: Single read FStandUpButtonAspectRatio;
     property PlayNowButtonAspectRatio: Single read FPlayNowButtonAspectRatio;
     property SeatActionFrameAspectRatio: Single read FSeatActionFrameAspectRatio;
+    property JoinWaitingListButtonAspectRatio: Single read FJoinWaitingListButtonAspectRatio;
+    property LeaveWaitingListButtonAspectRatio: Single read FLeaveWaitingListButtonAspectRatio;
   end;
 
 var
@@ -259,6 +272,10 @@ begin
   AddDXImage('ActionDisconnected.image', FSeatActionDisconnected);
   AddDXImage('ActionFold.image', FSeatActionFold);
   AddDXImage('ActionRaise.image', FSeatActionRaise);
+  AddDXImage('JoinWaitingList_Normal.image', FJoinWaitingListNormal, FJoinWaitingListButtonAspectRatio);
+  AddDXImage('JoinWaitingList_Pressed.image', FJoinWaitingListPressed);
+  AddDXImage('LeaveWaitingList_Normal.image', FLeaveWaitingListNormal, FLeaveWaitingListButtonAspectRatio);
+  AddDXImage('LeaveWaitingList_Pressed.image', FLeaveWaitingListPressed);
 
   FGrayscaleImages := TObjectDictionary<TAsphyreImage, TAsphyreImage>.Create([]);
 

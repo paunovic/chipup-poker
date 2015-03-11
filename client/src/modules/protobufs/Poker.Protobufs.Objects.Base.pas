@@ -7,17 +7,16 @@ uses
 
 type
   TProtobufBaseObjectClass = class of TProtobufBaseObject;
+
   TProtobufBaseObject = class
   private
     FProtobufOutput: TProtoBufOutput;
     FLightweight: Boolean;
 
     function GetProtobufOutputSize: Word;
-
   protected
     procedure InitObjects; virtual;
     procedure HookNotifiers; virtual;
-
   public
     constructor Create(const ALightweight: Boolean = FALSE); overload;
     constructor Create(const APointer: pointer; const ASize: Integer; const ALightweight: Boolean = FALSE); overload;

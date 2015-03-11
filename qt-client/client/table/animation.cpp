@@ -1,13 +1,15 @@
 #include "animation.h"
 #include "animatecore.h"
 Animation::Animation(GameObject *obj, float endx, float endy, float duration, QScriptValue callback) :
-	QObject(0), duration(duration*4000), endx(endx), endy(endy), obj(obj), callback(callback)
+	QObject(0), duration(duration*1000), endx(endx), endy(endy), obj(obj), callback(callback)
 {
 	start = animateCore->getTime();
 	startx = obj->x();
 	starty = obj->y();
 	xdiff = endx - startx;
 	ydiff = endy - starty;
+	Q_ASSERT(startx >= 0);
+	Q_ASSERT(startx + xdiff >= 0);
 	qDebug() << "starting animation" << this << "at" << start << "with delay" << duration;
 	connect(obj,SIGNAL(destroyed(QObject*)),this,SLOT(object_deleted(QObject*)));
 }
@@ -39,6 +41,6 @@ void Animation::tick(int now) {
 	obj->setPosition(startx+(xdiff*progress),starty+(ydiff*progress));
 }
 void Animation::object_deleted(QObject *) {
-	animateCore->over(this);
+	if (animateCore) animateCore->over(this);
 	deleteLater();
 }

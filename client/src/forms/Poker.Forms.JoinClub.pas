@@ -3,11 +3,11 @@ unit Poker.Forms.JoinClub;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
-  cxButtons, cxLabel, cxTextEdit, Vcl.ActnList, cxSpinEdit,
-  Poker.Interfaces.FormParams, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.Menus, Vcl.StdCtrls, cxMaskEdit;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls,
+  Vcl.Forms, Vcl.Dialogs, cxContainer, cxButtons, cxLabel, cxTextEdit, Vcl.ActnList,
+  cxSpinEdit, Poker.Interfaces.FormParams, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus,
+  Vcl.StdCtrls, cxMaskEdit;
 
 type
   TfrmJoinClub = class(TForm, IFormParams)

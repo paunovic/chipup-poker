@@ -3,7 +3,8 @@ unit Poker.DirectX.Animations;
 interface
 
 uses
-   Winapi.Windows, System.Generics.Collections, System.Classes, Asphyre.Math, Asphyre.Timing, Poker.DirectX.AnimationNew, Poker.Common.SafeMutex,
+   Winapi.Windows, System.Generics.Collections, System.Classes, Asphyre.Math,
+   Asphyre.Timing, Poker.DirectX.AnimationNew, Poker.Common.SafeMutex,
    System.SyncObjs;
 
 const

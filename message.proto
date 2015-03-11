@@ -217,6 +217,7 @@ message Club {
 	optional uint32 default_balance_limit = 10;
 	optional bool unlimited_default_balance = 11;
 	optional uint32 buyin_reset = 12;
+	optional uint32 max_rake_per_hand = 13;
 }
 
 message User {
@@ -404,6 +405,7 @@ message TableStatus {
 	optional uint32 minimum_raise = 26;
 	required TableType table_type = 27;
 	repeated TableMessage table_message = 28;
+	optional int32 queue_position = 29;
 }
 
 message SeatInfo {

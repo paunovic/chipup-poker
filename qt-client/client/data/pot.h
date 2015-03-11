@@ -8,6 +8,8 @@
 
 namespace Data {
 
+class WinnerData;
+
 class Pot : public QObject {
 Q_OBJECT
 public:
@@ -15,6 +17,8 @@ public:
 	int value() { return value_; }
 	QList<int> members() { return members_; }
 	int rake() { return rake_; }
+
+	QList<WinnerData*> winnerData;
 
 	Q_PROPERTY(int value READ value)
 	Q_PROPERTY(QList<int> members READ members)

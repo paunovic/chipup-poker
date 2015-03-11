@@ -15,6 +15,7 @@
 
 class GameObjectUi;
 class SeatObject;
+class Table;
 
 typedef enum {
 	Left=0,
@@ -40,6 +41,7 @@ protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void drawCross(QPainter &p);
+	void drawGrid(QPainter &p);
 	virtual bool event(QEvent *event);
 
 	QList<GameObjectUi*> uiElements;
@@ -73,7 +75,7 @@ public:
 	bool table_status(QSharedPointer<Data::TableStatus> ts);
 	bool loadJs(QString code,QString file);
 	void loadJsFromResource();
-	void setupUi(QWidget *parent, QGridLayout *layout);
+	void setupUi(QWidget *parent, QGridLayout *layout, Table *rootwindow);
 	TableUi *getUi() { Q_ASSERT(tableui); return tableui; }
 	void setGame(const Data::Game *game);
 	const Data::Game *getRawGame() const { return rawgame; }
@@ -84,13 +86,17 @@ public:
 signals:
 
 public slots:
+	void renderWinning(QString msg);
+protected:
+	TableUi *tableui;
+	friend class Table;
 private:
 	QScriptEngine engine;
-	TableUi *tableui;
 	GameWrap *game;
 	const Data::Game *rawgame;
 	QSharedPointer<Data::TableStatus> lastTs;
 	ScriptAgent *agent;
+	Table *rootwindow;
 };
 class GameObject : public QObject {
 Q_OBJECT
@@ -100,9 +106,11 @@ public:
 	float y() { return internal->y; }
 	TablePrivate *getTable() { return table; }
 	bool visible() { return internal->isVisible(); }
+	int getKeySide() const { return (int)internal->keyside; }
 
 	Q_PROPERTY(bool visible READ visible WRITE setVisible)
 	Q_PROPERTY(float renderHeight READ getRenderHeight)
+	Q_PROPERTY(int keySide READ getKeySide WRITE setSide)
 public slots:
 	void setPosition(float x, float y);
 	void setSize(float w);

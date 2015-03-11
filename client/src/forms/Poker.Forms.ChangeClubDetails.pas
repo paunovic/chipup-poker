@@ -3,9 +3,11 @@ unit Poker.Forms.ChangeClubDetails;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxLabel, cxTextEdit,
-  cxButtons, Poker.Clubs.Club, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxSpinEdit, cxCheckBox, cxGraphics,
-  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls, Poker.Types,
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls,
+  Vcl.Forms, Vcl.Dialogs, cxContainer, cxLabel, cxTextEdit, cxButtons, Poker.Clubs.Club,
+  Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxSpinEdit,
+  cxCheckBox, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit,
+  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls, Poker.Types,
   cxDropDownEdit;
 
 type
@@ -26,6 +28,8 @@ type
     lbsResetBuyinLimits: TcxLabel;
     cbResetBuyinLimits: TcxComboBox;
     lbsResetBuyinMinutes: TcxLabel;
+    lbsMaxRakePerHand: TcxLabel;
+    seMaxRakePerHand: TcxSpinEdit;
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -106,6 +110,7 @@ begin
     edClubName.Text := club.Name;
     edInvitationCode.Text := club.Password;
     seRake.Value := club.Rake;
+    seMaxRakePerHand.Value := club.MaxRakePerHand;
     seLimit.Value := club.DefaultBalanceLimit / 100;
     cbDefaultPlayerLimit.Checked := not club.UnlimitedDefaultBalance;
     cbResetBuyinLimits.Text := IntToStr(club.BuyinReset);
@@ -157,7 +162,7 @@ begin
 
   acOK.Enabled := FALSE;
   ServerSocket.ChangeClubDetails(FClubId, edClubName.Text, edInvitationCode.Text, rake,
-      limituint, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
+      limituint, seMaxRakePerHand.Value, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
 end;
 
 procedure TfrmChangeClubDetails.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);

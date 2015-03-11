@@ -33,8 +33,8 @@ void PokerMain::sendMessage(Poker::ServerCodes,google::protobuf::Message*){}
 void PokerMain::socket_readyRead(){}
 void PokerMain::parsePacket(Poker::ServerCodes,std::string){}
 void PokerMain::replyFinished(QNetworkReply*){}
-void PokerMain::socket_connected(){}
 void PokerMain::send_ping(){}
+void PokerMain::doLogin(QString username, QString password){}
 void PokerMain::RegisterListener(QObject *listener) {
 	const QMetaObject *mo = listener->metaObject();
 	for (int i = 0; i < mo->methodCount(); ++i) {

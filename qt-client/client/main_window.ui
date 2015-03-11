@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>866</width>
-    <height>620</height>
+    <width>715</width>
+    <height>695</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,6 +19,22 @@
   <property name="windowTitle">
    <string>ChipUP Poker</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QPushButton#btHomeGames, QPushButton#btTournaments,#btHomeGamesDummy,#btTournamentsDummy {
+	border-image: none;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #343a3c, stop: 1 #171717);
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #202223, stop: 1 #4b5152);
+	color: white;
+	min-width: 11em;
+	padding-top: 1em;
+	padding-bottom: 1em;
+}
+QPushButton:checked#btHomeGamesDummy, QPushButton:checked#btTournamentsDummy {
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #780b0b, stop: 1 #221212);
+	color: #f5682c;
+	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3a2425, stop: 1 #9f2f2f);
+}</string>
+  </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>false</bool>
   </property>
@@ -27,7 +43,16 @@
     <property name="spacing">
      <number>0</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
@@ -46,204 +71,205 @@ background-repeat: no-repeat;</string>
     </item>
     <item>
      <widget class="QWidget" name="paMain" native="true">
-      <widget class="QPushButton" name="btHomeGames">
-       <property name="geometry">
-        <rect>
-         <x>11</x>
-         <y>34</y>
-         <width>143</width>
-         <height>56</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>HOME GAMES</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="btTournaments">
-       <property name="geometry">
-        <rect>
-         <x>11</x>
-         <y>92</y>
-         <width>143</width>
-         <height>56</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>TOURNAMENTS</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QStackedWidget" name="stackedWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>841</width>
-         <height>443</height>
-        </rect>
-       </property>
-       <widget class="QWidget" name="page">
-        <widget class="QPushButton" name="btOpenClubLobby">
-         <property name="enabled">
-          <bool>false</bool>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QStackedWidget" name="stackedWidget">
+         <property name="currentIndex">
+          <number>0</number>
          </property>
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>278</y>
-           <width>143</width>
-           <height>35</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Open Club Lobby</string>
-         </property>
+         <widget class="QWidget" name="page">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QPushButton" name="btHomeGamesDummy">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="text">
+                <string>HOME GAMES</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btTournaments">
+               <property name="text">
+                <string>TOURNAMENTS</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btOpenClubLobby">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Open Club Lobby</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btOpenTable">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Open Table</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btCreateClub">
+               <property name="text">
+                <string>Create Club...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btJoinClub">
+               <property name="text">
+                <string>Join Club...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_3">
+                 <item>
+                  <widget class="QLabel" name="btPublicGames">
+                   <property name="text">
+                    <string>PUBLIC HOME GAMES</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTreeView" name="gridPublicClubs"/>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_4">
+                 <item>
+                  <widget class="QLabel" name="btPrivateClubs">
+                   <property name="text">
+                    <string>MY HOME GAMES</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTreeView" name="gridPrivateClubs"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTreeView" name="gridGames"/>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <item>
+              <widget class="QPushButton" name="btHomeGames">
+               <property name="text">
+                <string>HOME GAMES</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btTournamentsDummy">
+               <property name="text">
+                <string>TOURNAMENTS</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btTournamentRegister">
+               <property name="text">
+                <string>Register</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btTournamentLobby">
+               <property name="text">
+                <string>Tournament Lobby</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTreeView" name="treeView"/>
+           </item>
+          </layout>
+         </widget>
         </widget>
-        <widget class="QPushButton" name="btOpenTable">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>316</y>
-           <width>143</width>
-           <height>35</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Open Table</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btCreateClub">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>354</y>
-           <width>143</width>
-           <height>35</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Create Club...</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btJoinClub">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>392</y>
-           <width>143</width>
-           <height>35</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Join Club...</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="btPrivateClubs">
-         <property name="geometry">
-          <rect>
-           <x>495</x>
-           <y>1</y>
-           <width>334</width>
-           <height>32</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>MY HOME GAMES</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-        <widget class="QLabel" name="btPublicGames">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>1</y>
-           <width>334</width>
-           <height>32</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>PUBLIC HOME GAMES</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-        <widget class="QTreeView" name="gridGames">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>265</y>
-           <width>676</width>
-           <height>162</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QTreeView" name="gridPublicClubs">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>34</y>
-           <width>336</width>
-           <height>221</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QTreeView" name="gridPrivateClubs">
-         <property name="geometry">
-          <rect>
-           <x>495</x>
-           <y>34</y>
-           <width>336</width>
-           <height>221</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
-       <widget class="QWidget" name="page_2">
-        <widget class="QPushButton" name="btTournamentRegister">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>354</y>
-           <width>143</width>
-           <height>35</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Register</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btTournamentLobby">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>392</y>
-           <width>143</width>
-           <height>35</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Tournament Lobby</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-      <zorder>stackedWidget</zorder>
-      <zorder>btHomeGames</zorder>
-      <zorder>btTournaments</zorder>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -253,8 +279,8 @@ background-repeat: no-repeat;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>866</width>
-     <height>26</height>
+     <width>715</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAccount">
@@ -310,13 +336,18 @@ background-repeat: no-repeat;</string>
     </property>
     <addaction name="actionCSS_Editor"/>
     <addaction name="actionSelf_Tests"/>
+    <addaction name="actionDisconnect"/>
    </widget>
    <addaction name="menuAccount"/>
    <addaction name="menuOptions"/>
    <addaction name="menuHelp"/>
    <addaction name="menuDev"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="sizeGripEnabled">
+    <bool>true</bool>
+   </property>
+  </widget>
   <action name="actionChange_E_mail_address">
    <property name="text">
     <string>Change &amp;E-mail address...</string>
@@ -403,6 +434,11 @@ background-repeat: no-repeat;</string>
   <action name="actionSelf_Tests">
    <property name="text">
     <string>Self-Tests</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </action>
  </widget>

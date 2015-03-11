@@ -3,8 +3,10 @@ unit Poker.Tournaments;
 interface
 
 uses
-  Poker.Protobufs.Objects.TournamentList, Poker.Common.SafeMutex, System.Generics.Collections, Poker.Types, Poker.Tournaments.Info,
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Games.Game, Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.TournamentList, Poker.Common.SafeMutex,
+  System.Generics.Collections, Poker.Types, Poker.Tournaments.Info,
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Games.Game,
+  Poker.Protobufs.Objects.Game;
 
 type
   TTournamentList = class(TObjectDictionary<TMongoId, TTournamentInfo>)

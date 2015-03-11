@@ -13,6 +13,20 @@
 #define QFINDTESTDATA(x) QString("../../qt-client/test/") + x
 #endif
 
+// from the simulator-qt project
+static void setDpiRecursive(QObject *object, const QSize &dpi) {
+	foreach (QObject *child, object->children()) setDpiRecursive(child,dpi);
+
+	object->setProperty("_q_customDpiX",dpi.width());
+	object->setProperty("_q_customDpiY",dpi.height());
+}
+void changeDpi(const QSize &dpi) {
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+		setDpiRecursive(widget,dpi);
+	}
+}
+// </copy&paste>
+
 int font1,font2;
 void TestCase::initTestCase() {
 	font1 = QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
@@ -47,7 +61,7 @@ void TestCase::renderChips() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586,300);
 	Data::Game g;
 	g.seats = 5;
@@ -74,7 +88,16 @@ void TestCase::renderChips() {
 
 	core = 0;
 }
+void TestCase::rendercards_data() {
+	QTest::addColumn<QString>("name");
+	QTest::addColumn<double>("size");
+	QTest::newRow("small") << "cards_s.png" << 0.04;
+	QTest::newRow("big") << "cards_b.png" << 0.1;
+}
+
 void TestCase::rendercards() {
+	QFETCH(QString,name);
+	QFETCH(double,size);
 	int result;
 	TablePrivate p;
 	PokerMain pm;
@@ -82,11 +105,12 @@ void TestCase::rendercards() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586*2,300*2);
 	Data::Game g;
 	g.seats = 5;
 	p.setGame(&g);
+	p.global().setProperty("size",size);
 	QFile input(QFINDTESTDATA("cards.js"));
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
@@ -101,7 +125,7 @@ void TestCase::rendercards() {
 
 	QPixmap image(root.size());
 	root.render(&image);
-	image.save("cards.png");
+	image.save(name);
 
 	core = 0;
 }
@@ -110,14 +134,17 @@ void TestCase::alignment_data() {
 	QTest::addColumn<bool>("withDealer");
 	QTest::addColumn<bool>("withBet");
 	QTest::addColumn<QString>("filename");
-	QTest::newRow("all10") << 10 << true << true << "all10.png";
-	QTest::newRow("all5") << 5 << true << true << "all5.png";
+	QTest::addColumn<int>("cardCount");
+	QTest::newRow("all10") << 10 << true << true << "all10.png" << 2;
+	QTest::newRow("all5") << 5 << true << true << "all5.png" << 2;
+	QTest::newRow("all5Omaha") << 5 << true << true << "all5omaha.png" << 4;
 }
 void TestCase::alignment() {
 	QFETCH(int,seats);
 	QFETCH(bool,withDealer);
 	QFETCH(bool,withBet);
 	QFETCH(QString,filename);
+	QFETCH(int,cardCount);
 	int result;
 	PokerMain pm;
 	core = &pm;
@@ -158,6 +185,7 @@ void TestCase::alignment() {
 		QVERIFY(result);
 	}
 	for (int i=0; i<seats; i++) {
+		uint8_t cards[] = {0,1,2,3};
 		QByteArray id;
 		id[0] = i;
 		Data::SeatInfo *seat = new Data::SeatInfo(&pm);
@@ -165,9 +193,10 @@ void TestCase::alignment() {
 
 		source.set_player_mongo_id(id.data(),id.length());
 		source.set_seat_index(i);
-		source.set_card_count(0);
 		source.set_status(Poker::SeatInfo::psInHand);
 		source.set_chips(20000);
+		source.set_cards(cards,cardCount);
+		source.set_card_count(cardCount);
 		seat->update(source);
 		ts->seats.append(seat);
 		Data::User *u = new Data::User(&pm);
@@ -182,10 +211,21 @@ void TestCase::alignment() {
 		if (i == 2) initial.add_bets(300);
 		else initial.add_bets(200);
 	}
+	Poker::TableEvent *dealing = initial.add_events();
+	dealing->set_event(Poker::TableEvent::teDealing);
+
 	ts->update(initial);
+	tbl.eval("testcase = true");
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 	tbl.eval("alignment();");
+	changeDpi(QSize(121,120));
+	for (int i=0; i<50; i++) {
+		ac.setTime(i*1000);
+		ac.tick();
+		QApplication::sendPostedEvents();
+		if (i < 30) QTest::qSleep(20);
+	}
 	QPixmap image(tbl.size());
 	tbl.render(&image);
 	image.save(filename);
@@ -203,7 +243,7 @@ void TestCase::animate() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586,300);
 	Data::Game g;
 	g.seats = 5;
@@ -225,7 +265,7 @@ void TestCase::animate() {
 	root.render(&image);
 	image.save("frame0.png");
 	int x = 1;
-	for (int time=10; time < 1020; time+=20) {
+	for (int time=10; time < 1050; time+=20) {
 		root.render(&image);
 		ac.setTime(time);
 		ac.tick();
@@ -234,7 +274,8 @@ void TestCase::animate() {
 	}
 
 	QApplication::sendPostedEvents(0, QEvent::DeferredDelete);
-	QCOMPARE(0,ac.animationCount());
+	ac.dumpObjectTree();
+	QCOMPARE(ac.animationCount(),0);
 
 	core = 0;
 	animateCore = 0;
@@ -250,7 +291,7 @@ void TestCase::testsomething() {
 	QWidget root;
 	QGridLayout grid;
 	root.setLayout(&grid);
-	p.setupUi(&root,&grid);
+	p.setupUi(&root,&grid,0);
 	root.resize(586,300);
 	QFETCH(int,filled);
 	QFETCH(QString,output);

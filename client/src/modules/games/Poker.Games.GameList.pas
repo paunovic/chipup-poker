@@ -3,7 +3,8 @@ unit Poker.Games.GameList;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.Protobufs.Objects.Game, Poker.Common.SafeMutex, Poker.Types;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game,
+  Poker.Protobufs.Objects.Game, Poker.Common.SafeMutex, Poker.Types;
 
 type
   TGameList = class(TObjectDictionary<TMongoId, TGameInfo>)

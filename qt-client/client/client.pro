@@ -56,7 +56,9 @@ SOURCES += main.cpp loginwindow.cpp \
     data/playerclubstatus.cpp \
     table/dealerbutton.cpp \
     table/scriptagent.cpp \
-    clublobby.cpp
+    clublobby.cpp \
+    data/clubmember.cpp \
+    data/winnerdata.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -83,7 +85,9 @@ HEADERS  += loginwindow.h \
     data/playerclubstatus.h \
     table/dealerbutton.h \
     table/scriptagent.h \
-    clublobby.h
+    clublobby.h \
+    data/clubmember.h \
+    data/winnerdata.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h

@@ -3,9 +3,11 @@ unit Poker.Tables.Table;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.TournamentPlayerTransfer;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, Poker.Games.Game,
+  Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms, Poker.HandHistory.Items,
+  Poker.Tables.Renderer, Poker.Avatars.Avatar, Poker.Types, Poker.Tables.Status,
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TableEvent,
+  Poker.Protobufs.Objects.TournamentPlayerTransfer;
 
 type
   TTable = class
@@ -746,6 +748,8 @@ begin
   FStatus.ActionRaise := FALSE;
   FStatus.ActionBet := FALSE;
   FStatus.ActionPlayNow := FALSE;
+  FStatus.ActionJoinWaitingList := FALSE;
+  FStatus.ActionLeaveWaitingList := FALSE;
   FStatus.ActionSitOut := FALSE;
   FStatus.ActionFoldToAny := FALSE;
   FStatus.ActionSitOutNextBB := FALSE;
@@ -764,7 +768,13 @@ begin
 
   if (not (FTableType in [ttLive, ttTournament])) or
      (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
+  begin
+    FStatus.ActionJoinWaitingList := (FTableType = ttLive) and
+                                     (FGame.Seats = FStatus.Seats.Count) and
+                                     (FStatus.QueuePosition = 0);
+    FStatus.ActionLeaveWaitingList := FStatus.QueuePosition > 0;
     Exit;
+  end;
 
   FStatus.ActionStandUp := FTableType = ttLive;
   FStatus.FocusWindow := FALSE;

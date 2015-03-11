@@ -3,11 +3,10 @@ unit Poker.Forms.ImageCrop;
 interface
 
 uses
-  Winapi.Windows, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
-  Vcl.ActnList, cxButtons,
-  GR32_Image, GR32, GR32_backends, GR32_Resamplers, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.StdCtrls;
+  Winapi.Windows, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Vcl.ActnList, cxButtons,
+  GR32_Image, GR32, GR32_backends, GR32_Resamplers, cxGraphics, cxLookAndFeels,
+  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls;
 
 const
    PixelCountMax = 32768;

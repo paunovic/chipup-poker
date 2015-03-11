@@ -2,6 +2,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QMetaMethod>
+#include <QApplication>
+#include <QWidget>
+#include <QMainWindow>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -10,22 +13,25 @@
 #include "data/user.h"
 #include "data/playerclubstatus.h"
 #include "sound_effects.h"
+#include "table.h"
 
 using namespace Poker;
 
 PokerMain *core;
+
+static void flagOffline(QMainWindow *window);
 
 PokerMain::PokerMain(QObject *parent) :
     QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
 {
 	setObjectName("core");
 	delayQuit = false;
+	reconnectState = notSignedIn;
 	manager_ = new QNetworkAccessManager(this);
 	effects_ = new SoundEffects(this);
 	self_ = new Data::User(this);
 	connect(manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
-    connect(&socket,SIGNAL(connected()),this,SLOT(socket_connected()));
     connect(&socket,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(socket_state_change(QAbstractSocket::SocketState)));
     connect(&socket,SIGNAL(sslErrors(QList<QSslError>)),this,SLOT(socket_sslErrors(QList<QSslError>)));
     connect(&socket,SIGNAL(encrypted()),this,SLOT(socket_ready()));
@@ -39,22 +45,40 @@ QNetworkAccessManager *PokerMain::manager() {
 void PokerMain::replyFinished(QNetworkReply *reply) {
 	reply->deleteLater();
 }
-
-void PokerMain::socket_connected() {
-    qDebug() << "socket connected";
-}
 void PokerMain::try_connect() {
     if (socket.state() == QAbstractSocket::UnconnectedState) {
         socket.connectToHostEncrypted("server.chipuppoker.com",12346);
     }
 }
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
-    qDebug() << state;
-    switch (state) {
-    case QAbstractSocket::UnconnectedState:
-        // set a timer to reconnect
-        break;
-    }
+	qDebug() << state;
+	switch (state) {
+	case QAbstractSocket::HostLookupState:
+		break;
+	case QAbstractSocket::ConnectingState:
+		break;
+	case QAbstractSocket::ConnectedState:
+		qDebug() << "socket connected";
+		break;
+	case QAbstractSocket::ClosingState:
+		qDebug() << "socket closing";
+		break;
+	case QAbstractSocket::UnconnectedState:
+		// set a timer to reconnect
+		qDebug() << "unconnected";
+		emit protocol_ready(false);
+		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+			qDebug() << widget << widget->metaObject()->className();
+			QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget);
+			if (mainWindow) {
+				flagOffline(mainWindow);
+			}
+		}
+		try_connect();
+		break;
+	}
+}
+static void flagOffline(QMainWindow *mainWindow) {
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "incoming err" << errors;
@@ -165,6 +189,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		max_play_time = hr.max_play_time();
 		send_ping();
 		emit protocol_ready(true);
+		if (reconnectState == SignedIn) {
+			doLogin(username,password);
+		}
 		break;
 	case Poker::srLoginReply: // 2
 		srLoginReply(data);
@@ -192,15 +219,19 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			emit clubs_changed();
 			break;
 		}
-        case ClubCommandReply::csInvalidName:
-            emit club_create_reply(ccr.status());
-            break;
+		case ClubCommandReply::csInvalidName:
+			emit club_create_reply(ccr.status());
+			break;
 		default:
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}
 		break; }
 	case Poker::srLogout: // 8
 		delayQuit = false;
+		reconnectState = notSignedIn;
+		break;
+	case Poker::srKickPlayerReply: // 11
+		qDebug() << "srKickPlayerReply";
 		break;
 	case Poker::srTableSitOk: // 27
 		srTableSitOk(data);
@@ -226,6 +257,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		totalError += diff;
 		qDebug() << "ping:" << ping << "server clock:" << server_clock << "offset:" << clock_offset << "diff:" << diff << totalError;
 		break; }
+	case Poker::srReinstatePlayerOk: // 32
+		qDebug() << "srReinstatePlayerOk";
+		break;
 	case Poker::srTableStatsReply: // 35
 		qDebug() << "srTableStatsReply";
 		break;
@@ -274,6 +308,10 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		}
 		break;
 	}
+	case Poker::seClubChange: // 53
+		qDebug() << "seClubChange";
+		seClubChange(data);
+		break;
 	case Poker::seGameChange: // 55
 		seGameChange(data);
 		break;
@@ -372,6 +410,20 @@ Data::User *PokerMain::findUser(QByteArray userid) {
 	qDebug() << "none found";
 	return 0;
 }
+void PokerMain::seClubChange(std::string data) {
+	Poker::Club input;
+	input.ParseFromString(data);
+	int seq = input.seq();
+	Data::Club *club = 0;
+	for (int i=0; i<clubs.size(); i++) {
+		club = clubs.at(i);
+		if (club->seq == seq) break;
+	}
+	Q_ASSERT(club);
+	club->update(input);
+	emit club_changed(club);
+}
+
 void PokerMain::srLoginReply(std::string data) {
 	Poker::LoginReply lr;
 	int i;
@@ -379,7 +431,8 @@ void PokerMain::srLoginReply(std::string data) {
 	lr.ParseFromString(data);
 	if (lr.login_status() == LoginReply::lrSuccess) {
 		qDebug() << "sucess!";
-		// TODO, convert and use reconnect_tables,tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
+		reconnectState = SignedIn;
+		// TODO, convert and use tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
 		clubs.clear();
 		for (i=0; i<lr.clubs_size(); i++) {
 			Poker::Club c = lr.clubs(i);
@@ -393,12 +446,40 @@ void PokerMain::srLoginReply(std::string data) {
 			Data::Game *g_out = new Data::Game;
 			g_out->update(g);
 			games.append(g_out);
+			qDebug() << "found game" << g_out->gameid.toHex();
 		}
 		for (i=0; i<lr.users_size(); i++) {
 			Poker::User u = lr.users(i);
 			Data::User *u_out = new Data::User;
 			u_out->update(u);
 			users.append(u_out);
+		}
+		for (i=0; i<lr.reconnect_tables_size(); i++) {
+			Poker::TableStatus ts = lr.reconnect_tables(i);
+			QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+			out->update(ts);
+			bool found = false;
+			foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+				qDebug() << widget << widget->metaObject()->className();
+				Table *tbl = qobject_cast<Table*>(widget);
+				if (tbl) {
+					if (out->gameid == tbl->getGameId()) {
+						found = true;
+						break;
+					}
+				}
+			}
+			qDebug() << "tbl found?" << found;
+			if (!found) {
+				qDebug() << "lookign for game" << out->gameid.toHex();
+				const Data::Game *game = getGame(out->gameid);
+				Q_ASSERT(game);
+				Table *t = new Table();
+				const Data::Club *club = clubs.getClub(game->clubid);
+				t->setGame(game,club);
+				t->show();
+			}
+			emit table_status(out);
 		}
 		Poker::User self = lr.self();
 		self_->update(self);
@@ -410,6 +491,14 @@ void PokerMain::srLoginReply(std::string data) {
 		emit login_failure();
 	}
 }
+const Data::Game *PokerMain::getGame(QByteArray gameid) const {
+	foreach (const Data::Game *g, games) {
+		qDebug() << "searching" << g->gameid.toHex();
+		if (g->gameid == gameid) return g;
+	}
+	return 0;
+}
+
 void PokerMain::srInvalidTableBuyin(std::string data) {
 	Poker::BuyinError be;
 	be.ParseFromString(data);
@@ -479,4 +568,12 @@ void PokerMain::RegisterListener(QObject *listener) {
 int parseValue(QString input) {
 	QString x = input.section('.', 0, 0) + input.section('.', 1, 1).leftJustified(2, '0');
 	return x.toInt();
+}
+void PokerMain::doLogin(QString username, QString password) {
+	Poker::LoginParams lp;
+	lp.set_username(qPrintable(username));
+	lp.set_password(qPrintable(password));
+	this->username = username;
+	this->password = password;
+	core->sendMessage(Poker::scLogin,&lp);
 }

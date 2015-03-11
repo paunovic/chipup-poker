@@ -47,6 +47,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	ui->gridGames->setSelectionModel(game_selection_model);
 	ui->gridGames->setRootIsDecorated(false);
 	core->RegisterListener(this);
+	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
+	ui->gridPublicClubs->setMinimumWidth(em*31);
+	ui->gridPrivateClubs->setMinimumWidth(em*31);
+	ui->gridPrivateClubs->setMinimumHeight(em*18);
+	ui->gridGames->setMinimumHeight(em*18);
+	for (int i=0; i<6; i++) {
+		ui->gridGames->resizeColumnToContents(i);
+	}
+	//setFixedSize(size());
 }
 MainWindow::~MainWindow() {
 	delete ui;
@@ -54,12 +63,16 @@ MainWindow::~MainWindow() {
 void MainWindow::homeGames() {
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->btTournaments->setChecked(false);
+	ui->btTournamentsDummy->setChecked(false);
 	ui->btHomeGames->setChecked(true);
+	ui->btHomeGamesDummy->setChecked(true);
 }
 void MainWindow::tournaments() {
 	ui->stackedWidget->setCurrentIndex(1);
 	ui->btTournaments->setChecked(true);
+	ui->btTournamentsDummy->setChecked(true);
 	ui->btHomeGames->setChecked(false);
+	ui->btHomeGamesDummy->setChecked(false);
 }
 void MainWindow::private_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
@@ -70,6 +83,9 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
 	core->game_model.setFilter(currentClub);
+	for (int i=0; i<6; i++) {
+		ui->gridGames->resizeColumnToContents(i);
+	}
 }
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
@@ -80,6 +96,9 @@ void MainWindow::public_club_selected(const QItemSelection &selected, const QIte
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
 	core->game_model.setFilter(currentClub);
+	for (int i=0; i<6; i++) {
+		ui->gridGames->resizeColumnToContents(i);
+	}
 }
 void MainWindow::on_btJoinClub_clicked() {
 	JoinClub *jc = new JoinClub(this);
@@ -135,22 +154,30 @@ void MainWindow::on_gridGames_doubleClicked(const QModelIndex &index) {
 }
 void MainWindow::on_gridPrivateClubs_doubleClicked(const QModelIndex &index) {
 	qDebug() << "priv club click" << index.row();
-	const Data::Club *club = core->clubs.private_club_model.getClub(index);
+	Data::Club *club = core->clubs.private_club_model.getClub(index);
 	qDebug() << club->name;
 	clubTriggered(club);
 }
 void MainWindow::on_gridPublicClubs_doubleClicked(const QModelIndex &index) {
 	qDebug() << "priv club click" << index.row();
-	const Data::Club *club = core->clubs.public_club_model.getClub(index);
+	Data::Club *club = core->clubs.public_club_model.getClub(index);
 	qDebug() << club->name;
 	clubTriggered(club);
 }
 void MainWindow::on_btOpenClubLobby_clicked() {
 	clubTriggered(currentClub);
 }
-void MainWindow::clubTriggered(const Data::Club *club) {
+void MainWindow::clubTriggered(Data::Club *club) {
 	// TODO, if its a public club, dont let you open the lobby for some reason??
 	ClubLobby *cl = new ClubLobby();
 	cl->setClub(club);
 	cl->show();
+}
+void MainWindow::on_actionDisconnect_triggered() {
+	core->testDisconnect();
+}
+void MainWindow::resizeEvent(QResizeEvent *event) {
+	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
+	QSize priv = ui->gridPrivateClubs->size();
+	qDebug() << "root size" << size() << "private size" << priv << (priv/em);
 }

@@ -4,9 +4,9 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxContainer, cxLabel,
-  cxButtons, cxTextEdit, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
+  cxContainer, cxLabel, cxButtons, cxTextEdit, Vcl.ActnList, cxGraphics, cxControls,
+  cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
+  Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmChangeEMail = class(TForm)

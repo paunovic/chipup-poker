@@ -5,11 +5,13 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
-  Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
-  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin,
-  System.Generics.Collections, Poker.Common.AlphaBlendThread, Vcl.Menus;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Dialogs, Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxGraphics, dxSkinsForm,
+  Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
+  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit,
+  ChipUpPokerDarkSkin, System.Generics.Collections, Poker.Common.AlphaBlendThread,
+  Vcl.Menus;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -195,7 +197,7 @@ begin
     if edLogin.Text = '' then
     begin
       cbRememberLogin.Checked := TRUE;
-      edLogin.Text := Settings.Login;
+      edLogin.Text := Settings.LoginUsername;
       edPassword.SetFocus;
     end;
   end;
@@ -209,10 +211,10 @@ begin
   cbRememberPassword.Checked := Settings.RememberPassword;
 
   if Settings.RememberLogin then
-    edLogin.Text := Settings.Login;
+    edLogin.Text := Settings.LoginUsername;
 
   if Settings.RememberPassword then
-    edPassword.Text := Settings.Password;
+    edPassword.Text := Settings.LoginPassword;
 end;
 
 procedure TfrmChipUpLogin.SaveSettings;
@@ -221,14 +223,14 @@ begin
   Settings.RememberPassword := cbRememberPassword.Checked;
 
   if Settings.RememberLogin then
-    Settings.Login := edLogin.Text
+    Settings.LoginUsername := edLogin.Text
   else
-    Settings.Login := '';
+    Settings.LoginUsername := '';
 
   if Settings.RememberPassword then
-    Settings.Password := edPassword.Text
+    Settings.LoginPassword := edPassword.Text
   else
-    Settings.Password := '';
+    Settings.LoginPassword := '';
 end;
 
 procedure TfrmChipUpLogin.ServerComboboxChange(Sender: TObject);
@@ -314,7 +316,7 @@ end;
 
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
 begin
-  acLogin.Enabled := (AEnable) and (not DXCore.Device.IsAtFault);
+  acLogin.Enabled := (AEnable);// and (not DXCore.Device.IsAtFault);
   acShowCreateAccountForm.Enabled := AEnable;
   acShowForgotPasswordForm.Enabled := AEnable;
 end;

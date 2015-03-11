@@ -3,7 +3,8 @@ unit Poker.ActionMainMenuBarStyle;
 interface
 
 uses
-  System.Types, Vcl.ActnMan, Vcl.ActnMenus, Vcl.StdActnMenus, Vcl.StdStyleActnCtrls, Vcl.GraphUtil, Vcl.ActnColorMaps;
+  System.Types, Vcl.ActnMan, Vcl.ActnMenus, Vcl.StdActnMenus, Vcl.StdStyleActnCtrls,
+  Vcl.GraphUtil, Vcl.ActnColorMaps;
 
 type
   TActionMainMenuBarStyle = class(TStandardStyleActionBars)

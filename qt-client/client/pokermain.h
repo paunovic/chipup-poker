@@ -41,12 +41,15 @@ public:
 	QSettings& config() { return *settings; }
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
 	Data::User *findUser(QByteArray userid);
+	const Data::Game *getGame(QByteArray gameid) const;
 	QNetworkAccessManager *manager();
 	qint64 getUptime() { return uptime.elapsed(); }
 	qint64 getServerTime() { return clock_offset + uptime.elapsed(); }
 	Data::User *self() { Q_ASSERT(self_); return self_; }
 	void RegisterListener(QObject *listener);
 	SoundEffects *effects() { return effects_; }
+	void doLogin(QString username, QString password);
+	void testDisconnect() { socket.disconnectFromHost(); }
 
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
@@ -69,7 +72,7 @@ signals:
 	void sit_ok(QByteArray gameid);
 	void seat_taken(QByteArray gameid);
 	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
-
+	void club_changed(const Data::Club *);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -80,8 +83,7 @@ public slots:
     void parsePacket(Poker::ServerCodes code,std::string data);
 	void replyFinished(QNetworkReply *reply);
 private slots:
-    void socket_connected();
-    void send_ping();
+	void send_ping();
 private:
 	void srLoginReply(std::string data);
 	void seGameChange(std::string data);
@@ -94,6 +96,9 @@ private:
 	void srTableSitSeatTaken(std::string data);
 	void srTableBuyinLessThanCashout(std::string data);
 	void sePlayerClubStatus(std::string data);
+	void seClubChange(std::string data);
+
+	enum ReconnectState { notSignedIn, SignedIn };
 
     QSslSocket socket;
     QByteArray buffer;
@@ -106,6 +111,8 @@ private:
 	bool first_ping;
 	int totalError;
 	SoundEffects *effects_;
+	QString username,password;
+	enum ReconnectState reconnectState;
 };
 int parseValue(QString input);
 

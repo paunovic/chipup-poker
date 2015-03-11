@@ -3,7 +3,8 @@ unit Poker.Avatars.Avatar;
 interface
 
 uses
-  Vcl.Imaging.JPEG, Vcl.Graphics, System.Classes, System.SysUtils, Asphyre.Images, OverbyteIcsHttpProt, OverbyteIcsWSocket;
+  Vcl.Imaging.JPEG, Vcl.Graphics, System.Classes, System.SysUtils, Asphyre.Images,
+  OverbyteIcsHttpProt, OverbyteIcsWSocket;
 
 type
   TAvatar = class

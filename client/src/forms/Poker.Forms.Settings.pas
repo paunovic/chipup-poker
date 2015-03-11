@@ -3,10 +3,13 @@ unit Poker.Forms.Settings;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin,
-  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxPC, Vcl.StdCtrls, dximctrl, cxContainer, cxEdit, cxGroupBox, Vcl.ImgList, cxListBox, cxLabel,
-  dxGDIPlusClasses, cxImage, cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit, cxDropDownEdit, Vcl.ExtCtrls;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls,
+  cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin,
+  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxPC, Vcl.StdCtrls, dximctrl, cxContainer,
+  cxEdit, cxGroupBox, Vcl.ImgList, cxListBox, cxLabel, dxGDIPlusClasses, cxImage,
+  cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit,
+  cxDropDownEdit, Vcl.ExtCtrls;
 
 type
   TfrmSettings = class(TForm)
@@ -53,7 +56,7 @@ procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
   pcSettings.ActivePageIndex := 0;
   lbOptions.Selected[0] := TRUE;
-  cbCardBackground.ItemIndex := Settings.CardBackground;
+//  cbCardBackground.ItemIndex := Settings.CardBackground;
 end;
 
 procedure TfrmSettings.FormDestroy(Sender: TObject);
@@ -76,7 +79,7 @@ procedure TfrmSettings.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if ModalResult = mrOk then
   begin
-    Settings.CardBackground := cbCardBackground.ItemIndex;
+//    Settings.CardBackground := cbCardBackground.ItemIndex;
     Settings.Save;
   end;
 end;

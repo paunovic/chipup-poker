@@ -32,6 +32,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 		On_protocol_ready(true);
 	}
 #endif
+	setFixedSize(sizeHint());
 }
 
 LoginWindow::~LoginWindow() {
@@ -39,20 +40,18 @@ LoginWindow::~LoginWindow() {
 }
 void LoginWindow::On_protocol_ready(bool ready) {
 	qDebug() << "ready" << ready;
-	ui->btLogin->setEnabled(true);
-	ui->btLogin->setText(tr("LOGIN"));
+	ui->btLogin->setEnabled(ready);
+	if (ready) ui->btLogin->setText(tr("LOGIN"));
+	else ui->btLogin->setText(tr("Connecting..."));
 	ui->btLogin->setDefault(true);
-    ui->btCreateAccount->setEnabled(true);
+	ui->btCreateAccount->setEnabled(ready);
 	//ui->btForgotPassword->setEnabled(true);
-    //do_login();
+	//do_login();
 }
 void LoginWindow::on_btLogin_clicked() {
 	QString username = ui->edLogin->text();
 	QString password = ui->edPassword->text();
-	Poker::LoginParams lp;
-	lp.set_username(qPrintable(username));
-	lp.set_password(qPrintable(password));
-	core->sendMessage(Poker::scLogin,&lp);
+	core->doLogin(username,password);
 }
 void LoginWindow::on_edLogin_returnPressed() {
 	on_btLogin_clicked();

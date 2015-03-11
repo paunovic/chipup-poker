@@ -15,12 +15,13 @@ Table::Table(QWidget *parent) :
 {
 	ui->setupUi(this);
 	p = new TablePrivate;
-	p->setupUi(ui->centerWrap,ui->center);
+	p->setupUi(ui->centerWrap,ui->center,this);
 	core->RegisterListener(this);
 #ifdef JSDEBUG
 	debuger = new JsEditor(this);
 	debuger->show();
 #endif
+	ui->statusbar->setVisible(false);
 }
 Table::~Table() {
 	delete ui;
@@ -97,7 +98,9 @@ void Table::on_btMin_clicked() {
 void Table::on_btMax_clicked() {
 	ui->raiseSlider->setValue(lastTableStatus->maximum_raise);
 }
-
+void Table::renderWinning(QString msg) {
+	ui->teChat->append(QString("<font color='#00ff00'>Dealer:</font> <font color='#a8ff99'>%1</font>").arg(msg));
+}
 void Table::on_btCheck_clicked() {
 	Poker::PutChips pc;
 	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
@@ -135,10 +138,6 @@ void Table::on_teChatInput_returnPressed() {
 	qDebug() << layout->cellRect(0,0);
 	qDebug() << layout->cellRect(1,0);
 
-}
-void Table::resizeEvent(QResizeEvent *event) {
-	//qDebug() << height();
-	QMainWindow::resizeEvent(event);
 }
 void Table::editJs(QString newcode) {
 	p->editJs(newcode);

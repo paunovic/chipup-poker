@@ -652,6 +652,16 @@ object frmTable: TfrmTable
       Category = 'HandPlayback'
       OnExecute = acPreviousHandExecute
     end
+    object acJoinWaitingList: TAction
+      Category = 'Game'
+      Caption = 'acJoinWaitingList'
+      OnExecute = acJoinWaitingListExecute
+    end
+    object acLeaveWaitingList: TAction
+      Category = 'Game'
+      Caption = 'acLeaveWaitingList'
+      OnExecute = acLeaveWaitingListExecute
+    end
   end
   object RVStyle: TRVStyle
     TextStyles = <

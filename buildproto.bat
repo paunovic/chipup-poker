@@ -1,4 +1,4 @@
-if exist "C:\dev-cpp\devcpp.exe" (GOTO :setdevcpp) else (GOTO :setvs)
+if exist "C:\dev-cpp\devcpp.exe" (GOTO :setdevcpp) else (if exist "c:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" (GOTO :setvs) else (GOTO :notfound))
 
 :setdevcpp
 	set PATH=C:/dev-cpp/bin/;cpp-protobuf-generator;%PATH%
@@ -17,3 +17,10 @@ if exist "C:\dev-cpp\devcpp.exe" (GOTO :setdevcpp) else (GOTO :setvs)
 	cd ..
 	protoc message.proto backend.proto common.proto -o message.desc --delphi_out=cpp-protobuf-generator/output/
 	protocopier\bin\Win32\release\protocopier.exe
+	goto :end
+	
+:notfound
+	echo "ERROR: Dev C++ or Visual Studio not found!"
+	goto :end
+	
+:end
