@@ -56,7 +56,15 @@ type
     FPlayNowResizeRatio: Single;
     FPlayNowButtonWidth: Single;
     FPlayNowButtonHeight: Single;
+    FJoinWaitingListResizeRatio: Single;
+    FJoinWaitingListButtonWidth: Single;
+    FJoinWaitingListButtonHeight: Single;
+    FLeaveWaitingListResizeRatio: Single;
+    FLeaveWaitingListButtonWidth: Single;
+    FLeaveWaitingListButtonHeight: Single;
     FPlayNowButtonBounds: TPoint4;
+    FJoinWaitingListButtonBounds: TPoint4;
+    FLeaveWaitingListButtonBounds: TPoint4;
     FRaiseAmountBoxBounds: TRect;
     FHandPlaybackPreviousHand: TRect;
     FHandPlaybackNextHand: TRect;
@@ -124,6 +132,8 @@ type
     property HandPlaybackPreviousHand: TRect read FHandPlaybackPreviousHand;
     property StandUpButtonBounds: TPoint4 read FStandUpButtonBounds;
     property PlayNowButtonBounds: TPoint4 read FPlayNowButtonBounds;
+    property JoinWaitingListButtonBounds: TPoint4 read FJoinWaitingListButtonBounds;
+    property LeaveWaitingListButtonBounds: TPoint4 read FLeaveWaitingListButtonBounds;
     property RaisePresetButtonsBounds: TArray<TPoint4> read FRaisePresetButtonsBounds;
     property ActionButtonsBounds: TArray<TPoint4> read FActionButtonsBounds;
     property TotalRakePoint: TPoint2 read FTotalRakePoint;
@@ -488,10 +498,12 @@ begin
     FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top + FChatBoxBounds.Height), FChatBoxBounds.Width, 18);
     FCheckboxesLeft := FChatBoxBounds.Right + FLowerIntfBorder;
 
-    // playnow button resize ratio
+    // playnow and join/leave waiting list button resize ratio
     FPlayNowResizeRatio := FTableResizeRatio * 1.38;
     if FPlayNowResizeRatio > 1 then
       FPlayNowResizeRatio := 1;
+    FJoinWaitingListResizeRatio := FPlayNowResizeRatio;
+    FLeaveWaitingListResizeRatio := FPlayNowResizeRatio;
 
     // playnow button bounds
     FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
@@ -499,6 +511,16 @@ begin
     FPlayNowButtonBounds := pBounds4(FChatBoxBounds.Right + (ADXAreaSize.x - FChatBoxBounds.Right) / 2 - FPlayNowButtonWidth / 2,
                                      FChatBoxBounds.Top + (ADXAreaSize.y - FChatBoxBounds.Top) / 2.5 - FPlayNowButtonHeight / 2,
                                      FPlayNowButtonWidth, FPlayNowButtonHeight);
+
+    // join/leave waiting list button bounds
+    FJoinWaitingListButtonWidth := TableResources.JoinWaitingListNormal.Texture[0].Width * FJoinWaitingListResizeRatio;
+    FJoinWaitingListButtonHeight := FJoinWaitingListButtonWidth / TableResources.JoinWaitingListButtonAspectRatio;
+
+    FLeaveWaitingListButtonWidth := TableResources.LeaveWaitingListNormal.Texture[0].Width * FLeaveWaitingListResizeRatio;
+    FLeaveWaitingListButtonHeight := FLeaveWaitingListButtonWidth / TableResources.LeaveWaitingListButtonAspectRatio;
+
+    FJoinWaitingListButtonBounds := FPlayNowButtonBounds;
+    FLeaveWaitingListButtonBounds := FLeaveWaitingListButtonBounds;
 
     // hand playback bounds
     wint := Round(ADXAreaSize.x / 2.5);

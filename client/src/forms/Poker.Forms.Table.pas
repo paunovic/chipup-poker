@@ -61,6 +61,8 @@ type
     cbAutoCall: TcxCheckBox;
     cbAutoCallAny: TcxCheckBox;
     cbSplitTableCards: TcxCheckBox;
+    acJoinWaitingList: TAction;
+    acLeaveWaitingList: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -105,6 +107,8 @@ type
     procedure acPreviousHandExecute(Sender: TObject);
     procedure cbAutoCheckPropertiesChange(Sender: TObject);
     procedure cbSplitTableCardsPropertiesChange(Sender: TObject);
+    procedure acJoinWaitingListExecute(Sender: TObject);
+    procedure acLeaveWaitingListExecute(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -252,6 +256,8 @@ begin
 
     table.Renderer.AddDXButton(acStandUp, @table.Renderer.Metrics.StandUpButtonBounds, TableResources.StandUpButtonNormalImage, TableResources.StandUpButtonPressedImage, nil);
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
+    table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
+    table.Renderer.AddDXButton(acLeaveWaitingList, @table.Renderer.Metrics.LeaveWaitingListButtonBounds, TableResources.LeaveWaitingListNormal, TableResources.LeaveWaitingListPressed, nil);
 
     FDXBFold := table.Renderer.AddDXButton(acFold, @table.Renderer.Metrics.ActionButtonsBounds[0],
          TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
@@ -987,6 +993,8 @@ begin
     acRaisePot.Enabled := acRaise.Enabled;
     acRaiseMax.Enabled := acRaise.Enabled;
     acPlayNow.Enabled := table.Status.ActionPlayNow;
+    acJoinWaitingList.Enabled := table.Status.ActionJoinWaitingList;
+    acLeaveWaitingList.Enabled := table.Status.ActionLeaveWaitingList;
     acShowCards.Enabled := table.Status.ActionShowCards;
     acTableStats.Enabled := table.Status.ActionShowStats;
   finally
@@ -1724,6 +1732,40 @@ begin
     acHandPlaybackPause.Execute;
     if table.HandHistoryPlayback.CurrentStateIndex < table.HandHistoryPlayback.States.Count - 1 then
       table.SetTableStatus(table.HandHistoryPlayback.NextState, TRUE);
+  finally
+    Tables.Unlock;
+  end;
+end;
+
+procedure TfrmTable.acJoinWaitingListExecute(Sender: TObject);
+var
+  table: TTable;
+  member: TPB_ClubMember;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
+       (member.Suspended) then
+      Exit;
+
+    ServerSocket.TableSit(FGameId, -1, 0);
+  finally
+    Tables.Unlock;
+  end;
+end;
+
+procedure TfrmTable.acLeaveWaitingListExecute(Sender: TObject);
+var
+  table: TTable;
+  member: TPB_ClubMember;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
+       (member.Suspended) then
+      Exit;
+
+    ServerSocket.TableStandUp(FGameId);
   finally
     Tables.Unlock;
   end;

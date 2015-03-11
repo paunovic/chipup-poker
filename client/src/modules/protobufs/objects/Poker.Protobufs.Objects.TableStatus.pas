@@ -39,6 +39,7 @@ type
       kMinimumRaiseFieldNumber = 26;
       kTableTypeFieldNumber = 27;
       kTableMessageFieldNumber = 28;
+      kQueuePositionFieldNumber = 29;
 
     var
       FTableMongoId: TMongoId;
@@ -64,6 +65,7 @@ type
       FMinimumRaise: UInt32;
       FTableType: TTableType;
       FTableMessage: TList<TPB_TableMessage>;
+      FQueuePosition: Integer;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
@@ -130,6 +132,9 @@ type
     procedure SetTableType(const AValue: TTableType);
     procedure set_has_TableMessage;
     procedure clear_has_TableMessage;
+    procedure set_has_QueuePosition;
+    procedure clear_has_QueuePosition;
+    procedure SetQueuePosition(const AValue: Integer);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -260,6 +265,11 @@ type
     function has_TableMessage: Boolean;
     procedure clear_TableMessage;
     property TableMessage: TList<TPB_TableMessage> read FTableMessage;
+
+    // optional int32 QueuePosition = 29;
+    function has_QueuePosition: Boolean;
+    procedure clear_QueuePosition;
+    property QueuePosition: Integer read FQueuePosition write SetQueuePosition;
 
   end;
 
@@ -452,6 +462,11 @@ begin
         FTableMessage.Add(TPB_TableMessage.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_TableMessage;
       end;
+      kQueuePositionFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FQueuePosition := AProtobufReader.readInt32;
+        set_has_QueuePosition;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -509,6 +524,8 @@ begin
     SetTableType(AFrom.TableType);
   for pbobj22 in AFrom.TableMessage do
     FTableMessage.Add(TPB_TableMessage.Create(pbobj22, Lightweight));
+  if AFrom.has_QueuePosition then
+    SetQueuePosition(AFrom.QueuePosition);
 end;
 
 function TPB_TableStatus.IsInitialized: Boolean;
@@ -1280,6 +1297,37 @@ begin
   end;
 end;
 
+procedure TPB_TableStatus.clear_QueuePosition;
+begin
+  FQueuePosition := 0;
+  clear_has_QueuePosition;
+end;
+
+function TPB_TableStatus.has_QueuePosition: Boolean;
+begin
+  result := (_has_bits_ and 268435456) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_QueuePosition;
+begin
+  _has_bits_ := _has_bits_ or 268435456;
+end;
+
+procedure TPB_TableStatus.clear_has_QueuePosition;
+begin
+  _has_bits_ := _has_bits_ and not 268435456;
+end;
+
+procedure TPB_TableStatus.SetQueuePosition(const AValue: Integer);
+begin
+  if not Lightweight then
+    Assert(not has_QueuePosition);
+  FQueuePosition := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kQueuePositionFieldNumber, AValue);
+  set_has_QueuePosition;
+end;
+
 procedure TPB_TableStatus.Clear;
 begin
   if _has_bits_ = 0 then
@@ -1308,6 +1356,7 @@ begin
   clear_MinimumRaise;
   clear_TableType;
   clear_TableMessage;
+  clear_QueuePosition;
 end;
 
 procedure TPB_TableStatusList.Assign(const APB_TableStatusList: TList<TPB_TableStatus>);
