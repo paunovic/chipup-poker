@@ -7,6 +7,8 @@ var localPots = [];
 var db = new DealerButton();
 var testcase = false;
 
+var cardWidth = 0.05;
+
 var idleChips = [];
 function getChipStack() {
 	if (idleChips.length) return idleChips.pop();
@@ -54,7 +56,7 @@ function tableStatus(ts) {
 				var offset = i*3;
 				for (var x=0; x<3; x++) {
 					if (!localFlop[x+offset]) localFlop[x+offset] = new Card();
-					localFlop[x+offset].setSize(0.063);
+					localFlop[x+offset].setSize(cardWidth);
 					localFlop[x+offset].card = card.cards[x];
 					localFlop[x+offset].visible = false;
 				}
@@ -68,7 +70,7 @@ function tableStatus(ts) {
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localTurn[i]) localTurn[i] = new Card();
-				localTurn[i].setSize(0.063);
+				localTurn[i].setSize(cardWidth);
 				localTurn[i].visible = false;
 				if (!sets[i]) sets[i] = [];
 				if (i == 0) height = 0.477;
@@ -82,7 +84,7 @@ function tableStatus(ts) {
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localRiver[i]) localRiver[i] = new Card();
-				localRiver[i].setSize(0.063);
+				localRiver[i].setSize(cardWidth);
 				localRiver[i].visible = false;
 				if (!sets[i]) sets[i] = [];
 				if (i == 0) height = 0.477;
@@ -146,7 +148,7 @@ function AnimateCards(opts) {
 				} else {
 					card = new Card();
 					log('placing card at:'+JSON.stringify(pos));
-					card.setSize(0.063);
+					card.setSize(cardWidth);
 					local.cards[j] = card;
 					queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
 					queueAction(new RevealCard(local.cards[j],cardvalue));
@@ -179,7 +181,7 @@ AnimateFlop.prototype.begin = function () {
 	for (var x=0; x<3; x++) {
 		if (!localFlop[x+this.offset]) localFlop[x+this.offset] = new Card();
 		localFlop[x+this.offset].visible = false;
-		localFlop[x+this.offset].setSize(0.063);
+		localFlop[x+this.offset].setSize(cardWidth);
 	}
 	localFlop[0+this.offset].card = -1;
 	localFlop[0+this.offset].setPosition(0.5,0.1);
@@ -415,7 +417,6 @@ function calcSeatPosition(index) {
 function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
-	var cardWidth = 0.063;
 	var cardOffset = cardWidth;
 	var seatWidth = 0.16;
 	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
@@ -486,11 +487,12 @@ function calcBetLocation(seat) {
 function DealCard(destx,desty,cardobj) {
 	this.destx = destx;
 	this.desty = desty;
+	if (this.destx < 0) throw "invalid x pos";
 	this.cardobj = cardobj;
 	//cardobj.visible = false;
 }
 DealCard.prototype.begin = function DealCardBegin() {
-	log("starting card animation");
+	log("starting card animation "+this.destx+" "+this.desty);
 	this.cardobj.card = -1;
 	this.cardobj.visible = true;
 	this.cardobj.setPosition(0.5,0.1);

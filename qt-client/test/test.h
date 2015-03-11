@@ -7,6 +7,7 @@ private slots:
 	void cleanupTestCase();
 	void testsomething_data();
 	void testsomething();
+	void rendercards_data();
 	void rendercards();
 	void animate();
 	void renderChips_data();

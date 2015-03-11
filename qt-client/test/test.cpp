@@ -88,7 +88,16 @@ void TestCase::renderChips() {
 
 	core = 0;
 }
+void TestCase::rendercards_data() {
+	QTest::addColumn<QString>("name");
+	QTest::addColumn<double>("size");
+	QTest::newRow("small") << "cards_s.png" << 0.04;
+	QTest::newRow("big") << "cards_b.png" << 0.1;
+}
+
 void TestCase::rendercards() {
+	QFETCH(QString,name);
+	QFETCH(double,size);
 	int result;
 	TablePrivate p;
 	PokerMain pm;
@@ -101,6 +110,7 @@ void TestCase::rendercards() {
 	Data::Game g;
 	g.seats = 5;
 	p.setGame(&g);
+	p.global().setProperty("size",size);
 	QFile input(QFINDTESTDATA("cards.js"));
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";
@@ -115,7 +125,7 @@ void TestCase::rendercards() {
 
 	QPixmap image(root.size());
 	root.render(&image);
-	image.save("cards.png");
+	image.save(name);
 
 	core = 0;
 }
@@ -255,7 +265,7 @@ void TestCase::animate() {
 	root.render(&image);
 	image.save("frame0.png");
 	int x = 1;
-	for (int time=10; time < 1020; time+=20) {
+	for (int time=10; time < 1050; time+=20) {
 		root.render(&image);
 		ac.setTime(time);
 		ac.tick();
@@ -264,7 +274,8 @@ void TestCase::animate() {
 	}
 
 	QApplication::sendPostedEvents(0, QEvent::DeferredDelete);
-	QCOMPARE(0,ac.animationCount());
+	ac.dumpObjectTree();
+	QCOMPARE(ac.animationCount(),0);
 
 	core = 0;
 	animateCore = 0;

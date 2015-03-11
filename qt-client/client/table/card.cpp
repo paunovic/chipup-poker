@@ -74,15 +74,20 @@ CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(pa
 	font = QFont("Card Characters");
 	font.setBold(true);
 	font.setPixelSize(10);
-	fm = new QFontMetrics(font);
+	fm = new QFontMetricsF(font);
 	updateFace();
 }
 void CardObjectUi::paintEvent(QPaintEvent *) {
 	QPainter p(this);
 	p.setPen(Qt::NoPen);
 	p.setBrush(QColor(127,0,0));
-	int pixelsize = (qreal)width() * 0.35;
-	font.setPixelSize(pixelsize);
+	if (lastsize != width()) {
+		int pixelsize = (qreal)width() * 0.35;
+		font.setPixelSize(pixelsize);
+		delete fm;
+		fm = new QFontMetricsF(font);
+		lastsize = width();
+	}
 	//p.drawRect(0,0,width(),height());
 
 	int card = jsobj->getCard();
@@ -92,17 +97,17 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 		p.drawPixmap(0,0,width(),height(),pix);
 		int target_width = (qreal)width() * 0.55;
 		int target_height = ((qreal)face.height()*target_width)/face.width();
-		int target_x = (width()/2) - (target_width/2);
+		int target_x = width() - target_width - (width() * 0.05);
 		int target_y = (height()/2) - (target_height/2);
 		QRectF faceLocation(target_x,target_y,target_width,target_height);
 		p.drawPixmap(faceLocation,face,QRectF());
 
 		p.setPen(getSuitColor(card));
 		p.setFont(font);
-		QString value = getDisplayValue(card)+"\n"+getSuitFontCode(card);
-		QRectF rank(fm->boundingRect(value));
-		rank.moveTo(0,0.01*width());
-		qDebug() << rank;
+		QString value = getDisplayValue(card)+"\r\n"+getSuitFontCode(card);
+		QRectF safezone(0.02*height(),0.02*width(),0.225*width(),height());
+		QRectF rank = fm->boundingRect(safezone,0,value);
+		//rank.moveTo(0.01*height(),0.01*width());
 		p.drawText(rank,0,value);
 	}
 }
