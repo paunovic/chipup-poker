@@ -405,7 +405,8 @@ message TableStatus {
 	optional uint32 minimum_raise = 26;
 	required TableType table_type = 27;
 	repeated TableMessage table_message = 28;
-	optional int32 queue_position = 29;
+	optional uint32 queue_position = 29;
+	repeated uint32 reserved_seats = 30;
 }
 
 message SeatInfo {

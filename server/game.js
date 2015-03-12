@@ -92,6 +92,8 @@ function Game(obj) {
 	this.seats = []; // internal data for seats
 	this.reconnect = []; // array of ObjectId's for offline members
 	this.timebanks = {}; // timebank data for all users who have visited the table
+	this.sitQueue = []; // array of people waiting to sit down
+	this.reserved_seats = []; // array of {index:int, userid:objectid} for sitQueue action
 	this.obj = obj;
 	this.id = obj._id;
 	activeGames[this.id] = this;
@@ -321,6 +323,13 @@ Game.prototype.sitDown = function (conn,params,cb) {
 	assert(conn.userid);
 	var events = [];
 	conn.log('sitting down',params);
+	if (params.seat_index == -1) {
+		// check that all seats are filled
+		this.sitQueue.push(conn.userid);
+		conn.send(codes.seTableStatus,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
+		cb(false,events);
+		return;
+	}
 	if ((params.seat_index < 0) || (params.seat_index >= this.obj.seats)) {
 		conn.reply(0,'invalid seat index');
 		cb(false,events);
@@ -1275,6 +1284,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 		} else {
 			var table = { flop: this.flops[0], turn:this.turns[0], river:this.rivers[0] };
 			var results = []
+			console.log(table);
 			results[0] = dag.rankHands(table,hands);
 			console.log(results[0]);
 			if (this.flops[1]) table.flop = this.flops[1];
@@ -2061,12 +2071,19 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		}
 		tableStatus.seats.push(obj);
 	}
+	tableStatus.reserved_seats = [];
+	for (var x=0; x<this.reserved_seats.length; x++) {
+		tableStatus.reserved_seats.push(this.reserved_seats[x].index);
+	}
 	tableStatus.dealer = this.dealer;
 	tableStatus.current_seat = this.current_seat;
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
 	tableStatus.table_message = this.message;
+	if (this.sitQueue.indexOf(self.userid) != -1) {
+		tableStatus.queue_position = this.sitQueue.indexOf(self.userid) + 1;
+	}
 	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }
@@ -2242,6 +2259,10 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 						token2.stop();
 						token7.stop(); // 31ms 31%
 						token9.stop(); // 3ms
+						if (this.sitQueue.length) {
+							var next = this.sitQueue.shift();
+							this.reserved_seats.push({index:seatIdx,userid:next});
+						}
 						cb1(folded,events,offset);
 					});
 				}.bind(this));
@@ -2263,6 +2284,9 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 					this.broadcastStatus(null,true,events);
 					finish.call(this);
 				}.bind(this));
+		} else if (this.sitQueue.indexOf(conn.userid) != -1) {
+			// TODO, de-queue upon logout
+			finish.call(this);
 		} else finish.call(this);
 		function finish() {
 			var count = 0,key;
@@ -2298,6 +2322,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 	}.bind(this));
 }
 Game.prototype.handleDisconnect = function (conn,reason,userid,cb) {
+	// ran if a user is in the users array
 	assert(conn.userid);
 	if (this.club && (reason == 'logout')) {
 		conn.log('club game logout');
@@ -2431,6 +2456,7 @@ Game.prototype.stopTimer = function stopTimer(seat) {
 	this.timer = null;
 }
 Game.handleDisconnect = function handleDisconnect(conn,reason,cb1) {
+	// ran for ANY disconnection event
 	conn.log('handling disconnect:%s',reason);
 	var jobs = [];
 	for (var key in activeGames) {
