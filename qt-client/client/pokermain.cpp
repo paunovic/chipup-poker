@@ -47,7 +47,7 @@ void PokerMain::replyFinished(QNetworkReply *reply) {
 }
 void PokerMain::try_connect() {
     if (socket.state() == QAbstractSocket::UnconnectedState) {
-        socket.connectToHostEncrypted("server.chipuppoker.com",12346);
+		socket.connectToHostEncrypted("dev-server.chipuppoker.com",12346);
     }
 }
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
@@ -82,6 +82,13 @@ static void flagOffline(QMainWindow *mainWindow) {
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "incoming err" << errors;
+//#define DEVSERVER
+#ifndef DEVSERVER
+	QList<QSslCertificate> cert = QSslCertificate::fromPath(":/resources/OfficialServerCertificate.pem");
+#else
+	QList<QSslCertificate> cert = QSslCertificate::fromPath(":/resources/DevServerCertificate.pem");
+#endif
+#if 0
     QList<QSslCertificate> cert = QSslCertificate::fromData(
                 "-----BEGIN CERTIFICATE-----\n"
                 "MIIDiTCCAnGgAwIBAgIJAKfTetvcSDlkMA0GCSqGSIb3DQEBBQUAMFsxCzAJBgNV\n"
@@ -104,10 +111,15 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
                 "HkaMVE+e0ZCaYpuDbl1bnhkYhOmP/p7rC/r0kuvwYFAgfbhOW70/wgwxz9qFRS0O\n"
                 "8XZWdnYfZX068XiJMVxR7+Q44aR8nv7cpc8r7OfpxbShoL9W2RoPGn0u1Yrq\n"
                 "-----END CERTIFICATE-----\n");
+#endif
     qDebug() << "certs" << cert;
-    QSslError error(QSslError::SelfSignedCertificate, cert.at(0));
+	QSslError errorSelfSigned(QSslError::SelfSignedCertificate, cert.at(0));
     QList<QSslError> expectedSslErrors;
-    expectedSslErrors.append(error);
+	expectedSslErrors.append(errorSelfSigned);
+#ifdef DEVSERVER
+	QSslError wrongHostError(QSslError::HostNameMismatch, cert.at(0));
+	expectedSslErrors.append(wrongHostError);
+#endif
     socket.ignoreSslErrors(expectedSslErrors);
     qDebug() << "expected error" << expectedSslErrors;
 }

@@ -26,6 +26,7 @@ private slots:
 	void on_edLogin_returnPressed();
 	void on_edPassword_returnPressed();
 	void On_login_sucess();
+	void On_login_failure();
 };
 
 #endif // LOGINWINDOW_H

@@ -50,6 +50,7 @@ private slots:
 	void on_btSitOut_stateChanged(int state);
 	void on_cbSitOutBB_stateChanged(int state);
 	void on_btDouble_stateChanged(int state);
+	void on_btJoinWaitingList_clicked();
 private:
 	Ui::Table *ui;
 	TablePrivate *p;

@@ -1,6 +1,8 @@
 #ifndef CHIP_H
 #define CHIP_H
 
+#include <QFontMetrics>
+
 #include "tableprivate.h"
 
 class ChipObject;
@@ -17,6 +19,11 @@ private:
 	ChipObject *jsobj;
 	QPixmap c1,c5,c25,c100,c500,c1000;
 	QList<QPixmap> chips;
+	QFont font;
+	QFontMetrics *fm;
+	QString text;
+	QRect textRegion;
+	QSize sizeHintInternal;
 };
 
 class ChipObject : public GameObject {

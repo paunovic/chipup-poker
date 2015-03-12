@@ -209,7 +209,7 @@ void TestCase::alignment() {
 	initial.set_state(Poker::TableStatus::tsPreFlop);
 	for (int i=0; i<seats; i++) {
 		if (i == 2) initial.add_bets(300);
-		else initial.add_bets(200);
+		else initial.add_bets(123*i);
 	}
 	Poker::TableEvent *dealing = initial.add_events();
 	dealing->set_event(Poker::TableEvent::teDealing);
@@ -228,6 +228,7 @@ void TestCase::alignment() {
 	}
 	QPixmap image(tbl.size());
 	tbl.render(&image);
+	qDebug() << "saving" << filename;
 	image.save(filename);
 	
 	core = 0;

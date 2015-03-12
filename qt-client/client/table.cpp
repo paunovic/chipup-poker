@@ -57,6 +57,12 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 		ui->cbSitOutBB->setVisible(false);
 		ui->btSitOut->setVisible(false);
 		ui->cbFoldAny->setVisible(false);
+		ui->btLeaveWaitingList->setVisible(false);
+		if ((ts->table_type == Poker::TableStatus::ttLive) &&
+				(game->seats == ts->seats.length()) &&
+				 (ts->queue_position == 0)) {
+			ui->btJoinWaitingList->setVisible(true);
+		} else ui->btJoinWaitingList->setVisible(false);
 		ui->stackedWidget->setCurrentIndex(0);
 	} else { // sitting, play now may be needed
 		switch (seat->rawStatus()) {
@@ -233,4 +239,11 @@ void Table::on_btDouble_stateChanged(int state) {
 
 void Table::On_sit_ok(QByteArray gameid) {
 	if (gameid != game->gameid) return;
+}
+void Table::on_btJoinWaitingList_clicked() {
+	Poker::TableSit ts;
+	ts.set_game_id(game->gameid.data(),game->gameid.length());
+	ts.set_chips(0);
+	ts.set_seat_index(-1);
+	core->sendMessage(Poker::scTableSit,&ts);
 }

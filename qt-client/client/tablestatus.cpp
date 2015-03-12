@@ -55,6 +55,8 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		m.update(in.table_message(i));
 		table_message.append(m);
 	}
+	if (in.has_queue_position()) queue_position = in.queue_position();
+	else queue_position = 0;
 }
 QString TableStatus::getState() {
 	switch (state_) {

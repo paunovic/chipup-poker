@@ -57,6 +57,7 @@ type get ## name() { return name; }
 	Poker::Game::GameLimit game_limit;
 	Poker::TableStatus::TableType table_type;
 	QList<Data::TableMessage> table_message;
+	int queue_position;
 signals:
 
 public slots:

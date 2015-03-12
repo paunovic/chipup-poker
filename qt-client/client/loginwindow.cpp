@@ -1,4 +1,5 @@
 #include <QPainter>
+#include <QMessageBox>
 
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
@@ -86,6 +87,10 @@ void LoginWindow::On_login_sucess() {
 	close();
 	deleteLater();
 }
+void LoginWindow::On_login_failure() {
+	QMessageBox::warning(this,tr("Warning"),tr("Invalid login/password"));
+}
+
 void LoginWindow::paintEvent(QPaintEvent *) {
 	QPainter p(this);
 	int targetHeight = ((qreal)background.height()*width())/background.width();

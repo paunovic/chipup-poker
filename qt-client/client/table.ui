@@ -126,7 +126,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_3">
          <layout class="QHBoxLayout" name="verticalLayout_5">
@@ -134,6 +134,49 @@
            <widget class="QPushButton" name="btPlayNow">
             <property name="text">
              <string>Play Now</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btJoinWaitingList">
+            <property name="minimumSize">
+             <size>
+              <width>77</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+	border-image: url(:/resources/waiting_list/JoinWaitingList_Normal.png);
+}
+QPushButton:pressed {
+	border-image: url(:/resources/waiting_list/JoinWaitingList_Pressed.png);
+}
+</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btLeaveWaitingList">
+            <property name="minimumSize">
+             <size>
+              <width>77</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+	border-image: url(:/resources/waiting_list/LeaveWaitingList_Normal.png);
+}
+QPushButton:pressed {
+	border-image: url(:/resources/waiting_list/LeaveWaitingList_Pressed.png);
+}</string>
+            </property>
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>
