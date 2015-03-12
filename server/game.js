@@ -2264,7 +2264,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 							this.reserved_seats.push({index:seatIdx,userid:next});
 						}
 						cb1(folded,events,offset);
-					});
+					}.bind(this));
 				}.bind(this));
 			}
 		}
