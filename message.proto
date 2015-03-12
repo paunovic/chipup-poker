@@ -62,6 +62,7 @@ enum ServerCodes {
 	seTournamentPlayerFinished = 61;
 	seTournamentPlayerTransfer = 62;
 	sePlayerClubStatus = 63;
+	seReservedSeatFree = 64;
 	
 	scHello = 70;
 	scLogin = 71;
@@ -767,4 +768,8 @@ message DeleteTableStats {
 message SoftException {
 	required string exception = 1;
 	optional string data = 2;
+}
+message ReservedSeatFree {
+	required TableStatus ts = 1;
+	required uint32 seat_index = 2;
 }

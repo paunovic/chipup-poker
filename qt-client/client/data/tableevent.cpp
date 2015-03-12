@@ -37,10 +37,16 @@ QString TableEvent::getEvent() {
 	case Poker::TableEvent::teTurn: return "teTurn"; // 10
 	case Poker::TableEvent::teRiver: return "teRiver"; // 11
 	case Poker::TableEvent::tePostRiver: return "tePostRiver"; // 12
-	case Poker::TableEvent::teExistingCards: return "teExistingCards"; // 14
+	case Poker::TableEvent::tePreWin: return "tePreWin";			// 13
+	case Poker::TableEvent::teExistingCards: return "teExistingCards";	// 14
+	case Poker::TableEvent::teDisconnect: return "teDisconnect";		// 15
+	case Poker::TableEvent::teSB: return "teSB";				// 16
+	case Poker::TableEvent::teBB: return "teBB";				// 17
+	case Poker::TableEvent::teForced: return "teForced";			// 18
 //	default:
 //		return QString("FIXME:%1").arg(event);
 	}
+	return "ERROR";
 }
 int TableEvent::getCardCount() {
 	return cards.length();

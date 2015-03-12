@@ -103,6 +103,7 @@ class TournamentPrize;
 class PlayerClubStatus;
 class DeleteTableStats;
 class SoftException;
+class ReservedSeatFree;
 
 enum UpdateFileInfo_UpdateFileType {
   UpdateFileInfo_UpdateFileType_ufFull = 0,
@@ -646,6 +647,7 @@ enum ServerCodes {
   seTournamentPlayerFinished = 61,
   seTournamentPlayerTransfer = 62,
   sePlayerClubStatus = 63,
+  seReservedSeatFree = 64,
   scHello = 70,
   scLogin = 71,
   scTournamentRegister = 72,
@@ -4612,12 +4614,24 @@ class TableStatus : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Poker::TableMessage >*
       mutable_table_message();
 
-  // optional int32 queue_position = 29;
+  // optional uint32 queue_position = 29;
   inline bool has_queue_position() const;
   inline void clear_queue_position();
   static const int kQueuePositionFieldNumber = 29;
-  inline ::google::protobuf::int32 queue_position() const;
-  inline void set_queue_position(::google::protobuf::int32 value);
+  inline ::google::protobuf::uint32 queue_position() const;
+  inline void set_queue_position(::google::protobuf::uint32 value);
+
+  // repeated uint32 reserved_seats = 30;
+  inline int reserved_seats_size() const;
+  inline void clear_reserved_seats();
+  static const int kReservedSeatsFieldNumber = 30;
+  inline ::google::protobuf::uint32 reserved_seats(int index) const;
+  inline void set_reserved_seats(int index, ::google::protobuf::uint32 value);
+  inline void add_reserved_seats(::google::protobuf::uint32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+      reserved_seats() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+      mutable_reserved_seats();
 
   // @@protoc_insertion_point(class_scope:Poker.TableStatus)
  private:
@@ -4685,10 +4699,11 @@ class TableStatus : public ::google::protobuf::Message {
   ::google::protobuf::uint32 minimum_raise_;
   int table_type_;
   ::google::protobuf::RepeatedPtrField< ::Poker::TableMessage > table_message_;
-  ::google::protobuf::int32 queue_position_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > reserved_seats_;
+  ::google::protobuf::uint32 queue_position_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(24 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(25 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -9712,6 +9727,100 @@ class SoftException : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SoftException* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ReservedSeatFree : public ::google::protobuf::Message {
+ public:
+  ReservedSeatFree();
+  virtual ~ReservedSeatFree();
+
+  ReservedSeatFree(const ReservedSeatFree& from);
+
+  inline ReservedSeatFree& operator=(const ReservedSeatFree& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ReservedSeatFree& default_instance();
+
+  void Swap(ReservedSeatFree* other);
+
+  // implements Message ----------------------------------------------
+
+  ReservedSeatFree* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ReservedSeatFree& from);
+  void MergeFrom(const ReservedSeatFree& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required .Poker.TableStatus ts = 1;
+  inline bool has_ts() const;
+  inline void clear_ts();
+  static const int kTsFieldNumber = 1;
+  inline const ::Poker::TableStatus& ts() const;
+  inline ::Poker::TableStatus* mutable_ts();
+  inline ::Poker::TableStatus* release_ts();
+  inline void set_allocated_ts(::Poker::TableStatus* ts);
+
+  // required uint32 seat_index = 2;
+  inline bool has_seat_index() const;
+  inline void clear_seat_index();
+  static const int kSeatIndexFieldNumber = 2;
+  inline ::google::protobuf::uint32 seat_index() const;
+  inline void set_seat_index(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:Poker.ReservedSeatFree)
+ private:
+  inline void set_has_ts();
+  inline void clear_has_ts();
+  inline void set_has_seat_index();
+  inline void clear_has_seat_index();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Poker::TableStatus* ts_;
+  ::google::protobuf::uint32 seat_index_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_message_2eproto();
+  friend void protobuf_AssignDesc_message_2eproto();
+  friend void protobuf_ShutdownFile_message_2eproto();
+
+  void InitAsDefaultInstance();
+  static ReservedSeatFree* default_instance_;
 };
 // ===================================================================
 
@@ -15165,7 +15274,7 @@ TableStatus::mutable_table_message() {
   return &table_message_;
 }
 
-// optional int32 queue_position = 29;
+// optional uint32 queue_position = 29;
 inline bool TableStatus::has_queue_position() const {
   return (_has_bits_[0] & 0x00800000u) != 0;
 }
@@ -15176,15 +15285,40 @@ inline void TableStatus::clear_has_queue_position() {
   _has_bits_[0] &= ~0x00800000u;
 }
 inline void TableStatus::clear_queue_position() {
-  queue_position_ = 0;
+  queue_position_ = 0u;
   clear_has_queue_position();
 }
-inline ::google::protobuf::int32 TableStatus::queue_position() const {
+inline ::google::protobuf::uint32 TableStatus::queue_position() const {
   return queue_position_;
 }
-inline void TableStatus::set_queue_position(::google::protobuf::int32 value) {
+inline void TableStatus::set_queue_position(::google::protobuf::uint32 value) {
   set_has_queue_position();
   queue_position_ = value;
+}
+
+// repeated uint32 reserved_seats = 30;
+inline int TableStatus::reserved_seats_size() const {
+  return reserved_seats_.size();
+}
+inline void TableStatus::clear_reserved_seats() {
+  reserved_seats_.Clear();
+}
+inline ::google::protobuf::uint32 TableStatus::reserved_seats(int index) const {
+  return reserved_seats_.Get(index);
+}
+inline void TableStatus::set_reserved_seats(int index, ::google::protobuf::uint32 value) {
+  reserved_seats_.Set(index, value);
+}
+inline void TableStatus::add_reserved_seats(::google::protobuf::uint32 value) {
+  reserved_seats_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+TableStatus::reserved_seats() const {
+  return reserved_seats_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+TableStatus::mutable_reserved_seats() {
+  return &reserved_seats_;
 }
 
 // -------------------------------------------------------------------
@@ -20995,6 +21129,70 @@ inline void SoftException::set_allocated_data(::std::string* data) {
     clear_has_data();
     data_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// -------------------------------------------------------------------
+
+// ReservedSeatFree
+
+// required .Poker.TableStatus ts = 1;
+inline bool ReservedSeatFree::has_ts() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ReservedSeatFree::set_has_ts() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ReservedSeatFree::clear_has_ts() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ReservedSeatFree::clear_ts() {
+  if (ts_ != NULL) ts_->::Poker::TableStatus::Clear();
+  clear_has_ts();
+}
+inline const ::Poker::TableStatus& ReservedSeatFree::ts() const {
+  return ts_ != NULL ? *ts_ : *default_instance_->ts_;
+}
+inline ::Poker::TableStatus* ReservedSeatFree::mutable_ts() {
+  set_has_ts();
+  if (ts_ == NULL) ts_ = new ::Poker::TableStatus;
+  return ts_;
+}
+inline ::Poker::TableStatus* ReservedSeatFree::release_ts() {
+  clear_has_ts();
+  ::Poker::TableStatus* temp = ts_;
+  ts_ = NULL;
+  return temp;
+}
+inline void ReservedSeatFree::set_allocated_ts(::Poker::TableStatus* ts) {
+  delete ts_;
+  ts_ = ts;
+  if (ts) {
+    set_has_ts();
+  } else {
+    clear_has_ts();
+  }
+}
+
+// required uint32 seat_index = 2;
+inline bool ReservedSeatFree::has_seat_index() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ReservedSeatFree::set_has_seat_index() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ReservedSeatFree::clear_has_seat_index() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ReservedSeatFree::clear_seat_index() {
+  seat_index_ = 0u;
+  clear_has_seat_index();
+}
+inline ::google::protobuf::uint32 ReservedSeatFree::seat_index() const {
+  return seat_index_;
+}
+inline void ReservedSeatFree::set_seat_index(::google::protobuf::uint32 value) {
+  set_has_seat_index();
+  seat_index_ = value;
 }
 
 

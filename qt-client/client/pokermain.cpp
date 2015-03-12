@@ -47,7 +47,11 @@ void PokerMain::replyFinished(QNetworkReply *reply) {
 }
 void PokerMain::try_connect() {
     if (socket.state() == QAbstractSocket::UnconnectedState) {
+#ifdef DEVSERVER
 		socket.connectToHostEncrypted("dev-server.chipuppoker.com",12346);
+#else
+		socket.connectToHostEncrypted("server.chipuppoker.com",12346);
+#endif
     }
 }
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
@@ -82,7 +86,6 @@ static void flagOffline(QMainWindow *mainWindow) {
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
     qDebug() << "incoming err" << errors;
-//#define DEVSERVER
 #ifndef DEVSERVER
 	QList<QSslCertificate> cert = QSslCertificate::fromPath(":/resources/OfficialServerCertificate.pem");
 #else
