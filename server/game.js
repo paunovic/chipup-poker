@@ -316,6 +316,16 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		if (this.bets[params.seat_index] == undefined) this.bets[params.seat_index] = 0;
 		events.push(this.makeEvent('teSit',params.seat_index));
 		this.updateBuyin(params.seat_index,params.chips,function () {
+			if (this.reserved_seats.length > 0) {
+				// atleast one seat is reserved, check which index and un-reserve it
+				for (var x=0; x<this.reserved_seats.length; x++) {
+					if (this.reserved_seats[x].index == params.seat_index) {
+						clearTimeout(this.reserved_seats[x].timer);
+						this.reserved_seats.splice(x,1);
+						break;
+					}
+				}
+			}
 			finish.call(this);
 		}.bind(this));
 	}
@@ -329,6 +339,22 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		conn.send(codes.seTableStatus,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
 		cb(false,events);
 		return;
+	}
+	if (this.reserved_seats.length > 0) {
+		// atleast one seat is reserved, check that this user is obeying the rules
+		for (var x=0; x<this.reserved_seats.length; x++) {
+			if (this.reserved_seats[x].index == params.seat_index) {
+				if (myutils.compareObjectID(this.reserved_seats[x].userid,conn.userid)) {
+					// this user has permission to sit here
+					break;
+				} else {
+					// reserved seat
+					this.reply(0,'that seat is reserved');
+					cb(false,events);
+					return;
+				}
+			}
+		}
 	}
 	if ((params.seat_index < 0) || (params.seat_index >= this.obj.seats)) {
 		conn.reply(0,'invalid seat index');
@@ -2261,7 +2287,11 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 						token9.stop(); // 3ms
 						if (this.sitQueue.length) {
 							var next = this.sitQueue.shift();
-							this.reserved_seats.push({index:seatIdx,userid:next});
+							var timer = setTimeout(this.bootReserved.bind(this,seatIdx),60000);
+							this.reserved_seats.push({index:seatIdx,userid:next, timer:timer});
+							if (this.users[next]) {
+								this.users[next].send(codes.seReservedSeatFree,{seat_index:seatIdx,ts:this.getTableStatus(this.users[next],null,[])},'Poker.ReservedSeatFree');
+							}
 						}
 						cb1(folded,events,offset);
 					}.bind(this));
@@ -2269,6 +2299,36 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 			}
 		}
 	}
+}
+Game.prototype.bootReserved = function (seatIdx) {
+	this.log('times up!');
+	this.Lock.writeLock(function (release) {
+		this.log('got lock %d',seatIdx);
+		for (var x=0; x<this.reserved_seats.length; x++) {
+			this.log('loop %d %d',x,this.reserved_seats[x].index);
+			if (this.reserved_seats[x].index != seatIdx) continue;
+			this.log('match');
+			var userid = this.reserved_seats[x].userid;
+			this.reserved_seats.splice(x,1);
+			if (this.sitQueue.length) {
+				this.log('re-reserving next');
+				var next = this.sitQueue.shift();
+				var timer = setTimeout(this.bootReserved.bind(this,seatIdx),60000);
+				this.reserved_seats.push({index:seatIdx,userid:next, timer:timer});
+				if (this.users[next]) {
+					this.users[next].send(codes.seReservedSeatFree,{seat_index:seatIdx,ts:this.getTableStatus(this.users[next],null,[])},'Poker.ReservedSeatFree');
+				}
+			}
+			if (this.users[userid]) {
+				this.log('telling user');
+				this.users[userid].send(codes.srReservedSeatTimeout,this.getTableStatus(this.users[userid],null,[]),'Poker.TableStatus');
+			}
+			this.broadcastStatus(null,null,[]);
+			this.log('release');
+			release();
+			return;
+		}
+	}.bind(this));
 }
 Game.prototype.leave = function leave(conn,reason,cb1) {
 	conn.log('getting lock:%s',this.Lock.trace);
