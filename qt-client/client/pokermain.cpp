@@ -26,6 +26,11 @@ PokerMain::PokerMain(QObject *parent) :
 {
 	setObjectName("core");
 	delayQuit = false;
+#ifdef DEVSERVER
+	serverAddress = "dev-server.chipuppoker.com";
+#else
+	serverAddress = "server.chipuppoker.com";
+#endif
 	reconnectState = notSignedIn;
 	manager_ = new QNetworkAccessManager(this);
 	effects_ = new SoundEffects(this);
@@ -46,13 +51,9 @@ void PokerMain::replyFinished(QNetworkReply *reply) {
 	reply->deleteLater();
 }
 void PokerMain::try_connect() {
-    if (socket.state() == QAbstractSocket::UnconnectedState) {
-#ifdef DEVSERVER
-		socket.connectToHostEncrypted("dev-server.chipuppoker.com",12346);
-#else
-		socket.connectToHostEncrypted("server.chipuppoker.com",12346);
-#endif
-    }
+	if (socket.state() == QAbstractSocket::UnconnectedState) {
+		socket.connectToHostEncrypted(serverAddress,12346);
+	}
 }
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
 	qDebug() << state;
@@ -62,7 +63,7 @@ void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
 	case QAbstractSocket::ConnectingState:
 		break;
 	case QAbstractSocket::ConnectedState:
-		qDebug() << "socket connected";
+		//qDebug() << "socket connected";
 		break;
 	case QAbstractSocket::ClosingState:
 		qDebug() << "socket closing";
@@ -85,52 +86,28 @@ void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
 static void flagOffline(QMainWindow *mainWindow) {
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
-    qDebug() << "incoming err" << errors;
+	qDebug() << "incoming err" << errors;
 #ifndef DEVSERVER
 	QList<QSslCertificate> cert = QSslCertificate::fromPath(":/resources/OfficialServerCertificate.pem");
 #else
 	QList<QSslCertificate> cert = QSslCertificate::fromPath(":/resources/DevServerCertificate.pem");
 #endif
-#if 0
-    QList<QSslCertificate> cert = QSslCertificate::fromData(
-                "-----BEGIN CERTIFICATE-----\n"
-                "MIIDiTCCAnGgAwIBAgIJAKfTetvcSDlkMA0GCSqGSIb3DQEBBQUAMFsxCzAJBgNV\n"
-                "BAYTAlVTMRMwEQYDVQQIDApTb21lLVN0YXRlMRYwFAYDVQQKDA1jaGlwIHVwIHBv\n"
-                "a2VyMR8wHQYDVQQDDBZzZXJ2ZXIuY2hpcHVwcG9rZXIuY29tMB4XDTE0MDQxNTE5\n"
-                "MDkwM1oXDTE1MDQxNTE5MDkwM1owWzELMAkGA1UEBhMCVVMxEzARBgNVBAgMClNv\n"
-                "bWUtU3RhdGUxFjAUBgNVBAoMDWNoaXAgdXAgcG9rZXIxHzAdBgNVBAMMFnNlcnZl\n"
-                "ci5jaGlwdXBwb2tlci5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB\n"
-                "AQDjvpOTvKb4tIMGpprvxeTGdOt5kkkTq47jyraPLCnMIEJluGKbfO8ByZFjH8aV\n"
-                "hWIKG4+3U6LMnx1j8OWW611VooIFjxs4Chc3+EhdyT7muVsNB2N8UmP350jfi7wH\n"
-                "J1+A7yXCHqxesqe9I4NTttXm6QrfT/vslSKo5kR/05Afe8Yj5r+6JlDhX+P2G0Dl\n"
-                "6Hi9CDJ5YIby1fLygYk+NPaSdnXXwsfB3VXFda4MincxgmY7QURBrAjDmKkS4nTn\n"
-                "shG4kYaqlTBCZH45a3xvqYcqtgpart31BbjAzwUtsW/fshBEJzcYUZ9pXiWgSrH9\n"
-                "Nu1sefkcmMplkGM6jef1pinPAgMBAAGjUDBOMB0GA1UdDgQWBBTFB2O6DCiOqKq2\n"
-                "47wrh0+IXTWjWzAfBgNVHSMEGDAWgBTFB2O6DCiOqKq247wrh0+IXTWjWzAMBgNV\n"
-                "HRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4IBAQBF0YjN6LsO7xTzjv3JPTtgSC/k\n"
-                "uOdRx0MD7LLbrqglWuBLVDN1d+q7v44Nr6TbRRLS+wqPK9sBepnzUOMuYUfYzg1o\n"
-                "Hxmcv3bW+yv9jR+9boIeFs9wkjCIMcNdOpM0b5GM1moGCvsX/0BFd+4yQYRCftb4\n"
-                "R+5IFPZ2OM11/EgCyQ/dpjYHSj+nmL87qr+2TbdSJ//2afzMmM5v0+K1JoHOjJ7s\n"
-                "HkaMVE+e0ZCaYpuDbl1bnhkYhOmP/p7rC/r0kuvwYFAgfbhOW70/wgwxz9qFRS0O\n"
-                "8XZWdnYfZX068XiJMVxR7+Q44aR8nv7cpc8r7OfpxbShoL9W2RoPGn0u1Yrq\n"
-                "-----END CERTIFICATE-----\n");
-#endif
-    qDebug() << "certs" << cert;
+	//qDebug() << "certs" << cert;
 	QSslError errorSelfSigned(QSslError::SelfSignedCertificate, cert.at(0));
-    QList<QSslError> expectedSslErrors;
-	expectedSslErrors.append(errorSelfSigned);
+	QList<QSslError> expectedSslErrors;
 #ifdef DEVSERVER
 	QSslError wrongHostError(QSslError::HostNameMismatch, cert.at(0));
 	expectedSslErrors.append(wrongHostError);
 #endif
-    socket.ignoreSslErrors(expectedSslErrors);
-    qDebug() << "expected error" << expectedSslErrors;
+	expectedSslErrors.append(errorSelfSigned);
+	socket.ignoreSslErrors(expectedSslErrors);
+	qDebug() << "expected error" << expectedSslErrors;
 }
 void PokerMain::socket_ready() {
 	first_ping = true;
     Poker::HelloParams hp;
     hp.set_debug(false);
-	qDebug() << "sending hello";
+	//qDebug() << "sending hello";
     sendMessage(Poker::scHello,&hp);
     pinger.setSingleShot(false);
     pinger.setInterval(30000);
@@ -270,7 +247,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			diff = 0;
 		}
 		totalError += diff;
-		qDebug() << "ping:" << ping << "server clock:" << server_clock << "offset:" << clock_offset << "diff:" << diff << totalError;
+		//qDebug() << "ping:" << ping << "server clock:" << server_clock << "offset:" << clock_offset << "diff:" << diff << totalError;
 		break; }
 	case Poker::srReinstatePlayerOk: // 32
 		qDebug() << "srReinstatePlayerOk";

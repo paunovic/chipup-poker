@@ -59,6 +59,7 @@ public:
 	QApplication *app;
 	QList<Data::User*> users;
 	int max_play_time;
+	QString serverAddress;
 signals:
 	void protocol_ready(bool);
 	void login_sucess();

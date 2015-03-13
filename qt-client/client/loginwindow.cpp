@@ -18,7 +18,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 	core->try_connect();
 	core->RegisterListener(this);
 #ifndef testcase
-	qDebug() << "loading config";
+	//qDebug() << "loading config";
 	QString username = core->config().value("login/username").toString();
 	if (username.size()>0) {
 		ui->edLogin->setText(username);

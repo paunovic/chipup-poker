@@ -6,7 +6,7 @@
 #include <QDesktopServices>
 
 SoundEffects::SoundEffects(QObject *parent): QObject(parent) {
-	qDebug() << "loading sound";
+	//qDebug() << "loading sound";
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 	dealing = new QSoundEffect(this);
 	dealing->setSource(QUrl("qrc:/resources/sounds/Dealing.wav"));
@@ -39,12 +39,12 @@ SoundEffects::SoundEffects(QObject *parent): QObject(parent) {
 			}
 		}
 	}
-	qDebug() << tempdir;
+	//qDebug() << tempdir;
 	dealing = new QSound(tempdir.absoluteFilePath("Dealing.wav"),this);
 	putChipsSmall = new QSound(tempdir.absoluteFilePath("PutChipsSmall.wav"),this);
 	timebank = new QSound(tempdir.absoluteFilePath("Timebank.wav"),this);
 #endif
-	qDebug() << "loaded";
+	//qDebug() << "loaded";
 }
 void SoundEffects::PlaySound(enum SoundId soundId) {
 	qDebug() << "starting sound" << ((int)soundId);

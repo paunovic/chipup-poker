@@ -191,7 +191,7 @@ void SeatObject::setAvatar(QString in) {
 	if (in != avatar_) {
 		qDebug() << "fetching avatar?" << in << "for seat" << getSeat();
 		avatar_ = in;
-		pendingReply = core->manager()->get(QNetworkRequest("https://chipuppoker.com/getavatar?id="+in));
+		pendingReply = core->manager()->get(QNetworkRequest(QString("https://%1/getavatar?id=%2").arg(core->serverAddress).arg(in)));
 	}
 }
 void SeatObject::replyFinished(QNetworkReply *reply) {
