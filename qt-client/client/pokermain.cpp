@@ -319,6 +319,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::sePlayerClubStatus: // 63
 		sePlayerClubStatus(data);
 		break;
+	case Poker::seReservedSeatFree: // 64
+		seReservedSeatFree(data);
+		break;
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
@@ -414,6 +417,15 @@ void PokerMain::seClubChange(std::string data) {
 	Q_ASSERT(club);
 	club->update(input);
 	emit club_changed(club);
+}
+void PokerMain::seReservedSeatFree(std::string data) {
+	Poker::ReservedSeatFree rsf;
+	rsf.ParseFromString(data);
+	quint32 seat_index = rsf.seat_index();
+	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+	out->update(rsf.ts());
+	emit table_status(out);
+	emit reserved_seat_free(out->gameid,seat_index);
 }
 
 void PokerMain::srLoginReply(std::string data) {

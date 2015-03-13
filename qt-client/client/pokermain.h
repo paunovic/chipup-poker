@@ -74,6 +74,7 @@ signals:
 	void seat_taken(QByteArray gameid);
 	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
 	void club_changed(const Data::Club *);
+	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -98,6 +99,7 @@ private:
 	void srTableBuyinLessThanCashout(std::string data);
 	void sePlayerClubStatus(std::string data);
 	void seClubChange(std::string data);
+	void seReservedSeatFree(std::string data);
 
 	enum ReconnectState { notSignedIn, SignedIn };
 
