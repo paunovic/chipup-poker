@@ -648,6 +648,7 @@ enum ServerCodes {
   seTournamentPlayerTransfer = 62,
   sePlayerClubStatus = 63,
   seReservedSeatFree = 64,
+  srReservedSeatTimeout = 65,
   scHello = 70,
   scLogin = 71,
   scTournamentRegister = 72,
