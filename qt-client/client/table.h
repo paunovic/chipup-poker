@@ -10,6 +10,7 @@
 
 class TablePrivate;
 class JsEditor;
+class TableSit;
 
 namespace Ui {
 class Table;
@@ -34,6 +35,7 @@ public:
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
 	void On_sit_ok(QByteArray gameid);
+	void On_reserved_seat_free(QByteArray gameid, quint32 seat_index);
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();
@@ -56,6 +58,7 @@ private:
 	TablePrivate *p;
 	const Data::Game *game;
 	QSharedPointer<Data::TableStatus> lastTableStatus;
+	TableSit *sitwindow;
 #ifdef JSDEBUG
 	JsEditor *debuger;
 #endif

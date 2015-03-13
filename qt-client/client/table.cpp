@@ -8,6 +8,7 @@
 #include "pokermain.h"
 #include "jseditor.h"
 #include "data/seatinfo.h"
+#include "table/table_sit.h"
 
 Table::Table(QWidget *parent) :
 	QMainWindow(parent),
@@ -36,6 +37,13 @@ bool Table::event(QEvent *event) {
 	}
 	return QMainWindow::event(event);
 }
+void Table::On_reserved_seat_free(QByteArray gameid, quint32 seat_index) {
+	if (gameid != game->gameid) return;
+	qDebug() << "my turn to sit in seat" << seat_index;
+	sitwindow = new TableSit(game,seat_index,lastTableStatus);
+	sitwindow->show();
+}
+
 bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
 	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
