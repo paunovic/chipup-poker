@@ -105,6 +105,28 @@ class DeleteTableStats;
 class SoftException;
 class ReservedSeatFree;
 
+enum HelloParams_AppCode {
+  HelloParams_AppCode_DelphiWindows = 1,
+  HelloParams_AppCode_QtLinux32 = 2,
+  HelloParams_AppCode_QtLinuxArm = 3,
+  HelloParams_AppCode_QtMac = 4,
+  HelloParams_AppCode_QtWindows32 = 5
+};
+bool HelloParams_AppCode_IsValid(int value);
+const HelloParams_AppCode HelloParams_AppCode_AppCode_MIN = HelloParams_AppCode_DelphiWindows;
+const HelloParams_AppCode HelloParams_AppCode_AppCode_MAX = HelloParams_AppCode_QtWindows32;
+const int HelloParams_AppCode_AppCode_ARRAYSIZE = HelloParams_AppCode_AppCode_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* HelloParams_AppCode_descriptor();
+inline const ::std::string& HelloParams_AppCode_Name(HelloParams_AppCode value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    HelloParams_AppCode_descriptor(), value);
+}
+inline bool HelloParams_AppCode_Parse(
+    const ::std::string& name, HelloParams_AppCode* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<HelloParams_AppCode>(
+    HelloParams_AppCode_descriptor(), name, value);
+}
 enum UpdateFileInfo_UpdateFileType {
   UpdateFileInfo_UpdateFileType_ufFull = 0,
   UpdateFileInfo_UpdateFileType_ufDiff = 1,
@@ -1234,6 +1256,33 @@ class HelloParams : public ::google::protobuf::Message {
 
   // nested types ----------------------------------------------------
 
+  typedef HelloParams_AppCode AppCode;
+  static const AppCode DelphiWindows = HelloParams_AppCode_DelphiWindows;
+  static const AppCode QtLinux32 = HelloParams_AppCode_QtLinux32;
+  static const AppCode QtLinuxArm = HelloParams_AppCode_QtLinuxArm;
+  static const AppCode QtMac = HelloParams_AppCode_QtMac;
+  static const AppCode QtWindows32 = HelloParams_AppCode_QtWindows32;
+  static inline bool AppCode_IsValid(int value) {
+    return HelloParams_AppCode_IsValid(value);
+  }
+  static const AppCode AppCode_MIN =
+    HelloParams_AppCode_AppCode_MIN;
+  static const AppCode AppCode_MAX =
+    HelloParams_AppCode_AppCode_MAX;
+  static const int AppCode_ARRAYSIZE =
+    HelloParams_AppCode_AppCode_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor*
+  AppCode_descriptor() {
+    return HelloParams_AppCode_descriptor();
+  }
+  static inline const ::std::string& AppCode_Name(AppCode value) {
+    return HelloParams_AppCode_Name(value);
+  }
+  static inline bool AppCode_Parse(const ::std::string& name,
+      AppCode* value) {
+    return HelloParams_AppCode_Parse(name, value);
+  }
+
   // accessors -------------------------------------------------------
 
   // required bool debug = 1;
@@ -1255,18 +1304,28 @@ class HelloParams : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Poker::UpdateFileInfo >*
       mutable_files();
 
+  // optional .Poker.HelloParams.AppCode appcode = 3;
+  inline bool has_appcode() const;
+  inline void clear_appcode();
+  static const int kAppcodeFieldNumber = 3;
+  inline ::Poker::HelloParams_AppCode appcode() const;
+  inline void set_appcode(::Poker::HelloParams_AppCode value);
+
   // @@protoc_insertion_point(class_scope:Poker.HelloParams)
  private:
   inline void set_has_debug();
   inline void clear_has_debug();
+  inline void set_has_appcode();
+  inline void clear_has_appcode();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Poker::UpdateFileInfo > files_;
   bool debug_;
+  int appcode_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -10688,6 +10747,29 @@ HelloParams::files() const {
 inline ::google::protobuf::RepeatedPtrField< ::Poker::UpdateFileInfo >*
 HelloParams::mutable_files() {
   return &files_;
+}
+
+// optional .Poker.HelloParams.AppCode appcode = 3;
+inline bool HelloParams::has_appcode() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void HelloParams::set_has_appcode() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void HelloParams::clear_has_appcode() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void HelloParams::clear_appcode() {
+  appcode_ = 1;
+  clear_has_appcode();
+}
+inline ::Poker::HelloParams_AppCode HelloParams::appcode() const {
+  return static_cast< ::Poker::HelloParams_AppCode >(appcode_);
+}
+inline void HelloParams::set_appcode(::Poker::HelloParams_AppCode value) {
+  assert(::Poker::HelloParams_AppCode_IsValid(value));
+  set_has_appcode();
+  appcode_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -21205,6 +21287,10 @@ inline void ReservedSeatFree::set_seat_index(::google::protobuf::uint32 value) {
 namespace google {
 namespace protobuf {
 
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Poker::HelloParams_AppCode>() {
+  return ::Poker::HelloParams_AppCode_descriptor();
+}
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Poker::UpdateFileInfo_UpdateFileType>() {
   return ::Poker::UpdateFileInfo_UpdateFileType_descriptor();

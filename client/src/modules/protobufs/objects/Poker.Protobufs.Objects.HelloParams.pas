@@ -10,15 +10,19 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
+  TAppCode = (DelphiWindows = 1, QtLinux32, QtLinuxArm, QtMac, QtWindows32);
+
   TPB_HelloParams = class(TProtobufBaseObject)
   private
     const
       kDebugFieldNumber = 1;
       kFilesFieldNumber = 2;
+      kAppcodeFieldNumber = 3;
 
     var
       FDebug: Boolean;
       FFiles: TList<TPB_UpdateFileInfo>;
+      FAppcode: TAppCode;
       _has_bits_: UINT32;
 
     procedure set_has_Debug;
@@ -26,6 +30,9 @@ type
     procedure SetDebug(const AValue: Boolean);
     procedure set_has_Files;
     procedure clear_has_Files;
+    procedure set_has_Appcode;
+    procedure clear_has_Appcode;
+    procedure SetAppcode(const AValue: TAppCode);
     procedure FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
   protected
     procedure InitObjects; override;
@@ -47,6 +54,11 @@ type
     function has_Files: Boolean;
     procedure clear_Files;
     property Files: TList<TPB_UpdateFileInfo> read FFiles;
+
+    // optional AppCode Appcode = 3;
+    function has_Appcode: Boolean;
+    procedure clear_Appcode;
+    property Appcode: TAppCode read FAppcode write SetAppcode;
 
   end;
 
@@ -106,6 +118,11 @@ begin
         FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Files;
       end;
+      kAppcodeFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FAppcode := TAppCode(AProtobufReader.readEnum);
+        set_has_Appcode;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -119,6 +136,8 @@ begin
     SetDebug(AFrom.Debug);
   for pbobj1 in AFrom.Files do
     FFiles.Add(TPB_UpdateFileInfo.Create(pbobj1, Lightweight));
+  if AFrom.has_Appcode then
+    SetAppcode(AFrom.Appcode);
 end;
 
 function TPB_HelloParams.IsInitialized: Boolean;
@@ -202,6 +221,37 @@ begin
   end;
 end;
 
+procedure TPB_HelloParams.clear_Appcode;
+begin
+  FAppcode := TAppCode(0);
+  clear_has_Appcode;
+end;
+
+function TPB_HelloParams.has_Appcode: Boolean;
+begin
+  result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_HelloParams.set_has_Appcode;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_HelloParams.clear_has_Appcode;
+begin
+  _has_bits_ := _has_bits_ and not 4;
+end;
+
+procedure TPB_HelloParams.SetAppcode(const AValue: TAppCode);
+begin
+  if not Lightweight then
+    Assert(not has_Appcode);
+  FAppcode := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kAppcodeFieldNumber, Integer(AValue));
+  set_has_Appcode;
+end;
+
 procedure TPB_HelloParams.Clear;
 begin
   if _has_bits_ = 0 then
@@ -209,6 +259,7 @@ begin
 
   clear_Debug;
   clear_Files;
+  clear_Appcode;
 end;
 
 procedure TPB_HelloParamsList.Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);

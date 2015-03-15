@@ -149,7 +149,15 @@ message HelloReply {
 
 message HelloParams {
 	required bool debug = 1;
+	enum AppCode {
+		DelphiWindows = 1;
+		QtLinux32 = 2;
+		QtLinuxArm = 3;
+		QtMac = 4;
+		QtWindows32 = 5;
+	}
 	repeated UpdateFileInfo files = 2;
+	optional AppCode appcode = 3;
 }
 
 message UpdateFileInfo {
