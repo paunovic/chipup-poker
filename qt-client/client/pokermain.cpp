@@ -15,6 +15,8 @@
 #include "sound_effects.h"
 #include "table.h"
 
+#define DEVSERVER
+
 using namespace Poker;
 
 PokerMain *core;
@@ -106,6 +108,13 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
 void PokerMain::socket_ready() {
 	first_ping = true;
     Poker::HelloParams hp;
+#ifdef Q_OS_WIN
+	hp.set_appcode(Poker::HelloParams::QtWindows32);
+#elif defined(Q_OS_LINUX)
+	hp.set_appcode(Poker::HelloParams::QtLinux32);
+#elif defined(Q_OS_MAC)
+	hp.set_appcode(Poker::HelloParams::QtMac);
+#endif
     hp.set_debug(false);
 	//qDebug() << "sending hello";
     sendMessage(Poker::scHello,&hp);
