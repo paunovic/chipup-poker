@@ -4,6 +4,7 @@ var assert = require('assert');
 var child_process = require('child_process');
 var crypto = require('crypto');
 var https = require('https');
+var temp = require('temp');
 
 var config = require('./config');
 var models = require('./db').models;
@@ -11,75 +12,138 @@ var models = require('./db').models;
 module.exports.unpackInstaller = unpackInstaller;
 module.exports.copyFile = copyFile;
 module.exports.recurse_dir = recurse_dir;
+module.exports.unpackDmg = unpackDmg;
+function updateLive(doc,sizes,cb) {
+	var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
+	var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
+	req.on('data',function (chunk) {
+		console.log(chunk);
+	});
+	req.on('error',function (err) {
+		console.log('http error sending new version:',err);
+	});
+	req.write(body);
+	req.end();
+	cb();
+}
 function unpackInstaller(record,cb1) {
-	function updateLive(doc,sizes,cb) {
-		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
-		var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
-		req.on('data',function (chunk) {
-			console.log(chunk);
-		});
-		req.on('error',function (err) {
-			console.log('http error sending new version:',err);
-		});
-		req.write(body);
-		req.end();
-		cb();
-	}
-	function hashFiles(files) {
-		var hashes = {};
-		var sizes = [];
-		async.each(files,function hashFile(filename,cb2) {
-			var hasher = crypto.createHash('sha256');
-			var client = fs.createReadStream('unpacked/'+record._id+'/app/'+filename);
-			var size = 0;
-			client.on('data',function (data) {
-				hasher.update(data);
-				size += data.length;
-			});
-			client.on('end',function () {
-				var hash = hasher.digest('hex');
-				console.log('hash of %s is %s',filename,hash);
-				var key = filename.replace('.',':');
-				sizes.push({_id:hash, size:size});
-				hashes[key] = hash;
-				copyFile('unpacked/'+record._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
-					fs.unlink('unpacked/'+record._id+'/app/'+filename,function () {
-						cb2();
-					});
-				});
-			});
-		},function () {
-			record.hashes = hashes;
-			record.save(function (err,newdoc) {
-				assert.ifError(err);
-				if (err) console.log(err);
-				console.log('inserted %j',newdoc);
-				fs.rmdir('unpacked/'+record._id+'/app/',function () {
-					fs.rmdir('unpacked/'+record._id,function () {
-						async.each(sizes,function (row,cb) {
-							models.ObjectSize.create(row,cb);
-						},function () {
-							updateLive(record,sizes,function () {
-								cb1(true);
-							});
-						});
-					});
-				});
-			});
-		});
-	}
+	var prefix = 'unpacked/'+record._id+'/app/';
 	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+record._id+'/','-e','installers/'+record.name],{stdio:'inherit'});
 	unpacker.on('close',function (code) {
+		console.log('result',arguments);
 		if (code != 0) {
 			cb1(false);
 			return;
 		}
 		assert.equal(code,0);
-		recurse_dir('','unpacked/'+record._id+'/app/',function (err,files) {
+		recurse_dir('',prefix,function (err,files) {
 			assert.ifError(err);
 			console.log('all files:%j',files);
-			hashFiles(files);
+			hashFiles(prefix,files,function (hashes,sizes) {
+				record.hashes = hashes;
+				record.save(function (err,newdoc) {
+					assert.ifError(err);
+					if (err) console.log(err);
+					console.log('inserted %j',newdoc);
+					deleteDir('unpacked/'+record._id);
+					async.each(sizes,function (row,cb) {
+						models.ObjectSize.create(row,cb);
+					},function () {
+						updateLive(record,sizes,function () {
+							cb1(true);
+						});
+					});
+				});
+			});
 		});
+	});
+}
+function deleteDir(path,cb1) {
+	if (fs.existsSync(path)) {
+		fs.readdir(path,function (err,files) {
+			async.each(files,function (item,cb) {
+				fs.stat(path+"/"+item,function (err,stats) {
+					if (stats.isDirectory()) {
+						deleteDir(path+"/"+item,cb);
+					} else {
+						fs.unlink(path+"/"+item,cb);
+					}
+				});
+			},function () {
+				fs.rmdir(path);
+				if (cb1) cb1();
+			});
+		});
+	}
+}
+function unpackDmg(record,localFile,cb1) {
+	temp.mkdir('unpackA',function (err,dirPath) {
+		console.log(dirPath);
+		var child = child_process.spawn('7z',['x','-o'+dirPath,localFile],{stdio:'inherit'});
+		child.on('close',function (code) {
+			console.log('child exited with code',code);
+			if (code == 0) {
+				temp.mkdir('unpackB',function (err,dirPath2) {
+					var child = child_process.spawn('7z',['x','-o'+dirPath2,dirPath+'/4.hfs'],{stdio:'inherit'});
+					child.on('close',function (code) {
+						console.log('child exited with code',code);
+						deleteDir(dirPath);
+						if (code == 0) {
+							recurse_dir('',dirPath2+'/chipuppoker/chipuppoker.app/',function (err,files) {
+								assert.ifError(err);
+								console.log('all files:%j',files);
+								hashFiles(dirPath2+'/chipuppoker/chipuppoker.app/',files,function (hashes,sizes) {
+									record.hashes = hashes;
+									record.save(function (err,newdoc) {
+										assert.ifError(err);
+										if (err) console.log(err);
+										deleteDir(dirPath2);
+										async.each(sizes,function (row,cb) {
+											models.ObjectSize.create(row,cb);
+										},function () {
+											updateLive(record,sizes,function () {
+												cb1(true);
+											});
+										});
+									});
+								});
+							});
+						} else {
+							cb(false);
+						}
+					});
+				});
+			} else {
+				cb(false);
+			}
+		});
+	});
+}
+function hashFiles(prefix,files,cb) {
+	var hashes = {};
+	var sizes = [];
+	async.each(files,function hashFile(filename,cb2) {
+		var hasher = crypto.createHash('sha256');
+		var client = fs.createReadStream(prefix+filename);
+		var size = 0;
+		client.on('data',function (data) {
+			hasher.update(data);
+			size += data.length;
+		});
+		client.on('end',function () {
+			var hash = hasher.digest('hex');
+			//console.log('hash of %s is %s',filename,hash);
+			var key = filename.replace('.',':').replace('.',':');
+			sizes.push({_id:hash, size:size});
+			hashes[key] = hash;
+			copyFile(prefix+filename,'unpacked/objects/'+hash,function () {
+				fs.unlink(prefix+filename,function () {
+					cb2();
+				});
+			});
+		});
+	},function () {
+		cb(hashes,sizes);
 	});
 }
 function copyFile(source,dest,cb) {
@@ -95,14 +159,14 @@ function copyFile(source,dest,cb) {
 function recurse_dir(path,prefix,cb4) {
 	var items = [];
 	fs.readdir(prefix+path,function (err,files) {
-		console.log('checked path %s %s',prefix,path);
+		console.log('checked path %s %s',prefix,path,files);
 		assert.ifError(err);
 		async.each(files,function checkItem(filename,cb3) {
 			fs.stat(prefix+path+filename,function (err,stats) {
 				assert.ifError(err);
 				console.log('stats:%j',stats);
 				if (stats.isDirectory()) {
-					recurse_dir(filename+'/',prefix,function (err,items2) {
+					recurse_dir(path+filename+'/',prefix,function (err,items2) {
 						console.log('2nd level %j',items2);
 						assert.ifError(err);
 						items = items.concat(items2);

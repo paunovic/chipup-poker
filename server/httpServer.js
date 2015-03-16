@@ -247,6 +247,8 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/club',this.getClub.bind(this));
 	app.get('/secure/game',this.getGame.bind(this));
 	app.get('/secure/hand',this.getHand.bind(this));
+	app.get('/secure/addMac',this.addMac.bind(this));
+	app.post('/secure/addMac',this.addMac.bind(this));
 
 	app.get('/secure/installers',this.installers_func.bind(this));
 	app.post('/secure/installers',this.installers_func.bind(this));
@@ -262,6 +264,42 @@ Server.prototype.addSecure = function (app) {
 	app.post('/secure/diffStats',this.getDiffStats.bind(this));
 	app.post('/secure/makeDiff',this.syncMakeDiff.bind(this));
 };
+Server.prototype.addMac = function (req,res) {
+	var start = Date.now();
+	console.log(req.body);
+	if (req.files && req.files.dmg) {
+		var localFile = req.files.dmg.path;
+		var name1 = localFile.split('/')[1];
+		var version = 'FIXME';
+		var revision = req.body.githash;
+		var debug ='release';
+		fs.rename(localFile,'installers/'+name1,function (err) {
+			assert.ifError(err);
+			var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.dmg.size,appcode:'QtMac'});
+			obj.save(function (err) {
+				assert.ifError(err);
+				global.log('new version recorded: %j',obj);
+				installer.unpackDmg(obj,'installers/'+name1,function (success) {
+					var key1;
+					if (success) {
+						if (debug == 'debug') key1 = 'debuginstallerid';
+						else key1 = 'installerid';
+						//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
+						//	assert.ifError(err);
+						//});
+						obj.ts = obj._id.getTimestamp().toString();
+						this.IO.sockets.emit('new_installer',obj);
+						res.send('OK');
+					} else {
+						res.send('error');
+					}
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+	} else {
+		res.render('addmac',{start:start});
+	}
+}
 Server.prototype.getDiffStats = function (req,res) {
 	console.log(req.body);
 	models.Diff.findOne({sourcehash:req.body.source, desthash: req.body.dest},function (err,diffRow) {
@@ -1073,7 +1111,7 @@ Server.prototype.newVersion = function newVersion(req,res) {
 
 	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 		assert.ifError(err);
-		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size});
+		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size,appcode:'DelphiWindows'});
 		obj.save(function (err) {
 			assert.ifError(err);
 			global.log('new version recorded: %j',obj);
