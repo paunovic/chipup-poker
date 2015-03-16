@@ -203,7 +203,7 @@ void PokerMain::doUpdate(const HelloReply hr) {
 		QString temp = hr.update_files(x).path().c_str();
 		temp = temp.replace(':',".");
 		QString file = approot.absoluteFilePath(temp);
-		qDebug() << file;
+		qDebug() << file << hr.update_files(x).url().c_str();
 	}
 }
 
