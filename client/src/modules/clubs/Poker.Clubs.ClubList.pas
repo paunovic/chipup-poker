@@ -3,7 +3,9 @@ unit Poker.Clubs.ClubList;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Games.Game, Poker.Common.SafeMutex, Poker.Types;
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club,
+  Poker.Protobufs.Objects.Club, Poker.Games.Game, Poker.Common.SafeMutex,
+  Poker.Types;
 
 type
   TClubList = class(TObjectDictionary<TMongoId, TClubInfo>)

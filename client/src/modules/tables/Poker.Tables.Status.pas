@@ -3,8 +3,9 @@ unit Poker.Tables.Status;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
+  Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus,
+  Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Seats.SeatList, Poker.Games.Game,
+  Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
   Poker.Protobufs.Objects.TableMessage;
 
 type
@@ -38,6 +39,7 @@ type
     FCurrentPlaytime: Int64;
     FSelfSeatIndex: Integer;
     FMessages: TObjectList<TPB_TableMessage>;
+    FQueuePosition: Integer;
 
     FActionStandUp: Boolean;
     FActionFold: Boolean;
@@ -51,6 +53,8 @@ type
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
     FActionShowStats: Boolean;
+    FActionJoinWaitingList: Boolean;
+    FActionLeaveWaitingList: Boolean;
     FEvents: TPB_TableEventList;
 
     FAutoCheckVisible: Boolean;
@@ -107,6 +111,7 @@ type
     property RakePercent: UINT32 read FRakePercent;
     property SelfSeatIndex: Integer read FSelfSeatIndex;
     property TotalRake: UINT32 read FTotalRake;
+    property QueuePosition: Integer read FQueuePosition;
 
     function IsSitting: Boolean;
 
@@ -117,6 +122,8 @@ type
     property ActionRaise: Boolean read FActionRaise write FActionRaise;
     property ActionBet: Boolean read FActionBet write FActionBet;
     property ActionPlayNow: Boolean read FActionPlayNow write FActionPlayNow;
+    property ActionJoinWaitingList: Boolean read FActionJoinWaitingList write FActionJoinWaitingList;
+    property ActionLeaveWaitingList: Boolean read FActionLeaveWaitingList write FActionLeaveWaitingList;
     property ActionSitOut: Boolean read FActionSitOut write FActionSitOut;
     property ActionFoldToAny: Boolean read FActionFoldToAny write FActionFoldToAny;
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
@@ -258,6 +265,7 @@ begin
   FRotationHand := ATableStatusProtobuf.Rotation;
   FCurrentLimit := ATableStatusProtobuf.GameLimit;
   FMinimumRaise := ATableStatusProtobuf.MinimumRaise;
+  FQueuePosition := ATableStatusProtobuf.QueuePosition;
   FMessages.Clear;
   for table_message in ATableStatusProtobuf.TableMessage do
     FMessages.Add(TPB_TableMessage.Create(table_message));
@@ -411,7 +419,6 @@ begin
     call_amount := MinimumBet;
   result := call_amount;
 end;
-
 
 
 end.

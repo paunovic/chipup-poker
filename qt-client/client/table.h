@@ -6,15 +6,16 @@
 #include <QMainWindow>
 
 #include "tablestatus.h"
+#include "game.h"
 
 class TablePrivate;
 class JsEditor;
+class TableSit;
 
 namespace Ui {
 class Table;
 }
 namespace Data {
-class Game;
 class Club;
 }
 
@@ -28,8 +29,13 @@ public:
 	bool setGameForTesting(const Data::Game *game, QString jscode);
 	void editJs(QString newcode);
 	void eval(QString code);
+	void renderWinning(QString msg);
+	QByteArray getGameId() const { return game->gameid; }
+
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
+	void On_sit_ok(QByteArray gameid);
+	void On_reserved_seat_free(QByteArray gameid, quint32 seat_index);
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();
@@ -43,13 +49,16 @@ private slots:
 	void on_btMax_clicked();
 	void on_bt3BB_clicked();
 	void on_btPot_clicked();
-protected:
-	void resizeEvent(QResizeEvent *event);
+	void on_btSitOut_stateChanged(int state);
+	void on_cbSitOutBB_stateChanged(int state);
+	void on_btDouble_stateChanged(int state);
+	void on_btJoinWaitingList_clicked();
 private:
 	Ui::Table *ui;
 	TablePrivate *p;
 	const Data::Game *game;
 	QSharedPointer<Data::TableStatus> lastTableStatus;
+	TableSit *sitwindow;
 #ifdef JSDEBUG
 	JsEditor *debuger;
 #endif

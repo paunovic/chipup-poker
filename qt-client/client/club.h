@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QDebug>
 #include "cpp/message.pb.h"
+#include "data/clubmember.h"
 
 namespace Data {
 
@@ -11,14 +12,16 @@ class ClubList;
 
 class Club {
 public:
+	Club();
 	void update(const Poker::Club&);
 
 	enum Role { Owner, Member };
-	QByteArray clubid;
+	QByteArray clubid,owner;
 	int seq;
 	QString name;
 	Role role;
 	bool is_private;
+	ClubMemberList members;
 };
 
 class ClubListModel : public QAbstractListModel {
@@ -44,6 +47,7 @@ public:
     QVariant headerData(int, Qt::Orientation, int) const;
 	void modified(Club *item);
 	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+	Club* getClub(const QModelIndex index) { return m_entries.at(index.row()); }
 
 	friend class ClubList;
 protected:
@@ -66,6 +70,7 @@ public:
 	Club *at(int i) {
 		return clubs.at(i);
 	}
+	const Club *getClub(QByteArray clubid) const;
 
 	Data::ClubListModel public_club_model,private_club_model;
 private:

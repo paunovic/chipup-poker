@@ -3,8 +3,8 @@ unit Poker.Tournaments.Info;
 interface
 
 uses
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentMember, System.Generics.Collections, Poker.Protobufs.Objects.Game,
-  Poker.Games.GameList;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentMember,
+  System.Generics.Collections, Poker.Protobufs.Objects.Game, Poker.Games.GameList;
 
 type
   TTournamentInfo = class(TPB_TournamentInfo)

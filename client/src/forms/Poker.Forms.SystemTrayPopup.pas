@@ -3,10 +3,9 @@ unit Poker.Forms.SystemTrayPopup;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, cxGraphics, cxControls, cxEdit,
-  cxImage, cxLabel, Vcl.ExtCtrls, dxBevel, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
-  dxGDIPlusClasses;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
+  cxGraphics, cxControls, cxEdit, cxImage, cxLabel, Vcl.ExtCtrls, dxBevel, cxLookAndFeels,
+  cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, dxGDIPlusClasses;
 
 type
   TfrmSystemTrayPopup = class(TForm)

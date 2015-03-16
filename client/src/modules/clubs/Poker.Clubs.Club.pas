@@ -3,8 +3,10 @@ unit Poker.Clubs.Club;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Games.GameList, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.ClubPlayerStats, Poker.Protobufs.Objects.ClubMember, Poker.Types;
+  System.Generics.Collections, System.SysUtils, Poker.Games.GameList,
+  Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubStatsReply,
+  Poker.Protobufs.Objects.ClubPlayerStats, Poker.Protobufs.Objects.ClubMember,
+  Poker.Types;
 
 type
   TClubInfo = class(TPB_Club)

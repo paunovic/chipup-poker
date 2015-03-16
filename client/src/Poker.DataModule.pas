@@ -5,10 +5,13 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player,
-  Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
-  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections,
+  Poker.Players.Player, Vcl.Forms, dxSkinsForm, Poker.Clubs.Club,
+  Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
+  dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
+  Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
+  Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
 
 type
   TdmMain = class(TDataModule)
@@ -88,6 +91,12 @@ begin
   LoadFonts;
 
   TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  if (Settings.DeveloperMode) and
+     (Settings.ServerIndex in [1, 2]) then
+    server_index := Settings.ServerIndex
+  else
+    server_index := 0;
+  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
   TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
@@ -101,14 +110,6 @@ begin
   THandHistory.Initialize;
   TTournamentList.Initialize;
   TModalDialogs.Initialize;
-
-  if (Settings.DeveloperMode) and
-     (Settings.ServerIndex in [1, 2]) then
-    server_index := Settings.ServerIndex
-  else
-    server_index := 0;
-
-  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
 
   FSelfInfo := TPlayerInfo.Create;
 

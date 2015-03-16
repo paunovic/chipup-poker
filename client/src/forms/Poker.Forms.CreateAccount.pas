@@ -3,11 +3,10 @@ unit Poker.Forms.CreateAccount;
 interface
 
 uses
-  Winapi.Windows, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxContainer, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList,
-   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.Menus, Vcl.StdCtrls;
+  Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
+  cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList, Poker.Interfaces.ModalForm,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmCreateAccount = class(TForm, IModalForm)
@@ -148,8 +147,8 @@ begin
   case pbreply.Status of
    regSuccess: begin
       ModalDialogs.ShowInformation('Account successfully created. Please check your inbox for confirmation e-mail');
-      if Settings.Login = '' then
-        Settings.Login := edEMail.Text;
+      if Settings.LoginUsername = '' then
+        Settings.LoginUsername := edEMail.Text;
       ModalResult := mrOk;
       Close;
    end;

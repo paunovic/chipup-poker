@@ -33,8 +33,8 @@ void PokerMain::sendMessage(Poker::ServerCodes,google::protobuf::Message*){}
 void PokerMain::socket_readyRead(){}
 void PokerMain::parsePacket(Poker::ServerCodes,std::string){}
 void PokerMain::replyFinished(QNetworkReply*){}
-void PokerMain::socket_connected(){}
 void PokerMain::send_ping(){}
+void PokerMain::doLogin(QString username, QString password){}
 void PokerMain::RegisterListener(QObject *listener) {
 	const QMetaObject *mo = listener->metaObject();
 	for (int i = 0; i < mo->methodCount(); ++i) {
@@ -58,4 +58,8 @@ void PokerMain::RegisterListener(QObject *listener) {
 		if (connect(core,qPrintable(QString("2%1").arg(signal)),listener,qPrintable(QString("1%1").arg(slot)))) {
 		} else qWarning("QMetaObject::connectSlotsByName: No matching signal for %s", slot);
 	}
+}
+int parseValue(QString input) {
+	QString x = input.section('.', 0, 0) + input.section('.', 1, 1).leftJustified(2, '0');
+	return x.toInt();
 }

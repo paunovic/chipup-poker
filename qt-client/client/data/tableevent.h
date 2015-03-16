@@ -9,6 +9,8 @@
 
 namespace Data {
 
+class Pot;
+
 class TableEvent : public QObject {
 Q_OBJECT
 public:
@@ -21,6 +23,7 @@ public:
 	// pots
 	QList<int> bets;
 	QList<Hand*> cards;
+	QList<Pot*> pots;
 
 	Q_PROPERTY(QString event READ getEvent)
 	Q_PROPERTY(int seat READ getSeat)

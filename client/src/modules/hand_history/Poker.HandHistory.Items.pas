@@ -3,9 +3,10 @@ unit Poker.HandHistory.Items;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, Poker.Common.SafeMutex, Poker.Protobufs.Objects.HandHistory,
-  Poker.HandHistory.Players, Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game,
-  Poker.Types, Poker.Tournaments, Poker.Tournaments.Info;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes,
+  Poker.Common.SafeMutex, Poker.Protobufs.Objects.HandHistory, Poker.HandHistory.Players,
+  Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club,
+  Poker.Protobufs.Objects.Game, Poker.Types, Poker.Tournaments, Poker.Tournaments.Info;
 
 type
   THandHistoryItems = class;
@@ -504,8 +505,8 @@ begin
 
           player_line := player_line + Format('won %s%s%s', [ATags.Chips, ChipsToStr(seat_winnings[player.Seat]), ATags.NormalText]);
 
-//          if hand_strength <> '' then FIXME
-   //         player_line := player_line + Format(' with %s%s', [ATags.HandStrength, hand_strength]);
+          if hand_strength <> '' then // FIXME / CHECKME!
+            player_line := player_line + Format(' with %s%s', [ATags.HandStrength, hand_strength]);
         end;
 
         player_line := TrimRight(player_line);

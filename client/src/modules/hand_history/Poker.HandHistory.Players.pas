@@ -3,7 +3,8 @@ unit Poker.HandHistory.Players;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.SeatInfo;
+  System.SysUtils, System.Generics.Collections, Poker.Protobufs.Objects.PlayerHandHistory,
+  Poker.Protobufs.Objects.SeatInfo;
 
 type
   TPlayerHandHistories = class(TPB_PlayerHandHistoryList)

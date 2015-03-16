@@ -3,14 +3,14 @@ unit Poker.Forms.TournamentLobby;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Poker.Interfaces.FormParams, Poker.Types, cxGraphics, cxControls,
-  cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
-  dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
-  cxBlobEdit, cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView,
-  cxGridTableView, cxClasses, cxGridCustomView, cxGrid, cxCurrencyEdit,
-  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage, cxLabel, Vcl.ExtCtrls,
-  dxBevel;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams,
+  Poker.Types, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles,
+  dxSkinsCore, dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
+  cxBlobEdit, cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView,
+  cxClasses, cxGridCustomView, cxGrid, cxCurrencyEdit, Vcl.Menus, Vcl.ActnList,
+  Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage,
+  cxLabel, Vcl.ExtCtrls, dxBevel;
 
 type
   TfrmTournamentLobby = class(TForm, IFormParams)

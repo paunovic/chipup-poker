@@ -3,10 +3,10 @@ unit Poker.Forms.CreateClub;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxContainer, cxLabel, cxTextEdit, cxButtons, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit,
-  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxContainer, cxLabel, cxTextEdit, cxButtons, Vcl.ActnList, cxGraphics, cxControls,
+  cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
+  Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmCreateClub = class(TForm)

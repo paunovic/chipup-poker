@@ -4,8 +4,10 @@ interface
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread,
-  Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Base, Winapi.Messages;
+  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections,
+  OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread,
+  Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Protobufs.Objects.Base, Winapi.Messages;
 
 type
   TServerSocketCore = class
@@ -112,7 +114,6 @@ begin
   FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
   FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_PEER];
   FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE];
-//  FSocket.SslContext.SslVersionMethod := sslV3;
   FSocket.SslContext.InitContext;
   FSocket.SslContext.TrustCert(SSLCert_DevServer);
   FSocket.SslContext.TrustCert(SSLCert_OfficialServer);
@@ -315,7 +316,7 @@ begin
   if FReceiveBufferSize < SizeOf(rpc_size) + rpc_size then
     Exit;
 
-  rpc_message := TPB_RpcMessage.Create(pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
+  rpc_message := TPB_RpcMessage.Create(pointer(NativeUInt(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
   try
     if not rpc_message.IsInitialized then
     begin
@@ -326,14 +327,14 @@ begin
     if rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize then
       Exit;
 
-    if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
+    if ParseRpcMessage(rpc_message, pointer(NativeUInt(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
       {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj); {$ENDIF}
       PostMessage(MessageContainer.HWND, WM_MESSAGE_CALLBACK_PROTO, NativeUInt(data_obj), rpc_message.MethodId);
     end;
 
-    ptmp := pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
+    ptmp := pointer(NativeInt(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
     Dec(FReceiveBufferSize, SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
     Move(ptmp^, FReceiveBuffer, FReceiveBufferSize);
     ReallocMem(FReceiveBuffer, FReceiveBufferSize);

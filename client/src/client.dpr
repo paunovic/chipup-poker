@@ -9,11 +9,6 @@ program client;
 
 uses
   FastMM4 in '3rdparty\FastMM\FastMM4.pas',
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
   Winapi.Windows,
   Vcl.Forms,

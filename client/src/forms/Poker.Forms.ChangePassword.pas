@@ -3,10 +3,9 @@ unit Poker.Forms.ChangePassword;
 interface
 
 uses
-  Winapi.Windows, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
-  cxTextEdit, cxLabel, cxButtons, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
+  Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
+  cxTextEdit, cxLabel, cxButtons, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmChangePassword = class(TForm)

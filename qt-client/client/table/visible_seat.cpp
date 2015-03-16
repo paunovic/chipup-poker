@@ -43,15 +43,20 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	//painter.setPen(Qt::NoPen);
 	//painter.setBrush(QColor(127,0,0));
 	//if (keyside == Right) painter.drawRect(62,4,23,23);
+	int targetheight = heightForWidth(width());
+	float avatar_x = 0;
+	float avatar_width = 0;
 	if (!jsobj->getEmpty()) {
 		if (avatar.width()) {
-			int x;
-			if (keyside == Right) x = 62;
-			else x = 5;
-			painter.drawPixmap(x,4,23,23,avatar);
+			if (keyside == Right) avatar_x = width() * 0.69;
+			else avatar_x = width() * 0.05;
+			float y = targetheight * 0.13;
+			avatar_width = width() * 0.26;
+			float avatar_height = ((qreal)avatar.height()*avatar_width)/avatar.width();
+			QRectF corner(avatar_x,y,avatar_width,avatar_height);
+			painter.drawPixmap(corner,avatar,QRectF());
 		} else qWarning("avatar missing from a seat");
 	}
-	int targetheight = heightForWidth(width());
 	painter.drawPixmap(0,0,width(),targetheight,pix);
 	if (!jsobj->getEmpty()) {
 		painter.setPen(QColor(255,0,0)); // FIXME, light grey
@@ -59,7 +64,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 		dn.setWidth(dn.width()+5);
 		int offset;
 		if (keyside == Right) offset = 35;
-		else offset = 60;
+		else offset = width() - avatar_width;
 		offset -= dn.width() / 2;
 		dn.translate(offset,15);
 		//qDebug() << dn << displayname;
@@ -81,7 +86,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			QRect bb = fontMetric->boundingRect(bottomline);
 			bb.setWidth(bb.width()+5);
 			if (keyside == Right) offset = 35;
-			else offset = 60;
+			else offset = width() - avatar_width;
 			offset -= bb.width()/2;
 			bb.translate(offset,30);
 			//qDebug() << bb;
@@ -140,6 +145,8 @@ void VisibleSeat::mousePressEvent(QMouseEvent *) {
 }
 void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 	qDebug() << "release";
+	// TODO, add-on if this is the right seat
+	// TODO, block if its any other seat and your sitting
 	QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 	sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
 	sitwindow->show();
@@ -184,7 +191,7 @@ void SeatObject::setAvatar(QString in) {
 	if (in != avatar_) {
 		qDebug() << "fetching avatar?" << in << "for seat" << getSeat();
 		avatar_ = in;
-		pendingReply = core->manager()->get(QNetworkRequest("https://chipuppoker.com/getavatar?id="+in));
+		pendingReply = core->manager()->get(QNetworkRequest(QString("https://%1/getavatar?id=%2").arg(core->serverAddress).arg(in)));
 	}
 }
 void SeatObject::replyFinished(QNetworkReply *reply) {

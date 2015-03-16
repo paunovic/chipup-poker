@@ -28,7 +28,7 @@ TableSit::~TableSit() {
 }
 void TableSit::on_btOK_clicked() {
 	Poker::TableSit ts;
-	int chips = ui->seBuyin->text().toDouble()*100;
+	int chips = parseValue(ui->seBuyin->text());
 	qDebug() << ui->seBuyin->text() << chips;
 	ts.set_game_id(g->gameid.data(),g->gameid.length());
 	ts.set_chips(chips);

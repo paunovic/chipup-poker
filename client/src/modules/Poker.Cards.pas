@@ -5,7 +5,6 @@ interface
 uses
   System.SysUtils, System.Generics.Collections;
 
-
 type
   TCardSuit = (csUnknown, csHeart, csDiamond, csClub, csSpade);
   TCardValue = (cvUnknown, cvTwo, cvThree, cvFour, cvFive, cvSix, cvSeven, cvEight, cvNine, cvTen, cvJack, cvQueen, cvKing, cvAce);

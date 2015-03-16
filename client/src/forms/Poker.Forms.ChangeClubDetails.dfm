@@ -4,7 +4,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Change Club Settings'
-  ClientHeight = 193
+  ClientHeight = 192
   ClientWidth = 393
   Color = clWindow
   Ctl3D = False
@@ -22,7 +22,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   OnKeyPress = FormKeyPress
   DesignSize = (
     393
-    193)
+    192)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsClubName: TcxLabel
@@ -40,18 +40,18 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Transparent = True
   end
   object edClubName: TcxTextEdit
-    Left = 127
-    Top = 11
+    Left = 95
+    Top = 13
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 64
     Properties.ReadOnly = False
     TabOrder = 0
-    Width = 255
+    Width = 287
   end
   object lbsInvitationCode: TcxLabel
     Left = 12
-    Top = 38
+    Top = 43
     Caption = 'Club password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -64,36 +64,20 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Transparent = True
   end
   object edInvitationCode: TcxTextEdit
-    Left = 127
-    Top = 37
+    Left = 95
+    Top = 41
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 255
+    Width = 287
   end
   object btOK: TcxButton
     Left = 190
-    Top = 157
+    Top = 156
     Width = 93
     Height = 27
     Action = acOK
-    Anchors = [akRight, akBottom]
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 6
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentFont = False
-  end
-  object btCancel: TcxButton
-    Left = 289
-    Top = 157
-    Width = 93
-    Height = 27
-    Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 7
@@ -104,30 +88,46 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Style = []
     ParentFont = False
   end
+  object btCancel: TcxButton
+    Left = 289
+    Top = 156
+    Width = 93
+    Height = 27
+    Action = acCancel
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 8
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+  end
   object cbDefaultPlayerLimit: TcxCheckBox
     Left = 10
-    Top = 93
+    Top = 97
     Caption = 'Default player limit:'
     Properties.ImmediatePost = True
     Properties.OnChange = cbDefaultPlayerLimitPropertiesChange
-    TabOrder = 3
+    TabOrder = 4
     Transparent = True
     Width = 113
   end
   object seLimit: TcxSpinEdit
     Left = 127
-    Top = 93
+    Top = 97
     Enabled = False
     Properties.MinValue = 1.000000000000000000
     Properties.UseDisplayFormatWhenEditing = True
     Properties.ValueType = vtFloat
-    TabOrder = 4
+    TabOrder = 5
     Value = 1000.000000000000000000
     Width = 95
   end
   object seRake: TcxSpinEdit
-    Left = 127
-    Top = 65
+    Left = 70
+    Top = 69
     Properties.AssignedValues.MinValue = True
     Properties.CanEdit = False
     Properties.DisplayFormat = '0%'
@@ -139,13 +139,13 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   end
   object lbsClubRake: TcxLabel
     Left = 12
-    Top = 66
+    Top = 70
     Caption = 'Club rake:'
     Transparent = True
   end
   object lbsResetBuyinLimits: TcxLabel
     Left = 12
-    Top = 122
+    Top = 126
     Caption = 'Hit && Run rule: player must wait minimum'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -159,20 +159,20 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   end
   object cbResetBuyinLimits: TcxComboBox
     Left = 212
-    Top = 121
+    Top = 125
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
       '30'
       '60'
       '90'
       '120')
-    TabOrder = 5
+    TabOrder = 6
     Text = '30'
     Width = 56
   end
   object lbsResetBuyinMinutes: TcxLabel
     Left = 270
-    Top = 122
+    Top = 126
     Caption = 'minutes'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -184,9 +184,26 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Style.IsFontAssigned = True
     Transparent = True
   end
+  object lbsMaxRakePerHand: TcxLabel
+    Left = 140
+    Top = 70
+    Caption = 'Maximum rake per hand (in $):'
+    Transparent = True
+  end
+  object seMaxRakePerHand: TcxSpinEdit
+    Left = 294
+    Top = 69
+    Properties.AssignedValues.MinValue = True
+    Properties.CanEdit = False
+    Properties.DisplayFormat = '$0'
+    Properties.EditFormat = '$0'
+    Properties.UseDisplayFormatWhenEditing = True
+    TabOrder = 3
+    Width = 88
+  end
   object acChangeClubDetails: TActionList
-    Left = 52
-    Top = 21
+    Left = 24
+    Top = 115
     object acOK: TAction
       Caption = 'OK'
       OnExecute = acOKExecute

@@ -3,10 +3,10 @@ unit Poker.Forms.Reconnect;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, OverbyteIcsWSocket, Vcl.ExtCtrls,
-  cxLabel, cxProgressBar, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
+  Poker.Interfaces.ModalForm, OverbyteIcsWSocket, Vcl.ExtCtrls, cxLabel, cxProgressBar,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit,
+  dxSkinsCore, ChipUpPokerDarkSkin;
 
 type
   TReconnectionStatus = (rsIdle, rsConnecting, rsConnected, rsHelloing, rsHelloOk, rsLoggingIn, rsLoggedIn, rsInvalidCredentials);

@@ -17,7 +17,6 @@ type
     FDone: Boolean;
 
     procedure syncNotify;
-
   protected
     procedure Execute; override;
   public

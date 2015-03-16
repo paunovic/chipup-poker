@@ -3,7 +3,8 @@ unit Poker.Games.Game;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Types;
+  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.Game,
+  Poker.Protobufs.Objects.TableStatus, Poker.Types;
 
 type
   TGameInfo = class(TPB_Game)

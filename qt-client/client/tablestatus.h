@@ -57,11 +57,11 @@ type get ## name() { return name; }
 	Poker::Game::GameLimit game_limit;
 	Poker::TableStatus::TableType table_type;
 	QList<Data::TableMessage> table_message;
+	int queue_position;
 signals:
 
 public slots:
-	QObject *readSeat(int index);
-	int seatCount() { return seats.length(); }
+	QObject *readSeatBySeat(int seat);
 private:
 	QList<int> bets_;
 	Poker::TableStatus::TableState state_;

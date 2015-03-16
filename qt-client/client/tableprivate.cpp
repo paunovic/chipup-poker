@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QStringList>
 #include <QPainter>
+#include <QScriptEngineDebugger>
+#include <QMainWindow>
 
 #include "tableprivate.h"
 #include "table/visible_seat.h"
@@ -10,24 +12,27 @@
 #include "table/animation.h"
 #include "table/animatecore.h"
 #include "table/dealerbutton.h"
+#include "data/seatinfo.h"
 #include "sound_effects.h"
 #include "pokermain.h"
+#include "table.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
-	qDebug() << "JS:" << context->argument(0).toString();
+	qDebug() << /*QDateTime::currentDateTime() <<*/ "JS:" << context->argument(0).toString();
 	return engine->undefinedValue();
 }
 static QScriptValue renderPosition(QScriptContext *context, QScriptEngine *engine) {
 	SeatObject *seatobj = static_cast<SeatObject*>(context->thisObject().toQObject());
-	QPoint pos = seatobj->getSeatUi()->getPosition();
+	//QPoint pos = seatobj->getSeatUi()->getPosition();
 	QScriptValue ret = engine->newObject();
-	qDebug() << pos;
-	Q_ASSERT(pos.y() > 0);
-	ret.setProperty("x",pos.x());
-	ret.setProperty("y",pos.y());
+	float x = seatobj->x();
+	if (seatobj->getKeySide() == Right) x -= seatobj->getSeatUi()->w;
+	else if (seatobj->getKeySide() == Top) x -= (seatobj->getSeatUi()->w/2);
+	ret.setProperty("x",x);
+	ret.setProperty("y",seatobj->y());
+	ret.setProperty("keySide",seatobj->getKeySide());
 	return ret;
 }
-
 static QScriptValue NewSeatObject(QScriptContext *, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	SeatObject *seatobj = new SeatObject(parent);
@@ -75,6 +80,14 @@ static QScriptValue NewTimer(QScriptContext *,QScriptEngine *engine) {
 TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
 
+	agent = new ScriptAgent(&engine);
+	//engine.setAgent(agent);
+	//QScriptEngineDebugger *debuger = new QScriptEngineDebugger(this);
+	//debuger->setAutoShowStandardWindow(true);
+	//debuger->attachTo(&engine);
+	//QMainWindow *debugWindow = debuger->standardWindow();
+	//debugWindow->show();
+
 	QScriptValue global = engine.globalObject();
 
 	global.setProperty("log",engine.newFunction(js_log,1));
@@ -96,18 +109,23 @@ TablePrivate::~TablePrivate() {
 	delete game;
 }
 bool TablePrivate::loadJs(QString code,QString file) {
+	agent->setCode(code);
 	engine.evaluate(code,file);
 	if (engine.hasUncaughtException()) {
 		qDebug() << engine.uncaughtExceptionBacktrace();
 		qDebug() << engine.uncaughtExceptionLineNumber();
-		qDebug() << "uncaught excepion" << engine.uncaughtException().toString();
+		qDebug() << "uncaught excepion while loading js" << engine.uncaughtException().toString();
 		engine.clearExceptions();
 		return false;
 	} else {
-		//qDebug() << "JS loaded";
+		qDebug() << "JS loaded";
 		return true;
 	}
 }
+void TablePrivate::renderWinning(QString msg) {
+	rootwindow->renderWinning(msg);
+}
+
 void TablePrivate::loadJsFromResource() {
 	QFile input(":/table.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -135,6 +153,43 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 	for (i1=ts->pots.begin(), index=0; i1!=ts->pots.end(); ++i1, index++) {
 		pots.setProperty(index,engine.newQObject(*i1));
 	}
+
+	QList<QSharedPointer<Data::TableEvent> >::Iterator i2;
+	QScriptValue events = engine.newArray();
+	int j=0,k;
+	for (i2=ts->events.begin(); i2!=ts->events.end(); ++i2) {
+		QSharedPointer<Data::TableEvent> e = *i2;
+		QScriptValue event = engine.newQObject(e.data());
+		QScriptValue pots = engine.newArray();
+		k = 0;
+		foreach (Data::Pot *p, e->pots) {
+			QScriptValue pot = engine.newQObject(p);
+			QScriptValue wda = engine.newArray();
+			int l=0;
+			foreach (Data::WinnerData *wd , p->winnerData) {
+				wda.setProperty(l,engine.newQObject((QObject*)wd));
+				l++;
+			}
+			pot.setProperty("WinnerData",wda);
+			pots.setProperty(k,pot);
+			k++;
+		}
+		event.setProperty("pots",pots);
+		events.setProperty(j,event);
+		j++;
+	}
+	jsts.setProperty("events",events);
+
+	QList<Data::SeatInfo*>::Iterator i3;
+	QScriptValue seats = engine.newArray();
+	j = 0;
+	for (i3=ts->seats.begin(); i3!=ts->seats.end(); ++i3) {
+		Data::SeatInfo *seat = *i3;
+		seats.setProperty(j,engine.newQObject(seat));
+		j++;
+	}
+	jsts.setProperty("seats",seats);
+
 	args.append(jsts);
 	func.call(engine.globalObject(),args);
 	if (engine.hasUncaughtException()) {
@@ -143,25 +198,6 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 		engine.clearExceptions();
 		return false;
 	}
-	QScriptValue func2 = engine.globalObject().property("tableEvent");
-	if (!func2.isFunction()) {
-		qDebug() << "tableEvent isnt a function";
-		return false;
-	}
-	QList<QSharedPointer<Data::TableEvent> >::Iterator i2;
-	for (i2=ts->events.begin(); i2!=ts->events.end(); ++i2) {
-		QSharedPointer<Data::TableEvent> e = *i2;
-		QScriptValue event = engine.newQObject(e.data());
-		QScriptValueList args;
-		args.append(event);
-		func2.call(engine.globalObject(),args);
-		if (engine.hasUncaughtException()) {
-			qDebug() << engine.uncaughtExceptionBacktrace();
-			qDebug() << engine.uncaughtException().toString();
-			engine.clearExceptions();
-			return false;
-		}
-	}
 	return true;
 }
 void TablePrivate::setGame(const Data::Game *game) {
@@ -169,8 +205,9 @@ void TablePrivate::setGame(const Data::Game *game) {
 	this->game = new GameWrap(game);
 	engine.globalObject().setProperty("game",engine.newQObject(this->game));
 }
-void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout) {
+void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout, Table *rootwindow) {
 	tableui = new TableUi(parent);
+	this->rootwindow = rootwindow;
 	//layout->setRowStretch(1,1);
 	layout->addWidget(tableui,0,0);
 	//layout->addWidget(new QWidget(parent),1,0);

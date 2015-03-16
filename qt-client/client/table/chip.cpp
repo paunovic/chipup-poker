@@ -11,6 +11,9 @@ ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 
 ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(parent),
 	jsobj(jsobj) {
+	font.setPointSize(7);
+	font.setBold(true);
+	fm = new QFontMetrics(font);
 	c1 = QPixmap(":/resources/chips/1.png");
 	c5 = QPixmap(":/resources/chips/5.png");
 	c25 = QPixmap(":/resources/chips/25.png");
@@ -45,8 +48,14 @@ void ChipObjectUi::updateValue() {
 			v -= 1;
 		}
 	}
+	qDebug() << "chip stack changed";
 	update();
 	updateGeometry();
+	text = QString("%1").arg((float)jsobj->value()/100);
+	int new_width = tbl->width() * w;
+	int height = (chips.length() * 5) + (pix.height() * 0.6);
+	textRegion = fm->boundingRect(QRect((qreal)pix.width()*0.45,height/2,200,height/2),0,text);
+	qDebug() << textRegion << "chip text";
 }
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight) {
 	float scale = 0.45;
@@ -70,14 +79,20 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	}
 	p.restore();
 
+	//p.setBrush(Qt::green);
+	//p.drawRect(textRegion);
+
 	p.setPen(QColor(255,255,255));
-	int chipwidth = pix.width()*0.6;
-	p.drawText(chipwidth,height()/2,width() - chipwidth,height(),0,QString("%1").arg((float)jsobj->value()/100));
+	p.setFont(font);
+	p.drawText(textRegion.topLeft(),text);
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
 	int height = (chips.length() * 5) + (pix.height() * 0.6);
-	QSize ret(new_width+40,height);
+	qDebug() << textRegion << textRegion.bottomRight();
+	QSize ret(new_width+textRegion.width(),height);
 	if (jsobj->value() == 300) qDebug() << "chip size" << ret;
-	return ret;
+	QPoint x = textRegion.bottomRight();
+	if (height < x.y()) height = x.y();
+	return QSize(x.x()+10,height);
 }

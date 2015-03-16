@@ -99,7 +99,6 @@
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<Debugger_RunParams>-noupdate</Debugger_RunParams>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUpPoker;LegalCopyright=Marko Paunovic, paunovic@gmail.com;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUp Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_MapFile>3</DCC_MapFile>

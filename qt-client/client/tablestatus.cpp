@@ -55,13 +55,21 @@ void TableStatus::update(const Poker::TableStatus &in) {
 		m.update(in.table_message(i));
 		table_message.append(m);
 	}
+	if (in.has_queue_position()) queue_position = in.queue_position();
+	else queue_position = 0;
 }
 QString TableStatus::getState() {
 	switch (state_) {
 	case Poker::TableStatus::tsIdle: return "tsIdle";
 	case Poker::TableStatus::tsPreFlop: return "tsPreFlop";
-	default: return QString("err:%1").arg((int)state_);
+	case Poker::TableStatus::tsFlop: return "tsFlop";
+	case Poker::TableStatus::tsTurn: return "tsTurn";
+	case Poker::TableStatus::tsRiver: return "tsRiver";
+	case Poker::TableStatus::tsWinning: return "tsWinning";
+	case Poker::TableStatus::tsWinning2: return "tsWinning2";
+	//default: return QString("err:%1").arg((int)state_);
 	}
+	return "error";
 }
 TableStatus::~TableStatus() {
 	// TODO, try setting the parent of the seats
@@ -70,7 +78,12 @@ TableStatus::~TableStatus() {
 	//	delete x;
 	//}
 }
-QObject *TableStatus::readSeat(int index) {
-	return seats.at(index);
+QObject *TableStatus::readSeatBySeat(int seat) {
+	QList<SeatInfo*>::Iterator i;
+	for (i=seats.begin(); i!=seats.end(); ++i) {
+		SeatInfo *seatinfo = *i;
+		if (seatinfo->seat_index == seat) return seatinfo;
+	}
+	return NULL;
 }
 } // namespace Data

@@ -5,6 +5,9 @@ var localTurn = [];
 var localRiver = [];
 var localPots = [];
 var db = new DealerButton();
+var testcase = false;
+
+var cardWidth = 0.05;
 
 var idleChips = [];
 function getChipStack() {
@@ -23,19 +26,90 @@ function updatePots() {
 		if (lastTS.pots[i].value == 0) continue;
 		localPots[i].setPosition(0.35 + (0.1*i),0.3);
 		localPots[i].visible = true;
-		localPots[i].value = lastTS.pots[i].value;
+		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
+		// TODO, render rake
 	}
 }
 var lastTS;
 function tableStatus(ts) {
+	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
 	updateSeats(ts);
 	lastTS = ts;
-	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
+	if (ts.state == 'tsIdle') {
+		for (var x=0; x<seat_objects.length; x++) {
+			var local = seat_objects[x];
+			if (!local) continue;
+			for (var y=0; y<local.cards.length; y++) {
+				if (local.cards[y]) queueAction(new HideCard(local.cards[y]));
+				delete local.cards[y];
+			}
+		}
+	}
+	var sets = [];
+	for (var j=0; j<ts.events.length; j++) {
+		log("event:"+j+" out of "+ts.events.length);
+		var event = ts.events[j];
+		switch (event.event) {
+		case "teFlop":
+			for (var i=0; i<event.getCardCount(); i++) {
+				var card = event.getCard(i);
+				var offset = i*3;
+				for (var x=0; x<3; x++) {
+					if (!localFlop[x+offset]) localFlop[x+offset] = new Card();
+					localFlop[x+offset].setSize(cardWidth);
+					localFlop[x+offset].card = card.cards[x];
+					localFlop[x+offset].visible = false;
+				}
+				log("queueing flop reveal");
+				if (!sets[i]) sets[i] = [];
+				sets[i].push(new AnimateFlop(card.cards,offset));
+			}
+			updatePots();
+			break;
+		case "teTurn":
+			for (var i=0; i<event.getCardCount(); i++) {
+				var card = event.getCard(i);
+				if (!localTurn[i]) localTurn[i] = new Card();
+				localTurn[i].setSize(cardWidth);
+				localTurn[i].visible = false;
+				if (!sets[i]) sets[i] = [];
+				if (i == 0) height = 0.477;
+				else height = 0.55;
+				sets[i].push(new DealCard(0.523,height,localTurn[i]));
+				sets[i].push(new RevealCard(localTurn[i],card.cards[0]));
+			}
+			updatePots();
+			break;
+		case "teRiver":
+			for (var i=0; i<event.getCardCount(); i++) {
+				var card = event.getCard(i);
+				if (!localRiver[i]) localRiver[i] = new Card();
+				localRiver[i].setSize(cardWidth);
+				localRiver[i].visible = false;
+				if (!sets[i]) sets[i] = [];
+				if (i == 0) height = 0.477;
+				else height = 0.55;
+				sets[i].push(new DealCard(0.592,height,localRiver[i]));
+				sets[i].push(new RevealCard(localRiver[i],card.cards[0]));
+			}
+			updatePots();
+			break;
+		}
+	}
+	for (var j=0; j<sets.length; j++) {
+		for (var i=0; i<sets[j].length; i++) {
+			queueAction(sets[j][i]);
+		}
+	}
+	for (var j=0; j<ts.events.length; j++) {
+		log("event:"+j+" out of "+ts.events.length);
+		var event = ts.events[j];
+		tableEvent(event);
+	}
 }
 function updateSeats(ts,opts) {
-	var max = ts.seatCount();
-	for (var i=0; i<max; i++) {
-		var seat = ts.readSeat(i);
+	for (var i=0; i<ts.seats.length; i++) {
+		var seat = ts.seats[i];
 		var local = seat_objects[seat.seat_index];
 		local.updateInfo(seat);
 		seat_objects[seat.seat_index].empty = false;
@@ -44,10 +118,9 @@ function updateSeats(ts,opts) {
 		seat_objects[seat.seat_index].avatar = user.avatar;
 	}
 }
-function AnimateCards() {
-	var max = lastTS.seatCount();
-	for (var i=0; i<max; i++) {
-		var seat = lastTS.readSeat(i);
+function AnimateCards(opts) {
+	for (var i=0; i<lastTS.seats.length; i++) {
+		var seat = lastTS.seats[i];
 		var local = seat_objects[seat.seat_index];
 		//log("index:"+i+" seat#:"+seat.seat_index);
 		//log(JSON.stringify(seat));
@@ -57,19 +130,28 @@ function AnimateCards() {
 			for (var j=0; j<seat.card_count; j++) {
 				var cardvalue = -1;
 				if (seat.hand.cards.length) cardvalue = seat.hand.cards[j];
-				var pos = calcCardPosition(seat.seat_index,j);
+				var pos = calcCardPosition(seat.seat_index,j,seat.card_count);
 				if (local.cards[j]) {
-					if (local.cards[j].card != cardvalue) {
-						local.cards[j].card = cardvalue;
-						queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
+					var skip = false;
+					if (opts && opts.reveal) {
+						if (local.cards[j].card != cardvalue) {
+							queueAction(new RevealCard(local.cards[j],cardvalue));
+							skip = true;
+						}
+					}
+					if (!skip) {
+						if (local.cards[j].card != cardvalue) {
+							queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
+							queueAction(new RevealCard(local.cards[j],cardvalue));
+						}
 					}
 				} else {
 					card = new Card();
 					log('placing card at:'+JSON.stringify(pos));
-					card.setSize(0.1);
-					card.card = cardvalue;
+					card.setSize(cardWidth);
 					local.cards[j] = card;
 					queueAction(new DealCard(pos.x,pos.y,local.cards[j]));
+					queueAction(new RevealCard(local.cards[j],cardvalue));
 				}
 				local.cards[j].stackUnder(local);
 			}
@@ -86,11 +168,63 @@ function queueAction(action) {
 	actions.push(action);
 	if (actions.length == 1) actions[0].begin();
 }
+function AnimateFlop(cards,offset) {
+	this.cards = cards;
+	this.secondDone = false;
+	this.thirdDone = false;
+	this.offset = offset;
+	if (offset == 0) this.y = 0.477;
+	else this.y = 0.55;
+	log("starting flop animation for:"+cards);
+}
+AnimateFlop.prototype.begin = function () {
+	for (var x=0; x<3; x++) {
+		if (!localFlop[x+this.offset]) localFlop[x+this.offset] = new Card();
+		localFlop[x+this.offset].visible = false;
+		localFlop[x+this.offset].setSize(cardWidth);
+	}
+	localFlop[0+this.offset].card = -1;
+	localFlop[0+this.offset].setPosition(0.5,0.1);
+	localFlop[0+this.offset].visible = true;
+	PlaySound(0);
+	var that = this;
+	Animate(localFlop[0+this.offset], 0.318,this.y, 0.25,once(function () { that.reveal(); }));
+}
+AnimateFlop.prototype.reveal = function () {
+	for (var x=0; x<3; x++) {
+		localFlop[x+this.offset].card = this.cards[x];
+	}
+	localFlop[1+this.offset].setPosition(0.318,this.y);
+	localFlop[2+this.offset].setPosition(0.318,this.y);
+	localFlop[1+this.offset].visible = true;
+	localFlop[2+this.offset].visible = true;
+	var that = this;
+	Animate(localFlop[1+this.offset],0.387,this.y,0.25,once(function () { that.second(); }));
+	Animate(localFlop[2+this.offset],0.454,this.y,0.25,once(function () { that.third(); }));
+}
+AnimateFlop.prototype.second = function () {
+	this.secondDone = true;
+	this.check();
+}
+AnimateFlop.prototype.third = function () {
+	this.thirdDone = true;
+	this.check();
+}
+AnimateFlop.prototype.check = function () {
+	if (this.secondDone && this.thirdDone) eventDone();
+}
+function HideCard(obj) {
+	this.card = obj;
+}
+HideCard.prototype.begin = function () {
+	this.card.visible = false;
+	eventDone();
+}
 function tableEvent(event) {
 	log('EVENT:'+event.event);
 	switch (event.event) {
 	case "teSit":
-		var seat = lastTS.readSeat(event.seat);
+		var seat = lastTS.readSeatBySeat(event.seat);
 		var local = seat_objects[event.seat];
 		local.updateInfo(seat);
 		seat_objects[event.seat].empty = false;
@@ -110,44 +244,6 @@ function tableEvent(event) {
 			seat_objects[event.seat].bet = null;
 		}
 		break;
-	case "teFlop":
-		for (var i=0; i<event.getCardCount(); i++) {
-			var card = event.getCard(i);
-			for (var x=0; x<3; x++) {
-				if (!localFlop[x]) localFlop[x] = new Card();
-				localFlop[x].setSize(0.063);
-				localFlop[x].card = card.cards[x];
-				localFlop[x].visible = false;
-			}
-			log("queueing flop reveal");
-			queueAction(new DealCard(0.318,0.477,localFlop[0]));
-			queueAction(new DealCard(0.387,0.477,localFlop[1]));
-			queueAction(new DealCard(0.454,0.477,localFlop[2]));
-		}
-		updatePots();
-		break;
-	case "teTurn":
-		for (var i=0; i<event.getCardCount(); i++) {
-			var card = event.getCard(i);
-			if (!localTurn[0]) localTurn[0] = new Card();
-			localTurn[0].setSize(0.063);
-			localTurn[0].card = card.cards[0];
-			localTurn[0].visible = false;
-			queueAction(new DealCard(0.523,0.477,localTurn[0]));
-		}
-		updatePots();
-		break;
-	case "teRiver":
-		for (var i=0; i<event.getCardCount(); i++) {
-			var card = event.getCard(i);
-			if (!localRiver[0]) localRiver[0] = new Card();
-			localRiver[0].setSize(0.063);
-			localRiver[0].card = card.cards[0];
-			localRiver[0].visible = false;
-			queueAction(new DealCard(0.592,0.477,localRiver[0]))
-		}
-		updatePots();
-		break;
 	case "teExistingCards":
 		for (var i=0; i<event.getCardCount(); i++) {
 			var card = event.getCard(i);
@@ -155,23 +251,62 @@ function tableEvent(event) {
 		}
 		break;
 	case "teWinning":
-		updateBets();
-		if (localFlop[0]) {
-			localFlop[0].visible = false;
-			localFlop[1].visible = false;
-			localFlop[2].visible = false;
+		queueAction(new SimpleDelay(2000));
+		var perSeatWins = [];
+		for (var i=0; i<game.seats; i++) perSeatWins[i] = 0;
+		queueAction(new UpdateChat(JSON.stringify(event.pots)));
+		var seatMap = [];
+		for (var i=0; i<lastTS.seats.length; i++) {
+			seatMap[lastTS.seats[i].seat_index] = lastTS.seats[i];
 		}
-		if (localTurn[0]) localTurn[0].visible = false;
-		if (localRiver[0]) localRiver[0].visible = false;
+		for (var i=0; i<event.pots.length; i++) {
+			var winnerCount = event.pots[i].WinnerData.length;
+			for (var k=0; k<event.pots[i].WinnerData.length; k++) {
+				log("i:"+i+" k:"+k+" wd:"+JSON.stringify(event.pots[i].WinnerData[k]));
+				var winnerSeat = event.pots[i].WinnerData[k].seat;
+				var winnerName = seatMap[winnerSeat].user.displayName;
+				var potvalue = event.pots[i].value - event.pots[i].rake;
+				var gain = 0;
+				if (winnerCount == 1) {
+					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips"));
+					gain = potvalue;
+				} else {
+					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips"));
+					gain = potvalue/winnerCount;
+				}
+				// TODO, rake
+				perSeatWins[winnerSeat] += gain;
+			}
+		}
 		var p;
 		while (p=localPots.shift()) {
 			hideChips(p);
 		}
+		for (var i=0; i<game.seats; i++) {
+			var pos = calcBetLocation(i);
+			if (perSeatWins[i] == 0) continue;
+			log("seat#"+i+" won:"+perSeatWins[i]+" coords:"+JSON.stringify(pos));
+			queueAction(new AnimateChipWin(pos,perSeatWins[i]));
+		}
+		updateBets();
+		AnimateCards({reveal:true});
+		for (var i=0; i<localFlop.length; i++) {
+			if (localFlop[i]) {
+				log("hiding flop:"+i);
+				queueAction(new HideCard(localFlop[i]));
+			}
+		}
+		for (var i=0; i<localTurn.length; i++) {
+			if (localTurn[i]) queueAction(new HideCard(localTurn[i]));
+		}
+		for (var i=0; i<localRiver.length; i++) {
+			if (localRiver[i]) queueAction(new HideCard(localRiver[i]));
+		}
 		break;
 	case 'teDealing':
 		updateDealer(lastTS.dealer);
-		AnimateCards();
 		updateBets({sound:true});
+		AnimateCards();
 		break;
 	case 'teCall':
 		updateBets({sound:true});
@@ -182,15 +317,42 @@ function tableEvent(event) {
 	case 'teRaise':
 		updateBets({sound:true});
 		break;
+	case "teAllIn":
+		updateBets({sound:true});
+		break;
 	case 'tePostRiver':
 		break;
 	default:
 		dump(event);
 	}
 }
+function AnimateChipWin(dest,chips) {
+	this.stack = getChipStack();
+	this.dest = dest;
+	this.chips = chips;
+}
+AnimateChipWin.prototype.begin = function () {
+	this.stack.value = this.chips;
+	this.stack.setPosition(0.5,0.5);
+	var stack = this.stack;
+	Animate(this.stack, this.dest.x, this.dest.y, 0.5, function () { hideChips(stack); eventDone(); });
+}
+function UpdateChat(msg) {
+	this.msg = msg;
+}
+UpdateChat.prototype.begin = function () {
+	root.renderWinning(this.msg);
+	eventDone();
+}
+function SimpleDelay(delay) {
+	this.delay = delay;
+}
+SimpleDelay.prototype.begin = function () {
+	this.timer = setTimeout(eventDone,this.delay);
+}
 function updateBets(opts) {
-	for (var i=0; i<lastTS.seatCount(); i++) {
-		var remote = lastTS.readSeat(i);
+	for (var i=0; i<lastTS.seats.length; i++) {
+		var remote = lastTS.seats[i];
 		var local = seat_objects[remote.seat_index];
 		if (lastTS.bets[remote.seat_index] == 0) {
 			if (local.bet) {
@@ -221,6 +383,7 @@ function dump(i) {
 	}
 }
 function initSeats() {
+	log("doing init seats");
 	for (var i=0; i<game.seats; i++) {
 		var seat = new SeatObject();
 		seat.setSize(0.16);
@@ -251,10 +414,14 @@ function calcSeatPosition(index) {
 
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
-function calcCardPosition(seat,card) {
+function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
-	return { x:seatpos.x + (card*25), y:seatpos.y + 10 };
+	var cardOffset = cardWidth;
+	var seatWidth = 0.16;
+	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
+	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
+	return { x:center + (card * cardOffset), y:seatpos.y - 0.0 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
@@ -320,17 +487,28 @@ function calcBetLocation(seat) {
 function DealCard(destx,desty,cardobj) {
 	this.destx = destx;
 	this.desty = desty;
+	if (this.destx < 0) throw "invalid x pos";
 	this.cardobj = cardobj;
-	cardobj.visible = false;
+	//cardobj.visible = false;
 }
 DealCard.prototype.begin = function DealCardBegin() {
+	log("starting card animation "+this.destx+" "+this.desty);
+	this.cardobj.card = -1;
 	this.cardobj.visible = true;
 	this.cardobj.setPosition(0.5,0.1);
 	Animate(this.cardobj, this.destx,this.desty, 0.25,eventDone);
 	PlaySound(0);
 }
+function RevealCard(obj,value) {
+	this.obj = obj;
+	this.value = value;
+}
+RevealCard.prototype.begin = function () {
+	this.obj.card = this.value;
+	eventDone();
+}
 function eventDone() {
-	log('event done, doing next');
+	log('event done, doing next:'+actions.length);
 	var self = actions.shift();
 	if (actions.length > 0) actions[0].begin();
 }
@@ -345,12 +523,24 @@ ShowBet.prototype.begin = function ShowBetBegin() {
 	this.timer = setTimeout(eventDone,200);
 }
 function setTimeout(cb,delay) {
+	if (testcase) {
+		cb();
+		return;
+	}
 	var timer = new QTimer();
 	timer.interval = delay;
 	timer.singleShot = true;
 	timer.timeout.connect(this,cb);
 	timer.start();
 	return timer;
+}
+function once(fn) {
+	var done = false;
+	return function () {
+		if (done) return;
+		done = true;
+		fn();
+	}
 }
 initSeats();
 dump(game);

@@ -92,6 +92,8 @@ function Game(obj) {
 	this.seats = []; // internal data for seats
 	this.reconnect = []; // array of ObjectId's for offline members
 	this.timebanks = {}; // timebank data for all users who have visited the table
+	this.sitQueue = []; // array of people waiting to sit down
+	this.reserved_seats = []; // array of {index:int, userid:objectid} for sitQueue action
 	this.obj = obj;
 	this.id = obj._id;
 	activeGames[this.id] = this;
@@ -314,6 +316,16 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		if (this.bets[params.seat_index] == undefined) this.bets[params.seat_index] = 0;
 		events.push(this.makeEvent('teSit',params.seat_index));
 		this.updateBuyin(params.seat_index,params.chips,function () {
+			if (this.reserved_seats.length > 0) {
+				// atleast one seat is reserved, check which index and un-reserve it
+				for (var x=0; x<this.reserved_seats.length; x++) {
+					if (this.reserved_seats[x].index == params.seat_index) {
+						clearTimeout(this.reserved_seats[x].timer);
+						this.reserved_seats.splice(x,1);
+						break;
+					}
+				}
+			}
 			finish.call(this);
 		}.bind(this));
 	}
@@ -321,6 +333,29 @@ Game.prototype.sitDown = function (conn,params,cb) {
 	assert(conn.userid);
 	var events = [];
 	conn.log('sitting down',params);
+	if (params.seat_index == -1) {
+		// check that all seats are filled
+		this.sitQueue.push(conn.userid);
+		conn.send(codes.seTableStatus,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
+		cb(false,events);
+		return;
+	}
+	if (this.reserved_seats.length > 0) {
+		// atleast one seat is reserved, check that this user is obeying the rules
+		for (var x=0; x<this.reserved_seats.length; x++) {
+			if (this.reserved_seats[x].index == params.seat_index) {
+				if (myutils.compareObjectID(this.reserved_seats[x].userid,conn.userid)) {
+					// this user has permission to sit here
+					break;
+				} else {
+					// reserved seat
+					this.reply(0,'that seat is reserved');
+					cb(false,events);
+					return;
+				}
+			}
+		}
+	}
 	if ((params.seat_index < 0) || (params.seat_index >= this.obj.seats)) {
 		conn.reply(0,'invalid seat index');
 		cb(false,events);
@@ -1279,6 +1314,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 		} else {
 			var table = { flop: this.flops[0], turn:this.turns[0], river:this.rivers[0] };
 			var results = []
+			console.log(table);
 			results[0] = dag.rankHands(table,hands);
 			console.log(results[0]);
 			if (this.flops[1]) table.flop = this.flops[1];
@@ -2071,6 +2107,10 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		}
 		tableStatus.seats.push(obj);
 	}
+	tableStatus.reserved_seats = [];
+	for (var x=0; x<this.reserved_seats.length; x++) {
+		tableStatus.reserved_seats.push(this.reserved_seats[x].index);
+	}
 	tableStatus.dealer = this.dealer;
 	tableStatus.current_seat = this.current_seat;
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
@@ -2078,6 +2118,9 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.rotation = this.rotation;
 	tableStatus.table_message = this.message;
 	this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
+	if (this.sitQueue.indexOf(self.userid) != -1) {
+		tableStatus.queue_position = this.sitQueue.indexOf(self.userid) + 1;
+	}
 	return tableStatus;
 }
 Game.prototype.sittingCount = function () {
@@ -2252,12 +2295,50 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 						token2.stop();
 						token7.stop(); // 31ms 31%
 						token9.stop(); // 3ms
+						if (this.sitQueue.length) {
+							var next = this.sitQueue.shift();
+							var timer = setTimeout(this.bootReserved.bind(this,seatIdx),60000);
+							this.reserved_seats.push({index:seatIdx,userid:next, timer:timer});
+							if (this.users[next]) {
+								this.users[next].send(codes.seReservedSeatFree,{seat_index:seatIdx,ts:this.getTableStatus(this.users[next],null,[])},'Poker.ReservedSeatFree');
+							}
+						}
 						cb1(folded,events,offset);
-					});
+					}.bind(this));
 				}.bind(this));
 			}
 		}
 	}
+}
+Game.prototype.bootReserved = function (seatIdx) {
+	this.log('times up!');
+	this.Lock.writeLock(function (release) {
+		this.log('got lock %d',seatIdx);
+		for (var x=0; x<this.reserved_seats.length; x++) {
+			this.log('loop %d %d',x,this.reserved_seats[x].index);
+			if (this.reserved_seats[x].index != seatIdx) continue;
+			this.log('match');
+			var userid = this.reserved_seats[x].userid;
+			this.reserved_seats.splice(x,1);
+			if (this.sitQueue.length) {
+				this.log('re-reserving next');
+				var next = this.sitQueue.shift();
+				var timer = setTimeout(this.bootReserved.bind(this,seatIdx),60000);
+				this.reserved_seats.push({index:seatIdx,userid:next, timer:timer});
+				if (this.users[next]) {
+					this.users[next].send(codes.seReservedSeatFree,{seat_index:seatIdx,ts:this.getTableStatus(this.users[next],null,[])},'Poker.ReservedSeatFree');
+				}
+			}
+			if (this.users[userid]) {
+				this.log('telling user');
+				this.users[userid].send(codes.srReservedSeatTimeout,this.getTableStatus(this.users[userid],null,[]),'Poker.TableStatus');
+			}
+			this.broadcastStatus(null,null,[]);
+			this.log('release');
+			release();
+			return;
+		}
+	}.bind(this));
 }
 Game.prototype.leave = function leave(conn,reason,cb1) {
 	conn.log('getting lock:%s',this.Lock.trace);
@@ -2273,6 +2354,9 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 					this.broadcastStatus(null,true,events);
 					finish.call(this);
 				}.bind(this));
+		} else if (this.sitQueue.indexOf(conn.userid) != -1) {
+			// TODO, de-queue upon logout
+			finish.call(this);
 		} else finish.call(this);
 		function finish() {
 			var count = 0,key;
@@ -2308,6 +2392,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 	}.bind(this));
 }
 Game.prototype.handleDisconnect = function (conn,reason,userid,cb) {
+	// ran if a user is in the users array
 	assert(conn.userid);
 	if (this.club && (reason == 'logout')) {
 		conn.log('club game logout');
@@ -2441,6 +2526,7 @@ Game.prototype.stopTimer = function stopTimer(seat) {
 	this.timer = null;
 }
 Game.handleDisconnect = function handleDisconnect(conn,reason,cb1) {
+	// ran for ANY disconnection event
 	conn.log('handling disconnect:%s',reason);
 	var jobs = [];
 	for (var key in activeGames) {

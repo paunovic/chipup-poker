@@ -3,9 +3,11 @@ unit Poker.Forms.Subscriptions;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
-  cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, cxGroupBox, cxRadioGroup, Vcl.Menus, cxButtons, cxLabel, Vcl.ActnList;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit,
+  dxSkinsCore, ChipUpPokerDarkSkin, cxGroupBox, cxRadioGroup, Vcl.Menus, cxButtons,
+  cxLabel, Vcl.ActnList;
 
 type
   TfrmSubscriptions = class(TForm)

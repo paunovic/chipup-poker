@@ -39,6 +39,8 @@ type
       kMinimumRaiseFieldNumber = 26;
       kTableTypeFieldNumber = 27;
       kTableMessageFieldNumber = 28;
+      kQueuePositionFieldNumber = 29;
+      kReservedSeatsFieldNumber = 30;
 
     var
       FTableMongoId: TMongoId;
@@ -64,6 +66,8 @@ type
       FMinimumRaise: UInt32;
       FTableType: TTableType;
       FTableMessage: TList<TPB_TableMessage>;
+      FQueuePosition: UInt32;
+      FReservedSeats: TList<UInt32>;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
@@ -130,11 +134,17 @@ type
     procedure SetTableType(const AValue: TTableType);
     procedure set_has_TableMessage;
     procedure clear_has_TableMessage;
+    procedure set_has_QueuePosition;
+    procedure clear_has_QueuePosition;
+    procedure SetQueuePosition(const AValue: UInt32);
+    procedure set_has_ReservedSeats;
+    procedure clear_has_ReservedSeats;
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
     procedure TableMessageNotifyEvent(Sender: TObject; const Item: TPB_TableMessage; Action: TCollectionNotification);
+    procedure ReservedSeatsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
@@ -261,6 +271,16 @@ type
     procedure clear_TableMessage;
     property TableMessage: TList<TPB_TableMessage> read FTableMessage;
 
+    // optional uint32 QueuePosition = 29;
+    function has_QueuePosition: Boolean;
+    procedure clear_QueuePosition;
+    property QueuePosition: UInt32 read FQueuePosition write SetQueuePosition;
+
+    // repeated uint32 ReservedSeats = 30;
+    function has_ReservedSeats: Boolean;
+    procedure clear_ReservedSeats;
+    property ReservedSeats: TList<UInt32> read FReservedSeats;
+
   end;
 
   TPB_TableStatusList = class(TObjectList<TPB_TableStatus>)
@@ -306,6 +326,11 @@ begin
     FTableMessage.OnNotify := nil;
     FreeAndNil(FTableMessage);
   end;
+  if Assigned(FReservedSeats) then
+  begin
+    FReservedSeats.OnNotify := nil;
+    FreeAndNil(FReservedSeats);
+  end;
   inherited;
 end;
 
@@ -317,6 +342,7 @@ begin
   FEvents := TObjectList<TPB_TableEvent>.Create;
   FPots := TObjectList<TPB_Pot>.Create;
   FTableMessage := TObjectList<TPB_TableMessage>.Create;
+  FReservedSeats := TList<UInt32>.Create;
 end;
 
 procedure TPB_TableStatus.HookNotifiers;
@@ -327,6 +353,7 @@ begin
   FEvents.OnNotify := EventsNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
   FTableMessage.OnNotify := TableMessageNotifyEvent;
+  FReservedSeats.OnNotify := ReservedSeatsNotifyEvent;
 end;
 
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -452,6 +479,16 @@ begin
         FTableMessage.Add(TPB_TableMessage.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_TableMessage;
       end;
+      kQueuePositionFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FQueuePosition := AProtobufReader.readUInt32;
+        set_has_QueuePosition;
+      end;
+      kReservedSeatsFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FReservedSeats.Add(AProtobufReader.readUInt32);
+        set_has_ReservedSeats;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -509,6 +546,9 @@ begin
     SetTableType(AFrom.TableType);
   for pbobj22 in AFrom.TableMessage do
     FTableMessage.Add(TPB_TableMessage.Create(pbobj22, Lightweight));
+  if AFrom.has_QueuePosition then
+    SetQueuePosition(AFrom.QueuePosition);
+  FReservedSeats.AddRange(AFrom.ReservedSeats);
 end;
 
 function TPB_TableStatus.IsInitialized: Boolean;
@@ -1280,6 +1320,71 @@ begin
   end;
 end;
 
+procedure TPB_TableStatus.clear_QueuePosition;
+begin
+  FQueuePosition := 0;
+  clear_has_QueuePosition;
+end;
+
+function TPB_TableStatus.has_QueuePosition: Boolean;
+begin
+  result := (_has_bits_ and 268435456) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_QueuePosition;
+begin
+  _has_bits_ := _has_bits_ or 268435456;
+end;
+
+procedure TPB_TableStatus.clear_has_QueuePosition;
+begin
+  _has_bits_ := _has_bits_ and not 268435456;
+end;
+
+procedure TPB_TableStatus.SetQueuePosition(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_QueuePosition);
+  FQueuePosition := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kQueuePositionFieldNumber, AValue);
+  set_has_QueuePosition;
+end;
+
+procedure TPB_TableStatus.clear_ReservedSeats;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
+begin
+  on_notify := FReservedSeats.OnNotify;
+  FReservedSeats.OnNotify := nil;
+  FReservedSeats.Clear;
+  FReservedSeats.OnNotify := on_notify;
+  clear_has_ReservedSeats;
+end;
+
+function TPB_TableStatus.has_ReservedSeats: Boolean;
+begin
+  result := (_has_bits_ and 536870912) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_ReservedSeats;
+begin
+  _has_bits_ := _has_bits_ or 536870912;
+end;
+
+procedure TPB_TableStatus.clear_has_ReservedSeats;
+begin
+  _has_bits_ := _has_bits_ and not 536870912;
+end;
+
+procedure TPB_TableStatus.ReservedSeatsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_ReservedSeats;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kReservedSeatsFieldNumber, Item);
+end;
+
 procedure TPB_TableStatus.Clear;
 begin
   if _has_bits_ = 0 then
@@ -1308,6 +1413,8 @@ begin
   clear_MinimumRaise;
   clear_TableType;
   clear_TableMessage;
+  clear_QueuePosition;
+  clear_ReservedSeats;
 end;
 
 procedure TPB_TableStatusList.Assign(const APB_TableStatusList: TList<TPB_TableStatus>);

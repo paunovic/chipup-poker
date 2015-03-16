@@ -490,6 +490,16 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.error(e);
 		}
 		return;
+	} else if (code == codes.scSoftException) {
+		try {
+			params = pb.Parse(args,'Poker.SoftException');
+			models.SoftException.create({exception:params.exception, data:params.data, userid:this.userid, ip: this.socket ? this.socket.remoteAddress : null},function (err,log) {
+				console.log('made log',err,log);
+			});
+		} catch (e) {
+			this.error(e);
+		}
+		return;
 	}
 	switch (this.state) {
 	case 1: // need to login

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network script
+QT       += core gui network script scripttools
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia
 
@@ -28,8 +28,7 @@ unix {
 LIBS += -L../protobuf/
 }
 LIBS += -lprotobuf
-SOURCES += main.cpp\
-        loginwindow.cpp \
+SOURCES += main.cpp loginwindow.cpp \
     pokermain.cpp \
     cpp/common.pb.cc \
     cpp/message.pb.cc \
@@ -55,7 +54,11 @@ SOURCES += main.cpp\
     table/chip.cpp \
     table/table_sit.cpp \
     data/playerclubstatus.cpp \
-    table/dealerbutton.cpp
+    table/dealerbutton.cpp \
+    table/scriptagent.cpp \
+    clublobby.cpp \
+    data/clubmember.cpp \
+    data/winnerdata.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -80,17 +83,22 @@ HEADERS  += loginwindow.h \
     table/animatecore.h \
     table/table_sit.h \
     data/playerclubstatus.h \
-    table/dealerbutton.h
+    table/dealerbutton.h \
+    table/scriptagent.h \
+    clublobby.h \
+    data/clubmember.h \
+    data/winnerdata.h
 
-SOURCES += sound_effects.cpp
-HEADERS += sound_effects.h
+SOURCES += sound_effects.cpp selftest.cpp
+HEADERS += sound_effects.h selftest.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
     csseditor.ui \
     table.ui \
     jseditor.ui \
-    table/table_sit.ui
+    table/table_sit.ui selftest.ui \
+    clublobby.ui
 
 RESOURCES += \
     resources.qrc

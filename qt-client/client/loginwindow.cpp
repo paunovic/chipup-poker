@@ -1,4 +1,5 @@
 #include <QPainter>
+#include <QMessageBox>
 
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
@@ -17,7 +18,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 	core->try_connect();
 	core->RegisterListener(this);
 #ifndef testcase
-	qDebug() << "loading config";
+	//qDebug() << "loading config";
 	QString username = core->config().value("login/username").toString();
 	if (username.size()>0) {
 		ui->edLogin->setText(username);
@@ -32,6 +33,7 @@ LoginWindow::LoginWindow(QWidget *parent) :
 		On_protocol_ready(true);
 	}
 #endif
+	setFixedSize(sizeHint());
 }
 
 LoginWindow::~LoginWindow() {
@@ -39,20 +41,18 @@ LoginWindow::~LoginWindow() {
 }
 void LoginWindow::On_protocol_ready(bool ready) {
 	qDebug() << "ready" << ready;
-	ui->btLogin->setEnabled(true);
-	ui->btLogin->setText(tr("LOGIN"));
+	ui->btLogin->setEnabled(ready);
+	if (ready) ui->btLogin->setText(tr("LOGIN"));
+	else ui->btLogin->setText(tr("Connecting..."));
 	ui->btLogin->setDefault(true);
-    ui->btCreateAccount->setEnabled(true);
+	ui->btCreateAccount->setEnabled(ready);
 	//ui->btForgotPassword->setEnabled(true);
-    //do_login();
+	//do_login();
 }
 void LoginWindow::on_btLogin_clicked() {
 	QString username = ui->edLogin->text();
 	QString password = ui->edPassword->text();
-	Poker::LoginParams lp;
-	lp.set_username(qPrintable(username));
-	lp.set_password(qPrintable(password));
-	core->sendMessage(Poker::scLogin,&lp);
+	core->doLogin(username,password);
 }
 void LoginWindow::on_edLogin_returnPressed() {
 	on_btLogin_clicked();
@@ -87,6 +87,10 @@ void LoginWindow::On_login_sucess() {
 	close();
 	deleteLater();
 }
+void LoginWindow::On_login_failure() {
+	QMessageBox::warning(this,tr("Warning"),tr("Invalid login/password"));
+}
+
 void LoginWindow::paintEvent(QPaintEvent *) {
 	QPainter p(this);
 	int targetHeight = ((qreal)background.height()*width())/background.width();

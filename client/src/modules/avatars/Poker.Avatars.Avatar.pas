@@ -3,7 +3,8 @@ unit Poker.Avatars.Avatar;
 interface
 
 uses
-  Vcl.Imaging.JPEG, Vcl.Graphics, System.Classes, System.SysUtils, Asphyre.Images, OverbyteIcsHttpProt, OverbyteIcsWSocket;
+  Vcl.Imaging.JPEG, Vcl.Graphics, System.Classes, System.SysUtils, Asphyre.Images,
+  OverbyteIcsHttpProt, OverbyteIcsWSocket;
 
 type
   TAvatar = class
@@ -66,6 +67,12 @@ begin
   begin
     FHTTP.OnRequestDone := nil;
     FHTTP.Abort;
+    if Assigned(FHTTP.RcvdStream) then
+      FHTTP.RcvdStream.Free;
+    if Assigned(FHTTP.SendStream) then
+      FHTTP.SendStream.Free;
+    FHTTP.SslContext.DeInitContext;
+    FHTTP.SslContext.Free;
     FreeAndNil(FHTTP);
   end;
 

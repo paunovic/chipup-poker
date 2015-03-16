@@ -101,5 +101,11 @@
         <file>resources/sounds/MoveChips.wav</file>
         <file>resources/sounds/PutChipsSmall.wav</file>
         <file>resources/sounds/Timebank.wav</file>
+        <file>resources/waiting_list/JoinWaitingList_Normal.png</file>
+        <file>resources/waiting_list/JoinWaitingList_Pressed.png</file>
+        <file>resources/waiting_list/LeaveWaitingList_Normal.png</file>
+        <file>resources/waiting_list/LeaveWaitingList_Pressed.png</file>
+        <file>resources/DevServerCertificate.pem</file>
+        <file>resources/OfficialServerCertificate.pem</file>
     </qresource>
 </RCC>

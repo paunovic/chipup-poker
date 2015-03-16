@@ -3,7 +3,8 @@ unit Poker.DirectX.Button;
 interface
 
 uses
-  Asphyre.Images, Vcl.ActnList, Asphyre.Canvas, Asphyre.Types, Vcl.Controls, System.Classes, Poker.Tables.RenderMetrics;
+  Asphyre.Images, Vcl.ActnList, Asphyre.Canvas, Asphyre.Types, Vcl.Controls,
+  System.Classes, Poker.Tables.RenderMetrics;
 
 type
   TDXButton = class

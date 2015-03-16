@@ -13,6 +13,7 @@ const
   ANITAG_CHIPS = 'chips';
   ANITAG_SEAT = 'seat';
   ANITAG_POT_INDEX = 'pot_index';
+  ANITAG_SHOW_CARD = 'show_card';
 
 type
   TDXAnimation = class;

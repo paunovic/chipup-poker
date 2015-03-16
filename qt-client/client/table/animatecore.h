@@ -15,13 +15,12 @@ public:
 	qint64 getTime();
 	void setTime(qint64 in) { time = in; }
 	int animationCount() { return animations.length(); }
+	void over(Animation *obj);
 
 signals:
 
 public slots:
 	void tick();
-private slots:
-	void over(QObject *obj);
 
 private:
 	QList<Animation*> animations;

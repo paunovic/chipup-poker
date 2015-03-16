@@ -3,9 +3,10 @@ unit Poker.Tables.TableList;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table,  Poker.Types,
-  Poker.Protobufs.Objects.TableStatus, Poker.Common.SafeMutex;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game,
+  Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms, Poker.Avatars.AvatarList,
+  Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table,
+  Poker.Types, Poker.Protobufs.Objects.TableStatus, Poker.Common.SafeMutex;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)

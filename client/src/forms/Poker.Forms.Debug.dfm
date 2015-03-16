@@ -30,8 +30,6 @@ object frmDebug: TfrmDebug
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
-    ExplicitTop = 19
-    ExplicitHeight = 290
   end
   object meSeatPos: TcxMemo
     Left = 0
@@ -66,8 +64,6 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    ExplicitTop = 19
-    ExplicitHeight = 290
     Height = 291
     Width = 621
   end
@@ -84,9 +80,6 @@ object frmDebug: TfrmDebug
     Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoAutoCopyUnicodeText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoFastFormatting]
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
-    ExplicitLeft = 134
-    ExplicitTop = -41
-    ExplicitHeight = 290
   end
   object paInfo: TPanel
     Left = 0
@@ -588,7 +581,6 @@ object frmDebug: TfrmDebug
       Text = 'RegEx filtering...'
       OnEnter = teFindTextEnter
       OnExit = teFindTextExit
-      ExplicitHeight = 19
       Height = 18
       Width = 154
     end
@@ -611,7 +603,6 @@ object frmDebug: TfrmDebug
       Text = 'Find text...'
       OnEnter = teFindTextEnter
       OnExit = teFindTextExit
-      ExplicitHeight = 19
       Height = 18
       Width = 154
     end
@@ -635,9 +626,6 @@ object frmDebug: TfrmDebug
       Style.IsFontAssigned = True
       TabOrder = 2
       Text = 'Debug Output'
-      ExplicitLeft = 0
-      ExplicitWidth = 224
-      ExplicitHeight = 19
       Height = 18
       Width = 293
     end
@@ -736,7 +724,6 @@ object frmDebug: TfrmDebug
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 600
     end
   end
   object alDebug: TActionList

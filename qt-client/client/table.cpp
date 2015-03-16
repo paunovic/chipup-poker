@@ -8,6 +8,7 @@
 #include "pokermain.h"
 #include "jseditor.h"
 #include "data/seatinfo.h"
+#include "table/table_sit.h"
 
 Table::Table(QWidget *parent) :
 	QMainWindow(parent),
@@ -15,12 +16,13 @@ Table::Table(QWidget *parent) :
 {
 	ui->setupUi(this);
 	p = new TablePrivate;
-	p->setupUi(ui->centerWrap,ui->center);
+	p->setupUi(ui->centerWrap,ui->center,this);
 	core->RegisterListener(this);
 #ifdef JSDEBUG
 	debuger = new JsEditor(this);
 	debuger->show();
 #endif
+	ui->statusbar->setVisible(false);
 }
 Table::~Table() {
 	delete ui;
@@ -35,9 +37,16 @@ bool Table::event(QEvent *event) {
 	}
 	return QMainWindow::event(event);
 }
+void Table::On_reserved_seat_free(QByteArray gameid, quint32 seat_index) {
+	if (gameid != game->gameid) return;
+	qDebug() << "my turn to sit in seat" << seat_index;
+	sitwindow = new TableSit(game,seat_index,lastTableStatus);
+	sitwindow->show();
+}
+
 bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	lastTableStatus = ts;
-	qDebug() << QString("minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
+	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);
 	QList<Data::SeatInfo*>::Iterator i;
 	bool self_found = false;
@@ -56,6 +65,12 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 		ui->cbSitOutBB->setVisible(false);
 		ui->btSitOut->setVisible(false);
 		ui->cbFoldAny->setVisible(false);
+		ui->btLeaveWaitingList->setVisible(false);
+		if ((ts->table_type == Poker::TableStatus::ttLive) &&
+				(game->seats == ts->seats.length()) &&
+				 (ts->queue_position == 0)) {
+			ui->btJoinWaitingList->setVisible(true);
+		} else ui->btJoinWaitingList->setVisible(false);
 		ui->stackedWidget->setCurrentIndex(0);
 	} else { // sitting, play now may be needed
 		switch (seat->rawStatus()) {
@@ -97,7 +112,9 @@ void Table::on_btMin_clicked() {
 void Table::on_btMax_clicked() {
 	ui->raiseSlider->setValue(lastTableStatus->maximum_raise);
 }
-
+void Table::renderWinning(QString msg) {
+	ui->teChat->append(QString("<font color='#00ff00'>Dealer:</font> <font color='#a8ff99'>%1</font>").arg(msg));
+}
 void Table::on_btCheck_clicked() {
 	Poker::PutChips pc;
 	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
@@ -136,10 +153,6 @@ void Table::on_teChatInput_returnPressed() {
 	qDebug() << layout->cellRect(1,0);
 
 }
-void Table::resizeEvent(QResizeEvent *event) {
-	//qDebug() << height();
-	QMainWindow::resizeEvent(event);
-}
 void Table::editJs(QString newcode) {
 	p->editJs(newcode);
 }
@@ -152,6 +165,9 @@ void Table::on_btPlayNow_clicked() {
 	Poker::Game g;
 	g.set__id(game->gameid.data(),game->gameid.length());
 	core->sendMessage(Poker::scTablePlayNow,&g);
+
+	ui->btSitOut->setChecked(false);
+	ui->cbSitOutBB->setChecked(false);
 }
 void Table::on_btFold_clicked() {
 	Poker::Game g;
@@ -206,4 +222,36 @@ void Table::on_btRaise_clicked() {
 }
 void Table::eval(QString code) {
 	p->eval(code);
+}
+void Table::on_btSitOut_stateChanged(int state) {
+	qDebug() << __func__ << state;
+	Poker::TableBoolFlag tbf;
+	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	tbf.set_flag(state);
+	core->sendMessage(Poker::scTableSitOutNextHand,&tbf);
+}
+void Table::on_cbSitOutBB_stateChanged(int state) {
+	qDebug() << __func__ << state;
+	Poker::TableBoolFlag tbf;
+	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	tbf.set_flag(state);
+	core->sendMessage(Poker::scTableSitOutNextBB,&tbf);
+}
+void Table::on_btDouble_stateChanged(int state) {
+	qDebug() << __func__ << state;
+	Poker::TableBoolFlag tbf;
+	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+	tbf.set_flag(state);
+	core->sendMessage(Poker::scSplitTableCards,&tbf);
+}
+
+void Table::On_sit_ok(QByteArray gameid) {
+	if (gameid != game->gameid) return;
+}
+void Table::on_btJoinWaitingList_clicked() {
+	Poker::TableSit ts;
+	ts.set_game_id(game->gameid.data(),game->gameid.length());
+	ts.set_chips(0);
+	ts.set_seat_index(-1);
+	core->sendMessage(Poker::scTableSit,&ts);
 }
