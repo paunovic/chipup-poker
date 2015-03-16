@@ -588,6 +588,13 @@ handlers[codes.scShowCards] = function (args,token) {
 					release();
 					return;
 				}
+				var seatIdx = game.findSeat(this);
+				if (seatIdx != -1) {
+					this.reply(0,'your already sitting');
+					token.stop();
+					release();
+					return;
+				}
 				game.sitDown(this,params,function (sucess,events) {
 					if (sucess) {
 						game.broadcastStatus(this,true,events); // sendEvent
@@ -745,6 +752,7 @@ handlers[codes.scShowCards] = function (args,token) {
 					return;
 				}
 				game.members[seatIdx].want_split = params.flag;
+				console.log("seat %d setting split to %j",seatIdx,params.flag);
 				token.stop();
 				release();
 			}.bind(this));

@@ -465,6 +465,7 @@ Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 		return;
 	}
 	var time = (Date.now() - this.members[seatIdx].sitTime) / 1000;
+	console.log('time:%d, member:',time,this.members[seatIdx]);
 	assert(time > 0.001);
 	var doc = { gameid:this.obj._id,userid:this.seats[seatIdx].userid, secondsplayed:time };
 	var mods = { $inc:{secondsplayed:time}};
@@ -1116,6 +1117,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 					this.addHistory({code:['teFlop'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsFlop';
 					this.log('flop adding to %d',extradelay);
+					if (this.doingSplit) extradelay += 1500;
 					token.tag += 'c';
 					token.stop();
 					cb.call(this,events,1500+extradelay);
@@ -1143,6 +1145,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 					this.addHistory({code:['teTurn'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsTurn';
 					this.log('turn adding to %d',extradelay);
+					if (this.doingSplit) extradelay += 1500;
 					token.tag += 'd';
 					token.stop();
 					cb.call(this,events,1500+extradelay);
@@ -1169,6 +1172,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 					this.addHistory({code:['teRiver'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsRiver';
 					this.log('river adding to %d',extradelay);
+					if (this.doingSplit) extradelay += 1500;
 					token.tag += 'e';
 					token.stop();
 					cb.call(this,events,1500+extradelay);
@@ -1310,9 +1314,11 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 			}
 			data.push({seat:forcewin,msg:'default'});
 		} else {
+			var forcesplit = false;
 			for (var y=0; y<results.length; y++) {
 				for (var x=0; x<results[y].outputs.length; x++) {
 					if (pot.members.indexOf(results[y].outputs[x].seat) == -1) continue;
+					if (forcesplit) results[y].outputs[x].id = 5;
 					if (lowestid[y] == -1) {
 						lowestid[y] = results[y].outputs[x].id;
 						winningindex[y] = x;
@@ -1815,6 +1821,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		}
 		var havechips = 0;
 		var emptyseat = false;
+		var activeSeats = [];
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) {
 				emptyseat = true;
@@ -1823,7 +1830,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			if (this.members[x].status == 'psOutOfPlay') continue;
 			if (this.ignoreOffline && this.members[x].disconnected) continue;
 			if (this.members[x].chips > 0) {
-				this.members[x].sitTime = Date.now();
+				activeSeats.push(x);
 				this.log('sm found one',x,this.members[x].status,this.members[x].chips);
 				havechips++;
 			} else if (this.members[x].chips == 0) {
@@ -1879,6 +1886,9 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 					this.stateMachine(cb,null,config,events,extradelay);
 					return;
 				}
+			}
+			for (var x=0; x<activeSeats.length; x++) {
+				this.members[activeSeats[x]].sitTime = Date.now();
 			}
 			this.deal(cb,config,emptyseat);
 		} else {
@@ -2067,7 +2077,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
 	tableStatus.table_message = this.message;
-	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
+	this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }
 Game.prototype.sittingCount = function () {
