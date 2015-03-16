@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QWidget>
 #include <QMainWindow>
+#include <QThread>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -14,6 +15,7 @@
 #include "data/playerclubstatus.h"
 #include "sound_effects.h"
 #include "table.h"
+#include "updatehasher.h"
 
 #define DEVSERVER
 
@@ -24,10 +26,16 @@ PokerMain *core;
 static void flagOffline(QMainWindow *window);
 
 PokerMain::PokerMain(QObject *parent) :
-    QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
+	QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker")), approot("c:/mac/")
 {
 	setObjectName("core");
 	delayQuit = false;
+	workerThread = new QThread();
+	workerThread->start();
+	hasher = new Core::UpdateHasher();
+	hasher->moveToThread(workerThread);
+	connect(this,SIGNAL(startHashing()),hasher,SLOT(startHashing()));
+	connect(hasher,SIGNAL(doneHashing()),this,SLOT(doneHashing()));
 #ifdef DEVSERVER
 	serverAddress = "dev-server.chipuppoker.com";
 #else
@@ -107,21 +115,32 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
 }
 void PokerMain::socket_ready() {
 	first_ping = true;
-    Poker::HelloParams hp;
+    pinger.setSingleShot(false);
+    pinger.setInterval(30000);
+	pinger.start();
+	qDebug() << "starting hashing" << QThread::currentThread();
+	emit startHashing();
+}
+void PokerMain::doneHashing() {
+	Poker::HelloParams hp;
 #ifdef Q_OS_WIN
-	hp.set_appcode(Poker::HelloParams::QtWindows32);
+	hp.set_appcode(Poker::HelloParams::QtMac);
 #elif defined(Q_OS_LINUX)
 	hp.set_appcode(Poker::HelloParams::QtLinux32);
 #elif defined(Q_OS_MAC)
 	hp.set_appcode(Poker::HelloParams::QtMac);
 #endif
-    hp.set_debug(false);
+	hp.set_debug(false);
+	foreach (Core::UpdateFileInfo item, hasher->files) {
+		Poker::UpdateFileInfo *ufi = hp.add_files();
+		ufi->set_path(qPrintable(item.path));
+		ufi->set_hash(item.hash.data(),item.hash.length());
+	}
+
 	//qDebug() << "sending hello";
-    sendMessage(Poker::scHello,&hp);
-    pinger.setSingleShot(false);
-    pinger.setInterval(30000);
-    pinger.start();
+	sendMessage(Poker::scHello,&hp);
 }
+
 void PokerMain::sendMessage(Poker::ServerCodes code, google::protobuf::Message *message) {
     Poker::RpcMessage header;
     header.set_methodid(code);
@@ -178,6 +197,16 @@ void PokerMain::socket_readyRead() {
 		buffer = buffer.right(buffer.size() - (2 + headerSize + datasize));
 	}
 }
+void PokerMain::doUpdate(const HelloReply hr) {
+	for (int x=0; x<hr.update_files_size(); x++) {
+		qDebug() << x << hr.update_files(x).file_type();
+		QString temp = hr.update_files(x).path().c_str();
+		temp = temp.replace(':',".");
+		QString file = approot.absoluteFilePath(temp);
+		qDebug() << file;
+	}
+}
+
 void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	Poker::HelloReply hr;
 	Poker::PingReply ping_reply;
@@ -189,9 +218,13 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		validCharacters = hr.valid_chars_regex();
 		max_play_time = hr.max_play_time();
 		send_ping();
-		emit protocol_ready(true);
-		if (reconnectState == SignedIn) {
-			doLogin(username,password);
+		if (hr.update_files_size()) {
+			doUpdate(hr);
+		} else {
+			emit protocol_ready(true);
+			if (reconnectState == SignedIn) {
+				doLogin(username,password);
+			}
 		}
 		break;
 	case Poker::srLoginReply: // 2

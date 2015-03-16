@@ -58,7 +58,8 @@ SOURCES += main.cpp loginwindow.cpp \
     table/scriptagent.cpp \
     clublobby.cpp \
     data/clubmember.cpp \
-    data/winnerdata.cpp
+    data/winnerdata.cpp \
+    updatehasher.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -87,7 +88,8 @@ HEADERS  += loginwindow.h \
     table/scriptagent.h \
     clublobby.h \
     data/clubmember.h \
-    data/winnerdata.h
+    data/winnerdata.h \
+    updatehasher.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h
