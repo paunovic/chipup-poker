@@ -14,6 +14,7 @@ TEMPLATE = app
 #CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
 INCLUDEPATH += ../protobuf/
+TARGET = chipuppoker
 
 # to compile into a dmg:
 # codesign -f -s "Tox CI (jenkins) CSA" qtox.app --deep
