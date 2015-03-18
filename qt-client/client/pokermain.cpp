@@ -28,17 +28,24 @@ PokerMain *core;
 static void flagOffline(QMainWindow *window);
 
 PokerMain::PokerMain(QObject *parent) :
-	QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker")), approot("c:/mac/")
+    QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
 {
+#if defined(Q_OS_MAC)
+    qDebug() << "appdirpath" << QApplication::applicationDirPath();
+    QDir binaryDir(QApplication::applicationDirPath());
+    approot = binaryDir.absoluteFilePath("../../");
+#endif
 	setObjectName("core");
 	delayQuit = false;
 	workerThread = new QThread();
 	workerThread->start();
-	hasher = new Core::UpdateHasher();
-	hasher->moveToThread(workerThread);
-	connect(this,SIGNAL(startHashing()),hasher,SLOT(startHashing()));
-	connect(hasher,SIGNAL(doneHashing()),this,SLOT(doneHashing()));
-	connect(this,SIGNAL(startDownload()),hasher,SLOT(startDownload()));
+    if (approot.exists()) {
+        hasher = new Core::UpdateHasher(approot);
+        hasher->moveToThread(workerThread);
+        connect(this,SIGNAL(startHashing()),hasher,SLOT(startHashing()));
+        connect(hasher,SIGNAL(doneHashing()),this,SLOT(doneHashing()));
+        connect(this,SIGNAL(startDownload()),hasher,SLOT(startDownload()));
+    }
 #ifdef DEVSERVER
 	serverAddress = "dev-server.chipuppoker.com";
 #else

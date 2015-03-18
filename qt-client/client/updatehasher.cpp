@@ -10,15 +10,14 @@
 
 namespace Core {
 
-UpdateHasher::UpdateHasher(QObject *parent) :
-	QObject(parent)
+UpdateHasher::UpdateHasher(QDir approot): approot(approot)
 {
 }
 
 void UpdateHasher::startHashing() {
-	QDir root("c:/mac/");
 	qDebug() << QThread::currentThread();
-	recurseDirectory(root,root);
+    files.clear();
+    recurseDirectory(approot,approot);
 	qDebug() << "done hashing in thread";
 	emit doneHashing();
 }
@@ -40,9 +39,9 @@ void UpdateHasher::recurseDirectory(QDir root, QDir path) {
 			if (fh.open(QFile::ReadOnly)) {
 				hasher.addData(&fh);
 				fh.close();
-				entry.path = root.relativeFilePath(item.absoluteFilePath());
+                entry.path = root.relativeFilePath(item.absoluteFilePath()).replace("\\","/");
 				entry.hash = hasher.result();
-				//qDebug() << item.baseName() << entry.hash.toHex();
+                qDebug() << entry.path << entry.hash.toHex();
 				this->files.append(entry);
 			}
 		}

@@ -2,8 +2,8 @@
 #define UPDATEHASHER_H
 
 #include <QObject>
+#include <QDir>
 
-class QDir;
 class QNetworkReply;
 
 namespace Core {
@@ -20,7 +20,7 @@ class UpdateHasher : public QObject
 {
 	Q_OBJECT
 public:
-	explicit UpdateHasher(QObject *parent = 0);
+    explicit UpdateHasher(QDir approot);
 
 	QList<UpdateFileInfo> files;
 signals:
@@ -30,6 +30,7 @@ public slots:
 	void startDownload();
 private:
 	void recurseDirectory(QDir root, QDir path);
+    QDir approot;
 };
 }
 

@@ -14,11 +14,13 @@ FileSaver::FileSaver(QNetworkReply *reply, Core::UpdateFileInfo row)
 	qDebug() << row.path << "read in x bytes:" << data.size() << "/" << row.size;
 	QFile fh(row.path);
 	QDir test(row.path);
-	QDir parent(test.absoluteFilePath(".."));
-	if (!parent.exists()) {
-		qDebug() << "parent doesnt exist";
-		parent.mkpath(".");
-	}
+    if (!test.exists()) {
+        QDir parent(test.absoluteFilePath(".."));
+        if (!parent.exists()) {
+            qDebug() << "parent doesnt exist" << parent;
+            parent.mkpath(".");
+        }
+    }
 	if (fh.open(QFile::WriteOnly)) {
 		fh.write(data);
 		fh.close();
