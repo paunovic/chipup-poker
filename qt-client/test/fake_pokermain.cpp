@@ -65,3 +65,5 @@ int parseValue(QString input) {
 }
 void PokerMain::doneHashing() {
 }
+void PokerMain::httpsErrors(QNetworkReply *reply, const QList<QSslError> &errors) {
+}

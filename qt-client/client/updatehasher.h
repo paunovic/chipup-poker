@@ -4,13 +4,16 @@
 #include <QObject>
 
 class QDir;
+class QNetworkReply;
 
 namespace Core {
 
 class UpdateFileInfo {
 public:
-	QString path;
+	QString path,url;
 	QByteArray hash;
+	QNetworkReply *reply;
+	quint32 size;
 };
 
 class UpdateHasher : public QObject
@@ -24,6 +27,7 @@ signals:
 	void doneHashing();
 public slots:
 	void startHashing();
+	void startDownload();
 private:
 	void recurseDirectory(QDir root, QDir path);
 };

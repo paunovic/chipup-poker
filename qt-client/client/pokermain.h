@@ -21,13 +21,11 @@
 #include "game.h"
 #include "tablestatus.h"
 #include "data/user.h"
+#include "updatehasher.h"
 
 class QApplication;
 class QNetworkAccessManager;
 class QNetworkReply;
-namespace Core {
-class UpdateHasher;
-}
 
 namespace Data {
 class PlayerClubStatus;
@@ -89,6 +87,7 @@ public slots:
     void socket_readyRead();
     void parsePacket(Poker::ServerCodes code,std::string data);
 	void replyFinished(QNetworkReply *reply);
+	void httpsErrors(QNetworkReply *reply, const QList<QSslError> &errors);
 private slots:
 	void send_ping();
 	void doneHashing();
@@ -126,6 +125,7 @@ private:
 	QThread *workerThread;
 	Core::UpdateHasher *hasher;
 	QDir approot;
+	QList<Core::UpdateFileInfo> files_in;
 };
 int parseValue(QString input);
 

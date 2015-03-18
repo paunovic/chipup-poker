@@ -59,7 +59,8 @@ SOURCES += main.cpp loginwindow.cpp \
     clublobby.cpp \
     data/clubmember.cpp \
     data/winnerdata.cpp \
-    updatehasher.cpp
+    updatehasher.cpp \
+    filesaver.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -89,7 +90,8 @@ HEADERS  += loginwindow.h \
     clublobby.h \
     data/clubmember.h \
     data/winnerdata.h \
-    updatehasher.h
+    updatehasher.h \
+    filesaver.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h
