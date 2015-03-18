@@ -102,7 +102,8 @@ var InstallerSchema = new Schema({
 	debug:String,
 	size: Number,
 	hashes: Schema.Types.Mixed,
-	ts:String
+	ts:String,
+	appcode:String
 },{collection:'installers'});
 var ObjectSizeSchema = new Schema({
 	_id:String,
@@ -158,7 +159,7 @@ var MoveSchema = new Schema({
 	WinnerPotData:[PotSchema]
 });
 MoveSchema.path('pots').validate(function (pots) {
-	return pots.length < 5;
+	return pots.length < 20;
 },'too many pots');
 var PlayerSchema = new Schema({
 	seat:Number,
@@ -237,7 +238,7 @@ var GameStateSchema = new Schema({
 	moveCounter: Number
 },{collection:'gameState'});
 GameStateSchema.path('pots').validate(function (pots) {
-	return pots.length < 5;
+	return pots.length < 20;
 },'too many pots');
 
 var ClubBalanceSchema = new Schema({
@@ -299,6 +300,12 @@ var TournamentLogSchema = new Schema({
 	tournament_id:ObjectId,
 	records: [ Mixed ]
 });
+var SoftExceptionSchema = new Schema({
+	exception:String,
+	data:String,
+	ip:String,
+	userid:ObjectId
+});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -331,6 +338,7 @@ module.exports.open = function (dbname) {
 	models.PaypalRequest = mongoose.model('PaypalRequest',PaypalRequestSchema);
 	models.Tournament = mongoose.model('Tournament',TournamentSchema);
 	models.TournamentLog = mongoose.model('TournamentLog',TournamentLogSchema);
+	models.SoftException = mongoose.model('SoftException',SoftExceptionSchema);
 }
 
 if (require.main === module) {

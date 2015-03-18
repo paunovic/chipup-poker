@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QSharedPointer>
 #include <QAbstractSocket>
+#include <QDir>
 
 #ifdef QT_NO_SSL
 #error SSL disabled in QT!
@@ -20,6 +21,7 @@
 #include "game.h"
 #include "tablestatus.h"
 #include "data/user.h"
+#include "updatehasher.h"
 
 class QApplication;
 class QNetworkAccessManager;
@@ -75,6 +77,7 @@ signals:
 	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
 	void club_changed(const Data::Club *);
 	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
+	void startHashing();
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -84,8 +87,10 @@ public slots:
     void socket_readyRead();
     void parsePacket(Poker::ServerCodes code,std::string data);
 	void replyFinished(QNetworkReply *reply);
+	void httpsErrors(QNetworkReply *reply, const QList<QSslError> &errors);
 private slots:
 	void send_ping();
+	void doneHashing();
 private:
 	void srLoginReply(std::string data);
 	void seGameChange(std::string data);
@@ -100,6 +105,7 @@ private:
 	void sePlayerClubStatus(std::string data);
 	void seClubChange(std::string data);
 	void seReservedSeatFree(std::string data);
+	void doUpdate(const Poker::HelloReply hr);
 
 	enum ReconnectState { notSignedIn, SignedIn };
 
@@ -116,6 +122,10 @@ private:
 	SoundEffects *effects_;
 	QString username,password;
 	enum ReconnectState reconnectState;
+	QThread *workerThread;
+	Core::UpdateHasher *hasher;
+	QDir approot;
+	QList<Core::UpdateFileInfo> files_in;
 };
 int parseValue(QString input);
 

@@ -5,6 +5,8 @@
 #include <QApplication>
 #include <QWidget>
 #include <QMainWindow>
+#include <QThread>
+#include <QStandardPaths>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -14,6 +16,10 @@
 #include "data/playerclubstatus.h"
 #include "sound_effects.h"
 #include "table.h"
+#include "updatehasher.h"
+#include "filesaver.h"
+
+#define DEVSERVER
 
 using namespace Poker;
 
@@ -22,10 +28,17 @@ PokerMain *core;
 static void flagOffline(QMainWindow *window);
 
 PokerMain::PokerMain(QObject *parent) :
-    QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker"))
+	QObject(parent), settings(new QSettings("ChipUPPoker","ChipUPPoker")), approot("c:/mac/")
 {
 	setObjectName("core");
 	delayQuit = false;
+	workerThread = new QThread();
+	workerThread->start();
+	hasher = new Core::UpdateHasher();
+	hasher->moveToThread(workerThread);
+	connect(this,SIGNAL(startHashing()),hasher,SLOT(startHashing()));
+	connect(hasher,SIGNAL(doneHashing()),this,SLOT(doneHashing()));
+	connect(this,SIGNAL(startDownload()),hasher,SLOT(startDownload()));
 #ifdef DEVSERVER
 	serverAddress = "dev-server.chipuppoker.com";
 #else
@@ -42,12 +55,28 @@ PokerMain::PokerMain(QObject *parent) :
     connect(&socket,SIGNAL(encrypted()),this,SLOT(socket_ready()));
 	connect(&socket,SIGNAL(readyRead()),this,SLOT(socket_readyRead()));
 	connect(&pinger,SIGNAL(timeout()),this,SLOT(send_ping()));
+	connect(manager_,SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),this,SLOT(httpsErrors(QNetworkReply*,QList<QSslError>)));
 	uptime.start();
 }
 QNetworkAccessManager *PokerMain::manager() {
 	return manager_;
 }
+void PokerMain::httpsErrors(QNetworkReply *reply, const QList<QSslError> &errors) {
+	qDebug() << reply << errors;
+	if (errors.length() > 0) {
+		QSslError err = errors.at(0);
+		qDebug() << "cert" << err.certificate();
+	}
+}
+
 void PokerMain::replyFinished(QNetworkReply *reply) {
+	qDebug() << reply;
+	foreach (Core::UpdateFileInfo item, files_in) {
+		if (item.reply != reply) continue;
+		qDebug() << "found it" << item.path;
+		FileSaver *fs = new FileSaver(reply,item);
+		return;
+	}
 	reply->deleteLater();
 }
 void PokerMain::try_connect() {
@@ -105,14 +134,32 @@ void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
 }
 void PokerMain::socket_ready() {
 	first_ping = true;
-    Poker::HelloParams hp;
-    hp.set_debug(false);
-	//qDebug() << "sending hello";
-    sendMessage(Poker::scHello,&hp);
     pinger.setSingleShot(false);
     pinger.setInterval(30000);
-    pinger.start();
+	pinger.start();
+	qDebug() << "starting hashing" << QThread::currentThread();
+	emit startHashing();
 }
+void PokerMain::doneHashing() {
+	Poker::HelloParams hp;
+#ifdef Q_OS_WIN
+	hp.set_appcode(Poker::HelloParams::QtMac);
+#elif defined(Q_OS_LINUX)
+	hp.set_appcode(Poker::HelloParams::QtLinux32);
+#elif defined(Q_OS_MAC)
+	hp.set_appcode(Poker::HelloParams::QtMac);
+#endif
+	hp.set_debug(false);
+	foreach (Core::UpdateFileInfo item, hasher->files) {
+		Poker::UpdateFileInfo *ufi = hp.add_files();
+		ufi->set_path(qPrintable(item.path));
+		ufi->set_hash(item.hash.data(),item.hash.length());
+	}
+
+	//qDebug() << "sending hello";
+	sendMessage(Poker::scHello,&hp);
+}
+
 void PokerMain::sendMessage(Poker::ServerCodes code, google::protobuf::Message *message) {
     Poker::RpcMessage header;
     header.set_methodid(code);
@@ -169,6 +216,37 @@ void PokerMain::socket_readyRead() {
 		buffer = buffer.right(buffer.size() - (2 + headerSize + datasize));
 	}
 }
+void PokerMain::doUpdate(const HelloReply hr) {
+	Core::UpdateFileInfo ufi;
+	QDir tempdir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+	if (!tempdir.exists("chipuppoker")) tempdir.mkpath("chipuppoker");
+	tempdir.cd("chipuppoker");
+	if (!tempdir.exists("update")) tempdir.mkpath("update");
+	tempdir.cd("update");
+	qDebug() << "downloading to" << tempdir;
+	for (int x=0; x<hr.update_files_size(); x++) {
+		qDebug() << x << hr.update_files(x).file_type();
+		QString temp = hr.update_files(x).path().c_str();
+		temp = temp.replace(':',".");
+		QString file = approot.absoluteFilePath(temp);
+		qDebug() << file << hr.update_files(x).url().c_str();
+		ufi.url = hr.update_files(x).url().c_str();
+		ufi.path = file;
+		ufi.size = hr.update_files(x).file_size();
+		if (hr.update_files(x).file_type() == Poker::UpdateFileInfo::ufFull) {
+			qDebug() << "downloading";
+			ufi.reply = core->manager()->get(QNetworkRequest(ufi.url));
+		} else if (hr.update_files(x).file_type() == Poker::UpdateFileInfo::ufRemove) {
+			qDebug() << "deleting";
+			approot.remove(temp);
+		} else {
+			qDebug() << "TODO, patch";
+		}
+		files_in.append(ufi);
+	}
+	// TODO, restart when done
+}
+
 void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	Poker::HelloReply hr;
 	Poker::PingReply ping_reply;
@@ -180,9 +258,13 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		validCharacters = hr.valid_chars_regex();
 		max_play_time = hr.max_play_time();
 		send_ping();
-		emit protocol_ready(true);
-		if (reconnectState == SignedIn) {
-			doLogin(username,password);
+		if (hr.update_files_size()) {
+			doUpdate(hr);
+		} else {
+			emit protocol_ready(true);
+			if (reconnectState == SignedIn) {
+				doLogin(username,password);
+			}
 		}
 		break;
 	case Poker::srLoginReply: // 2

@@ -586,6 +586,7 @@ begin
   try
     protobuf.Debug := ADebug;
     protobuf.Files.AddRange(AFiles);
+    protobuf.Appcode := DelphiWindows;
     SendProtobuf(scHello, protobuf);
   finally
     protobuf.Free;
