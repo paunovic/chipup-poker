@@ -26,7 +26,7 @@ public:
 signals:
 	void doneHashing();
 public slots:
-	void startHashing();
+	void startHashing(QString scriptspath);
 	void startDownload();
 private:
 	void recurseDirectory(QDir root, QDir path);

@@ -6,8 +6,13 @@
 #include <QWidget>
 #include <QMainWindow>
 #include <QThread>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QStandardPaths>
+#else
+#include <QDesktopServices>
+#endif
 #include <QProcess>
+#include <QResource>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -36,6 +41,11 @@ PokerMain::PokerMain(QObject *parent) :
     QDir binaryDir(QApplication::applicationDirPath());
     approot = binaryDir.absoluteFilePath("../../");
 #endif
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	datadir = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+#else
+	datadir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+#endif
 	setObjectName("core");
 	delayQuit = false;
 	workerThread = new QThread();
@@ -43,7 +53,7 @@ PokerMain::PokerMain(QObject *parent) :
     if (approot.exists()) {
         hasher = new Core::UpdateHasher(approot);
         hasher->moveToThread(workerThread);
-        connect(this,SIGNAL(startHashing()),hasher,SLOT(startHashing()));
+        connect(this,SIGNAL(startHashing(QString)),hasher,SLOT(startHashing(QString)));
         connect(hasher,SIGNAL(doneHashing()),this,SLOT(doneHashing()));
         connect(this,SIGNAL(startDownload()),hasher,SLOT(startDownload()));
     }
@@ -106,6 +116,7 @@ void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
 		qDebug() << "socket closing";
 		break;
 	case QAbstractSocket::UnconnectedState:
+		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		// set a timer to reconnect
 		qDebug() << "unconnected";
 		emit protocol_ready(false);
@@ -146,7 +157,7 @@ void PokerMain::socket_ready() {
     pinger.setInterval(30000);
 	pinger.start();
 	qDebug() << "starting hashing" << QThread::currentThread();
-	emit startHashing();
+	emit startHashing(datadir.absoluteFilePath("scripts.rcc"));
 }
 void PokerMain::doneHashing() {
 	Poker::HelloParams hp;
@@ -226,18 +237,27 @@ void PokerMain::socket_readyRead() {
 }
 void PokerMain::doUpdate(const HelloReply hr) {
 	Core::UpdateFileInfo ufi;
-	QDir tempdir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-	if (!tempdir.exists("chipuppoker")) tempdir.mkpath("chipuppoker");
-	tempdir.cd("chipuppoker");
-	if (!tempdir.exists("update")) tempdir.mkpath("update");
-	tempdir.cd("update");
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	//QDir tempdir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+#else
+	//QDir tempdir(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+#endif
+	//if (!tempdir.exists("chipuppoker")) tempdir.mkpath("chipuppoker");
+	//tempdir.cd("chipuppoker");
+	//if (!tempdir.exists("update")) tempdir.mkpath("update");
+	//tempdir.cd("update");
     pending_updates = 0;
-	qDebug() << "downloading to" << tempdir;
+	//qDebug() << "downloading to" << tempdir;
 	for (int x=0; x<hr.update_files_size(); x++) {
 		qDebug() << x << hr.update_files(x).file_type();
 		QString temp = hr.update_files(x).path().c_str();
 		temp = temp.replace(':',".");
-		QString file = approot.absoluteFilePath(temp);
+		QString file;
+		if (temp == "assets/scripts.rcc") {
+			file = datadir.absoluteFilePath("scripts.rcc");
+		} else {
+			file = approot.absoluteFilePath(temp);
+		}
 		qDebug() << file << hr.update_files(x).url().c_str();
 		ufi.url = hr.update_files(x).url().c_str();
 		ufi.path = file;
@@ -257,13 +277,13 @@ void PokerMain::doUpdate(const HelloReply hr) {
 	// TODO, restart when done
 }
 void PokerMain::fileSaved(Core::UpdateFileInfo row) {
-    pending_updates--;
-    if (pending_updates == 0) {
-        QString self = QApplication::applicationFilePath();
-        qDebug() << "update ready to restart" << self;
-        QProcess::execute(self);
-        QApplication::quit();
-    }
+	pending_updates--;
+	if (pending_updates == 0) {
+		QString self = QApplication::applicationFilePath();
+		qDebug() << "update ready to restart" << self;
+		QProcess::startDetached(self);
+		QApplication::quit();
+	}
 }
 
 void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
@@ -320,6 +340,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		}
 		break; }
 	case Poker::srLogout: // 8
+		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		delayQuit = false;
 		reconnectState = notSignedIn;
 		break;
@@ -363,6 +384,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		srInvalidTableBuyin(data);
 		break;
 	case Poker::seSecondaryLoginDetected:
+		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		emit secondary_login();
 		break;
 	case Poker::srJoinClubReply: {
@@ -535,6 +557,7 @@ void PokerMain::srLoginReply(std::string data) {
 	qDebug() << "srLoginReply";
 	lr.ParseFromString(data);
 	if (lr.login_status() == LoginReply::lrSuccess) {
+		QResource::registerResource(datadir.absoluteFilePath("scripts.rcc"));
 		qDebug() << "sucess!";
 		reconnectState = SignedIn;
 		// TODO, convert and use tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses

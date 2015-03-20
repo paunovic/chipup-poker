@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QFile>
 #include <QDebug>
-#include <QResource>
 #include <QFontDatabase>
 #include <QTranslator>
 
@@ -32,7 +31,6 @@ int main(int argc, char *argv[]) {
 		QString css(buffer);
 		a.setStyleSheet(css);
 	}
-	QResource::registerResource("scripts.rcc");
 	QFontDatabase::addApplicationFont(":/resources/cards/CardCharacters.TTF");
 	QFontDatabase::addApplicationFont(":/resources/seats/Barmeno-Bold.ttf");
 	core = new PokerMain();

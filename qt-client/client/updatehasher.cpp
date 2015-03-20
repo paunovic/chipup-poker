@@ -14,10 +14,24 @@ UpdateHasher::UpdateHasher(QDir approot): approot(approot)
 {
 }
 
-void UpdateHasher::startHashing() {
+void UpdateHasher::startHashing(QString scriptspath) {
 	qDebug() << QThread::currentThread();
     files.clear();
-    recurseDirectory(approot,approot);
+#if defined(Q_OS_MAC)
+	recurseDirectory(approot,approot);
+#endif
+	UpdateFileInfo scripts;
+	scripts.path = "assets/scripts.rcc";
+	QFile fh(scriptspath);
+	if (fh.exists()) {
+		if (fh.open(QFile::ReadOnly)) {
+			QCryptographicHash hasher(QCryptographicHash::Sha256);
+			hasher.addData(&fh);
+			fh.close();
+			scripts.hash = hasher.result();
+		} else qDebug() << "failed to open scripts.rcc";
+	} else qDebug() << "scripts.rcc not found, hash left blank";
+	this->files.append(scripts);
 	qDebug() << "done hashing in thread";
 	emit doneHashing();
 }

@@ -77,7 +77,7 @@ signals:
 	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
 	void club_changed(const Data::Club *);
 	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
-	void startHashing();
+	void startHashing(QString scriptspath);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -124,9 +124,9 @@ private:
 	enum ReconnectState reconnectState;
 	QThread *workerThread;
 	Core::UpdateHasher *hasher;
-	QDir approot;
+	QDir approot,datadir;
 	QList<Core::UpdateFileInfo> files_in;
-    unsigned int pending_updates;
+	unsigned int pending_updates;
 };
 int parseValue(QString input);
 

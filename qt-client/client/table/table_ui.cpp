@@ -51,7 +51,7 @@ void TableUi::paintEvent(QPaintEvent *) {
 	painter.drawPixmap(0.095*width(),0,w,h,pix);
 	painter.restore();
 	//painter.drawEllipse(ring);
-	drawGrid(painter);
+	//drawGrid(painter);
 }
 void TableUi::drawCross(QPainter &p) {
 	int w = width();
