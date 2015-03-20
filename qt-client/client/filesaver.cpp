@@ -4,6 +4,7 @@
 #include <QDir>
 
 #include "filesaver.h"
+#include "pokermain.h"
 
 FileSaver::FileSaver(QNetworkReply *reply, Core::UpdateFileInfo row)
 {
@@ -11,7 +12,7 @@ FileSaver::FileSaver(QNetworkReply *reply, Core::UpdateFileInfo row)
 	this->row = row;
 	connect(reply,SIGNAL(readyRead()),this,SLOT(readyRead()));
 	QByteArray data = reply->readAll();
-	qDebug() << row.path << "read in x bytes:" << data.size() << "/" << row.size;
+    //qDebug() << row.path << "read in x bytes:" << data.size() << "/" << row.size;
 	QFile fh(row.path);
 	QDir test(row.path);
     if (!test.exists()) {
@@ -24,6 +25,7 @@ FileSaver::FileSaver(QNetworkReply *reply, Core::UpdateFileInfo row)
 	if (fh.open(QFile::WriteOnly)) {
 		fh.write(data);
 		fh.close();
+        core->fileSaved(row);
 	} else {
 		qDebug() << "failed to open file";
 	}

@@ -52,7 +52,7 @@ public:
 	SoundEffects *effects() { return effects_; }
 	void doLogin(QString username, QString password);
 	void testDisconnect() { socket.disconnectFromHost(); }
-
+    void fileSaved(Core::UpdateFileInfo row);
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
 	QList<Data::Game*> games;
@@ -126,6 +126,7 @@ private:
 	Core::UpdateHasher *hasher;
 	QDir approot;
 	QList<Core::UpdateFileInfo> files_in;
+    unsigned int pending_updates;
 };
 int parseValue(QString input);
 

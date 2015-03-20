@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QStandardPaths>
+#include <QProcess>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -80,7 +81,7 @@ void PokerMain::replyFinished(QNetworkReply *reply) {
 	qDebug() << reply;
 	foreach (Core::UpdateFileInfo item, files_in) {
 		if (item.reply != reply) continue;
-		qDebug() << "found it" << item.path;
+        //qDebug() << "found it" << item.path;
 		FileSaver *fs = new FileSaver(reply,item);
 		return;
 	}
@@ -230,6 +231,7 @@ void PokerMain::doUpdate(const HelloReply hr) {
 	tempdir.cd("chipuppoker");
 	if (!tempdir.exists("update")) tempdir.mkpath("update");
 	tempdir.cd("update");
+    pending_updates = 0;
 	qDebug() << "downloading to" << tempdir;
 	for (int x=0; x<hr.update_files_size(); x++) {
 		qDebug() << x << hr.update_files(x).file_type();
@@ -243,6 +245,7 @@ void PokerMain::doUpdate(const HelloReply hr) {
 		if (hr.update_files(x).file_type() == Poker::UpdateFileInfo::ufFull) {
 			qDebug() << "downloading";
 			ufi.reply = core->manager()->get(QNetworkRequest(ufi.url));
+            pending_updates++;
 		} else if (hr.update_files(x).file_type() == Poker::UpdateFileInfo::ufRemove) {
 			qDebug() << "deleting";
 			approot.remove(temp);
@@ -252,6 +255,15 @@ void PokerMain::doUpdate(const HelloReply hr) {
 		files_in.append(ufi);
 	}
 	// TODO, restart when done
+}
+void PokerMain::fileSaved(Core::UpdateFileInfo row) {
+    pending_updates--;
+    if (pending_updates == 0) {
+        QString self = QApplication::applicationFilePath();
+        qDebug() << "update ready to restart" << self;
+        QProcess::execute(self);
+        QApplication::quit();
+    }
 }
 
 void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
