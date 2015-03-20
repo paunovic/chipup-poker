@@ -15,7 +15,7 @@ UpdateHasher::UpdateHasher(QDir approot): approot(approot)
 }
 
 void UpdateHasher::startHashing(QString scriptspath) {
-	qDebug() << QThread::currentThread();
+    qDebug() << QThread::currentThread() << "scriptpath:" << scriptspath;
     files.clear();
 #if defined(Q_OS_MAC)
 	recurseDirectory(approot,approot);
@@ -44,10 +44,12 @@ void UpdateHasher::recurseDirectory(QDir root, QDir path) {
 	QCryptographicHash hasher(QCryptographicHash::Sha256);
 	UpdateFileInfo entry;
 	foreach (QFileInfo item, files) {
-		if (item.isDir()) {
+        if (item.isSymLink()) {
+             //qDebug() << "skipping symlink" << item.absoluteFilePath();
+        } else if (item.isDir()) {
 			//qDebug() << "want to recurse" << item.absoluteFilePath();
 			recurseDirectory(root,QDir(item.absoluteFilePath()));
-		} else {
+        } else {
 			hasher.reset();
 			QFile fh(item.absoluteFilePath());
 			if (fh.open(QFile::ReadOnly)) {
@@ -55,9 +57,9 @@ void UpdateHasher::recurseDirectory(QDir root, QDir path) {
 				fh.close();
                 entry.path = root.relativeFilePath(item.absoluteFilePath()).replace("\\","/");
 				entry.hash = hasher.result();
-                qDebug() << entry.path << entry.hash.toHex();
+                //qDebug() << entry.path << entry.hash.toHex();
 				this->files.append(entry);
-			}
+            } else qDebug() << "failed to open" << item.absoluteFilePath();
 		}
 	}
 }

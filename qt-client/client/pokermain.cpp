@@ -688,7 +688,7 @@ void PokerMain::RegisterListener(QObject *listener) {
 #else
 		signal = metaObject()->method(sigIndex).signature();
 #endif
-		qDebug() << "connecting" << signal << "to" << slot;
+        //qDebug() << "connecting" << signal << "to" << slot;
 		if (connect(core,qPrintable(QString("2%1").arg(signal)),listener,qPrintable(QString("1%1").arg(slot)))) {
 		} else qWarning("PokerMain::RegisterListener: No matching signal for %s", slot);
 	}
