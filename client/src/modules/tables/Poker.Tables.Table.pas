@@ -492,7 +492,7 @@ begin
   {$IFDEF DEBUG}
   tmp := GetEnumName(TypeInfo(TTableState), Integer(FStatus.State));
   if ATableStatus.Locked then
-    tmp := tmp + ', LOCKED';
+    tmp := tmp + ', locked';
   seatdbg := nil;
   playerdbg := nil;
   tb := 0;

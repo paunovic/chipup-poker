@@ -94,7 +94,8 @@ uses
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
   Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished,
-  Poker.Protobufs.Objects.TableMessage, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Protobufs.Objects.PlayerClubStatus;
+  Poker.Protobufs.Objects.TableMessage, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Protobufs.Objects.PlayerClubStatus,
+  Poker.Protobufs.Objects.ReservedSeatFree;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -473,6 +474,7 @@ begin
     srTableSitSeatTaken,
     srTableAddonOk,
     srClubBalanceReached,
+    seReservedSeatTimeout,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
       gtc := GetTickCount;
@@ -516,6 +518,7 @@ begin
     seTournamentPlayerFinished: ADataObject := TPB_TournamentPlayerFinished.Create(ADataPointer, ARpcMessage.DataSize);
     seTournamentPlayerTransfer: ADataObject := TPB_TournamentPlayerTransfer.Create(ADataPointer, ARpcMessage.DataSize);
     sePlayerClubStatus: ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    seReservedSeatFree: ADataObject := TPB_ReservedSeatFree.Create(ADataPointer, ARpcMessage.DataSize);
   else
     SoftException(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]));
     Exit(FALSE);
