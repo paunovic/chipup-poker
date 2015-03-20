@@ -62,7 +62,7 @@ type
     seTournamentPlayerTransfer = 62,
     sePlayerClubStatus = 63,
     seReservedSeatFree = 64,
-    srReservedSeatTimeout = 65,
+    seReservedSeatTimeout = 65,
     scHello = 70,
     scLogin = 71,
     scTournamentRegister = 72,
@@ -199,7 +199,7 @@ begin
     seTournamentPlayerTransfer: result := 'seTournamentPlayerTransfer';
     sePlayerClubStatus: result := 'sePlayerClubStatus';
     seReservedSeatFree: result := 'seReservedSeatFree';
-    srReservedSeatTimeout: result := 'srReservedSeatTimeout';
+    seReservedSeatTimeout: result := 'seReservedSeatTimeout';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
     scTournamentRegister: result := 'scTournamentRegister';

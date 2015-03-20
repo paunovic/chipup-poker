@@ -128,6 +128,8 @@ type
       FDXBRaise: Integer;
       FDXBRaisePresets: array[0..3] of Integer;
 
+      FBuyinForm: TForm;
+
     procedure SetActionCaptions;
     procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 
@@ -160,6 +162,7 @@ type
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
     procedure CSEClubChange(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEReservedSeatFree(const AMethodId: Integer; const AObject: TObject);
 
     procedure DefocusControls;
     procedure RefreshAll;
@@ -187,7 +190,8 @@ uses
   Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game, Poker.Games.Game, Poker.Sounds,
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
-  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club, Poker.Common.ModalDialogs;
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club, Poker.Common.ModalDialogs,
+  Poker.Protobufs.Objects.ReservedSeatFree;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -225,7 +229,9 @@ begin
                           TServerMessageCallback.Create(seGameChange, CSEGameChange),
                           TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                           TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
-                          TServerMessageCallback.Create([seTableStatus, srTableSitOk, srTableAddonOk, srTableStandUpOk], CSRETableStatus)
+                          TServerMessageCallback.Create(seReservedSeatFree, CSEReservedSeatFree),
+                          TServerMessageCallback.Create([seTableStatus, srTableSitOk,
+                            srTableAddonOk, srTableStandUpOk, seReservedSeatTimeout], CSRETableStatus)
                       ]);
     end;
 
@@ -942,6 +948,21 @@ begin
   RefreshAll;
 end;
 
+procedure TfrmTable.CSEReservedSeatFree(const AMethodId: Integer; const AObject: TObject);
+var
+  seat_index: Integer;
+  pbreservedseatfree: TPB_ReservedSeatFree;
+begin
+  if not TTypes.TryCast<TPB_ReservedSeatFree>(AObject, pbreservedseatfree) then
+    Exit;
+  if pbreservedseatfree.Ts.TableMongoId <> FGameId then
+    Exit;
+
+  seat_index := pbreservedseatfree.SeatIndex;
+  FBuyinForm := RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose);
+  FormsContainer.Add(FBuyinForm);
+end;
+
 procedure TfrmTable.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 begin
   RefreshAll;
@@ -1240,6 +1261,8 @@ begin
       UncheckAutoplayOptions;
     if AMethodId = Integer(srTableSitOk) then
       cbSplitTableCards.Checked := Settings.AlwaysRunItTwice; // reset doing business checkbox
+    if AMethodId = Integer(seReservedSeatTimeout) then
+      FormsContainer.Close(FBuyinForm);
     if (not table.Form.Visible) and
        (not table.Hidden) then
       table.Show;
