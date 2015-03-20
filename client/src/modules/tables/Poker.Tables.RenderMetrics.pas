@@ -520,7 +520,7 @@ begin
     FLeaveWaitingListButtonHeight := FLeaveWaitingListButtonWidth / TableResources.LeaveWaitingListButtonAspectRatio;
 
     FJoinWaitingListButtonBounds := FPlayNowButtonBounds;
-    FLeaveWaitingListButtonBounds := FLeaveWaitingListButtonBounds;
+    FLeaveWaitingListButtonBounds := FPlayNowButtonBounds;
 
     // hand playback bounds
     wint := Round(ADXAreaSize.x / 2.5);

@@ -89,6 +89,9 @@ procedure TDXButton.RenderTo(const ACanvas: TAsphyreCanvas; const AMetrics: TTab
 var
   font: TAsphyreFont;
 begin
+  if FFontScaleRatio < 0.2 then
+    FFontScaleRatio := 0.15;
+
   if (not Assigned(FAction)) or
      (not FAction.Enabled) then
     Exit;

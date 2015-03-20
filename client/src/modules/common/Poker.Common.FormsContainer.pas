@@ -25,7 +25,8 @@ type
     procedure ResetState;
 
     procedure Add(const AForm: TForm);
-    procedure Close(const AFormClass: TFormClass);
+    procedure Close(const AFormClass: TFormClass); overload;
+    procedure Close(const AForm: TForm); overload;
     procedure Remove(const AForm: TForm); overload;
     procedure Remove(const AFormClass: TFormClass); overload;
     function RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean; const AShow: Boolean = TRUE): TForm;
@@ -190,6 +191,23 @@ begin
   begin
     form.Close;
     Remove(form);
+  end;
+end;
+
+procedure TFormsContainer.Close(const AForm: TForm);
+var
+  C1: Integer;
+begin
+  FLock.Acquire;
+  try
+    for C1 := FItems.Count - 1 downto 0 do
+      if FItems[C1] = AForm then
+      begin
+        AForm.Close;
+        FItems.Delete(C1);
+      end;
+  finally
+    FLock.Release;
   end;
 end;
 
