@@ -162,7 +162,7 @@ begin
 
   acOK.Enabled := FALSE;
   ServerSocket.ChangeClubDetails(FClubId, edClubName.Text, edInvitationCode.Text, rake,
-      limituint, seMaxRakePerHand.Value, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
+      seMaxRakePerHand.Value, limituint, not cbDefaultPlayerLimit.Checked, StrToInt(cbResetBuyinLimits.Text));
 end;
 
 procedure TfrmChangeClubDetails.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);

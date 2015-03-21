@@ -194,7 +194,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Left = 294
     Top = 69
     Properties.AssignedValues.MinValue = True
-    Properties.CanEdit = False
     Properties.DisplayFormat = '$0'
     Properties.EditFormat = '$0'
     Properties.UseDisplayFormatWhenEditing = True
