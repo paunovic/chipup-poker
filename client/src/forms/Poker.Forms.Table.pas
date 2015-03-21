@@ -243,6 +243,7 @@ begin
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
       lbsTableStats.Visible := FALSE;
+      lbvWaitingListPosition.Visible := FALSE;
 
       pbHandPlaybackProgress.Properties.Min := 0;
       pbHandPlaybackProgress.Visible := TRUE;
@@ -1224,14 +1225,17 @@ function TfrmTable.ConfirmLeaveTable: Boolean;
 var
   table: TTable;
   tt: TTableType;
-  is_sitting: Boolean;
+  is_in_waiting_list, is_sitting: Boolean;
+
 begin
   tt := ttLive;
   is_sitting := FALSE;
+  is_in_waiting_list := FALSE;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     tt := table.TableType;
     is_sitting := table.Status.IsSitting;
+    is_in_waiting_list := table.Status.QueuePosition > 0;
   finally
     Tables.Unlock;
   end;
@@ -1239,7 +1243,11 @@ begin
   result := TRUE;
   if (tt = ttLive) and
      (is_sitting) then
-    result := ModalDialogs.ShowConfirmation('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.') = mrYes;
+    result := ModalDialogs.ShowConfirmation('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.') = mrYes
+  else
+    if (tt = ttLive) and
+       (is_in_waiting_list) then
+      result := ModalDialogs.ShowConfirmation('Are you sure you want to leave the table? This will remove you from the waiting list.') = mrYes;
 end;
 
 function TfrmTable.ConfirmStandUp: Boolean;
