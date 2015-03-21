@@ -95,7 +95,19 @@ begin
 end;
 
 procedure TfrmTableSit.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  table: TTable;
 begin
+  if ModalResult <> mrOk then
+  begin
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      ServerSocket.TableSitClose(table.GameId);
+    finally
+      Tables.Unlock;
+    end;
+  end;
+
   Action := caFree;
 
   if Assigned(FCloseCallback) then

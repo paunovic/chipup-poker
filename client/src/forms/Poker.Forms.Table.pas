@@ -562,9 +562,9 @@ begin
          (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
          (seat_info.Status in [psOutOfPlay, psOutOfHand]) then
         FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose))
-      else // if we are not sitting and seat is not taken
+      else // if we are not sitting and seat is free
         if (not table.Status.IsSitting) and
-           (not table.Status.IsSeatTaken(seat_index)) then
+           (not table.Status.IsSeatFree(seat_index)) then
           FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose));
     end;
   finally

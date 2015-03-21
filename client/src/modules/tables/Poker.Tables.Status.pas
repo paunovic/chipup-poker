@@ -76,6 +76,8 @@ type
 
     function GetBet(const ASeatIndex: Integer): UINT32;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
+    function IsSeatReserved(const ASeatIndex: Integer): Boolean;
+    function IsSeatFree(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
 
@@ -215,6 +217,16 @@ begin
     end;
 
   Exit(FALSE);
+end;
+
+function TTableStatus.IsSeatFree(const ASeatIndex: Integer): Boolean;
+begin
+  result := not (IsSeatReserved(ASeatIndex) or IsSeatTaken(ASeatIndex));
+end;
+
+function TTableStatus.IsSeatReserved(const ASeatIndex: Integer): Boolean;
+begin
+  result := FReservedSeats.IndexOf(ASeatIndex) <> -1;
 end;
 
 function TTableStatus.IsSeatTaken(const ASeatIndex: Integer): Boolean;

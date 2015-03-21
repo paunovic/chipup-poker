@@ -657,7 +657,7 @@ begin
     end
     else
     begin
-      if table.Status.ReservedSeats.IndexOf(ASeatIndex) <> -1 then // seat is reserved
+      if table.Status.IsSeatReserved(ASeatIndex) then // seat is reserved
         DXCore.Canvas.UseImage(seat_reserved_image, TexFull4)
       else // seat is empty
         if FTableType = ttLive then
