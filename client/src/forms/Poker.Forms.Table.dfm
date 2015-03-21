@@ -539,6 +539,32 @@ object frmTable: TfrmTable
     Height = 17
     Width = 117
   end
+  object lbvWaitingListPosition: TcxLabel
+    Left = 430
+    Top = 497
+    Anchors = [akRight, akBottom]
+    Caption = 'Position in waiting list: 1'
+    ParentFont = False
+    Style.Edges = []
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Sintony'
+    Style.Font.Style = []
+    Style.Font.Quality = fqClearType
+    Style.LookAndFeel.NativeStyle = True
+    Style.TextColor = 13158600
+    Style.TextStyle = []
+    Style.TransparentBorder = True
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.NativeStyle = True
+    StyleFocused.LookAndFeel.NativeStyle = True
+    StyleHot.LookAndFeel.NativeStyle = True
+    Properties.Alignment.Horz = taRightJustify
+    Transparent = True
+    Visible = False
+    AnchorX = 571
+  end
   object ActionManager: TActionManager
     Images = il48px
     Left = 48

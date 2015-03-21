@@ -63,6 +63,7 @@ type
     cbSplitTableCards: TcxCheckBox;
     acJoinWaitingList: TAction;
     acLeaveWaitingList: TAction;
+    lbvWaitingListPosition: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -126,6 +127,7 @@ type
       FDXBCheck: Integer;
       FDXBCall: Integer;
       FDXBRaise: Integer;
+      FDXBJoinWaitingList: Integer;
       FDXBRaisePresets: array[0..3] of Integer;
 
       FBuyinForm: TForm;
@@ -149,6 +151,7 @@ type
     procedure UpdateTableCaption;
     procedure UpdateHandHistoryLabel;
     procedure UpdateHandStrength;
+    procedure UpdateWaitingListPositionCaption;
     procedure FocusWindow;
     procedure UncheckAutoplayOptions;
 
@@ -262,7 +265,7 @@ begin
 
     table.Renderer.AddDXButton(acStandUp, @table.Renderer.Metrics.StandUpButtonBounds, TableResources.StandUpButtonNormalImage, TableResources.StandUpButtonPressedImage, nil);
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
-    table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
+    FDXBJoinWaitingList := table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
     table.Renderer.AddDXButton(acLeaveWaitingList, @table.Renderer.Metrics.LeaveWaitingListButtonBounds, TableResources.LeaveWaitingListNormal, TableResources.LeaveWaitingListPressed, nil, FALSE, 0.15);
 
     FDXBFold := table.Renderer.AddDXButton(acFold, @table.Renderer.Metrics.ActionButtonsBounds[0],
@@ -704,6 +707,21 @@ begin
     Caption := cap;
 end;
 
+procedure TfrmTable.UpdateWaitingListPositionCaption;
+var
+  table: TTable;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if table.Status.QueuePosition = 1 then
+      lbvWaitingListPosition.Caption := 'You are next to play'
+    else
+      lbvWaitingListPosition.Caption := Format('Position: %d', [table.Status.QueuePosition]);
+  finally
+    Tables.Unlock;
+  end;
+end;
+
 procedure TfrmTable.lbsTableStatsClick(Sender: TObject);
 begin
   acTableStats.Execute;
@@ -959,6 +977,7 @@ begin
     Exit;
 
   seat_index := pbreservedseatfree.SeatIndex;
+  FocusWindow;
   FBuyinForm := RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose);
   FormsContainer.Add(FBuyinForm);
 end;
@@ -1155,6 +1174,14 @@ begin
 
         lbvHandStrength.Top := Round(table.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds^[0].y - lbvHandStrength.Height - 5);
 
+        lbvWaitingListPosition.Top := Round(table.Renderer.GetDXButton(FDXBJoinWaitingList).Bounds^[2].y + 3);
+        lbvWaitingListPosition.Left := Round(
+          table.Renderer.GetDXButton(FDXBJoinWaitingList).Bounds^[0].x +
+          (table.Renderer.GetDXButton(FDXBJoinWaitingList).Bounds^[1].x -
+           table.Renderer.GetDXButton(FDXBJoinWaitingList).Bounds^[0].x) / 2 -
+          lbvWaitingListPosition.Width / 2);
+        lbvWaitingListPosition.Visible := table.Status.QueuePosition > 0;
+
         if table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
         begin
           if member.Muted then
@@ -1270,6 +1297,7 @@ begin
     Tables.Unlock;
   end;
 
+  UpdateWaitingListPositionCaption;
   RefreshAll;
 end;
 
