@@ -7,7 +7,7 @@
 
 PokerMain *core;
 
-PokerMain::PokerMain(QObject *parent) {
+PokerMain::PokerMain(QObject*) {
 	manager_ = new QNetworkAccessManager(this);
 	self_ = new Data::User(this);
 	effects_ = new SoundEffects(this);
@@ -34,7 +34,7 @@ void PokerMain::socket_readyRead(){}
 void PokerMain::parsePacket(Poker::ServerCodes,std::string){}
 void PokerMain::replyFinished(QNetworkReply*){}
 void PokerMain::send_ping(){}
-void PokerMain::doLogin(QString username, QString password){}
+void PokerMain::doLogin(QString,QString){}
 void PokerMain::RegisterListener(QObject *listener) {
 	const QMetaObject *mo = listener->metaObject();
 	for (int i = 0; i < mo->methodCount(); ++i) {
@@ -65,5 +65,5 @@ int parseValue(QString input) {
 }
 void PokerMain::doneHashing() {
 }
-void PokerMain::httpsErrors(QNetworkReply *reply, const QList<QSslError> &errors) {
+void PokerMain::httpsErrors(QNetworkReply *, const QList<QSslError> &) {
 }

@@ -86,6 +86,7 @@ QString Game::typeToString() const {
 	case Poker::Game::gtOmaha: return "NLO";
 	case Poker::Game::gtRotationNLHPLO: return "Rotation NLH/NLO";
 	}
+	return "internal-error";
 }
 QString Game::typeToLongString() const {
 	switch (type) {
@@ -93,6 +94,7 @@ QString Game::typeToLongString() const {
 	case Poker::Game::gtOmaha: return "NLO";
 	case Poker::Game::gtRotationNLHPLO: return "Rotation NLH/NLO";
 	}
+	return "internal-error";
 }
 
 QVariant GameListModel::headerData(int row, Qt::Orientation, int role) const {

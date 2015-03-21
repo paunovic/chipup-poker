@@ -276,7 +276,7 @@ void PokerMain::doUpdate(const HelloReply hr) {
 	}
 	// TODO, restart when done
 }
-void PokerMain::fileSaved(Core::UpdateFileInfo row) {
+void PokerMain::fileSaved(Core::UpdateFileInfo)  {
 	pending_updates--;
 	if (pending_updates == 0) {
 		QString self = QApplication::applicationFilePath();

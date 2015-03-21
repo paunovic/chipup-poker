@@ -65,7 +65,8 @@ void TableSit::On_sit_ok(QByteArray gameid) {
 	}
 }
 void TableSit::On_seat_taken(QByteArray gameid) {
-	qDebug() << "FIXME, seat taken";
+#warning finish this later
+	qDebug() << "FIXME, seat taken" << gameid;
 }
 void TableSit::On_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
 	qDebug() << pcs.buyin_min << pcs.buyin_max;

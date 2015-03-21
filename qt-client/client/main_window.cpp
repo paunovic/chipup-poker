@@ -176,7 +176,7 @@ void MainWindow::clubTriggered(Data::Club *club) {
 void MainWindow::on_actionDisconnect_triggered() {
 	core->testDisconnect();
 }
-void MainWindow::resizeEvent(QResizeEvent *event) {
+void MainWindow::resizeEvent(QResizeEvent*) {
 	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
 	QSize priv = ui->gridPrivateClubs->size();
 	qDebug() << "root size" << size() << "private size" << priv << (priv/em);

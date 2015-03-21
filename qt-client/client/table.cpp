@@ -58,6 +58,7 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 			break;
 		}
 	}
+	// TODO, handle more of this in JS
 	ui->btStandUp->setVisible(self_found);
 	if (!self_found) { // not sitting, cant play now
 		ui->btPlayNow->setVisible(false);
