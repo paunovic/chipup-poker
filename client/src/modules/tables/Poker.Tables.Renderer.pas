@@ -448,6 +448,7 @@ var
   seat_empty_image_no_text: TAsphyreImage;
   seat_inactive_image: TAsphyreImage;
   seat_active_image: TAsphyreImage;
+  seat_reserved_image: TAsphyreImage;
   action_image: TAsphyreImage;
 //  seat_light_image: TAsphyreImage;
   avatar: TAvatar;
@@ -482,6 +483,7 @@ begin
     seat_empty_image_no_text := TableResources.SeatLeftEmptyTournamentImage;
     seat_inactive_image := TableResources.SeatLeftImage;
     seat_active_image := TableResources.SeatLeftActiveImage;
+    seat_reserved_image := TableResources.SeatLeftReservedImage;
 
     avatar_point := Point2(seat_point.X - FMetrics.SeatWidth / 2 + TableResources.SEAT_LEFT_AVATAR_X * FMetrics.SeatResizeRatio, seat_point.Y);
     seat_text_x_center := seat_point.X - (seat_point.X + FMetrics.SeatWidth / 2 - avatar_point.X) / 2 - 10 * FMetrics.SeatResizeRatio;
@@ -492,6 +494,7 @@ begin
     seat_empty_image_no_text := TableResources.SeatRightEmptyTournamentImage;
     seat_inactive_image := TableResources.SeatRightImage;
     seat_active_image := TableResources.SeatRightActiveImage;
+    seat_reserved_image := TableResources.SeatRightReservedImage;
 
     avatar_point := Point2(seat_point.X - FMetrics.SeatWidth / 2 + TableResources.SEAT_RIGHT_AVATAR_X * FMetrics.SeatResizeRatio, seat_point.Y);
     seat_text_x_center := seat_point.X + (avatar_point.X - (seat_point.X - FMetrics.SeatWidth / 2) - 10 * FMetrics.SeatResizeRatio);
@@ -654,11 +657,14 @@ begin
     end
     else
     begin
-      // empty seat
-      if FTableType = ttLive then
-        DXCore.Canvas.UseImage(seat_empty_image, TexFull4)
-      else
-        DXCore.Canvas.UseImage(seat_empty_image_no_text, TexFull4);
+      if table.Status.ReservedSeats.IndexOf(ASeatIndex) <> -1 then // seat is reserved
+        DXCore.Canvas.UseImage(seat_reserved_image, TexFull4)
+      else // seat is empty
+        if FTableType = ttLive then
+          DXCore.Canvas.UseImage(seat_empty_image, TexFull4)
+        else
+          DXCore.Canvas.UseImage(seat_empty_image_no_text, TexFull4);
+
       DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.SeatWidth / 2, seat_point.Y - FMetrics.SeatHeight / 2, FMetrics.SeatWidth, FMetrics.SeatHeight), clWhite4);
     end;
   finally

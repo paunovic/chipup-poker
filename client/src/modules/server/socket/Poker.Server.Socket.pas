@@ -62,6 +62,7 @@ type
     procedure CloseTournamentLobby(const ATournamentId: TMongoId);
     procedure QueryTournamentInfo(const ATournamentId: TMongoId);
     procedure TableSitOpen(const AGameId: TMongoId);
+    procedure TableSitClose(const AGameId: TMongoId);
     procedure DeleteTableStats(const AClubId: TMongoId; const ATableIds: TList<TMongoId>);
     procedure ChangeClubPlayerFlag(const ACommand: TServerCodes; const AClubId, APlayerId: TMongoId; const AFlag: Boolean);
     procedure SoftException(const AException, AData: String);
@@ -382,6 +383,19 @@ begin
     protobuf.SeatIndex := ASeatIndex;
     protobuf.Chips := AChips;
     SendProtobuf(scTableSit, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.TableSitClose(const AGameId: TMongoId);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoId := AGameId;
+    SendProtobuf(scTableSitClose, protobuf);
   finally
     protobuf.Free;
   end;

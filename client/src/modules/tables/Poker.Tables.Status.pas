@@ -40,6 +40,7 @@ type
     FSelfSeatIndex: Integer;
     FMessages: TObjectList<TPB_TableMessage>;
     FQueuePosition: Integer;
+    FReservedSeats: TList<UINT32>;
 
     FActionStandUp: Boolean;
     FActionFold: Boolean;
@@ -142,6 +143,7 @@ type
     property CallCaption: String read FCallCaption write FCallCaption;
     property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;
     property FocusWindow: Boolean read FFocusWindow write FFocusWindow;
+    property ReservedSeats: TList<UINT32> read FReservedSeats;
 
     property Events: TPB_TableEventList read FEvents;
   end;
@@ -171,11 +173,14 @@ begin
   FFlopCards := TObjectList<TCards>.Create;
   FTurnCard := TObjectList<TCard>.Create;
   FRiverCard := TObjectList<TCard>.Create;
+
+  FReservedSeats := TList<UINT32>.Create;
 end;
 
 destructor TTableStatus.Destroy;
 begin
   FMessages.Free;
+  FReservedSeats.Free;
   FBets.Free;
   FPreviousBets.Free;
   FEvents.Free;
@@ -266,6 +271,8 @@ begin
   FCurrentLimit := ATableStatusProtobuf.GameLimit;
   FMinimumRaise := ATableStatusProtobuf.MinimumRaise;
   FQueuePosition := ATableStatusProtobuf.QueuePosition;
+  FReservedSeats.Clear;
+  FReservedSeats.AddRange(ATableStatusProtobuf.ReservedSeats);
   FMessages.Clear;
   for table_message in ATableStatusProtobuf.TableMessage do
     FMessages.Add(TPB_TableMessage.Create(table_message));

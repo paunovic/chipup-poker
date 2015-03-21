@@ -115,6 +115,7 @@ enum ServerCodes {
 	scChangePlayerManagerState = 117;
 	scSplitTableCards = 118;
 	scSoftException = 119;
+	scTableSitClose = 120;
 }
 
 message StringSizes {

@@ -63,6 +63,8 @@ type
       FJoinWaitingListPressed: TAsphyreImage;
       FLeaveWaitingListNormal: TAsphyreImage;
       FLeaveWaitingListPressed: TAsphyreImage;
+      FSeatLeftReservedImage: TAsphyreImage;
+      FSeatRightReservedImage: TAsphyreImage;
 
       FGrayscaleImages: TObjectDictionary<TAsphyreImage, TAsphyreImage>;
 
@@ -179,6 +181,8 @@ type
     property JoinWaitingListPressed: TAsphyreImage read FJoinWaitingListPressed;
     property LeaveWaitingListNormal: TAsphyreImage read FLeaveWaitingListNormal;
     property LeaveWaitingListPressed: TAsphyreImage read FLeaveWaitingListPressed;
+    property SeatLeftReservedImage: TAsphyreImage read FSeatLeftReservedImage;
+    property SeatRightReservedImage: TAsphyreImage read FSeatRightReservedImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -276,6 +280,8 @@ begin
   AddDXImage('JoinWaitingList_Pressed.image', FJoinWaitingListPressed);
   AddDXImage('LeaveWaitingList_Normal.image', FLeaveWaitingListNormal, FLeaveWaitingListButtonAspectRatio);
   AddDXImage('LeaveWaitingList_Pressed.image', FLeaveWaitingListPressed);
+  AddDXImage('SeatLeftReserved.image', FSeatLeftReservedImage);
+  AddDXImage('SeatRightReserved.image', FSeatRightReservedImage);
 
   FGrayscaleImages := TObjectDictionary<TAsphyreImage, TAsphyreImage>.Create([]);
 
