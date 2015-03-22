@@ -365,13 +365,17 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 	var prefix;
 	if (config.diffserver) prefix='dev';
 	else prefix = 'live';
-	//console.log('hello params',params);
+	console.log('hello params',params);
 	if (params.debug) key1 = 'debuginstallerid';
 	else key1 = 'installerid';
 	key1 = prefix+'_'+key1;
+	if (!params.appcode) {
+	} else if (params.appcode != 'DelphiWindows') key1 = params.appcode + '_' + key1;
+	console.log('final key %s',key1);
 	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
 		if (!row2) {
+			console.log('warning, config installer not found');
 			if (mainfiles) {
 				this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
 				token.stop();
@@ -379,27 +383,38 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 			}
 		}
 		models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
+			if (!targetVersion) {
+				console.log('warning, installer missing');
+				if (mainfiles) {
+					this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
+					token.stop();
+				}
+				return;
+			}
 			var x;
-			//console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
 			for (x=0; x<files.length; x++) {
 				var clientFile = files[x];
-				clientFile.key = clientFile.path.replace('.',':');
+				clientFile.key = clientFile.path.replace('.',':').replace('.',':');
 				checked[clientFile.key] = true;
+				console.log("client claims to have %s",clientFile.key);
 			}
 			if (mainfiles) {
 				for (var key in targetVersion.hashes) {
 					if (!checked[key]) {
-						console.log('file %s is missing',key.replace(':','.'));
-						var fake = { path:key.replace(':','.'), hash:'', key:key };
+						console.log('file %s is missing',key);
+						var fake = { path:key.replace(':','.').replace(':','.'), hash:'', key:key };
 						files.push(fake);
 					}
 				}
 			}
 			if (assetsEnabled) {
+				if (!targetVersion.hashes) targetVersion.hashes = {};
 				for (x in assets) {
 					targetVersion.hashes[x] = assets[x];
+					console.log('adding asset',x);
 				}
 			}
 			async.each(files,function checkFile(clientFile,cb) {
@@ -407,6 +422,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 				else clientFile.hash = '';
 				var targetFile = targetVersion.hashes[clientFile.key];
 				if (!targetFile) {
+					console.log('%s not found in server',clientFile.key);
 					toUpdate.push({file_type:'ufRemove',path:clientFile.path});
 					return cb();
 				}
@@ -415,7 +431,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 					//console.log('need to patch %s',clientFile.path);
 					models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
-						if (diffRow) {
+						if (diffRow && (params.appcode == 'DelphiWindows')) {
 							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
 							toUpdate.push(UFI);
 							cb();
@@ -423,9 +439,9 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 							models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
 								assert.ifError(err);
 								if (sizeRow) {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
+									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
+									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
 									fetchSize(targetFile);
 									console.log('cant find original of %s',clientFile.path);
 								}
@@ -463,7 +479,7 @@ ClientSocket.prototype.handle = function (code,args) {
 	clearTimeout(this.idleTimer);
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 	var token = profiler.start('handle-default');
-	if (args && (args.length > (10*1024))) {
+	if (args && (args.length > (16*1024))) {
 		this.log('rejecting code %d with arg size %d',code,args.length);
 		this.error('packet too large');
 	}
@@ -664,6 +680,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scHello:
 			try {
 				params = pb.Parse(args,'Poker.HelloParams');
+				this.log('files:%j',params);
 				if (params.files.length == 0) {
 					this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
 					return;
