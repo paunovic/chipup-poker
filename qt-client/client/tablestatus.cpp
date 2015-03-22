@@ -57,6 +57,8 @@ void TableStatus::update(const Poker::TableStatus &in) {
 	}
 	if (in.has_queue_position()) queue_position = in.queue_position();
 	else queue_position = 0;
+	_reservedSeats.clear();
+	for (i=0; i<in.reserved_seats_size(); i++) _reservedSeats.append(in.reserved_seats(i));
 }
 QString TableStatus::getState() {
 	switch (state_) {

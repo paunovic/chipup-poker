@@ -141,15 +141,22 @@ SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	//qDebug() << "seat info" << internal->size() << internal->pos() << internal->isVisible() << internal->isHidden();
 }
 void VisibleSeat::mousePressEvent(QMouseEvent *) {
-	qDebug() << __func__ << jsobj->getSeat();
+	//qDebug() << __func__ << jsobj->getSeat();
 }
 void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
-	qDebug() << "release";
-	// TODO, add-on if this is the right seat
-	// TODO, block if its any other seat and your sitting
-	QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
-	sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
-	sitwindow->show();
+	qDebug() << "release" << jsobj->getSeat();
+	Data::SeatInfo *my_seat = jsobj->getTable()->findMySeat();
+	if (my_seat) {
+		if (my_seat->seat_index != jsobj->getSeat()) { // you clicked a seat thats not yours, while sitting
+			return;
+		} else {
+			qDebug() << "TODO, add-on";
+		}
+	} else {
+		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
+		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
+		sitwindow->show();
+	}
 }
 void VisibleSeat::updateSeat() {
 	Q_ASSERT(jsobj);

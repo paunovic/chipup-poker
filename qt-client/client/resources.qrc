@@ -107,5 +107,7 @@
         <file>resources/waiting_list/LeaveWaitingList_Pressed.png</file>
         <file>resources/DevServerCertificate.pem</file>
         <file>resources/OfficialServerCertificate.pem</file>
+        <file>resources/seats/SeatLeftReserved.png</file>
+        <file>resources/seats/SeatRightReserved.png</file>
     </qresource>
 </RCC>

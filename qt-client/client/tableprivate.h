@@ -83,6 +83,7 @@ public:
 	void editJs(QString newcode);
 	QScriptValue global() { return engine.globalObject(); }
 	QSharedPointer<Data::TableStatus> getLastTs() { return lastTs; }
+	Data::SeatInfo *findMySeat() const;
 signals:
 
 public slots:

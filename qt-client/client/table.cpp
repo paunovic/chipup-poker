@@ -127,7 +127,11 @@ void Table::setGame(const Data::Game *game, const Data::Club *club) {
 	this->game = game;
 	p->setGame(game);
 	setWindowTitle(QString(tr("%1 (%2/%3 %4) - %5")).arg(game->gamename).arg(game->sb).arg(game->bb).arg(game->typeToString()).arg(club->name));
+#if 1
+	p->loadJs(jscode,"table.js");
+#else
 	p->loadJsFromResource();
+#endif
 }
 bool Table::setGameForTesting(const Data::Game *game, QString jscode) {
 	this->game = game;

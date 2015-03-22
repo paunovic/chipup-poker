@@ -26,6 +26,7 @@ public:
 	int getCurrentSeat() { return current_seat; }
 	QList<int> bets() { return bets_; }
 	int dealer() { return dealer_; }
+	QList<int> reservedSeats() { return _reservedSeats; }
 
 #define X(type,name) Q_PROPERTY(QString name READ get ## name )\
 type name;\
@@ -38,6 +39,7 @@ type get ## name() { return name; }
 	Q_PROPERTY(QString state READ getState)
 	Q_PROPERTY(int current_seat READ getCurrentSeat)
 	Q_PROPERTY(QList<int> bets READ bets)
+	Q_PROPERTY(QList<int> reservedSeats READ reservedSeats)
 	Q_PROPERTY(int dealer READ dealer)
 	
 	QByteArray gameid;
@@ -63,7 +65,7 @@ signals:
 public slots:
 	QObject *readSeatBySeat(int seat);
 private:
-	QList<int> bets_;
+	QList<int> bets_,_reservedSeats;
 	Poker::TableStatus::TableState state_;
 	int dealer_;
 };

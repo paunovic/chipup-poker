@@ -231,3 +231,9 @@ void TablePrivate::editJs(QString newcode) {
 		engine.clearExceptions();
 	}
 }
+Data::SeatInfo * TablePrivate::findMySeat() const {
+	for (int x=0; x < lastTs->seats.length(); x++) {
+		Data::SeatInfo *seat = lastTs->seats[x];
+		if (seat->userid == core->self()->id) return seat;
+	}
+}
