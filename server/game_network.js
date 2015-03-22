@@ -622,6 +622,13 @@ handlers[codes.scShowCards] = function (args,token) {
 			if (!game) return;
 			game.Lock.writeLock(function (release) {
 				var x = game.findSeat(this),token2,seating = game.members[x];
+				var queue_position = game.sitQueue.indexOf(this.userid);
+				if ((x == -1) && (queue_position != -1)) {
+					game.sitQueue.splice(queue_position,1);
+					this.send(codes.seTableStatus,game.getTableStatus(this,null,[]),'Poker.TableStatus');
+					release();
+					return;
+				}
 				if (!seating) {
 					this.log('standup error %d',x);
 					release();
@@ -731,6 +738,20 @@ handlers[codes.scShowCards] = function (args,token) {
 		Game.getGame(id,function (err,game) {
 			assert.ifError(err);
 			this.sendClubStatus(game.club,game);
+		}.bind(this));
+	};
+	handlers[codes.scTableSitClose] = function (args,token) {
+		var params,id;
+		try {
+			params = pb.Parse(args,'Poker.Game');
+			id = myutils.toMongoId(params._id);
+		} catch (e) {
+			this.error(e);
+			return;
+		}
+		Game.getGame(id,function (err,game) {
+			assert.ifError(err);
+			game.tableSitClose(this);
 		}.bind(this));
 	};
 	handlers[codes.scSplitTableCards] = function (args,token) {

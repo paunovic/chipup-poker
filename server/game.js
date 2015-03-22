@@ -349,7 +349,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					break;
 				} else {
 					// reserved seat
-					this.reply(0,'that seat is reserved');
+					conn.reply(0,'that seat is reserved');
 					cb(false,events);
 					return;
 				}
@@ -2331,7 +2331,7 @@ Game.prototype.bootReserved = function (seatIdx) {
 			}
 			if (this.users[userid]) {
 				this.log('telling user');
-				this.users[userid].send(codes.srReservedSeatTimeout,this.getTableStatus(this.users[userid],null,[]),'Poker.TableStatus');
+				this.users[userid].send(codes.seReservedSeatTimeout,this.getTableStatus(this.users[userid],null,[]),'Poker.TableStatus');
 			}
 			this.broadcastStatus(null,null,[]);
 			this.log('release');
@@ -2340,6 +2340,16 @@ Game.prototype.bootReserved = function (seatIdx) {
 		}
 	}.bind(this));
 }
+Game.prototype.tableSitClose = function (conn) {
+	for (var x=0; x<this.reserved_seats.length; x++) {
+		console.log(x,this.reserved_seats[x],conn.userid);
+		if (myutils.compareObjectID(this.reserved_seats[x].userid,conn.userid)) {
+			clearTimeout(this.reserved_seats[x].timer);
+			this.bootReserved(this.reserved_seats[x].index);
+			return;
+		}
+	}
+};
 Game.prototype.leave = function leave(conn,reason,cb1) {
 	conn.log('getting lock:%s',this.Lock.trace);
 	delete this.users[conn.userid];
@@ -2347,6 +2357,12 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 		conn.log('got lock',this.Lock.readers);
 		var seatIdx = this.findSeat(conn);
 		conn.log('leave1 idx %d %s',seatIdx,reason);
+		var queue_position = this.sitQueue.indexOf(conn.userid);
+		if ((seatIdx == -1) && (queue_position != -1)) {
+			this.sitQueue.splice(queue_position,1);
+			release();
+			return;
+		}
 		if (seatIdx >= 0) {
 			this.standUp(conn,function (folded,events) {
 					conn.log('releasing lock events:%j',events);
@@ -2354,9 +2370,6 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 					this.broadcastStatus(null,true,events);
 					finish.call(this);
 				}.bind(this));
-		} else if (this.sitQueue.indexOf(conn.userid) != -1) {
-			// TODO, de-queue upon logout
-			finish.call(this);
 		} else finish.call(this);
 		function finish() {
 			var count = 0,key;
