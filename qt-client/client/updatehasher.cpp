@@ -35,9 +35,6 @@ void UpdateHasher::startHashing(QString scriptspath) {
 	qDebug() << "done hashing in thread";
 	emit doneHashing();
 }
-void UpdateHasher::startDownload() {
-}
-
 void UpdateHasher::recurseDirectory(QDir root, QDir path) {
 	//qDebug() << "checking" << path;
 	QFileInfoList files = path.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);

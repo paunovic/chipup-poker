@@ -236,4 +236,5 @@ Data::SeatInfo * TablePrivate::findMySeat() const {
 		Data::SeatInfo *seat = lastTs->seats[x];
 		if (seat->userid == core->self()->id) return seat;
 	}
+	return 0;
 }

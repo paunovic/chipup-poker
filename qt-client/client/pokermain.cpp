@@ -55,7 +55,6 @@ PokerMain::PokerMain(QObject *parent) :
         hasher->moveToThread(workerThread);
         connect(this,SIGNAL(startHashing(QString)),hasher,SLOT(startHashing(QString)));
         connect(hasher,SIGNAL(doneHashing()),this,SLOT(doneHashing()));
-        connect(this,SIGNAL(startDownload()),hasher,SLOT(startDownload()));
     }
 #ifdef DEVSERVER
 	serverAddress = "dev-server.chipuppoker.com";
