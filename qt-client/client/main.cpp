@@ -3,14 +3,36 @@
 #include <QDebug>
 #include <QFontDatabase>
 #include <QTranslator>
+#include <locale>
 
 #include "loginwindow.h"
 #include "pokermain.h"
 #include "table/animatecore.h"
+#include "client/windows/handler/exception_handler.h"
+
+bool errorFilter(void *context, EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions) {
+	qDebug() << __func__ << exinfo << assertions;
+	return true;
+}
+bool dumpMade(const wchar_t* dump_path,
+			  const wchar_t* minidump_id,
+			  void* context,
+			  EXCEPTION_POINTERS* exinfo,
+			  MDRawAssertionInfo* assertion,
+			  bool succeeded) {
+	qDebug() << __func__ << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
+	return succeeded;
+}
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	
+	std::string temp = "e:\\";
+	std::wstring dump_path(temp.begin(), temp.end());
+	std::wstring *pipe = 0;
+	google_breakpad::ExceptionHandler *handler =
+		new google_breakpad::ExceptionHandler(dump_path,errorFilter,dumpMade,0,
+								google_breakpad::ExceptionHandler::HANDLER_ALL,	MiniDumpNormal,pipe,0);
+
 	QTranslator translator;
 #if 0
 	translator.load("chipuppoker_ru");

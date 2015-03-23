@@ -127,7 +127,7 @@ void Table::setGame(const Data::Game *game, const Data::Club *club) {
 	this->game = game;
 	p->setGame(game);
 	setWindowTitle(QString(tr("%1 (%2/%3 %4) - %5")).arg(game->gamename).arg(game->sb).arg(game->bb).arg(game->typeToString()).arg(club->name));
-#if 1
+#if 0
 	QFile input("/home/clever/apps/poker/qt-client/client/table.js");
 	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "failed to load js";

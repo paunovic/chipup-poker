@@ -13,7 +13,7 @@ TEMPLATE = app
 
 #CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
-INCLUDEPATH += ../protobuf/
+INCLUDEPATH += ../protobuf/ ../google-breakpad/
 TARGET = chipuppoker
 
 # to compile into a dmg:
@@ -23,12 +23,13 @@ TARGET = chipuppoker
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
 win32 {
-LIBS += -L../protobuf/release/ -L../protobuf/debug/
+LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/
+DEFINES += BUILDNUM=$(BUILDNUM)
 }
 unix {
 LIBS += -L../protobuf/
 }
-LIBS += -lprotobuf
+LIBS += -lprotobuf -lgoogle-breakpad
 SOURCES += main.cpp loginwindow.cpp \
     pokermain.cpp \
     cpp/common.pb.cc \
