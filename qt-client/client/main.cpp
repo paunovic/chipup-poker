@@ -17,10 +17,15 @@
 #endif
 #include "version.h"
 
-bool errorFilter(void *context, EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions) {
-	qDebug() << __func__ << exinfo << assertions;
+bool errorFilter(void *context
+#ifdef Q_OS_WIN
+, EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions
+#endif
+) {
+	qDebug() << __func__;
 	return true;
 }
+#ifdef Q_OS_WIN
 bool dumpMade(const wchar_t* dump_path,
 			  const wchar_t* minidump_id,
 			  void* context,
@@ -28,6 +33,10 @@ bool dumpMade(const wchar_t* dump_path,
 			  MDRawAssertionInfo* assertion,
 			  bool succeeded) {
 	qDebug() << __func__ << build_number << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
+#else
+bool dumpMade(const google_breakpad::MinidumpDescriptor& descriptor, void* context, bool succeeded) {
+	qDebug() << __func__ << succeeded;
+#endif
 	return succeeded;
 }
 
@@ -36,9 +45,11 @@ int main(int argc, char *argv[]) {
 	std::string temp = "e:\\";
 	std::wstring dump_path(temp.begin(), temp.end());
 	std::wstring *pipe = 0;
-	google_breakpad::ExceptionHandler *handler =
-		new google_breakpad::ExceptionHandler(dump_path,errorFilter,dumpMade,0,
-								google_breakpad::ExceptionHandler::HANDLER_ALL,	MiniDumpNormal,pipe,0);
+#ifdef Q_OS_WIN
+	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(dump_path,errorFilter,dumpMade,0, google_breakpad::ExceptionHandler::HANDLER_ALL, MiniDumpNormal,pipe,0);
+#elif defined(Q_OS_LINUX)
+	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor("/tmp/"),errorFilter,dumpMade,0,true,-1);
+#endif
 
 	QTranslator translator;
 #if 0

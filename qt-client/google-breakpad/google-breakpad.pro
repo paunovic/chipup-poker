@@ -11,12 +11,21 @@ TEMPLATE = lib
 CONFIG += staticlib
 LIBS += -lwininet
 
+win32 {
 SOURCES += \
     common/windows/guid_string.cc \
     common/windows/http_upload.cc \
     common/windows/string_utils.cc \
     client/windows/handler/exception_handler.cc \
     client/windows/crash_generation/crash_generation_client.cc
+}
+linux {
+SOURCES += client/linux/handler/exception_handler.cc client/linux/log/log.cc common/linux/linux_libc_support.cc client/linux/handler/minidump_descriptor.cc common/linux/guid_creator.cc \
+	client/linux/crash_generation/crash_generation_client.cc client/linux/microdump_writer/microdump_writer.cc client/linux/minidump_writer/linux_ptrace_dumper.cc \
+	client/linux/minidump_writer/linux_dumper.cc common/linux/memory_mapped_file.cc common/linux/elfutils.cc common/linux/file_id.cc client/linux/dump_writer_common/ucontext_reader.cc \
+	common/linux/safe_readlink.cc client/linux/minidump_writer/minidump_writer.cc client/linux/minidump_writer/minidump_writer.cc client/minidump_file_writer.cc common/string_conversion.cc \
+	client/linux/dump_writer_common/seccomp_unwinder.cc common/convert_UTF.c client/linux/dump_writer_common/thread_info.cc
+}
 
 HEADERS += \
     common/windows/string_utils-inl.h \

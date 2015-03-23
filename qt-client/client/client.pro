@@ -27,7 +27,7 @@ LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/ 
 DEFINES += BUILDNUM=$(BUILDNUM)
 }
 unix {
-LIBS += -L../protobuf/
+LIBS += -L../protobuf/ -L../google-breakpad/
 }
 LIBS += -lprotobuf -lgoogle-breakpad
 SOURCES += main.cpp loginwindow.cpp \
