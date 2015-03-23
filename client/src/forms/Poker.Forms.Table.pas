@@ -568,7 +568,7 @@ begin
         FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose))
       else // if we are not sitting and seat is free
         if (not table.Status.IsSitting) and
-           (not table.Status.IsSeatFree(seat_index)) then
+           (table.Status.IsSeatFree(seat_index)) then
           FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose));
     end;
   finally

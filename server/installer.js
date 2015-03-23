@@ -12,7 +12,7 @@ var models = require('./db').models;
 module.exports.unpackInstaller = unpackInstaller;
 module.exports.copyFile = copyFile;
 module.exports.recurse_dir = recurse_dir;
-module.exports.unpackDmg = unpackDmg;
+module.exports.unpackTar = unpackTar;
 function updateLive(doc,sizes,cb) {
 	var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
 	var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
@@ -62,7 +62,7 @@ function deleteDir(path,cb1) {
 	if (fs.existsSync(path)) {
 		fs.readdir(path,function (err,files) {
 			async.each(files,function (item,cb) {
-				fs.stat(path+"/"+item,function (err,stats) {
+				fs.lstat(path+"/"+item,function (err,stats) {
 					if (stats.isDirectory()) {
 						deleteDir(path+"/"+item,cb);
 					} else {
@@ -76,45 +76,34 @@ function deleteDir(path,cb1) {
 		});
 	}
 }
-function unpackDmg(record,localFile,cb1) {
-	temp.mkdir('unpackA',function (err,dirPath) {
+function unpackTar(record,localFile,cb1) {
+	temp.mkdir('unpack',function (err,dirPath) {
 		console.log(dirPath);
-		var child = child_process.spawn('7z',['x','-o'+dirPath,localFile],{stdio:'inherit'});
+		var child = child_process.spawn('tar',['-xf',localFile,'-C',dirPath],{stdio:'inherit'});
 		child.on('close',function (code) {
 			console.log('child exited with code',code);
 			if (code == 0) {
-				temp.mkdir('unpackB',function (err,dirPath2) {
-					var child = child_process.spawn('7z',['x','-o'+dirPath2,dirPath+'/4.hfs'],{stdio:'inherit'});
-					child.on('close',function (code) {
-						console.log('child exited with code',code);
-						deleteDir(dirPath);
-						if (code == 0) {
-							recurse_dir('',dirPath2+'/chipuppoker/chipuppoker.app/',function (err,files) {
-								assert.ifError(err);
-								console.log('all files:%j',files);
-								hashFiles(dirPath2+'/chipuppoker/chipuppoker.app/',files,function (hashes,sizes) {
-									record.hashes = hashes;
-									record.save(function (err,newdoc) {
-										assert.ifError(err);
-										if (err) console.log(err);
-										deleteDir(dirPath2);
-										async.each(sizes,function (row,cb) {
-											models.ObjectSize.create(row,cb);
-										},function () {
-											updateLive(record,sizes,function () {
-												cb1(true);
-											});
-										});
-									});
+				recurse_dir('',dirPath+'/chipuppoker.app/',function (err,files) {
+					assert.ifError(err);
+					console.log('all files:%j',files);
+					hashFiles(dirPath+'/chipuppoker.app/',files,function (hashes,sizes) {
+						record.hashes = hashes;
+						record.save(function (err,newdoc) {
+							assert.ifError(err);
+							if (err) console.log(err);
+							deleteDir(dirPath);
+							async.each(sizes,function (row,cb) {
+								models.ObjectSize.create(row,cb);
+							},function () {
+								updateLive(record,sizes,function () {
+									cb1(true);
 								});
 							});
-						} else {
-							cb(false);
-						}
+						});
 					});
 				});
 			} else {
-				cb(false);
+				cb1(false);
 			}
 		});
 	});
@@ -161,11 +150,16 @@ function recurse_dir(path,prefix,cb4) {
 	fs.readdir(prefix+path,function (err,files) {
 		console.log('checked path %s %s',prefix,path,files);
 		assert.ifError(err);
-		async.each(files,function checkItem(filename,cb3) {
-			fs.stat(prefix+path+filename,function (err,stats) {
+		async.eachLimit(files,1,function checkItem(filename,cb3) {
+			//if (filename == 'Current') return cb3();
+			fs.lstat(prefix+path+filename,function (err,stats) {
 				assert.ifError(err);
-				console.log('stats:%j',stats);
-				if (stats.isDirectory()) {
+				//console.log('stats:%j',stats);
+				if (stats.isSymbolicLink()) {
+					console.log('%s is a symlink',filename);
+					cb3();
+				} else if (stats.isDirectory()) {
+					console.log("%s is a directory",filename);
 					recurse_dir(path+filename+'/',prefix,function (err,items2) {
 						console.log('2nd level %j',items2);
 						assert.ifError(err);
@@ -173,6 +167,7 @@ function recurse_dir(path,prefix,cb4) {
 						cb3();
 					});
 				} else if (stats.isFile()) {
+					console.log('%s is a file',filename);
 					items.push(path+filename);
 					cb3();
 				}
