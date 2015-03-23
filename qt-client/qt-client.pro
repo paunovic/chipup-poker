@@ -5,7 +5,7 @@
 TEMPLATE = subdirs
 
 # Directories
-SUBDIRS += protobuf client test
+SUBDIRS += protobuf google-breakpad client test
 
 OTHER_FILES += \
     android/AndroidManifest.xml \

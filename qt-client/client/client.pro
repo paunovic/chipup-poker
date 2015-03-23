@@ -13,7 +13,7 @@ TEMPLATE = app
 
 #CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
-INCLUDEPATH += ../protobuf/
+INCLUDEPATH += ../protobuf/ ../google-breakpad/
 TARGET = chipuppoker
 
 # to compile into a dmg:
@@ -23,12 +23,13 @@ TARGET = chipuppoker
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
 win32 {
-LIBS += -L../protobuf/release/ -L../protobuf/debug/
+LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/ -L../google-breakpad/release/
+DEFINES += BUILDNUM=$(BUILDNUM)
 }
 unix {
 LIBS += -L../protobuf/
 }
-LIBS += -lprotobuf
+LIBS += -lprotobuf -lgoogle-breakpad
 SOURCES += main.cpp loginwindow.cpp \
     pokermain.cpp \
     cpp/common.pb.cc \
@@ -61,7 +62,8 @@ SOURCES += main.cpp loginwindow.cpp \
     data/clubmember.cpp \
     data/winnerdata.cpp \
     updatehasher.cpp \
-    filesaver.cpp
+    filesaver.cpp \
+    version.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -92,7 +94,8 @@ HEADERS  += loginwindow.h \
     data/clubmember.h \
     data/winnerdata.h \
     updatehasher.h \
-    filesaver.h
+    filesaver.h \
+    version.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h

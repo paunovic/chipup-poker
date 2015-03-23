@@ -13,6 +13,12 @@
 #include "table.h"
 #include "selftest.h"
 
+void crash()
+{
+  volatile int* a = (int*)(NULL);
+  *a = 1;
+}
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
 	currentClub = 0;
 

@@ -161,7 +161,7 @@ void PokerMain::socket_ready() {
 void PokerMain::doneHashing() {
 	Poker::HelloParams hp;
 #ifdef Q_OS_WIN
-	hp.set_appcode(Poker::HelloParams::QtMac);
+	hp.set_appcode(Poker::HelloParams::QtWindows32);
 #elif defined(Q_OS_LINUX)
 	hp.set_appcode(Poker::HelloParams::QtLinux32);
 #elif defined(Q_OS_MAC)

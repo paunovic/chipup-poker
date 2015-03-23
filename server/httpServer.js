@@ -168,6 +168,7 @@ function Server(activeUsersIN) {
 	});
 	app.post('/contactPost',this.contactPost);
 	app.post('/newVersion',this.newVersion.bind(this));
+	app.post('/addMac',this.addMac.bind(this));
 	app.get('/secure/broadcast',function (req,res) {
 		res.render('broadcast',{start:Date.now()});
 	});
@@ -266,7 +267,7 @@ Server.prototype.addSecure = function (app) {
 };
 Server.prototype.addMac = function (req,res) {
 	var start = Date.now();
-	console.log(req.body);
+	console.log(req.body,req.files);
 	if (req.files && req.files.dmg) {
 		var localFile = req.files.dmg.path;
 		var name1 = localFile.split('/')[1];
@@ -279,14 +280,12 @@ Server.prototype.addMac = function (req,res) {
 			obj.save(function (err) {
 				assert.ifError(err);
 				global.log('new version recorded: %j',obj);
-				installer.unpackDmg(obj,'installers/'+name1,function (success) {
+				installer.unpackTar(obj,req.files.tar.path,function (success) {
 					var key1;
 					if (success) {
-						if (debug == 'debug') key1 = 'debuginstallerid';
-						else key1 = 'installerid';
-						//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
-						//	assert.ifError(err);
-						//});
+						models.Config.update({_id:'QtMac_dev_installerid'},{$set:{value:obj._id}},function(err,res2) {
+							assert.ifError(err);
+						});
 						obj.ts = obj._id.getTimestamp().toString();
 						this.IO.sockets.emit('new_installer',obj);
 						res.send('OK');
