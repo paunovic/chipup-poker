@@ -8,7 +8,13 @@
 #include "loginwindow.h"
 #include "pokermain.h"
 #include "table/animatecore.h"
-#include "client/windows/handler/exception_handler.h"
+#ifdef Q_OS_WIN
+# include "client/windows/handler/exception_handler.h"
+#elif defined(Q_OS_LINUX)
+# include "client/linux/handler/exception_handler.h"
+#elif defined(Q_OS_MAC)
+# include "client/mac/handler/exception_handler.h"
+#endif
 #include "version.h"
 
 bool errorFilter(void *context, EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions) {
