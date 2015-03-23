@@ -46,6 +46,9 @@ double TableSit::GetBuyinMax() {
 	return (double)g->buyin_max/100;
 }
 void TableSit::on_btCancel_clicked() {
+	Poker::Game g2;
+	g2.set__id(g->gameid.data(),g->gameid.length());
+	core->sendMessage(Poker::scTableSitClose,&g2);
 	close();
 	deleteLater();
 }
@@ -67,6 +70,11 @@ void TableSit::On_sit_ok(QByteArray gameid) {
 void TableSit::On_seat_taken(QByteArray gameid) {
 #warning finish this later
 	qDebug() << "FIXME, seat taken" << gameid;
+}
+void TableSit::On_sit_timeout(QByteArray gameid) {
+	if (g->gameid != gameid) return;
+	close();
+	deleteLater();
 }
 void TableSit::On_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
 	qDebug() << pcs.buyin_min << pcs.buyin_max;

@@ -670,7 +670,7 @@ enum ServerCodes {
   seTournamentPlayerTransfer = 62,
   sePlayerClubStatus = 63,
   seReservedSeatFree = 64,
-  srReservedSeatTimeout = 65,
+  seReservedSeatTimeout = 65,
   scHello = 70,
   scLogin = 71,
   scTournamentRegister = 72,
@@ -720,11 +720,12 @@ enum ServerCodes {
   scMutePlayer = 116,
   scChangePlayerManagerState = 117,
   scSplitTableCards = 118,
-  scSoftException = 119
+  scSoftException = 119,
+  scTableSitClose = 120
 };
 bool ServerCodes_IsValid(int value);
 const ServerCodes ServerCodes_MIN = srNotImplemented;
-const ServerCodes ServerCodes_MAX = scSoftException;
+const ServerCodes ServerCodes_MAX = scTableSitClose;
 const int ServerCodes_ARRAYSIZE = ServerCodes_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ServerCodes_descriptor();

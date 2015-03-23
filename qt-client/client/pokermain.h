@@ -78,6 +78,7 @@ signals:
 	void club_changed(const Data::Club *);
 	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
 	void startHashing(QString scriptspath);
+	void sit_timeout(QByteArray gameid);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -105,6 +106,7 @@ private:
 	void sePlayerClubStatus(std::string data);
 	void seClubChange(std::string data);
 	void seReservedSeatFree(std::string data);
+	void seReservedSeatTimeout(std::string data);
 	void doUpdate(const Poker::HelloReply hr);
 
 	enum ReconnectState { notSignedIn, SignedIn };

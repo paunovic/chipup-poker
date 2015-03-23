@@ -20,10 +20,12 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	seatRightActive = QPixmap(":/resources/seats/SeatRightActive.png");
 	seatRightEmpty = QPixmap(":/resources/seats/SeatRightEmpty.png");
 	seatRightEmptyTournament = QPixmap(":/resources/seats/SeatRightEmptyTournament.png");
+	seatRightReserved = QPixmap(":/resources/seats/SeatRightReserved.png");
 	seatLeft = QPixmap(":/resources/seats/SeatLeft.png");
 	seatLeftActive = QPixmap(":/resources/seats/SeatLeftActive.png");
 	seatLeftEmpty = QPixmap(":/resources/seats/SeatLeftEmpty.png");
 	seatLeftEmptyTournament = QPixmap(":/resources/seats/SeatLeftEmptyTournament.png");
+	seatLeftReserved = QPixmap(":/resources/seats/SeatLeftReserved.png");
 	timebar = QPixmap(":/resources/table/Timebar.png");
 	timebank = QPixmap(":/resources/table/Timebank.png");
 	updateSeat();
@@ -169,8 +171,13 @@ void VisibleSeat::updateSeat() {
 			if (jsobj->left()) pix = seatLeftEmptyTournament;
 			else pix = seatRightEmptyTournament;
 		} else {
-			if (jsobj->left()) pix = seatLeftEmpty;
-			else pix = seatRightEmpty;
+			if (jsobj->reserved()) {
+				if (jsobj->left()) pix = seatLeftReserved;
+				else pix = seatRightReserved;
+			} else {
+				if (jsobj->left()) pix = seatLeftEmpty;
+				else pix = seatRightEmpty;
+			}
 		}
 	} else {
 		if (active) {

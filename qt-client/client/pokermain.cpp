@@ -444,6 +444,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::seReservedSeatFree: // 64
 		seReservedSeatFree(data);
 		break;
+	case Poker::seReservedSeatTimeout: // 65
+		seReservedSeatTimeout(data);
+		break;
 	default:
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
@@ -549,7 +552,14 @@ void PokerMain::seReservedSeatFree(std::string data) {
 	emit table_status(out);
 	emit reserved_seat_free(out->gameid,seat_index);
 }
-
+void PokerMain::seReservedSeatTimeout(std::string data) {
+	Poker::TableStatus ts;
+	ts.ParseFromString(data);
+	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+	out->update(ts);
+	emit sit_timeout(out->gameid);
+	emit table_status(out);
+}
 void PokerMain::srLoginReply(std::string data) {
 	Poker::LoginReply lr;
 	int i;

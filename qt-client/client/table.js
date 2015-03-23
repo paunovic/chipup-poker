@@ -108,7 +108,8 @@ function tableStatus(ts) {
 	}
 }
 function updateSeats(ts,opts) {
-	for (var i=0; i<ts.seats.length; i++) {
+	var i;
+	for (i=0; i<ts.seats.length; i++) {
 		var seat = ts.seats[i];
 		var local = seat_objects[seat.seat_index];
 		local.updateInfo(seat);
@@ -116,6 +117,10 @@ function updateSeats(ts,opts) {
 		local.active = (seat.seat_index == ts.current_seat); // FIXME, ignore when idle?
 		var user = seat.getUser();
 		seat_objects[seat.seat_index].avatar = user.avatar;
+	}
+	for (i=0; i<game.seats; i++) seat_objects[i].reserved = false;
+	for (i=0; i<ts.reservedSeats.length; i++) {
+		seat_objects[ts.reservedSeats[i]].reserved = true;
 	}
 }
 function AnimateCards(opts) {

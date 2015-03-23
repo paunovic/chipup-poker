@@ -2123,7 +2123,7 @@ void protobuf_AddDesc_message_2eproto() {
     "ble_id\030\002 \003(\014B\004\200\265\030\001\"0\n\rSoftException\022\021\n\te"
     "xception\030\001 \002(\t\022\014\n\004data\030\002 \001(\t\"F\n\020Reserved"
     "SeatFree\022\036\n\002ts\030\001 \002(\0132\022.Poker.TableStatus"
-    "\022\022\n\nseat_index\030\002 \002(\r*\352\022\n\013ServerCodes\022\024\n\020"
+    "\022\022\n\nseat_index\030\002 \002(\r*\377\022\n\013ServerCodes\022\024\n\020"
     "srNotImplemented\020\000\022\013\n\007srHello\020\001\022\020\n\014srLog"
     "inReply\020\002\022\023\n\017srRegisterReply\020\003\022\025\n\021srCrea"
     "teClubReply\020\004\022\023\n\017srJoinClubReply\020\005\022\024\n\020sr"
@@ -2157,7 +2157,7 @@ void protobuf_AddDesc_message_2eproto() {
     "t\020;\022\020\n\014seUserChange\020<\022\036\n\032seTournamentPla"
     "yerFinished\020=\022\036\n\032seTournamentPlayerTrans"
     "fer\020>\022\026\n\022sePlayerClubStatus\020\?\022\026\n\022seReser"
-    "vedSeatFree\020@\022\031\n\025srReservedSeatTimeout\020A"
+    "vedSeatFree\020@\022\031\n\025seReservedSeatTimeout\020A"
     "\022\013\n\007scHello\020F\022\013\n\007scLogin\020G\022\030\n\024scTourname"
     "ntRegister\020H\022\016\n\nscRegister\020I\022\024\n\020scForgot"
     "Password\020J\022\014\n\010scLogout\020K\022\020\n\014scCreateClub"
@@ -2183,9 +2183,9 @@ void protobuf_AddDesc_message_2eproto() {
     "itOpen\020q\022\031\n\025scResetPlayerBalances\020r\022\026\n\022s"
     "cDeleteTableStats\020s\022\020\n\014scMutePlayer\020t\022\036\n"
     "\032scChangePlayerManagerState\020u\022\025\n\021scSplit"
-    "TableCards\020v\022\023\n\017scSoftException\020w28\n\006Ser"
-    "ver\022.\n\005Login\022\022.Poker.LoginParams\032\021.Poker"
-    ".LoginReply", 13571);
+    "TableCards\020v\022\023\n\017scSoftException\020w\022\023\n\017scT"
+    "ableSitClose\020x28\n\006Server\022.\n\005Login\022\022.Poke"
+    "r.LoginParams\032\021.Poker.LoginReply", 13592);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "message.proto", &protobuf_RegisterTypes);
   StringSizes::default_instance_ = new StringSizes();
@@ -2450,6 +2450,7 @@ bool ServerCodes_IsValid(int value) {
     case 117:
     case 118:
     case 119:
+    case 120:
       return true;
     default:
       return false;

@@ -29,8 +29,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *);
 private:
 	float timebarHeight(int w) const;
-	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament,seatRightActive;
-	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament,seatLeftActive;
+	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament,seatRightActive,seatRightReserved;
+	QPixmap seatLeft, seatLeftEmpty, seatLeftEmptyTournament,seatLeftActive,seatLeftReserved;
 	QPixmap timebar,timebank;
 	SeatObject *jsobj;
 	TableSit *sitwindow;
@@ -54,6 +54,8 @@ public:
 	SeatObject(TablePrivate *parent);
 	bool active() { return seat->active; }
 	void setActive(bool in) { seat->active = in; seat->updateSeat(); }
+	bool reserved() { return _reserved; }
+	void setReserved(bool in) { _reserved = in; seat->updateSeat(); }
 
 	Q_PROPERTY(int seat READ getSeat WRITE setSeat)
 	Q_PROPERTY(bool tournament READ getTourn WRITE setTourn)
@@ -61,6 +63,7 @@ public:
 	Q_PROPERTY(QString avatar READ avatar WRITE setAvatar)
 	Q_PROPERTY(bool left READ left WRITE setLeft)
 	Q_PROPERTY(bool active READ active WRITE setActive)
+	Q_PROPERTY(bool reserved READ reserved WRITE setReserved)
 	int getSeat() { return seatIndex; }
 	void setSeat(int in) { seatIndex = in; }
 	bool getTourn() { return tournament; }
@@ -79,7 +82,7 @@ private slots:
 private:
 	VisibleSeat *seat;
 	int seatIndex;
-	bool tournament,empty,left_;
+	bool tournament,empty,left_,_reserved;
 	QString avatar_;
 	QNetworkReply *pendingReply;
 };

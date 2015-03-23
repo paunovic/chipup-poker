@@ -27,6 +27,7 @@ private slots:
 	void On_sit_ok(QByteArray gameid);
 	void On_seat_taken(QByteArray gameid);
 	void On_PlayerClubStatus(Data::PlayerClubStatus &pcs);
+	void On_sit_timeout(QByteArray gameid);
 private:
 	double GetBuyinMin();
 	double GetBuyinMax();
