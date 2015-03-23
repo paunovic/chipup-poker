@@ -9,6 +9,7 @@
 #include "pokermain.h"
 #include "table/animatecore.h"
 #include "client/windows/handler/exception_handler.h"
+#include "version.h"
 
 bool errorFilter(void *context, EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions) {
 	qDebug() << __func__ << exinfo << assertions;
@@ -20,7 +21,7 @@ bool dumpMade(const wchar_t* dump_path,
 			  EXCEPTION_POINTERS* exinfo,
 			  MDRawAssertionInfo* assertion,
 			  bool succeeded) {
-	qDebug() << __func__ << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
+	qDebug() << __func__ << build_number << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
 	return succeeded;
 }
 
