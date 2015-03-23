@@ -245,7 +245,9 @@ void VisibleSeat::updateInfo(Data::SeatInfo *info) {
 		timebarPercent = 0;
 	}
 	Data::User *u = static_cast<Data::User*>(info->getUser());
-	displayname = u->displayName();
+	if (u) {
+		displayname = u->displayName();
+	}
 	status = info->rawStatus();
 	chips = info->chips();
 	userid = info->userid;
