@@ -68,7 +68,7 @@ void TableSit::On_sit_ok(QByteArray gameid) {
 	}
 }
 void TableSit::On_seat_taken(QByteArray gameid) {
-#ifndef W_OS_WIN
+#ifndef Q_OS_WIN
 #warning finish this later
 #endif
 	qDebug() << "FIXME, seat taken" << gameid;

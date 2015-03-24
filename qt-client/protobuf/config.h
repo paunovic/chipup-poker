@@ -12,7 +12,7 @@
 /* define if the compiler has hash_set */
 #define HAVE_HASH_SET 1
 
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(_MSC_VER)
 #define HASH_SET_H <unordered_set>
 #define HASH_MAP_H <unordered_map>
 #define HASH_NAMESPACE std
@@ -20,6 +20,17 @@
 #define HASH_SET_H <tr1/unordered_set>
 #define HASH_MAP_H <tr1/unordered_map>
 #define HASH_NAMESPACE std::tr1
+#endif
+
+#ifdev _MSC_VER
+static inline int min(int a, int b) {
+	if (a < b) return a;
+	return b;
+}
+static inline int min(int a, int b) {
+	if (a < b) return b;
+	return a;
+}
 #endif
 
 #define HASH_MAP_CLASS unordered_map
