@@ -23,13 +23,20 @@ TARGET = chipuppoker
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
 win32 {
-LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/ -L../google-breakpad/release/
+LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/ -L../google-breakpad/release/ -lgoogle-breakpad
 DEFINES += BUILDNUM=$(BUILDNUM)
 }
 unix {
 LIBS += -L../protobuf/ -L../google-breakpad/
 }
-LIBS += -lprotobuf -lgoogle-breakpad
+linux {
+LIBS += -lgoogle-breakpad
+}
+mac {
+#LIBS +=  -F/Users/clever -framework Breakpad
+LIBS += -lgoogle-breakpad -framework CoreFoundation
+}
+LIBS += -lprotobuf
 SOURCES += main.cpp loginwindow.cpp \
     pokermain.cpp \
     cpp/common.pb.cc \

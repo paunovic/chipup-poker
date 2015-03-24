@@ -337,6 +337,7 @@ background-repeat: no-repeat;</string>
     <addaction name="actionCSS_Editor"/>
     <addaction name="actionSelf_Tests"/>
     <addaction name="actionDisconnect"/>
+    <addaction name="actionCrash"/>
    </widget>
    <addaction name="menuAccount"/>
    <addaction name="menuOptions"/>
@@ -439,6 +440,11 @@ background-repeat: no-repeat;</string>
   <action name="actionDisconnect">
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionCrash">
+   <property name="text">
+    <string>Crash</string>
    </property>
   </action>
  </widget>

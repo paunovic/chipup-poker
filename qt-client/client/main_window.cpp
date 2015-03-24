@@ -187,3 +187,8 @@ void MainWindow::resizeEvent(QResizeEvent*) {
 	QSize priv = ui->gridPrivateClubs->size();
 	qDebug() << "root size" << size() << "private size" << priv << (priv/em);
 }
+
+void MainWindow::on_actionCrash_triggered()
+{
+    crash();
+}

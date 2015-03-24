@@ -33,9 +33,11 @@ bool dumpMade(const wchar_t* dump_path,
 			  MDRawAssertionInfo* assertion,
 			  bool succeeded) {
 	qDebug() << __func__ << build_number << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
-#else
+#elif defined(Q_OS_LINUX)
 bool dumpMade(const google_breakpad::MinidumpDescriptor& descriptor, void* context, bool succeeded) {
 	qDebug() << __func__ << succeeded;
+#else
+bool dumpMade(const char *dump_dir, const char *minidump_id, void *context, bool succeeded) {
 #endif
 	return succeeded;
 }
@@ -49,6 +51,8 @@ int main(int argc, char *argv[]) {
 	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(dump_path,errorFilter,dumpMade,0, google_breakpad::ExceptionHandler::HANDLER_ALL, MiniDumpNormal,pipe,0);
 #elif defined(Q_OS_LINUX)
 	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor("/tmp/"),errorFilter,dumpMade,0,true,-1);
+#elif defined(Q_OS_MAC)
+	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler("/tmp/",errorFilter,dumpMade,0,true,0);
 #endif
 
 	QTranslator translator;
