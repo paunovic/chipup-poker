@@ -71,7 +71,8 @@ SOURCES += main.cpp loginwindow.cpp \
     data/winnerdata.cpp \
     updatehasher.cpp \
     filesaver.cpp \
-    version.cpp
+    version.cpp \
+    minidumpuploader.cpp
 
 HEADERS  += loginwindow.h \
     pokermain.h \
@@ -103,7 +104,8 @@ HEADERS  += loginwindow.h \
     data/winnerdata.h \
     updatehasher.h \
     filesaver.h \
-    version.h
+    version.h \
+    minidumpuploader.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h

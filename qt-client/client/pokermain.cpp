@@ -24,6 +24,7 @@
 #include "table.h"
 #include "updatehasher.h"
 #include "filesaver.h"
+#include "minidumpuploader.h"
 
 #define DEVSERVER
 
@@ -50,6 +51,7 @@ PokerMain::PokerMain(QObject *parent) :
 	delayQuit = false;
 	workerThread = new QThread();
 	workerThread->start();
+	uploader = new MiniDumpUploader();
     if (approot.exists()) {
         hasher = new Core::UpdateHasher(approot);
         hasher->moveToThread(workerThread);
@@ -299,6 +301,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		if (hr.update_files_size()) {
 			doUpdate(hr);
 		} else {
+			uploader->checkForDumps();
 			emit protocol_ready(true);
 			if (reconnectState == SignedIn) {
 				doLogin(username,password);
@@ -713,4 +716,7 @@ void PokerMain::doLogin(QString username, QString password) {
 	this->username = username;
 	this->password = password;
 	core->sendMessage(Poker::scLogin,&lp);
+}
+void PokerMain::setMinidumpPath(QString path) {
+	uploader->setMinidumpPath(path);
 }

@@ -26,12 +26,12 @@
 class QApplication;
 class QNetworkAccessManager;
 class QNetworkReply;
+class MiniDumpUploader;
+class SoundEffects;
 
 namespace Data {
 class PlayerClubStatus;
 }
-
-class SoundEffects;
 
 class PokerMain : public QObject
 {
@@ -62,6 +62,7 @@ public:
 	QList<Data::User*> users;
 	int max_play_time;
 	QString serverAddress;
+	void setMinidumpPath(QString path);
 signals:
 	void protocol_ready(bool);
 	void login_sucess();
@@ -129,6 +130,7 @@ private:
 	QDir approot,datadir;
 	QList<Core::UpdateFileInfo> files_in;
 	unsigned int pending_updates;
+	MiniDumpUploader *uploader;
 };
 int parseValue(QString input);
 
