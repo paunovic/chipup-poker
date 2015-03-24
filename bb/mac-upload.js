@@ -30,9 +30,9 @@ function doUpload(revision,host) {
 
 	var textsize = header.length + middle.length + footer.length;
 	// ~/Qt/5.4/clang_64/bin/macdeployqt chipuppoker.app/ -dmg
-	var filesize1 = fs.statSync('../build-qt-client-Desktop_Qt_5_4_1_clang_64bit-Debug/client/chipuppoker.dmg').size;
+	var filesize1 = fs.statSync('../../buildbot-build/client/chipuppoker.dmg').size;
 	// tar -cvjf chipuppoker.tar.bz2 chipuppoker.app/
-	var filesize2 = fs.statSync('../build-qt-client-Desktop_Qt_5_4_1_clang_64bit-Debug/client/chipuppoker.tar.bz2').size;
+	var filesize2 = fs.statSync('../../buildbot-build/client/chipuppoker.tar.bz2').size;
 
 	var request = https.request({hostname:host,method:'POST',path:'/addMac?version='+version+'&revision='+revision+
 		'&debug='+process.argv[2],
@@ -52,10 +52,10 @@ function doUpload(revision,host) {
 	request.setHeader('Content-Type','multipart/form-data; boundary="'+key+'"');
 	request.write(header);
 	console.log('making stream');
-	fs.createReadStream('../build-qt-client-Desktop_Qt_5_4_1_clang_64bit-Debug/client/chipuppoker.dmg',{bufferSize: 4*1024})
+	fs.createReadStream('../../buildbot-build/client/chipuppoker.dmg',{bufferSize: 4*1024})
 		.on('end',function () {
 			request.write(middle);
-			fs.createReadStream('../build-qt-client-Desktop_Qt_5_4_1_clang_64bit-Debug/client/chipuppoker.tar.bz2',{bufferSize: 4*1024})
+			fs.createReadStream('../../buildbot-build/client/chipuppoker.tar.bz2',{bufferSize: 4*1024})
 				.on('end',function () {
 					console.log('%s ending',host);
 					request.end(footer);
