@@ -4,6 +4,8 @@
 #include <QFontDatabase>
 #include <QTranslator>
 #include <locale>
+#include <QStandardPaths>
+#include <QProcess>
 
 #include "loginwindow.h"
 #include "pokermain.h"
@@ -39,20 +41,25 @@ bool dumpMade(const google_breakpad::MinidumpDescriptor& descriptor, void* conte
 #else
 bool dumpMade(const char *dump_dir, const char *minidump_id, void *context, bool succeeded) {
 #endif
+	QString self = QApplication::applicationFilePath();
+	qDebug() << "update ready to restart" << self;
+	QProcess::startDetached(self);
 	return succeeded;
 }
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	std::string temp = "e:\\";
+	QDir datadir(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+	if (!datadir.exists("minidumps")) datadir.mkdir("minidumps");
+	std::string temp = qPrintable(datadir.absoluteFilePath("minidumps"));
 	std::wstring dump_path(temp.begin(), temp.end());
 	std::wstring *pipe = 0;
 #ifdef Q_OS_WIN
 	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(dump_path,errorFilter,dumpMade,0, google_breakpad::ExceptionHandler::HANDLER_ALL, MiniDumpNormal,pipe,0);
 #elif defined(Q_OS_LINUX)
-	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor("/tmp/"),errorFilter,dumpMade,0,true,-1);
+	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor(temp),errorFilter,dumpMade,0,true,-1);
 #elif defined(Q_OS_MAC)
-	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler("/tmp/",errorFilter,dumpMade,0,true,0);
+	google_breakpad::ExceptionHandler *handler = new google_breakpad::ExceptionHandler(temp,errorFilter,dumpMade,0,true,0);
 #endif
 
 	QTranslator translator;

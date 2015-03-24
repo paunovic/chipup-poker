@@ -13,6 +13,7 @@ TEMPLATE = app
 
 #CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
+QMAKE_CXXFLAGS += -g
 INCLUDEPATH += ../protobuf/ ../google-breakpad/
 TARGET = chipuppoker
 
