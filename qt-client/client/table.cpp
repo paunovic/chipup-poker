@@ -237,21 +237,21 @@ void Table::eval(QString code) {
 	p->eval(code);
 }
 void Table::on_btSitOut_stateChanged(int state) {
-	qDebug() << __func__ << state;
+	qDebug() << "on_btSitOut_stateChanged" << state;
 	Poker::TableBoolFlag tbf;
 	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
 	tbf.set_flag(state);
 	core->sendMessage(Poker::scTableSitOutNextHand,&tbf);
 }
 void Table::on_cbSitOutBB_stateChanged(int state) {
-	qDebug() << __func__ << state;
+	qDebug() << "on_cbSitOutBB_stateChanged" << state;
 	Poker::TableBoolFlag tbf;
 	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
 	tbf.set_flag(state);
 	core->sendMessage(Poker::scTableSitOutNextBB,&tbf);
 }
 void Table::on_btDouble_stateChanged(int state) {
-	qDebug() << __func__ << state;
+	qDebug() << "on_btDouble_stateChanged" << state;
 	Poker::TableBoolFlag tbf;
 	tbf.set_table_mongo_id(game->gameid.data(),game->gameid.length());
 	tbf.set_flag(state);

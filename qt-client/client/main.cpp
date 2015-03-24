@@ -24,7 +24,7 @@ bool errorFilter(void *context
 , EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions
 #endif
 ) {
-	qDebug() << __func__;
+	qDebug() << "errorFilter";
 	return true;
 }
 #ifdef Q_OS_WIN
@@ -34,7 +34,7 @@ bool dumpMade(const wchar_t* dump_path,
 			  EXCEPTION_POINTERS* exinfo,
 			  MDRawAssertionInfo* assertion,
 			  bool succeeded) {
-	qDebug() << __func__ << build_number << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
+	qDebug() << "dumpMade" << build_number << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
 #elif defined(Q_OS_LINUX)
 bool dumpMade(const google_breakpad::MinidumpDescriptor& descriptor, void* context, bool succeeded) {
 	qDebug() << __func__ << succeeded;
