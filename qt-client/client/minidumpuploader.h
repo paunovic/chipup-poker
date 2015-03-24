@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDir>
+#include <QNetworkReply>
 
 class MiniDumpUploader : public QObject
 {
@@ -14,9 +15,11 @@ public:
 signals:
 
 public slots:
+	void finished();
 private:
 	QDir minidumppath;
-	bool uploading;
+	QNetworkReply *reply;
+	QFileInfo currentFile;
 };
 
 #endif // MINIDUMPUPLOADER_H

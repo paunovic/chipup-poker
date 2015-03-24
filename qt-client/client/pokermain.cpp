@@ -51,6 +51,7 @@ PokerMain::PokerMain(QObject *parent) :
 	delayQuit = false;
 	workerThread = new QThread();
 	workerThread->start();
+	uploader = new MiniDumpUploader();
     if (approot.exists()) {
         hasher = new Core::UpdateHasher(approot);
         hasher->moveToThread(workerThread);
@@ -717,6 +718,5 @@ void PokerMain::doLogin(QString username, QString password) {
 	core->sendMessage(Poker::scLogin,&lp);
 }
 void PokerMain::setMinidumpPath(QString path) {
-	if (!uploader) uploader = new MiniDumpUploader();
 	uploader->setMinidumpPath(path);
 }
