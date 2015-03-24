@@ -22,17 +22,6 @@
 #define HASH_NAMESPACE std::tr1
 #endif
 
-#ifdef _MSC_VER
-static inline int min(int a, int b) {
-	if (a < b) return a;
-	return b;
-}
-static inline int min(int a, int b) {
-	if (a < b) return b;
-	return a;
-}
-#endif
-
 #define HASH_MAP_CLASS unordered_map
 
 #define HASH_SET_CLASS unordered_set
