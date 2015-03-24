@@ -22,7 +22,7 @@
 #define HASH_NAMESPACE std::tr1
 #endif
 
-#ifdev _MSC_VER
+#ifdef _MSC_VER
 static inline int min(int a, int b) {
 	if (a < b) return a;
 	return b;
