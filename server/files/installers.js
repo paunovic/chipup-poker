@@ -112,6 +112,10 @@ function checkDiff() {
 }
 function makeDiff2() {
 	// FIXME, use socket.io once ssl is fixed
+	if (!sourceHash || !destHash) {
+		alert('you must select both a source and dest');
+		return;
+	}
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST','/secure/makeDiff',true);
 	xhr.setRequestHeader("Content-Type","application/json");
