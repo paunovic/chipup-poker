@@ -1,0 +1,4 @@
+extends secure
+block content
+  a(href='/secure/breakpadReports?delete='+report._id) Delete
+  pre=report.reportBody

@@ -169,6 +169,8 @@ function Server(activeUsersIN) {
 	app.post('/contactPost',this.contactPost);
 	app.post('/newVersion',this.newVersion.bind(this));
 	app.post('/addMac',this.addMac.bind(this));
+	app.get('/build_done',this.buildDone.bind(this));
+	app.post('/minidumpUpload',this.minidumpUpload.bind(this));
 	app.get('/secure/broadcast',function (req,res) {
 		res.render('broadcast',{start:Date.now()});
 	});
@@ -264,6 +266,7 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/tournament_log',this.getTournamentLog.bind(this));
 	app.post('/secure/diffStats',this.getDiffStats.bind(this));
 	app.post('/secure/makeDiff',this.syncMakeDiff.bind(this));
+	app.get('/secure/breakpadReports',this.breakpadReports.bind(this));
 };
 Server.prototype.addMac = function (req,res) {
 	var start = Date.now();
@@ -299,6 +302,67 @@ Server.prototype.addMac = function (req,res) {
 		res.render('addmac',{start:start});
 	}
 }
+Server.prototype.buildDone = function (req,res) {
+	console.log(req.query);
+	var buildnum = parseInt(req.query.buildnum);
+	var start = fs.createReadStream("/tmp/symbols-mac-"+buildnum+".txt",{start:0, end:128});
+	start.setEncoding('utf8');
+	start.on('data',function (input) {
+		var lines = input.split("\n");
+		var words = lines[0].split(' ');
+		var fingerprint = words[3];
+		var file = words[4];
+		fs.mkdir("symbols/"+file+"/"+fingerprint,function () {
+			var input = fs.createReadStream("/tmp/symbols-mac-"+buildnum+".txt");
+			var output = fs.createWriteStream("symbols/"+file+"/"+fingerprint+"/"+file+".sym");
+			input.pipe(output).on('end',function () {
+				console.log('done');
+				output.close();
+			});
+		});
+	});
+	res.end('OK\n');
+};
+Server.prototype.minidumpUpload = function (req,res) {
+	console.log(req.files.minidump.path,req.files.minidump.originalFilename,req.query);
+	var child = child_process.spawn('minidump_stackwalk',[req.files.minidump.path,'symbols'],{stdio:['ignore','pipe','ignore']});
+	child.stdout.setEncoding('utf8');
+	var body = '';
+	child.stdout.on('data',function (data) {
+		body += data;
+	});
+	child.on('close',function (status) {
+		if (status == 0) {
+			var obj = new models.BreakpadReport({reportBody:body});
+			obj.save(function () {
+				res.end('OK');
+			});
+		} else {
+			res.end('FAIL');
+		}
+	});
+	child.on('error',function (err) {
+		console.log(err);
+		res.end("FAIL");
+	});
+};
+Server.prototype.breakpadReports = function (req,res) {
+	if (req.query.id) {
+		models.BreakpadReport.findById(req.query.id,function (err,row) {
+			res.render('breakpadreport',{report:row});
+		});
+	} else if (req.query.delete) {
+		models.BreakpadReport.remove({_id:req.query.delete},function (err) {
+			models.BreakpadReport.find(function (err,rows) {
+				res.render('breakpadreports',{rows:rows});
+			});
+		});
+	} else {
+		models.BreakpadReport.find(function (err,rows) {
+			res.render('breakpadreports',{rows:rows});
+		});
+	}
+};
 Server.prototype.getDiffStats = function (req,res) {
 	console.log(req.body);
 	models.Diff.findOne({sourcehash:req.body.source, desthash: req.body.dest},function (err,diffRow) {
