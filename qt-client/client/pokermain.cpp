@@ -425,6 +425,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		}
 		break;
 	}
+	case Poker::seChat: // 50
+		seChat(data);
+		break;
 	case Poker::seClubChange: // 53
 		qDebug() << "seClubChange";
 		seClubChange(data);
@@ -651,6 +654,13 @@ void PokerMain::srTableSitOk(std::string data) {
 	out->update(ts);
 	emit table_status(out);
 	emit sit_ok(out->gameid);
+}
+void PokerMain::seChat(std::string data) {
+	Poker::ChatEvent ce;
+	ce.ParseFromString(data);
+	Data::Chat out;
+	out.update(ce);
+	emit chat_event(out);
 }
 void PokerMain::srTableStandUpOk(std::string data) {
 	Poker::TableStatus ts;

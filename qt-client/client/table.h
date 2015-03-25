@@ -7,6 +7,7 @@
 
 #include "tablestatus.h"
 #include "game.h"
+#include "data/chat.h"
 
 class TablePrivate;
 class JsEditor;
@@ -36,6 +37,7 @@ public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
 	void On_sit_ok(QByteArray gameid);
 	void On_reserved_seat_free(QByteArray gameid, quint32 seat_index);
+	void On_chat_event(Data::Chat packet);
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();

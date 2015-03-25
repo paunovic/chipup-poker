@@ -268,3 +268,9 @@ void Table::on_btJoinWaitingList_clicked() {
 	ts.set_seat_index(-1);
 	core->sendMessage(Poker::scTableSit,&ts);
 }
+void Table::On_chat_event(Data::Chat event) {
+	if (event.event != Poker::ChatEvent::ceUserMessage) return;
+	if (event.table_id != game->gameid) return;
+	qDebug() << "user msg" << event.timestamp << event.username << event.msg;
+	ui->teChat->append(QString("%1 %2 %3").arg(event.timestamp).arg(event.username).arg(event.msg));
+}

@@ -21,6 +21,7 @@
 #include "game.h"
 #include "tablestatus.h"
 #include "data/user.h"
+#include "data/chat.h"
 #include "updatehasher.h"
 
 class QApplication;
@@ -80,6 +81,7 @@ signals:
 	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
 	void startHashing(QString scriptspath);
 	void sit_timeout(QByteArray gameid);
+	void chat_event(Data::Chat packet);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -108,6 +110,7 @@ private:
 	void seClubChange(std::string data);
 	void seReservedSeatFree(std::string data);
 	void seReservedSeatTimeout(std::string data);
+	void seChat(std::string data);
 	void doUpdate(const Poker::HelloReply hr);
 
 	enum ReconnectState { notSignedIn, SignedIn };

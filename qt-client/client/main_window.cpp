@@ -192,3 +192,7 @@ void MainWindow::on_actionCrash_triggered()
 {
     crash();
 }
+void MainWindow::On_chat_event(Data::Chat packet) {
+	if (packet.event != Poker::ChatEvent::ceServerMessage) return;
+	qDebug() << "global msg" << packet.msg;
+}

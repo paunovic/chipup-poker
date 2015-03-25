@@ -38,7 +38,7 @@ mac {
 LIBS += -lgoogle-breakpad -framework CoreFoundation
 }
 LIBS += -lprotobuf
-SOURCES += main.cpp loginwindow.cpp \
+SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
     pokermain.cpp \
     cpp/common.pb.cc \
     cpp/message.pb.cc \
@@ -74,7 +74,7 @@ SOURCES += main.cpp loginwindow.cpp \
     version.cpp \
     minidumpuploader.cpp
 
-HEADERS  += loginwindow.h \
+HEADERS  += loginwindow.h data/chat.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
