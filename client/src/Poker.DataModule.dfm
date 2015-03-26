@@ -265,7 +265,7 @@ object dmMain: TdmMain
   end
   object tiSkinControllerRefresh: TTimer
     Enabled = False
-    Interval = 50
+    Interval = 10
     OnTimer = tiSkinControllerRefreshTimer
     Left = 228
     Top = 8

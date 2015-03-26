@@ -45,6 +45,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tiLoginTimeoutTimer(Sender: TObject);
     procedure acUpdateExecute(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
@@ -119,6 +120,11 @@ begin
   SaveSettings;
 
   TAlphaBlendThread.FreeAlpaBlendThread(FAlphaBlendThread);
+end;
+
+procedure TfrmChipUpLogin.FormActivate(Sender: TObject);
+begin
+  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -458,6 +464,7 @@ begin
   begin
     if AlphaBlendValue = 0 then
       Close;
+    dmMain.tiSkinControllerRefresh.Enabled := TRUE;
   end;
 end;
 

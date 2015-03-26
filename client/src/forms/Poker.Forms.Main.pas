@@ -169,6 +169,7 @@ type
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
     procedure acLaunchNewInstanceExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -345,6 +346,11 @@ begin
   FRegisteredTournamentsMap.Free;
 end;
 
+procedure TfrmChipUpMain.FormActivate(Sender: TObject);
+begin
+  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
+end;
+
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Settings.MainFormMaximized := WindowState = wsMaximized;
@@ -427,8 +433,6 @@ begin
     WindowState := wsMaximized
   else
     WindowState := wsNormal;
-
-  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TfrmChipUpMain.FlushData;
@@ -456,6 +460,7 @@ begin
   FlushData;
   Hide;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
+  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TfrmChipUpMain.ShowTournamentLayout(const AShow: Boolean);

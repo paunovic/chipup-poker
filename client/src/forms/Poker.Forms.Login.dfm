@@ -19,6 +19,7 @@ object frmChipUpLogin: TfrmChipUpLogin
   KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
+  OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
