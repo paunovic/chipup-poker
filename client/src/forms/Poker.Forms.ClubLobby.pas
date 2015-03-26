@@ -163,6 +163,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure acMuteUnmutePlayerExecute(Sender: TObject);
     procedure acPromoteDemoteUserExecute(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -258,6 +259,11 @@ end;
 procedure TfrmClubLobby.FormResize(Sender: TObject);
 begin
   ConfigureGUI(FALSE);
+end;
+
+procedure TfrmClubLobby.FormActivate(Sender: TObject);
+begin
+  dmMain.RefreshSkinController;
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);

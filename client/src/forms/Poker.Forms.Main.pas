@@ -348,7 +348,7 @@ end;
 
 procedure TfrmChipUpMain.FormActivate(Sender: TObject);
 begin
-  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
+  dmMain.RefreshSkinController;
 end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -460,7 +460,6 @@ begin
   FlushData;
   Hide;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
-  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TfrmChipUpMain.ShowTournamentLayout(const AShow: Boolean);

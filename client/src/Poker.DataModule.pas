@@ -51,6 +51,7 @@ type
     procedure StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
+    procedure RefreshSkinController;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -435,6 +436,11 @@ begin
       Tables.Unlock;
     end;
   end;
+end;
+
+procedure TdmMain.RefreshSkinController;
+begin
+  tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TdmMain.LoadFonts;

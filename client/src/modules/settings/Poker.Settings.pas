@@ -91,6 +91,10 @@ type
     property LoginPassword: String index PROPINDEX_LOGIN_PASSWORD read GetStringValue write SetStringValue;
 
     property ServerIndex: Int64 index PROPINDEX_SERVER_INDEX read GetIntegerValue write SetIntegerValue;
+    property MainFormX: Int64 index PROPINDEX_MAIN_FORM_X read GetIntegerValue write SetIntegerValue;
+    property MainFormY: Int64 index PROPINDEX_MAIN_FORM_Y read GetIntegerValue write SetIntegerValue;
+    property MainFormWidth: Int64 index PROPINDEX_MAIN_FORM_WIDTH read GetIntegerValue write SetIntegerValue;
+    property MainFormHeight: Int64 index PROPINDEX_MAIN_FORM_HEIGHT read GetIntegerValue write SetIntegerValue;
 
     property RememberLogin: Boolean index PROPINDEX_REMEMBER_LOGIN read GetBooleanValue write SetBooleanValue;
     property RememberPassword: Boolean index PROPINDEX_REMEMBER_PASSWORD read GetBooleanValue write SetBooleanValue;
@@ -101,10 +105,6 @@ type
     property FoldConfirmation: Boolean index PROPINDEX_FOLD_CONFIRMATION read GetBooleanValue write SetBooleanValue;
     property AlwaysRunItTwice: Boolean index PROPINDEX_ALWAYS_RUN_TWICE read GetBooleanValue write SetBooleanValue;
     property MainFormMaximized: Boolean index PROPINDEX_MAIN_FORM_MAXIMIZED read GetBooleanValue write SetBooleanValue;
-    property MainFormX: Int64 index PROPINDEX_MAIN_FORM_X read GetIntegerValue write SetIntegerValue;
-    property MainFormY: Int64 index PROPINDEX_MAIN_FORM_Y read GetIntegerValue write SetIntegerValue;
-    property MainFormWidth: Int64 index PROPINDEX_MAIN_FORM_WIDTH read GetIntegerValue write SetIntegerValue;
-    property MainFormHeight: Int64 index PROPINDEX_MAIN_FORM_HEIGHT read GetIntegerValue write SetIntegerValue;
   end;
 
 var
