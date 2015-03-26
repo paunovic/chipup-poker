@@ -3584,7 +3584,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsTournaments
+      Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 438
@@ -4811,8 +4811,8 @@ object frmChipUpMain: TfrmChipUpMain
     Top = 52
   end
   object StyleRepository: TcxStyleRepository
-    Left = 648
-    Top = 52
+    Left = 464
+    Top = 112
     PixelsPerInch = 96
     object styleTournamentOpen: TcxStyle
       AssignedValues = [svFont, svTextColor]
@@ -4868,7 +4868,7 @@ object frmChipUpMain: TfrmChipUpMain
     Enabled = False
     Interval = 500
     OnTimer = tiTournamentInfoRefreshTimer
-    Left = 736
-    Top = 52
+    Left = 348
+    Top = 112
   end
 end

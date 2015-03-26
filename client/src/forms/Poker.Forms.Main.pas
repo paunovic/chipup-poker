@@ -427,6 +427,8 @@ begin
     WindowState := wsMaximized
   else
     WindowState := wsNormal;
+
+  dmMain.tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TfrmChipUpMain.FlushData;

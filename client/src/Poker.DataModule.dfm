@@ -263,4 +263,11 @@ object dmMain: TdmMain
       TextColor = 14474460
     end
   end
+  object tiSkinControllerRefresh: TTimer
+    Enabled = False
+    Interval = 50
+    OnTimer = tiSkinControllerRefreshTimer
+    Left = 228
+    Top = 8
+  end
 end
