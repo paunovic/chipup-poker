@@ -147,6 +147,7 @@ void TestCase::alignment() {
 	QFETCH(int,cardCount);
 	int result;
 	PokerMain pm;
+	pm.setDataDir(QDir("datadir"));
 	core = &pm;
 
 	Table tbl;
@@ -170,7 +171,7 @@ void TestCase::alignment() {
 	AnimateCore ac(true);
 	animateCore = &ac;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
-	tbl.resize(600,500);
+	tbl.resize(700,500);
 	Data::Game g;
 	g.seats = seats;
 	QFile input("../../qt-client/client/table.js");

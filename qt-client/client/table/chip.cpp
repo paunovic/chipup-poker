@@ -2,6 +2,8 @@
 
 #include "chip.h"
 
+#define CHIP_SEP 3
+
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	value_ = 1;
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
@@ -73,7 +75,7 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	p.save();
 	QList<QPixmap>::Iterator i;
 	int y=0;
-	for (i=chips.begin(); i!=chips.end(); ++i, y+=5) {
+	for (i=chips.begin(); i!=chips.end(); ++i, y+=CHIP_SEP) {
 		QPixmap chip = *i;
 		drawChip(p,chip,0,y,height());
 	}
@@ -88,7 +90,7 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
-	int height = (chips.length() * 5) + (pix.height() * 0.6);
+	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
 	qDebug() << textRegion << textRegion.bottomRight();
 	QSize ret(new_width+textRegion.width(),height);
 	if (jsobj->value() == 300) qDebug() << "chip size" << ret;

@@ -85,7 +85,7 @@ void CardObjectUi::paintEvent(QPaintEvent *) {
 		int pixelsize = (qreal)width() * 0.35;
 		font.setPixelSize(pixelsize);
 		delete fm;
-		fm = new QFontMetricsF(font);
+		fm = new QFontMetricsF(font); // FIXME, do this in resizeEvent
 		lastsize = width();
 	}
 	//p.drawRect(0,0,width(),height());

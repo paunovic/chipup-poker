@@ -456,8 +456,8 @@ function moveDealer(button,index) {
 	var rawx = Math.sin(fakeindex*interval);
 	var rawy = Math.cos(fakeindex*interval);
 
-	var x = ((rawx/2)*0.58)+0.485;
-	var y = ((rawy/2)*-0.45)+0.45;
+	var x = ((rawx/2)*0.58)+0.48;
+	var y = ((rawy/2)*-0.4)+0.42;
 	button.setPosition(x,y);
 }
 var test = [];

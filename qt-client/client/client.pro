@@ -39,7 +39,7 @@ LIBS += -lgoogle-breakpad -framework CoreFoundation
 }
 LIBS += -lprotobuf
 SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
-    pokermain.cpp \
+    pokermain.cpp pokermain_shared.cpp \
     cpp/common.pb.cc \
     cpp/message.pb.cc \
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \

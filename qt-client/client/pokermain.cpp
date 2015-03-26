@@ -42,11 +42,6 @@ PokerMain::PokerMain(QObject *parent) :
     QDir binaryDir(QApplication::applicationDirPath());
     approot = binaryDir.absoluteFilePath("../../");
 #endif
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	datadir = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-#else
-	datadir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
-#endif
 	setObjectName("core");
 	delayQuit = false;
 	workerThread = new QThread();
@@ -726,7 +721,4 @@ void PokerMain::doLogin(QString username, QString password) {
 	this->username = username;
 	this->password = password;
 	core->sendMessage(Poker::scLogin,&lp);
-}
-void PokerMain::setMinidumpPath(QString path) {
-	uploader->setMinidumpPath(path);
 }

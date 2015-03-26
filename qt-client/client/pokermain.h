@@ -53,7 +53,7 @@ public:
 	SoundEffects *effects() { return effects_; }
 	void doLogin(QString username, QString password);
 	void testDisconnect() { socket.disconnectFromHost(); }
-    void fileSaved(Core::UpdateFileInfo row);
+	void fileSaved(Core::UpdateFileInfo row);
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
 	QList<Data::Game*> games;
@@ -63,7 +63,9 @@ public:
 	QList<Data::User*> users;
 	int max_play_time;
 	QString serverAddress;
-	void setMinidumpPath(QString path);
+	void setDataDir(QDir datadir);
+	bool loadCachedAvatar(QString id, QPixmap *output);
+	void saveAvatar(QString id, QByteArray rawdata);
 signals:
 	void protocol_ready(bool);
 	void login_sucess();
@@ -130,7 +132,7 @@ private:
 	enum ReconnectState reconnectState;
 	QThread *workerThread;
 	Core::UpdateHasher *hasher;
-	QDir approot,datadir;
+	QDir approot,datadir,avatarCache;
 	QList<Core::UpdateFileInfo> files_in;
 	unsigned int pending_updates;
 	MiniDumpUploader *uploader;

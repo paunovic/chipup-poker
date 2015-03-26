@@ -4,6 +4,7 @@
 #include <QFontMetrics>
 #include <QTimer>
 #include <QByteArray>
+#include <QRectF>
 
 #include "tableprivate.h"
 
@@ -18,8 +19,8 @@ public:
 	void updateSeat();
 	void updateInfo(Data::SeatInfo *info);
 	QSize sizeHint() const;
+	void setAvatar(QPixmap avatar);
 	
-	QPixmap avatar;
 	bool active;
 private slots:
 	void tick();
@@ -27,6 +28,7 @@ protected:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *);
 	void mouseReleaseEvent(QMouseEvent *);
+	virtual void resizeEvent(QResizeEvent *event);
 private:
 	float timebarHeight(int w) const;
 	QPixmap seatRight,seatRightEmpty,seatRightEmptyTournament,seatRightActive,seatRightReserved;
@@ -47,6 +49,8 @@ private:
 	float timebarPercent;
 	enum Timebarmode { tbmIdle,tbmTimebar,tbmTimebank };
 	Timebarmode lastTimebarMode;
+	QRectF avatarLocation,line1,line2;
+	QPixmap avatar;
 };
 class SeatObject : public GameObject {
 Q_OBJECT
