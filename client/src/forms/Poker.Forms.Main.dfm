@@ -14,13 +14,14 @@ object frmChipUpMain: TfrmChipUpMain
   Font.Name = 'Arial'
   Font.Style = []
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDesigned
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
   OnResize = FormResize
+  OnShow = FormShow
   DesignSize = (
     841
     582)

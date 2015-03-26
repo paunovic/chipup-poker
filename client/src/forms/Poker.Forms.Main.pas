@@ -168,6 +168,7 @@ type
     procedure acConfirmationOnFoldExecute(Sender: TObject);
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
     procedure acLaunchNewInstanceExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -346,6 +347,15 @@ end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  Settings.MainFormMaximized := WindowState = wsMaximized;
+  if not Settings.MainFormMaximized then
+  begin
+    Settings.MainFormX := Left;
+    Settings.MainFormY := Top;
+    Settings.MainFormWidth := Width;
+    Settings.MainFormHeight := Height;
+  end;
+
   Action := caFree;
 end;
 
@@ -385,6 +395,39 @@ begin
   paTournamentInfo.Height := gridTournaments.Height - 1;
 end;
 
+
+procedure TfrmChipUpMain.FormShow(Sender: TObject);
+begin
+  if Settings.MainFormWidth > -1 then
+    Width := Settings.MainFormWidth;
+
+  if Settings.MainFormHeight > -1 then
+    Height := Settings.MainFormHeight;
+
+  if Settings.MainFormX > -1 then
+    Left := Settings.MainFormX
+  else
+    Left := Screen.Width div 2 - Width div 2;
+
+  if Settings.MainFormY > -1 then
+    Top := Settings.MainFormY
+  else
+    Top := Screen.Height div 2 - Height div 2;
+
+  if Left + Width > Screen.DesktopWidth then
+    Left := Screen.DesktopWidth - Width;
+  if Top + Height > Screen.DesktopHeight then
+    Top := Screen.DesktopHeight - Top;
+  if Left < 0 then
+    Left := 0;
+  if Top < 0 then
+    Top := 0;
+
+  if Settings.MainFormMaximized then
+    WindowState := wsMaximized
+  else
+    WindowState := wsNormal;
+end;
 
 procedure TfrmChipUpMain.FlushData;
 begin
