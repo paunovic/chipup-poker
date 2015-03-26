@@ -72,7 +72,8 @@ SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
     updatehasher.cpp \
     filesaver.cpp \
     version.cpp \
-    minidumpuploader.cpp
+    minidumpuploader.cpp \
+    notifywindow.cpp
 
 HEADERS  += loginwindow.h data/chat.h \
     pokermain.h \
@@ -105,7 +106,8 @@ HEADERS  += loginwindow.h data/chat.h \
     updatehasher.h \
     filesaver.h \
     version.h \
-    minidumpuploader.h
+    minidumpuploader.h \
+    notifywindow.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h
@@ -116,7 +118,8 @@ FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     table.ui \
     jseditor.ui \
     table/table_sit.ui selftest.ui \
-    clublobby.ui
+    clublobby.ui \
+    NotifyWindow.ui
 
 RESOURCES += \
     resources.qrc

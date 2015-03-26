@@ -155,3 +155,9 @@ min-width: 13em;
 #btSuspend,#btMute,#btRemove {
 min-width: 10em;
 }
+#NotifyWindow {
+background-color: black;
+}
+NotifyWindow #notification {
+color: white;
+}

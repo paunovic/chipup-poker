@@ -160,11 +160,20 @@ void Table::on_actionReload_triggered() {
 void Table::on_teChatInput_returnPressed() {
 	QString message = ui->teChatInput->text();
 	ui->teChatInput->setText("");
+#if 0
 	ui->teChat->append(p->eval(message).toString());
 	QGridLayout *layout = ui->center;
 	qDebug() << layout->cellRect(0,0);
 	qDebug() << layout->cellRect(1,0);
-
+#else
+	Poker::ChatEvent ce;
+	ce.set_event(Poker::ChatEvent::ceUserMessage);
+	ce.set_table_id(game->gameid.data(),game->gameid.length());
+	Poker::ChatMessage cm;
+	cm.set_msg(qPrintable(message));
+	ce.set_allocated_msg(&cm);
+	core->sendMessage(Poker::seChat,&ce);
+#endif
 }
 void Table::editJs(QString newcode) {
 	p->editJs(newcode);
@@ -271,6 +280,7 @@ void Table::on_btJoinWaitingList_clicked() {
 void Table::On_chat_event(Data::Chat event) {
 	if (event.event != Poker::ChatEvent::ceUserMessage) return;
 	if (event.table_id != game->gameid) return;
-	qDebug() << "user msg" << event.timestamp << event.username << event.msg;
-	ui->teChat->append(QString("%1 %2 %3").arg(event.timestamp).arg(event.username).arg(event.msg));
+	QString color = "#c0c0c0";
+	if (event.username == core->self()->displayName()) color = "#46a3ff";
+	ui->teChat->append(QString("<font color='#e1e1e1'>%1:</font> <font color='%2'>%3</font>").arg(event.username).arg(color).arg(event.msg));
 }

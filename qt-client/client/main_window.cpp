@@ -12,6 +12,7 @@
 
 #include "table.h"
 #include "selftest.h"
+#include "notifywindow.h"
 
 void crash()
 {
@@ -62,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 		ui->gridGames->resizeColumnToContents(i);
 	}
 	//setFixedSize(size());
+	NotifyWindow *popup = new NotifyWindow();
+	popup->setMessage("packet.msg");
 }
 MainWindow::~MainWindow() {
 	delete ui;
@@ -195,4 +198,6 @@ void MainWindow::on_actionCrash_triggered()
 void MainWindow::On_chat_event(Data::Chat packet) {
 	if (packet.event != Poker::ChatEvent::ceServerMessage) return;
 	qDebug() << "global msg" << packet.msg;
+	NotifyWindow *popup = new NotifyWindow();
+	popup->setMessage(packet.msg);
 }

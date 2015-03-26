@@ -20,6 +20,7 @@ private:
 	QDir minidumppath;
 	QNetworkReply *reply;
 	QFileInfo currentFile;
+	QFile *input;
 };
 
 #endif // MINIDUMPUPLOADER_H

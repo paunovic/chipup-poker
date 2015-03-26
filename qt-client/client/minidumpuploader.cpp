@@ -25,7 +25,7 @@ void MiniDumpUploader::checkForDumps() {
 		QHttpPart minidump;
 		minidump.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/octed-stream"));
 		minidump.setHeader(QNetworkRequest::ContentDispositionHeader,QVariant(QString("form-data; name=\"minidump\"; filename=\"%1\"").arg(currentFile.fileName())));
-		QFile *input = new QFile(currentFile.absoluteFilePath());
+		input = new QFile(currentFile.absoluteFilePath());
 		if (!input->open(QFile::ReadOnly)) {
 			qDebug() << "unable to open a crash dump";
 			return;
@@ -45,6 +45,12 @@ void MiniDumpUploader::finished() {
 	qDebug() << reply->readAll();
 	reply->deleteLater();
 	reply = 0;
-	minidumppath.remove(currentFile.fileName());
-	checkForDumps();
+	input->close();
+	input = 0;
+	qDebug() << minidumppath << currentFile.fileName();
+	if (minidumppath.remove(currentFile.fileName())) {
+		checkForDumps();
+	} else {
+		qDebug() << "unable to delete a dump";
+	}
 }
