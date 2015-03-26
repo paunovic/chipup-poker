@@ -21,6 +21,11 @@ type
       PROPINDEX_ANIMATIONS = 9;
       PROPINDEX_FOLD_CONFIRMATION = 10;
       PROPINDEX_ALWAYS_RUN_TWICE = 11;
+      PROPINDEX_MAIN_FORM_MAXIMIZED = 12;
+      PROPINDEX_MAIN_FORM_X = 13;
+      PROPINDEX_MAIN_FORM_Y = 14;
+      PROPINDEX_MAIN_FORM_WIDTH = 15;
+      PROPINDEX_MAIN_FORM_HEIGHT = 16;
 
       // json field names
       JSON_LOGIN_USERNAME = 'login_username';
@@ -34,6 +39,11 @@ type
       JSON_ANIMATIONS = 'animations';
       JSON_FOLD_CONFIRMATION = 'fold_confirmation';
       JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
+      JSON_MAIN_FORM_MAXIMIZED = 'main_form_maximized';
+      JSON_MAIN_FORM_X = 'main_form_x';
+      JSON_MAIN_FORM_Y = 'main_form_y';
+      JSON_MAIN_FORM_WIDTH = 'main_form_width';
+      JSON_MAIN_FORM_HEIGHT = 'main_form_height';
 
       // default values
       DEFAULT_LOGIN_USERNAME = '';
@@ -47,6 +57,11 @@ type
       DEFAULT_ANIMATIONS = TRUE;
       DEFAULT_FOLD_CONFIRMATION = FALSE;
       DEFAULT_ALWAYS_RUN_IT_TWICE = FALSE;
+      DEFAULT_MAIN_FORM_MAXIMIZED = FALSE;
+      DEFAULT_MAIN_FORM_X = -1;
+      DEFAULT_MAIN_FORM_Y = -1;
+      DEFAULT_MAIN_FORM_WIDTH = -1;
+      DEFAULT_MAIN_FORM_HEIGHT = -1;
 
     function GetStringValue(const AIndex: Integer): String;
     procedure SetStringValue(const AIndex: Integer; const AValue: String);
@@ -76,6 +91,10 @@ type
     property LoginPassword: String index PROPINDEX_LOGIN_PASSWORD read GetStringValue write SetStringValue;
 
     property ServerIndex: Int64 index PROPINDEX_SERVER_INDEX read GetIntegerValue write SetIntegerValue;
+    property MainFormX: Int64 index PROPINDEX_MAIN_FORM_X read GetIntegerValue write SetIntegerValue;
+    property MainFormY: Int64 index PROPINDEX_MAIN_FORM_Y read GetIntegerValue write SetIntegerValue;
+    property MainFormWidth: Int64 index PROPINDEX_MAIN_FORM_WIDTH read GetIntegerValue write SetIntegerValue;
+    property MainFormHeight: Int64 index PROPINDEX_MAIN_FORM_HEIGHT read GetIntegerValue write SetIntegerValue;
 
     property RememberLogin: Boolean index PROPINDEX_REMEMBER_LOGIN read GetBooleanValue write SetBooleanValue;
     property RememberPassword: Boolean index PROPINDEX_REMEMBER_PASSWORD read GetBooleanValue write SetBooleanValue;
@@ -85,6 +104,7 @@ type
     property Animations: Boolean index PROPINDEX_ANIMATIONS read GetBooleanValue write SetBooleanValue;
     property FoldConfirmation: Boolean index PROPINDEX_FOLD_CONFIRMATION read GetBooleanValue write SetBooleanValue;
     property AlwaysRunItTwice: Boolean index PROPINDEX_ALWAYS_RUN_TWICE read GetBooleanValue write SetBooleanValue;
+    property MainFormMaximized: Boolean index PROPINDEX_MAIN_FORM_MAXIMIZED read GetBooleanValue write SetBooleanValue;
   end;
 
 var
@@ -195,6 +215,22 @@ begin
       field := JSON_SERVER_INDEX;
       default_value := DEFAULT_SERVER_INDEX;
     end;
+    PROPINDEX_MAIN_FORM_X: begin
+      field := JSON_MAIN_FORM_X;
+      default_value := DEFAULT_MAIN_FORM_X;
+    end;
+    PROPINDEX_MAIN_FORM_Y: begin
+      field := JSON_MAIN_FORM_Y;
+      default_value := DEFAULT_MAIN_FORM_Y;
+    end;
+    PROPINDEX_MAIN_FORM_WIDTH: begin
+      field := JSON_MAIN_FORM_WIDTH;
+      default_value := DEFAULT_MAIN_FORM_WIDTH;
+    end;
+    PROPINDEX_MAIN_FORM_HEIGHT: begin
+      field := JSON_MAIN_FORM_HEIGHT;
+      default_value := DEFAULT_MAIN_FORM_HEIGHT;
+    end;
   else
     SoftException(Format('TSettings.GetIntegerValue(%d): index not found', [AIndex]));
     Exit(0);
@@ -246,6 +282,10 @@ begin
       field := JSON_ALWAYS_RUN_IT_TWICE;
       default_value := DEFAULT_ALWAYS_RUN_IT_TWICE;
     end;
+    PROPINDEX_MAIN_FORM_MAXIMIZED: begin
+      field := JSON_MAIN_FORM_MAXIMIZED;
+      default_value := DEFAULT_MAIN_FORM_MAXIMIZED;
+    end;
   else
     SoftException(Format('TSettings.GetBooleanValue(%d): index not found', [AIndex]));
     Exit(FALSE);
@@ -281,6 +321,10 @@ var
 begin
   case AIndex of
     PROPINDEX_SERVER_INDEX: field_name := JSON_SERVER_INDEX;
+    PROPINDEX_MAIN_FORM_X: field_name := JSON_MAIN_FORM_X;
+    PROPINDEX_MAIN_FORM_Y: field_name := JSON_MAIN_FORM_Y;
+    PROPINDEX_MAIN_FORM_WIDTH: field_name := JSON_MAIN_FORM_WIDTH;
+    PROPINDEX_MAIN_FORM_HEIGHT: field_name := JSON_MAIN_FORM_HEIGHT;
   else
     SoftException(Format('TSettings.SetIntegerValue(%d, %d): index not found', [AIndex, AValue]));
     Exit;
@@ -302,6 +346,7 @@ begin
     PROPINDEX_ANIMATIONS: field_name:= JSON_ANIMATIONS;
     PROPINDEX_FOLD_CONFIRMATION: field_name:= JSON_FOLD_CONFIRMATION;
     PROPINDEX_ALWAYS_RUN_TWICE: field_name:= JSON_ALWAYS_RUN_IT_TWICE;
+    PROPINDEX_MAIN_FORM_MAXIMIZED: field_name := JSON_MAIN_FORM_MAXIMIZED;
   else
     SoftException(Format('TSettings.SetIntegerValue(%d, %s): index not found', [AIndex, BoolToStr(AValue, TRUE)]));
     Exit;

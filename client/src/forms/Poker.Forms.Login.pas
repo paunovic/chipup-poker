@@ -458,6 +458,7 @@ begin
   begin
     if AlphaBlendValue = 0 then
       Close;
+    dmMain.RefreshSkinController;
   end;
 end;
 

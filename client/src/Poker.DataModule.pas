@@ -11,7 +11,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
   dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
   Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
+  Poker.Protobufs.Objects.Game, cxStyles, cxClasses, Vcl.ExtCtrls;
 
 type
   TdmMain = class(TDataModule)
@@ -20,9 +20,11 @@ type
     HintController: TcxHintStyleController;
     GridStyles: TcxStyleRepository;
     styleInactiveCell: TcxStyle;
+    tiSkinControllerRefresh: TTimer;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
+    procedure tiSkinControllerRefreshTimer(Sender: TObject);
   private
     FSelfInfo: TPlayerInfo;
     FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
@@ -49,6 +51,7 @@ type
     procedure StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
+    procedure RefreshSkinController;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -198,6 +201,12 @@ begin
   FUpdateFiles.Clear;
   for ufi in AFiles do
     FUpdateFiles.Add(TPB_UpdateFileInfo.Create(ufi, TRUE));
+end;
+
+procedure TdmMain.tiSkinControllerRefreshTimer(Sender: TObject);
+begin
+  SkinController.Refresh;
+  tiSkinControllerRefresh.Enabled := FALSE;
 end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;
@@ -427,6 +436,11 @@ begin
       Tables.Unlock;
     end;
   end;
+end;
+
+procedure TdmMain.RefreshSkinController;
+begin
+  tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TdmMain.LoadFonts;

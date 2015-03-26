@@ -1305,7 +1305,6 @@ begin
     Tables.Unlock;
   end;
 
-  UpdateWaitingListPositionCaption;
   RefreshAll;
 end;
 
@@ -1603,6 +1602,8 @@ var
 begin
   ConfigureActions;
   ConfigureAutoPlayOptions;
+  UpdateWaitingListPositionCaption;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.Renderer.UpdateDXAreaSize;
