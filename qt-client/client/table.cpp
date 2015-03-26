@@ -161,6 +161,9 @@ void Table::on_teChatInput_returnPressed() {
 	QString message = ui->teChatInput->text();
 	ui->teChatInput->setText("");
 #if 0
+	int page = message.toInt();
+	ui->stackedWidget->setCurrentIndex(page);
+#elif 0
 	ui->teChat->append(p->eval(message).toString());
 	QGridLayout *layout = ui->center;
 	qDebug() << layout->cellRect(0,0);

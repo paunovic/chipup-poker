@@ -21,6 +21,9 @@
     <property name="topMargin">
      <number>0</number>
     </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
       <item>
@@ -61,6 +64,9 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
         <property name="spacing">
@@ -80,6 +86,9 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="groupOptions">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
@@ -197,11 +206,26 @@ QPushButton:pressed {
         </widget>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
           <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
            <layout class="QHBoxLayout" name="layBetPresets">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
@@ -252,19 +276,19 @@ QPushButton:pressed {
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
              <property name="spacing">
-              <number>16</number>
+              <number>0</number>
              </property>
              <property name="leftMargin">
-              <number>8</number>
+              <number>4</number>
              </property>
              <property name="topMargin">
-              <number>2</number>
+              <number>3</number>
              </property>
              <property name="rightMargin">
               <number>4</number>
              </property>
              <property name="bottomMargin">
-              <number>7</number>
+              <number>3</number>
              </property>
              <item>
               <widget class="QLabel" name="lbRaiseAmount">
@@ -304,6 +328,9 @@ font: bold;</string>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <widget class="QPushButton" name="btFold">
               <property name="text">
