@@ -25,7 +25,7 @@ NotifyWindow::NotifyWindow() : QWidget(0), ui(new Ui::NotifyWindow) {
 	setAttribute(Qt::WA_DeleteOnClose,true);
 
 	// And this conditional block is the third point
-#ifdef Q_OS_MAC
+/*#ifdef Q_OS_MAC
 	winId(); // This call creates the OS window ID itself.
 			 // qt_mac_window_for() doesn't
 
@@ -39,7 +39,7 @@ NotifyWindow::NotifyWindow() : QWidget(0), ui(new Ui::NotifyWindow) {
 		0 };
 	int clearAttr[] = { 0 };
 	HIWindowChangeAttributes(qt_mac_window_for(this), setAttr, clearAttr);
-#endif
+#endif*/
 	setAutoFillBackground(true);
 }
 void NotifyWindow::setMessage(QString msg) {
