@@ -27,7 +27,7 @@ type
       FPots: TList<TPB_Pot>;
       FBets: TList<UInt32>;
       FCards: TList<TBytes>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Event;
     procedure clear_has_Event;
@@ -190,7 +190,7 @@ function TPB_TableEvent.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   for pbobj in Pots do
     if not pbobj.IsInitialized then
@@ -206,17 +206,17 @@ end;
 
 function TPB_TableEvent.has_Event: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Event;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TableEvent.clear_has_Event;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TableEvent.SetEvent(const AValue: TTableEventType);
@@ -237,17 +237,17 @@ end;
 
 function TPB_TableEvent.has_Seat: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Seat;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TableEvent.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TableEvent.SetSeat(const AValue: Integer);
@@ -273,17 +273,17 @@ end;
 
 function TPB_TableEvent.has_Pots: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Pots;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TableEvent.clear_has_Pots;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -311,17 +311,17 @@ end;
 
 function TPB_TableEvent.has_Bets: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Bets;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TableEvent.clear_has_Bets;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
@@ -345,17 +345,17 @@ end;
 
 function TPB_TableEvent.has_Cards: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Cards;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_TableEvent.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_TableEvent.CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
@@ -368,7 +368,7 @@ end;
 
 procedure TPB_TableEvent.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Event;

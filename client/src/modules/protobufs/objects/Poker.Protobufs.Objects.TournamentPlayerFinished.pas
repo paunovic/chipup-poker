@@ -25,7 +25,7 @@ type
       FPlace: Integer;
       FPrize: TPB_TournamentPrize;
       FTableId: TMongoId;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_TournamentId;
     procedure clear_has_TournamentId;
@@ -155,7 +155,7 @@ end;
 
 function TPB_TournamentPlayerFinished.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $17) <> $17 then
+  if (FHasBits and $17) <> $17 then
     Exit(FALSE);
   if (has_Prize) then
     if not FPrize.IsInitialized then
@@ -171,17 +171,17 @@ end;
 
 function TPB_TournamentPlayerFinished.has_TournamentId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentPlayerFinished.set_has_TournamentId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentPlayerFinished.clear_has_TournamentId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentPlayerFinished.SetTournamentId(const AValue: TMongoId);
@@ -206,17 +206,17 @@ end;
 
 function TPB_TournamentPlayerFinished.has_PlayerId: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentPlayerFinished.set_has_PlayerId;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentPlayerFinished.clear_has_PlayerId;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentPlayerFinished.SetPlayerId(const AValue: TMongoId);
@@ -241,17 +241,17 @@ end;
 
 function TPB_TournamentPlayerFinished.has_Place: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TournamentPlayerFinished.set_has_Place;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TournamentPlayerFinished.clear_has_Place;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TournamentPlayerFinished.SetPlace(const AValue: Integer);
@@ -272,17 +272,17 @@ end;
 
 function TPB_TournamentPlayerFinished.has_Prize: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TournamentPlayerFinished.set_has_Prize;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TournamentPlayerFinished.clear_has_Prize;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TournamentPlayerFinished.SetPrize(const AValue: TPB_TournamentPrize);
@@ -303,17 +303,17 @@ end;
 
 function TPB_TournamentPlayerFinished.has_TableId: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TournamentPlayerFinished.set_has_TableId;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TournamentPlayerFinished.clear_has_TableId;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TournamentPlayerFinished.SetTableId(const AValue: TMongoId);
@@ -332,7 +332,7 @@ end;
 
 procedure TPB_TournamentPlayerFinished.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_TournamentId;

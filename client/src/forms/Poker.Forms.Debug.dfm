@@ -145,7 +145,7 @@ object frmDebug: TfrmDebug
     end
     object lbsSocketState: TcxLabel
       Left = 5
-      Top = 4
+      Top = 20
       Anchors = [akLeft, akBottom]
       Caption = 'Socket:'
       ParentFont = False
@@ -246,7 +246,7 @@ object frmDebug: TfrmDebug
     end
     object lbvSocketState: TcxLabel
       Left = 57
-      Top = 4
+      Top = 20
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -273,7 +273,7 @@ object frmDebug: TfrmDebug
       Width = 31
       Height = 29
       Hint = 'Seat positions'
-      Anchors = [akLeft, akBottom]
+      Anchors = [akTop, akRight]
       Colors.PressedText = clRed
       OptionsImage.Glyph.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
@@ -310,6 +310,8 @@ object frmDebug: TfrmDebug
         090B000000000000000000000000000000000000000000000000000000000000
         0000000000000000000000000000000000000000000000000000000000000000
         0000000000000000000000000000000000000000000000000000}
+      ParentShowHint = False
+      ShowHint = True
       SpeedButtonOptions.GroupIndex = 3
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
@@ -326,7 +328,7 @@ object frmDebug: TfrmDebug
     end
     object lbsLatency: TcxLabel
       Left = 5
-      Top = 20
+      Top = 36
       Anchors = [akLeft, akBottom]
       Caption = 'Latency:'
       ParentFont = False
@@ -341,7 +343,7 @@ object frmDebug: TfrmDebug
     end
     object lbvLatency: TcxLabel
       Left = 57
-      Top = 20
+      Top = 36
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -440,7 +442,7 @@ object frmDebug: TfrmDebug
     end
     object lbsServer: TcxLabel
       Left = 5
-      Top = 36
+      Top = 4
       Anchors = [akLeft, akBottom]
       Caption = 'Server:'
       ParentFont = False
@@ -455,7 +457,7 @@ object frmDebug: TfrmDebug
     end
     object lbvServer: TcxLabel
       Left = 57
-      Top = 36
+      Top = 4
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'

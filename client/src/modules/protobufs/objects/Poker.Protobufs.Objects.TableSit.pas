@@ -20,7 +20,7 @@ type
       FGameId: TMongoId;
       FSeatIndex: Integer;
       FChips: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_GameId;
     procedure clear_has_GameId;
@@ -117,7 +117,7 @@ end;
 
 function TPB_TableSit.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $5) <> $5 then
+  if (FHasBits and $5) <> $5 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -130,17 +130,17 @@ end;
 
 function TPB_TableSit.has_GameId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TableSit.set_has_GameId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TableSit.clear_has_GameId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TableSit.SetGameId(const AValue: TMongoId);
@@ -165,17 +165,17 @@ end;
 
 function TPB_TableSit.has_SeatIndex: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TableSit.set_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TableSit.clear_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TableSit.SetSeatIndex(const AValue: Integer);
@@ -196,17 +196,17 @@ end;
 
 function TPB_TableSit.has_Chips: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TableSit.set_has_Chips;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TableSit.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TableSit.SetChips(const AValue: UInt32);
@@ -221,7 +221,7 @@ end;
 
 procedure TPB_TableSit.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_GameId;

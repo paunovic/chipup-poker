@@ -21,7 +21,7 @@ type
       FTableMongoId: TMongoId;
       FChipAmount: UInt32;
       FCurrentState: TTableState;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_TableMongoId;
     procedure clear_has_TableMongoId;
@@ -118,7 +118,7 @@ end;
 
 function TPB_PutChips.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $7) <> $7 then
+  if (FHasBits and $7) <> $7 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -131,17 +131,17 @@ end;
 
 function TPB_PutChips.has_TableMongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_PutChips.set_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_PutChips.clear_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_PutChips.SetTableMongoId(const AValue: TMongoId);
@@ -166,17 +166,17 @@ end;
 
 function TPB_PutChips.has_ChipAmount: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_PutChips.set_has_ChipAmount;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_PutChips.clear_has_ChipAmount;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_PutChips.SetChipAmount(const AValue: UInt32);
@@ -197,17 +197,17 @@ end;
 
 function TPB_PutChips.has_CurrentState: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_PutChips.set_has_CurrentState;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_PutChips.clear_has_CurrentState;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);
@@ -222,7 +222,7 @@ end;
 
 procedure TPB_PutChips.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_TableMongoId;

@@ -284,7 +284,7 @@ begin
     end;
 
     if move.ContainsEvent(teCheck) then
-      ALines.Add(Format('%s%s%s checks', [ATags.PlayerNick, player_nick, ATags.NormalText, player_nick]));
+      ALines.Add(Format('%s%s%s checks', [ATags.PlayerNick, player_nick, ATags.NormalText]));
 
     if move.ContainsEvent(teCall) then
     begin

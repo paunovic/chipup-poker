@@ -30,7 +30,7 @@ type
       FSecondsplayed: UInt32;
       FChipsinplay: UInt32;
       FHands: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Userid;
     procedure clear_has_Userid;
@@ -227,7 +227,7 @@ end;
 
 function TPB_TablePlayerStats.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -240,17 +240,17 @@ end;
 
 function TPB_TablePlayerStats.has_Userid: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Userid;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Userid;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TMongoId);
@@ -275,17 +275,17 @@ end;
 
 function TPB_TablePlayerStats.has_Balance: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Balance;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Balance;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
@@ -311,17 +311,17 @@ end;
 
 function TPB_TablePlayerStats.has_Buyins: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Buyins;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Buyins;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
@@ -345,17 +345,17 @@ end;
 
 function TPB_TablePlayerStats.has_Cashouts: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Cashouts;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Cashouts;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
@@ -374,17 +374,17 @@ end;
 
 function TPB_TablePlayerStats.has_Rakecontrib: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Rakecontrib;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Rakecontrib;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UInt32);
@@ -405,17 +405,17 @@ end;
 
 function TPB_TablePlayerStats.has_Secondsplayed: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Secondsplayed;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Secondsplayed;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UInt32);
@@ -436,17 +436,17 @@ end;
 
 function TPB_TablePlayerStats.has_Chipsinplay: Boolean;
 begin
-  result := (_has_bits_ and 128) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Chipsinplay;
 begin
-  _has_bits_ := _has_bits_ or 128;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Chipsinplay;
 begin
-  _has_bits_ := _has_bits_ and not 128;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UInt32);
@@ -467,17 +467,17 @@ end;
 
 function TPB_TablePlayerStats.has_Hands: Boolean;
 begin
-  result := (_has_bits_ and 256) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Hands;
 begin
-  _has_bits_ := _has_bits_ or 256;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Hands;
 begin
-  _has_bits_ := _has_bits_ and not 256;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_TablePlayerStats.SetHands(const AValue: UInt32);
@@ -492,7 +492,7 @@ end;
 
 procedure TPB_TablePlayerStats.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Userid;

@@ -18,7 +18,7 @@ type
     var
       FSb: UInt32;
       FBb: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Sb;
     procedure clear_has_Sb;
@@ -100,7 +100,7 @@ end;
 
 function TPB_GameBlinds.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +113,17 @@ end;
 
 function TPB_GameBlinds.has_Sb: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_GameBlinds.set_has_Sb;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_GameBlinds.clear_has_Sb;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_GameBlinds.SetSb(const AValue: UInt32);
@@ -144,17 +144,17 @@ end;
 
 function TPB_GameBlinds.has_Bb: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_GameBlinds.set_has_Bb;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_GameBlinds.clear_has_Bb;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_GameBlinds.SetBb(const AValue: UInt32);
@@ -169,7 +169,7 @@ end;
 
 procedure TPB_GameBlinds.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Sb;

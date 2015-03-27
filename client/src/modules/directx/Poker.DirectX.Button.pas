@@ -69,7 +69,7 @@ end;
 
 procedure TDXButton.MouseMove(Shift: TShiftState; X, Y: Integer);
 begin
-
+  //
 end;
 
 procedure TDXButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

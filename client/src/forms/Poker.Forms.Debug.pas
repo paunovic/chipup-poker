@@ -126,7 +126,7 @@ implementation
 
 uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
-  JclExprEval, Poker.Table.Resources,
+  JclExprEval, Poker.Tables.Resources,
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,

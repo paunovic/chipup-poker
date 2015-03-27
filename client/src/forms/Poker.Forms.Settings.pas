@@ -125,6 +125,7 @@ end;
 
 procedure TfrmSettings.RenderThemeTable;
 begin
+  //
 end;
 
 end.

@@ -21,7 +21,7 @@ type
       FSubscriptionPlan: TPlayerSubscriptionPlan;
       FUrl: String;
       FStripeToken: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_SubscriptionPlan;
     procedure clear_has_SubscriptionPlan;
@@ -118,7 +118,7 @@ end;
 
 function TPB_SubscriptionPlanChange.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -131,17 +131,17 @@ end;
 
 function TPB_SubscriptionPlanChange.has_SubscriptionPlan: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_SubscriptionPlanChange.set_has_SubscriptionPlan;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_SubscriptionPlanChange.clear_has_SubscriptionPlan;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_SubscriptionPlanChange.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
@@ -162,17 +162,17 @@ end;
 
 function TPB_SubscriptionPlanChange.has_Url: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_SubscriptionPlanChange.set_has_Url;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_SubscriptionPlanChange.clear_has_Url;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_SubscriptionPlanChange.SetUrl(const AValue: String);
@@ -193,17 +193,17 @@ end;
 
 function TPB_SubscriptionPlanChange.has_StripeToken: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_SubscriptionPlanChange.set_has_StripeToken;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_SubscriptionPlanChange.clear_has_StripeToken;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_SubscriptionPlanChange.SetStripeToken(const AValue: String);
@@ -218,7 +218,7 @@ end;
 
 procedure TPB_SubscriptionPlanChange.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_SubscriptionPlan;

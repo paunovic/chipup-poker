@@ -28,7 +28,7 @@ type
       FEmail: String;
       FAuthed: Boolean;
       FSubscriptionPlan: TPlayerSubscriptionPlan;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -170,7 +170,7 @@ end;
 
 function TPB_User.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $5) <> $5 then
+  if (FHasBits and $5) <> $5 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -183,17 +183,17 @@ end;
 
 function TPB_User.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_User.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_User.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TMongoId);
@@ -218,17 +218,17 @@ end;
 
 function TPB_User.has_Avatar: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_User.set_has_Avatar;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_User.clear_has_Avatar;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
@@ -249,17 +249,17 @@ end;
 
 function TPB_User.has_Displayname: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_User.set_has_Displayname;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_User.clear_has_Displayname;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_User.SetDisplayname(const AValue: String);
@@ -280,17 +280,17 @@ end;
 
 function TPB_User.has_Email: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_User.set_has_Email;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_User.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_User.SetEmail(const AValue: String);
@@ -311,17 +311,17 @@ end;
 
 function TPB_User.has_Authed: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_User.set_has_Authed;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_User.clear_has_Authed;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
@@ -342,17 +342,17 @@ end;
 
 function TPB_User.has_SubscriptionPlan: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_User.set_has_SubscriptionPlan;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_User.clear_has_SubscriptionPlan;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_User.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
@@ -367,7 +367,7 @@ end;
 
 procedure TPB_User.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

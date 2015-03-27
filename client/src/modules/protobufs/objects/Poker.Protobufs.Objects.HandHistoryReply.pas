@@ -23,7 +23,7 @@ type
       FGameid: TMongoId;
       FRows: TList<TPB_HandHistory>;
       FTournamentId: TMongoId;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_ClubId;
     procedure clear_has_ClubId;
@@ -159,7 +159,7 @@ function TPB_HandHistoryReply.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $2) <> $2 then
+  if (FHasBits and $2) <> $2 then
     Exit(FALSE);
   for pbobj in Rows do
     if not pbobj.IsInitialized then
@@ -175,17 +175,17 @@ end;
 
 function TPB_HandHistoryReply.has_ClubId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_HandHistoryReply.set_has_ClubId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_HandHistoryReply.clear_has_ClubId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_HandHistoryReply.SetClubId(const AValue: TMongoId);
@@ -210,17 +210,17 @@ end;
 
 function TPB_HandHistoryReply.has_Gameid: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_HandHistoryReply.set_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_HandHistoryReply.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_HandHistoryReply.SetGameid(const AValue: TMongoId);
@@ -250,17 +250,17 @@ end;
 
 function TPB_HandHistoryReply.has_Rows: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_HandHistoryReply.set_has_Rows;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_HandHistoryReply.clear_has_Rows;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_HandHistoryReply.RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
@@ -283,17 +283,17 @@ end;
 
 function TPB_HandHistoryReply.has_TournamentId: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_HandHistoryReply.set_has_TournamentId;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_HandHistoryReply.clear_has_TournamentId;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_HandHistoryReply.SetTournamentId(const AValue: TMongoId);
@@ -312,7 +312,7 @@ end;
 
 procedure TPB_HandHistoryReply.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_ClubId;

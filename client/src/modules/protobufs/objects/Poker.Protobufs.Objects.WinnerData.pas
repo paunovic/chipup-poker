@@ -20,7 +20,7 @@ type
     var
       FSeat: Integer;
       FMsg: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Seat;
     procedure clear_has_Seat;
@@ -102,7 +102,7 @@ end;
 
 function TPB_WinnerData.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $c) <> $c then
+  if (FHasBits and $c) <> $c then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -115,17 +115,17 @@ end;
 
 function TPB_WinnerData.has_Seat: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_WinnerData.set_has_Seat;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_WinnerData.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
@@ -146,17 +146,17 @@ end;
 
 function TPB_WinnerData.has_Msg: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_WinnerData.set_has_Msg;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_WinnerData.clear_has_Msg;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_WinnerData.SetMsg(const AValue: String);
@@ -171,7 +171,7 @@ end;
 
 procedure TPB_WinnerData.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Seat;

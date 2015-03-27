@@ -312,6 +312,8 @@ begin
   FDXFonts.Free;
   FDXImages.Free;
   FDXMediaFile.Free;
+
+  inherited;
 end;
 
 procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single);

@@ -3,7 +3,7 @@ unit Poker.Settings;
 interface
 
 uses
-  superobject, System.Classes, Poker.HardcodedSettings;
+  superobject, System.Classes, Poker.HardcodedSettings, Vcl.Forms;
 
 type
   TSettings = class(THardcodedSettings)
@@ -39,11 +39,13 @@ type
       JSON_ANIMATIONS = 'animations';
       JSON_FOLD_CONFIRMATION = 'fold_confirmation';
       JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
-      JSON_MAIN_FORM_MAXIMIZED = 'main_form_maximized';
-      JSON_MAIN_FORM_X = 'main_form_x';
-      JSON_MAIN_FORM_Y = 'main_form_y';
-      JSON_MAIN_FORM_WIDTH = 'main_form_width';
-      JSON_MAIN_FORM_HEIGHT = 'main_form_height';
+      JSON_FORM_SETTINGS = 'forms';
+      JSON_FORM_NAME = 'name';
+      JSON_FORM_MAXIMIZED = 'maximized';
+      JSON_FORM_X = 'x';
+      JSON_FORM_Y = 'y';
+      JSON_FORM_WIDTH = 'width';
+      JSON_FORM_HEIGHT = 'height';
 
       // default values
       DEFAULT_LOGIN_USERNAME = '';
@@ -57,11 +59,6 @@ type
       DEFAULT_ANIMATIONS = TRUE;
       DEFAULT_FOLD_CONFIRMATION = FALSE;
       DEFAULT_ALWAYS_RUN_IT_TWICE = FALSE;
-      DEFAULT_MAIN_FORM_MAXIMIZED = FALSE;
-      DEFAULT_MAIN_FORM_X = -1;
-      DEFAULT_MAIN_FORM_Y = -1;
-      DEFAULT_MAIN_FORM_WIDTH = -1;
-      DEFAULT_MAIN_FORM_HEIGHT = -1;
 
     function GetStringValue(const AIndex: Integer): String;
     procedure SetStringValue(const AIndex: Integer; const AValue: String);
@@ -85,16 +82,15 @@ type
     function Load: Boolean;
     procedure Save;
 
+    procedure SaveFormSettings(const AForm: TForm);
+    procedure LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
+
     property SettingsFile: String read FSettingsFile;
 
     property LoginUsername: String index PROPINDEX_LOGIN_USERNAME read GetStringValue write SetStringValue;
     property LoginPassword: String index PROPINDEX_LOGIN_PASSWORD read GetStringValue write SetStringValue;
 
     property ServerIndex: Int64 index PROPINDEX_SERVER_INDEX read GetIntegerValue write SetIntegerValue;
-    property MainFormX: Int64 index PROPINDEX_MAIN_FORM_X read GetIntegerValue write SetIntegerValue;
-    property MainFormY: Int64 index PROPINDEX_MAIN_FORM_Y read GetIntegerValue write SetIntegerValue;
-    property MainFormWidth: Int64 index PROPINDEX_MAIN_FORM_WIDTH read GetIntegerValue write SetIntegerValue;
-    property MainFormHeight: Int64 index PROPINDEX_MAIN_FORM_HEIGHT read GetIntegerValue write SetIntegerValue;
 
     property RememberLogin: Boolean index PROPINDEX_REMEMBER_LOGIN read GetBooleanValue write SetBooleanValue;
     property RememberPassword: Boolean index PROPINDEX_REMEMBER_PASSWORD read GetBooleanValue write SetBooleanValue;
@@ -104,7 +100,6 @@ type
     property Animations: Boolean index PROPINDEX_ANIMATIONS read GetBooleanValue write SetBooleanValue;
     property FoldConfirmation: Boolean index PROPINDEX_FOLD_CONFIRMATION read GetBooleanValue write SetBooleanValue;
     property AlwaysRunItTwice: Boolean index PROPINDEX_ALWAYS_RUN_TWICE read GetBooleanValue write SetBooleanValue;
-    property MainFormMaximized: Boolean index PROPINDEX_MAIN_FORM_MAXIMIZED read GetBooleanValue write SetBooleanValue;
   end;
 
 var
@@ -176,6 +171,88 @@ begin
   end;
 end;
 
+procedure TSettings.SaveFormSettings(const AForm: TForm);
+var
+  C1: Integer;
+  formsettings, formjson: ISuperObject;
+begin
+  if not Assigned(FJSON.O[JSON_FORM_SETTINGS]) then
+    FJSON.O[JSON_FORM_SETTINGS] := SA([]);
+  formsettings := FJSON.O[JSON_FORM_SETTINGS];
+
+  formjson := nil;
+  for C1 := formsettings.AsArray.Length - 1 downto 0 do
+    if formsettings.AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+    begin
+      formjson := formsettings.AsArray.O[C1];
+      formsettings.AsArray.Delete(C1);
+    end;
+
+  if not Assigned(formjson) then
+    formjson := SO;
+
+  formjson.S[JSON_FORM_NAME] := AForm.Name;
+  formjson.B[JSON_FORM_MAXIMIZED] := AForm.WindowState = wsMaximized;
+  if AForm.WindowState <> wsMaximized then
+  begin
+    formjson.I[JSON_FORM_X] := AForm.Left;
+    formjson.I[JSON_FORM_Y] := AForm.Top;
+    formjson.I[JSON_FORM_WIDTH] := AForm.Width;
+    formjson.I[JSON_FORM_HEIGHT] := AForm.Height;
+  end;
+
+  formsettings.AsArray.Add(formjson);
+end;
+
+procedure TSettings.LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
+var
+  C1: Integer;
+  formjson: ISuperObject;
+begin
+  formjson := nil;
+  if Assigned(FJSON.O[JSON_FORM_SETTINGS]) then
+    for C1 := 0 to FJSON.O[JSON_FORM_SETTINGS].AsArray.Length - 1 do
+      if FJSON.O[JSON_FORM_SETTINGS].AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+      begin
+        formjson := FJSON.O[JSON_FORM_SETTINGS].AsArray.O[C1];
+        Break;
+      end;
+
+  if Assigned(formjson) then
+  begin
+    if Assigned(formjson.O[JSON_FORM_X]) then
+      AForm.Left := formjson.I[JSON_FORM_X];
+    if Assigned(formjson.O[JSON_FORM_Y]) then
+      AForm.Top := formjson.I[JSON_FORM_Y];
+    if Assigned(formjson.O[JSON_FORM_WIDTH]) then
+      AForm.Width := formjson.I[JSON_FORM_WIDTH];
+    if Assigned(formjson.O[JSON_FORM_HEIGHT]) then
+      AForm.Height := formjson.I[JSON_FORM_HEIGHT];
+
+    if formjson.B[JSON_FORM_MAXIMIZED] then
+      AForm.WindowState := wsMaximized
+    else
+      AForm.WindowState := wsNormal;
+  end
+  else
+  begin
+    if ADefaultX <> -1 then
+      AForm.Left := ADefaultX;
+    if ADefaultY <> -1 then
+      AForm.Top := ADefaultY;
+  end;
+
+  if AForm.Left + AForm.Width > Screen.DesktopWidth then
+    AForm.Left := Screen.DesktopWidth - AForm.Width;
+  if AForm.Top + AForm.Height > Screen.DesktopHeight then
+    AForm.Top := Screen.DesktopHeight - AForm.Top;
+  if AForm.Left < 0 then
+    AForm.Left := 0;
+  if AForm.Top < 0 then
+    AForm.Top := 0;
+end;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 function TSettings.GetStringValue(const AIndex: Integer): String;
@@ -214,22 +291,6 @@ begin
     PROPINDEX_SERVER_INDEX: begin
       field := JSON_SERVER_INDEX;
       default_value := DEFAULT_SERVER_INDEX;
-    end;
-    PROPINDEX_MAIN_FORM_X: begin
-      field := JSON_MAIN_FORM_X;
-      default_value := DEFAULT_MAIN_FORM_X;
-    end;
-    PROPINDEX_MAIN_FORM_Y: begin
-      field := JSON_MAIN_FORM_Y;
-      default_value := DEFAULT_MAIN_FORM_Y;
-    end;
-    PROPINDEX_MAIN_FORM_WIDTH: begin
-      field := JSON_MAIN_FORM_WIDTH;
-      default_value := DEFAULT_MAIN_FORM_WIDTH;
-    end;
-    PROPINDEX_MAIN_FORM_HEIGHT: begin
-      field := JSON_MAIN_FORM_HEIGHT;
-      default_value := DEFAULT_MAIN_FORM_HEIGHT;
     end;
   else
     SoftException(Format('TSettings.GetIntegerValue(%d): index not found', [AIndex]));
@@ -282,10 +343,6 @@ begin
       field := JSON_ALWAYS_RUN_IT_TWICE;
       default_value := DEFAULT_ALWAYS_RUN_IT_TWICE;
     end;
-    PROPINDEX_MAIN_FORM_MAXIMIZED: begin
-      field := JSON_MAIN_FORM_MAXIMIZED;
-      default_value := DEFAULT_MAIN_FORM_MAXIMIZED;
-    end;
   else
     SoftException(Format('TSettings.GetBooleanValue(%d): index not found', [AIndex]));
     Exit(FALSE);
@@ -321,10 +378,6 @@ var
 begin
   case AIndex of
     PROPINDEX_SERVER_INDEX: field_name := JSON_SERVER_INDEX;
-    PROPINDEX_MAIN_FORM_X: field_name := JSON_MAIN_FORM_X;
-    PROPINDEX_MAIN_FORM_Y: field_name := JSON_MAIN_FORM_Y;
-    PROPINDEX_MAIN_FORM_WIDTH: field_name := JSON_MAIN_FORM_WIDTH;
-    PROPINDEX_MAIN_FORM_HEIGHT: field_name := JSON_MAIN_FORM_HEIGHT;
   else
     SoftException(Format('TSettings.SetIntegerValue(%d, %d): index not found', [AIndex, AValue]));
     Exit;
@@ -346,7 +399,6 @@ begin
     PROPINDEX_ANIMATIONS: field_name:= JSON_ANIMATIONS;
     PROPINDEX_FOLD_CONFIRMATION: field_name:= JSON_FOLD_CONFIRMATION;
     PROPINDEX_ALWAYS_RUN_TWICE: field_name:= JSON_ALWAYS_RUN_IT_TWICE;
-    PROPINDEX_MAIN_FORM_MAXIMIZED: field_name := JSON_MAIN_FORM_MAXIMIZED;
   else
     SoftException(Format('TSettings.SetIntegerValue(%d, %s): index not found', [AIndex, BoolToStr(AValue, TRUE)]));
     Exit;

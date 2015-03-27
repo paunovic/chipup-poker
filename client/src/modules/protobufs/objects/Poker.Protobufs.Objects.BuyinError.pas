@@ -18,7 +18,7 @@ type
     var
       FGameId: TMongoId;
       FLastCashout: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_GameId;
     procedure clear_has_GameId;
@@ -100,7 +100,7 @@ end;
 
 function TPB_BuyinError.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +113,17 @@ end;
 
 function TPB_BuyinError.has_GameId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_BuyinError.set_has_GameId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_BuyinError.clear_has_GameId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_BuyinError.SetGameId(const AValue: TMongoId);
@@ -148,17 +148,17 @@ end;
 
 function TPB_BuyinError.has_LastCashout: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_BuyinError.set_has_LastCashout;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_BuyinError.clear_has_LastCashout;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_BuyinError.SetLastCashout(const AValue: UInt32);
@@ -173,7 +173,7 @@ end;
 
 procedure TPB_BuyinError.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_GameId;

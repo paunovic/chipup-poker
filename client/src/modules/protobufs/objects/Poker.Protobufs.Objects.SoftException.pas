@@ -18,7 +18,7 @@ type
     var
       FException: String;
       FData: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Exception;
     procedure clear_has_Exception;
@@ -100,7 +100,7 @@ end;
 
 function TPB_SoftException.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +113,17 @@ end;
 
 function TPB_SoftException.has_Exception: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_SoftException.set_has_Exception;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_SoftException.clear_has_Exception;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_SoftException.SetException(const AValue: String);
@@ -144,17 +144,17 @@ end;
 
 function TPB_SoftException.has_Data: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_SoftException.set_has_Data;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_SoftException.clear_has_Data;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_SoftException.SetData(const AValue: String);
@@ -169,7 +169,7 @@ end;
 
 procedure TPB_SoftException.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Exception;
