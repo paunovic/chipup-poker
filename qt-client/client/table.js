@@ -7,7 +7,9 @@ var localPots = [];
 var db = new DealerButton();
 var testcase = false;
 
+var cardStart = 0.353;
 var cardWidth = 0.05;
+var tableCardOffset = 0.055;
 
 var idleChips = [];
 function getChipStack() {
@@ -75,7 +77,7 @@ function tableStatus(ts) {
 				if (!sets[i]) sets[i] = [];
 				if (i == 0) height = 0.477;
 				else height = 0.55;
-				sets[i].push(new DealCard(0.523,height,localTurn[i]));
+				sets[i].push(new DealCard(cardStart + (tableCardOffset*3),height,localTurn[i]));
 				sets[i].push(new RevealCard(localTurn[i],card.cards[0]));
 			}
 			updatePots();
@@ -89,7 +91,7 @@ function tableStatus(ts) {
 				if (!sets[i]) sets[i] = [];
 				if (i == 0) height = 0.477;
 				else height = 0.55;
-				sets[i].push(new DealCard(0.592,height,localRiver[i]));
+				sets[i].push(new DealCard(cardStart + (tableCardOffset*4),height,localRiver[i]));
 				sets[i].push(new RevealCard(localRiver[i],card.cards[0]));
 			}
 			updatePots();
@@ -193,19 +195,19 @@ AnimateFlop.prototype.begin = function () {
 	localFlop[0+this.offset].visible = true;
 	PlaySound(0);
 	var that = this;
-	Animate(localFlop[0+this.offset], 0.318,this.y, 0.25,once(function () { that.reveal(); }));
+	Animate(localFlop[0+this.offset], cardStart,this.y, 0.25,once(function () { that.reveal(); }));
 }
 AnimateFlop.prototype.reveal = function () {
 	for (var x=0; x<3; x++) {
 		localFlop[x+this.offset].card = this.cards[x];
 	}
-	localFlop[1+this.offset].setPosition(0.318,this.y);
-	localFlop[2+this.offset].setPosition(0.318,this.y);
+	localFlop[1+this.offset].setPosition(cardStart,this.y);
+	localFlop[2+this.offset].setPosition(cardStart,this.y);
 	localFlop[1+this.offset].visible = true;
 	localFlop[2+this.offset].visible = true;
 	var that = this;
-	Animate(localFlop[1+this.offset],0.387,this.y,0.25,once(function () { that.second(); }));
-	Animate(localFlop[2+this.offset],0.454,this.y,0.25,once(function () { that.third(); }));
+	Animate(localFlop[1+this.offset],cardStart + tableCardOffset,this.y,0.25,once(function () { that.second(); }));
+	Animate(localFlop[2+this.offset],cardStart + (tableCardOffset*2),this.y,0.25,once(function () { that.third(); }));
 }
 AnimateFlop.prototype.second = function () {
 	this.secondDone = true;

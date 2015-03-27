@@ -477,6 +477,11 @@ void TestCase::simplegame() {
 
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);
+
+	for (int i=0; i<10; i++) {
+		ac.setTime(i*1000);
+		ac.tick();
+	}
 	tbl.render(&image);
 	image.save("simplegame2.png");
 
