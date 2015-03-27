@@ -78,11 +78,13 @@ QPushButton:checked#btHomeGamesDummy, QPushButton:checked#btTournamentsDummy {
 	border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 #3a2425, stop: 1 #9f2f2f);
 }
 
-
-
 QCheckBox {
 	color:#b4b4b4;
 }
+QCheckBox::disabled {
+color: #6e6e6e;
+}
+
 QLineEdit#teChatInput {
 	background-color: #262626;
 	color: #808080;

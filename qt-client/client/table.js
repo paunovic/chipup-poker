@@ -8,8 +8,8 @@ var db = new DealerButton();
 var testcase = false;
 
 var cardStart = 0.353;
-var cardWidth = 0.05;
-var tableCardOffset = 0.055;
+var cardWidth = 0.07;
+var tableCardOffset = 0.075;
 
 var idleChips = [];
 function getChipStack() {
@@ -21,15 +21,45 @@ function hideChips(input) {
 	idleChips.push(input);
 }
 function updatePots() {
+	var toAnimate = [];
+	for (var i=0; i<lastTS.seats.length; i++) {
+		var remote = lastTS.seats[i];
+		var local = seat_objects[remote.seat_index];
+		if (lastTS.bets[remote.seat_index] == 0) {
+			if (local.bet) {
+				toAnimate.push(local.bet);
+				local.bet = null;
+			}
+		}
+	}
+	queueAction(new AnimateBetsToPot(toAnimate));
 	for (var i=0; i<lastTS.pots.length; i++) {
 		if (!localPots[i]) {
 			localPots[i] = getChipStack();
 		}
 		if (lastTS.pots[i].value == 0) continue;
-		localPots[i].setPosition(0.35 + (0.1*i),0.3);
-		localPots[i].visible = true;
+		localPots[i].setPosition(0.5 + (0.1*i),0.3);
+		queueAction(new ShowBet(localPots[i]));
 		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
 		// TODO, render rake
+		// TODO, animate player bets into this pot
+	}
+}
+function AnimateBetsToPot(bets) {
+	this.bets = bets;
+	this.count = bets.length;
+}
+AnimateBetsToPot.prototype.begin = function () {
+	var that = this;
+	for (var i=0; i<this.bets.length; i++) {
+		Animate(this.bets[i],0.5,0.3,0.5,once(function () { that.check(); }));
+	}
+}
+AnimateBetsToPot.prototype.check = function () {
+	this.count--;
+	if (this.count == 0) {
+		for (var i=0; i<this.bets.length; i++) hideChips(this.bets[i]);
+		eventDone();
 	}
 }
 var lastTS;
@@ -297,6 +327,7 @@ function tableEvent(event) {
 		}
 		updateBets();
 		AnimateCards({reveal:true});
+		queueAction(new SimpleDelay(250));
 		for (var i=0; i<localFlop.length; i++) {
 			if (localFlop[i]) {
 				log("hiding flop:"+i);
@@ -308,6 +339,14 @@ function tableEvent(event) {
 		}
 		for (var i=0; i<localRiver.length; i++) {
 			if (localRiver[i]) queueAction(new HideCard(localRiver[i]));
+		}
+		queueAction(new SimpleDelay(250));
+		for (var i=0; i<lastTS.seats.length; i++) {
+			var local = seat_objects[lastTS.seats[i].seat_index];
+			for (var y=0; y<local.cards.length; y++) {
+				if (local.cards[y]) queueAction(new HideCard(local.cards[y]));
+				delete local.cards[y];
+			}
 		}
 		break;
 	case 'teDealing':
@@ -340,7 +379,7 @@ function AnimateChipWin(dest,chips) {
 }
 AnimateChipWin.prototype.begin = function () {
 	this.stack.value = this.chips;
-	this.stack.setPosition(0.5,0.5);
+	this.stack.setPosition(0.5,0.3);
 	var stack = this.stack;
 	Animate(this.stack, this.dest.x, this.dest.y, 0.5, function () { hideChips(stack); eventDone(); });
 }

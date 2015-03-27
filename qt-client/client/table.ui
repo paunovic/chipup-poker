@@ -17,7 +17,10 @@
    <double>1.000000000000000</double>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,4,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,4,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMinAndMaxSize</enum>
+    </property>
     <property name="topMargin">
      <number>0</number>
     </property>
@@ -26,6 +29,9 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
       <item>
        <widget class="QLabel" name="lbStats">
         <property name="text">
@@ -64,6 +70,9 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
       <property name="rightMargin">
        <number>10</number>
       </property>
@@ -71,6 +80,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
         <property name="spacing">
          <number>0</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <item>
          <widget class="QTextEdit" name="teChat"/>
@@ -88,6 +100,9 @@
        <layout class="QVBoxLayout" name="groupOptions">
         <property name="spacing">
          <number>0</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <item>
          <spacer name="verticalSpacer">

@@ -98,3 +98,9 @@ QSize ChipObjectUi::sizeHint() const {
 	if (height < x.y()) height = x.y();
 	return QSize(x.x()+10,height);
 }
+void ChipObject::setVisible(bool in) {
+	chips->setVisible(in);
+	if (!in) {
+		qDebug() << table->global().engine()->currentContext()->backtrace();
+	}
+}

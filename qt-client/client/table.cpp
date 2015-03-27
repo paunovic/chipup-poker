@@ -80,6 +80,7 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 			ui->cbSitOutBB->setVisible(true);
 			ui->btSitOut->setVisible(true);
 			ui->cbFoldAny->setVisible(true);
+			ui->cbFoldAny->setEnabled(false);
 			ui->btPlayNow->setVisible(false);
 			break;
 		case Poker::SeatInfo::psOutOfPlay:

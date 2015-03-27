@@ -28,6 +28,7 @@ void TableUi::resizeEvent(QResizeEvent *) {
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
 	setMinimumHeight(((qreal)(41*em)*width())/(85*em));
+	setMaximumHeight(((qreal)(41*em)*width())/(85*em));
 }
 int TableUi::rootHeight() {
 	return ((float)pix.height()*width())/pix.width();

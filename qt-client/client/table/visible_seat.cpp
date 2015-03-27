@@ -98,9 +98,9 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	if (!jsobj->getEmpty()) {
 		painter.setPen(QColor(198,198,198));
 		QRect dn = fontMetric->boundingRect(displayname);
-		qDebug() << dn << displayname << line1;
+		//qDebug() << dn << displayname << line1;
 		dn.translate(line1.x() + ((line1.width() - dn.width())/2),line1.y() + (dn.y()*-1));
-		qDebug() << dn << displayname << line1;
+		//qDebug() << dn << displayname << line1;
 		painter.drawText(dn.bottomLeft(),displayname);
 
 		QString bottomline;
@@ -118,7 +118,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 		if (bottomline.length() > 0) {
 			QRect bb = fontMetric->boundingRect(bottomline);
 			bb.translate(line2.x() + ((line2.width() - bb.width())/2),line2.y() + (bb.y()*-1));
-			qDebug() << bb << line2;
+			//qDebug() << bb << line2;
 			painter.drawText(bb.bottomLeft(),bottomline);
 		}
 	}
