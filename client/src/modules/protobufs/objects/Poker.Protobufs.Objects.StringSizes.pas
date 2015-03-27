@@ -28,7 +28,7 @@ type
       FUsername: Integer;
       FGamename: Integer;
       FContactMessage: Integer;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Email;
     procedure clear_has_Email;
@@ -185,7 +185,7 @@ end;
 
 function TPB_StringSizes.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $7f) <> $7f then
+  if (FHasBits and $7f) <> $7f then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -198,17 +198,17 @@ end;
 
 function TPB_StringSizes.has_Email: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_Email;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_StringSizes.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
@@ -229,17 +229,17 @@ end;
 
 function TPB_StringSizes.has_Password: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_Password;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_StringSizes.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_StringSizes.SetPassword(const AValue: Integer);
@@ -260,17 +260,17 @@ end;
 
 function TPB_StringSizes.has_Clubname: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_Clubname;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_StringSizes.clear_has_Clubname;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_StringSizes.SetClubname(const AValue: Integer);
@@ -291,17 +291,17 @@ end;
 
 function TPB_StringSizes.has_Invcode: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_Invcode;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_StringSizes.clear_has_Invcode;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
@@ -322,17 +322,17 @@ end;
 
 function TPB_StringSizes.has_Username: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_Username;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_StringSizes.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_StringSizes.SetUsername(const AValue: Integer);
@@ -353,17 +353,17 @@ end;
 
 function TPB_StringSizes.has_Gamename: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_StringSizes.clear_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_StringSizes.SetGamename(const AValue: Integer);
@@ -384,17 +384,17 @@ end;
 
 function TPB_StringSizes.has_ContactMessage: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_StringSizes.set_has_ContactMessage;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_StringSizes.clear_has_ContactMessage;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);
@@ -409,7 +409,7 @@ end;
 
 procedure TPB_StringSizes.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Email;

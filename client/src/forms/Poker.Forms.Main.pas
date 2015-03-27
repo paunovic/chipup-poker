@@ -168,16 +168,20 @@ type
     procedure acConfirmationOnFoldExecute(Sender: TObject);
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
     procedure acLaunchNewInstanceExecute(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormActivate(Sender: TObject);
   private
-    FSelectedClub: TMongoId;
-    FSelectedGame: TMongoId;
-    FSelectedTournament: TMongoId;
-    FCallbacksId: Integer;
-    FShuttingDown: Boolean;
-    FActionMainMenuBarFont: TFont;
-    FRegisteredTournamentsMap: TDictionary<Integer, TMongoId>;
+    const
+      RESOURCE_CASHIER_NORMAL = 'CashierNormal';
+      RESOURCE_CASHIER_PRESSED = 'CashierPressed';
+
+    var
+      FSelectedClub: TMongoId;
+      FSelectedGame: TMongoId;
+      FSelectedTournament: TMongoId;
+      FCallbacksId: Integer;
+      FShuttingDown: Boolean;
+      FActionMainMenuBarFont: TFont;
+      FRegisteredTournamentsMap: TDictionary<Integer, TMongoId>;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -238,6 +242,7 @@ type
     procedure WMQueryEndSession(var AMessage: TWMQueryEndSession); message WM_QUERYENDSESSION;
     procedure WMEndSession(var AMessage: TWMEndSession); message WM_ENDSESSION;
     procedure WMSettingChange(var AMessage: TWMSettingChange); message WM_SETTINGCHANGE;
+    procedure WMWindowPosChanging(var AMessage: TWMWindowPosChanging); message WM_WINDOWPOSCHANGING;
   public
     procedure LoginStatus(const AValue: TLoginStatus);
     procedure OpenClubTable(const AClubId, ATableId: TMongoId);
@@ -312,7 +317,10 @@ begin
                       TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk, srTournamentOpenTable], CSRTableStatus)
                   ], TRUE);
 
-  LoadImageFromResource(imgCashier, 'CashierNormal');
+  Settings.LoadFormSettings(self,
+    Screen.Width div 2 - Width div 2, Screen.Height div 2 - Height div 2);
+
+  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
 
   ActionManager.Style := ActionMainMenuBarStyle;
   ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
@@ -353,14 +361,7 @@ end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Settings.MainFormMaximized := WindowState = wsMaximized;
-  if not Settings.MainFormMaximized then
-  begin
-    Settings.MainFormX := Left;
-    Settings.MainFormY := Top;
-    Settings.MainFormWidth := Width;
-    Settings.MainFormHeight := Height;
-  end;
+  Settings.SaveFormSettings(self);
 
   Action := caFree;
 end;
@@ -373,14 +374,14 @@ begin
 
   if CanClose then
   begin
-    if (dmMain.IsLoggedIn) then
+    if dmMain.IsLoggedIn then
       ServerSocket.Logout;
   end;
 end;
 
 procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
 begin
-  LoadImageFromResource(imgCashier, 'CashierNormal');
+  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
 end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
@@ -399,41 +400,11 @@ begin
   paTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
   paTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
   paTournamentInfo.Height := gridTournaments.Height - 1;
+
+  if WindowState <> wsMaximized then
+    Settings.SaveFormSettings(self);
 end;
 
-
-procedure TfrmChipUpMain.FormShow(Sender: TObject);
-begin
-  if Settings.MainFormWidth > -1 then
-    Width := Settings.MainFormWidth;
-
-  if Settings.MainFormHeight > -1 then
-    Height := Settings.MainFormHeight;
-
-  if Settings.MainFormX > -1 then
-    Left := Settings.MainFormX
-  else
-    Left := Screen.Width div 2 - Width div 2;
-
-  if Settings.MainFormY > -1 then
-    Top := Settings.MainFormY
-  else
-    Top := Screen.Height div 2 - Height div 2;
-
-  if Left + Width > Screen.DesktopWidth then
-    Left := Screen.DesktopWidth - Width;
-  if Top + Height > Screen.DesktopHeight then
-    Top := Screen.DesktopHeight - Top;
-  if Left < 0 then
-    Left := 0;
-  if Top < 0 then
-    Top := 0;
-
-  if Settings.MainFormMaximized then
-    WindowState := wsMaximized
-  else
-    WindowState := wsNormal;
-end;
 
 procedure TfrmChipUpMain.FlushData;
 begin
@@ -510,8 +481,6 @@ begin
       end;
     end;
   end;
-
-  {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
 end;
 
 procedure TfrmChipUpMain.tiTournamentInfoRefreshTimer(Sender: TObject);
@@ -1069,14 +1038,14 @@ end;
 procedure TfrmChipUpMain.WMEndSession(var AMessage: TWMEndSession);
 begin
   FShuttingDown := AMessage.EndSession;
-
   inherited;
 end;
 
 procedure TfrmChipUpMain.WMQueryEndSession(var AMessage: TWMQueryEndSession);
 begin
   FShuttingDown := TRUE;
-
+  AMessage.Result := 1;
+  PostQuitMessage(0);
   inherited;
 end;
 
@@ -1088,6 +1057,19 @@ begin
   // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
   ActionMainMenuBar.Font.Assign(FActionMainMenuBarFont);
   ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
+end;
+
+procedure TfrmChipUpMain.WMWindowPosChanging(var AMessage: TWMWindowPosChanging);
+const
+  SWP_STATECHANGED = $8000;
+begin
+  // save form state if form is about to be maximized
+  if ((AMessage.WindowPos^.flags and (SWP_STATECHANGED or SWP_FRAMECHANGED)) <> 0) and
+     (AMessage.WindowPos^.x < 0) and
+     (AMessage.WindowPos^.y < 0) then
+    Settings.SaveFormSettings(self);
+
+  inherited;
 end;
 
 procedure TfrmChipUpMain.gridPrivateClubsEnter(Sender: TObject);
@@ -1248,7 +1230,7 @@ begin
   if Button = mbLeft then
   begin
     if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
-      LoadImageFromResource(imgCashier, 'CashierPressed');
+      LoadImageFromResource(imgCashier, RESOURCE_CASHIER_PRESSED);
   end;
 end;
 
@@ -1258,7 +1240,7 @@ begin
   begin
     if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       acOpenCashier.Execute;
-    LoadImageFromResource(imgCashier, 'CashierNormal');
+    LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
   end;
 end;
 

@@ -24,7 +24,7 @@ type
       FUserId: TMongoId;
       FSeatSource: UInt32;
       FSeatDestination: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_GameSource;
     procedure clear_has_GameSource;
@@ -151,7 +151,7 @@ end;
 
 function TPB_TournamentPlayerTransfer.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1f) <> $1f then
+  if (FHasBits and $1f) <> $1f then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -164,17 +164,17 @@ end;
 
 function TPB_TournamentPlayerTransfer.has_GameSource: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentPlayerTransfer.set_has_GameSource;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentPlayerTransfer.clear_has_GameSource;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentPlayerTransfer.SetGameSource(const AValue: TMongoId);
@@ -199,17 +199,17 @@ end;
 
 function TPB_TournamentPlayerTransfer.has_GameDestination: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentPlayerTransfer.set_has_GameDestination;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentPlayerTransfer.clear_has_GameDestination;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentPlayerTransfer.SetGameDestination(const AValue: TMongoId);
@@ -234,17 +234,17 @@ end;
 
 function TPB_TournamentPlayerTransfer.has_UserId: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TournamentPlayerTransfer.set_has_UserId;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TournamentPlayerTransfer.clear_has_UserId;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TournamentPlayerTransfer.SetUserId(const AValue: TMongoId);
@@ -269,17 +269,17 @@ end;
 
 function TPB_TournamentPlayerTransfer.has_SeatSource: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TournamentPlayerTransfer.set_has_SeatSource;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TournamentPlayerTransfer.clear_has_SeatSource;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TournamentPlayerTransfer.SetSeatSource(const AValue: UInt32);
@@ -300,17 +300,17 @@ end;
 
 function TPB_TournamentPlayerTransfer.has_SeatDestination: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TournamentPlayerTransfer.set_has_SeatDestination;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TournamentPlayerTransfer.clear_has_SeatDestination;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TournamentPlayerTransfer.SetSeatDestination(const AValue: UInt32);
@@ -325,7 +325,7 @@ end;
 
 procedure TPB_TournamentPlayerTransfer.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_GameSource;

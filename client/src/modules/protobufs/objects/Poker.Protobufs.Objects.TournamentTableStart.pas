@@ -19,7 +19,7 @@ type
     var
       FGame: TPB_Game;
       FTableStatus: TPB_TableStatus;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Game;
     procedure clear_has_Game;
@@ -109,7 +109,7 @@ end;
 
 function TPB_TournamentTableStart.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   if (has_Game) then
     if not FGame.IsInitialized then
@@ -128,17 +128,17 @@ end;
 
 function TPB_TournamentTableStart.has_Game: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentTableStart.set_has_Game;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentTableStart.clear_has_Game;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentTableStart.SetGame(const AValue: TPB_Game);
@@ -159,17 +159,17 @@ end;
 
 function TPB_TournamentTableStart.has_TableStatus: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentTableStart.set_has_TableStatus;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentTableStart.clear_has_TableStatus;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentTableStart.SetTableStatus(const AValue: TPB_TableStatus);
@@ -184,7 +184,7 @@ end;
 
 procedure TPB_TournamentTableStart.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Game;

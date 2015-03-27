@@ -22,7 +22,7 @@ type
       FTableid: TMongoId;
       FBuyinMin: UInt32;
       FBuyinMax: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
@@ -134,7 +134,7 @@ end;
 
 function TPB_PlayerClubStatus.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -147,17 +147,17 @@ end;
 
 function TPB_PlayerClubStatus.has_Clubid: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_PlayerClubStatus.set_has_Clubid;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_PlayerClubStatus.clear_has_Clubid;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_PlayerClubStatus.SetClubid(const AValue: TMongoId);
@@ -182,17 +182,17 @@ end;
 
 function TPB_PlayerClubStatus.has_Tableid: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_PlayerClubStatus.set_has_Tableid;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_PlayerClubStatus.clear_has_Tableid;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_PlayerClubStatus.SetTableid(const AValue: TMongoId);
@@ -217,17 +217,17 @@ end;
 
 function TPB_PlayerClubStatus.has_BuyinMin: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_PlayerClubStatus.set_has_BuyinMin;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_PlayerClubStatus.clear_has_BuyinMin;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_PlayerClubStatus.SetBuyinMin(const AValue: UInt32);
@@ -248,17 +248,17 @@ end;
 
 function TPB_PlayerClubStatus.has_BuyinMax: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_PlayerClubStatus.set_has_BuyinMax;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_PlayerClubStatus.clear_has_BuyinMax;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_PlayerClubStatus.SetBuyinMax(const AValue: UInt32);
@@ -273,7 +273,7 @@ end;
 
 procedure TPB_PlayerClubStatus.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Clubid;

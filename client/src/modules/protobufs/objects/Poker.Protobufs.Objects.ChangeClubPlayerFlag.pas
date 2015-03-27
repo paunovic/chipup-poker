@@ -20,7 +20,7 @@ type
       FClubMongoId: TMongoId;
       FPlayerMongoId: TMongoId;
       FFlag: Boolean;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_ClubMongoId;
     procedure clear_has_ClubMongoId;
@@ -117,7 +117,7 @@ end;
 
 function TPB_ChangeClubPlayerFlag.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $7) <> $7 then
+  if (FHasBits and $7) <> $7 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -130,17 +130,17 @@ end;
 
 function TPB_ChangeClubPlayerFlag.has_ClubMongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.set_has_ClubMongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.clear_has_ClubMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.SetClubMongoId(const AValue: TMongoId);
@@ -165,17 +165,17 @@ end;
 
 function TPB_ChangeClubPlayerFlag.has_PlayerMongoId: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.set_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.clear_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.SetPlayerMongoId(const AValue: TMongoId);
@@ -200,17 +200,17 @@ end;
 
 function TPB_ChangeClubPlayerFlag.has_Flag: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.set_has_Flag;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.clear_has_Flag;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.SetFlag(const AValue: Boolean);
@@ -225,7 +225,7 @@ end;
 
 procedure TPB_ChangeClubPlayerFlag.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_ClubMongoId;

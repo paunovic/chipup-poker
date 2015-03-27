@@ -189,6 +189,7 @@ uses
   Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas',
   Poker.Protobufs.Objects.ReservedSeatFree in 'modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas';
 
+
 procedure FocusApp;
 var
   window_handle: THandle;
@@ -207,13 +208,13 @@ begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
 
   TCommandLineParams.ParseParams;
-        {
+
   if not TInstanceController.AcquireInstance(Settings.Hardcoded.INSTANCE_MUTEX_NAME) then
   begin
     FocusApp;
     Exit;
   end;
-         }
+
   Application.Initialize;
   Application.Title := 'ChipUP Poker';
   Application.MainFormOnTaskbar := True;

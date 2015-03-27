@@ -20,7 +20,7 @@ type
     var
       FId: TMongoId;
       FReplyStatus: TTournamentCommandEnum;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -102,7 +102,7 @@ end;
 
 function TPB_TournamentCommandParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -115,17 +115,17 @@ end;
 
 function TPB_TournamentCommandParams.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentCommandParams.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentCommandParams.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentCommandParams.SetMongoId(const AValue: TMongoId);
@@ -150,17 +150,17 @@ end;
 
 function TPB_TournamentCommandParams.has_ReplyStatus: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentCommandParams.set_has_ReplyStatus;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentCommandParams.clear_has_ReplyStatus;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentCommandParams.SetReplyStatus(const AValue: TTournamentCommandEnum);
@@ -175,7 +175,7 @@ end;
 
 procedure TPB_TournamentCommandParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

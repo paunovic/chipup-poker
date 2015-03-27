@@ -111,7 +111,7 @@ begin
      Exit(TRUE);
    end;
 
-  SoftException(Format('DirectX swap chain element not acquired', [AHandle]));
+  SoftException('DirectX swap chain element not acquired');
   Exit(FALSE);
 end;
 

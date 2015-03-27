@@ -20,7 +20,7 @@ type
     var
       FMessage: TTableMessageType;
       FEndTime: UInt64;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Message;
     procedure clear_has_Message;
@@ -102,7 +102,7 @@ end;
 
 function TPB_TableMessage.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -115,17 +115,17 @@ end;
 
 function TPB_TableMessage.has_Message: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TableMessage.set_has_Message;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TableMessage.clear_has_Message;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TableMessage.SetMessage(const AValue: TTableMessageType);
@@ -146,17 +146,17 @@ end;
 
 function TPB_TableMessage.has_EndTime: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TableMessage.set_has_EndTime;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TableMessage.clear_has_EndTime;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TableMessage.SetEndTime(const AValue: UInt64);
@@ -171,7 +171,7 @@ end;
 
 procedure TPB_TableMessage.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Message;

@@ -23,7 +23,7 @@ type
       FDebug: Boolean;
       FFiles: TList<TPB_UpdateFileInfo>;
       FAppcode: TAppCode;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Debug;
     procedure clear_has_Debug;
@@ -144,7 +144,7 @@ function TPB_HelloParams.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   for pbobj in Files do
     if not pbobj.IsInitialized then
@@ -160,17 +160,17 @@ end;
 
 function TPB_HelloParams.has_Debug: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_HelloParams.set_has_Debug;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_HelloParams.clear_has_Debug;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_HelloParams.SetDebug(const AValue: Boolean);
@@ -196,17 +196,17 @@ end;
 
 function TPB_HelloParams.has_Files: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_HelloParams.set_has_Files;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_HelloParams.clear_has_Files;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_HelloParams.FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
@@ -229,17 +229,17 @@ end;
 
 function TPB_HelloParams.has_Appcode: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_HelloParams.set_has_Appcode;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_HelloParams.clear_has_Appcode;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_HelloParams.SetAppcode(const AValue: TAppCode);
@@ -254,7 +254,7 @@ end;
 
 procedure TPB_HelloParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Debug;

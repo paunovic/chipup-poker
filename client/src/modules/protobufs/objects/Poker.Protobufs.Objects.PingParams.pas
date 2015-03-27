@@ -16,7 +16,7 @@ type
 
     var
       FUptime: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Uptime;
     procedure clear_has_Uptime;
@@ -83,7 +83,7 @@ end;
 
 function TPB_PingParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -96,17 +96,17 @@ end;
 
 function TPB_PingParams.has_Uptime: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_PingParams.set_has_Uptime;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_PingParams.clear_has_Uptime;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_PingParams.SetUptime(const AValue: UInt32);
@@ -121,7 +121,7 @@ end;
 
 procedure TPB_PingParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Uptime;

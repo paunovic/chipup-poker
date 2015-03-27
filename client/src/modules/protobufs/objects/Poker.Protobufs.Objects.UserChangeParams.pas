@@ -17,7 +17,7 @@ type
 
     var
       FUsers: TList<TPB_User>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Users;
     procedure clear_has_Users;
@@ -108,7 +108,7 @@ function TPB_UserChangeParams.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $0) <> $0 then
+  if (FHasBits and $0) <> $0 then
     Exit(FALSE);
   for pbobj in Users do
     if not pbobj.IsInitialized then
@@ -129,17 +129,17 @@ end;
 
 function TPB_UserChangeParams.has_Users: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_UserChangeParams.set_has_Users;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_UserChangeParams.clear_has_Users;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
@@ -156,7 +156,7 @@ end;
 
 procedure TPB_UserChangeParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Users;

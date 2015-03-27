@@ -29,7 +29,7 @@ type
       FNick: String;
       FMuck: Boolean;
       FStatus: TPlayerStatus;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -186,7 +186,7 @@ end;
 
 function TPB_PlayerHandHistory.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $5b) <> $5b then
+  if (FHasBits and $5b) <> $5b then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -199,17 +199,17 @@ end;
 
 function TPB_PlayerHandHistory.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TMongoId);
@@ -234,17 +234,17 @@ end;
 
 function TPB_PlayerHandHistory.has_Seat: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_Seat;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_PlayerHandHistory.SetSeat(const AValue: Integer);
@@ -265,17 +265,17 @@ end;
 
 function TPB_PlayerHandHistory.has_Cards: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_Cards;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
@@ -296,17 +296,17 @@ end;
 
 function TPB_PlayerHandHistory.has_Chips: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_Chips;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_PlayerHandHistory.SetChips(const AValue: UInt32);
@@ -327,17 +327,17 @@ end;
 
 function TPB_PlayerHandHistory.has_Nick: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_Nick;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_Nick;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_PlayerHandHistory.SetNick(const AValue: String);
@@ -358,17 +358,17 @@ end;
 
 function TPB_PlayerHandHistory.has_Muck: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_Muck;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_Muck;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
@@ -389,17 +389,17 @@ end;
 
 function TPB_PlayerHandHistory.has_Status: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_PlayerHandHistory.set_has_Status;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_PlayerHandHistory.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_PlayerHandHistory.SetStatus(const AValue: TPlayerStatus);
@@ -414,7 +414,7 @@ end;
 
 procedure TPB_PlayerHandHistory.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

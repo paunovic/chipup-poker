@@ -23,7 +23,7 @@ type
       FEvent: TEventType;
       FMsg: TPB_ChatMessage;
       FTableId: TMongoId;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Event;
     procedure clear_has_Event;
@@ -124,7 +124,7 @@ end;
 
 function TPB_ChatEvent.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   if (has_Msg) then
     if not FMsg.IsInitialized then
@@ -140,17 +140,17 @@ end;
 
 function TPB_ChatEvent.has_Event: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ChatEvent.set_has_Event;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ChatEvent.clear_has_Event;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
@@ -171,17 +171,17 @@ end;
 
 function TPB_ChatEvent.has_Msg: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ChatEvent.set_has_Msg;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ChatEvent.clear_has_Msg;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ChatEvent.SetMsg(const AValue: TPB_ChatMessage);
@@ -202,17 +202,17 @@ end;
 
 function TPB_ChatEvent.has_TableId: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_ChatEvent.set_has_TableId;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_ChatEvent.clear_has_TableId;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TMongoId);
@@ -231,7 +231,7 @@ end;
 
 procedure TPB_ChatEvent.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Event;

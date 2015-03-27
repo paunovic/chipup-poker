@@ -2,8 +2,6 @@ unit Poker.Forms.Login;
 
 interface
 
-{$I defines.inc}
-
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Dialogs, Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels,
@@ -75,7 +73,7 @@ type
     procedure HelloServer;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
-    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
+    procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
   public
     property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
   end;
@@ -309,9 +307,9 @@ begin
   tiLoginTimeout.Enabled := FALSE;
 end;
 
-procedure TfrmChipUpLogin.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+procedure TfrmChipUpLogin.WMEraseBkgnd(var AMessage: TWMEraseBkgnd);
 begin
-  Message.Result := 0;
+  AMessage.Result := 0;
 end;
 
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);

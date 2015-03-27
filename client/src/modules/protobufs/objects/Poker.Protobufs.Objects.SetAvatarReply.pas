@@ -18,7 +18,7 @@ type
 
     var
       FStatus: TSetAvatarStatus;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Status;
     procedure clear_has_Status;
@@ -85,7 +85,7 @@ end;
 
 function TPB_SetAvatarReply.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -98,17 +98,17 @@ end;
 
 function TPB_SetAvatarReply.has_Status: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_SetAvatarReply.set_has_Status;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_SetAvatarReply.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_SetAvatarReply.SetStatus(const AValue: TSetAvatarStatus);
@@ -123,7 +123,7 @@ end;
 
 procedure TPB_SetAvatarReply.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Status;

@@ -17,7 +17,7 @@ type
 
     var
       FAssets: TList<TPB_UpdateFileInfo>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Assets;
     procedure clear_has_Assets;
@@ -108,7 +108,7 @@ function TPB_AssetList.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $0) <> $0 then
+  if (FHasBits and $0) <> $0 then
     Exit(FALSE);
   for pbobj in Assets do
     if not pbobj.IsInitialized then
@@ -129,17 +129,17 @@ end;
 
 function TPB_AssetList.has_Assets: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_AssetList.set_has_Assets;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_AssetList.clear_has_Assets;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_AssetList.AssetsNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
@@ -156,7 +156,7 @@ end;
 
 procedure TPB_AssetList.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Assets;

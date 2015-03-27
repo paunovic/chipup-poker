@@ -20,7 +20,7 @@ type
       FMethodId: Integer;
       FDataSize: Integer;
       FToken: Integer;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MethodId;
     procedure clear_has_MethodId;
@@ -117,7 +117,7 @@ end;
 
 function TPB_RpcMessage.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -130,17 +130,17 @@ end;
 
 function TPB_RpcMessage.has_MethodId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_RpcMessage.set_has_MethodId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_RpcMessage.clear_has_MethodId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
@@ -161,17 +161,17 @@ end;
 
 function TPB_RpcMessage.has_DataSize: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_RpcMessage.set_has_DataSize;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_RpcMessage.clear_has_DataSize;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_RpcMessage.SetDataSize(const AValue: Integer);
@@ -192,17 +192,17 @@ end;
 
 function TPB_RpcMessage.has_Token: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_RpcMessage.set_has_Token;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_RpcMessage.clear_has_Token;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_RpcMessage.SetToken(const AValue: Integer);
@@ -217,7 +217,7 @@ end;
 
 procedure TPB_RpcMessage.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MethodId;

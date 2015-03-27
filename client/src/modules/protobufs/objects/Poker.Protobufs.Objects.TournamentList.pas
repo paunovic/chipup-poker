@@ -17,7 +17,7 @@ type
 
     var
       FItems: TList<TPB_TournamentInfo>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Items;
     procedure clear_has_Items;
@@ -108,7 +108,7 @@ function TPB_TournamentList.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $0) <> $0 then
+  if (FHasBits and $0) <> $0 then
     Exit(FALSE);
   for pbobj in Items do
     if not pbobj.IsInitialized then
@@ -129,17 +129,17 @@ end;
 
 function TPB_TournamentList.has_Items: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentList.set_has_Items;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentList.clear_has_Items;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentList.ItemsNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
@@ -156,7 +156,7 @@ end;
 
 procedure TPB_TournamentList.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Items;

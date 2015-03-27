@@ -39,7 +39,7 @@ type
       FGame: TPB_Game;
       FCurrentGame: TGameType;
       FRake: Integer;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -318,7 +318,7 @@ function TPB_HandHistory.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $927) <> $927 then
+  if (FHasBits and $927) <> $927 then
     Exit(FALSE);
   for pbobj in Players do
     if not pbobj.IsInitialized then
@@ -340,17 +340,17 @@ end;
 
 function TPB_HandHistory.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_HandHistory.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_HandHistory.SetMongoId(const AValue: TMongoId);
@@ -375,17 +375,17 @@ end;
 
 function TPB_HandHistory.has_Seq: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Seq;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_HandHistory.clear_has_Seq;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_HandHistory.SetSeq(const AValue: UInt32);
@@ -406,17 +406,17 @@ end;
 
 function TPB_HandHistory.has_Totalrake: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Totalrake;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_HandHistory.clear_has_Totalrake;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_HandHistory.SetTotalrake(const AValue: UInt32);
@@ -442,17 +442,17 @@ end;
 
 function TPB_HandHistory.has_Players: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Players;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_HandHistory.clear_has_Players;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_HandHistory.PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
@@ -480,17 +480,17 @@ end;
 
 function TPB_HandHistory.has_Cards: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Cards;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_HandHistory.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_HandHistory.CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
@@ -509,17 +509,17 @@ end;
 
 function TPB_HandHistory.has_Endtime: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Endtime;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_HandHistory.clear_has_Endtime;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_HandHistory.SetEndtime(const AValue: UInt32);
@@ -545,17 +545,17 @@ end;
 
 function TPB_HandHistory.has_BalanceChanges: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_BalanceChanges;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_HandHistory.clear_has_BalanceChanges;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_HandHistory.BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
@@ -579,17 +579,17 @@ end;
 
 function TPB_HandHistory.has_Moves: Boolean;
 begin
-  result := (_has_bits_ and 128) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Moves;
 begin
-  _has_bits_ := _has_bits_ or 128;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_HandHistory.clear_has_Moves;
 begin
-  _has_bits_ := _has_bits_ and not 128;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_HandHistoryMove; Action: TCollectionNotification);
@@ -612,17 +612,17 @@ end;
 
 function TPB_HandHistory.has_Dealer: Boolean;
 begin
-  result := (_has_bits_ and 256) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Dealer;
 begin
-  _has_bits_ := _has_bits_ or 256;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_HandHistory.clear_has_Dealer;
 begin
-  _has_bits_ := _has_bits_ and not 256;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_HandHistory.SetDealer(const AValue: UInt32);
@@ -643,17 +643,17 @@ end;
 
 function TPB_HandHistory.has_Game: Boolean;
 begin
-  result := (_has_bits_ and 512) > 0;
+  result := (FHasBits and 512) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Game;
 begin
-  _has_bits_ := _has_bits_ or 512;
+  FHasBits := FHasBits or 512;
 end;
 
 procedure TPB_HandHistory.clear_has_Game;
 begin
-  _has_bits_ := _has_bits_ and not 512;
+  FHasBits := FHasBits and not 512;
 end;
 
 procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
@@ -674,17 +674,17 @@ end;
 
 function TPB_HandHistory.has_CurrentGame: Boolean;
 begin
-  result := (_has_bits_ and 1024) > 0;
+  result := (FHasBits and 1024) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_CurrentGame;
 begin
-  _has_bits_ := _has_bits_ or 1024;
+  FHasBits := FHasBits or 1024;
 end;
 
 procedure TPB_HandHistory.clear_has_CurrentGame;
 begin
-  _has_bits_ := _has_bits_ and not 1024;
+  FHasBits := FHasBits and not 1024;
 end;
 
 procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
@@ -705,17 +705,17 @@ end;
 
 function TPB_HandHistory.has_Rake: Boolean;
 begin
-  result := (_has_bits_ and 2048) > 0;
+  result := (FHasBits and 2048) > 0;
 end;
 
 procedure TPB_HandHistory.set_has_Rake;
 begin
-  _has_bits_ := _has_bits_ or 2048;
+  FHasBits := FHasBits or 2048;
 end;
 
 procedure TPB_HandHistory.clear_has_Rake;
 begin
-  _has_bits_ := _has_bits_ and not 2048;
+  FHasBits := FHasBits and not 2048;
 end;
 
 procedure TPB_HandHistory.SetRake(const AValue: Integer);
@@ -730,7 +730,7 @@ end;
 
 procedure TPB_HandHistory.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

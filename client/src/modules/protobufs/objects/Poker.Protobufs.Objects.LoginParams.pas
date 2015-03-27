@@ -18,7 +18,7 @@ type
     var
       FUsername: String;
       FPassword: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Username;
     procedure clear_has_Username;
@@ -100,7 +100,7 @@ end;
 
 function TPB_LoginParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +113,17 @@ end;
 
 function TPB_LoginParams.has_Username: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_LoginParams.set_has_Username;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_LoginParams.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_LoginParams.SetUsername(const AValue: String);
@@ -144,17 +144,17 @@ end;
 
 function TPB_LoginParams.has_Password: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_LoginParams.set_has_Password;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_LoginParams.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_LoginParams.SetPassword(const AValue: String);
@@ -169,7 +169,7 @@ end;
 
 procedure TPB_LoginParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Username;

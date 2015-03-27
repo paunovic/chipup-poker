@@ -55,7 +55,7 @@ type
       FCurrentBlindLevel: UInt32;
       FCurrentBlindLevelEndTime: UInt64;
       FPrizes: TList<TPB_TournamentPrize>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -440,7 +440,7 @@ function TPB_TournamentInfo.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $2fff) <> $2fff then
+  if (FHasBits and $2fff) <> $2fff then
     Exit(FALSE);
   for pbobj in Players do
     if not pbobj.IsInitialized then
@@ -465,17 +465,17 @@ end;
 
 function TPB_TournamentInfo.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentInfo.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentInfo.SetMongoId(const AValue: TMongoId);
@@ -500,17 +500,17 @@ end;
 
 function TPB_TournamentInfo.has_Name: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Name;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Name;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentInfo.SetName(const AValue: String);
@@ -531,17 +531,17 @@ end;
 
 function TPB_TournamentInfo.has_Description: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Description;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Description;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TournamentInfo.SetDescription(const AValue: String);
@@ -562,17 +562,17 @@ end;
 
 function TPB_TournamentInfo.has_Gametype: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Gametype;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Gametype;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TournamentInfo.SetGametype(const AValue: TGameType);
@@ -593,17 +593,17 @@ end;
 
 function TPB_TournamentInfo.has_Limit: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Limit;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Limit;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TournamentInfo.SetLimit(const AValue: TGameLimit);
@@ -624,17 +624,17 @@ end;
 
 function TPB_TournamentInfo.has_SeatsPerTable: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_SeatsPerTable;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_TournamentInfo.clear_has_SeatsPerTable;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_TournamentInfo.SetSeatsPerTable(const AValue: UInt32);
@@ -655,17 +655,17 @@ end;
 
 function TPB_TournamentInfo.has_Minplayers: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Minplayers;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Minplayers;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_TournamentInfo.SetMinplayers(const AValue: UInt32);
@@ -686,17 +686,17 @@ end;
 
 function TPB_TournamentInfo.has_Maxplayers: Boolean;
 begin
-  result := (_has_bits_ and 128) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Maxplayers;
 begin
-  _has_bits_ := _has_bits_ or 128;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Maxplayers;
 begin
-  _has_bits_ := _has_bits_ and not 128;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_TournamentInfo.SetMaxplayers(const AValue: UInt32);
@@ -717,17 +717,17 @@ end;
 
 function TPB_TournamentInfo.has_Startingchips: Boolean;
 begin
-  result := (_has_bits_ and 256) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Startingchips;
 begin
-  _has_bits_ := _has_bits_ or 256;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Startingchips;
 begin
-  _has_bits_ := _has_bits_ and not 256;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_TournamentInfo.SetStartingchips(const AValue: UInt32);
@@ -748,17 +748,17 @@ end;
 
 function TPB_TournamentInfo.has_Timeperlevel: Boolean;
 begin
-  result := (_has_bits_ and 512) > 0;
+  result := (FHasBits and 512) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Timeperlevel;
 begin
-  _has_bits_ := _has_bits_ or 512;
+  FHasBits := FHasBits or 512;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Timeperlevel;
 begin
-  _has_bits_ := _has_bits_ and not 512;
+  FHasBits := FHasBits and not 512;
 end;
 
 procedure TPB_TournamentInfo.SetTimeperlevel(const AValue: UInt32);
@@ -779,17 +779,17 @@ end;
 
 function TPB_TournamentInfo.has_RegisteredPlayers: Boolean;
 begin
-  result := (_has_bits_ and 1024) > 0;
+  result := (FHasBits and 1024) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_RegisteredPlayers;
 begin
-  _has_bits_ := _has_bits_ or 1024;
+  FHasBits := FHasBits or 1024;
 end;
 
 procedure TPB_TournamentInfo.clear_has_RegisteredPlayers;
 begin
-  _has_bits_ := _has_bits_ and not 1024;
+  FHasBits := FHasBits and not 1024;
 end;
 
 procedure TPB_TournamentInfo.SetRegisteredPlayers(const AValue: UInt32);
@@ -810,17 +810,17 @@ end;
 
 function TPB_TournamentInfo.has_StartTime: Boolean;
 begin
-  result := (_has_bits_ and 2048) > 0;
+  result := (FHasBits and 2048) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_StartTime;
 begin
-  _has_bits_ := _has_bits_ or 2048;
+  FHasBits := FHasBits or 2048;
 end;
 
 procedure TPB_TournamentInfo.clear_has_StartTime;
 begin
-  _has_bits_ := _has_bits_ and not 2048;
+  FHasBits := FHasBits and not 2048;
 end;
 
 procedure TPB_TournamentInfo.SetStartTime(const AValue: UInt32);
@@ -846,17 +846,17 @@ end;
 
 function TPB_TournamentInfo.has_Players: Boolean;
 begin
-  result := (_has_bits_ and 4096) > 0;
+  result := (FHasBits and 4096) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Players;
 begin
-  _has_bits_ := _has_bits_ or 4096;
+  FHasBits := FHasBits or 4096;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Players;
 begin
-  _has_bits_ := _has_bits_ and not 4096;
+  FHasBits := FHasBits and not 4096;
 end;
 
 procedure TPB_TournamentInfo.PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
@@ -879,17 +879,17 @@ end;
 
 function TPB_TournamentInfo.has_State: Boolean;
 begin
-  result := (_has_bits_ and 8192) > 0;
+  result := (FHasBits and 8192) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_State;
 begin
-  _has_bits_ := _has_bits_ or 8192;
+  FHasBits := FHasBits or 8192;
 end;
 
 procedure TPB_TournamentInfo.clear_has_State;
 begin
-  _has_bits_ := _has_bits_ and not 8192;
+  FHasBits := FHasBits and not 8192;
 end;
 
 procedure TPB_TournamentInfo.SetState(const AValue: TTournamentState);
@@ -915,17 +915,17 @@ end;
 
 function TPB_TournamentInfo.has_Games: Boolean;
 begin
-  result := (_has_bits_ and 16384) > 0;
+  result := (FHasBits and 16384) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Games;
 begin
-  _has_bits_ := _has_bits_ or 16384;
+  FHasBits := FHasBits or 16384;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Games;
 begin
-  _has_bits_ := _has_bits_ and not 16384;
+  FHasBits := FHasBits and not 16384;
 end;
 
 procedure TPB_TournamentInfo.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
@@ -953,17 +953,17 @@ end;
 
 function TPB_TournamentInfo.has_BlindStructure: Boolean;
 begin
-  result := (_has_bits_ and 32768) > 0;
+  result := (FHasBits and 32768) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_BlindStructure;
 begin
-  _has_bits_ := _has_bits_ or 32768;
+  FHasBits := FHasBits or 32768;
 end;
 
 procedure TPB_TournamentInfo.clear_has_BlindStructure;
 begin
-  _has_bits_ := _has_bits_ and not 32768;
+  FHasBits := FHasBits and not 32768;
 end;
 
 procedure TPB_TournamentInfo.BlindStructureNotifyEvent(Sender: TObject; const Item: TPB_GameBlinds; Action: TCollectionNotification);
@@ -986,17 +986,17 @@ end;
 
 function TPB_TournamentInfo.has_CurrentBlindLevel: Boolean;
 begin
-  result := (_has_bits_ and 65536) > 0;
+  result := (FHasBits and 65536) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_CurrentBlindLevel;
 begin
-  _has_bits_ := _has_bits_ or 65536;
+  FHasBits := FHasBits or 65536;
 end;
 
 procedure TPB_TournamentInfo.clear_has_CurrentBlindLevel;
 begin
-  _has_bits_ := _has_bits_ and not 65536;
+  FHasBits := FHasBits and not 65536;
 end;
 
 procedure TPB_TournamentInfo.SetCurrentBlindLevel(const AValue: UInt32);
@@ -1017,17 +1017,17 @@ end;
 
 function TPB_TournamentInfo.has_CurrentBlindLevelEndTime: Boolean;
 begin
-  result := (_has_bits_ and 131072) > 0;
+  result := (FHasBits and 131072) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_CurrentBlindLevelEndTime;
 begin
-  _has_bits_ := _has_bits_ or 131072;
+  FHasBits := FHasBits or 131072;
 end;
 
 procedure TPB_TournamentInfo.clear_has_CurrentBlindLevelEndTime;
 begin
-  _has_bits_ := _has_bits_ and not 131072;
+  FHasBits := FHasBits and not 131072;
 end;
 
 procedure TPB_TournamentInfo.SetCurrentBlindLevelEndTime(const AValue: UInt64);
@@ -1053,17 +1053,17 @@ end;
 
 function TPB_TournamentInfo.has_Prizes: Boolean;
 begin
-  result := (_has_bits_ and 262144) > 0;
+  result := (FHasBits and 262144) > 0;
 end;
 
 procedure TPB_TournamentInfo.set_has_Prizes;
 begin
-  _has_bits_ := _has_bits_ or 262144;
+  FHasBits := FHasBits or 262144;
 end;
 
 procedure TPB_TournamentInfo.clear_has_Prizes;
 begin
-  _has_bits_ := _has_bits_ and not 262144;
+  FHasBits := FHasBits and not 262144;
 end;
 
 procedure TPB_TournamentInfo.PrizesNotifyEvent(Sender: TObject; const Item: TPB_TournamentPrize; Action: TCollectionNotification);
@@ -1080,7 +1080,7 @@ end;
 
 procedure TPB_TournamentInfo.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;
