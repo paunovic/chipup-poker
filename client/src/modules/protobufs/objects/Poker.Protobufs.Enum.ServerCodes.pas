@@ -116,13 +116,13 @@ type
     scTableSitClose = 120
   );
 
-{$IFDEF DEBUG}
+
 function TranslateCode(const ACode: Integer): String;
-{$ENDIF DEBUG}
+
 
 implementation
 
-{$IFDEF DEBUG}
+
 uses System.SysUtils;
 
 function TranslateCode(const ACode: Integer): String;
@@ -242,6 +242,6 @@ begin
     result := Format('%d', [ACode]);
   end;
 end;
-{$ENDIF DEBUG}
+
 
 end.

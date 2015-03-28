@@ -270,8 +270,8 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"begin\n"	
 		"  case ACode of\n"
 		,"name",type->name()
-		,"begin","{$IFDEF DEBUG}"
-		,"end","{$ENDIF DEBUG}");
+		,"begin",""
+		,"end","");
 	for (int j=0; j<type->value_count(); j++) {
 		const EnumValueDescriptor *value = type->value(j);
 		printer.Print("    Integer($name$): result := '$name$';\n","name",value->name());
@@ -284,7 +284,7 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"$end$\n"
 		"\n"
 		"end."
-		,"end","{$ENDIF DEBUG}");
+		,"end","");
 }
 string EnumName(const FieldDescriptor *field) {
 	string name = field->camelcase_name();
