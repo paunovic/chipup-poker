@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4D4D4759-BB67-4670-B573-8A353B01598F}</ProjectGuid>
     <RootNamespace>cppprotobufgenerator</RootNamespace>
+    <ProjectName>cpp-protobuf-generator</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

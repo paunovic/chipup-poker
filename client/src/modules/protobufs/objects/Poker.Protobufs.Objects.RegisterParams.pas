@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.RegisterParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_RegisterParams = class(TProtobufBaseObject)
@@ -53,7 +55,6 @@ type
     function has_DisplayName: Boolean;
     procedure clear_DisplayName;
     property DisplayName: String read FDisplayName write SetDisplayName;
-
   end;
 
   TPB_RegisterParamsList = class(TObjectList<TPB_RegisterParams>)
@@ -63,7 +64,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams; const ALightweight: Boolean = FALSE);

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PutChips;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -54,7 +56,6 @@ type
     function has_CurrentState: Boolean;
     procedure clear_CurrentState;
     property CurrentState: TTableState read FCurrentState write SetCurrentState;
-
   end;
 
   TPB_PutChipsList = class(TObjectList<TPB_PutChips>)
@@ -64,7 +65,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PutChips.Create(const AFrom: TPB_PutChips; const ALightweight: Boolean = FALSE);

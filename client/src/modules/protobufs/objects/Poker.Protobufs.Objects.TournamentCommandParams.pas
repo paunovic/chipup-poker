@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentCommandParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TTournamentCommandEnum = (tceRegisterOk = 0, tceAlreadyRegistered, tceRegisterLimitReached, tceRegisterFailed, tceUnregisterOk, tceNotOpen);
@@ -45,7 +47,6 @@ type
     function has_ReplyStatus: Boolean;
     procedure clear_ReplyStatus;
     property ReplyStatus: TTournamentCommandEnum read FReplyStatus write SetReplyStatus;
-
   end;
 
   TPB_TournamentCommandParamsList = class(TObjectList<TPB_TournamentCommandParams>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentCommandParams.Create(const AFrom: TPB_TournamentCommandParams; const ALightweight: Boolean = FALSE);

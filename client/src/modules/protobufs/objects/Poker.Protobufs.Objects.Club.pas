@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.Club;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ClubMember;
 
 type
@@ -157,7 +159,6 @@ type
     function has_MaxRakePerHand: Boolean;
     procedure clear_MaxRakePerHand;
     property MaxRakePerHand: UInt32 read FMaxRakePerHand write SetMaxRakePerHand;
-
   end;
 
   TPB_ClubList = class(TObjectList<TPB_Club>)
@@ -167,7 +168,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_Club.Create(const AFrom: TPB_Club; const ALightweight: Boolean = FALSE);

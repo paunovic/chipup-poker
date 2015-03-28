@@ -157,7 +157,7 @@ begin
   buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
   HttpClient.SendStream.Write(buf[1], Length(buf));
   HttpClient.SendStream.Position := 0;
-  HttpClient.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
+  HttpClient.URL := Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
   HttpClient.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
   HttpClient.OnRequestDone := HTTPRequestDone;
   HttpClient.PostASync;

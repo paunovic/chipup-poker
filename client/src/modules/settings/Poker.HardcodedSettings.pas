@@ -15,17 +15,20 @@ type
         SETTINGS_FILENAME: String;
         SETTINGS_ENCRYPTION_KEY: String;
         DATABASE_FILENAME: String;
-        TCP_PING_INTERVAL: Byte;
-        TCP_INACTIVITY_PING_INTERVAL: Byte;
-        TCP_PING_TIMEOUT: Byte;
-        HAND_HISTORY_HAND_LIMIT_PER_TABLE: Word;
+        SERVER_PING_INTERVAL: Byte;
+        SERVER_INACTIVITY_PING_INTERVAL: Byte;
+        SERVER_PING_TIMEOUT: Byte;
+        SERVER_CONNECT_TIMEOUT: Byte;
         DIRECTX_SWAPCHAIN_COUNT: Byte;
+        TABLE_HAND_HISTORY_LIMIT: Word;
         TABLE_CHAT_SCROLLBACK_LINES: Word;
 
-        SERVER_CONFIG: array[0..1] of record
-          TCPAddress: String;
-          TCPPort: Word;
+        SERVER_LIST: array[0..1] of record
+          Address: String;
+          Port: Word;
           URL: String;
+          SSLEnable: Boolean;
+          SSLCertificate: String;
         end;
 
         ASSETS: record
@@ -71,18 +74,33 @@ type
         SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
         DATABASE_FILENAME: 'database.sqlite';
 
-        TCP_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
-        TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity (no command received or sent)
-        TCP_PING_TIMEOUT: 15; // in seconds
+        SERVER_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
+        SERVER_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity (no command received or sent)
+        SERVER_PING_TIMEOUT: 15; // in seconds
+        SERVER_CONNECT_TIMEOUT: 10; // in seconds
 
-        HAND_HISTORY_HAND_LIMIT_PER_TABLE: 1000; // amount of hands to store per table
         DIRECTX_SWAPCHAIN_COUNT: 64; // directx swapchain count
+
+        TABLE_HAND_HISTORY_LIMIT: 1000; // amount of hands to store per table
         TABLE_CHAT_SCROLLBACK_LINES: 200; // amount of chat lines to store per table
 
-        // server informations
-        SERVER_CONFIG: (
-          (TCPAddress: 'server.chipuppoker.com'; TCPPort: 12346; URL: 'https://www.chipuppoker.com'),
-          (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'https://dev-server.chipuppoker.com')
+        // server list
+        SERVER_LIST: (
+          (
+           Address: 'server.chipuppoker.com';
+           Port: 12346;
+           URL: 'https://www.chipuppoker.com';
+           SSLEnable: TRUE;
+           SSLCertificate: 'OfficialServerCertificate'
+          ),
+
+          (
+           Address: 'dev-server.chipuppoker.com';
+           Port: 12346;
+           URL: 'https://dev-server.chipuppoker.com';
+           SSLEnable: TRUE;
+           SSLCertificate: 'DevServerCertificate'
+          )
         );
 
         // assets paths
@@ -103,7 +121,7 @@ type
           (Path: 'assets\dxmedia.cpa'; RequiresRestart: FALSE)
         );
 
-        // animation metrics. times are in seconds
+        // animation metrics, times are in seconds
         ANIMATION_METRICS: (
           DEALING_INITIAL_DELAY: 1.5;
           DEALING_CARD_SPEED: 0.22;

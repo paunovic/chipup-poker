@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentDetails;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TournamentDetails = class(TProtobufBaseObject)
@@ -33,7 +35,6 @@ type
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TMongoId read FId write SetMongoId;
-
   end;
 
   TPB_TournamentDetailsList = class(TObjectList<TPB_TournamentDetails>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentDetails.Create(const AFrom: TPB_TournamentDetails; const ALightweight: Boolean = FALSE);

@@ -6,8 +6,8 @@ if exist "C:\dev-cpp\devcpp.exe" (GOTO :setdevcpp) else (if exist "c:\Program Fi
 	goto :build
 
 :setvs
-	set PATH=cpp-protobuf-generator/;cpp-protobuf-generator/cpp-protobuf-generator/debug/;%PATH%
-	set buildcommand="c:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" "cpp-protobuf-generator\cpp-protobuf-generator.sln"
+	set PATH=cpp-protobuf-generator/;cpp-protobuf-generator/cpp-protobuf-generator-vs/debug/;%PATH%
+	set buildcommand="c:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" "cpp-protobuf-generator-vs\cpp-protobuf-generator.sln"
 	goto :build
 
 :build

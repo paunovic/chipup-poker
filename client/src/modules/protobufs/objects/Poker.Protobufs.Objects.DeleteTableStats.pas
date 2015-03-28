@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.DeleteTableStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_DeleteTableStats = class(TProtobufBaseObject)
@@ -46,7 +48,6 @@ type
     function has_TableId: Boolean;
     procedure clear_TableId;
     property TableId: TList<TMongoId> read FTableId;
-
   end;
 
   TPB_DeleteTableStatsList = class(TObjectList<TPB_DeleteTableStats>)
@@ -56,7 +57,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_DeleteTableStats.Create(const AFrom: TPB_DeleteTableStats; const ALightweight: Boolean = FALSE);

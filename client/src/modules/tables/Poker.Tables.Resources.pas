@@ -5,7 +5,8 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards, System.Generics.Collections;
+  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas,
+  Poker.Cards, System.Generics.Collections, Asphyre.Archives.Auth;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -20,6 +21,8 @@ type
       FDXImages: TAsphyreImages;
       FDXMediaFile: TAsphyreArchive;
       FDXFonts: TAsphyreFonts;
+      FArchiveSecretKey: array[0..3] of Cardinal;
+      FArchiveAuthHandle: Cardinal;
 
       FRoomBackgroundImage: TAsphyreImage;
       FFinalRoomBackgroundImage: TAsphyreImage;
@@ -93,6 +96,9 @@ type
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
     procedure AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
     procedure DesaturateImage(const AImage: TAsphyreImage);
+    procedure Authorize(Sender: TObject; Auth: TAsphyreAuth;
+       Archive: TAsphyreArchive; AuthType: TAuthType);
+
 
   public
     const
@@ -232,6 +238,13 @@ var
   CCV: TCardValue;
   CCS: TCardSuit;
 begin
+  FArchiveSecretKey[0] := $558BDE13;
+  FArchiveSecretKey[1] := $CA0AB660;
+  FArchiveSecretKey[2] := $98CBDC20;
+  FArchiveSecretKey[3] := $7C17DF66;
+
+  FArchiveAuthHandle := Auth.Subscribe(Authorize);
+
   ArchiveTypeAccess := ataAnyFile;
   FDXMediaFile := TAsphyreArchive.Create;
   FDXMediaFile.OpenMode := aomReadOnly;
@@ -312,8 +325,16 @@ begin
   FDXFonts.Free;
   FDXImages.Free;
   FDXMediaFile.Free;
+  Auth.Unsubscribe(FArchiveAuthHandle);
 
   inherited;
+end;
+
+procedure TTableResources.Authorize(Sender: TObject; Auth: TAsphyreAuth;
+  Archive: TAsphyreArchive; AuthType: TAuthType);
+begin
+  if AuthType = atProvideKey then
+    Auth.ProvideKey(@FArchiveSecretKey[0]);
 end;
 
 procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single);
@@ -367,6 +388,8 @@ function TTableResources.GrayscaleVersion(const AImage: TAsphyreImage): TAsphyre
 begin
   if not FGrayscaleImages.TryGetValue(AImage, result) then
   begin
+    // fixme: duplicate image here instead using archive
+    // then when you do that, remove all global references to archive
     AddDXImage(AImage.Name, result);
     DesaturateImage(result);
     FGrayscaleImages.Add(AImage, result);

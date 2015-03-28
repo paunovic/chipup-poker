@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ForgotPasswordParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ForgotPasswordParams = class(TProtobufBaseObject)
@@ -33,7 +35,6 @@ type
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
-
   end;
 
   TPB_ForgotPasswordParamsList = class(TObjectList<TPB_ForgotPasswordParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ForgotPasswordParams.Create(const AFrom: TPB_ForgotPasswordParams; const ALightweight: Boolean = FALSE);

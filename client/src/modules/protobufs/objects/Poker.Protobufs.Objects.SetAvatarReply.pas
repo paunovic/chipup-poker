@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.SetAvatarReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TSetAvatarStatus = (saSuccess = 0, saNotFound);
@@ -35,7 +37,6 @@ type
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TSetAvatarStatus read FStatus write SetStatus;
-
   end;
 
   TPB_SetAvatarReplyList = class(TObjectList<TPB_SetAvatarReply>)
@@ -45,7 +46,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_SetAvatarReply.Create(const AFrom: TPB_SetAvatarReply; const ALightweight: Boolean = FALSE);

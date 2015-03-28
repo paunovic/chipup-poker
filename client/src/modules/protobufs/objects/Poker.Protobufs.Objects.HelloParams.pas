@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HelloParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
@@ -59,7 +61,6 @@ type
     function has_Appcode: Boolean;
     procedure clear_Appcode;
     property Appcode: TAppCode read FAppcode write SetAppcode;
-
   end;
 
   TPB_HelloParamsList = class(TObjectList<TPB_HelloParams>)
@@ -69,7 +70,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HelloParams.Create(const AFrom: TPB_HelloParams; const ALightweight: Boolean = FALSE);

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChangeMailReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TChangeMailStatus = (cmSuccess = 0, cmDuplicateMail, cmInvalidEmail);
@@ -35,7 +37,6 @@ type
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TChangeMailStatus read FStatus write SetStatus;
-
   end;
 
   TPB_ChangeMailReplyList = class(TObjectList<TPB_ChangeMailReply>)
@@ -45,7 +46,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChangeMailReply.Create(const AFrom: TPB_ChangeMailReply; const ALightweight: Boolean = FALSE);

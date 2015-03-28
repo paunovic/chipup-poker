@@ -606,7 +606,7 @@ begin
   begin
     FLock.Acquire;
     try
-      while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
+      while Count >= Settings.Hardcoded.TABLE_HAND_HISTORY_LIMIT do
         inherited Remove(Last);
       inherited Add(THandHistoryItem.Create(self, AHandHistory));
     finally

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HandHistory;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.HandHistoryMove, Poker.Protobufs.Objects.Game;
 
 type
@@ -147,7 +149,6 @@ type
     function has_Rake: Boolean;
     procedure clear_Rake;
     property Rake: Integer read FRake write SetRake;
-
   end;
 
   TPB_HandHistoryList = class(TObjectList<TPB_HandHistory>)
@@ -157,7 +158,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HandHistory.Create(const AFrom: TPB_HandHistory; const ALightweight: Boolean = FALSE);

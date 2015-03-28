@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableStatus;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableMessage;
 
 type
@@ -280,7 +282,6 @@ type
     function has_ReservedSeats: Boolean;
     procedure clear_ReservedSeats;
     property ReservedSeats: TList<UInt32> read FReservedSeats;
-
   end;
 
   TPB_TableStatusList = class(TObjectList<TPB_TableStatus>)
@@ -290,7 +291,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableStatus.Create(const AFrom: TPB_TableStatus; const ALightweight: Boolean = FALSE);

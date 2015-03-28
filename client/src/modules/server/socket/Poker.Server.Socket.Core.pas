@@ -5,7 +5,7 @@ interface
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections,
-  OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread,
+  OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread, Poker.Common.SSLCert,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes,
   Poker.Protobufs.Objects.Base, Winapi.Messages;
 
@@ -30,6 +30,7 @@ type
       FPinging: Boolean;
       FSSLHandshakeDone: Boolean;
       FSocketConnectThread: TServerSocketConnectThread;
+      FSSLCert: TSSLCert;
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -56,15 +57,15 @@ type
     {$ENDIF}
 
   public
-    constructor Create(const AServer: String; const APort: Integer);
+    constructor Create(const AServerIndex: Integer);
     destructor Destroy; override;
 
     procedure Connect(const AConnectSynchronously: Boolean = FALSE);
     procedure Disconnect;
     function IsConnected: Boolean;
 
-    procedure SendProtobuf(const AMethodId: Integer; const AProtobuf: TProtobufBaseObject);
-    procedure SendRawBytes(const AMethodId: Integer; const AProtobuf; const ASize: Integer);
+    procedure SendProtobuf(const AServerCode: TServerCodes; const AProtobuf: TProtobufBaseObject);
+    procedure SendRawBytes(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
 
     procedure Ping;
 
@@ -74,13 +75,14 @@ type
     property ServerTime: UINT64 read FServerTime;
     property TimeOffset: UINT64 read FTimeOffset;
     property IsPinging: Boolean read FPinging;
+    property SSLCertificate: TSSLCert read FSSLCert;
   end;
 
 implementation
 
 uses
   Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer, Poker.Server.Socket,
-  Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams,
+  Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club,
   Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
@@ -98,26 +100,32 @@ uses
   Poker.Protobufs.Objects.ReservedSeatFree;
 
 
-constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
+constructor TServerSocketCore.Create(const AServerIndex: Integer);
 begin
-  FServer := AServer;
-  FPort := APort;
+  FServer := Settings.Hardcoded.SERVER_LIST[AServerIndex].Address;
+  FPort := Settings.Hardcoded.SERVER_LIST[AServerIndex].Port;
 
   FInternalHWND := AllocateHwnd(WndProc);
 
   FSocket := TSslWSocket.Create(nil);
-  FSocket.TimeoutConnect := 1500;
-  FSocket.TimeoutIdle := 1500;
-  FSocket.TimeoutSampling := 1500;
-  FSocket.SslContext := TSslContext.Create(nil);
-  FSocket.SslContext.SslVerifyPeer := TRUE;
-  FSocket.SslContext.SslVerifyDepth := 9;
-  FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
-  FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_PEER];
-  FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE];
-  FSocket.SslContext.InitContext;
-  FSocket.SslContext.TrustCert(SSLCert_DevServer);
-  FSocket.SslContext.TrustCert(SSLCert_OfficialServer);
+  FSocket.SslEnable := Settings.Hardcoded.SERVER_LIST[AServerIndex].SSLEnable;
+  FSocket.TimeoutConnect := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
+  FSocket.TimeoutIdle := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
+  FSocket.TimeoutSampling := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
+
+  if FSocket.SslEnable then
+  begin
+    FSocket.SslContext := TSslContext.Create(nil);
+    FSocket.SslContext.SslVerifyPeer := TRUE;
+    FSocket.SslContext.SslVerifyDepth := 9;
+    FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
+    FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_PEER];
+    FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE];
+    FSocket.SslContext.InitContext;
+    FSSLCert := TSSLCert.Create(nil);
+    FSSLCert.LoadFromResource(Settings.Hardcoded.SERVER_LIST[AServerIndex].SSLCertificate);
+    FSocket.SslContext.TrustCert(FSSLCert);
+  end;
 end;
 
 destructor TServerSocketCore.Destroy;
@@ -126,8 +134,14 @@ begin
 
   Disconnect;
 
-  FSocket.SslContext.DeInitContext;
-  FSocket.SslContext.Free;
+  if Assigned(FSocket.SslContext) then
+  begin
+    FSocket.SslContext.DeInitContext;
+    if Assigned(FSSLCert) then
+      FreeAndNil(FSSLCert);
+    FSocket.SslContext.Free;
+    FSocket.SslContext := nil;
+  end;
   FreeAndNil(FSocket);
 
   DeallocateHWnd(FInternalHWND);
@@ -147,8 +161,6 @@ begin
 
   FSocket.Addr := FServer;
   FSocket.Port := IntToStr(FPort);
-  FSocket.TimeoutConnect := 10000;
-  FSocket.SslEnable := TRUE;
   FSocket.OnChangeState := SocketChangeState;
   FSocket.OnDataAvailable := SocketDataAvailable;
   FSocket.OnError := SocketError;
@@ -175,12 +187,14 @@ procedure TServerSocketCore.Disconnect;
 begin
   KillPingTimers;
   KillPingTimeoutTimer;
+
   if FSocket.State <> TSocketState.wsClosed then
   begin
     {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
     FSocket.Flush;
     FSocket.CloseDelayed;
   end;
+
   FSSLHandshakeDone := FALSE;
   FreeReceiveBuffer;
 end;
@@ -189,8 +203,17 @@ procedure TServerSocketCore.SocketSessionConnected(Sender: TObject; ErrCode: Wor
 begin
   if ErrCode = 0 then
   begin
-    {$IFDEF DEBUG} DebugLn('Starting SSL handshake...', ditSocket); {$ENDIF}
-    FSocket.StartSslHandshake;
+    if FSocket.SslEnable then
+    begin
+      {$IFDEF DEBUG} DebugLn('Starting SSL handshake...', ditSocket); {$ENDIF}
+      FSocket.StartSslHandshake;
+    end
+    else
+    begin
+      {$IFDEF DEBUG} DebugLn('SSL not enabled for this server', ditSocket); {$ENDIF}
+      ResetInactivityPingTimer;
+      ResetPingTimer;
+    end;
   end
   else
   begin
@@ -201,7 +224,7 @@ end;
 
 procedure TServerSocketCore.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  SoftException(Format('Session closed [%d]', [ErrCode]));
+  SoftException('Session closed');
   Disconnect;
 end;
 
@@ -259,7 +282,7 @@ begin
     dbgtype := ADebugType;
 
   if ARpcMessage.DataSize = 0 then
-    DebugLn(Format('Method: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype)
+    DebugLn(Format('Code: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype)
   else
   begin
     if (IsDebugFormAssigned) and
@@ -269,9 +292,9 @@ begin
       serialized_object := '';
 
     if AStreamSize = 0 then
-      DebugLn(Format('Method: %s; DataSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
+      DebugLn(Format('Code: %s; data size: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
     else
-      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
+      DebugLn(Format('Code: %s; data size: %d; stream size: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
   end;
 end;
 {$ENDIF}
@@ -373,13 +396,32 @@ end;
 procedure TServerSocketCore.SocketError(Sender: TObject);
 {$IFDEF DEBUG}
 var
-  last_err: Integer;
+  last_err, wsa_err: Integer;
+  line: String;
 {$ENDIF}
 begin
   {$IFDEF DEBUG}
   last_err := FSocket.LastError;
+  wsa_err := WSAGetLastError;
   if last_err <> WSAEWOULDBLOCK then // ignore WSAEWOULDBLOCK
-    SoftException(Format('Socket error [%d]: %s', [last_err, WSocketErrorDesc(last_err)]));
+  begin
+    line := '';
+
+    if last_err > 0 then
+      line := Format('%s (#%d)', [WSocketErrorDesc(last_err), last_err]);
+
+    if wsa_err > 0 then
+    begin
+      if line <> '' then
+        line := line + ' | ';
+      line := line + Format('%s (#%d)', [WSocketErrorDesc(wsa_err), wsa_err]);
+    end;
+
+    if line <> '' then
+      SoftException(Format('Socket error: %s', [line]))
+    else
+      SoftException('Unknown socket error');
+  end;
   {$ENDIF}
 
   case FSocket.State of
@@ -392,17 +434,17 @@ end;
 
 procedure TServerSocketCore.ResetPingTimer;
 begin
-  SetTimer(FInternalHWND, TIMER_ID_PING, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, nil);
+  SetTimer(FInternalHWND, TIMER_ID_PING, Settings.Hardcoded.SERVER_PING_INTERVAL * 1000, nil);
 end;
 
 procedure TServerSocketCore.ResetInactivityPingTimer;
 begin
-  SetTimer(FInternalHWND, TIMER_ID_INACTIVITY_PING, Settings.Hardcoded.TCP_INACTIVITY_PING_INTERVAL * 1000, nil);
+  SetTimer(FInternalHWND, TIMER_ID_INACTIVITY_PING, Settings.Hardcoded.SERVER_INACTIVITY_PING_INTERVAL * 1000, nil);
 end;
 
 procedure TServerSocketCore.ResetPingTimeoutTimer;
 begin
-  SetTimer(FInternalHWND, TIMER_ID_PING_TIMEOUT, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, nil);
+  SetTimer(FInternalHWND, TIMER_ID_PING_TIMEOUT, Settings.Hardcoded.SERVER_PING_TIMEOUT * 1000, nil);
   FPinging := TRUE;
   {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState, dfiLatency]); {$ENDIF}
 end;
@@ -421,62 +463,47 @@ end;
 
 function TServerSocketCore.IsConnected: Boolean;
 begin
-  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FSSLHandshakeDone);
+  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and
+   ((not FSocket.SslEnable) or (FSSLHandshakeDone));
 end;
 
 function TServerSocketCore.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
 var
   err: String;
-  sc: TServerCodes;
-  valid_sc: Boolean;
   gtc: DWORD;
 begin
   ADataObject := nil;
-  valid_sc := FALSE;
 
-  for sc := Low(TServerCodes) to High(TServerCodes) do
-    if ARpcMessage.MethodId = Integer(sc) then
-    begin
-      valid_sc := TRUE;
-      Break;
-    end;
-
-  if not valid_sc then
-  begin
-    SoftException(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]));
-    Exit(FALSE);
-  end;
-
-  case TServerCodes(ARpcMessage.MethodId) of
-    srNotImplemented: begin
+  case ARpcMessage.MethodId of
+    Integer(srNotImplemented): begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
-      SoftException(Format('Received not implemented method id: %s', [err]));
+      SoftException(Format('Received unimplemented code: %s', [err]));
     end;
-    srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srLogout: ;
-    srRegisterReply: ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srChangePasswordOk: ;
-    seSecondaryLoginDetected: ;
-    seAccountConfirmed: ADataObject := TPB_User.Create(ADataPointer, ARpcMessage.DataSize);
-    srPlayerLimitOk: ADataObject := TPB_PlayerLimitParams.Create(ADataPointer, ARpcMessage.DataSize);
-    srGetPlayers: ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
-    srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srSetAvatarReply: ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srCreateClubReply,
-    srJoinClubReply,
-    srLeaveClubReply,
-    srChangeClubDetailsReply,
-    srKickPlayerReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srTableAddonOverLimit,
-    seTableStatus,
-    srTableSitOk,
-    srTableSitSeatTaken,
-    srTableAddonOk,
-    srClubBalanceReached,
-    seReservedSeatTimeout,
-    srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
-    srPong: begin
+    Integer(srLoginReply): ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srLogout): ;
+    Integer(srRegisterReply): ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srChangePasswordOk): ;
+    Integer(seSecondaryLoginDetected): ;
+    Integer(seAccountConfirmed): ADataObject := TPB_User.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srPlayerLimitOk): ADataObject := TPB_PlayerLimitParams.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srGetPlayers): ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srChangeMailReply): ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srSetAvatarReply): ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srCreateClubReply),
+    Integer(srJoinClubReply),
+    Integer(srLeaveClubReply),
+    Integer(srChangeClubDetailsReply),
+    Integer(srKickPlayerReply): ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srHello): ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srTableAddonOverLimit),
+    Integer(seTableStatus),
+    Integer(srTableSitOk),
+    Integer(srTableSitSeatTaken),
+    Integer(srTableAddonOk),
+    Integer(srClubBalanceReached),
+    Integer(seReservedSeatTimeout),
+    Integer(srTableStandUpOk): ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srPong): begin
       gtc := GetTickCount;
       ADataObject := TPB_PingReply.Create(ADataPointer, ARpcMessage.DataSize);
       FLatency := gtc - (ADataObject as TPB_PingReply).Uptime;
@@ -486,48 +513,50 @@ begin
       ResetPingTimer;
       {$IFDEF DEBUG} RefreshDebugForm([dfiLatency]); {$ENDIF}
     end;
-    seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
-    srClubDisbandOk,
-    srOwnershipGiveAwayNotOwner,
-    srOwnershipGiveawayInvalidPlayerId,
-    srOwnershipGiveAwayInvalidClubId,
-    srOwnershipGiveAwayOk,
-    srSuspendPlayerOk,
-    srReinstatePlayerOk,
-    seClubChange,
-    srResetPlayerBalanceOk,
-    seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
-    srCreateGameOk,
-    srDeleteGameOk,
-    seGameChange,
-    seGameCreate,
-    srNotSitting,
-    seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
-    seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
-    srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
-    srContactUsOk: ;
-    srTableBuyinLessThanCashout,
-    srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
-    srHandHistoryMsg: ADataObject := TPB_HandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srQueryAssetsReply: ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
-    srSubscriptionPlanChange: ADataObject := TPB_SubscriptionPlanChange.Create(ADataPointer, ARpcMessage.DataSize);
-    seTournamentList: ADataObject := TPB_TournamentList.Create(ADataPointer, ARpcMessage.DataSize);
-    srTournamentReply: ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
-    srTournamentDetails: ADataObject := TPB_TournamentInfo.Create(ADataPointer, ARpcMessage.DataSize);
-    srTournamentOpenTable: ADataObject := TPB_TournamentTableStart.Create(ADataPointer, ARpcMessage.DataSize);
-    seTournamentPlayerFinished: ADataObject := TPB_TournamentPlayerFinished.Create(ADataPointer, ARpcMessage.DataSize);
-    seTournamentPlayerTransfer: ADataObject := TPB_TournamentPlayerTransfer.Create(ADataPointer, ARpcMessage.DataSize);
-    sePlayerClubStatus: ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
-    seReservedSeatFree: ADataObject := TPB_ReservedSeatFree.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(seChat): ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srClubDisbandOk),
+    Integer(srOwnershipGiveAwayNotOwner),
+    Integer(srOwnershipGiveawayInvalidPlayerId),
+    Integer(srOwnershipGiveAwayInvalidClubId),
+    Integer(srOwnershipGiveAwayOk),
+    Integer(srSuspendPlayerOk),
+    Integer(srReinstatePlayerOk),
+    Integer(seClubChange),
+    Integer(srResetPlayerBalanceOk),
+    Integer(seClubDeleted): ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srCreateGameOk),
+    Integer(srDeleteGameOk),
+    Integer(seGameChange),
+    Integer(seGameCreate),
+    Integer(srNotSitting),
+    Integer(seGameDelete): ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(seUserChange): ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srTableStatsReply): ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srContactUsOk): ;
+    Integer(srTableBuyinLessThanCashout),
+    Integer(srInvalidTableBuyin): ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srHandHistoryMsg): ADataObject := TPB_HandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srQueryAssetsReply): ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srSubscriptionPlanChange): ADataObject := TPB_SubscriptionPlanChange.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(seTournamentList): ADataObject := TPB_TournamentList.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srTournamentReply): ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srTournamentDetails): ADataObject := TPB_TournamentInfo.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(srTournamentOpenTable): ADataObject := TPB_TournamentTableStart.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(seTournamentPlayerFinished): ADataObject := TPB_TournamentPlayerFinished.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(seTournamentPlayerTransfer): ADataObject := TPB_TournamentPlayerTransfer.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(sePlayerClubStatus): ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    Integer(seReservedSeatFree): ADataObject := TPB_ReservedSeatFree.Create(ADataPointer, ARpcMessage.DataSize);
   else
-    SoftException(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]));
+    SoftException(Format('Unhandled code received: %d',
+      [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
     Exit(FALSE);
   end;
 
   if (Assigned(ADataObject)) and
      (not (ADataObject as TProtobufBaseObject).IsInitialized) then
   begin
-    SoftException(Format('MethodId: %d; ADataObject not initialized', [ARpcMessage.MethodId]));
+    SoftException(Format('Data object not initialized for code: %s',
+      [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;
@@ -535,7 +564,7 @@ begin
   Exit(TRUE);
 end;
 
-procedure TServerSocketCore.SendRawBytes(const AMethodId: Integer; const AProtobuf; const ASize: Integer);
+procedure TServerSocketCore.SendRawBytes(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
 var
   rpc_message: TPB_RpcMessage;
   mstream: TMemoryStream;
@@ -543,7 +572,7 @@ var
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
-    rpc_message.MethodId := Integer(AMethodId);
+    rpc_message.MethodId := Integer(AServerCode);
     if ASize > 0 then
       rpc_message.DataSize := ASize;
     mstream := TMemoryStream.Create;
@@ -564,7 +593,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCore.SendProtobuf(const AMethodId: Integer; const AProtobuf: TProtobufBaseObject);
+procedure TServerSocketCore.SendProtobuf(const AServerCode: TServerCodes; const AProtobuf: TProtobufBaseObject);
 var
   rpc_message: TPB_RpcMessage;
   mstream: TMemoryStream;
@@ -572,7 +601,7 @@ var
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
-    rpc_message.Methodid := AMethodId;
+    rpc_message.Methodid := Integer(AServerCode);
     if Assigned(AProtobuf) then
       rpc_message.DataSize := AProtobuf.ProtobufOutputSize;
     mstream := TMemoryStream.Create;
@@ -610,7 +639,7 @@ begin
   protobuf := TPB_PingParams.Create;
   try
     protobuf.Uptime := GetTickCount;
-    SendProtobuf(Integer(scPing), protobuf);
+    SendProtobuf(scPing, protobuf);
     KillPingTimers;
     ResetPingTimeoutTimer;
   finally

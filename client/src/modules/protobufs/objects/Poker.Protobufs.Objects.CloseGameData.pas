@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.CloseGameData;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TCloseGameTime = (cgtCurrentHand = 0, cgtFiveMinutes, cgtFifteenMinutes);
@@ -45,7 +47,6 @@ type
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
-
   end;
 
   TPB_CloseGameDataList = class(TObjectList<TPB_CloseGameData>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_CloseGameData.Create(const AFrom: TPB_CloseGameData; const ALightweight: Boolean = FALSE);

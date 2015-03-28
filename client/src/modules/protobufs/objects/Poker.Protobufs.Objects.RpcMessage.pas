@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.RpcMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_RpcMessage = class(TProtobufBaseObject)
@@ -53,7 +55,6 @@ type
     function has_Token: Boolean;
     procedure clear_Token;
     property Token: Integer read FToken write SetToken;
-
   end;
 
   TPB_RpcMessageList = class(TObjectList<TPB_RpcMessage>)
@@ -63,7 +64,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_RpcMessage.Create(const AFrom: TPB_RpcMessage; const ALightweight: Boolean = FALSE);

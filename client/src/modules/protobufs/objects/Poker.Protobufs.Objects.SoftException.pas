@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.SoftException;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_SoftException = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_Data: Boolean;
     procedure clear_Data;
     property Data: String read FData write SetData;
-
   end;
 
   TPB_SoftExceptionList = class(TObjectList<TPB_SoftException>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_SoftException.Create(const AFrom: TPB_SoftException; const ALightweight: Boolean = FALSE);

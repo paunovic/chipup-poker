@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ClubMember;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ClubMember = class(TProtobufBaseObject)
@@ -93,7 +95,6 @@ type
     function has_Manager: Boolean;
     procedure clear_Manager;
     property Manager: Boolean read FManager write SetManager;
-
   end;
 
   TPB_ClubMemberList = class(TObjectList<TPB_ClubMember>)
@@ -103,7 +104,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ClubMember.Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE);

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.Pot;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.WinnerData;
 
 type
@@ -67,7 +69,6 @@ type
     function has_Rake: Boolean;
     procedure clear_Rake;
     property Rake: UInt32 read FRake write SetRake;
-
   end;
 
   TPB_PotList = class(TObjectList<TPB_Pot>)
@@ -77,7 +78,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_Pot.Create(const AFrom: TPB_Pot; const ALightweight: Boolean = FALSE);

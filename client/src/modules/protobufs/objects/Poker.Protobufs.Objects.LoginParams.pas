@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.LoginParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_LoginParams = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_Password: Boolean;
     procedure clear_Password;
     property Password: String read FPassword write SetPassword;
-
   end;
 
   TPB_LoginParamsList = class(TObjectList<TPB_LoginParams>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_LoginParams.Create(const AFrom: TPB_LoginParams; const ALightweight: Boolean = FALSE);

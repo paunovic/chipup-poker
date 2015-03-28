@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TablePlayerStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TablePlayerStats = class(TProtobufBaseObject)
@@ -106,7 +108,6 @@ type
     function has_Hands: Boolean;
     procedure clear_Hands;
     property Hands: UInt32 read FHands write SetHands;
-
   end;
 
   TPB_TablePlayerStatsList = class(TObjectList<TPB_TablePlayerStats>)
@@ -116,7 +117,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TablePlayerStats.Create(const AFrom: TPB_TablePlayerStats; const ALightweight: Boolean = FALSE);

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PlayerLimitParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_PlayerLimitParams = class(TProtobufBaseObject)
@@ -63,7 +65,6 @@ type
     function has_Unlimited: Boolean;
     procedure clear_Unlimited;
     property Unlimited: Boolean read FUnlimited write SetUnlimited;
-
   end;
 
   TPB_PlayerLimitParamsList = class(TObjectList<TPB_PlayerLimitParams>)
@@ -73,7 +74,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PlayerLimitParams.Create(const AFrom: TPB_PlayerLimitParams; const ALightweight: Boolean = FALSE);

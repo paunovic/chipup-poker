@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ClubPlayerStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ClubPlayerStats = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_ClubBalance: Boolean;
     procedure clear_ClubBalance;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
-
   end;
 
   TPB_ClubPlayerStatsList = class(TObjectList<TPB_ClubPlayerStats>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ClubPlayerStats.Create(const AFrom: TPB_ClubPlayerStats; const ALightweight: Boolean = FALSE);

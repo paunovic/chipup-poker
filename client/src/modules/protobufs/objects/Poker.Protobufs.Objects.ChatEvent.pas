@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChatEvent;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ChatMessage;
 
 type
@@ -56,7 +58,6 @@ type
     function has_TableId: Boolean;
     procedure clear_TableId;
     property TableId: TMongoId read FTableId write SetTableId;
-
   end;
 
   TPB_ChatEventList = class(TObjectList<TPB_ChatEvent>)
@@ -66,7 +67,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChatEvent.Create(const AFrom: TPB_ChatEvent; const ALightweight: Boolean = FALSE);

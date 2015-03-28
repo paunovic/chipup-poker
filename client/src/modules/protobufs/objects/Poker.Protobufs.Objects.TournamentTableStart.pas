@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentTableStart;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -44,7 +46,6 @@ type
     function has_TableStatus: Boolean;
     procedure clear_TableStatus;
     property TableStatus: TPB_TableStatus read FTableStatus write SetTableStatus;
-
   end;
 
   TPB_TournamentTableStartList = class(TObjectList<TPB_TournamentTableStart>)
@@ -54,7 +55,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentTableStart.Create(const AFrom: TPB_TournamentTableStart; const ALightweight: Boolean = FALSE);

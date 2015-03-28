@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableSit;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TableSit = class(TProtobufBaseObject)
@@ -53,7 +55,6 @@ type
     function has_Chips: Boolean;
     procedure clear_Chips;
     property Chips: UInt32 read FChips write SetChips;
-
   end;
 
   TPB_TableSitList = class(TObjectList<TPB_TableSit>)
@@ -63,7 +64,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableSit.Create(const AFrom: TPB_TableSit; const ALightweight: Boolean = FALSE);

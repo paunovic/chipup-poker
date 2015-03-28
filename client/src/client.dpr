@@ -16,6 +16,7 @@ uses
   pbOutput in '3rdparty\protobufs\pbOutput.pas',
   pbPublic in '3rdparty\protobufs\pbPublic.pas',
   StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
+  Asphyre.Streams in '3rdparty\AsphyreSphinx\Source\Asphyre.Streams.pas',
   OverbyteIcsHttpProt in '3rdparty\icsv8\OverbyteIcsHttpProt.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
@@ -67,13 +68,15 @@ uses
   Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
   Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas',
   Poker.Common.ModalDialogs in 'modules\common\Poker.Common.ModalDialogs.pas',
+  Poker.Common.SSLCert in 'modules\common\Poker.Common.SSLCert.pas',
+  Poker.Common.SafeMutex in 'modules\common\Poker.Common.SafeMutex.pas',
+  Poker.Common.CPUUsage in 'modules\common\Poker.Common.CPUUsage.pas',
   Poker.HardcodedSettings in 'modules\settings\Poker.HardcodedSettings.pas',
   Poker.Settings in 'modules\settings\Poker.Settings.pas',
   Poker.Server.Settings in 'modules\server\Poker.Server.Settings.pas',
   Poker.Server.Validators in 'modules\server\Poker.Server.Validators.pas',
   Poker.Server.MessageContainer in 'modules\server\Poker.Server.MessageContainer.pas',
   Poker.Server.MessageCallbacks in 'modules\server\Poker.Server.MessageCallbacks.pas',
-  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
   Poker.Server.Socket.Core in 'modules\server\socket\Poker.Server.Socket.Core.pas',
   Poker.Server.Socket in 'modules\server\socket\Poker.Server.Socket.pas',
   Poker.Server.Socket.ConnectThread in 'modules\server\socket\Poker.Server.Socket.ConnectThread.pas',
@@ -181,14 +184,12 @@ uses
   Poker.Protobufs.Objects.TournamentPlayerFinished in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas',
   Poker.Protobufs.Objects.GameBlinds in 'modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas',
   Poker.Protobufs.Objects.TableMessage in 'modules\protobufs\objects\Poker.Protobufs.Objects.TableMessage.pas',
-  Poker.Common.SafeMutex in 'modules\common\Poker.Common.SafeMutex.pas',
   Poker.Protobufs.Objects.TournamentPlayerTransfer in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas',
   Poker.Protobufs.Objects.TournamentPrize in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas',
   Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas',
   Poker.Protobufs.Objects.DeleteTableStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas',
   Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas',
   Poker.Protobufs.Objects.ReservedSeatFree in 'modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas';
-
 
 procedure FocusApp;
 var
@@ -205,8 +206,6 @@ begin
 end;
 
 begin
-  {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
-
   TCommandLineParams.ParseParams;
 
   if not TInstanceController.AcquireInstance(Settings.Hardcoded.INSTANCE_MUTEX_NAME) then

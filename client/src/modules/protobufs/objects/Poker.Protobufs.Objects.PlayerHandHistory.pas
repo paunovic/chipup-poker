@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PlayerHandHistory;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.SeatInfo;
 
 type
@@ -94,7 +96,6 @@ type
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;
-
   end;
 
   TPB_PlayerHandHistoryList = class(TObjectList<TPB_PlayerHandHistory>)
@@ -104,7 +105,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PlayerHandHistory.Create(const AFrom: TPB_PlayerHandHistory; const ALightweight: Boolean = FALSE);

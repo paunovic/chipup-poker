@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HandHistoryReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.HandHistory;
 
 type
@@ -67,7 +69,6 @@ type
     function has_TournamentId: Boolean;
     procedure clear_TournamentId;
     property TournamentId: TMongoId read FTournamentId write SetTournamentId;
-
   end;
 
   TPB_HandHistoryReplyList = class(TObjectList<TPB_HandHistoryReply>)
@@ -77,7 +78,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HandHistoryReply.Create(const AFrom: TPB_HandHistoryReply; const ALightweight: Boolean = FALSE);

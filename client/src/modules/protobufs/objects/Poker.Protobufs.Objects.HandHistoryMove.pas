@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HandHistoryMove;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
@@ -77,7 +79,6 @@ type
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
-
   end;
 
   TPB_HandHistoryMoveList = class(TObjectList<TPB_HandHistoryMove>)
@@ -87,7 +88,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HandHistoryMove.Create(const AFrom: TPB_HandHistoryMove; const ALightweight: Boolean = FALSE);

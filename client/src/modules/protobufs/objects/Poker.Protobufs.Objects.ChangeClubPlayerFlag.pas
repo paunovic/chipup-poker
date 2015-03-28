@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChangeClubPlayerFlag;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChangeClubPlayerFlag = class(TProtobufBaseObject)
@@ -53,7 +55,6 @@ type
     function has_Flag: Boolean;
     procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;
-
   end;
 
   TPB_ChangeClubPlayerFlagList = class(TObjectList<TPB_ChangeClubPlayerFlag>)
@@ -63,7 +64,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChangeClubPlayerFlag.Create(const AFrom: TPB_ChangeClubPlayerFlag; const ALightweight: Boolean = FALSE);

@@ -9,7 +9,7 @@ uses
   Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
   OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit,
   ChipUpPokerDarkSkin, System.Generics.Collections, Poker.Common.AlphaBlendThread,
-  Vcl.Menus;
+  Vcl.Menus, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -47,6 +47,7 @@ type
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
+    FPopupMenu: TPopupMenu;
     FAlphaBlendThread: TAlphaBlendThread;
 
     procedure ApplySettings;
@@ -55,6 +56,7 @@ type
     procedure ModalFormClose(Sender: TObject);
 
     procedure CreateServerCombobox;
+    procedure CreatePopupMenu;
 
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
@@ -108,6 +110,8 @@ begin
   if Settings.DeveloperMode then
     EnterDeveloperMode;
 
+  tiLoginTimeout.Interval := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
+
   EnableGUI(FCurrentStatus = lsHelloOk);
 end;
 
@@ -144,10 +148,28 @@ begin
   FServerComboBox.Left := btLogin.Left;
   FServerComboBox.Properties.DropDownListStyle := lsFixedList;
   FServerComboBox.Properties.Items.Clear;
-  for C1 := Low(Settings.Hardcoded.SERVER_CONFIG) to High(Settings.Hardcoded.SERVER_CONFIG) do
-    FServerComboBox.Properties.Items.Add(Settings.Hardcoded.SERVER_CONFIG[C1].TCPAddress);
+  for C1 := Low(Settings.Hardcoded.SERVER_LIST) to High(Settings.Hardcoded.SERVER_LIST) do
+    FServerComboBox.Properties.Items.Add(Settings.Hardcoded.SERVER_LIST[C1].Address);
   FServerComboBox.ItemIndex := Settings.ServerIndex;
   FServerComboBox.Properties.OnChange := ServerComboboxChange;
+end;
+
+procedure TfrmChipUpLogin.CreatePopupMenu;
+var
+  C1: Integer;
+  mi: TMenuItem;
+begin
+  FPopupMenu := TPopupMenu.Create(self);
+
+  for C1 := 0 to frmChipUpMain.ActionManager.ActionCount - 1 do
+    if frmChipUpMain.ActionManager.Actions[C1].Category = 'Dev' then
+    begin
+      mi := TMenuItem.Create(FPopupMenu);
+      mi.Action := frmChipUpMain.ActionManager.Actions[C1];
+      FPopupMenu.Items.Add(mi);
+    end;
+
+  imgBackground.PopupMenu := FPopupMenu;
 end;
 
 procedure TfrmChipUpLogin.FormShow(Sender: TObject);
@@ -238,7 +260,7 @@ begin
   item_index := (Sender as TcxComboBox).ItemIndex;
   Settings.ServerIndex := item_index;
   TServerSocket.Deinitialize;
-  TServerSocket.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
+  TServerSocket.Initialize(item_index);
 end;
 
 procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
@@ -297,7 +319,7 @@ begin
      (CurrentStatus = lsConnected) then
   begin
     HelloServer;
-    tiConnect.Interval := 2000;
+    tiConnect.Interval := 1000;
   end;
 end;
 
@@ -322,11 +344,14 @@ end;
 procedure TfrmChipUpLogin.EnterDeveloperMode;
 begin
   CreateServerCombobox;
+  CreatePopupMenu;
 end;
 
 procedure TfrmChipUpLogin.LeaveDeveloperMode;
 begin
   FreeAndNil(FServerComboBox);
+  imgBackground.PopupMenu := nil;
+  FreeAndNil(FPopupMenu);
 end;
 
 procedure TfrmChipUpLogin.FormKeyPress(Sender: TObject; var Key: Char);
@@ -456,7 +481,7 @@ begin
   begin
     if AlphaBlendValue = 0 then
       Close;
-    dmMain.RefreshSkinController;
+    dmMain.RefreshSkinControllerDelayed;
   end;
 end;
 

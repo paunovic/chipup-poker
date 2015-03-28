@@ -17,6 +17,7 @@ object frmDebug: TfrmDebug
   SnapBuffer = 20
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 14
   object rvMemoryState: TRichView
@@ -130,7 +131,7 @@ object frmDebug: TfrmDebug
     end
     object lbsMemoryUsage: TcxLabel
       Left = 280
-      Top = 20
+      Top = 36
       Anchors = [akLeft, akBottom]
       Caption = 'Memory:'
       ParentFont = False
@@ -198,7 +199,7 @@ object frmDebug: TfrmDebug
     end
     object lbvMemoryUsage: TcxLabel
       Left = 332
-      Top = 20
+      Top = 36
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -553,6 +554,46 @@ object frmDebug: TfrmDebug
       Transparent = True
       Height = 17
       Width = 52
+    end
+    object lbsCPU: TcxLabel
+      Left = 280
+      Top = 20
+      Anchors = [akLeft, akBottom]
+      Caption = 'CPU:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvCPU: TcxLabel
+      Left = 332
+      Top = 20
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 62
     end
   end
   object paTop: TPanel

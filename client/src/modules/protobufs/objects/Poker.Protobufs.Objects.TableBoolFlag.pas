@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableBoolFlag;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TableBoolFlag = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_Flag: Boolean;
     procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;
-
   end;
 
   TPB_TableBoolFlagList = class(TObjectList<TPB_TableBoolFlag>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag; const ALightweight: Boolean = FALSE);

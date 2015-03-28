@@ -178,7 +178,7 @@ begin
         Exit(E_FAIL);
     end;
     Byte(pointer(NativeUInt(ADest) + C1)^) := Byte(mmio_info.pchNext^);
-    Inc(DWORD(mmio_info.pchNext));
+    Inc(NativeUInt(mmio_info.pchNext));
   end;
 
   if mmioSetInfo(AHHMIOIn, @mmio_info, 0) <> 0 then

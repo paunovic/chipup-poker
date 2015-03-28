@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ValidCharsRegex;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ValidCharsRegex = class(TProtobufBaseObject)
@@ -83,7 +85,6 @@ type
     function has_Gamename: Boolean;
     procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
-
   end;
 
   TPB_ValidCharsRegexList = class(TObjectList<TPB_ValidCharsRegex>)
@@ -93,7 +94,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ValidCharsRegex.Create(const AFrom: TPB_ValidCharsRegex; const ALightweight: Boolean = FALSE);

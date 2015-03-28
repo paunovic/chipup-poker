@@ -4,7 +4,7 @@ interface
 
 uses
   Vcl.Imaging.JPEG, Vcl.Graphics, System.Classes, System.SysUtils, Asphyre.Images,
-  OverbyteIcsHttpProt, OverbyteIcsWSocket;
+  OverbyteIcsHttpProt;
 
 type
   TAvatar = class
@@ -43,8 +43,9 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  OverbyteIcsWSocket,
   Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
-  Poker.Settings, Poker.Server.SSLCerts, Poker.SoftExceptions;
+  Poker.Settings, Poker.SoftExceptions, Poker.Server.Socket;
 
 { TAvatar }
 
@@ -71,8 +72,12 @@ begin
       FHTTP.RcvdStream.Free;
     if Assigned(FHTTP.SendStream) then
       FHTTP.SendStream.Free;
-    FHTTP.SslContext.DeInitContext;
-    FHTTP.SslContext.Free;
+
+    if Assigned(FHTTP.SslContext) then
+    begin
+      FHTTP.SslContext.DeInitContext;
+      FHTTP.SslContext.Free;
+    end;
     FreeAndNil(FHTTP);
   end;
 
@@ -113,8 +118,11 @@ begin
     FHTTP.RcvdStream := nil;
   end;
 
-  FHTTP.SslContext.DeInitContext;
-  FHTTP.SslContext.Free;
+  if Assigned(FHTTP.SslContext) then
+  begin
+    FHTTP.SslContext.DeInitContext;
+    FHTTP.SslContext.Free;
+  end;
   FreeAndNil(FHTTP);
 end;
 
@@ -124,16 +132,20 @@ begin
     Exit;
 
   FHTTP := TSslHttpCli.Create(nil);
-  FHTTP.SslContext := TSslContext.Create(nil);
   FHTTP.Connection := 'Keep-Alive';
   FHTTP.BandwidthLimit := 0;
   FHTTP.RequestVer := '1.1';
   FHTTP.RcvdStream := TMemoryStream.Create;
-  FHTTP.URL := Format(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
+  FHTTP.URL := Format(Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL +
+    Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   FHTTP.OnRequestDone := HTTPRequestDone;
-  FHTTP.SslContext.InitContext;
-  FHTTP.SslContext.TrustCert(SSLCert_OfficialServer);
-  FHTTP.SslContext.TrustCert(SSLCert_DevServer);
+
+  if ServerSocket.Socket.SSLEnable then
+  begin
+    FHTTP.SslContext := TSslContext.Create(nil);
+    FHTTP.SslContext.InitContext;
+    FHTTP.SslContext.TrustCert(ServerSocket.SSLCertificate);
+  end;
   FHTTP.GetAsync;
   {$IFDEF DEBUG} DebugLn(Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc); {$ENDIF}
 end;

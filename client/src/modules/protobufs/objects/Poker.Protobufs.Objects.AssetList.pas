@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.AssetList;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
@@ -37,7 +39,6 @@ type
     function has_Assets: Boolean;
     procedure clear_Assets;
     property Assets: TList<TPB_UpdateFileInfo> read FAssets;
-
   end;
 
   TPB_AssetListList = class(TObjectList<TPB_AssetList>)
@@ -47,7 +48,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_AssetList.Create(const AFrom: TPB_AssetList; const ALightweight: Boolean = FALSE);

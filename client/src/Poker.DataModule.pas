@@ -52,7 +52,7 @@ type
     procedure StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
-    procedure RefreshSkinController;
+    procedure RefreshSkinControllerDelayed;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -96,11 +96,11 @@ begin
 
   TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
   if (Settings.DeveloperMode) and
-     (Settings.ServerIndex in [1, 2]) then
+     (Settings.ServerIndex > 0) then
     server_index := Settings.ServerIndex
   else
     server_index := 0;
-  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
+  TServerSocket.Initialize(server_index);
   TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
@@ -172,12 +172,12 @@ end;
 
 procedure TdmMain.OpenSiteLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL));
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL));
 end;
 
 procedure TdmMain.OpenTACLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
 end;
 
 procedure TdmMain.SetUpdaterBatchFile(const AFile: String);
@@ -447,7 +447,7 @@ begin
   end;
 end;
 
-procedure TdmMain.RefreshSkinController;
+procedure TdmMain.RefreshSkinControllerDelayed;
 begin
   tiSkinControllerRefresh.Enabled := TRUE;
 end;

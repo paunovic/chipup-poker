@@ -115,6 +115,7 @@ type
     acConfirmationOnFold: TAction;
     acAlwaysRunItTwice: TAction;
     acLaunchNewInstance: TAction;
+    acOpenDebugForm: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -169,6 +170,7 @@ type
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
     procedure acLaunchNewInstanceExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure acOpenDebugFormExecute(Sender: TObject);
   private
     const
       RESOURCE_CASHIER_NORMAL = 'CashierNormal';
@@ -356,7 +358,7 @@ end;
 
 procedure TfrmChipUpMain.FormActivate(Sender: TObject);
 begin
-  dmMain.RefreshSkinController;
+  dmMain.RefreshSkinControllerDelayed;
 end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -562,6 +564,14 @@ begin
     end;
 
   FormsContainer.RunForm(TfrmClubLobby, self, [FSelectedClub.Memory], TRUE);
+end;
+
+procedure TfrmChipUpMain.acOpenDebugFormExecute(Sender: TObject);
+begin
+  {$IFDEF DEBUG}
+  TfrmDebug.Initialize;
+  RefreshDebugForm([]);
+  {$ENDIF}
 end;
 
 procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);

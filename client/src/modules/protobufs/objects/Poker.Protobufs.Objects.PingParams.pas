@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PingParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_PingParams = class(TProtobufBaseObject)
@@ -33,7 +35,6 @@ type
     function has_Uptime: Boolean;
     procedure clear_Uptime;
     property Uptime: UInt32 read FUptime write SetUptime;
-
   end;
 
   TPB_PingParamsList = class(TObjectList<TPB_PingParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PingParams.Create(const AFrom: TPB_PingParams; const ALightweight: Boolean = FALSE);

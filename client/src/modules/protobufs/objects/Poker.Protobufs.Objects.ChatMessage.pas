@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChatMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChatMessage = class(TProtobufBaseObject)
@@ -63,7 +65,6 @@ type
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: UInt32 read FTimestamp write SetTimestamp;
-
   end;
 
   TPB_ChatMessageList = class(TObjectList<TPB_ChatMessage>)
@@ -73,7 +74,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChatMessage.Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE);

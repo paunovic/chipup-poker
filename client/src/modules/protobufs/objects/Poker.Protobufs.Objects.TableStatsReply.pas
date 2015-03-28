@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableStatsReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TablePlayerStats;
 
 type
@@ -67,7 +69,6 @@ type
     function has_Hands: Boolean;
     procedure clear_Hands;
     property Hands: UInt32 read FHands write SetHands;
-
   end;
 
   TPB_TableStatsReplyList = class(TObjectList<TPB_TableStatsReply>)
@@ -77,7 +78,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableStatsReply.Create(const AFrom: TPB_TableStatsReply; const ALightweight: Boolean = FALSE);

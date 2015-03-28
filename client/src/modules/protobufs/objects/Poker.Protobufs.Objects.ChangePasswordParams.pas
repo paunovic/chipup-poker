@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChangePasswordParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChangePasswordParams = class(TProtobufBaseObject)
@@ -33,7 +35,6 @@ type
     function has_NewPassword: Boolean;
     procedure clear_NewPassword;
     property NewPassword: String read FNewPassword write SetNewPassword;
-
   end;
 
   TPB_ChangePasswordParamsList = class(TObjectList<TPB_ChangePasswordParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChangePasswordParams.Create(const AFrom: TPB_ChangePasswordParams; const ALightweight: Boolean = FALSE);
