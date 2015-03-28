@@ -23,6 +23,8 @@ Table::Table(QWidget *parent) :
 	debuger->show();
 #endif
 	ui->statusbar->setVisible(false);
+	ui->btLeaveWaitingList->setVisible(false);
+	ui->btJoinWaitingList->setVisible(false);
 }
 Table::~Table() {
 	delete ui;
