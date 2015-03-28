@@ -54,6 +54,7 @@ AnimateBetsToPot.prototype.begin = function () {
 	for (var i=0; i<this.bets.length; i++) {
 		Animate(this.bets[i],0.5,0.3,0.5,once(function () { that.check(); }));
 	}
+	if (this.bets.length == 0) eventDone();
 }
 AnimateBetsToPot.prototype.check = function () {
 	this.count--;
