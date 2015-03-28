@@ -35,7 +35,7 @@ function doUpload(revision,host) {
 	var filesize2 = fs.statSync('../../buildbot-build/client/chipuppoker.tar.bz2').size;
 
 	var request = https.request({hostname:host,method:'POST',path:'/addMac?version='+version+'&revision='+revision+
-		'&buildnum='+process.argv[1],
+		'&buildnum='+process.argv[2],
 		headers:{'Content-Length':textsize+filesize1+filesize2},
 		ca:fs.readFileSync('sub.class1.server.ca.pem'),
 		rejectUnauthorized:false
