@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentInfo;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds, Poker.Protobufs.Objects.TournamentPrize;
 
 type
@@ -219,7 +221,6 @@ type
     function has_Prizes: Boolean;
     procedure clear_Prizes;
     property Prizes: TList<TPB_TournamentPrize> read FPrizes;
-
   end;
 
   TPB_TournamentInfoList = class(TObjectList<TPB_TournamentInfo>)
@@ -229,7 +230,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentInfo.Create(const AFrom: TPB_TournamentInfo; const ALightweight: Boolean = FALSE);

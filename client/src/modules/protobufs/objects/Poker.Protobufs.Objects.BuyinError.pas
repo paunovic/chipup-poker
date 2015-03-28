@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.BuyinError;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_BuyinError = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_LastCashout: Boolean;
     procedure clear_LastCashout;
     property LastCashout: UInt32 read FLastCashout write SetLastCashout;
-
   end;
 
   TPB_BuyinErrorList = class(TObjectList<TPB_BuyinError>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_BuyinError.Create(const AFrom: TPB_BuyinError; const ALightweight: Boolean = FALSE);

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.SeatInfo;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPlayerStatus = (psOutOfPlay = 0, psOutOfHand, psInHand, psFolded, psAllIn);
@@ -135,7 +137,6 @@ type
     function has_Autoplay: Boolean;
     procedure clear_Autoplay;
     property Autoplay: Boolean read FAutoplay write SetAutoplay;
-
   end;
 
   TPB_SeatInfoList = class(TObjectList<TPB_SeatInfo>)
@@ -145,7 +146,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_SeatInfo.Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE);

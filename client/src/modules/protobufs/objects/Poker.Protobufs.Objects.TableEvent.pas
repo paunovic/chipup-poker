@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableEvent;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Pot;
 
 type
@@ -79,7 +81,6 @@ type
     function has_Cards: Boolean;
     procedure clear_Cards;
     property Cards: TList<TBytes> read FCards;
-
   end;
 
   TPB_TableEventList = class(TObjectList<TPB_TableEvent>)
@@ -89,7 +90,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableEvent.Create(const AFrom: TPB_TableEvent; const ALightweight: Boolean = FALSE);

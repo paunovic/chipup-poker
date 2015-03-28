@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.UpdateFileInfo;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TUpdateFileType = (ufFull = 0, ufDiff, ufRemove);
@@ -75,7 +77,6 @@ type
     function has_FileSize: Boolean;
     procedure clear_FileSize;
     property FileSize: UInt32 read FFileSize write SetFileSize;
-
   end;
 
   TPB_UpdateFileInfoList = class(TObjectList<TPB_UpdateFileInfo>)
@@ -85,7 +86,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_UpdateFileInfo.Create(const AFrom: TPB_UpdateFileInfo; const ALightweight: Boolean = FALSE);

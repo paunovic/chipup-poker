@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentList;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TournamentInfo;
 
 type
@@ -37,7 +39,6 @@ type
     function has_Items: Boolean;
     procedure clear_Items;
     property Items: TList<TPB_TournamentInfo> read FItems;
-
   end;
 
   TPB_TournamentListList = class(TObjectList<TPB_TournamentList>)
@@ -47,7 +48,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentList.Create(const AFrom: TPB_TournamentList; const ALightweight: Boolean = FALSE);

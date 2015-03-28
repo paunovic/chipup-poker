@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChangeEMailParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChangeEMailParams = class(TProtobufBaseObject)
@@ -33,7 +35,6 @@ type
     function has_NewMail: Boolean;
     procedure clear_NewMail;
     property NewMail: String read FNewMail write SetNewMail;
-
   end;
 
   TPB_ChangeEMailParamsList = class(TObjectList<TPB_ChangeEMailParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChangeEMailParams.Create(const AFrom: TPB_ChangeEMailParams; const ALightweight: Boolean = FALSE);

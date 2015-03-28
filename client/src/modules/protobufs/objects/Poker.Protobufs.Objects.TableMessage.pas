@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TTableMessageType = (tmtClosing = 0, tmtTournamentBreak, tmtTournamentStart);
@@ -45,7 +47,6 @@ type
     function has_EndTime: Boolean;
     procedure clear_EndTime;
     property EndTime: UInt64 read FEndTime write SetEndTime;
-
   end;
 
   TPB_TableMessageList = class(TObjectList<TPB_TableMessage>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableMessage.Create(const AFrom: TPB_TableMessage; const ALightweight: Boolean = FALSE);

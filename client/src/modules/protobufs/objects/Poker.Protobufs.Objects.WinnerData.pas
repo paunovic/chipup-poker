@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.WinnerData;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TCardRankings = (crRoyalFlush = 0, crStraightFlush, cr4OfKind, crFullHouse, crFlush, crStraight, crThreeOfKind, crTwoPair, crOnePair, crHighCard);
@@ -45,7 +47,6 @@ type
     function has_Msg: Boolean;
     procedure clear_Msg;
     property Msg: String read FMsg write SetMsg;
-
   end;
 
   TPB_WinnerDataList = class(TObjectList<TPB_WinnerData>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_WinnerData.Create(const AFrom: TPB_WinnerData; const ALightweight: Boolean = FALSE);

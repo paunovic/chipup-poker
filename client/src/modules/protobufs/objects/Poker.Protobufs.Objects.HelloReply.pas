@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HelloReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.StringSizes, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.ValidCharsRegex;
 
 type
@@ -107,7 +109,6 @@ type
     function has_ValidCharsRegex: Boolean;
     procedure clear_ValidCharsRegex;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
-
   end;
 
   TPB_HelloReplyList = class(TObjectList<TPB_HelloReply>)
@@ -117,7 +118,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply; const ALightweight: Boolean = FALSE);

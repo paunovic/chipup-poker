@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.LoginReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.PlayerClubStatus;
 
 type
@@ -119,7 +121,6 @@ type
     function has_PlayerClubStatuses: Boolean;
     procedure clear_PlayerClubStatuses;
     property PlayerClubStatuses: TList<TPB_PlayerClubStatus> read FPlayerClubStatuses;
-
   end;
 
   TPB_LoginReplyList = class(TObjectList<TPB_LoginReply>)
@@ -129,7 +130,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_LoginReply.Create(const AFrom: TPB_LoginReply; const ALightweight: Boolean = FALSE);

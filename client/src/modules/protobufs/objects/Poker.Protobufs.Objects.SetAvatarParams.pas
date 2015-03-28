@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.SetAvatarParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_SetAvatarParams = class(TProtobufBaseObject)
@@ -33,7 +35,6 @@ type
     function has_AvatarId: Boolean;
     procedure clear_AvatarId;
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
-
   end;
 
   TPB_SetAvatarParamsList = class(TObjectList<TPB_SetAvatarParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_SetAvatarParams.Create(const AFrom: TPB_SetAvatarParams; const ALightweight: Boolean = FALSE);

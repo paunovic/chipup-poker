@@ -21,11 +21,6 @@ type
       PROPINDEX_ANIMATIONS = 9;
       PROPINDEX_FOLD_CONFIRMATION = 10;
       PROPINDEX_ALWAYS_RUN_TWICE = 11;
-      PROPINDEX_MAIN_FORM_MAXIMIZED = 12;
-      PROPINDEX_MAIN_FORM_X = 13;
-      PROPINDEX_MAIN_FORM_Y = 14;
-      PROPINDEX_MAIN_FORM_WIDTH = 15;
-      PROPINDEX_MAIN_FORM_HEIGHT = 16;
 
       // json field names
       JSON_LOGIN_USERNAME = 'login_username';
@@ -39,13 +34,13 @@ type
       JSON_ANIMATIONS = 'animations';
       JSON_FOLD_CONFIRMATION = 'fold_confirmation';
       JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
-      JSON_FORM_SETTINGS = 'forms';
+      JSON_FORMS_SETTINGS = 'forms';
       JSON_FORM_NAME = 'name';
       JSON_FORM_MAXIMIZED = 'maximized';
       JSON_FORM_X = 'x';
       JSON_FORM_Y = 'y';
-      JSON_FORM_WIDTH = 'width';
-      JSON_FORM_HEIGHT = 'height';
+      JSON_FORM_W = 'w';
+      JSON_FORM_H = 'h';
 
       // default values
       DEFAULT_LOGIN_USERNAME = '';
@@ -174,18 +169,18 @@ end;
 procedure TSettings.SaveFormSettings(const AForm: TForm);
 var
   C1: Integer;
-  formsettings, formjson: ISuperObject;
+  forms_settings, formjson: ISuperObject;
 begin
-  if not Assigned(FJSON.O[JSON_FORM_SETTINGS]) then
-    FJSON.O[JSON_FORM_SETTINGS] := SA([]);
-  formsettings := FJSON.O[JSON_FORM_SETTINGS];
+  if not Assigned(FJSON.O[JSON_FORMS_SETTINGS]) then
+    FJSON.O[JSON_FORMS_SETTINGS] := SA([]);
+  forms_settings := FJSON.O[JSON_FORMS_SETTINGS];
 
   formjson := nil;
-  for C1 := formsettings.AsArray.Length - 1 downto 0 do
-    if formsettings.AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+  for C1 := forms_settings.AsArray.Length - 1 downto 0 do
+    if forms_settings.AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
     begin
-      formjson := formsettings.AsArray.O[C1];
-      formsettings.AsArray.Delete(C1);
+      formjson := forms_settings.AsArray.O[C1];
+      forms_settings.AsArray.Delete(C1);
     end;
 
   if not Assigned(formjson) then
@@ -197,11 +192,11 @@ begin
   begin
     formjson.I[JSON_FORM_X] := AForm.Left;
     formjson.I[JSON_FORM_Y] := AForm.Top;
-    formjson.I[JSON_FORM_WIDTH] := AForm.Width;
-    formjson.I[JSON_FORM_HEIGHT] := AForm.Height;
+    formjson.I[JSON_FORM_W] := AForm.Width;
+    formjson.I[JSON_FORM_H] := AForm.Height;
   end;
 
-  formsettings.AsArray.Add(formjson);
+  forms_settings.AsArray.Add(formjson);
 end;
 
 procedure TSettings.LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
@@ -210,11 +205,11 @@ var
   formjson: ISuperObject;
 begin
   formjson := nil;
-  if Assigned(FJSON.O[JSON_FORM_SETTINGS]) then
-    for C1 := 0 to FJSON.O[JSON_FORM_SETTINGS].AsArray.Length - 1 do
-      if FJSON.O[JSON_FORM_SETTINGS].AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+  if Assigned(FJSON.O[JSON_FORMS_SETTINGS]) then
+    for C1 := 0 to FJSON.O[JSON_FORMS_SETTINGS].AsArray.Length - 1 do
+      if FJSON.O[JSON_FORMS_SETTINGS].AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
       begin
-        formjson := FJSON.O[JSON_FORM_SETTINGS].AsArray.O[C1];
+        formjson := FJSON.O[JSON_FORMS_SETTINGS].AsArray.O[C1];
         Break;
       end;
 
@@ -224,10 +219,10 @@ begin
       AForm.Left := formjson.I[JSON_FORM_X];
     if Assigned(formjson.O[JSON_FORM_Y]) then
       AForm.Top := formjson.I[JSON_FORM_Y];
-    if Assigned(formjson.O[JSON_FORM_WIDTH]) then
-      AForm.Width := formjson.I[JSON_FORM_WIDTH];
-    if Assigned(formjson.O[JSON_FORM_HEIGHT]) then
-      AForm.Height := formjson.I[JSON_FORM_HEIGHT];
+    if Assigned(formjson.O[JSON_FORM_W]) then
+      AForm.Width := formjson.I[JSON_FORM_W];
+    if Assigned(formjson.O[JSON_FORM_H]) then
+      AForm.Height := formjson.I[JSON_FORM_H];
 
     if formjson.B[JSON_FORM_MAXIMIZED] then
       AForm.WindowState := wsMaximized

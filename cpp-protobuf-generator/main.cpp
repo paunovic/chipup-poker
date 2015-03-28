@@ -267,30 +267,18 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"uses System.SysUtils;\n"
 		"\n"
 		"function TranslateCode(const ACode: Integer): String;\n"
-		"var\n"
-		"  sc: T$name$;\n"
-		"  sc_valid: Boolean;\n"
-		"begin\n"
-		"  sc_valid := FALSE;\n"
-		"  for sc := Low(T$name$) to High(T$name$) do\n"
-		"    if Integer(sc) = ACode then\n"
-		"    begin\n"
-		"      sc_valid := TRUE;\n"
-		"      Break;\n"
-		"    end;\n"
-		"\n"
-		"  if not sc_valid then\n"
-		"    Exit(Format('UNKNOWN CODE [%d]', [ACode]));\n"
-		"\n"
-		"  case T$name$(ACode) of\n"
+		"begin\n"	
+		"  case ACode of\n"
 		,"name",type->name()
 		,"begin","{$IFDEF DEBUG}"
 		,"end","{$ENDIF DEBUG}");
 	for (int j=0; j<type->value_count(); j++) {
 		const EnumValueDescriptor *value = type->value(j);
-		printer.Print("    $name$: result := '$name$';\n","name",value->name());
+		printer.Print("    Integer($name$): result := '$name$';\n","name",value->name());
 	}
 	printer.Print(
+		"  else\n"
+		"    result := Format('%d', [ACode]);\n"
 		"  end;\n"
 		"end;\n"
 		"$end$\n"
@@ -519,7 +507,9 @@ class BaseGenerator : public CodeGenerator {
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types"
+				"  System.SysUtils,\n"
+				"  {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF},\n"
+				"  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types"
 				,"filename",file->name()
 				,"name",message->name());
 			if (message->field_count() > 0) {
@@ -668,7 +658,8 @@ class BaseGenerator : public CodeGenerator {
 				} else {
 					printer.Print(vars,"    property $name$: $type$ read $pname$ write Set$name$;\n");
 				}
-				printer.Print("\n");
+				if (j<message->field_count() - 1)
+					printer.Print("\n");
 			}
 			printer.Print(
 				"  end;\n\n"
@@ -679,7 +670,7 @@ class BaseGenerator : public CodeGenerator {
 				"implementation\n"
 				"\n"
 				"uses\n"
-				"  pbPublic, Poker.Common.Misc;\n"
+				"  pbPublic;\n"
 				"\n"
 				,"name",message->name());
 

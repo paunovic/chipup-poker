@@ -263,7 +263,7 @@ end;
 
 procedure TfrmClubLobby.FormActivate(Sender: TObject);
 begin
-  dmMain.RefreshSkinController;
+  dmMain.RefreshSkinControllerDelayed;
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);

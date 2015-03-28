@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.StringSizes;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_StringSizes = class(TProtobufBaseObject)
@@ -93,7 +95,6 @@ type
     function has_ContactMessage: Boolean;
     procedure clear_ContactMessage;
     property ContactMessage: Integer read FContactMessage write SetContactMessage;
-
   end;
 
   TPB_StringSizesList = class(TObjectList<TPB_StringSizes>)
@@ -103,7 +104,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_StringSizes.Create(const AFrom: TPB_StringSizes; const ALightweight: Boolean = FALSE);

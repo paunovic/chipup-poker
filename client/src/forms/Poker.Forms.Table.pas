@@ -358,6 +358,7 @@ var
   table: TTable;
   close_table: Boolean;
 begin
+  Action := caNone;
   close_table := TRUE;
 
   if Tables.GetAndLockTable(FInternalId, table) then

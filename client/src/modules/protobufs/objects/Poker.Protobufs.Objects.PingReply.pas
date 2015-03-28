@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PingReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_PingReply = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_Servertime: Boolean;
     procedure clear_Servertime;
     property Servertime: UInt64 read FServertime write SetServertime;
-
   end;
 
   TPB_PingReplyList = class(TObjectList<TPB_PingReply>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PingReply.Create(const AFrom: TPB_PingReply; const ALightweight: Boolean = FALSE);

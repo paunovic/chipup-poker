@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.GiveClubOwnershipParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_GiveClubOwnershipParams = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
-
   end;
 
   TPB_GiveClubOwnershipParamsList = class(TObjectList<TPB_GiveClubOwnershipParams>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_GiveClubOwnershipParams.Create(const AFrom: TPB_GiveClubOwnershipParams; const ALightweight: Boolean = FALSE);

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ClubStatsReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ClubPlayerStats;
 
 type
@@ -47,7 +49,6 @@ type
     function has_PlayerStats: Boolean;
     procedure clear_PlayerStats;
     property PlayerStats: TList<TPB_ClubPlayerStats> read FPlayerStats;
-
   end;
 
   TPB_ClubStatsReplyList = class(TObjectList<TPB_ClubStatsReply>)
@@ -57,7 +58,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ClubStatsReply.Create(const AFrom: TPB_ClubStatsReply; const ALightweight: Boolean = FALSE);

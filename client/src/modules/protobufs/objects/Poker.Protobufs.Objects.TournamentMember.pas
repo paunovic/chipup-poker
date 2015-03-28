@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentMember;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TournamentMember = class(TProtobufBaseObject)
@@ -83,7 +85,6 @@ type
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
     property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
-
   end;
 
   TPB_TournamentMemberList = class(TObjectList<TPB_TournamentMember>)
@@ -93,7 +94,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentMember.Create(const AFrom: TPB_TournamentMember; const ALightweight: Boolean = FALSE);

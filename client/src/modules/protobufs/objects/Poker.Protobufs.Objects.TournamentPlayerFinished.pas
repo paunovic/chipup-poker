@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentPlayerFinished;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TournamentPrize;
 
 type
@@ -74,7 +76,6 @@ type
     function has_TableId: Boolean;
     procedure clear_TableId;
     property TableId: TMongoId read FTableId write SetTableId;
-
   end;
 
   TPB_TournamentPlayerFinishedList = class(TObjectList<TPB_TournamentPlayerFinished>)
@@ -84,7 +85,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentPlayerFinished.Create(const AFrom: TPB_TournamentPlayerFinished; const ALightweight: Boolean = FALSE);

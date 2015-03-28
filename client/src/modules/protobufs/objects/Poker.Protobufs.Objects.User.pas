@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.User;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPlayerSubscriptionPlan = (pspBasic = 0, pspNormal, pspSuper);
@@ -85,7 +87,6 @@ type
     function has_SubscriptionPlan: Boolean;
     procedure clear_SubscriptionPlan;
     property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
-
   end;
 
   TPB_UserList = class(TObjectList<TPB_User>)
@@ -95,7 +96,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_User.Create(const AFrom: TPB_User; const ALightweight: Boolean = FALSE);

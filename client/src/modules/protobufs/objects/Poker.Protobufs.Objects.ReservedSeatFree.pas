@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ReservedSeatFree;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -44,7 +46,6 @@ type
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
     property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
-
   end;
 
   TPB_ReservedSeatFreeList = class(TObjectList<TPB_ReservedSeatFree>)
@@ -54,7 +55,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ReservedSeatFree.Create(const AFrom: TPB_ReservedSeatFree; const ALightweight: Boolean = FALSE);

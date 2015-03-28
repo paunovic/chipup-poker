@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.RegisterReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TRegisterStatus = (regSuccess = 0, regDuplicateEmail, regDupUsername, regInvalidEmail, regInvalidName);
@@ -35,7 +37,6 @@ type
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TRegisterStatus read FStatus write SetStatus;
-
   end;
 
   TPB_RegisterReplyList = class(TObjectList<TPB_RegisterReply>)
@@ -45,7 +46,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_RegisterReply.Create(const AFrom: TPB_RegisterReply; const ALightweight: Boolean = FALSE);

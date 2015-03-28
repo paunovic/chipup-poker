@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.GetUserParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
@@ -47,7 +49,6 @@ type
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
-
   end;
 
   TPB_GetUserParamsList = class(TObjectList<TPB_GetUserParams>)
@@ -57,7 +58,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams; const ALightweight: Boolean = FALSE);

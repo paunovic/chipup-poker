@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentPlayerTransfer;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TournamentPlayerTransfer = class(TProtobufBaseObject)
@@ -73,7 +75,6 @@ type
     function has_SeatDestination: Boolean;
     procedure clear_SeatDestination;
     property SeatDestination: UInt32 read FSeatDestination write SetSeatDestination;
-
   end;
 
   TPB_TournamentPlayerTransferList = class(TObjectList<TPB_TournamentPlayerTransfer>)
@@ -83,7 +84,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentPlayerTransfer.Create(const AFrom: TPB_TournamentPlayerTransfer; const ALightweight: Boolean = FALSE);

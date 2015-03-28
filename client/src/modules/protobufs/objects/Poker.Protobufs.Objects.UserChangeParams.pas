@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.UserChangeParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
@@ -37,7 +39,6 @@ type
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
-
   end;
 
   TPB_UserChangeParamsList = class(TObjectList<TPB_UserChangeParams>)
@@ -47,7 +48,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_UserChangeParams.Create(const AFrom: TPB_UserChangeParams; const ALightweight: Boolean = FALSE);

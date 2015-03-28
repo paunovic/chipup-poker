@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.KickPlayerParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_KickPlayerParams = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
-
   end;
 
   TPB_KickPlayerParamsList = class(TObjectList<TPB_KickPlayerParams>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_KickPlayerParams.Create(const AFrom: TPB_KickPlayerParams; const ALightweight: Boolean = FALSE);

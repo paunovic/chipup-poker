@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PlayerClubStatus;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_PlayerClubStatus = class(TProtobufBaseObject)
@@ -63,7 +65,6 @@ type
     function has_BuyinMax: Boolean;
     procedure clear_BuyinMax;
     property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
-
   end;
 
   TPB_PlayerClubStatusList = class(TObjectList<TPB_PlayerClubStatus>)
@@ -73,7 +74,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PlayerClubStatus.Create(const AFrom: TPB_PlayerClubStatus; const ALightweight: Boolean = FALSE);

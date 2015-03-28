@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ContactMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TContactReason = (cmQuestions = 0, cmSuggestions, cmBugReport, cmOther);
@@ -45,7 +47,6 @@ type
     function has_Message: Boolean;
     procedure clear_Message;
     property Message: String read FMessage write SetMessage;
-
   end;
 
   TPB_ContactMessageList = class(TObjectList<TPB_ContactMessage>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ContactMessage.Create(const AFrom: TPB_ContactMessage; const ALightweight: Boolean = FALSE);

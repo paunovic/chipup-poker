@@ -4477,6 +4477,10 @@ object frmChipUpMain: TfrmChipUpMain
           item
             Items = <
               item
+                Action = acOpenDebugForm
+                Caption = '&Show Debug Form'
+              end
+              item
                 Action = acLaunchNewInstance
                 Caption = '&Launch New Instance'
               end
@@ -4647,6 +4651,11 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Dev'
       Caption = 'Launch New Instance'
       OnExecute = acLaunchNewInstanceExecute
+    end
+    object acOpenDebugForm: TAction
+      Category = 'Dev'
+      Caption = 'Show Debug Form'
+      OnExecute = acOpenDebugFormExecute
     end
   end
   object ApplicationEvents: TApplicationEvents

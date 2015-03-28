@@ -11,11 +11,13 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore,
   ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
-  Poker.Common.SafeMutex;
+  Poker.Common.SafeMutex, Poker.Common.CPUUsage;
 
 type
-  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
-  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser, dfiServer, dfiSoundBuffers, dfiAnimations);
+  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc,
+    ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks,
+    dfiSwapChains, dfiUser, dfiServer, dfiSoundBuffers, dfiAnimations);
   TDebugRefreshItemSet = set of TDebugRefreshItem;
 
   TDebugFormLog = class(TIdNotify)
@@ -88,6 +90,8 @@ type
     rvMemoryState: TRichView;
     cbDebugInfo: TcxComboBox;
     btPause: TcxButton;
+    lbsCPU: TcxLabel;
+    lbvCPU: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -102,7 +106,14 @@ type
     procedure teFindTextExit(Sender: TObject);
     procedure teFindTextPropertiesChange(Sender: TObject);
     procedure cbDebugInfoPropertiesChange(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
+    const
+      SCROLLBACK_LINES = 500;
+
+    var
+      FSelfCPUCounter: PCPUUsageData;
+
     function FindStyleWithName(const AName: String): Integer;
     procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
     procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
@@ -225,9 +236,11 @@ class procedure TfrmDebug.Initialize;
 const
   ATTACH_PARENT_PROCESS = -1;
 begin
-  ConsoleAttached := AttachConsole(ATTACH_PARENT_PROCESS);
+  if not ConsoleAttached then
+    ConsoleAttached := AttachConsole(ATTACH_PARENT_PROCESS);
 
-  frmDebug := TfrmDebug.Create(nil);
+  if not IsDebugFormAssigned then
+    frmDebug := TfrmDebug.Create(nil);
   frmDebug.Show;
 end;
 
@@ -238,7 +251,6 @@ begin
   if ConsoleAttached then
     FreeConsole;
 end;
-
 
 procedure TfrmDebug.FormCreate(Sender: TObject);
 begin
@@ -253,9 +265,16 @@ begin
   Width := Round(Screen.Monitors[0].Width / 2.7);
   Height := Round(Screen.Monitors[0].Height / 2.3);
 
+  FSelfCPUCounter := TCPUUsage.CreateCounter(GetCurrentProcessId);
+
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
   {$ENDIF}
+end;
+
+procedure TfrmDebug.FormDestroy(Sender: TObject);
+begin
+  TCPUUsage.DestroyCounter(FSelfCPUCounter);
 end;
 
 procedure TfrmDebug.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -265,11 +284,14 @@ begin
 end;
 
 procedure TfrmDebug.teFindTextEnter(Sender: TObject);
+var
+  teobj: TcxTextEdit;
 begin
-  if (Sender as TcxTextEdit).Tag = 0 then
+  teobj := Sender as TcxTextEdit;
+  if teobj.Tag = 0 then
   begin
-    (Sender as TcxTextEdit).Clear;
-    (Sender as TcxTextEdit).Tag := 1;
+    teobj.Clear;
+    teobj.Tag := 1;
   end;
 end;
 
@@ -371,8 +393,6 @@ begin
 end;
 
 procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
-const
-  SCROLLBACK_LINES = 500;
 var
   table: TRVTableItemInfo;
   sl: TStringList;
@@ -620,8 +640,10 @@ begin
   begin
     lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
     lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
+    lbvCPU.Caption := Format('%.2f%%', [TCPUUsage.Get(FSelfCPUCounter)]);
     lbvThreads.Refresh;
     lbvMemoryUsage.Refresh;
+    lbvCPU.Refresh;
 
     if rvMemoryState.Visible then
       UpdateMemoryUsageDetails;
@@ -761,12 +783,20 @@ begin
 end;
 
 procedure TfrmDebug.UpdateMemoryUsageDetails;
+var
+  fs: TFileStream;
 begin
   LogMemoryManagerStateToFile(MemoryUsageFilePath);
   if not btPause.Down then
   begin
     rvMemoryState.ClearAll;
-    rvMemoryState.LoadText(MemoryUsageFilePath, FindStyleWithName('MemoryState'), 2, FALSE);
+    fs := TFileStream.Create(MemoryUsageFilePath, fmOpenRead);
+    try
+      fs.Position := 3; // skip first three weird chars (EF BB BF) (BOM?)
+      rvMemoryState.LoadTextFromStream(fs, FindStyleWithName('MemoryState'), 2, FALSE);
+    finally
+      fs.Free;
+    end;
     rvMemoryState.Format;
     teFindText.Properties.OnChange(nil);
   end;

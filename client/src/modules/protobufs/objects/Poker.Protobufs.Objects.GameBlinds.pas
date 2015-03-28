@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.GameBlinds;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_GameBlinds = class(TProtobufBaseObject)
@@ -43,7 +45,6 @@ type
     function has_Bb: Boolean;
     procedure clear_Bb;
     property Bb: UInt32 read FBb write SetBb;
-
   end;
 
   TPB_GameBlindsList = class(TObjectList<TPB_GameBlinds>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_GameBlinds.Create(const AFrom: TPB_GameBlinds; const ALightweight: Boolean = FALSE);

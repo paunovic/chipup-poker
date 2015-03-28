@@ -1,4 +1,4 @@
-unit Poker.Server.SSLCerts;
+unit Poker.Common.SSLCert;
 
 interface
 
@@ -9,11 +9,6 @@ type
   TSSLCert = class(TX509Base)
     procedure LoadFromResource(const AResourceName: String; const APassword: PAnsiChar = nil);
   end;
-
-var
-  SSLCert_OfficialServer: TSSLCert;
-  SSLCert_DevServer: TSSLCert;
-  SSLCert_SubClass1Server: TSSLCert;
 
 implementation
 
@@ -41,20 +36,5 @@ begin
     rstream.Free;
   end;
 end;
-
-initialization
-  SSLCert_OfficialServer := TSSLCert.Create(nil);
-  SSLCert_OfficialServer.LoadFromResource('OfficialServerCertificate');
-
-  SSLCert_DevServer := TSSLCert.Create(nil);
-  SSLCert_DevServer.LoadFromResource('DevServerCertificate');
-
-  SSLCert_SubClass1Server := TSSLCert.Create(nil);
-  SSLCert_SubClass1Server.LoadFromResource('SubClass1ServerCertificate');
-
-finalization
-  FreeAndNil(SSLCert_SubClass1Server);
-  FreeAndNil(SSLCert_DevServer);
-  FreeAndNil(SSLCert_OfficialServer);
 
 end.

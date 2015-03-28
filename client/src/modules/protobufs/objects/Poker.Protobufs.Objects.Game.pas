@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.Game;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TGameLimit = (glNoLimit = 0, glPotLimit, glFixedLimit);
@@ -208,7 +210,6 @@ type
     function has_FinalTable: Boolean;
     procedure clear_FinalTable;
     property FinalTable: Boolean read FFinalTable write SetFinalTable;
-
   end;
 
   TPB_GameList = class(TObjectList<TPB_Game>)
@@ -218,7 +219,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_Game.Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE);
