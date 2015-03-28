@@ -1,5 +1,6 @@
 #include <QTimer>
 #include <QPalette>
+#include <QDesktopWidget>
 
 #include "notifywindow.h"
 #ifdef Q_OS_MAC
@@ -19,7 +20,8 @@ NotifyWindow::NotifyWindow() : QWidget(0), ui(new Ui::NotifyWindow) {
 	#endif
 		Qt::FramelessWindowHint |
 		Qt::WindowSystemMenuHint |
-		Qt::WindowStaysOnTopHint
+		Qt::WindowStaysOnTopHint |
+		Qt::WindowDoesNotAcceptFocus
 	);
 	setAttribute(Qt::WA_TranslucentBackground,false);
 	setAttribute(Qt::WA_DeleteOnClose,true);
@@ -40,7 +42,8 @@ NotifyWindow::NotifyWindow() : QWidget(0), ui(new Ui::NotifyWindow) {
 	int clearAttr[] = { 0 };
 	HIWindowChangeAttributes(qt_mac_window_for(this), setAttr, clearAttr);
 #endif*/
-	setAutoFillBackground(true);
+	setGeometry(QStyle::alignedRect(Qt::RightToLeft,Qt::AlignBottom,size(),
+									QApplication::desktop()->availableGeometry()));
 }
 void NotifyWindow::setMessage(QString msg) {
 	ui->notification->setText(msg);

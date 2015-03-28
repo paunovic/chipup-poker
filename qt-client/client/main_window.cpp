@@ -63,8 +63,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 		ui->gridGames->resizeColumnToContents(i);
 	}
 	//setFixedSize(size());
-	NotifyWindow *popup = new NotifyWindow();
-	popup->setMessage("packet.msg");
 }
 MainWindow::~MainWindow() {
 	delete ui;
