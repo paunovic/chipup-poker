@@ -290,3 +290,15 @@ void Table::On_chat_event(Data::Chat event) {
 	if (event.username == core->self()->displayName()) color = "#46a3ff";
 	ui->teChat->append(QString("<font color='#e1e1e1'>%1:</font> <font color='%2'>%3</font>").arg(event.username).arg(color).arg(event.msg));
 }
+QSize Table::sizeHint() const {
+	qDebug() << ui->horizontalLayout_2->sizeHint();
+	qDebug() << ui->center->sizeHint();
+	qDebug() << ui->horizontalLayout->sizeHint();
+	return QMainWindow::sizeHint();
+}
+void Table::resizeEvent(QResizeEvent *event) {
+	QMainWindow::resizeEvent(event);
+	qDebug() << ui->horizontalLayout_2->sizeHint() << ui->center->sizeHint() << ui->horizontalLayout->sizeHint();
+	qDebug() << minimumSize() << maximumSize();
+	setMaximumHeight(minimumHeight());
+}

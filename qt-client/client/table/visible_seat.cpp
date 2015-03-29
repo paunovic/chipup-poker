@@ -174,6 +174,10 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 			qDebug() << "TODO, add-on";
 		}
 	} else {
+		if (jsobj->reserved()) {
+			qDebug() << "that seat is reserved!";
+			return;
+		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
 		sitwindow->show();

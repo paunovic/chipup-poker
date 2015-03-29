@@ -65,7 +65,11 @@
     </item>
     <item>
      <widget class="QWidget" name="centerWrap" native="true">
-      <layout class="QGridLayout" name="center"/>
+      <layout class="QGridLayout" name="center">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinAndMaxSize</enum>
+       </property>
+      </layout>
      </widget>
     </item>
     <item>

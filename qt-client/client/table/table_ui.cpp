@@ -24,7 +24,7 @@ void TableUi::resizeEvent(QResizeEvent *) {
 		QSize size = el->sizeHint();
 		el->setGeometry(pos.x(),pos.y(), size.width(),size.height());
 	}
-	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Preferred);
+	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Maximum);
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
 	setMinimumHeight(((qreal)(41*em)*width())/(85*em));
@@ -79,7 +79,10 @@ void TableUi::element_deleted(QObject *item) {
 	uiElements.removeOne(static_cast<GameObjectUi*>(item));
 }
 QSize TableUi::sizeHint() const {
-	return QSize(300,200);
+	int em = fontMetrics().boundingRect("M").width();
+	QSize ret(width(),((qreal)(41*em)*width())/(85*em));
+	qDebug() << "sizeHint" << ret;
+	return ret;
 }
 bool TableUi::event(QEvent *event) {
 	if (event->type() == QEvent::LayoutRequest) {
