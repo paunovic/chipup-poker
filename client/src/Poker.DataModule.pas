@@ -53,6 +53,7 @@ type
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
     procedure RefreshSkinControllerDelayed;
+    procedure ServerSocketConnect;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -81,8 +82,6 @@ uses
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
-var
-  server_index: Integer;
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   UserDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
@@ -95,12 +94,7 @@ begin
   LoadFonts;
 
   TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
-  if (Settings.DeveloperMode) and
-     (Settings.ServerIndex > 0) then
-    server_index := Settings.ServerIndex
-  else
-    server_index := 0;
-  TServerSocket.Initialize(server_index);
+  TServerSocket.Initialize;
   TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
@@ -178,6 +172,22 @@ end;
 procedure TdmMain.OpenTACLink;
 begin
   ShellOpen(PChar(Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
+end;
+
+procedure TdmMain.ServerSocketConnect;
+var
+  server_index: Integer;
+begin
+  if (Settings.ServerIndex > 0) and
+     (Settings.DeveloperMode) then
+    server_index := Settings.ServerIndex
+  else
+    server_index := 0;
+
+  ServerSocket.Connect(Settings.Hardcoded.SERVER_LIST[server_index].Address,
+    Settings.Hardcoded.SERVER_LIST[server_index].Port,
+    Settings.Hardcoded.SERVER_LIST[server_index].SSLEnable,
+    Settings.Hardcoded.SERVER_LIST[server_index].SSLCertificate);
 end;
 
 procedure TdmMain.SetUpdaterBatchFile(const AFile: String);

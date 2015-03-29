@@ -7,7 +7,12 @@ uses
 
 type
   TSSLCert = class(TX509Base)
+  private
+    FResourceName: String;
+  public
     procedure LoadFromResource(const AResourceName: String; const APassword: PAnsiChar = nil);
+
+    property CertResourceName: String read FResourceName;
   end;
 
 implementation
@@ -35,6 +40,8 @@ begin
   finally
     rstream.Free;
   end;
+
+  FResourceName := AResourceName;
 end;
 
 end.

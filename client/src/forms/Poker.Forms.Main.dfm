@@ -4481,6 +4481,9 @@ object frmChipUpMain: TfrmChipUpMain
                 Caption = '&Show Debug Form'
               end
               item
+                Caption = '-'
+              end
+              item
                 Action = acLaunchNewInstance
                 Caption = '&Launch New Instance'
               end

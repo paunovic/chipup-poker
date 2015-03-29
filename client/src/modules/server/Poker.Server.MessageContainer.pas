@@ -172,7 +172,7 @@ var
   callback_socketstatechange: TSocketStateChangeCallback;
   obj: TObject;
 begin
-  {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
+  {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocket]); {$ENDIF}
 
   FLock.Acquire;
   try

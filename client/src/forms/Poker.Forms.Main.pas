@@ -402,9 +402,6 @@ begin
   paTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
   paTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
   paTournamentInfo.Height := gridTournaments.Height - 1;
-
-  if WindowState <> wsMaximized then
-    Settings.SaveFormSettings(self);
 end;
 
 
@@ -423,7 +420,6 @@ begin
   Tournaments.Clear;
   btHomeGames.Down := TRUE;
   acShowHomeGamesLayout.Execute;
-  {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
 procedure TfrmChipUpMain.DoLogout;
