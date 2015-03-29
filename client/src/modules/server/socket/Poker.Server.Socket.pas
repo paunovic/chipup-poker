@@ -12,7 +12,7 @@ uses
 type
   TServerSocket = class(TServerSocketCore)
   public
-    class procedure Initialize(const AServerIndex: Integer);
+    class procedure Initialize;
     class procedure Deinitialize;
 
     procedure Login(const ALogin, APass: String);
@@ -88,9 +88,9 @@ uses
   Poker.Protobufs.Objects.SoftException;
 
 
-class procedure TServerSocket.Initialize(const AServerIndex: Integer);
+class procedure TServerSocket.Initialize;
 begin
-  ServerSocket := TServerSocket.Create(AServerIndex);
+  ServerSocket := TServerSocket.Create;
 end;
 
 class procedure TServerSocket.Deinitialize;

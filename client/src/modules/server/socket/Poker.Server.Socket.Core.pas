@@ -20,8 +20,6 @@ type
     var
       FSocket: TSslWSocket;
       FInternalHWND: HWND;
-      FServer: String;
-      FPort: Integer;
       FReceiveBuffer: PAnsiChar;
       FReceiveBufferSize: Integer;
       FLatency: Integer;
@@ -31,12 +29,15 @@ type
       FSSLHandshakeDone: Boolean;
       FSocketConnectThread: TServerSocketConnectThread;
       FSSLCert: TSSLCert;
+      FBytesDownloaded: DWORD;
+      FBytesSent: DWORD;
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
     procedure SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
     procedure SocketSslVerifyPeer(Sender: TObject; var Ok: Integer; Cert: TX509Base);
     procedure SocketChangeState(Sender: TObject; OldState, NewState: TSocketState);
+    procedure SocketSendData(Sender: TObject; BytesSent: Integer);
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
     procedure SocketConnectThreadTerminate(Sender: TObject);
@@ -57,10 +58,12 @@ type
     {$ENDIF}
 
   public
-    constructor Create(const AServerIndex: Integer);
+    constructor Create;
     destructor Destroy; override;
 
-    procedure Connect(const AConnectSynchronously: Boolean = FALSE);
+    procedure Connect(const AServer: String; const APort: Integer;
+     const ASSLEnable: Boolean; const ASSLCert: String;
+     const AConnectSynchronously: Boolean = FALSE);
     procedure Disconnect;
     function IsConnected: Boolean;
 
@@ -69,13 +72,14 @@ type
 
     procedure Ping;
 
-    property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
     property ServerTime: UINT64 read FServerTime;
     property TimeOffset: UINT64 read FTimeOffset;
     property IsPinging: Boolean read FPinging;
     property SSLCertificate: TSSLCert read FSSLCert;
+    property BytesDownloaded: DWORD read FBytesDownloaded;
+    property BytesSent: DWORD read FBytesSent;
   end;
 
 implementation
@@ -100,32 +104,23 @@ uses
   Poker.Protobufs.Objects.ReservedSeatFree;
 
 
-constructor TServerSocketCore.Create(const AServerIndex: Integer);
+constructor TServerSocketCore.Create;
 begin
-  FServer := Settings.Hardcoded.SERVER_LIST[AServerIndex].Address;
-  FPort := Settings.Hardcoded.SERVER_LIST[AServerIndex].Port;
-
   FInternalHWND := AllocateHwnd(WndProc);
 
   FSocket := TSslWSocket.Create(nil);
-  FSocket.SslEnable := Settings.Hardcoded.SERVER_LIST[AServerIndex].SSLEnable;
   FSocket.TimeoutConnect := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
   FSocket.TimeoutIdle := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
   FSocket.TimeoutSampling := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
 
-  if FSocket.SslEnable then
-  begin
-    FSocket.SslContext := TSslContext.Create(nil);
-    FSocket.SslContext.SslVerifyPeer := TRUE;
-    FSocket.SslContext.SslVerifyDepth := 9;
-    FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
-    FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_PEER];
-    FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE];
-    FSocket.SslContext.InitContext;
-    FSSLCert := TSSLCert.Create(nil);
-    FSSLCert.LoadFromResource(Settings.Hardcoded.SERVER_LIST[AServerIndex].SSLCertificate);
-    FSocket.SslContext.TrustCert(FSSLCert);
-  end;
+  FSocket.OnChangeState := SocketChangeState;
+  FSocket.OnDataAvailable := SocketDataAvailable;
+  FSocket.OnError := SocketError;
+  FSocket.OnSessionConnected := SocketSessionConnected;
+  FSocket.OnSessionClosed := SocketSessionClosed;
+  FSocket.OnSslVerifyPeer := SocketSslVerifyPeer;
+  FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
+  FSocket.OnSendData := SocketSendData;
 end;
 
 destructor TServerSocketCore.Destroy;
@@ -149,28 +144,61 @@ begin
   inherited;
 end;
 
-procedure TServerSocketCore.Connect(const AConnectSynchronously: Boolean = FALSE);
+procedure TServerSocketCore.Connect(const AServer: String; const APort: Integer;
+     const ASSLEnable: Boolean; const ASSLCert: String;
+     const AConnectSynchronously: Boolean = FALSE);
 begin
   if (FSocket.State <> wsClosed) or
      (Assigned(FSocketConnectThread)) then
     Exit;
 
-  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
-
   FreeReceiveBuffer;
-
-  FSocket.Addr := FServer;
-  FSocket.Port := IntToStr(FPort);
-  FSocket.OnChangeState := SocketChangeState;
-  FSocket.OnDataAvailable := SocketDataAvailable;
-  FSocket.OnError := SocketError;
-  FSocket.OnSessionConnected := SocketSessionConnected;
-  FSocket.OnSessionClosed := SocketSessionClosed;
-  FSocket.OnSslVerifyPeer := SocketSslVerifyPeer;
-  FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
 
   KillPingTimers;
   KillPingTimeoutTimer;
+
+  FSocket.Addr := AServer;
+  FSocket.Port := IntToStr(APort);
+  FSocket.SslEnable := ASSLEnable;
+
+  if FSocket.SslEnable then
+  begin
+    if not Assigned(FSocket.SslContext) then
+    begin
+      FSocket.SslContext := TSslContext.Create(nil);
+      FSocket.SslContext.SslVerifyPeer := TRUE;
+      FSocket.SslContext.SslVerifyDepth := 9;
+      FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
+      FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_PEER];
+      FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE];
+      FSocket.SslContext.InitContext;
+    end;
+
+    if (Assigned(FSSLCert)) and
+       (FSSLCert.CertResourceName <> ASSLCert) then
+      FreeAndNil(FSSLCert);
+
+    if not Assigned(FSSLCert) then
+    begin
+      FSSLCert := TSSLCert.Create(nil);
+      FSSLCert.LoadFromResource(ASSLCert);
+    end;
+
+    FSocket.SslContext.TrustCert(FSSLCert);
+  end
+  else
+  begin
+    if Assigned(FSocket.SslContext) then
+    begin
+      FSocket.SslContext.Free;
+      FSocket.SslContext := nil;
+    end;
+
+    if Assigned(FSSLCert) then
+      FreeAndNil(FSSLCert);
+  end;
+
+  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%s...', [FSocket.Addr, FSocket.Port]), ditSocket); {$ENDIF}
 
   if AConnectSynchronously then
     FSocket.Connect
@@ -190,7 +218,6 @@ begin
 
   if FSocket.State <> TSocketState.wsClosed then
   begin
-    {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
     FSocket.Flush;
     FSocket.CloseDelayed;
   end;
@@ -222,9 +249,15 @@ begin
   end;
 end;
 
+procedure TServerSocketCore.SocketSendData(Sender: TObject; BytesSent: Integer);
+begin
+  Inc(FBytesSent, BytesSent);
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
+end;
+
 procedure TServerSocketCore.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  SoftException('Session closed');
+  {$IFDEF DEBUG} DebugLn('Session closed', ditSocket); {$ENDIF}
   Disconnect;
 end;
 
@@ -329,6 +362,8 @@ begin
   else
   begin
     Inc(FReceiveBufferSize, len);
+    {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
+    Inc(FBytesDownloaded, len);
     ReallocMem(FReceiveBuffer, FReceiveBufferSize);
     Move(rcv_buf[0], FReceiveBuffer[FReceiveBufferSize - len], len);
   end;
@@ -446,7 +481,7 @@ procedure TServerSocketCore.ResetPingTimeoutTimer;
 begin
   SetTimer(FInternalHWND, TIMER_ID_PING_TIMEOUT, Settings.Hardcoded.SERVER_PING_TIMEOUT * 1000, nil);
   FPinging := TRUE;
-  {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState, dfiLatency]); {$ENDIF}
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
 end;
 
 procedure TServerSocketCore.KillPingTimers;
@@ -511,7 +546,7 @@ begin
       FTimeOffset := FServerTime - gtc;
       KillPingTimeoutTimer;
       ResetPingTimer;
-      {$IFDEF DEBUG} RefreshDebugForm([dfiLatency]); {$ENDIF}
+      {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
     end;
     Integer(seChat): ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(srClubDisbandOk),

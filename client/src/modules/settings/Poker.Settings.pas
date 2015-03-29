@@ -240,7 +240,7 @@ begin
   if AForm.Left + AForm.Width > Screen.DesktopWidth then
     AForm.Left := Screen.DesktopWidth - AForm.Width;
   if AForm.Top + AForm.Height > Screen.DesktopHeight then
-    AForm.Top := Screen.DesktopHeight - AForm.Top;
+    AForm.Top := Screen.DesktopHeight - AForm.Height;
   if AForm.Left < 0 then
     AForm.Left := 0;
   if AForm.Top < 0 then

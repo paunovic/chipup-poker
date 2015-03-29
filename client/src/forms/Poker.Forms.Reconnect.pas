@@ -141,7 +141,7 @@ begin
   if FCurrentStatus = rsIdle then
   begin
     FCurrentStatus := rsConnecting;
-    ServerSocket.Connect;
+    dmMain.ServerSocketConnect;
   end;
 
   if (CurrentStatus = rsConnected) and

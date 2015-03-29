@@ -182,7 +182,7 @@ begin
   case ServerSocket.Socket.State of
     wsClosed: begin
       CurrentStatus := lsConnecting;
-      ServerSocket.Connect;
+      dmMain.ServerSocketConnect;
     end;
     wsConnected: CurrentStatus := lsConnected;
   end;
@@ -259,8 +259,7 @@ var
 begin
   item_index := (Sender as TcxComboBox).ItemIndex;
   Settings.ServerIndex := item_index;
-  TServerSocket.Deinitialize;
-  TServerSocket.Initialize(item_index);
+  ServerSocket.Disconnect;
 end;
 
 procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
@@ -312,7 +311,7 @@ begin
   if CurrentStatus = lsIdle then
   begin
     CurrentStatus := lsConnecting;
-    ServerSocket.Connect;
+    dmMain.ServerSocketConnect;
   end;
 
   if (ServerSocket.IsConnected) and
@@ -407,18 +406,17 @@ begin
   if not TTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
     Exit;
 
-  if (not TCommandLineParams.NoUpdateFlag) and
-     (pbhello.UpdateFiles.Count > 0) then
+  if pbhello.UpdateFiles.Count > 0 then
   begin
-    dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
-    acUpdate.Execute;
-  end
-  else
-  begin
-    {$IFDEF DEBUG}
     if TCommandLineParams.NoUpdateFlag then
-      DebugLn('Ignoring update (-noupdate parameter found)', ditApplication);
-    {$ENDIF}
+    begin
+      {$IFDEF DEBUG} DebugLn('Ignoring update (-noupdate parameter found)', ditApplication); {$ENDIF}
+    end
+    else
+    begin
+      dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
+      acUpdate.Execute;
+    end;
   end;
 
   ServerSettings.ParseHelloMessage(pbhello);
@@ -464,8 +462,6 @@ begin
     SoftException(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.LoginStatus)]));
     edLogin.SetFocus;
   end;
-
-  {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
 procedure TfrmChipUpLogin.AlphaBlendThreadNotify(Sender: TObject);
