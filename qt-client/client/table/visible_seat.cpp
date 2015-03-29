@@ -1,6 +1,7 @@
 #include <QPainter>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QStyle>
 
 #include "table/visible_seat.h"
 #include "pokermain.h"
@@ -44,12 +45,10 @@ void VisibleSeat::setAvatar(QPixmap in) {
 }
 void VisibleSeat::resizeEvent(QResizeEvent*) {
 	int targetheight = heightForWidth(width());
-	qDebug() << size();
 	float width = this->width() * 0.27;
 	float height;
 	if (avatar.width()) {
 		height = ((qreal)avatar.height()*width)/avatar.width();
-		qDebug() << width << height << avatar.size();
 	} else {
 		height = width;
 		qWarning("avatar missing from a seat");
@@ -97,11 +96,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	painter.drawPixmap(0,0,width(),targetheight,pix);
 	if (!jsobj->getEmpty()) {
 		painter.setPen(QColor(198,198,198));
-		QRect dn = fontMetric->boundingRect(displayname);
-		//qDebug() << dn << displayname << line1;
-		dn.translate(line1.x() + ((line1.width() - dn.width())/2),line1.y() + (dn.y()*-1));
-		//qDebug() << dn << displayname << line1;
-		painter.drawText(dn.bottomLeft(),displayname);
+		style()->drawItemText(&painter,line1.toRect(),Qt::AlignCenter,palette(),true,displayname);
 
 		QString bottomline;
 		painter.setPen(QColor(138,194,62));
@@ -116,10 +111,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			bottomline = QString("%1").arg((double)chips/100);
 		}
 		if (bottomline.length() > 0) {
-			QRect bb = fontMetric->boundingRect(bottomline);
-			bb.translate(line2.x() + ((line2.width() - bb.width())/2),line2.y() + (bb.y()*-1));
-			//qDebug() << bb << line2;
-			painter.drawText(bb.bottomLeft(),bottomline);
+			style()->drawItemText(&painter,line2.toRect(),Qt::AlignCenter,palette(),true,bottomline);
 		}
 	}
 	painter.setPen(QColor(255,0,0));
@@ -263,7 +255,6 @@ void VisibleSeat::tick() {
 		update();
 	} else {
 		timebarPercent = (float)diff / maxtimebank;
-		qDebug() << "timebank debug" << diff << timebarPercent;
 		update();
 	}
 }

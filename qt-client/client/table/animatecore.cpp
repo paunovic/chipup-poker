@@ -16,7 +16,6 @@ AnimateCore::AnimateCore(bool testing) :
 // TODO, delete animations when the window is closed
 void AnimateCore::tick() {
 	int now = getTime();
-	//qDebug() << "uptime" << now;
 
 	Animation *a;
 	foreach (a,animations) {
