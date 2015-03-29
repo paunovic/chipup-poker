@@ -44,12 +44,10 @@ void VisibleSeat::setAvatar(QPixmap in) {
 }
 void VisibleSeat::resizeEvent(QResizeEvent*) {
 	int targetheight = heightForWidth(width());
-	qDebug() << size();
 	float width = this->width() * 0.27;
 	float height;
 	if (avatar.width()) {
 		height = ((qreal)avatar.height()*width)/avatar.width();
-		qDebug() << width << height << avatar.size();
 	} else {
 		height = width;
 		qWarning("avatar missing from a seat");
@@ -182,6 +180,10 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 			qDebug() << "TODO, add-on";
 		}
 	} else {
+		if (jsobj->reserved()) {
+			qDebug() << "that seat is reserved!";
+			return;
+		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
 		sitwindow->show();

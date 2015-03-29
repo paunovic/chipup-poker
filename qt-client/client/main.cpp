@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	QFontDatabase::addApplicationFont(":/resources/seats/Barmeno-Bold.ttf");
 	core = new PokerMain();
 	core->setDataDir(datadir);
-	core->app = &a;
+
 	animateCore = new AnimateCore(false);
 
 	LoginWindow *w = new LoginWindow;

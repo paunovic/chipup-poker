@@ -32,7 +32,9 @@ public:
 	void eval(QString code);
 	void renderWinning(QString msg);
 	QByteArray getGameId() const { return game->gameid; }
-
+	QSize sizeHint() const;
+protected:
+	void resizeEvent(QResizeEvent *event);
 public slots:
 	bool On_table_status(QSharedPointer<Data::TableStatus> ts);
 	void On_sit_ok(QByteArray gameid);

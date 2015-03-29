@@ -44,6 +44,7 @@ PokerMain::PokerMain(QObject *parent) :
 #endif
 	setObjectName("core");
 	delayQuit = false;
+	allowUpdates = true;
 	workerThread = new QThread();
 	workerThread->start();
 	uploader = new MiniDumpUploader();
@@ -152,8 +153,10 @@ void PokerMain::socket_ready() {
     pinger.setSingleShot(false);
     pinger.setInterval(30000);
 	pinger.start();
-	qDebug() << "starting hashing" << QThread::currentThread();
-	emit startHashing(datadir.absoluteFilePath("scripts.rcc"));
+	if (allowUpdates) {
+		qDebug() << "starting hashing" << QThread::currentThread();
+		emit startHashing(datadir.absoluteFilePath("scripts.rcc"));
+	} else doneHashing();
 }
 void PokerMain::doneHashing() {
 	Poker::HelloParams hp;
@@ -293,7 +296,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		validCharacters = hr.valid_chars_regex();
 		max_play_time = hr.max_play_time();
 		send_ping();
-		if (hr.update_files_size()) {
+		if (allowUpdates && hr.update_files_size()) {
 			doUpdate(hr);
 		} else {
 			uploader->checkForDumps();
