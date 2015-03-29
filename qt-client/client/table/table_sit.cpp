@@ -12,6 +12,8 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	g.set__id(gamein->gameid.data(),gamein->gameid.length());
 	core->sendMessage(Poker::scTableSitOpen,&g);
 	core->RegisterListener(this);
+	setWindowFlags(windowFlags() & ~Qt::WindowMinMaxButtonsHint);
+	setFixedSize(size());
 }
 void TableSit::updateLimits() {
 	double buyinmin = GetBuyinMin();
