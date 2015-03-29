@@ -100,6 +100,7 @@ function tableStatus(ts) {
 			updatePots();
 			break;
 		case "teTurn":
+			queueAction(new SimpleDelay(1500));
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localTurn[i]) localTurn[i] = new Card();
@@ -260,6 +261,7 @@ HideCard.prototype.begin = function () {
 }
 function tableEvent(event) {
 	log('EVENT:'+event.event);
+	queueAction(new UpdateChat(JSON.stringify(event.event)));
 	switch (event.event) {
 	case "teSit":
 		var seat = lastTS.readSeatBySeat(event.seat);
@@ -289,10 +291,11 @@ function tableEvent(event) {
 		}
 		break;
 	case "teWinning":
+		AnimateCards({reveal:true});
 		queueAction(new SimpleDelay(2000));
 		var perSeatWins = [];
 		for (var i=0; i<game.seats; i++) perSeatWins[i] = 0;
-		queueAction(new UpdateChat(JSON.stringify(event.pots)));
+		//queueAction(new UpdateChat(JSON.stringify(event.pots)));
 		var seatMap = [];
 		for (var i=0; i<lastTS.seats.length; i++) {
 			seatMap[lastTS.seats[i].seat_index] = lastTS.seats[i];
@@ -327,7 +330,6 @@ function tableEvent(event) {
 			queueAction(new AnimateChipWin(pos,perSeatWins[i]));
 		}
 		updateBets();
-		AnimateCards({reveal:true});
 		queueAction(new SimpleDelay(250));
 		for (var i=0; i<localFlop.length; i++) {
 			if (localFlop[i]) {
