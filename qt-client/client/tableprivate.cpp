@@ -59,13 +59,17 @@ static QScriptValue NewDealerButton(QScriptContext *,QScriptEngine *engine) {
 
 static QScriptValue Animate(QScriptContext *context,QScriptEngine *engine) {
 	GameObject *object = static_cast<GameObject*>(context->argument(0).toQObject());
-	float endx = context->argument(1).toNumber();
-	float endy = context->argument(2).toNumber();
-	float seconds = context->argument(3).toNumber();
-	QScriptValue callback = context->argument(4);
-	Animation *a = new Animation(object,endx,endy,seconds,callback);
-	animateCore->addAnimation(a);
-	return engine->undefinedValue();
+	if (object) {
+		float endx = context->argument(1).toNumber();
+		float endy = context->argument(2).toNumber();
+		float seconds = context->argument(3).toNumber();
+		QScriptValue callback = context->argument(4);
+		Animation *a = new Animation(object,endx,endy,seconds,callback);
+		animateCore->addAnimation(a);
+		return engine->undefinedValue();
+	} else {
+		return context->throwError("object was null");
+	}
 }
 static QScriptValue PlaySound(QScriptContext *context, QScriptEngine *engine) {
 	int id = context->argument(0).toNumber();

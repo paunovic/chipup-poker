@@ -100,7 +100,7 @@ function tableStatus(ts) {
 			updatePots();
 			break;
 		case "teTurn":
-			queueAction(new SimpleDelay(1500));
+			queueAction(new SimpleDelay(1000));
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localTurn[i]) localTurn[i] = new Card();
@@ -115,6 +115,7 @@ function tableStatus(ts) {
 			updatePots();
 			break;
 		case "teRiver":
+			queueAction(new SimpleDelay(1000));
 			for (var i=0; i<event.getCardCount(); i++) {
 				var card = event.getCard(i);
 				if (!localRiver[i]) localRiver[i] = new Card();
@@ -292,13 +293,15 @@ function tableEvent(event) {
 		break;
 	case "teWinning":
 		AnimateCards({reveal:true});
-		queueAction(new SimpleDelay(2000));
+		queueAction(new SimpleDelay(1500));
 		var perSeatWins = [];
 		for (var i=0; i<game.seats; i++) perSeatWins[i] = 0;
 		//queueAction(new UpdateChat(JSON.stringify(event.pots)));
 		var seatMap = [];
 		for (var i=0; i<lastTS.seats.length; i++) {
-			seatMap[lastTS.seats[i].seat_index] = lastTS.seats[i];
+			var index = lastTS.seats[i].seat_index;
+			seatMap[index] = lastTS.seats[i];
+			if (lastTS.bets[index] && local.bet) seat_objects[index].bet.value = lastTS.bets[index];
 		}
 		for (var i=0; i<event.pots.length; i++) {
 			var winnerCount = event.pots[i].WinnerData.length;
@@ -323,12 +326,14 @@ function tableEvent(event) {
 		while (p=localPots.shift()) {
 			hideChips(p);
 		}
+		var sets = [];
 		for (var i=0; i<game.seats; i++) {
 			var pos = calcBetLocation(i);
 			if (perSeatWins[i] == 0) continue;
 			log("seat#"+i+" won:"+perSeatWins[i]+" coords:"+JSON.stringify(pos));
-			queueAction(new AnimateChipWin(pos,perSeatWins[i]));
+			sets.push({position:pos,gain:perSeatWins[i]});
 		}
+		if (sets.length) queueAction(new AnimateChipWin(sets));
 		updateBets();
 		queueAction(new SimpleDelay(250));
 		for (var i=0; i<localFlop.length; i++) {
@@ -375,16 +380,32 @@ function tableEvent(event) {
 		dump(event);
 	}
 }
-function AnimateChipWin(dest,chips) {
-	this.stack = getChipStack();
-	this.dest = dest;
-	this.chips = chips;
+function AnimateChipWin(sets) {
+	this.stack = [];
+	this.dest = [];
+	this.chips = [];
+	for (var i=0; i<sets.length; i++) {
+		this.stack[i] = getChipStack();
+		this.dest[i] = sets[i].position;
+		this.chips[i] = sets[i].gain;
+	}
+	this.count = sets.length;
 }
 AnimateChipWin.prototype.begin = function () {
-	this.stack.value = this.chips;
-	this.stack.setPosition(0.5,0.3);
-	var stack = this.stack;
-	Animate(this.stack, this.dest.x, this.dest.y, 0.5, function () { hideChips(stack); eventDone(); });
+	var that = this;
+	for (var i=0; i<this.stack.length; i++) {
+		this.stack[i].value = this.chips[i];
+		this.stack[i].setPosition(0.5,0.3);
+		Animate(this.stack[i], this.dest[i].x, this.dest[i].y, 0.5, function () { that.check(); });
+	}
+}
+AnimateChipWin.prototype.check = function () {
+	this.count--;
+	if (this.count) return;
+	for (var i=0; i<this.stack.length; i++) {
+		hideChips(this.stack[i]);
+	}
+	eventDone();
 }
 function UpdateChat(msg) {
 	this.msg = msg;

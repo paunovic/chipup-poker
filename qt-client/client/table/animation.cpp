@@ -4,6 +4,7 @@ Animation::Animation(GameObject *obj, float endx, float endy, float duration, QS
 	QObject(0), duration(duration*1000), endx(endx), endy(endy), obj(obj), callback(callback)
 {
 	start = animateCore->getTime();
+	Q_ASSERT(obj);
 	startx = obj->x();
 	starty = obj->y();
 	xdiff = endx - startx;
