@@ -80,6 +80,10 @@ static QScriptValue NewTimer(QScriptContext *,QScriptEngine *engine) {
 	QTimer *t = new QTimer();
 	return engine->newQObject(t,QScriptEngine::ScriptOwnership);
 }
+static QScriptValue ClearCheckBoxes(QScriptContext *context, QScriptEngine *engine) {
+	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
+	parent->rootwindow->clearCheckBoxes();
+}
 
 TablePrivate::TablePrivate(QObject *parent) :
 	QObject(parent) {
@@ -97,6 +101,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 	global.setProperty("log",engine.newFunction(js_log,1));
 	global.setProperty("PlaySound",engine.newFunction(PlaySound,1));
 	global.setProperty("Animate",engine.newFunction(Animate,5));
+	global.setProperty("ClearCheckBoxes",engine.newFunction(ClearCheckBoxes,0));
 	QScriptValue ctor = engine.newFunction(NewSeatObject);
 	QScriptValue metaObject = engine.newQMetaObject(&SeatObject::staticMetaObject, ctor);
 	global.setProperty("SeatObject",metaObject);
@@ -216,6 +221,7 @@ void TablePrivate::setupUi(QWidget *parent, QGridLayout *layout, Table *rootwind
 	layout->addWidget(tableui,0,0);
 	//layout->addWidget(new QWidget(parent),1,0);
 	//qDebug() << "rows" << layout->rowCount();
+	engine.globalObject().setProperty("controls",engine.newQObject(rootwindow));
 }
 
 QScriptValue TablePrivate::eval(QString code) {
@@ -242,3 +248,7 @@ Data::SeatInfo * TablePrivate::findMySeat() const {
 	}
 	return 0;
 }
+bool TablePrivate::autoCall() { return rootwindow->autoCall(); }
+bool TablePrivate::autoCallAny() { return rootwindow->autoCallAny(); }
+bool TablePrivate::autoCheck() { return rootwindow->autoCheck(); }
+bool TablePrivate::autoCheckFold() { return rootwindow->autoCheckFold(); }

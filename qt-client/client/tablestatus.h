@@ -26,6 +26,8 @@ public:
 	int getCurrentSeat() { return current_seat; }
 	QList<int> bets() { return bets_; }
 	int dealer() { return dealer_; }
+	int minimumBet() { return minimumBet_; }
+	void setMinimumBet(int in) { minimumBet_ = in; }
 	QList<int> reservedSeats() { return _reservedSeats; }
 
 #define X(type,name) Q_PROPERTY(QString name READ get ## name )\
@@ -41,13 +43,14 @@ type get ## name() { return name; }
 	Q_PROPERTY(QList<int> bets READ bets)
 	Q_PROPERTY(QList<int> reservedSeats READ reservedSeats)
 	Q_PROPERTY(int dealer READ dealer)
+	Q_PROPERTY(int minimumBet READ minimumBet)
 	
 	QByteArray gameid;
 	QList<Data::SeatInfo*> seats;
 	int current_seat;
 	bool locked;
 	int seq;
-	int minimum_bet, maximum_raise, minimum_raise;
+	int maximum_raise, minimum_raise;
 	int sb,bb;
 	int handid;
 	qint64 time;
@@ -67,7 +70,7 @@ public slots:
 private:
 	QList<int> bets_,_reservedSeats;
 	Poker::TableStatus::TableState state_;
-	int dealer_;
+	int dealer_,minimumBet_;
 };
 
 } // namespace Data

@@ -441,7 +441,7 @@ void TestCase::simplegame() {
 	ts->seats[0]->setStatus(Poker::SeatInfo::psInHand);
 	ts->seats[1]->setStatus(Poker::SeatInfo::psInHand);
 	qDebug() << "bets" << ts->bets();
-	ts->minimum_bet = 200;
+	ts->setMinimumBet(200);
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);
 

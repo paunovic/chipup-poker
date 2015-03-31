@@ -380,28 +380,28 @@ font: bold;</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QCheckBox" name="checkBox_6">
+             <widget class="QCheckBox" name="cbAutoCheckFold">
               <property name="text">
                <string>Check/Fold</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="cbAutoCheck">
               <property name="text">
                <string>Check</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_2">
+             <widget class="QCheckBox" name="cbAutoCall">
               <property name="text">
                <string>Call</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_5">
+             <widget class="QCheckBox" name="cbAutoCallAny">
               <property name="text">
                <string>Call Any</string>
               </property>

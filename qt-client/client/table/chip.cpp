@@ -99,6 +99,6 @@ QSize ChipObjectUi::sizeHint() const {
 void ChipObject::setVisible(bool in) {
 	chips->setVisible(in);
 	if (!in) {
-		qDebug() << table->global().engine()->currentContext()->backtrace();
+		//qDebug() << table->global().engine()->currentContext()->backtrace();
 	}
 }

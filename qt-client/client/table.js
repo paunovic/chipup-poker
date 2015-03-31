@@ -141,6 +141,24 @@ function tableStatus(ts) {
 		var event = ts.events[j];
 		tableEvent(event);
 	}
+	var mySeat = controls.MySeatIndex;
+	if (mySeat >= 0) {
+		log("myBet:"+ts.bets[mySeat]+" minBet:"+ts.minimumBet);
+		var myBet = ts.bets[mySeat];
+		if (myBet < ts.minimumBet) {
+			controls.AutoCheckFoldVisible = false;
+			controls.AutoFoldVisible = true;
+			controls.AutoCallVisible = true;
+		} else {
+			controls.AutoCheckFoldVisible = true;
+			controls.AutoFoldVisible = false;
+			controls.AutoCallVisible = false;
+		}
+		if (mySeat == ts.current_seat) {
+			controls.tryAutoAction();
+			ClearCheckBoxes();
+		}
+	}
 }
 function updateSeats(ts,opts) {
 	var i;
@@ -562,7 +580,7 @@ function DealCard(destx,desty,cardobj) {
 	//cardobj.visible = false;
 }
 DealCard.prototype.begin = function DealCardBegin() {
-	log("starting card animation "+this.destx+" "+this.desty);
+	//log("starting card animation "+this.destx+" "+this.desty);
 	this.cardobj.card = -1;
 	this.cardobj.visible = true;
 	this.cardobj.setPosition(0.5,0.1);
@@ -578,7 +596,7 @@ RevealCard.prototype.begin = function () {
 	eventDone();
 }
 function eventDone() {
-	log('event done, doing next:'+actions.length);
+	//log('event done, doing next:'+actions.length);
 	var self = actions.shift();
 	if (actions.length > 0) actions[0].begin();
 }
@@ -587,7 +605,6 @@ function ShowBet(chipobj) {
 	this.chipobj.visible = false;
 }
 ShowBet.prototype.begin = function ShowBetBegin() {
-	log("showing a chip");
 	this.chipobj.visible = true;
 	PlaySound(1);
 	this.timer = setTimeout(eventDone,200);
