@@ -63,6 +63,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 		ui->gridGames->resizeColumnToContents(i);
 	}
 	//setFixedSize(size());
+
+	ui->actionAlways_Run_it_Twice->setChecked(core->config().value("table/autoDouble").toBool());
+	ui->actionConfirmation_on_fold->setChecked(core->config().value("table/confirmFold").toBool());
+	ui->actionAlways_Check_Fold->setChecked(core->config().value("table/autoCheckFold").toBool());
 }
 MainWindow::~MainWindow() {
 	delete ui;
@@ -198,4 +202,19 @@ void MainWindow::On_chat_event(Data::Chat packet) {
 	qDebug() << "global msg" << packet.msg;
 	NotifyWindow *popup = new NotifyWindow();
 	popup->setMessage(packet.msg);
+}
+
+void MainWindow::on_actionAlways_Run_it_Twice_toggled(bool arg1) {
+	qDebug() << __func__;
+	core->config().setValue("table/autoDouble",arg1);
+}
+
+void MainWindow::on_actionConfirmation_on_fold_toggled(bool arg1) {
+	qDebug() << __func__;
+	core->config().setValue("table/confirmFold",arg1);
+}
+
+void MainWindow::on_actionAlways_Check_Fold_toggled(bool arg1) {
+	qDebug() << __func__;
+	core->config().setValue("table/autoCheckFold",arg1);
 }

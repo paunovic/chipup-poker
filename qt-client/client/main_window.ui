@@ -307,9 +307,9 @@ background-repeat: no-repeat;</string>
      <addaction name="actionAlways_Check_Fold"/>
      <addaction name="actionConfirmation_on_fold"/>
      <addaction name="separator"/>
-     <addaction name="actionAl_ways_Run_it_Twice"/>
+     <addaction name="actionAlways_Run_it_Twice"/>
     </widget>
-    <widget class="QMenu" name="menuT_ournaments">
+    <widget class="QMenu" name="menuTournaments">
      <property name="title">
       <string>T&amp;ournaments</string>
      </property>
@@ -317,7 +317,7 @@ background-repeat: no-repeat;</string>
      <addaction name="action_Open_All_Tables"/>
     </widget>
     <addaction name="menu_Table"/>
-    <addaction name="menuT_ournaments"/>
+    <addaction name="menuTournaments"/>
     <addaction name="separator"/>
     <addaction name="actionHand_History"/>
    </widget>
@@ -388,6 +388,9 @@ background-repeat: no-repeat;</string>
    </property>
   </action>
   <action name="actionAlways_Check_Fold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Always &amp;Check/Fold</string>
    </property>
@@ -408,11 +411,17 @@ background-repeat: no-repeat;</string>
    </property>
   </action>
   <action name="actionConfirmation_on_fold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>&amp;Confirmation on Fold</string>
    </property>
   </action>
-  <action name="actionAl_ways_Run_it_Twice">
+  <action name="actionAlways_Run_it_Twice">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Al&amp;ways Run it Twice</string>
    </property>

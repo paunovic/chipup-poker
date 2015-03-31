@@ -36,7 +36,10 @@ private slots:
 	void on_gridPrivateClubs_doubleClicked(const QModelIndex &index);
 	void on_gridPublicClubs_doubleClicked(const QModelIndex &index);
 	void on_btOpenClubLobby_clicked();
-    void on_actionCrash_triggered();
+	void on_actionCrash_triggered();
+	void on_actionAlways_Run_it_Twice_toggled(bool arg1);
+	void on_actionConfirmation_on_fold_toggled(bool arg1);
+	void on_actionAlways_Check_Fold_toggled(bool arg1);
 
 protected:
 	void resizeEvent(QResizeEvent *event);
