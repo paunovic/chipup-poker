@@ -83,6 +83,7 @@ static QScriptValue NewTimer(QScriptContext *,QScriptEngine *engine) {
 static QScriptValue ClearCheckBoxes(QScriptContext *context, QScriptEngine *engine) {
 	TablePrivate *parent = static_cast<TablePrivate*>(engine->globalObject().property("root").toQObject());
 	parent->rootwindow->clearCheckBoxes();
+	return engine->undefinedValue();
 }
 
 TablePrivate::TablePrivate(QObject *parent) :
