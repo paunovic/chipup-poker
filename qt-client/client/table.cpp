@@ -371,10 +371,18 @@ void Table::tryAutoAction() {
 	Data::SeatInfo *my_seat = p->findMySeat();
 	if (!my_seat) return;
 	if (lastTableStatus->current_seat != my_seat->seat_index) return;
+	int mybet = lastTableStatus->bets().at(my_seat->seat_index);
 	if (ui->cbAutoCheckFold->isChecked()) {
-		if (_AutoFoldVisible) on_btFold_clicked();
-		else on_btCheck_clicked();
+		if (_AutoFoldVisible) {
+			if (lastTableStatus->minimumBet() > mybet) {
+				on_btFold_clicked();
+			} else if (lastTableStatus->minimumBet() == mybet) {
+				on_btCheck_clicked();
+			}
+		} else if (lastTableStatus->minimumBet() == mybet) on_btCheck_clicked();
 	} else if (ui->cbAutoCall->isChecked()) {
 		on_btCheck_clicked();
+	} else if (ui->cbAutoCheck->isChecked()) {
+		if (lastTableStatus->minimumBet() == mybet) on_btCheck_clicked();
 	}
 }
