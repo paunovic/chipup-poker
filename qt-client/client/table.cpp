@@ -69,6 +69,7 @@ int Table::findMySeatIndex() {
 }
 
 bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
+	if (ts->gameid != game->gameid) return;
 	lastTableStatus = ts;
 	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimumBet()).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);
@@ -373,7 +374,7 @@ void Table::tryAutoAction() {
 	if (ui->cbAutoCheckFold->isChecked()) {
 		if (_AutoFoldVisible) on_btFold_clicked();
 		else on_btCheck_clicked();
-	} else if (ui->cbAutoCall) {
+	} else if (ui->cbAutoCall->isChecked()) {
 		on_btCheck_clicked();
 	}
 }
