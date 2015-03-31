@@ -69,7 +69,7 @@ int Table::findMySeatIndex() {
 }
 
 bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
-	if (ts->gameid != game->gameid) return;
+	if (ts->gameid != game->gameid) return false;
 	lastTableStatus = ts;
 	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimumBet()).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);
