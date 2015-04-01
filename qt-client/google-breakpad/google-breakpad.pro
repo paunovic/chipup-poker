@@ -29,9 +29,10 @@ SOURCES += client/linux/handler/exception_handler.cc client/linux/log/log.cc com
 mac {
 INCLUDEPATH += client/mac/
 SOURCES += client/mac/handler/exception_handler.cc client/mac/handler/minidump_generator.cc client/mac/crash_generation/crash_generation_client.cc common/md5.cc \
-	common/mac/macho_id.cc common/mac/macho_walker.cc common/mac/macho_utilities.cc common/mac/string_utilities.cc common/mac/MachIPC.mm common/mac/bootstrap_compat.cc \
+	common/mac/macho_id.cc common/mac/macho_walker.cc common/mac/macho_utilities.cc common/mac/string_utilities.cc common/mac/bootstrap_compat.cc \
 	common/mac/file_id.cc client/minidump_file_writer.cc client/mac/dynamic_images.cc client/mac/handler/dynamic_images.cc client/mac/handler/breakpad_nlist_64.cc \
 	common/string_conversion.cc common/convert_UTF.c
+OBJECTIVE_SOURCES += common/mac/MachIPC.mm
 }
 
 HEADERS += \

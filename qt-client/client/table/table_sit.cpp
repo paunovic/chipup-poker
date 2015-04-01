@@ -14,6 +14,19 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	core->RegisterListener(this);
 	setWindowFlags(windowFlags() & ~Qt::WindowMinMaxButtonsHint);
 	setFixedSize(size());
+	setWindowFlags(
+	#ifdef Q_OS_MAC
+		Qt::SubWindow | // This type flag is the second point
+	#else
+		Qt::Tool |
+	#endif
+		//Qt::FramelessWindowHint |
+		Qt::WindowSystemMenuHint
+		//Qt::WindowStaysOnTopHint |
+		//Qt::WindowDoesNotAcceptFocus
+	);
+	setAttribute(Qt::WA_TranslucentBackground,false);
+	setAttribute(Qt::WA_DeleteOnClose,true);
 }
 void TableSit::updateLimits() {
 	double buyinmin = GetBuyinMin();
@@ -52,7 +65,6 @@ void TableSit::on_btCancel_clicked() {
 	g2.set__id(g->gameid.data(),g->gameid.length());
 	core->sendMessage(Poker::scTableSitClose,&g2);
 	close();
-	deleteLater();
 }
 void TableSit::on_btMin_clicked() {
 	ui->seBuyin->setText(QString("%1").arg(GetBuyinMin()));
@@ -66,7 +78,6 @@ void TableSit::on_seBuyin_textEdited() {
 void TableSit::On_sit_ok(QByteArray gameid) {
 	if (gameid == g->gameid) {
 		close();
-		deleteLater();
 	}
 }
 void TableSit::On_seat_taken(QByteArray gameid) {
@@ -78,7 +89,6 @@ void TableSit::On_seat_taken(QByteArray gameid) {
 void TableSit::On_sit_timeout(QByteArray gameid) {
 	if (g->gameid != gameid) return;
 	close();
-	deleteLater();
 }
 void TableSit::On_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
 	qDebug() << pcs.buyin_min << pcs.buyin_max;

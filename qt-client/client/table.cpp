@@ -342,7 +342,10 @@ void Table::resizeEvent(QResizeEvent *event) {
 	QMainWindow::resizeEvent(event);
 	qDebug() << ui->horizontalLayout_2->sizeHint() << ui->center->sizeHint() << ui->horizontalLayout->sizeHint();
 	qDebug() << minimumSize() << maximumSize();
+	qDebug() << isMaximized();
+#ifndef Q_OS_MAC
 	setMaximumHeight(minimumHeight());
+#endif
 }
 bool Table::AutoFoldVisible() { return _AutoFoldVisible; }
 void Table::SetAutoFoldVisible(bool in) {
