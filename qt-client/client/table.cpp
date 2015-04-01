@@ -198,9 +198,9 @@ void Table::on_teChatInput_returnPressed() {
 	Poker::ChatEvent ce;
 	ce.set_event(Poker::ChatEvent::ceUserMessage);
 	ce.set_table_id(game->gameid.data(),game->gameid.length());
-	Poker::ChatMessage cm;
-	cm.set_msg(qPrintable(message));
-	ce.set_allocated_msg(&cm);
+	Poker::ChatMessage *cm = new Poker::ChatMessage;
+	cm->set_msg(qPrintable(message));
+	ce.set_allocated_msg(cm); // takes ownership
 	core->sendMessage(Poker::seChat,&ce);
 #endif
 }
