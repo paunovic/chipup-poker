@@ -403,5 +403,7 @@ void Table::tryAutoAction() {
 		on_btCheck_clicked();
 	} else if (ui->cbAutoCheck->isChecked()) {
 		if (lastTableStatus->minimumBet() == mybet) on_btCheck_clicked();
+	} else if (ui->cbAutoCallAny->isChecked()) {
+		on_btCheck_clicked();
 	}
 }
