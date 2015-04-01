@@ -14,6 +14,8 @@ public:
 	explicit NotifyWindow();
 	void setMessage(QString msg);
 signals:
+protected:
+	void resizeEvent(QResizeEvent *);
 
 public slots:
 	void timeout();
