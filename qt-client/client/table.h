@@ -58,6 +58,8 @@ public slots:
 	void On_reserved_seat_free(QByteArray gameid, quint32 seat_index);
 	void On_chat_event(Data::Chat packet);
 	void tryAutoAction();
+	bool canFold();
+	bool canCheck();
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();

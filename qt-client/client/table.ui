@@ -160,8 +160,22 @@
          <layout class="QHBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QPushButton" name="btPlayNow">
+            <property name="minimumSize">
+             <size>
+              <width>77</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+	border-image:url(:/resources/table/PlayNowButtonNormal.png);
+}
+QPushButton:pressed {
+	border-image:url(:/resources/table/PlayNowButtonPressed.png);
+}</string>
+            </property>
             <property name="text">
-             <string>Play Now</string>
+             <string/>
             </property>
            </widget>
           </item>

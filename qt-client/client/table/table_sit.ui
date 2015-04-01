@@ -50,8 +50,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="seBuyin">
-      </widget>
+      <widget class="QLineEdit" name="seBuyin"/>
      </item>
      <item>
       <widget class="QPushButton" name="btMin">

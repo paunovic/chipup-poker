@@ -110,5 +110,7 @@
         <file>resources/seats/SeatLeftReserved.png</file>
         <file>resources/seats/SeatRightReserved.png</file>
         <file>resources/Icon.png</file>
+        <file>resources/table/PlayNowButtonNormal.png</file>
+        <file>resources/table/PlayNowButtonPressed.png</file>
     </qresource>
 </RCC>

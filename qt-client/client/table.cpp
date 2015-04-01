@@ -133,6 +133,17 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	}
 	return result;
 }
+bool Table::canCheck() {
+	Data::SeatInfo *seat = p->findMySeat();
+	if (!seat) return false;
+	return lastTableStatus->minimumBet() == lastTableStatus->bets()[seat->seat_index];
+}
+bool Table::canFold() {
+	Data::SeatInfo *seat = p->findMySeat();
+	if (!seat) return false;
+	return true; // FIXME?
+}
+
 void Table::on_btMin_clicked() {
 	ui->raiseSlider->setValue(lastTableStatus->minimum_raise);
 }
@@ -221,9 +232,17 @@ void Table::on_btPlayNow_clicked() {
 	ui->cbSitOutBB->setChecked(false);
 }
 void Table::on_btFold_clicked() {
-	Poker::Game g;
-	g.set__id(game->gameid.data(),game->gameid.length());
-	core->sendMessage(Poker::scFold,&g);
+	if (canCheck() && core->config().value("table/autoCheckFold").toBool()) {
+		Poker::PutChips pc;
+		pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+		pc.set_current_state(lastTableStatus->state());
+		pc.set_chip_amount(lastTableStatus->minimumBet());
+		core->sendMessage(Poker::scPutChips,&pc);
+	} else {
+		Poker::Game g;
+		g.set__id(game->gameid.data(),game->gameid.length());
+		core->sendMessage(Poker::scFold,&g);
+	}
 }
 void Table::on_raiseSlider_valueChanged(int value) {
 	ui->lbRaiseAmount->setText(QString("%1").arg((float)value/100));

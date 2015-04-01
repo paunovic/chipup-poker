@@ -384,6 +384,11 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		srInvalidTableBuyin(data);
 		break;
 	case Poker::seSecondaryLoginDetected:
+		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+			qDebug() << widget << widget->metaObject()->className();
+			Table *tbl = qobject_cast<Table*>(widget);
+			if (tbl) tbl->close();
+		}
 		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		emit secondary_login();
 		break;
@@ -595,6 +600,8 @@ void PokerMain::srLoginReply(std::string data) {
 			u_out->update(u);
 			users.append(u_out);
 		}
+		Poker::User self = lr.self();
+		self_->update(self);
 		for (i=0; i<lr.reconnect_tables_size(); i++) {
 			Poker::TableStatus ts = lr.reconnect_tables(i);
 			QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
@@ -622,8 +629,6 @@ void PokerMain::srLoginReply(std::string data) {
 			}
 			emit table_status(out);
 		}
-		Poker::User self = lr.self();
-		self_->update(self);
 		emit login_sucess();
 		emit clubs_changed();
 		emit games_changed();
