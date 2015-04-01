@@ -1,3 +1,4 @@
+#include <QDesktopWidget>
 #include "table_sit.h"
 #include "ui_table_sit.h"
 #include "pokermain.h"
@@ -16,17 +17,19 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	setFixedSize(size());
 	setWindowFlags(
 	#ifdef Q_OS_MAC
-		Qt::SubWindow | // This type flag is the second point
+		Qt::Popup// This type flag is the second point
 	#else
 		Qt::Tool |
 	#endif
 		//Qt::FramelessWindowHint |
-		Qt::WindowSystemMenuHint
+		//Qt::WindowSystemMenuHint
 		//Qt::WindowStaysOnTopHint |
 		//Qt::WindowDoesNotAcceptFocus
 	);
 	setAttribute(Qt::WA_TranslucentBackground,false);
 	setAttribute(Qt::WA_DeleteOnClose,true);
+	setGeometry(QStyle::alignedRect(Qt::RightToLeft,Qt::AlignCenter,size(),
+									QApplication::desktop()->availableGeometry()));
 }
 void TableSit::updateLimits() {
 	double buyinmin = GetBuyinMin();
