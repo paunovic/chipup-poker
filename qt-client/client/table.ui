@@ -67,7 +67,7 @@
      <widget class="QWidget" name="centerWrap" native="true">
       <layout class="QGridLayout" name="center">
        <property name="sizeConstraint">
-        <enum>QLayout::SetMinAndMaxSize</enum>
+        <enum>QLayout::SetMinimumSize</enum>
        </property>
       </layout>
      </widget>
@@ -89,7 +89,14 @@
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <item>
-         <widget class="QTextEdit" name="teChat"/>
+         <widget class="QTextEdit" name="teChat">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>90</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLineEdit" name="teChatInput">
