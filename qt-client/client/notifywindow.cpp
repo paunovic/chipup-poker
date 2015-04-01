@@ -54,7 +54,7 @@ void NotifyWindow::setMessage(QString msg) {
 	connect(timer,SIGNAL(timeout()),this,SLOT(timeout()));
 	timer->start(5000);
 }
-void resizeEvent(QResizeEvent *event) {
+void NotifyWindow::resizeEvent(QResizeEvent *event) {
 	QWidget::resizeEvent(event);
 	setGeometry(QStyle::alignedRect(Qt::RightToLeft,Qt::AlignBottom,size(),
 									QApplication::desktop()->availableGeometry()));
