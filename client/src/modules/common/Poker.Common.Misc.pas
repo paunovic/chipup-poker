@@ -357,7 +357,7 @@ end;
 
 function GetThreadsCount(const APID: DWORD): Integer;
 var
-  snap_handle : THandle;
+  snap_handle: THandle;
   thread_entry: TThreadEntry32;
 begin
   result := 0;

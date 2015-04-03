@@ -90,7 +90,8 @@ uses
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
-  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions;
+  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions,
+  Poker.Server.Validators;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
@@ -175,9 +176,8 @@ end;
 procedure TfrmChipUpLogin.FormShow(Sender: TObject);
 begin
   if DXCore.Device.IsAtFault then
-    MessageDlg('Failed to initialize DirectX.'#10 +
-      'Please check that your graphic drivers are up-to-date and that your system meets the minimum requirements.',
-      mtError, [mbOK], 0);
+    ModalDialogs.ShowError('Failed to initialize DirectX.'#10 +
+      'Please check that your graphic drivers are up-to-date and that your system meets the minimum requirements.');
 
   case ServerSocket.Socket.State of
     wsClosed: begin
@@ -382,11 +382,30 @@ begin
 end;
 
 procedure TfrmChipUpLogin.acLoginExecute(Sender: TObject);
+var
+  err: String;
 begin
-  CurrentStatus := lsLoggingIn;
-  EnableGUI(FALSE);
-  tiLoginTimeout.Enabled := TRUE;
-  ServerSocket.Login(edLogin.Text, edPassword.Text);
+  if (ValidateUsername(edLogin.Text, err)) or
+     (ValidateEMail(edLogin.Text, err)) then
+  begin
+    if ValidateUserPassword(edPassword.Text, err) then
+    begin
+      CurrentStatus := lsLoggingIn;
+      EnableGUI(FALSE);
+      tiLoginTimeout.Enabled := TRUE;
+      ServerSocket.Login(edLogin.Text, edPassword.Text)
+    end
+    else
+    begin
+      ModalDialogs.ShowWarning(err);
+      edPassword.SetFocus;
+    end;
+  end
+  else
+  begin
+    ModalDialogs.ShowWarning('Invalid username/E-Mail address');
+    edLogin.SetFocus;
+  end;
 end;
 
 procedure TfrmChipUpLogin.acShowCreateAccountFormExecute(Sender: TObject);

@@ -69,6 +69,8 @@ end;
 
 procedure TDirectSoundBufferNotificationThread.Execute;
 begin
+  NameThreadForDebugging('DirectSoundBufferNotificationThread');
+
   while not Terminated do
   begin
     FWaitResult := WaitForMultipleObjects(FWaitHandles.Count, @FWaitHandles.ToArray[0], FALSE, INFINITE);

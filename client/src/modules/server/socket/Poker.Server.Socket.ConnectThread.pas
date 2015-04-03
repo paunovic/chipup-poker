@@ -28,6 +28,8 @@ end;
 
 procedure TServerSocketConnectThread.Execute;
 begin
+  NameThreadForDebugging('ServerSocketConnectThread');
+
   FSocket.Connect;
 end;
 

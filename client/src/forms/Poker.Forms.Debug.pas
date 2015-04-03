@@ -747,7 +747,7 @@ begin
       wsOpened: server_socket_state := 'Opened';
       wsBound: server_socket_state := 'Bound';
       wsConnecting: server_socket_state := 'Connecting...';
-      wsSocksConnected: server_socket_state := 'Socks connected';
+      wsSocksConnected: server_socket_state := 'Scks connected'; // not a typo! wouldn't fit otherwise in label width
       wsConnected: begin
         server_socket_state := 'Connected';
         server_socket_state_color := $001DE24F;

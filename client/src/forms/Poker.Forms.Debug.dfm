@@ -535,7 +535,6 @@ object frmDebug: TfrmDebug
       BevelEdges = []
       BevelOuter = bvNone
       TabOrder = 3
-      ExplicitLeft = 233
       object lbsCallbacks: TcxLabel
         Left = 5
         Top = 4

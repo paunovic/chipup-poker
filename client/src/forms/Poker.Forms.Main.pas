@@ -404,7 +404,6 @@ begin
   paTournamentInfo.Height := gridTournaments.Height - 1;
 end;
 
-
 procedure TfrmChipUpMain.FlushData;
 begin
   FormsContainer.CloseAllForms;

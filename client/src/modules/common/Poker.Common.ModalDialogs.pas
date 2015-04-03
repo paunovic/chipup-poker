@@ -20,6 +20,7 @@ type
     function ShowDialog(const AText: String; const AType: TMsgDlgType; const AButtons: TMsgDlgButtons; const ADefaultButton: TMsgDlgBtn): Integer;
     procedure ShowWarning(const AWarning: String);
     procedure ShowInformation(const AInformation: String);
+    procedure ShowError(const AError: String);
     function ShowConfirmation(const AConfirmation: String; const AButtons: TMsgDlgButtons = mbYesNo; const ADefaultButton: TMsgDlgBtn = mbYes): Integer;
   end;
 
@@ -75,6 +76,11 @@ begin
     FHandles.Remove(dialog.Handle);
     dialog.Free;
   end;
+end;
+
+procedure TModalDialogs.ShowError(const AError: String);
+begin
+  ShowDialog(AError, mtError, [mbOK], mbOK);
 end;
 
 procedure TModalDialogs.ShowInformation(const AInformation: String);
