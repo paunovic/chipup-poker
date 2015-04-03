@@ -19,7 +19,7 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	#ifdef Q_OS_MAC
 		Qt::Popup// This type flag is the second point
 	#else
-		Qt::Tool |
+		Qt::Tool
 	#endif
 		//Qt::FramelessWindowHint |
 		//Qt::WindowSystemMenuHint

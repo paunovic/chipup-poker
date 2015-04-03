@@ -304,10 +304,43 @@ function tableEvent(event) {
 		}
 		break;
 	case "teExistingCards":
+		updateDealer(lastTS.dealer);
+		updateBets({sound:true});
+		AnimateCards();
 		for (var i=0; i<event.getCardCount(); i++) {
 			var card = event.getCard(i);
 			dump(card.cards);
+			if (card.cards.length >= 3) {
+				var offset = 0;
+				for (var x=0; x<3; x++) {
+					if (!localFlop[x+offset]) localFlop[x+offset] = new Card();
+					localFlop[x+offset].setSize(cardWidth);
+					localFlop[x+offset].card = card.cards[x];
+					localFlop[x+offset].visible = false;
+				}
+				log("queueing flop reveal");
+				queueAction(new AnimateFlop(card.cards,offset));
+			}
+			var height = 0.477;
+			if (card.cards.length >= 4) {
+				if (!localTurn[0]) localTurn[0] = new Card();
+				localTurn[0].setSize(cardWidth);
+				localTurn[0].card = card.cards[3];
+				localTurn[0].visible = false;
+				queueAction(new DealCard(cardStart + (tableCardOffset*3),height,localTurn[0]));
+				queueAction(new RevealCard(localTurn[0],card.cards[3]));
+			}
+			if (card.cards.length = 5) {
+				if (!localRiver[0]) localRiver[0] = new Card();
+				localRiver[0].setSize(cardWidth);
+				localRiver[0].card = card.cards[4];
+				localRiver[0].visible = false;
+				queueAction(new DealCard(cardStart + (tableCardOffset*4),height,localRiver[0]));
+				queueAction(new RevealCard(localRiver[0],card.cards[4]));
+			}
+			break;
 		}
+		updatePots();
 		break;
 	case "teWinning":
 		AnimateCards({reveal:true});
