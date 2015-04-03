@@ -137,7 +137,8 @@ void TestCase::alignment_data() {
 	QTest::addColumn<int>("cardCount");
 	QTest::newRow("all10") << 10 << true << true << "all10.png" << 2;
 	QTest::newRow("all5") << 5 << true << true << "all5.png" << 2;
-	QTest::newRow("all5Omaha") << 5 << true << true << "all5omaha.png" << 4;
+	QTest::newRow("all5Omahad") << 5 << true << true << "all5omahad.png" << 4;
+	QTest::newRow("all5Omaha") << 5 << false << true << "all5omaha.png" << 4;
 }
 void TestCase::alignment() {
 	QFETCH(int,seats);
@@ -171,7 +172,7 @@ void TestCase::alignment() {
 	AnimateCore ac(true);
 	animateCore = &ac;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
-	tbl.resize(700,500);
+	tbl.resize(950,620);
 	Data::Game g;
 	g.seats = seats;
 	QFile input("../../qt-client/client/table.js");
@@ -210,16 +211,41 @@ void TestCase::alignment() {
 	initial.set_state(Poker::TableStatus::tsPreFlop);
 	for (int i=0; i<seats; i++) {
 		if (i == 2) initial.add_bets(300);
-		else initial.add_bets(123*i);
+		else initial.add_bets(123*(i+1));
 	}
 	Poker::TableEvent *dealing = initial.add_events();
 	dealing->set_event(Poker::TableEvent::teDealing);
 
 	ts->update(initial);
+	
+	QSharedPointer<Data::TableEvent> flop(new Data::TableEvent);
+	flop->event = Poker::TableEvent::teFlop;
+	char floparr[3] = { 0x2a,0x13,0x12 };
+	std::string flopraw((char*)&floparr,3);
+	Data::Hand *flopcards = new Data::Hand(flopraw);
+	flop->cards.append(flopcards);
+	ts->events.append(flop);
+
+	QSharedPointer<Data::TableEvent> turn(new Data::TableEvent);
+	turn->event = Poker::TableEvent::teTurn;
+	char turnarr[1] = {0x14};
+	std::string turnraw((char*)&turnarr,1);
+	Data::Hand *turncards = new Data::Hand(turnraw);
+	turn->cards.append(turncards);
+	ts->events.append(turn);
+
+	QSharedPointer<Data::TableEvent> river(new Data::TableEvent);
+	river->event = Poker::TableEvent::teRiver;
+	char riverarr[1] = {0x15};
+	std::string riverraw((char*)&riverarr,1);
+	Data::Hand *rivercards = new Data::Hand(riverraw);
+	river->cards.append(rivercards);
+	ts->events.append(river);
+
 	tbl.eval("testcase = true");
 	result = tbl.On_table_status(ts);
 	QVERIFY(result);
-	tbl.eval("alignment();");
+	if (withDealer) tbl.eval("alignment();");
 	changeDpi(QSize(121,120));
 	for (int i=0; i<50; i++) {
 		ac.setTime(i*1000);

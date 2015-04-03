@@ -7,7 +7,7 @@ var localPots = [];
 var db = new DealerButton();
 var testcase = false;
 
-var cardStart = 0.353;
+var cardStart = 0.31;
 var cardWidth = 0.07;
 var tableCardOffset = 0.075;
 
@@ -539,6 +539,7 @@ function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
 	log('seat pos is:'+JSON.stringify(seatpos));
 	var cardOffset = cardWidth;
+	if (cards == 4) cardOffset = 0.029;
 	var seatWidth = 0.16;
 	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
 	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
@@ -592,10 +593,10 @@ function calcBetLocation(seat) {
 	var rawx = Math.sin(fakeindex*interval);
 	var rawy = Math.cos(fakeindex*interval);
 
-	var scale = 0.8;
-	if (alignment_test || (lastTS.dealer == seat) ) scale = 0.6;
+	var scale = 0.7;
+	if (alignment_test || (lastTS.dealer == seat) ) scale = 0.55;
 	log("bet #"+seat+" scale:"+scale);
-	var x = (((rawx/2)*0.77)*scale)+0.495;
+	var x = (((rawx/2)*0.8)*scale)+0.495;
 	var y = (((rawy/2)*-0.62)*scale)+0.45;
 	var keyside;
 	if ( (rawy < 0.25) && (rawy > -0.25) ) {
