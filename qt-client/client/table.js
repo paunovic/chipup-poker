@@ -537,13 +537,13 @@ function calcSeatPosition(index) {
 }
 function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
-	log('seat pos is:'+JSON.stringify(seatpos));
+	//log('seat pos is:'+JSON.stringify(seatpos));
 	var cardOffset = cardWidth;
 	if (cards == 4) cardOffset = 0.029;
 	var seatWidth = 0.16;
 	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
 	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
-	return { x:center + (card * cardOffset), y:seatpos.y - 0.0 };
+	return { x:center + (card * cardOffset), y:seatpos.y - 0.015 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;

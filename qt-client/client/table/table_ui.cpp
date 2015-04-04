@@ -14,7 +14,7 @@ void TableUi::resizeEvent(QResizeEvent *) {
 	qDebug() << "tableui size" << size() << (size()/em);
 
 	float h = rootHeight();
-	yoffset = h * 0.1;
+	yoffset = h * 0.05;
 
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);
@@ -49,7 +49,7 @@ void TableUi::paintEvent(QPaintEvent *) {
 	float scale = 0.81;
 	float w = (float)width() * scale;
 	float h = (((float)pix.height() * width()) / pix.width()) * scale;
-	painter.drawPixmap(0.095*width(),0,w,h,pix);
+	painter.drawPixmap(0.095*width(),rootHeight() * 0.05,w,h,pix);
 	painter.restore();
 	//painter.drawEllipse(ring);
 	//drawGrid(painter);
