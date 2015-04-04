@@ -6,6 +6,7 @@
 
 #include "club.h"
 #include "game.h"
+#include "data/chat.h"
 
 namespace Ui {
 class MainWindow;
@@ -30,11 +31,15 @@ private slots:
 	void on_actionDisconnect_triggered();
 	void on_actionSelf_Tests_triggered();
 	void On_secondary_login();
+	void On_chat_event(Data::Chat packet);
 	void on_gridGames_doubleClicked(const QModelIndex &index);
 	void on_gridPrivateClubs_doubleClicked(const QModelIndex &index);
 	void on_gridPublicClubs_doubleClicked(const QModelIndex &index);
 	void on_btOpenClubLobby_clicked();
-    void on_actionCrash_triggered();
+	void on_actionCrash_triggered();
+	void on_actionAlways_Run_it_Twice_toggled(bool arg1);
+	void on_actionConfirmation_on_fold_toggled(bool arg1);
+	void on_actionAlways_Check_Fold_toggled(bool arg1);
 
 protected:
 	void resizeEvent(QResizeEvent *event);

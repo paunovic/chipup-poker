@@ -70,6 +70,8 @@ var
   start_time, total_time: DWORD;
   gtc, elapsed_time: DWORD;
 begin
+  NameThreadForDebugging('AlphaBlendThread');
+
   total_time := Round(FTimeInterval * 1000);
   start_time := GetTickCount + Round(FDelay * 1000);
   while (not Terminated) and

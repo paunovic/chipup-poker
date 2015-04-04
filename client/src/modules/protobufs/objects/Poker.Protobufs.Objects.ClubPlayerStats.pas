@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ClubPlayerStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ClubPlayerStats = class(TProtobufBaseObject)
@@ -18,7 +20,7 @@ type
     var
       FUserid: TMongoId;
       FClubBalance: Integer;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Userid;
     procedure clear_has_Userid;
@@ -43,7 +45,6 @@ type
     function has_ClubBalance: Boolean;
     procedure clear_ClubBalance;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
-
   end;
 
   TPB_ClubPlayerStatsList = class(TObjectList<TPB_ClubPlayerStats>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ClubPlayerStats.Create(const AFrom: TPB_ClubPlayerStats; const ALightweight: Boolean = FALSE);
@@ -100,7 +101,7 @@ end;
 
 function TPB_ClubPlayerStats.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +114,17 @@ end;
 
 function TPB_ClubPlayerStats.has_Userid: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ClubPlayerStats.set_has_Userid;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ClubPlayerStats.clear_has_Userid;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TMongoId);
@@ -148,17 +149,17 @@ end;
 
 function TPB_ClubPlayerStats.has_ClubBalance: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ClubPlayerStats.set_has_ClubBalance;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ClubPlayerStats.clear_has_ClubBalance;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ClubPlayerStats.SetClubBalance(const AValue: Integer);
@@ -173,7 +174,7 @@ end;
 
 procedure TPB_ClubPlayerStats.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Userid;

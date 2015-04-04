@@ -33,7 +33,7 @@ public:
 	int value() { return value_; }
 	void setValue(int in) { value_ = in; chips->updateValue(); }
 	bool visible() { return chips->isVisible(); }
-	void setVisible(bool in) { chips->setVisible(in); }
+	void setVisible(bool in);
 
 	Q_PROPERTY(int value READ value WRITE setValue)
 	Q_PROPERTY(bool visible READ visible WRITE setVisible)

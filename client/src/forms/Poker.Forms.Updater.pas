@@ -7,7 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel, cxProgressBar, cxImage,
   OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses,
-  Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger;
+  Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger,
+  Poker.Common.SSLCert;
 
 type
   TfrmUpdater = class(TForm, IModalForm)
@@ -37,6 +38,7 @@ type
     FCurrentDownloadedSize: UINT32;
     FFullInstaller: Boolean;
     FRequiresReboot: Boolean;
+    FSSLCert: TSSLCert;
 
     function PatchNonRebootFiles: Integer;
     function ProcessNextFile: Boolean;
@@ -58,8 +60,9 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Settings, Poker.DataModule, Poker.Protobufs.Objects.UpdateFileInfo,
-  Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi, Poker.Server.SSLCerts, Poker.SoftExceptions;
+  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Settings, Poker.DataModule,
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.Misc, Poker.HardcodedSettings,
+  Winapi.ShellApi, Poker.SoftExceptions;
 
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
@@ -79,8 +82,12 @@ begin
   for ufi in dmMain.UpdateFiles do
     Inc(FTotalSize, ufi.FileSize);
 
+  FSSLCert := TSSLCert.Create(nil);
+  FSSLCert.LoadFromResource('SubClass1ServerCertificate');
+
   SslContext.InitContext;
-  SslContext.TrustCert(SSLCert_SubClass1Server);
+  SslContext.TrustCert(FSSLCert);
+
   HttpClient.CtrlSocket.StartSslHandshake;
 end;
 
@@ -203,7 +210,7 @@ procedure TfrmUpdater.DownloadFullInstaller;
 begin
   FFullInstaller := TRUE;
   (HttpClient.RcvdStream as TMemoryStream).Clear;
-  HttpClient.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.LATEST_VERSION;
+  HttpClient.URL := Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.LATEST_VERSION;
   HttpClient.GetASync;
 end;
 

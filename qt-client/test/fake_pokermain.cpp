@@ -4,6 +4,7 @@
 #include "pokermain.h"
 #include "data/user.h"
 #include "sound_effects.h"
+#include "../client/minidumpuploader.h"
 
 PokerMain *core;
 
@@ -11,6 +12,7 @@ PokerMain::PokerMain(QObject*) {
 	manager_ = new QNetworkAccessManager(this);
 	self_ = new Data::User(this);
 	effects_ = new SoundEffects(this);
+	uploader = new MiniDumpUploader();
 }
 QNetworkAccessManager *PokerMain::manager() {
 	return manager_;

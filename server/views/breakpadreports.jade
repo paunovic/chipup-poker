@@ -1,0 +1,9 @@
+extends secure
+block content
+  table(border=1)
+    tr
+      th time
+    each report in rows
+      tr
+        td
+          a(href="/secure/breakpadReports?id="+report._id)=report._id.getTimestamp()

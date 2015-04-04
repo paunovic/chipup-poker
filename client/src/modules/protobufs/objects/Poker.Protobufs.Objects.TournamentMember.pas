@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentMember;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TournamentMember = class(TProtobufBaseObject)
@@ -26,7 +28,7 @@ type
       FGameid: TMongoId;
       FPosition: Integer;
       FSeatIndex: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -83,7 +85,6 @@ type
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
     property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
-
   end;
 
   TPB_TournamentMemberList = class(TObjectList<TPB_TournamentMember>)
@@ -93,7 +94,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentMember.Create(const AFrom: TPB_TournamentMember; const ALightweight: Boolean = FALSE);
@@ -168,7 +169,7 @@ end;
 
 function TPB_TournamentMember.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $7) <> $7 then
+  if (FHasBits and $7) <> $7 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -181,17 +182,17 @@ end;
 
 function TPB_TournamentMember.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentMember.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentMember.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentMember.SetMongoId(const AValue: TMongoId);
@@ -216,17 +217,17 @@ end;
 
 function TPB_TournamentMember.has_Displayname: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentMember.set_has_Displayname;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentMember.clear_has_Displayname;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentMember.SetDisplayname(const AValue: String);
@@ -247,17 +248,17 @@ end;
 
 function TPB_TournamentMember.has_Chips: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TournamentMember.set_has_Chips;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TournamentMember.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TournamentMember.SetChips(const AValue: UInt32);
@@ -278,17 +279,17 @@ end;
 
 function TPB_TournamentMember.has_Gameid: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TournamentMember.set_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TournamentMember.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TournamentMember.SetGameid(const AValue: TMongoId);
@@ -313,17 +314,17 @@ end;
 
 function TPB_TournamentMember.has_Position: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TournamentMember.set_has_Position;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TournamentMember.clear_has_Position;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TournamentMember.SetPosition(const AValue: Integer);
@@ -344,17 +345,17 @@ end;
 
 function TPB_TournamentMember.has_SeatIndex: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_TournamentMember.set_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_TournamentMember.clear_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_TournamentMember.SetSeatIndex(const AValue: UInt32);
@@ -369,7 +370,7 @@ end;
 
 procedure TPB_TournamentMember.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

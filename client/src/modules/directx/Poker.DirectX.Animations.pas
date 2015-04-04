@@ -141,6 +141,8 @@ end;
 
 procedure TDXAnimations.Execute;
 begin
+  NameThreadForDebugging('DXAnimationsThread');
+
   while not Terminated do
   begin
     if Count = 0 then

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableStatsReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TablePlayerStats;
 
 type
@@ -23,7 +25,7 @@ type
       FGameid: TMongoId;
       FPlayerstats: TList<TPB_TablePlayerStats>;
       FHands: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
@@ -67,7 +69,6 @@ type
     function has_Hands: Boolean;
     procedure clear_Hands;
     property Hands: UInt32 read FHands write SetHands;
-
   end;
 
   TPB_TableStatsReplyList = class(TObjectList<TPB_TableStatsReply>)
@@ -77,7 +78,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableStatsReply.Create(const AFrom: TPB_TableStatsReply; const ALightweight: Boolean = FALSE);
@@ -159,7 +160,7 @@ function TPB_TableStatsReply.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   for pbobj in Playerstats do
     if not pbobj.IsInitialized then
@@ -175,17 +176,17 @@ end;
 
 function TPB_TableStatsReply.has_Clubid: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TableStatsReply.set_has_Clubid;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TableStatsReply.clear_has_Clubid;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TableStatsReply.SetClubid(const AValue: TMongoId);
@@ -210,17 +211,17 @@ end;
 
 function TPB_TableStatsReply.has_Gameid: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TableStatsReply.set_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TableStatsReply.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TableStatsReply.SetGameid(const AValue: TMongoId);
@@ -250,17 +251,17 @@ end;
 
 function TPB_TableStatsReply.has_Playerstats: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TableStatsReply.set_has_Playerstats;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TableStatsReply.clear_has_Playerstats;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TableStatsReply.PlayerstatsNotifyEvent(Sender: TObject; const Item: TPB_TablePlayerStats; Action: TCollectionNotification);
@@ -283,17 +284,17 @@ end;
 
 function TPB_TableStatsReply.has_Hands: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TableStatsReply.set_has_Hands;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TableStatsReply.clear_has_Hands;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TableStatsReply.SetHands(const AValue: UInt32);
@@ -308,7 +309,7 @@ end;
 
 procedure TPB_TableStatsReply.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Clubid;

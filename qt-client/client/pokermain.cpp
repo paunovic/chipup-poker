@@ -24,6 +24,7 @@
 #include "table.h"
 #include "updatehasher.h"
 #include "filesaver.h"
+#include "minidumpuploader.h"
 
 #define DEVSERVER
 
@@ -41,15 +42,12 @@ PokerMain::PokerMain(QObject *parent) :
     QDir binaryDir(QApplication::applicationDirPath());
     approot = binaryDir.absoluteFilePath("../../");
 #endif
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	datadir = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-#else
-	datadir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
-#endif
 	setObjectName("core");
 	delayQuit = false;
+	allowUpdates = true;
 	workerThread = new QThread();
 	workerThread->start();
+	uploader = new MiniDumpUploader();
     if (approot.exists()) {
         hasher = new Core::UpdateHasher(approot);
         hasher->moveToThread(workerThread);
@@ -155,8 +153,10 @@ void PokerMain::socket_ready() {
     pinger.setSingleShot(false);
     pinger.setInterval(30000);
 	pinger.start();
-	qDebug() << "starting hashing" << QThread::currentThread();
-	emit startHashing(datadir.absoluteFilePath("scripts.rcc"));
+	if (allowUpdates) {
+		qDebug() << "starting hashing" << QThread::currentThread();
+		emit startHashing(datadir.absoluteFilePath("scripts.rcc"));
+	} else doneHashing();
 }
 void PokerMain::doneHashing() {
 	Poker::HelloParams hp;
@@ -296,9 +296,10 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		validCharacters = hr.valid_chars_regex();
 		max_play_time = hr.max_play_time();
 		send_ping();
-		if (hr.update_files_size()) {
+		if (allowUpdates && hr.update_files_size()) {
 			doUpdate(hr);
 		} else {
+			uploader->checkForDumps();
 			emit protocol_ready(true);
 			if (reconnectState == SignedIn) {
 				doLogin(username,password);
@@ -383,6 +384,11 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		srInvalidTableBuyin(data);
 		break;
 	case Poker::seSecondaryLoginDetected:
+		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+			qDebug() << widget << widget->metaObject()->className();
+			Table *tbl = qobject_cast<Table*>(widget);
+			if (tbl) tbl->close();
+		}
 		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		emit secondary_login();
 		break;
@@ -422,6 +428,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		}
 		break;
 	}
+	case Poker::seChat: // 50
+		seChat(data);
+		break;
 	case Poker::seClubChange: // 53
 		qDebug() << "seClubChange";
 		seClubChange(data);
@@ -591,6 +600,8 @@ void PokerMain::srLoginReply(std::string data) {
 			u_out->update(u);
 			users.append(u_out);
 		}
+		Poker::User self = lr.self();
+		self_->update(self);
 		for (i=0; i<lr.reconnect_tables_size(); i++) {
 			Poker::TableStatus ts = lr.reconnect_tables(i);
 			QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
@@ -618,8 +629,6 @@ void PokerMain::srLoginReply(std::string data) {
 			}
 			emit table_status(out);
 		}
-		Poker::User self = lr.self();
-		self_->update(self);
 		emit login_sucess();
 		emit clubs_changed();
 		emit games_changed();
@@ -648,6 +657,13 @@ void PokerMain::srTableSitOk(std::string data) {
 	out->update(ts);
 	emit table_status(out);
 	emit sit_ok(out->gameid);
+}
+void PokerMain::seChat(std::string data) {
+	Poker::ChatEvent ce;
+	ce.ParseFromString(data);
+	Data::Chat out;
+	out.update(ce);
+	emit chat_event(out);
 }
 void PokerMain::srTableStandUpOk(std::string data) {
 	Poker::TableStatus ts;

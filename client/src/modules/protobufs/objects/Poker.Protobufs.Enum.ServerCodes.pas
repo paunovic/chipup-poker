@@ -116,144 +116,132 @@ type
     scTableSitClose = 120
   );
 
-{$IFDEF DEBUG}
+
 function TranslateCode(const ACode: Integer): String;
-{$ENDIF DEBUG}
+
 
 implementation
 
-{$IFDEF DEBUG}
+
 uses System.SysUtils;
 
 function TranslateCode(const ACode: Integer): String;
-var
-  sc: TServerCodes;
-  sc_valid: Boolean;
 begin
-  sc_valid := FALSE;
-  for sc := Low(TServerCodes) to High(TServerCodes) do
-    if Integer(sc) = ACode then
-    begin
-      sc_valid := TRUE;
-      Break;
-    end;
-
-  if not sc_valid then
-    Exit(Format('UNKNOWN CODE [%d]', [ACode]));
-
-  case TServerCodes(ACode) of
-    srNotImplemented: result := 'srNotImplemented';
-    srHello: result := 'srHello';
-    srLoginReply: result := 'srLoginReply';
-    srRegisterReply: result := 'srRegisterReply';
-    srCreateClubReply: result := 'srCreateClubReply';
-    srJoinClubReply: result := 'srJoinClubReply';
-    srLeaveClubReply: result := 'srLeaveClubReply';
-    srChangeClubDetailsReply: result := 'srChangeClubDetailsReply';
-    srLogout: result := 'srLogout';
-    srKickPlayerReply: result := 'srKickPlayerReply';
-    srSetAvatarReply: result := 'srSetAvatarReply';
-    srChangeMailReply: result := 'srChangeMailReply';
-    srGetPlayers: result := 'srGetPlayers';
-    srSubscriptionPlanChange: result := 'srSubscriptionPlanChange';
-    srOwnershipGiveAwayNotOwner: result := 'srOwnershipGiveAwayNotOwner';
-    srOwnershipGiveAwayInvalidPlayerId: result := 'srOwnershipGiveAwayInvalidPlayerId';
-    srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
-    srOwnershipGiveAwayOk: result := 'srOwnershipGiveAwayOk';
-    srClubDisbandOk: result := 'srClubDisbandOk';
-    srTournamentOpenTable: result := 'srTournamentOpenTable';
-    srChangePasswordOk: result := 'srChangePasswordOk';
-    srCreateGameOk: result := 'srCreateGameOk';
-    srDeleteGameOk: result := 'srDeleteGameOk';
-    srTableSitOk: result := 'srTableSitOk';
-    srTableSitSeatTaken: result := 'srTableSitSeatTaken';
-    srTableStandUpOk: result := 'srTableStandUpOk';
-    srPong: result := 'srPong';
-    srSuspendPlayerOk: result := 'srSuspendPlayerOk';
-    srReinstatePlayerOk: result := 'srReinstatePlayerOk';
-    srTableAddonOk: result := 'srTableAddonOk';
-    srTableAddonOverLimit: result := 'srTableAddonOverLimit';
-    srTableStatsReply: result := 'srTableStatsReply';
-    srContactUsOk: result := 'srContactUsOk';
-    srTableBuyinLessThanCashout: result := 'srTableBuyinLessThanCashout';
-    srInvalidTableBuyin: result := 'srInvalidTableBuyin';
-    srPlayerLimitOk: result := 'srPlayerLimitOk';
-    srResetPlayerBalanceOk: result := 'srResetPlayerBalanceOk';
-    srClubBalanceReached: result := 'srClubBalanceReached';
-    srHandHistoryMsg: result := 'srHandHistoryMsg';
-    srQueryAssetsReply: result := 'srQueryAssetsReply';
-    srNotSitting: result := 'srNotSitting';
-    srTournamentReply: result := 'srTournamentReply';
-    srTournamentDetails: result := 'srTournamentDetails';
-    seChat: result := 'seChat';
-    seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
-    seAccountConfirmed: result := 'seAccountConfirmed';
-    seClubChange: result := 'seClubChange';
-    seClubDeleted: result := 'seClubDeleted';
-    seGameChange: result := 'seGameChange';
-    seGameCreate: result := 'seGameCreate';
-    seGameDelete: result := 'seGameDelete';
-    seTableStatus: result := 'seTableStatus';
-    seTournamentList: result := 'seTournamentList';
-    seUserChange: result := 'seUserChange';
-    seTournamentPlayerFinished: result := 'seTournamentPlayerFinished';
-    seTournamentPlayerTransfer: result := 'seTournamentPlayerTransfer';
-    sePlayerClubStatus: result := 'sePlayerClubStatus';
-    seReservedSeatFree: result := 'seReservedSeatFree';
-    seReservedSeatTimeout: result := 'seReservedSeatTimeout';
-    scHello: result := 'scHello';
-    scLogin: result := 'scLogin';
-    scTournamentRegister: result := 'scTournamentRegister';
-    scRegister: result := 'scRegister';
-    scForgotPassword: result := 'scForgotPassword';
-    scLogout: result := 'scLogout';
-    scCreateClub: result := 'scCreateClub';
-    scJoinClub: result := 'scJoinClub';
-    scKickPlayer: result := 'scKickPlayer';
-    scLeaveClub: result := 'scLeaveClub';
-    scGiveClubOwnership: result := 'scGiveClubOwnership';
-    scChangeClubDetails: result := 'scChangeClubDetails';
-    scDeleteClub: result := 'scDeleteClub';
-    scSubscriptionPlanChange: result := 'scSubscriptionPlanChange';
-    scChangeEmail: result := 'scChangeEmail';
-    scChangePassword: result := 'scChangePassword';
-    scSetAvatar: result := 'scSetAvatar';
-    scCreateGame: result := 'scCreateGame';
-    scCloseGame: result := 'scCloseGame';
-    scTableJoin: result := 'scTableJoin';
-    scTableLeave: result := 'scTableLeave';
-    scTableSit: result := 'scTableSit';
-    scTableStandUp: result := 'scTableStandUp';
-    scPing: result := 'scPing';
-    scSuspendPlayer: result := 'scSuspendPlayer';
-    scGetPlayers: result := 'scGetPlayers';
-    scFold: result := 'scFold';
-    scPutChips: result := 'scPutChips';
-    scTableAddOn: result := 'scTableAddOn';
-    scTablePlayNow: result := 'scTablePlayNow';
-    scTableSitOutNextHand: result := 'scTableSitOutNextHand';
-    scTableSitOutNextBB: result := 'scTableSitOutNextBB';
-    scResendVerificationMail: result := 'scResendVerificationMail';
-    scShowCards: result := 'scShowCards';
-    scQueryTableStats: result := 'scQueryTableStats';
-    scContactUs: result := 'scContactUs';
-    scSetPlayerLimit: result := 'scSetPlayerLimit';
-    scResetPlayerBalance: result := 'scResetPlayerBalance';
-    scQueryAssets: result := 'scQueryAssets';
-    scTournamentUnregister: result := 'scTournamentUnregister';
-    scTournamentLobbyOpen: result := 'scTournamentLobbyOpen';
-    scTournamentLobbyClose: result := 'scTournamentLobbyClose';
-    scTournamentQueryInfo: result := 'scTournamentQueryInfo';
-    scTableSitOpen: result := 'scTableSitOpen';
-    scResetPlayerBalances: result := 'scResetPlayerBalances';
-    scDeleteTableStats: result := 'scDeleteTableStats';
-    scMutePlayer: result := 'scMutePlayer';
-    scChangePlayerManagerState: result := 'scChangePlayerManagerState';
-    scSplitTableCards: result := 'scSplitTableCards';
-    scSoftException: result := 'scSoftException';
-    scTableSitClose: result := 'scTableSitClose';
+  case ACode of
+    Integer(srNotImplemented): result := 'srNotImplemented';
+    Integer(srHello): result := 'srHello';
+    Integer(srLoginReply): result := 'srLoginReply';
+    Integer(srRegisterReply): result := 'srRegisterReply';
+    Integer(srCreateClubReply): result := 'srCreateClubReply';
+    Integer(srJoinClubReply): result := 'srJoinClubReply';
+    Integer(srLeaveClubReply): result := 'srLeaveClubReply';
+    Integer(srChangeClubDetailsReply): result := 'srChangeClubDetailsReply';
+    Integer(srLogout): result := 'srLogout';
+    Integer(srKickPlayerReply): result := 'srKickPlayerReply';
+    Integer(srSetAvatarReply): result := 'srSetAvatarReply';
+    Integer(srChangeMailReply): result := 'srChangeMailReply';
+    Integer(srGetPlayers): result := 'srGetPlayers';
+    Integer(srSubscriptionPlanChange): result := 'srSubscriptionPlanChange';
+    Integer(srOwnershipGiveAwayNotOwner): result := 'srOwnershipGiveAwayNotOwner';
+    Integer(srOwnershipGiveAwayInvalidPlayerId): result := 'srOwnershipGiveAwayInvalidPlayerId';
+    Integer(srOwnershipGiveAwayInvalidClubId): result := 'srOwnershipGiveAwayInvalidClubId';
+    Integer(srOwnershipGiveAwayOk): result := 'srOwnershipGiveAwayOk';
+    Integer(srClubDisbandOk): result := 'srClubDisbandOk';
+    Integer(srTournamentOpenTable): result := 'srTournamentOpenTable';
+    Integer(srChangePasswordOk): result := 'srChangePasswordOk';
+    Integer(srCreateGameOk): result := 'srCreateGameOk';
+    Integer(srDeleteGameOk): result := 'srDeleteGameOk';
+    Integer(srTableSitOk): result := 'srTableSitOk';
+    Integer(srTableSitSeatTaken): result := 'srTableSitSeatTaken';
+    Integer(srTableStandUpOk): result := 'srTableStandUpOk';
+    Integer(srPong): result := 'srPong';
+    Integer(srSuspendPlayerOk): result := 'srSuspendPlayerOk';
+    Integer(srReinstatePlayerOk): result := 'srReinstatePlayerOk';
+    Integer(srTableAddonOk): result := 'srTableAddonOk';
+    Integer(srTableAddonOverLimit): result := 'srTableAddonOverLimit';
+    Integer(srTableStatsReply): result := 'srTableStatsReply';
+    Integer(srContactUsOk): result := 'srContactUsOk';
+    Integer(srTableBuyinLessThanCashout): result := 'srTableBuyinLessThanCashout';
+    Integer(srInvalidTableBuyin): result := 'srInvalidTableBuyin';
+    Integer(srPlayerLimitOk): result := 'srPlayerLimitOk';
+    Integer(srResetPlayerBalanceOk): result := 'srResetPlayerBalanceOk';
+    Integer(srClubBalanceReached): result := 'srClubBalanceReached';
+    Integer(srHandHistoryMsg): result := 'srHandHistoryMsg';
+    Integer(srQueryAssetsReply): result := 'srQueryAssetsReply';
+    Integer(srNotSitting): result := 'srNotSitting';
+    Integer(srTournamentReply): result := 'srTournamentReply';
+    Integer(srTournamentDetails): result := 'srTournamentDetails';
+    Integer(seChat): result := 'seChat';
+    Integer(seSecondaryLoginDetected): result := 'seSecondaryLoginDetected';
+    Integer(seAccountConfirmed): result := 'seAccountConfirmed';
+    Integer(seClubChange): result := 'seClubChange';
+    Integer(seClubDeleted): result := 'seClubDeleted';
+    Integer(seGameChange): result := 'seGameChange';
+    Integer(seGameCreate): result := 'seGameCreate';
+    Integer(seGameDelete): result := 'seGameDelete';
+    Integer(seTableStatus): result := 'seTableStatus';
+    Integer(seTournamentList): result := 'seTournamentList';
+    Integer(seUserChange): result := 'seUserChange';
+    Integer(seTournamentPlayerFinished): result := 'seTournamentPlayerFinished';
+    Integer(seTournamentPlayerTransfer): result := 'seTournamentPlayerTransfer';
+    Integer(sePlayerClubStatus): result := 'sePlayerClubStatus';
+    Integer(seReservedSeatFree): result := 'seReservedSeatFree';
+    Integer(seReservedSeatTimeout): result := 'seReservedSeatTimeout';
+    Integer(scHello): result := 'scHello';
+    Integer(scLogin): result := 'scLogin';
+    Integer(scTournamentRegister): result := 'scTournamentRegister';
+    Integer(scRegister): result := 'scRegister';
+    Integer(scForgotPassword): result := 'scForgotPassword';
+    Integer(scLogout): result := 'scLogout';
+    Integer(scCreateClub): result := 'scCreateClub';
+    Integer(scJoinClub): result := 'scJoinClub';
+    Integer(scKickPlayer): result := 'scKickPlayer';
+    Integer(scLeaveClub): result := 'scLeaveClub';
+    Integer(scGiveClubOwnership): result := 'scGiveClubOwnership';
+    Integer(scChangeClubDetails): result := 'scChangeClubDetails';
+    Integer(scDeleteClub): result := 'scDeleteClub';
+    Integer(scSubscriptionPlanChange): result := 'scSubscriptionPlanChange';
+    Integer(scChangeEmail): result := 'scChangeEmail';
+    Integer(scChangePassword): result := 'scChangePassword';
+    Integer(scSetAvatar): result := 'scSetAvatar';
+    Integer(scCreateGame): result := 'scCreateGame';
+    Integer(scCloseGame): result := 'scCloseGame';
+    Integer(scTableJoin): result := 'scTableJoin';
+    Integer(scTableLeave): result := 'scTableLeave';
+    Integer(scTableSit): result := 'scTableSit';
+    Integer(scTableStandUp): result := 'scTableStandUp';
+    Integer(scPing): result := 'scPing';
+    Integer(scSuspendPlayer): result := 'scSuspendPlayer';
+    Integer(scGetPlayers): result := 'scGetPlayers';
+    Integer(scFold): result := 'scFold';
+    Integer(scPutChips): result := 'scPutChips';
+    Integer(scTableAddOn): result := 'scTableAddOn';
+    Integer(scTablePlayNow): result := 'scTablePlayNow';
+    Integer(scTableSitOutNextHand): result := 'scTableSitOutNextHand';
+    Integer(scTableSitOutNextBB): result := 'scTableSitOutNextBB';
+    Integer(scResendVerificationMail): result := 'scResendVerificationMail';
+    Integer(scShowCards): result := 'scShowCards';
+    Integer(scQueryTableStats): result := 'scQueryTableStats';
+    Integer(scContactUs): result := 'scContactUs';
+    Integer(scSetPlayerLimit): result := 'scSetPlayerLimit';
+    Integer(scResetPlayerBalance): result := 'scResetPlayerBalance';
+    Integer(scQueryAssets): result := 'scQueryAssets';
+    Integer(scTournamentUnregister): result := 'scTournamentUnregister';
+    Integer(scTournamentLobbyOpen): result := 'scTournamentLobbyOpen';
+    Integer(scTournamentLobbyClose): result := 'scTournamentLobbyClose';
+    Integer(scTournamentQueryInfo): result := 'scTournamentQueryInfo';
+    Integer(scTableSitOpen): result := 'scTableSitOpen';
+    Integer(scResetPlayerBalances): result := 'scResetPlayerBalances';
+    Integer(scDeleteTableStats): result := 'scDeleteTableStats';
+    Integer(scMutePlayer): result := 'scMutePlayer';
+    Integer(scChangePlayerManagerState): result := 'scChangePlayerManagerState';
+    Integer(scSplitTableCards): result := 'scSplitTableCards';
+    Integer(scSoftException): result := 'scSoftException';
+    Integer(scTableSitClose): result := 'scTableSitClose';
+  else
+    result := Format('%d', [ACode]);
   end;
 end;
-{$ENDIF DEBUG}
+
 
 end.

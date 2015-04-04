@@ -163,6 +163,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure acMuteUnmutePlayerExecute(Sender: TObject);
     procedure acPromoteDemoteUserExecute(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -258,6 +259,11 @@ end;
 procedure TfrmClubLobby.FormResize(Sender: TObject);
 begin
   ConfigureGUI(FALSE);
+end;
+
+procedure TfrmClubLobby.FormActivate(Sender: TObject);
+begin
+  dmMain.RefreshSkinControllerDelayed;
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -599,7 +605,7 @@ begin
   c.BeginFullUpdate;
   try
     value := FALSE;
-    if c.GetValue(c.FocusedRecordIndex, gridTablesEnabled.Index) = TRUE then
+    if c.GetValue(c.FocusedRecordIndex, gridTablesEnabled.Index) then
       value := TRUE;
     c.SetValue(c.FocusedRecordIndex, gridTablesEnabled.Index, not value);
     UpdatePlayersStatsList;
@@ -624,7 +630,7 @@ end;
 procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
   AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
 begin
-  if ARecord.Values[gridTablesEnabled.Index] = TRUE then
+  if ARecord.Values[gridTablesEnabled.Index] then
     AStyle := styleCheckedRow
   else
     if Sender.DataController.FocusedRowIndex = ARecord.Index then
@@ -806,7 +812,7 @@ begin
         selectedids := TList<TMongoId>.Create;
         try
           for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
-            if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
+            if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) then
             begin
               selectedid := gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index);
               selectedids.Add(selectedid);
@@ -1159,7 +1165,7 @@ begin
         selectedids.Add(FSelectedStatsTableId);
 
       for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
-        if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
+        if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) then
         begin
           selectedid := gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index);
           if not selectedids.Contains(selectedid) then

@@ -33,73 +33,73 @@ public:
 	}
 	TypeInfo(FieldDescriptor::Type type): type(type) {
 		switch (type) {
-		case FieldDescriptor::TYPE_INT64:
-			baseDelphiName = delphiName = "Int64";
-			writer = "WriteInt64";
-			reader = "readInt64";
-			wiretype = "WIRETYPE_VARINT";
-			defaultdefault = "0";
-			typeName = "int64";
-			break;
-		case FieldDescriptor::TYPE_UINT64:
-			baseDelphiName = delphiName = "UInt64";
-			writer = "WriteInt64";
-			reader = "readInt64";
-			wiretype = "WIRETYPE_VARINT";
-			defaultdefault = "0";
-			typeName = "uint64";
-			break;
-		case FieldDescriptor::TYPE_INT32:
-			baseDelphiName = delphiName = "Integer";
-			writer = "writeInt32";
-			reader = "readInt32";
-			wiretype = "WIRETYPE_VARINT";
-			defaultdefault = "0";
-			typeName = "int32";
-			break;
-		case FieldDescriptor::TYPE_BOOL:
-			baseDelphiName = delphiName = "Boolean";
-			writer = "writeBoolean";
-			reader = "readBoolean";
-			wiretype = "WIRETYPE_VARINT";
-			defaultdefault = "false";
-			typeName = "bool";
-			break;
-		case FieldDescriptor::TYPE_STRING:
-			baseDelphiName = delphiName = "String";
-			writer = "writeString";
-			reader = "readUtf8String";
-			wiretype = "WIRETYPE_LENGTH_DELIMITED";
-			defaultdefault = "''";
-			typeName = "string";
-			break;
-		case FieldDescriptor::TYPE_MESSAGE:
-			// FIXME
-			defaultdefault = "nil";
-			writer = "writeMessage";
-			wiretype = "WIRETYPE_LENGTH_DELIMITED";
-			break;
-		case FieldDescriptor::TYPE_BYTES:
-			baseDelphiName = delphiName = "TBytes";
-			writer = "writeBytes";
-			reader = "readBytes";
-			wiretype = "WIRETYPE_LENGTH_DELIMITED";
-			typeName = "bytes";
-			break;
-		case FieldDescriptor::TYPE_UINT32:
-			baseDelphiName = delphiName = "UInt32";
-			writer = "writeUInt32";
-			reader = "readUInt32";
-			wiretype = "WIRETYPE_VARINT";
-			defaultdefault = "0";
-			typeName = "uint32";
-			break;
-		case FieldDescriptor::TYPE_ENUM:
-			// FIXME
-			writer = "writeInt32";
-			break;
-		default:
-			assert(false);
+			case FieldDescriptor::TYPE_INT64:
+				baseDelphiName = delphiName = "Int64";
+				writer = "WriteInt64";
+				reader = "readInt64";
+				wiretype = "WIRETYPE_VARINT";
+				defaultdefault = "0";
+				typeName = "int64";
+				break;
+			case FieldDescriptor::TYPE_UINT64:
+				baseDelphiName = delphiName = "UInt64";
+				writer = "WriteInt64";
+				reader = "readInt64";
+				wiretype = "WIRETYPE_VARINT";
+				defaultdefault = "0";
+				typeName = "uint64";
+				break;
+			case FieldDescriptor::TYPE_INT32:
+				baseDelphiName = delphiName = "Integer";
+				writer = "writeInt32";
+				reader = "readInt32";
+				wiretype = "WIRETYPE_VARINT";
+				defaultdefault = "0";
+				typeName = "int32";
+				break;
+			case FieldDescriptor::TYPE_BOOL:
+				baseDelphiName = delphiName = "Boolean";
+				writer = "writeBoolean";
+				reader = "readBoolean";
+				wiretype = "WIRETYPE_VARINT";
+				defaultdefault = "false";
+				typeName = "bool";
+				break;
+			case FieldDescriptor::TYPE_STRING:
+				baseDelphiName = delphiName = "String";
+				writer = "writeString";
+				reader = "readUtf8String";
+				wiretype = "WIRETYPE_LENGTH_DELIMITED";
+				defaultdefault = "''";
+				typeName = "string";
+				break;
+			case FieldDescriptor::TYPE_MESSAGE:
+				// FIXME
+				defaultdefault = "nil";
+				writer = "writeMessage";
+				wiretype = "WIRETYPE_LENGTH_DELIMITED";
+				break;
+			case FieldDescriptor::TYPE_BYTES:
+				baseDelphiName = delphiName = "TBytes";
+				writer = "writeBytes";
+				reader = "readBytes";
+				wiretype = "WIRETYPE_LENGTH_DELIMITED";
+				typeName = "bytes";
+				break;
+			case FieldDescriptor::TYPE_UINT32:
+				baseDelphiName = delphiName = "UInt32";
+				writer = "writeUInt32";
+				reader = "readUInt32";
+				wiretype = "WIRETYPE_VARINT";
+				defaultdefault = "0";
+				typeName = "uint32";
+				break;
+			case FieldDescriptor::TYPE_ENUM:
+				// FIXME
+				writer = "writeInt32";
+				break;
+			default:
+				assert(false);
 		}
 	}
 	string getDefault() { return defaultdefault; }
@@ -112,27 +112,28 @@ public:
 	string PrivateFieldName() { return privateField; }
 	string getLabelString() {
 		switch (field->label()) {
-		case FieldDescriptor::LABEL_OPTIONAL: return "optional";
-		case FieldDescriptor::LABEL_REQUIRED: return "required";
-		case FieldDescriptor::LABEL_REPEATED: return "repeated";
+			case FieldDescriptor::LABEL_OPTIONAL: return "optional";
+			case FieldDescriptor::LABEL_REQUIRED: return "required";
+			case FieldDescriptor::LABEL_REPEATED: return "repeated";
+			default: return "unknown";
 		}
 	}
 	string getTypeName() { return typeName; }
 	string getTypeString() {
 		switch (field->type()) {
-		case FieldDescriptor::TYPE_DOUBLE: return "double";
-		case FieldDescriptor::TYPE_FLOAT: return "float";
-		case FieldDescriptor::TYPE_INT64: return "int64";
-		case FieldDescriptor::TYPE_UINT64: return "uint64";
-		case FieldDescriptor::TYPE_FIXED64: return "fixed64";
-		case FieldDescriptor::TYPE_FIXED32: return "fixed32";
-		case FieldDescriptor::TYPE_BOOL: return "bool";
-		case FieldDescriptor::TYPE_STRING: return "string";
-		case FieldDescriptor::TYPE_MESSAGE: return "FIXME";
-		case FieldDescriptor::TYPE_INT32: return "int32";
-		case FieldDescriptor::TYPE_BYTES: return "bytes";
-		case FieldDescriptor::TYPE_UINT32: return "uint32";
-		case FieldDescriptor::TYPE_ENUM: return "FIXME";
+			case FieldDescriptor::TYPE_DOUBLE: return "double";
+			case FieldDescriptor::TYPE_FLOAT: return "float";
+			case FieldDescriptor::TYPE_INT64: return "int64";
+			case FieldDescriptor::TYPE_UINT64: return "uint64";
+			case FieldDescriptor::TYPE_FIXED64: return "fixed64";
+			case FieldDescriptor::TYPE_FIXED32: return "fixed32";
+			case FieldDescriptor::TYPE_BOOL: return "bool";
+			case FieldDescriptor::TYPE_STRING: return "string";
+			case FieldDescriptor::TYPE_MESSAGE: return "FIXME";
+			case FieldDescriptor::TYPE_INT32: return "int32";
+			case FieldDescriptor::TYPE_BYTES: return "bytes";
+			case FieldDescriptor::TYPE_UINT32: return "uint32";
+			case FieldDescriptor::TYPE_ENUM: return "FIXME";
 		}
 	}
 	void printPrivateVariable(io::Printer *printer,const FieldDescriptor *field) {
@@ -266,36 +267,24 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"uses System.SysUtils;\n"
 		"\n"
 		"function TranslateCode(const ACode: Integer): String;\n"
-		"var\n"
-		"  sc: T$name$;\n"
-		"  sc_valid: Boolean;\n"
-		"begin\n"
-		"  sc_valid := FALSE;\n"
-		"  for sc := Low(T$name$) to High(T$name$) do\n"
-		"    if Integer(sc) = ACode then\n"
-		"    begin\n"
-		"      sc_valid := TRUE;\n"
-		"      Break;\n"
-		"    end;\n"
-		"\n"
-		"  if not sc_valid then\n"
-		"    Exit(Format('UNKNOWN CODE [%d]', [ACode]));\n"
-		"\n"
-		"  case T$name$(ACode) of\n"
+		"begin\n"	
+		"  case ACode of\n"
 		,"name",type->name()
-		,"begin","{$IFDEF DEBUG}"
-		,"end","{$ENDIF DEBUG}");
+		,"begin",""
+		,"end","");
 	for (int j=0; j<type->value_count(); j++) {
 		const EnumValueDescriptor *value = type->value(j);
-		printer.Print("    $name$: result := '$name$';\n","name",value->name());
+		printer.Print("    Integer($name$): result := '$name$';\n","name",value->name());
 	}
 	printer.Print(
+		"  else\n"
+		"    result := Format('%d', [ACode]);\n"
 		"  end;\n"
 		"end;\n"
 		"$end$\n"
 		"\n"
 		"end."
-		,"end","{$ENDIF DEBUG}");
+		,"end","");
 }
 string EnumName(const FieldDescriptor *field) {
 	string name = field->camelcase_name();
@@ -403,15 +392,15 @@ class BaseGenerator : public CodeGenerator {
 			printer->Print(vars,
 				"function TPB_$message$.has_$name$: Boolean;\n"
 				"begin\n"
-				"  result := (_has_bits_ and $bit$) > 0;\n"
+				"  result := (FHasBits and $bit$) > 0;\n"
 				"end;\n\n"
 				"procedure TPB_$message$.set_has_$name$;\n"
 				"begin\n"
-				"  _has_bits_ := _has_bits_ or $bit$;\n"
+				"  FHasBits := FHasBits or $bit$;\n"
 				"end;\n\n"
 				"procedure TPB_$message$.clear_has_$name$;\n"
 				"begin\n"
-				"  _has_bits_ := _has_bits_ and not $bit$;\n"
+				"  FHasBits := FHasBits and not $bit$;\n"
 				"end;\n\n");
 
 			vars["enum"] = EnumName(field);
@@ -518,7 +507,9 @@ class BaseGenerator : public CodeGenerator {
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types"
+				"  System.SysUtils,\n"
+				"  {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF},\n"
+				"  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types"
 				,"filename",file->name()
 				,"name",message->name());
 			if (message->field_count() > 0) {
@@ -614,7 +605,7 @@ class BaseGenerator : public CodeGenerator {
 				instance.printPrivateVariable(&printer,field);
 			}
 			printer.Print(
-				"      _has_bits_: UINT32;\n"
+				"      FHasBits: UINT32;\n"
 				"\n");
 			GenerateSettersDec(message,&printer);
 			for (int j=0; j<message->field_count(); j++) {
@@ -667,7 +658,8 @@ class BaseGenerator : public CodeGenerator {
 				} else {
 					printer.Print(vars,"    property $name$: $type$ read $pname$ write Set$name$;\n");
 				}
-				printer.Print("\n");
+				if (j<message->field_count() - 1)
+					printer.Print("\n");
 			}
 			printer.Print(
 				"  end;\n\n"
@@ -678,7 +670,7 @@ class BaseGenerator : public CodeGenerator {
 				"implementation\n"
 				"\n"
 				"uses\n"
-				"  pbPublic, Poker.Common.Misc;\n"
+				"  pbPublic;\n"
 				"\n"
 				,"name",message->name());
 
@@ -933,7 +925,7 @@ class BaseGenerator : public CodeGenerator {
 					"  pbobj: TProtobufBaseObject;\n");
 			}
 			printer.Print("begin\n"
-				"  if (_has_bits_ and $mask$) <> $mask$ then\n"
+				"  if (FHasBits and $mask$) <> $mask$ then\n"
         "    Exit(FALSE);\n"
 				,"mask",hack);
 			for (int j=0; j<message->field_count(); j++) {
@@ -964,7 +956,7 @@ class BaseGenerator : public CodeGenerator {
 			printer.Print(
 				"procedure TPB_$name$.Clear;\n"
 				"begin\n"
-				"  if _has_bits_ = 0 then\n"
+				"  if FHasBits = 0 then\n"
 				"    Exit;\n\n"
 				,"name",message->name());
 			for (int j=0; j<message->field_count(); j++) {

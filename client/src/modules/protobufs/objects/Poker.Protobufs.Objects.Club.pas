@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.Club;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ClubMember;
 
 type
@@ -41,7 +43,7 @@ type
       FUnlimitedDefaultBalance: Boolean;
       FBuyinReset: UInt32;
       FMaxRakePerHand: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -157,7 +159,6 @@ type
     function has_MaxRakePerHand: Boolean;
     procedure clear_MaxRakePerHand;
     property MaxRakePerHand: UInt32 read FMaxRakePerHand write SetMaxRakePerHand;
-
   end;
 
   TPB_ClubList = class(TObjectList<TPB_Club>)
@@ -167,7 +168,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_Club.Create(const AFrom: TPB_Club; const ALightweight: Boolean = FALSE);
@@ -312,7 +313,7 @@ function TPB_Club.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $0) <> $0 then
+  if (FHasBits and $0) <> $0 then
     Exit(FALSE);
   for pbobj in Members do
     if not pbobj.IsInitialized then
@@ -328,17 +329,17 @@ end;
 
 function TPB_Club.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_Club.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_Club.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_Club.SetMongoId(const AValue: TMongoId);
@@ -368,17 +369,17 @@ end;
 
 function TPB_Club.has_Members: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_Club.set_has_Members;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_Club.clear_has_Members;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_Club.MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
@@ -401,17 +402,17 @@ end;
 
 function TPB_Club.has_Name: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_Club.set_has_Name;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_Club.clear_has_Name;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_Club.SetName(const AValue: String);
@@ -432,17 +433,17 @@ end;
 
 function TPB_Club.has_Owner: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_Club.set_has_Owner;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_Club.clear_has_Owner;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_Club.SetOwner(const AValue: TMongoId);
@@ -467,17 +468,17 @@ end;
 
 function TPB_Club.has_Password: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_Club.set_has_Password;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_Club.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_Club.SetPassword(const AValue: String);
@@ -498,17 +499,17 @@ end;
 
 function TPB_Club.has_IsPrivate: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_Club.set_has_IsPrivate;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_Club.clear_has_IsPrivate;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
@@ -529,17 +530,17 @@ end;
 
 function TPB_Club.has_Seq: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_Club.set_has_Seq;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_Club.clear_has_Seq;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);
@@ -560,17 +561,17 @@ end;
 
 function TPB_Club.has_PasswordExists: Boolean;
 begin
-  result := (_has_bits_ and 128) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_Club.set_has_PasswordExists;
 begin
-  _has_bits_ := _has_bits_ or 128;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_Club.clear_has_PasswordExists;
 begin
-  _has_bits_ := _has_bits_ and not 128;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_Club.SetPasswordExists(const AValue: Boolean);
@@ -591,17 +592,17 @@ end;
 
 function TPB_Club.has_Rake: Boolean;
 begin
-  result := (_has_bits_ and 256) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_Club.set_has_Rake;
 begin
-  _has_bits_ := _has_bits_ or 256;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_Club.clear_has_Rake;
 begin
-  _has_bits_ := _has_bits_ and not 256;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_Club.SetRake(const AValue: UInt32);
@@ -622,17 +623,17 @@ end;
 
 function TPB_Club.has_DefaultBalanceLimit: Boolean;
 begin
-  result := (_has_bits_ and 512) > 0;
+  result := (FHasBits and 512) > 0;
 end;
 
 procedure TPB_Club.set_has_DefaultBalanceLimit;
 begin
-  _has_bits_ := _has_bits_ or 512;
+  FHasBits := FHasBits or 512;
 end;
 
 procedure TPB_Club.clear_has_DefaultBalanceLimit;
 begin
-  _has_bits_ := _has_bits_ and not 512;
+  FHasBits := FHasBits and not 512;
 end;
 
 procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UInt32);
@@ -653,17 +654,17 @@ end;
 
 function TPB_Club.has_UnlimitedDefaultBalance: Boolean;
 begin
-  result := (_has_bits_ and 1024) > 0;
+  result := (FHasBits and 1024) > 0;
 end;
 
 procedure TPB_Club.set_has_UnlimitedDefaultBalance;
 begin
-  _has_bits_ := _has_bits_ or 1024;
+  FHasBits := FHasBits or 1024;
 end;
 
 procedure TPB_Club.clear_has_UnlimitedDefaultBalance;
 begin
-  _has_bits_ := _has_bits_ and not 1024;
+  FHasBits := FHasBits and not 1024;
 end;
 
 procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);
@@ -684,17 +685,17 @@ end;
 
 function TPB_Club.has_BuyinReset: Boolean;
 begin
-  result := (_has_bits_ and 2048) > 0;
+  result := (FHasBits and 2048) > 0;
 end;
 
 procedure TPB_Club.set_has_BuyinReset;
 begin
-  _has_bits_ := _has_bits_ or 2048;
+  FHasBits := FHasBits or 2048;
 end;
 
 procedure TPB_Club.clear_has_BuyinReset;
 begin
-  _has_bits_ := _has_bits_ and not 2048;
+  FHasBits := FHasBits and not 2048;
 end;
 
 procedure TPB_Club.SetBuyinReset(const AValue: UInt32);
@@ -715,17 +716,17 @@ end;
 
 function TPB_Club.has_MaxRakePerHand: Boolean;
 begin
-  result := (_has_bits_ and 4096) > 0;
+  result := (FHasBits and 4096) > 0;
 end;
 
 procedure TPB_Club.set_has_MaxRakePerHand;
 begin
-  _has_bits_ := _has_bits_ or 4096;
+  FHasBits := FHasBits or 4096;
 end;
 
 procedure TPB_Club.clear_has_MaxRakePerHand;
 begin
-  _has_bits_ := _has_bits_ and not 4096;
+  FHasBits := FHasBits and not 4096;
 end;
 
 procedure TPB_Club.SetMaxRakePerHand(const AValue: UInt32);
@@ -740,7 +741,7 @@ end;
 
 procedure TPB_Club.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.PingReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_PingReply = class(TProtobufBaseObject)
@@ -18,7 +20,7 @@ type
     var
       FUptime: UInt32;
       FServertime: UInt64;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Uptime;
     procedure clear_has_Uptime;
@@ -43,7 +45,6 @@ type
     function has_Servertime: Boolean;
     procedure clear_Servertime;
     property Servertime: UInt64 read FServertime write SetServertime;
-
   end;
 
   TPB_PingReplyList = class(TObjectList<TPB_PingReply>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_PingReply.Create(const AFrom: TPB_PingReply; const ALightweight: Boolean = FALSE);
@@ -100,7 +101,7 @@ end;
 
 function TPB_PingReply.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +114,17 @@ end;
 
 function TPB_PingReply.has_Uptime: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_PingReply.set_has_Uptime;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_PingReply.clear_has_Uptime;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_PingReply.SetUptime(const AValue: UInt32);
@@ -144,17 +145,17 @@ end;
 
 function TPB_PingReply.has_Servertime: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_PingReply.set_has_Servertime;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_PingReply.clear_has_Servertime;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_PingReply.SetServertime(const AValue: UInt64);
@@ -169,7 +170,7 @@ end;
 
 procedure TPB_PingReply.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Uptime;

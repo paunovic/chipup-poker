@@ -90,6 +90,9 @@ var BugsSchema = new Schema({
 	ScreenShot:Buffer,
 	BugReport:String
 },{collection:'bugs'});
+var BreakpadReports = new Schema({
+	reportBody:String
+});
 var DiffSchema = new Schema({
 	sourcehash:String,
 	desthash:String,
@@ -340,6 +343,7 @@ module.exports.open = function (dbname) {
 	models.Tournament = mongoose.model('Tournament',TournamentSchema);
 	models.TournamentLog = mongoose.model('TournamentLog',TournamentLogSchema);
 	models.SoftException = mongoose.model('SoftException',SoftExceptionSchema);
+	models.BreakpadReport = mongoose.model('BreakpadReport',BreakpadReports);
 }
 
 if (require.main === module) {

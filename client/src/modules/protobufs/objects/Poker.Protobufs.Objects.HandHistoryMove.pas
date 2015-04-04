@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HandHistoryMove;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
@@ -25,7 +27,7 @@ type
       FSeat: Integer;
       FWinnerPotData: TList<TPB_Pot>;
       FPots: TList<TPB_Pot>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Code;
     procedure clear_has_Code;
@@ -77,7 +79,6 @@ type
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
-
   end;
 
   TPB_HandHistoryMoveList = class(TObjectList<TPB_HandHistoryMove>)
@@ -87,7 +88,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HandHistoryMove.Create(const AFrom: TPB_HandHistoryMove; const ALightweight: Boolean = FALSE);
@@ -190,7 +191,7 @@ function TPB_HandHistoryMove.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $0) <> $0 then
+  if (FHasBits and $0) <> $0 then
     Exit(FALSE);
   for pbobj in WinnerPotData do
     if not pbobj.IsInitialized then
@@ -214,17 +215,17 @@ end;
 
 function TPB_HandHistoryMove.has_Code: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_HandHistoryMove.set_has_Code;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_HandHistoryMove.clear_has_Code;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_HandHistoryMove.CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
@@ -241,17 +242,17 @@ end;
 
 function TPB_HandHistoryMove.has_Bet: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_HandHistoryMove.set_has_Bet;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_HandHistoryMove.clear_has_Bet;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_HandHistoryMove.SetBet(const AValue: UInt32);
@@ -272,17 +273,17 @@ end;
 
 function TPB_HandHistoryMove.has_Seat: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_HandHistoryMove.set_has_Seat;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_HandHistoryMove.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_HandHistoryMove.SetSeat(const AValue: Integer);
@@ -308,17 +309,17 @@ end;
 
 function TPB_HandHistoryMove.has_WinnerPotData: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_HandHistoryMove.set_has_WinnerPotData;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_HandHistoryMove.clear_has_WinnerPotData;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_HandHistoryMove.WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -346,17 +347,17 @@ end;
 
 function TPB_HandHistoryMove.has_Pots: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_HandHistoryMove.set_has_Pots;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_HandHistoryMove.clear_has_Pots;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_HandHistoryMove.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -373,7 +374,7 @@ end;
 
 procedure TPB_HandHistoryMove.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Code;

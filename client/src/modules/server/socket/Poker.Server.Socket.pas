@@ -11,10 +11,8 @@ uses
 
 type
   TServerSocket = class(TServerSocketCore)
-  private
-    procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject); overload;
   public
-    class procedure Initialize(const AServer: String; const APort: Integer);
+    class procedure Initialize;
     class procedure Deinitialize;
 
     procedure Login(const ALogin, APass: String);
@@ -90,19 +88,14 @@ uses
   Poker.Protobufs.Objects.SoftException;
 
 
-class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
+class procedure TServerSocket.Initialize;
 begin
-  ServerSocket := TServerSocket.Create(AServer, APort);
+  ServerSocket := TServerSocket.Create;
 end;
 
 class procedure TServerSocket.Deinitialize;
 begin
   FreeAndNil(ServerSocket);
-end;
-
-procedure TServerSocket.SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
-begin
-  SendProtobuf(Integer(AMethodId), AProtobuf);
 end;
 
 procedure TServerSocket.Login(const ALogin, APass: String);

@@ -358,6 +358,7 @@ var
   table: TTable;
   close_table: Boolean;
 begin
+  Action := caNone;
   close_table := TRUE;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -1305,7 +1306,6 @@ begin
     Tables.Unlock;
   end;
 
-  UpdateWaitingListPositionCaption;
   RefreshAll;
 end;
 
@@ -1603,6 +1603,8 @@ var
 begin
   ConfigureActions;
   ConfigureAutoPlayOptions;
+  UpdateWaitingListPositionCaption;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.Renderer.UpdateDXAreaSize;

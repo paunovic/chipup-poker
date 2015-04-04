@@ -84,6 +84,17 @@ public:
 	QScriptValue global() { return engine.globalObject(); }
 	QSharedPointer<Data::TableStatus> getLastTs() { return lastTs; }
 	Data::SeatInfo *findMySeat() const;
+	bool autoCheck();
+	bool autoCheckFold();
+	bool autoCall();
+	bool autoCallAny();
+
+	Q_PROPERTY(bool autoCheck READ autoCheck)
+	Q_PROPERTY(bool autoCheckFold READ autoCheckFold)
+	Q_PROPERTY(bool autoCall READ autoCall)
+	Q_PROPERTY(bool autoCallAny READ autoCallAny)
+
+	Table *rootwindow;
 signals:
 
 public slots:
@@ -97,7 +108,6 @@ private:
 	const Data::Game *rawgame;
 	QSharedPointer<Data::TableStatus> lastTs;
 	ScriptAgent *agent;
-	Table *rootwindow;
 };
 class GameObject : public QObject {
 Q_OBJECT

@@ -21,17 +21,18 @@
 #include "game.h"
 #include "tablestatus.h"
 #include "data/user.h"
+#include "data/chat.h"
 #include "updatehasher.h"
 
 class QApplication;
 class QNetworkAccessManager;
 class QNetworkReply;
+class MiniDumpUploader;
+class SoundEffects;
 
 namespace Data {
 class PlayerClubStatus;
 }
-
-class SoundEffects;
 
 class PokerMain : public QObject
 {
@@ -40,25 +41,30 @@ public:
 	explicit PokerMain(QObject *parent = 0);
 	QList<Data::Club*> public_clubs();
 	QList<Data::Club*> private_clubs();
-	QSettings& config() { return *settings; }
-	QAbstractSocket::SocketState socketState() { return socket.state(); }
 	Data::User *findUser(QByteArray userid);
 	const Data::Game *getGame(QByteArray gameid) const;
 	QNetworkAccessManager *manager();
+	void RegisterListener(QObject *listener);
+	void doLogin(QString username, QString password);
+	void fileSaved(Core::UpdateFileInfo row);
+	void setDataDir(QDir datadir);
+	bool loadCachedAvatar(QString id, QPixmap *output);
+	void saveAvatar(QString id, QByteArray rawdata);
+
+	QSettings& config() { return *settings; }
+	QAbstractSocket::SocketState socketState() { return socket.state(); }
 	qint64 getUptime() { return uptime.elapsed(); }
 	qint64 getServerTime() { return clock_offset + uptime.elapsed(); }
 	Data::User *self() { Q_ASSERT(self_); return self_; }
-	void RegisterListener(QObject *listener);
-	SoundEffects *effects() { return effects_; }
-	void doLogin(QString username, QString password);
 	void testDisconnect() { socket.disconnectFromHost(); }
-    void fileSaved(Core::UpdateFileInfo row);
+	SoundEffects *effects() { return effects_; }
+	void setAllowUpdates(bool in) { allowUpdates = in; }
+
 	Data::ClubList clubs;
 	Data::GameListModel game_model;
 	QList<Data::Game*> games;
 	Poker::ValidCharsRegex validCharacters;
 	bool delayQuit;
-	QApplication *app;
 	QList<Data::User*> users;
 	int max_play_time;
 	QString serverAddress;
@@ -79,6 +85,7 @@ signals:
 	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
 	void startHashing(QString scriptspath);
 	void sit_timeout(QByteArray gameid);
+	void chat_event(Data::Chat packet);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -107,6 +114,7 @@ private:
 	void seClubChange(std::string data);
 	void seReservedSeatFree(std::string data);
 	void seReservedSeatTimeout(std::string data);
+	void seChat(std::string data);
 	void doUpdate(const Poker::HelloReply hr);
 
 	enum ReconnectState { notSignedIn, SignedIn };
@@ -119,16 +127,17 @@ private:
 	QNetworkAccessManager *manager_;
 	Data::User *self_;
 	quint64 clock_offset;
-	bool first_ping;
+	bool first_ping, allowUpdates;
 	int totalError;
 	SoundEffects *effects_;
 	QString username,password;
 	enum ReconnectState reconnectState;
 	QThread *workerThread;
 	Core::UpdateHasher *hasher;
-	QDir approot,datadir;
+	QDir approot,datadir,avatarCache;
 	QList<Core::UpdateFileInfo> files_in;
 	unsigned int pending_updates;
+	MiniDumpUploader *uploader;
 };
 int parseValue(QString input);
 

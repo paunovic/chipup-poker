@@ -11,11 +11,14 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore,
   ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
-  Poker.Common.SafeMutex;
+  Poker.Common.SafeMutex, Poker.Common.CPUUsage, dxScreenTip, dxCustomHint,
+  cxHint;
 
 type
-  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
-  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser, dfiServer, dfiSoundBuffers, dfiAnimations);
+  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc,
+    ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocket, dfiCallbacks,
+    dfiSwapChains, dfiServer, dfiSoundBuffers, dfiAnimations);
   TDebugRefreshItemSet = set of TDebugRefreshItem;
 
   TDebugFormLog = class(TIdNotify)
@@ -57,37 +60,45 @@ type
     meSeatPos: TcxMemo;
     rvLog: TRichView;
     paInfo: TPanel;
-    dxBevel2: TdxBevel;
-    lbsThreads: TcxLabel;
-    lbsMemoryUsage: TcxLabel;
-    lbsSocketState: TcxLabel;
-    lbsCalbackSets: TcxLabel;
-    lbvThreads: TcxLabel;
-    lbvMemoryUsage: TcxLabel;
-    lbvCallbackSets: TcxLabel;
-    lbvSocketState: TcxLabel;
+    dxBevel1: TdxBevel;
     btSeatPos: TcxButton;
-    lbsLatency: TcxLabel;
-    lbvLatency: TcxLabel;
     pmiShowPings: TMenuItem;
-    lbsSwapChain: TcxLabel;
-    lbvSwapChain: TcxLabel;
     paTop: TPanel;
     teRegexFilter: TcxTextEdit;
-    lbsUser: TcxLabel;
-    lbvUser: TcxLabel;
-    lbsServer: TcxLabel;
-    lbvServer: TcxLabel;
-    dxBevel3: TdxBevel;
-    lbsSoundBuffers: TcxLabel;
-    lbvSoundBuffers: TcxLabel;
-    lbsAnimations: TcxLabel;
-    lbvAnimations: TcxLabel;
     pmiRTTIEnabled: TMenuItem;
     teFindText: TcxTextEdit;
     rvMemoryState: TRichView;
     cbDebugInfo: TcxComboBox;
     btPause: TcxButton;
+    paInfoPanel1: TPanel;
+    paInfoPanel3: TPanel;
+    dxBevel2: TdxBevel;
+    lbvServer: TcxLabel;
+    lbsServer: TcxLabel;
+    lbsSocketState: TcxLabel;
+    lbvSocketState: TcxLabel;
+    lbsLatency: TcxLabel;
+    lbvLatency: TcxLabel;
+    lbsDataRecv: TcxLabel;
+    lbvDataRecv: TcxLabel;
+    lbvDataSent: TcxLabel;
+    lbsDataSent: TcxLabel;
+    paInfoPanel2: TPanel;
+    lbsCallbacks: TcxLabel;
+    lbvCallbacks: TcxLabel;
+    lbsSwapChain: TcxLabel;
+    lbvSwapChain: TcxLabel;
+    lbsAnimations: TcxLabel;
+    lbsSounds: TcxLabel;
+    lbvSounds: TcxLabel;
+    lbvAnimations: TcxLabel;
+    lbsThreads: TcxLabel;
+    lbvThreads: TcxLabel;
+    lbsCPU: TcxLabel;
+    lbvCPU: TcxLabel;
+    lbvMemoryUsage: TcxLabel;
+    lbsMemoryUsage: TcxLabel;
+    HintStyleController: TcxHintStyleController;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -102,11 +113,28 @@ type
     procedure teFindTextExit(Sender: TObject);
     procedure teFindTextPropertiesChange(Sender: TObject);
     procedure cbDebugInfoPropertiesChange(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
+    const
+      SCROLLBACK_LINES = 500;
+
+    var
+      FSelfCPUCounter: PCPUUsageData;
+
     function FindStyleWithName(const AName: String): Integer;
     procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
     procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
     procedure UpdateMemoryUsageDetails;
+    procedure RefreshSocketState;
+    procedure RefreshSocketLatency;
+    procedure RefreshSocketDataRecvSent;
+    procedure RefreshSocketData;
+    procedure RefreshSystemMetrics;
+    procedure RefreshCallbacksData;
+    procedure RefreshSwapChainData;
+    procedure RefreshServerData;
+    procedure RefreshSoundData;
+    procedure RefreshAnimationsData;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -126,7 +154,7 @@ implementation
 
 uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
-  JclExprEval, Poker.Table.Resources,
+  JclExprEval, Poker.Tables.Resources,
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
@@ -225,9 +253,11 @@ class procedure TfrmDebug.Initialize;
 const
   ATTACH_PARENT_PROCESS = -1;
 begin
-  ConsoleAttached := AttachConsole(ATTACH_PARENT_PROCESS);
+  if not ConsoleAttached then
+    ConsoleAttached := AttachConsole(ATTACH_PARENT_PROCESS);
 
-  frmDebug := TfrmDebug.Create(nil);
+  if not IsDebugFormAssigned then
+    frmDebug := TfrmDebug.Create(nil);
   frmDebug.Show;
 end;
 
@@ -238,7 +268,6 @@ begin
   if ConsoleAttached then
     FreeConsole;
 end;
-
 
 procedure TfrmDebug.FormCreate(Sender: TObject);
 begin
@@ -253,9 +282,16 @@ begin
   Width := Round(Screen.Monitors[0].Width / 2.7);
   Height := Round(Screen.Monitors[0].Height / 2.3);
 
+  FSelfCPUCounter := TCPUUsage.CreateCounter(GetCurrentProcessId);
+
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
   {$ENDIF}
+end;
+
+procedure TfrmDebug.FormDestroy(Sender: TObject);
+begin
+  TCPUUsage.DestroyCounter(FSelfCPUCounter);
 end;
 
 procedure TfrmDebug.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -265,11 +301,14 @@ begin
 end;
 
 procedure TfrmDebug.teFindTextEnter(Sender: TObject);
+var
+  teobj: TcxTextEdit;
 begin
-  if (Sender as TcxTextEdit).Tag = 0 then
+  teobj := Sender as TcxTextEdit;
+  if teobj.Tag = 0 then
   begin
-    (Sender as TcxTextEdit).Clear;
-    (Sender as TcxTextEdit).Tag := 1;
+    teobj.Clear;
+    teobj.Tag := 1;
   end;
 end;
 
@@ -371,8 +410,6 @@ begin
 end;
 
 procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
-const
-  SCROLLBACK_LINES = 500;
 var
   table: TRVTableItemInfo;
   sl: TStringList;
@@ -600,16 +637,187 @@ begin
   {$ENDIF}
 end;
 
-procedure TfrmDebug.RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
+procedure TfrmDebug.RefreshAnimationsData;
+begin
+  if Assigned(DXTimer) then
+    lbvAnimations.Caption := IntToStr(DXTimer.Animations.Count)
+  else
+    lbvAnimations.Caption := 'Unknown';
+  lbvAnimations.Refresh;
+end;
+
+procedure TfrmDebug.RefreshCallbacksData;
+begin
+  lbvCallbacks.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+  lbvCallbacks.Refresh;
+end;
+
+procedure TfrmDebug.RefreshServerData;
 var
-  server_socket_connected: Boolean;
+  line: String;
+  cpos: Integer;
+begin
+  if (Assigned(ServerSocket)) and
+     (ServerSocket.Socket.Addr <> '') then
+  begin
+    line := ServerSocket.Socket.Addr;
+    cpos := Pos('.chipuppoker.com', line);
+    if cpos > 0 then
+      line := Copy(line, 1, cpos - 1);
+    lbvServer.Caption := line;
+  end
+  else
+    lbvServer.Caption := 'Unknown';
+  lbvServer.Refresh;
+end;
+
+procedure TfrmDebug.RefreshSocketData;
+begin
+  RefreshSocketState;
+  RefreshSocketLatency;
+  RefreshSocketDataRecvSent;
+end;
+
+procedure TfrmDebug.RefreshSocketDataRecvSent;
+begin
+  if Assigned(ServerSocket) then
+  begin
+    lbvDataRecv.Caption := Format('%.2f kb', [ServerSocket.BytesDownloaded / 1024]);
+    lbvDataSent.Caption := Format('%.2f kb', [ServerSocket.BytesSent / 1024]);
+  end
+  else
+  begin
+    lbvDataRecv.Caption := 'Unknown';
+    lbvDataSent.Caption := 'Unknown';
+  end;
+  lbvDataRecv.Refresh;
+  lbvDataSent.Refresh;
+end;
+
+procedure TfrmDebug.RefreshSocketLatency;
+var
+  latency: Integer;
+  pinging: Boolean;
+  unknown: Boolean;
+begin
+  unknown := FALSE;
+  if (Assigned(ServerSocket)) and
+     (ServerSocket.IsConnected) then
+  begin
+    latency := ServerSocket.Latency;
+    pinging := ServerSocket.IsPinging;
+    if latency > 0 then
+    begin
+      lbvLatency.Caption := Format('%dms', [latency]);
+      if pinging then
+        lbvLatency.Caption := lbvLatency.Caption + ' ...';
+      if latency < 100 then
+        lbvLatency.Style.TextColor := $001DE24F
+      else
+        if latency < 500 then
+          lbvLatency.Style.TextColor := clYellow
+        else
+          lbvLatency.Style.TextColor := clRed;
+    end
+    else
+      unknown := TRUE;
+  end
+  else
+    unknown := TRUE;
+
+  if unknown then
+  begin
+    lbvLatency.Caption := 'Unknown';
+    lbvLatency.Style.TextColor := clWhite;
+  end;
+
+  lbvLatency.Refresh;
+end;
+
+procedure TfrmDebug.RefreshSocketState;
+var
   server_socket_state: String;
   server_socket_state_color: TColor;
+begin
+  server_socket_state_color := clWhite;
+  if Assigned(ServerSocket) then
+  begin
+    case ServerSocket.Socket.State of
+      wsInvalidState: server_socket_state := 'Invalid state';
+      wsOpened: server_socket_state := 'Opened';
+      wsBound: server_socket_state := 'Bound';
+      wsConnecting: server_socket_state := 'Connecting...';
+      wsSocksConnected: server_socket_state := 'Scks connected'; // not a typo! wouldn't fit otherwise in label width
+      wsConnected: begin
+        server_socket_state := 'Connected';
+        server_socket_state_color := $001DE24F;
+      end;
+      wsAccepting: server_socket_state := 'Accepting...';
+      wsListening: server_socket_state := 'Listening...';
+      wsClosed: begin
+        server_socket_state := 'Closed';
+        server_socket_state_color := clRed;
+      end;
+    else
+      server_socket_state := 'Unknown';
+    end;
+  end
+  else
+  begin
+    server_socket_state := 'Unassigned';
+    server_socket_state_color := clRed;
+  end;
+
+  lbvSocketState.Caption := server_socket_state;
+  lbvSocketState.Style.TextColor := server_socket_state_color;
+  lbvSocketState.Refresh;
+end;
+
+procedure TfrmDebug.RefreshSoundData;
+begin
+  if Assigned(Sounds) then
+    lbvSounds.Caption := IntToStr(Sounds.WavePlayer.Buffers.Count)
+  else
+    lbvSounds.Caption := 'Unknown';
+  lbvSounds.Refresh;
+end;
+
+procedure TfrmDebug.RefreshSwapChainData;
+var
   swap_chains_occupied: Integer;
   C1: Integer;
+begin
+  if (Assigned(DXCore)) and
+     (Assigned(DXCore.Device)) then
+  begin
+    swap_chains_occupied := 0;
+    for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
+      if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
+        Inc(swap_chains_occupied);
+    lbvSwapChain.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
+  end
+  else
+    lbvSwapChain.Caption := 'Unknown';
+  lbvSwapChain.Refresh;
+end;
+
+procedure TfrmDebug.RefreshSystemMetrics;
+begin
+  lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
+  lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
+  lbvCPU.Caption := Format('%.2f%%', [TCPUUsage.Get(FSelfCPUCounter)]);
+  lbvThreads.Refresh;
+  lbvMemoryUsage.Refresh;
+  lbvCPU.Refresh;
+
+  if rvMemoryState.Visible then
+    UpdateMemoryUsageDetails;
+end;
+
+procedure TfrmDebug.RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
+var
   refresh_items: TDebugRefreshItemSet;
   dfi: TDebugRefreshItem;
-  line: String;
 begin
   refresh_items := ARefreshItems;
   if refresh_items = [] then
@@ -617,156 +825,42 @@ begin
       Include(refresh_items, dfi);
 
   if dfiSystemMetrics in refresh_items then
-  begin
-    lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
-    lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
-    lbvThreads.Refresh;
-    lbvMemoryUsage.Refresh;
-
-    if rvMemoryState.Visible then
-      UpdateMemoryUsageDetails;
-  end;
+    RefreshSystemMetrics;
 
   if dfiCallbacks in refresh_items then
-  begin
-    lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
-    lbvCallbackSets.Refresh;
-  end;
+    RefreshCallbacksData;
 
-  if (dfiSocketState in refresh_items) or
-     (dfiLatency in refresh_items) then
-  begin
-    server_socket_connected := FALSE;
-    server_socket_state_color := clWhite;
-    if Assigned(ServerSocket) then
-    begin
-      case ServerSocket.Socket.State of
-        wsInvalidState: server_socket_state := 'Invalid state';
-        wsOpened: server_socket_state := 'Opened';
-        wsBound: server_socket_state := 'Bound';
-        wsConnecting: server_socket_state := 'Connecting...';
-        wsSocksConnected: server_socket_state := 'Socks connected';
-        wsConnected: begin
-          server_socket_connected := TRUE;
-          server_socket_state := 'Connected';
-          server_socket_state_color := $001DE24F;
-        end;
-        wsAccepting: server_socket_state := 'Accepting...';
-        wsListening: server_socket_state := 'Listening...';
-        wsClosed: begin
-          server_socket_state := 'Closed';
-          server_socket_state_color := clRed;
-        end;
-      else
-        server_socket_state := 'N/A';
-      end;
-    end
-    else
-    begin
-      server_socket_state := 'Unassigned';
-      server_socket_state_color := clRed;
-    end;
-
-    if dfiSocketState in refresh_items then
-    begin
-      lbvSocketState.Caption := server_socket_state;
-      lbvSocketState.Style.TextColor := server_socket_state_color;
-      lbvSocketState.Refresh;
-    end;
-
-    if dfiLatency in refresh_items then
-    begin
-      if (server_socket_connected) and
-         (Assigned(ServerSocket)) and
-         (ServerSocket.Latency > 0) then
-      begin
-        lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
-        if ServerSocket.IsPinging then
-          lbvLatency.Caption := lbvLatency.Caption + ' ...';
-        if ServerSocket.Latency < 100 then
-          lbvLatency.Style.TextColor := $001DE24F
-        else
-          if ServerSocket.Latency < 500 then
-            lbvLatency.Style.TextColor := clYellow
-          else
-            lbvLatency.Style.TextColor := clRed;
-      end
-      else
-      begin
-        lbvLatency.Caption := 'N/A';
-        lbvLatency.Style.TextColor := clWhite;
-      end;
-      lbvLatency.Refresh;
-    end;
-  end;
+  if dfiSocket in refresh_items then
+    RefreshSocketData;
 
   if dfiSwapChains in refresh_items then
-  begin
-    if (Assigned(DXCore)) and
-       (Assigned(DXCore.Device)) then
-    begin
-      swap_chains_occupied := 0;
-      for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
-        if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
-          Inc(swap_chains_occupied);
-      lbvSwapChain.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
-    end
-    else
-      lbvSwapChain.Caption := 'N/A';
-    lbvSwapChain.Refresh;
-  end;
-
-  if dfiUser in refresh_items then
-  begin
-    if (Assigned(dmMain.SelfInfo)) and
-       (dmMain.SelfInfo.Displayname <> '') then
-      lbvUser.Caption := dmMain.SelfInfo.Displayname
-    else
-      lbvUser.Caption := 'N/A';
-    lbvUser.Refresh;
-  end;
+    RefreshSwapChainData;
 
   if dfiServer in refresh_items then
-  begin
-    if (Assigned(ServerSocket)) and
-       (ServerSocket.Socket.Addr <> '') then
-    begin
-      line := ServerSocket.Socket.Addr;
-      if Pos('.', line) > 0 then
-        line := Copy(line, 1, Pos('.', line) - 1);
-      lbvServer.Caption := line;
-    end
-    else
-      lbvServer.Caption := 'N/A';
-    lbvServer.Refresh;
-  end;
+    RefreshServerData;
 
   if dfiSoundBuffers in refresh_items then
-  begin
-    if Assigned(Sounds) then
-      lbvSoundBuffers.Caption := IntToStr(Sounds.WavePlayer.Buffers.Count)
-    else
-      lbvSoundBuffers.Caption := 'N/A';
-    lbvSoundBuffers.Refresh;
-  end;
+    RefreshSoundData;
 
   if dfiAnimations in refresh_items then
-  begin
-    if Assigned(DXTimer) then
-      lbvAnimations.Caption := IntToStr(DXTimer.Animations.Count)
-    else
-      lbvAnimations.Caption := 'N/A';
-    lbvAnimations.Refresh;
-  end;
+    RefreshAnimationsData;
 end;
 
 procedure TfrmDebug.UpdateMemoryUsageDetails;
+var
+  fs: TFileStream;
 begin
   LogMemoryManagerStateToFile(MemoryUsageFilePath);
   if not btPause.Down then
   begin
     rvMemoryState.ClearAll;
-    rvMemoryState.LoadText(MemoryUsageFilePath, FindStyleWithName('MemoryState'), 2, FALSE);
+    fs := TFileStream.Create(MemoryUsageFilePath, fmOpenRead);
+    try
+      fs.Position := 3; // skip first three weird chars (EF BB BF) (BOM?)
+      rvMemoryState.LoadTextFromStream(fs, FindStyleWithName('MemoryState'), 2, FALSE);
+    finally
+      fs.Free;
+    end;
     rvMemoryState.Format;
     teFindText.Properties.OnChange(nil);
   end;

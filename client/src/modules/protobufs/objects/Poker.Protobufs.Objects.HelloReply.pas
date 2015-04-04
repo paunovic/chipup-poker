@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.HelloReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.StringSizes, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.ValidCharsRegex;
 
 type
@@ -31,7 +33,7 @@ type
       FMinSizes: TPB_StringSizes;
       FUpdateFiles: TList<TPB_UpdateFileInfo>;
       FValidCharsRegex: TPB_ValidCharsRegex;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_StringSizes;
     procedure clear_has_StringSizes;
@@ -107,7 +109,6 @@ type
     function has_ValidCharsRegex: Boolean;
     procedure clear_ValidCharsRegex;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
-
   end;
 
   TPB_HelloReplyList = class(TObjectList<TPB_HelloReply>)
@@ -117,7 +118,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply; const ALightweight: Boolean = FALSE);
@@ -239,7 +240,7 @@ function TPB_HelloReply.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $bf) <> $bf then
+  if (FHasBits and $bf) <> $bf then
     Exit(FALSE);
   if (has_StringSizes) then
     if not FStringSizes.IsInitialized then
@@ -264,17 +265,17 @@ end;
 
 function TPB_HelloReply.has_StringSizes: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_StringSizes;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_HelloReply.clear_has_StringSizes;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
@@ -295,17 +296,17 @@ end;
 
 function TPB_HelloReply.has_ChangeExpireTime: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_ChangeExpireTime;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_HelloReply.clear_has_ChangeExpireTime;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_HelloReply.SetChangeExpireTime(const AValue: Integer);
@@ -326,17 +327,17 @@ end;
 
 function TPB_HelloReply.has_ForgotExpireTime: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_ForgotExpireTime;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_HelloReply.clear_has_ForgotExpireTime;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_HelloReply.SetForgotExpireTime(const AValue: Integer);
@@ -357,17 +358,17 @@ end;
 
 function TPB_HelloReply.has_MaxPlayTime: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_MaxPlayTime;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_HelloReply.clear_has_MaxPlayTime;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_HelloReply.SetMaxPlayTime(const AValue: Integer);
@@ -388,17 +389,17 @@ end;
 
 function TPB_HelloReply.has_MaxTimebank: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_MaxTimebank;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_HelloReply.clear_has_MaxTimebank;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
@@ -419,17 +420,17 @@ end;
 
 function TPB_HelloReply.has_MinSizes: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_MinSizes;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_HelloReply.clear_has_MinSizes;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
@@ -455,17 +456,17 @@ end;
 
 function TPB_HelloReply.has_UpdateFiles: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_UpdateFiles;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_HelloReply.clear_has_UpdateFiles;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_HelloReply.UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
@@ -488,17 +489,17 @@ end;
 
 function TPB_HelloReply.has_ValidCharsRegex: Boolean;
 begin
-  result := (_has_bits_ and 128) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_HelloReply.set_has_ValidCharsRegex;
 begin
-  _has_bits_ := _has_bits_ or 128;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_HelloReply.clear_has_ValidCharsRegex;
 begin
-  _has_bits_ := _has_bits_ and not 128;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
@@ -513,7 +514,7 @@ end;
 
 procedure TPB_HelloReply.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_StringSizes;

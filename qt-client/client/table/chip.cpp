@@ -1,6 +1,9 @@
 #include <QPainter>
+#include <QStyle>
 
 #include "chip.h"
+
+#define CHIP_SEP 3
 
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	value_ = 1;
@@ -53,8 +56,8 @@ void ChipObjectUi::updateValue() {
 	updateGeometry();
 	text = QString("%1").arg((float)jsobj->value()/100);
 	int new_width = tbl->width() * w;
-	int height = (chips.length() * 5) + (pix.height() * 0.6);
-	textRegion = fm->boundingRect(QRect((qreal)pix.width()*0.45,height/2,200,height/2),0,text);
+	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
+	textRegion = QRect((qreal)pix.width()*0.45,0,(qreal)pix.width()*1.1,height);
 	qDebug() << textRegion << "chip text";
 }
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight) {
@@ -73,26 +76,29 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	p.save();
 	QList<QPixmap>::Iterator i;
 	int y=0;
-	for (i=chips.begin(); i!=chips.end(); ++i, y+=5) {
+	for (i=chips.begin(); i!=chips.end(); ++i, y+=CHIP_SEP) {
 		QPixmap chip = *i;
 		drawChip(p,chip,0,y,height());
 	}
 	p.restore();
 
 	//p.setBrush(Qt::green);
-	//p.drawRect(textRegion);
 
 	p.setPen(QColor(255,255,255));
 	p.setFont(font);
-	p.drawText(textRegion.topLeft(),text);
+	style()->drawItemText(&p,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
 }
 QSize ChipObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
-	int height = (chips.length() * 5) + (pix.height() * 0.6);
-	qDebug() << textRegion << textRegion.bottomRight();
+	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
 	QSize ret(new_width+textRegion.width(),height);
-	if (jsobj->value() == 300) qDebug() << "chip size" << ret;
 	QPoint x = textRegion.bottomRight();
 	if (height < x.y()) height = x.y();
-	return QSize(x.x()+10,height);
+	return QSize(x.x(),height);
+}
+void ChipObject::setVisible(bool in) {
+	chips->setVisible(in);
+	if (!in) {
+		//qDebug() << table->global().engine()->currentContext()->backtrace();
+	}
 }

@@ -3,7 +3,7 @@ unit Poker.Settings;
 interface
 
 uses
-  superobject, System.Classes, Poker.HardcodedSettings;
+  superobject, System.Classes, Poker.HardcodedSettings, Vcl.Forms;
 
 type
   TSettings = class(THardcodedSettings)
@@ -34,6 +34,13 @@ type
       JSON_ANIMATIONS = 'animations';
       JSON_FOLD_CONFIRMATION = 'fold_confirmation';
       JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
+      JSON_FORMS_SETTINGS = 'forms';
+      JSON_FORM_NAME = 'name';
+      JSON_FORM_MAXIMIZED = 'maximized';
+      JSON_FORM_X = 'x';
+      JSON_FORM_Y = 'y';
+      JSON_FORM_W = 'w';
+      JSON_FORM_H = 'h';
 
       // default values
       DEFAULT_LOGIN_USERNAME = '';
@@ -69,6 +76,9 @@ type
 
     function Load: Boolean;
     procedure Save;
+
+    procedure SaveFormSettings(const AForm: TForm);
+    procedure LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
 
     property SettingsFile: String read FSettingsFile;
 
@@ -155,6 +165,88 @@ begin
     mstream.Free;
   end;
 end;
+
+procedure TSettings.SaveFormSettings(const AForm: TForm);
+var
+  C1: Integer;
+  forms_settings, formjson: ISuperObject;
+begin
+  if not Assigned(FJSON.O[JSON_FORMS_SETTINGS]) then
+    FJSON.O[JSON_FORMS_SETTINGS] := SA([]);
+  forms_settings := FJSON.O[JSON_FORMS_SETTINGS];
+
+  formjson := nil;
+  for C1 := forms_settings.AsArray.Length - 1 downto 0 do
+    if forms_settings.AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+    begin
+      formjson := forms_settings.AsArray.O[C1];
+      forms_settings.AsArray.Delete(C1);
+    end;
+
+  if not Assigned(formjson) then
+    formjson := SO;
+
+  formjson.S[JSON_FORM_NAME] := AForm.Name;
+  formjson.B[JSON_FORM_MAXIMIZED] := AForm.WindowState = wsMaximized;
+  if AForm.WindowState <> wsMaximized then
+  begin
+    formjson.I[JSON_FORM_X] := AForm.Left;
+    formjson.I[JSON_FORM_Y] := AForm.Top;
+    formjson.I[JSON_FORM_W] := AForm.Width;
+    formjson.I[JSON_FORM_H] := AForm.Height;
+  end;
+
+  forms_settings.AsArray.Add(formjson);
+end;
+
+procedure TSettings.LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
+var
+  C1: Integer;
+  formjson: ISuperObject;
+begin
+  formjson := nil;
+  if Assigned(FJSON.O[JSON_FORMS_SETTINGS]) then
+    for C1 := 0 to FJSON.O[JSON_FORMS_SETTINGS].AsArray.Length - 1 do
+      if FJSON.O[JSON_FORMS_SETTINGS].AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+      begin
+        formjson := FJSON.O[JSON_FORMS_SETTINGS].AsArray.O[C1];
+        Break;
+      end;
+
+  if Assigned(formjson) then
+  begin
+    if Assigned(formjson.O[JSON_FORM_X]) then
+      AForm.Left := formjson.I[JSON_FORM_X];
+    if Assigned(formjson.O[JSON_FORM_Y]) then
+      AForm.Top := formjson.I[JSON_FORM_Y];
+    if Assigned(formjson.O[JSON_FORM_W]) then
+      AForm.Width := formjson.I[JSON_FORM_W];
+    if Assigned(formjson.O[JSON_FORM_H]) then
+      AForm.Height := formjson.I[JSON_FORM_H];
+
+    if formjson.B[JSON_FORM_MAXIMIZED] then
+      AForm.WindowState := wsMaximized
+    else
+      AForm.WindowState := wsNormal;
+  end
+  else
+  begin
+    if ADefaultX <> -1 then
+      AForm.Left := ADefaultX;
+    if ADefaultY <> -1 then
+      AForm.Top := ADefaultY;
+  end;
+
+  if AForm.Left + AForm.Width > Screen.DesktopWidth then
+    AForm.Left := Screen.DesktopWidth - AForm.Width;
+  if AForm.Top + AForm.Height > Screen.DesktopHeight then
+    AForm.Top := Screen.DesktopHeight - AForm.Height;
+  if AForm.Left < 0 then
+    AForm.Left := 0;
+  if AForm.Top < 0 then
+    AForm.Top := 0;
+end;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

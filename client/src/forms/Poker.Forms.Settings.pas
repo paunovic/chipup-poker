@@ -41,7 +41,6 @@ type
   private
     procedure LeftListboxChanged;
   public
-    procedure RenderThemeTable;
   end;
 
 implementation
@@ -121,10 +120,6 @@ end;
 procedure TfrmSettings.LeftListboxChanged;
 begin
   pcSettings.ActivePageIndex := lbOptions.ItemIndex;
-end;
-
-procedure TfrmSettings.RenderThemeTable;
-begin
 end;
 
 end.

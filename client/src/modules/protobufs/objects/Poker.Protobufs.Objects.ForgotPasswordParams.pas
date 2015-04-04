@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ForgotPasswordParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ForgotPasswordParams = class(TProtobufBaseObject)
@@ -16,7 +18,7 @@ type
 
     var
       FEmail: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Email;
     procedure clear_has_Email;
@@ -33,7 +35,6 @@ type
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
-
   end;
 
   TPB_ForgotPasswordParamsList = class(TObjectList<TPB_ForgotPasswordParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ForgotPasswordParams.Create(const AFrom: TPB_ForgotPasswordParams; const ALightweight: Boolean = FALSE);
@@ -83,7 +84,7 @@ end;
 
 function TPB_ForgotPasswordParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -96,17 +97,17 @@ end;
 
 function TPB_ForgotPasswordParams.has_Email: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ForgotPasswordParams.set_has_Email;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ForgotPasswordParams.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);
@@ -121,7 +122,7 @@ end;
 
 procedure TPB_ForgotPasswordParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Email;

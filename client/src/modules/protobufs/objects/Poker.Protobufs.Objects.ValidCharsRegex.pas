@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ValidCharsRegex;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ValidCharsRegex = class(TProtobufBaseObject)
@@ -26,7 +28,7 @@ type
       FClubname: String;
       FClubpassword: String;
       FGamename: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Email;
     procedure clear_has_Email;
@@ -83,7 +85,6 @@ type
     function has_Gamename: Boolean;
     procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
-
   end;
 
   TPB_ValidCharsRegexList = class(TObjectList<TPB_ValidCharsRegex>)
@@ -93,7 +94,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ValidCharsRegex.Create(const AFrom: TPB_ValidCharsRegex; const ALightweight: Boolean = FALSE);
@@ -168,7 +169,7 @@ end;
 
 function TPB_ValidCharsRegex.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3f) <> $3f then
+  if (FHasBits and $3f) <> $3f then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -181,17 +182,17 @@ end;
 
 function TPB_ValidCharsRegex.has_Email: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ValidCharsRegex.set_has_Email;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ValidCharsRegex.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ValidCharsRegex.SetEmail(const AValue: String);
@@ -212,17 +213,17 @@ end;
 
 function TPB_ValidCharsRegex.has_Username: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ValidCharsRegex.set_has_Username;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ValidCharsRegex.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ValidCharsRegex.SetUsername(const AValue: String);
@@ -243,17 +244,17 @@ end;
 
 function TPB_ValidCharsRegex.has_Password: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_ValidCharsRegex.set_has_Password;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_ValidCharsRegex.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_ValidCharsRegex.SetPassword(const AValue: String);
@@ -274,17 +275,17 @@ end;
 
 function TPB_ValidCharsRegex.has_Clubname: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_ValidCharsRegex.set_has_Clubname;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_ValidCharsRegex.clear_has_Clubname;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_ValidCharsRegex.SetClubname(const AValue: String);
@@ -305,17 +306,17 @@ end;
 
 function TPB_ValidCharsRegex.has_Clubpassword: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_ValidCharsRegex.set_has_Clubpassword;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_ValidCharsRegex.clear_has_Clubpassword;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_ValidCharsRegex.SetClubpassword(const AValue: String);
@@ -336,17 +337,17 @@ end;
 
 function TPB_ValidCharsRegex.has_Gamename: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_ValidCharsRegex.set_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_ValidCharsRegex.clear_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_ValidCharsRegex.SetGamename(const AValue: String);
@@ -361,7 +362,7 @@ end;
 
 procedure TPB_ValidCharsRegex.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Email;

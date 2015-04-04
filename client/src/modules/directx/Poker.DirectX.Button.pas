@@ -24,7 +24,6 @@ type
     procedure RenderTo(const ACanvas: TAsphyreCanvas; const AMetrics: TTableRenderMetrics);
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure MouseMove(Shift: TShiftState; X, Y: Integer);
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
     property Id: Integer read FId write FId;
@@ -65,11 +64,6 @@ begin
     Exit;
 
   FDown := PtInBounds(Point(X, Y), FBounds^);
-end;
-
-procedure TDXButton.MouseMove(Shift: TShiftState; X, Y: Integer);
-begin
-
 end;
 
 procedure TDXButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

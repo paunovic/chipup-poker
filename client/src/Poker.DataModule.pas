@@ -11,7 +11,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
   dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
   Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
+  Poker.Protobufs.Objects.Game, cxStyles, cxClasses, Vcl.ExtCtrls;
 
 type
   TdmMain = class(TDataModule)
@@ -20,9 +20,11 @@ type
     HintController: TcxHintStyleController;
     GridStyles: TcxStyleRepository;
     styleInactiveCell: TcxStyle;
+    tiSkinControllerRefresh: TTimer;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
+    procedure tiSkinControllerRefreshTimer(Sender: TObject);
   private
     FSelfInfo: TPlayerInfo;
     FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
@@ -33,6 +35,7 @@ type
     procedure LoadFonts;
     function GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
     procedure ProcessPlayerObject(const ALoginReply: TPB_LoginReply);
+    procedure ProcessClubsObject(const AClubs: TList<TPB_Club>);
   public
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
     procedure ProcessReconnectedTables;
@@ -49,6 +52,8 @@ type
     procedure StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
+    procedure RefreshSkinControllerDelayed;
+    procedure ServerSocketConnect;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -77,8 +82,6 @@ uses
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
-var
-  server_index: Integer;
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   UserDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
@@ -91,12 +94,7 @@ begin
   LoadFonts;
 
   TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
-  if (Settings.DeveloperMode) and
-     (Settings.ServerIndex in [1, 2]) then
-    server_index := Settings.ServerIndex
-  else
-    server_index := 0;
-  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
+  TServerSocket.Initialize;
   TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
@@ -168,12 +166,28 @@ end;
 
 procedure TdmMain.OpenSiteLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL));
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL));
 end;
 
 procedure TdmMain.OpenTACLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
+end;
+
+procedure TdmMain.ServerSocketConnect;
+var
+  server_index: Integer;
+begin
+  if (Settings.ServerIndex > 0) and
+     (Settings.DeveloperMode) then
+    server_index := Settings.ServerIndex
+  else
+    server_index := 0;
+
+  ServerSocket.Connect(Settings.Hardcoded.SERVER_LIST[server_index].Address,
+    Settings.Hardcoded.SERVER_LIST[server_index].Port,
+    Settings.Hardcoded.SERVER_LIST[server_index].SSLEnable,
+    Settings.Hardcoded.SERVER_LIST[server_index].SSLCertificate);
 end;
 
 procedure TdmMain.SetUpdaterBatchFile(const AFile: String);
@@ -198,6 +212,12 @@ begin
   FUpdateFiles.Clear;
   for ufi in AFiles do
     FUpdateFiles.Add(TPB_UpdateFileInfo.Create(ufi, TRUE));
+end;
+
+procedure TdmMain.tiSkinControllerRefreshTimer(Sender: TObject);
+begin
+  SkinController.Refresh;
+  tiSkinControllerRefresh.Enabled := FALSE;
 end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;
@@ -246,18 +266,13 @@ begin
       ServerSocket.OpenTournamentLobby((form as TfrmTournamentLobby).TournamentId);
 end;
 
-procedure TdmMain.ProcessPlayerObject(const ALoginReply: TPB_LoginReply);
+procedure TdmMain.ProcessClubsObject(const AClubs: TList<TPB_Club>);
 var
+  to_remove: TList<TMongoId>;
   club: TClubInfo;
   pbclub: TPB_Club;
-  pbgame: TPB_Game;
-  tables_close: TObjectList<TTable>;
-  game: TGameInfo;
-  table: TTable;
   found: Boolean;
-  to_remove: TList<TMongoId>;
   mongoid: TMongoId;
-  tournament: TTournamentInfo;
 begin
   to_remove := TList<TMongoId>.Create;
   try
@@ -266,7 +281,7 @@ begin
       for club in dmMain.SelfInfo.Clubs.Values do
       begin
         found := FALSE;
-        for pbclub in ALoginReply.Clubs do
+        for pbclub in AClubs do
           if pbclub.MongoId = club.MongoId then
           begin
             club.Assign(pbclub);
@@ -295,7 +310,7 @@ begin
       end;
     end;
 
-    for pbclub in ALoginReply.Clubs do
+    for pbclub in AClubs do
     begin
       dmMain.SelfInfo.Clubs.Lock;
       try
@@ -305,57 +320,70 @@ begin
         dmMain.SelfInfo.Clubs.Unlock;
       end;
     end;
-
-    for pbgame in ALoginReply.Games do
-    begin
-      if dmMain.SelfInfo.Clubs.GetAndLock(pbgame.ClubMongoid, club) then
-      try
-        club.Games.AddGame(pbgame);
-      finally
-        dmMain.SelfInfo.Clubs.Unlock;
-      end;
-
-      if Tournaments.GetAndLock(pbgame.Tournament, tournament) then
-      try
-        tournament.AddGame(pbgame);
-      finally
-        Tournaments.Unlock;
-      end;
-    end;
-
-    tables_close := TObjectList<TTable>.Create(FALSE);
-    try
-      Tables.Lock;
-      try
-        for table in Tables.Values do
-        begin
-          found := FALSE;
-          if dmMain.SelfInfo.Clubs.GetAndLockByGame(table.GameId, club, game) then
-          begin
-            found := TRUE;
-            dmMain.SelfInfo.Clubs.Unlock;
-          end
-          else
-            if Tournaments.GetAndLockByGame(table.GameId, tournament, pbgame) then
-            begin
-              found := TRUE;
-              Tournaments.Unlock;
-            end;
-
-          if not found then
-            tables_close.Add(table)
-        end;
-      finally
-        Tables.Unlock;
-      end;
-
-      for table in tables_close do
-        Tables.Remove(table.InternalId);
-    finally
-      tables_close.Free;
-    end;
   finally
     to_remove.Free;
+  end;
+end;
+
+procedure TdmMain.ProcessPlayerObject(const ALoginReply: TPB_LoginReply);
+var
+  pbgame: TPB_Game;
+  tables_close: TObjectList<TTable>;
+  game: TGameInfo;
+  table: TTable;
+  found: Boolean;
+  tournament: TTournamentInfo;
+  club: TClubInfo;
+begin
+  ProcessClubsObject(ALoginReply.Clubs);
+
+  for pbgame in ALoginReply.Games do
+  begin
+    if dmMain.SelfInfo.Clubs.GetAndLock(pbgame.ClubMongoid, club) then
+    try
+      club.Games.AddGame(pbgame);
+    finally
+      dmMain.SelfInfo.Clubs.Unlock;
+    end;
+
+    if Tournaments.GetAndLock(pbgame.Tournament, tournament) then
+    try
+      tournament.AddGame(pbgame);
+    finally
+      Tournaments.Unlock;
+    end;
+  end;
+
+  tables_close := TObjectList<TTable>.Create(FALSE);
+  try
+    Tables.Lock;
+    try
+      for table in Tables.Values do
+      begin
+        found := FALSE;
+        if dmMain.SelfInfo.Clubs.GetAndLockByGame(table.GameId, club, game) then
+        begin
+          found := TRUE;
+          dmMain.SelfInfo.Clubs.Unlock;
+        end
+        else
+          if Tournaments.GetAndLockByGame(table.GameId, tournament, pbgame) then
+          begin
+            found := TRUE;
+            Tournaments.Unlock;
+          end;
+
+        if not found then
+          tables_close.Add(table)
+      end;
+    finally
+      Tables.Unlock;
+    end;
+
+    for table in tables_close do
+      Tables.Remove(table.InternalId);
+  finally
+    tables_close.Free;
   end;
 end;
 
@@ -427,6 +455,11 @@ begin
       Tables.Unlock;
     end;
   end;
+end;
+
+procedure TdmMain.RefreshSkinControllerDelayed;
+begin
+  tiSkinControllerRefresh.Enabled := TRUE;
 end;
 
 procedure TdmMain.LoadFonts;

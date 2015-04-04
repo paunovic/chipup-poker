@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.RegisterParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_RegisterParams = class(TProtobufBaseObject)
@@ -20,7 +22,7 @@ type
       FEmail: String;
       FPassword: String;
       FDisplayName: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Email;
     procedure clear_has_Email;
@@ -53,7 +55,6 @@ type
     function has_DisplayName: Boolean;
     procedure clear_DisplayName;
     property DisplayName: String read FDisplayName write SetDisplayName;
-
   end;
 
   TPB_RegisterParamsList = class(TObjectList<TPB_RegisterParams>)
@@ -63,7 +64,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams; const ALightweight: Boolean = FALSE);
@@ -117,7 +118,7 @@ end;
 
 function TPB_RegisterParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $7) <> $7 then
+  if (FHasBits and $7) <> $7 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -130,17 +131,17 @@ end;
 
 function TPB_RegisterParams.has_Email: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_RegisterParams.set_has_Email;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_RegisterParams.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_RegisterParams.SetEmail(const AValue: String);
@@ -161,17 +162,17 @@ end;
 
 function TPB_RegisterParams.has_Password: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_RegisterParams.set_has_Password;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_RegisterParams.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_RegisterParams.SetPassword(const AValue: String);
@@ -192,17 +193,17 @@ end;
 
 function TPB_RegisterParams.has_DisplayName: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_RegisterParams.set_has_DisplayName;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_RegisterParams.clear_has_DisplayName;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_RegisterParams.SetDisplayName(const AValue: String);
@@ -217,7 +218,7 @@ end;
 
 procedure TPB_RegisterParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Email;

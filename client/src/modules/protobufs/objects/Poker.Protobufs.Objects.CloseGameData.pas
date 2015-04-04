@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.CloseGameData;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TCloseGameTime = (cgtCurrentHand = 0, cgtFiveMinutes, cgtFifteenMinutes);
@@ -20,7 +22,7 @@ type
     var
       FGameid: TMongoId;
       FTimestamp: TCloseGameTime;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
@@ -45,7 +47,6 @@ type
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
-
   end;
 
   TPB_CloseGameDataList = class(TObjectList<TPB_CloseGameData>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_CloseGameData.Create(const AFrom: TPB_CloseGameData; const ALightweight: Boolean = FALSE);
@@ -102,7 +103,7 @@ end;
 
 function TPB_CloseGameData.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -115,17 +116,17 @@ end;
 
 function TPB_CloseGameData.has_Gameid: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_CloseGameData.set_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_CloseGameData.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_CloseGameData.SetGameid(const AValue: TMongoId);
@@ -150,17 +151,17 @@ end;
 
 function TPB_CloseGameData.has_Timestamp: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_CloseGameData.set_has_Timestamp;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_CloseGameData.clear_has_Timestamp;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
@@ -175,7 +176,7 @@ end;
 
 procedure TPB_CloseGameData.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Gameid;

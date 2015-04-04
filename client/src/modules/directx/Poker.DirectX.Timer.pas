@@ -202,6 +202,8 @@ end;
 
 procedure TDXTimer.Execute;
 begin
+  NameThreadForDebugging('DXTimerThread');
+
   while not Terminated do
   begin
     Process;

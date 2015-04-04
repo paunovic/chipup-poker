@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChatMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChatMessage = class(TProtobufBaseObject)
@@ -22,7 +24,7 @@ type
       FUsername: String;
       FMsg: String;
       FTimestamp: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
@@ -63,7 +65,6 @@ type
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: UInt32 read FTimestamp write SetTimestamp;
-
   end;
 
   TPB_ChatMessageList = class(TObjectList<TPB_ChatMessage>)
@@ -73,7 +74,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChatMessage.Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE);
@@ -134,7 +135,7 @@ end;
 
 function TPB_ChatMessage.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $4) <> $4 then
+  if (FHasBits and $4) <> $4 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -147,17 +148,17 @@ end;
 
 function TPB_ChatMessage.has_MongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ChatMessage.set_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ChatMessage.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ChatMessage.SetMongoId(const AValue: TMongoId);
@@ -182,17 +183,17 @@ end;
 
 function TPB_ChatMessage.has_Username: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ChatMessage.set_has_Username;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ChatMessage.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ChatMessage.SetUsername(const AValue: String);
@@ -213,17 +214,17 @@ end;
 
 function TPB_ChatMessage.has_Msg: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_ChatMessage.set_has_Msg;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_ChatMessage.clear_has_Msg;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_ChatMessage.SetMsg(const AValue: String);
@@ -244,17 +245,17 @@ end;
 
 function TPB_ChatMessage.has_Timestamp: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_ChatMessage.set_has_Timestamp;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_ChatMessage.clear_has_Timestamp;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_ChatMessage.SetTimestamp(const AValue: UInt32);
@@ -269,7 +270,7 @@ end;
 
 procedure TPB_ChatMessage.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_MongoId;

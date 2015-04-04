@@ -38,8 +38,8 @@ mac {
 LIBS += -lgoogle-breakpad -framework CoreFoundation
 }
 LIBS += -lprotobuf
-SOURCES += main.cpp loginwindow.cpp \
-    pokermain.cpp \
+SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
+    pokermain.cpp pokermain_shared.cpp \
     cpp/common.pb.cc \
     cpp/message.pb.cc \
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
@@ -71,9 +71,11 @@ SOURCES += main.cpp loginwindow.cpp \
     data/winnerdata.cpp \
     updatehasher.cpp \
     filesaver.cpp \
-    version.cpp
+    version.cpp \
+    minidumpuploader.cpp \
+    notifywindow.cpp
 
-HEADERS  += loginwindow.h \
+HEADERS  += loginwindow.h data/chat.h \
     pokermain.h \
     cpp/common.pb.h \
     cpp/message.pb.h \
@@ -103,7 +105,9 @@ HEADERS  += loginwindow.h \
     data/winnerdata.h \
     updatehasher.h \
     filesaver.h \
-    version.h
+    version.h \
+    minidumpuploader.h \
+    notifywindow.h
 
 SOURCES += sound_effects.cpp selftest.cpp
 HEADERS += sound_effects.h selftest.h
@@ -114,7 +118,8 @@ FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     table.ui \
     jseditor.ui \
     table/table_sit.ui selftest.ui \
-    clublobby.ui
+    clublobby.ui \
+    NotifyWindow.ui
 
 RESOURCES += \
     resources.qrc

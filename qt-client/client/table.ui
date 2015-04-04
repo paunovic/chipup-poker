@@ -17,12 +17,21 @@
    <double>1.000000000000000</double>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,4,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,4,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMinAndMaxSize</enum>
+    </property>
     <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
      <number>0</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
       <item>
        <widget class="QLabel" name="lbStats">
         <property name="text">
@@ -56,18 +65,38 @@
     </item>
     <item>
      <widget class="QWidget" name="centerWrap" native="true">
-      <layout class="QGridLayout" name="center"/>
+      <layout class="QGridLayout" name="center">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
+       </property>
+      </layout>
      </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
         <property name="spacing">
          <number>0</number>
         </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
         <item>
-         <widget class="QTextEdit" name="teChat"/>
+         <widget class="QTextEdit" name="teChat">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>90</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLineEdit" name="teChatInput">
@@ -80,6 +109,12 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="groupOptions">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
         <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
@@ -132,8 +167,22 @@
          <layout class="QHBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QPushButton" name="btPlayNow">
+            <property name="minimumSize">
+             <size>
+              <width>77</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+	border-image:url(:/resources/table/PlayNowButtonNormal.png);
+}
+QPushButton:pressed {
+	border-image:url(:/resources/table/PlayNowButtonPressed.png);
+}</string>
+            </property>
             <property name="text">
-             <string>Play Now</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -197,11 +246,26 @@ QPushButton:pressed {
         </widget>
         <widget class="QWidget" name="page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
           <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
            <layout class="QHBoxLayout" name="layBetPresets">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
@@ -252,19 +316,19 @@ QPushButton:pressed {
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
              <property name="spacing">
-              <number>16</number>
+              <number>0</number>
              </property>
              <property name="leftMargin">
-              <number>8</number>
+              <number>4</number>
              </property>
              <property name="topMargin">
-              <number>2</number>
+              <number>3</number>
              </property>
              <property name="rightMargin">
               <number>4</number>
              </property>
              <property name="bottomMargin">
-              <number>7</number>
+              <number>3</number>
              </property>
              <item>
               <widget class="QLabel" name="lbRaiseAmount">
@@ -304,6 +368,9 @@ font: bold;</string>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <widget class="QPushButton" name="btFold">
               <property name="text">
@@ -334,28 +401,28 @@ font: bold;</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QCheckBox" name="checkBox_6">
+             <widget class="QCheckBox" name="cbAutoCheckFold">
               <property name="text">
                <string>Check/Fold</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="cbAutoCheck">
               <property name="text">
                <string>Check</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_2">
+             <widget class="QCheckBox" name="cbAutoCall">
               <property name="text">
                <string>Call</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_5">
+             <widget class="QCheckBox" name="cbAutoCallAny">
               <property name="text">
                <string>Call Any</string>
               </property>

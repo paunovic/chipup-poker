@@ -16,7 +16,9 @@ type
 implementation
 
 uses
-  Winapi.Windows;
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  System.SysUtils, Winapi.Windows;
+
 
 class function TInstanceController.AcquireInstance(const AMutexName: String): Boolean;
 var
@@ -25,22 +27,31 @@ begin
   result := FALSE;
   hMutex := CreateMutex(nil, FALSE, PChar(AMutexName));
   if hMutex <> 0 then
+  begin
     if GetLastError = ERROR_ALREADY_EXISTS then
       result := FALSE
     else
     begin
       FMutexHandle := hMutex;
       result := TRUE;
+      {$IFDEF DEBUG} DebugLn('Instance mutex acquired', ditApplication); {$ENDIF}
     end;
+  end
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn(Format('Failed to acquire instance mutex [%d]', [GetLastError]), ditApplication); {$ENDIF}
+  end;
 end;
 
 class procedure TInstanceController.ReleaseInstance;
 begin
-  if FMutexHandle = 0 then
-    Exit;
+  if FMutexHandle > 0 then
+  begin
+    CloseHandle(FMutexHandle);
+    FMutexHandle := 0;
+  end;
 
-  CloseHandle(FMutexHandle);
-  FMutexHandle := 0;
+  {$IFDEF DEBUG} DebugLn('Instance mutex released', ditApplication); {$ENDIF}
 end;
 
 end.

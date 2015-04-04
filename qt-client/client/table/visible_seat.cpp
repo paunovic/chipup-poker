@@ -1,6 +1,7 @@
 #include <QPainter>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QStyle>
 
 #include "table/visible_seat.h"
 #include "pokermain.h"
@@ -12,7 +13,7 @@
 VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	: GameObjectUi(parent), active(false), jsobj(jsobj), font("Barmeno") {
 	font.setPointSize(7);
-	font.setBold(true);
+	font.setBold(false);
 	fontMetric = new QFontMetrics(font);
 	sitwindow = NULL;
 	//qDebug() << __func__ << "create" << parent;
@@ -37,6 +38,48 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 VisibleSeat::~VisibleSeat() {
 	delete fontMetric;
 }
+void VisibleSeat::setAvatar(QPixmap in) {
+	avatar = in;
+	resizeEvent(0);
+	update();
+}
+void VisibleSeat::resizeEvent(QResizeEvent*) {
+	int targetheight = heightForWidth(width());
+	float width = this->width() * 0.27;
+	float height;
+	if (avatar.width()) {
+		height = ((qreal)avatar.height()*width)/avatar.width();
+	} else {
+		height = width;
+		qWarning("avatar missing from a seat");
+	}
+	float x,y;
+	if (jsobj->left()) x = this->width() * 0.68;
+	else x = this->width() * 0.05;
+	y = targetheight * 0.13;
+	avatarLocation = QRectF(x,y,width,height);
+
+	// top line
+	if (jsobj->left()) x = this->width() * 0.05;
+	else x = this->width() * 0.4;
+	y = this->height() * 0.05;
+	width = this->width() * 0.5;
+	height = targetheight * 0.4;
+	line1 = QRectF(x,y,width,height);
+	
+	// bottom line
+	if (jsobj->left()) x = this->width() * 0.05;
+	else x = this->width() * 0.4;
+	y = this->height() * 0.45;
+	width = this->width() * 0.5;
+	height = targetheight * 0.4;
+	line2 = QRectF(x,y,width,height);
+	
+	int pixelsize = (qreal)this->width() * 0.11;
+	font.setPixelSize(pixelsize);
+	delete fontMetric;
+	fontMetric = new QFontMetrics(font);
+}
 void VisibleSeat::paintEvent(QPaintEvent *) {
 	//qDebug() << "seat redraw" << jsobj->getSeat();
 	QPainter painter(this);
@@ -46,34 +89,17 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	//painter.setBrush(QColor(127,0,0));
 	//if (keyside == Right) painter.drawRect(62,4,23,23);
 	int targetheight = heightForWidth(width());
-	float avatar_x = 0;
-	float avatar_width = 0;
 	if (!jsobj->getEmpty()) {
-		if (avatar.width()) {
-			if (keyside == Right) avatar_x = width() * 0.69;
-			else avatar_x = width() * 0.05;
-			float y = targetheight * 0.13;
-			avatar_width = width() * 0.26;
-			float avatar_height = ((qreal)avatar.height()*avatar_width)/avatar.width();
-			QRectF corner(avatar_x,y,avatar_width,avatar_height);
-			painter.drawPixmap(corner,avatar,QRectF());
-		} else qWarning("avatar missing from a seat");
+		if (avatar.width()) painter.drawPixmap(avatarLocation,avatar,QRectF());
+		else qWarning("avatar missing from a seat");
 	}
 	painter.drawPixmap(0,0,width(),targetheight,pix);
 	if (!jsobj->getEmpty()) {
-		painter.setPen(QColor(255,0,0)); // FIXME, light grey
-		QRect dn = fontMetric->boundingRect(displayname);
-		dn.setWidth(dn.width()+5);
-		int offset;
-		if (keyside == Right) offset = 35;
-		else offset = width() - avatar_width;
-		offset -= dn.width() / 2;
-		dn.translate(offset,15);
-		//qDebug() << dn << displayname;
-		painter.drawText(dn,displayname);
+		painter.setPen(QColor(198,198,198));
+		style()->drawItemText(&painter,line1.toRect(),Qt::AlignCenter,palette(),true,displayname);
 
 		QString bottomline;
-		painter.setPen(QColor(0,255,0)); // FIXME
+		painter.setPen(QColor(138,194,62));
 		switch (status) {
 		case Poker::SeatInfo::psOutOfPlay:
 			bottomline = tr("Sitting Out");
@@ -85,14 +111,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 			bottomline = QString("%1").arg((double)chips/100);
 		}
 		if (bottomline.length() > 0) {
-			QRect bb = fontMetric->boundingRect(bottomline);
-			bb.setWidth(bb.width()+5);
-			if (keyside == Right) offset = 35;
-			else offset = width() - avatar_width;
-			offset -= bb.width()/2;
-			bb.translate(offset,30);
-			//qDebug() << bb;
-			painter.drawText(bb,bottomline);
+			style()->drawItemText(&painter,line2.toRect(),Qt::AlignCenter,palette(),true,bottomline);
 		}
 	}
 	painter.setPen(QColor(255,0,0));
@@ -155,6 +174,10 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 			qDebug() << "TODO, add-on";
 		}
 	} else {
+		if (jsobj->reserved()) {
+			qDebug() << "that seat is reserved!";
+			return;
+		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
 		sitwindow->show();
@@ -205,17 +228,24 @@ void SeatObject::setAvatar(QString in) {
 	if (in != avatar_) {
 		qDebug() << "fetching avatar?" << in << "for seat" << getSeat();
 		avatar_ = in;
-		pendingReply = core->manager()->get(QNetworkRequest(QString("https://%1/getavatar?id=%2").arg(core->serverAddress).arg(in)));
+		QPixmap cache;
+		if (core->loadCachedAvatar(in,&cache)) {
+			seat->setAvatar(cache);
+		} else {
+			pendingReply = core->manager()->get(QNetworkRequest(QString("https://%1/getavatar?id=%2").arg(core->serverAddress).arg(in)));
+		}
 	}
 }
 void SeatObject::replyFinished(QNetworkReply *reply) {
 	if (reply == pendingReply) {
 		qDebug() << "got reply for seat" << getSeat();
 		QByteArray image = reply->readAll();
-		seat->avatar.loadFromData(image);
-		seat->update();
+		QPixmap loader;
+		loader.loadFromData(image);
+		seat->setAvatar(loader);
 		pendingReply->deleteLater();
 		pendingReply = 0;
+		core->saveAvatar(avatar_,image);
 	}
 }
 void SeatObject::updateInfo(Data::SeatInfo *info) {
@@ -229,7 +259,6 @@ void VisibleSeat::tick() {
 		update();
 	} else {
 		timebarPercent = (float)diff / maxtimebank;
-		qDebug() << "timebank debug" << diff << timebarPercent;
 		update();
 	}
 }

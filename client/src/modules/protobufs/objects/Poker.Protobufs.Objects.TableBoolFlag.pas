@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TableBoolFlag;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TableBoolFlag = class(TProtobufBaseObject)
@@ -18,7 +20,7 @@ type
     var
       FTableMongoId: TMongoId;
       FFlag: Boolean;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_TableMongoId;
     procedure clear_has_TableMongoId;
@@ -43,7 +45,6 @@ type
     function has_Flag: Boolean;
     procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;
-
   end;
 
   TPB_TableBoolFlagList = class(TObjectList<TPB_TableBoolFlag>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag; const ALightweight: Boolean = FALSE);
@@ -100,7 +101,7 @@ end;
 
 function TPB_TableBoolFlag.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +114,17 @@ end;
 
 function TPB_TableBoolFlag.has_TableMongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TableBoolFlag.set_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TableBoolFlag.clear_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TMongoId);
@@ -148,17 +149,17 @@ end;
 
 function TPB_TableBoolFlag.has_Flag: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TableBoolFlag.set_has_Flag;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TableBoolFlag.clear_has_Flag;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TableBoolFlag.SetFlag(const AValue: Boolean);
@@ -173,7 +174,7 @@ end;
 
 procedure TPB_TableBoolFlag.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_TableMongoId;

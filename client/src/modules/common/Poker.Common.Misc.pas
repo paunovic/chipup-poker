@@ -357,7 +357,7 @@ end;
 
 function GetThreadsCount(const APID: DWORD): Integer;
 var
-  snap_handle : THandle;
+  snap_handle: THandle;
   thread_entry: TThreadEntry32;
 begin
   result := 0;
@@ -389,7 +389,7 @@ end;
 
 function EncodeURL(const ASrc: String): String;
 const
-  HEXMAP     : String = '0123456789ABCDEF';
+  HEXMAP: String = '0123456789ABCDEF';
   SAFE_CHARS = [33, 39..42, 45, 46, 48..57, 65..90, 95, 97..122, 126];
 var
   I, J: Integer;

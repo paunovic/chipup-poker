@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ContactMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TContactReason = (cmQuestions = 0, cmSuggestions, cmBugReport, cmOther);
@@ -20,7 +22,7 @@ type
     var
       FReason: TContactReason;
       FMessage: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Reason;
     procedure clear_has_Reason;
@@ -45,7 +47,6 @@ type
     function has_Message: Boolean;
     procedure clear_Message;
     property Message: String read FMessage write SetMessage;
-
   end;
 
   TPB_ContactMessageList = class(TObjectList<TPB_ContactMessage>)
@@ -55,7 +56,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ContactMessage.Create(const AFrom: TPB_ContactMessage; const ALightweight: Boolean = FALSE);
@@ -102,7 +103,7 @@ end;
 
 function TPB_ContactMessage.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -115,17 +116,17 @@ end;
 
 function TPB_ContactMessage.has_Reason: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ContactMessage.set_has_Reason;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ContactMessage.clear_has_Reason;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ContactMessage.SetReason(const AValue: TContactReason);
@@ -146,17 +147,17 @@ end;
 
 function TPB_ContactMessage.has_Message: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ContactMessage.set_has_Message;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ContactMessage.clear_has_Message;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ContactMessage.SetMessage(const AValue: String);
@@ -171,7 +172,7 @@ end;
 
 procedure TPB_ContactMessage.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Reason;

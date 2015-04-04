@@ -1,3 +1,4 @@
+qt-client/x
 __history
 client/bin
 client/design
@@ -35,3 +36,11 @@ protocopier/bin/Win32/Release/dcu/*
 cpp-protobuf-generator/cpp-protobuf-generator/debug
 cpp-protobuf-generator/cpp-protobuf-generator/*.sdf
 cpp-protobuf-generator/cpp-protobuf-generator/*.suo
+cpp-generator/output
+generator
+icsv8w
+*.o
+moc_*
+cpp-protobuf-generator/cpp-protobuf-generator-vs/debug
+cpp-protobuf-generator/cpp-protobuf-generator-vs/*.sdf
+cpp-protobuf-generator/cpp-protobuf-generator-vs/*.suo

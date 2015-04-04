@@ -23,11 +23,24 @@ Table::Table(QWidget *parent) :
 	debuger->show();
 #endif
 	ui->statusbar->setVisible(false);
+	ui->btLeaveWaitingList->setVisible(false);
+	ui->btJoinWaitingList->setVisible(false);
 }
 Table::~Table() {
 	delete ui;
 	delete p;
 }
+void Table::clearCheckBoxes() {
+	ui->cbAutoCall->setChecked(false);
+	ui->cbAutoCallAny->setChecked(false);
+	ui->cbAutoCheck->setChecked(false);
+	ui->cbAutoCheckFold->setChecked(false);
+}
+bool Table::autoCall() { return ui->cbAutoCall->isChecked(); }
+bool Table::autoCallAny() { return ui->cbAutoCallAny->isChecked(); }
+bool Table::autoCheck() { return ui->cbAutoCheck->isChecked(); }
+bool Table::autoCheckFold() { return ui->cbAutoCheckFold->isChecked(); }
+
 bool Table::event(QEvent *event) {
 	if (event->type() == QEvent::Close) {
 		Poker::Game g;
@@ -43,10 +56,22 @@ void Table::On_reserved_seat_free(QByteArray gameid, quint32 seat_index) {
 	sitwindow = new TableSit(game,seat_index,lastTableStatus);
 	sitwindow->show();
 }
+int Table::findMySeatIndex() {
+	QList<Data::SeatInfo*>::Iterator i;
+	Data::SeatInfo *seat = 0;
+	for (i=lastTableStatus->seats.begin(); i!=lastTableStatus->seats.end(); ++i) {
+		seat = *i;
+		if (seat->getUserid() == core->self()->id) {
+			return seat->seat_index;
+		}
+	}
+	return -1;
+}
 
 bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
+	if (ts->gameid != game->gameid) return false;
 	lastTableStatus = ts;
-	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimum_bet).arg(ts->maximum_raise);
+	qDebug() << QString("Table::on_table_status minbet:%1 maxbet:%2").arg(ts->minimumBet()).arg(ts->maximum_raise);
 	bool result = p->table_status(ts);
 	QList<Data::SeatInfo*>::Iterator i;
 	bool self_found = false;
@@ -80,6 +105,7 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 			ui->cbSitOutBB->setVisible(true);
 			ui->btSitOut->setVisible(true);
 			ui->cbFoldAny->setVisible(true);
+			ui->cbFoldAny->setEnabled(false);
 			ui->btPlayNow->setVisible(false);
 			break;
 		case Poker::SeatInfo::psOutOfPlay:
@@ -87,14 +113,14 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 			ui->stackedWidget->setCurrentIndex(0);
 			break;
 		case Poker::SeatInfo::psInHand:
-			qDebug() << QString("i am in hand, current seat:%1, myself:%2, minbet:%3, mybet:%4").arg(ts->current_seat).arg(seat->seat_index).arg(ts->minimum_bet).arg(ts->bets()[seat->seat_index]);
+			qDebug() << QString("i am in hand, current seat:%1, myself:%2, minbet:%3, mybet:%4").arg(ts->current_seat).arg(seat->seat_index).arg(ts->minimumBet()).arg(ts->bets()[seat->seat_index]);
 			if (ts->current_seat == seat->seat_index) {
 				qDebug() << "stack change";
 				ui->stackedWidget->setCurrentIndex(1);
-				if (ts->minimum_bet == ts->bets()[seat->seat_index]) {
+				if (ts->minimumBet() == ts->bets()[seat->seat_index]) {
 					ui->btCheck->setText(tr("CHECK"));
 				} else {
-					ui->btCheck->setText(tr("CALL (%1)").arg((ts->minimum_bet - ts->bets()[seat->seat_index])/100));
+					ui->btCheck->setText(tr("CALL (%1)").arg((ts->minimumBet() - ts->bets()[seat->seat_index])/100));
 				}
 				ui->raiseSlider->setMinimum(ts->minimum_raise);
 				ui->raiseSlider->setMaximum(ts->maximum_raise);
@@ -107,6 +133,17 @@ bool Table::On_table_status(QSharedPointer<Data::TableStatus> ts) {
 	}
 	return result;
 }
+bool Table::canCheck() {
+	Data::SeatInfo *seat = p->findMySeat();
+	if (!seat) return false;
+	return lastTableStatus->minimumBet() == lastTableStatus->bets()[seat->seat_index];
+}
+bool Table::canFold() {
+	Data::SeatInfo *seat = p->findMySeat();
+	if (!seat) return false;
+	return true; // FIXME?
+}
+
 void Table::on_btMin_clicked() {
 	ui->raiseSlider->setValue(lastTableStatus->minimum_raise);
 }
@@ -120,7 +157,7 @@ void Table::on_btCheck_clicked() {
 	Poker::PutChips pc;
 	pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
 	pc.set_current_state(lastTableStatus->state());
-	pc.set_chip_amount(lastTableStatus->minimum_bet);
+	pc.set_chip_amount(lastTableStatus->minimumBet());
 	core->sendMessage(Poker::scPutChips,&pc);
 }
 void Table::setGame(const Data::Game *game, const Data::Club *club) {
@@ -160,11 +197,23 @@ void Table::on_actionReload_triggered() {
 void Table::on_teChatInput_returnPressed() {
 	QString message = ui->teChatInput->text();
 	ui->teChatInput->setText("");
+#if 0
+	int page = message.toInt();
+	ui->stackedWidget->setCurrentIndex(page);
+#elif 0
 	ui->teChat->append(p->eval(message).toString());
 	QGridLayout *layout = ui->center;
 	qDebug() << layout->cellRect(0,0);
 	qDebug() << layout->cellRect(1,0);
-
+#else
+	Poker::ChatEvent ce;
+	ce.set_event(Poker::ChatEvent::ceUserMessage);
+	ce.set_table_id(game->gameid.data(),game->gameid.length());
+	Poker::ChatMessage *cm = new Poker::ChatMessage;
+	cm->set_msg(qPrintable(message));
+	ce.set_allocated_msg(cm); // takes ownership
+	core->sendMessage(Poker::seChat,&ce);
+#endif
 }
 void Table::editJs(QString newcode) {
 	p->editJs(newcode);
@@ -183,16 +232,24 @@ void Table::on_btPlayNow_clicked() {
 	ui->cbSitOutBB->setChecked(false);
 }
 void Table::on_btFold_clicked() {
-	Poker::Game g;
-	g.set__id(game->gameid.data(),game->gameid.length());
-	core->sendMessage(Poker::scFold,&g);
+	if (canCheck() && core->config().value("table/autoCheckFold").toBool()) {
+		Poker::PutChips pc;
+		pc.set_table_mongo_id(game->gameid.data(),game->gameid.length());
+		pc.set_current_state(lastTableStatus->state());
+		pc.set_chip_amount(lastTableStatus->minimumBet());
+		core->sendMessage(Poker::scPutChips,&pc);
+	} else {
+		Poker::Game g;
+		g.set__id(game->gameid.data(),game->gameid.length());
+		core->sendMessage(Poker::scFold,&g);
+	}
 }
 void Table::on_raiseSlider_valueChanged(int value) {
 	ui->lbRaiseAmount->setText(QString("%1").arg((float)value/100));
 	ui->btRaise->setText(QString("BET (%1)").arg((float)value/100));
 }
 void Table::on_bt3BB_clicked() {
-	int val = lastTableStatus->minimum_bet;
+	int val = lastTableStatus->minimumBet();
 	qDebug() << "3bb min bet" << val;
 	if (val == 0) val = game->bb;
 	qDebug() << "3bb final" << val;
@@ -211,7 +268,7 @@ void Table::on_btPot_clicked() {
 			seat_bet = lastTableStatus->bets()[seat->seat_index];
 		}
 	}
-	raise_value = lastTableStatus->minimum_bet - seat_bet;
+	raise_value = lastTableStatus->minimumBet() - seat_bet;
 
 	QList<Data::Pot*>::Iterator i2;
 	for (i2=lastTableStatus->pots.begin(); i2!=lastTableStatus->pots.end(); ++i2) {
@@ -221,7 +278,7 @@ void Table::on_btPot_clicked() {
 	for (int x=0; x<lastTableStatus->bets().length(); x++) {
 		raise_value += lastTableStatus->bets()[x];
 	}
-	raise_value += lastTableStatus->minimum_bet;
+	raise_value += lastTableStatus->minimumBet();
 	ui->lbRaiseAmount->setText(QString("%1").arg((float)raise_value/100));
 	ui->btRaise->setText(QString("BET (%1)").arg((float)raise_value/100));
 	ui->raiseSlider->setValue(raise_value);
@@ -267,4 +324,89 @@ void Table::on_btJoinWaitingList_clicked() {
 	ts.set_chips(0);
 	ts.set_seat_index(-1);
 	core->sendMessage(Poker::scTableSit,&ts);
+}
+void Table::On_chat_event(Data::Chat event) {
+	if (event.event != Poker::ChatEvent::ceUserMessage) return;
+	if (event.table_id != game->gameid) return;
+	QString color = "#c0c0c0";
+	if (event.username == core->self()->displayName()) color = "#46a3ff";
+	ui->teChat->append(QString("<font color='#e1e1e1'>%1:</font> <font color='%2'>%3</font>").arg(event.username).arg(color).arg(event.msg));
+}
+QSize Table::sizeHint() const {
+	qDebug() << ui->horizontalLayout_2->sizeHint();
+	qDebug() << ui->center->sizeHint();
+	qDebug() << ui->horizontalLayout->sizeHint();
+	return QMainWindow::sizeHint();
+}
+void Table::resizeEvent(QResizeEvent *event) {
+	QMainWindow::resizeEvent(event);
+	qDebug() << ui->horizontalLayout_2->sizeHint() << ui->center->sizeHint() << ui->horizontalLayout->sizeHint();
+	qDebug() << minimumSize() << maximumSize();
+	qDebug() << isMaximized();
+#ifndef Q_OS_MAC
+	setMaximumHeight(minimumHeight());
+#endif
+}
+bool Table::AutoFoldVisible() { return _AutoFoldVisible; }
+void Table::SetAutoFoldVisible(bool in) {
+	_AutoFoldVisible = in;
+
+	ui->cbAutoCheckFold->setVisible(_AutoFoldVisible || _AutoCheckFoldVisible);
+
+	if (_AutoFoldVisible) ui->cbAutoCheckFold->setText(tr("Fold"));
+	else ui->cbAutoCheckFold->setText(tr("Check/Fold"));
+}
+void Table::SetAutoCheckFoldVisible(bool in) {
+	_AutoCheckFoldVisible = in;
+
+	ui->cbAutoCheckFold->setVisible(_AutoFoldVisible || _AutoCheckFoldVisible);
+
+	if (_AutoFoldVisible) ui->cbAutoCheckFold->setText(tr("Fold"));
+	else ui->cbAutoCheckFold->setText(tr("Check/Fold"));
+}
+void Table::SetAutoCallVisible(bool in) {
+	_AutoCallVisible = in;
+
+	ui->cbAutoCall->setVisible(_AutoCallVisible);
+}
+void Table::on_cbAutoCall_stateChanged(int state) {
+	ui->cbAutoCallAny->setChecked(false);
+	ui->cbAutoCheck->setChecked(false);
+	ui->cbAutoCheckFold->setChecked(false);
+}
+void Table::on_cbAutoCallAny_stateChanged(int state) {
+	ui->cbAutoCall->setChecked(false);
+	ui->cbAutoCheck->setChecked(false);
+	ui->cbAutoCheckFold->setChecked(false);
+}
+void Table::on_cbAutoCheck_stateChanged(int state) {
+	ui->cbAutoCallAny->setChecked(false);
+	ui->cbAutoCheck->setChecked(false);
+	ui->cbAutoCheckFold->setChecked(false);
+}
+void Table::on_cbAutoCheckFold_stateChanged(int state) {
+	ui->cbAutoCallAny->setChecked(false);
+	ui->cbAutoCheck->setChecked(false);
+	ui->cbAutoCheckFold->setChecked(false);
+}
+void Table::tryAutoAction() {
+	Data::SeatInfo *my_seat = p->findMySeat();
+	if (!my_seat) return;
+	if (lastTableStatus->current_seat != my_seat->seat_index) return;
+	int mybet = lastTableStatus->bets().at(my_seat->seat_index);
+	if (ui->cbAutoCheckFold->isChecked()) {
+		if (_AutoFoldVisible) {
+			if (lastTableStatus->minimumBet() > mybet) {
+				on_btFold_clicked();
+			} else if (lastTableStatus->minimumBet() == mybet) {
+				on_btCheck_clicked();
+			}
+		} else if (lastTableStatus->minimumBet() == mybet) on_btCheck_clicked();
+	} else if (ui->cbAutoCall->isChecked()) {
+		on_btCheck_clicked();
+	} else if (ui->cbAutoCheck->isChecked()) {
+		if (lastTableStatus->minimumBet() == mybet) on_btCheck_clicked();
+	} else if (ui->cbAutoCallAny->isChecked()) {
+		on_btCheck_clicked();
+	}
 }

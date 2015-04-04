@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.SeatInfo;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPlayerStatus = (psOutOfPlay = 0, psOutOfHand, psInHand, psFolded, psAllIn);
@@ -38,7 +40,7 @@ type
       FDisconnected: Boolean;
       FCanShow: Boolean;
       FAutoplay: Boolean;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_SeatIndex;
     procedure clear_has_SeatIndex;
@@ -135,7 +137,6 @@ type
     function has_Autoplay: Boolean;
     procedure clear_Autoplay;
     property Autoplay: Boolean read FAutoplay write SetAutoplay;
-
   end;
 
   TPB_SeatInfoList = class(TObjectList<TPB_SeatInfo>)
@@ -145,7 +146,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_SeatInfo.Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE);
@@ -255,7 +256,7 @@ end;
 
 function TPB_SeatInfo.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1e7) <> $1e7 then
+  if (FHasBits and $1e7) <> $1e7 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -268,17 +269,17 @@ end;
 
 function TPB_SeatInfo.has_SeatIndex: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_SeatInfo.clear_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_SeatInfo.SetSeatIndex(const AValue: Integer);
@@ -299,17 +300,17 @@ end;
 
 function TPB_SeatInfo.has_PlayerMongoId: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_SeatInfo.clear_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TMongoId);
@@ -334,17 +335,17 @@ end;
 
 function TPB_SeatInfo.has_Chips: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_Chips;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_SeatInfo.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_SeatInfo.SetChips(const AValue: UInt32);
@@ -365,17 +366,17 @@ end;
 
 function TPB_SeatInfo.has_CardCount: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_CardCount;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_SeatInfo.clear_has_CardCount;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);
@@ -396,17 +397,17 @@ end;
 
 function TPB_SeatInfo.has_Cards: Boolean;
 begin
-  result := (_has_bits_ and 16) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_Cards;
 begin
-  _has_bits_ := _has_bits_ or 16;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_SeatInfo.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ and not 16;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
@@ -427,17 +428,17 @@ end;
 
 function TPB_SeatInfo.has_Status: Boolean;
 begin
-  result := (_has_bits_ and 32) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_Status;
 begin
-  _has_bits_ := _has_bits_ or 32;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_SeatInfo.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ and not 32;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
@@ -458,17 +459,17 @@ end;
 
 function TPB_SeatInfo.has_Timebank: Boolean;
 begin
-  result := (_has_bits_ and 64) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_Timebank;
 begin
-  _has_bits_ := _has_bits_ or 64;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_SeatInfo.clear_has_Timebank;
 begin
-  _has_bits_ := _has_bits_ and not 64;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_SeatInfo.SetTimebank(const AValue: UInt32);
@@ -489,17 +490,17 @@ end;
 
 function TPB_SeatInfo.has_CardsVisible: Boolean;
 begin
-  result := (_has_bits_ and 128) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_CardsVisible;
 begin
-  _has_bits_ := _has_bits_ or 128;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_SeatInfo.clear_has_CardsVisible;
 begin
-  _has_bits_ := _has_bits_ and not 128;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
@@ -520,17 +521,17 @@ end;
 
 function TPB_SeatInfo.has_Disconnected: Boolean;
 begin
-  result := (_has_bits_ and 256) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_Disconnected;
 begin
-  _has_bits_ := _has_bits_ or 256;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_SeatInfo.clear_has_Disconnected;
 begin
-  _has_bits_ := _has_bits_ and not 256;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
@@ -551,17 +552,17 @@ end;
 
 function TPB_SeatInfo.has_CanShow: Boolean;
 begin
-  result := (_has_bits_ and 512) > 0;
+  result := (FHasBits and 512) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_CanShow;
 begin
-  _has_bits_ := _has_bits_ or 512;
+  FHasBits := FHasBits or 512;
 end;
 
 procedure TPB_SeatInfo.clear_has_CanShow;
 begin
-  _has_bits_ := _has_bits_ and not 512;
+  FHasBits := FHasBits and not 512;
 end;
 
 procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);
@@ -582,17 +583,17 @@ end;
 
 function TPB_SeatInfo.has_Autoplay: Boolean;
 begin
-  result := (_has_bits_ and 1024) > 0;
+  result := (FHasBits and 1024) > 0;
 end;
 
 procedure TPB_SeatInfo.set_has_Autoplay;
 begin
-  _has_bits_ := _has_bits_ or 1024;
+  FHasBits := FHasBits or 1024;
 end;
 
 procedure TPB_SeatInfo.clear_has_Autoplay;
 begin
-  _has_bits_ := _has_bits_ and not 1024;
+  FHasBits := FHasBits and not 1024;
 end;
 
 procedure TPB_SeatInfo.SetAutoplay(const AValue: Boolean);
@@ -607,7 +608,7 @@ end;
 
 procedure TPB_SeatInfo.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_SeatIndex;

@@ -172,6 +172,8 @@ var
   callback_socketstatechange: TSocketStateChangeCallback;
   obj: TObject;
 begin
+  {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocket]); {$ENDIF}
+
   FLock.Acquire;
   try
     for callback_set in FCallbackSets do

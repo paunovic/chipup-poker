@@ -7,7 +7,7 @@
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
-			<TargetedPlatforms>1</TargetedPlatforms>
+			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -71,7 +71,6 @@
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_UsePackage>cxLibraryRS16;dxSkinSevenRS16;dxPsPrVwAdvRS16;dxSkinSummer2008RS16;dxPSCoreRS16;cxPivotGridOLAPRS16;dxPScxGridLnkRS16;dxPScxTLLnkRS16;cxPageControlRS16;dxSkinVS2010RS16;vclimg;dxSkinDevExpressStyleRS16;dxSkinWhiteprintRS16;dxComnRS16;vcldb;dxSkinBlackRS16;dxADOServerModeRS16;dxBarExtDBItemsRS16;dxSkinXmas2008BlueRS16;dxSkinOffice2007BlueRS16;dxSkinOffice2007GreenRS16;cxDataRS16;cxBarEditItemRS16;dxDockingRS16;cxPageControldxBarPopupMenuRS16;dxPSDBTeeChartRS16;dxPSLnksRS16;dxBarExtItemsRS16;dxPSTeeChartRS16;dxPSdxLCLnkRS16;cxVerticalGridRS16;dxSkinSharpRS16;dxSkinOffice2007BlackRS16;dxorgcRS16;dxSkinBlueprintRS16;dxPScxExtCommonRS16;dxNavBarRS16;DBXOdbcDriver;dxdbtrRS16;dxSkinFoggyRS16;dxPScxSSLnkRS16;dxSkinDarkSideRS16;dxSkinscxPCPainterRS16;dxPSdxDBTVLnkRS16;vclactnband;dxPScxSchedulerLnkRS16;dxServerModeRS16;bindcompvcl;vclie;dxSkinSilverRS16;dsnapcon;dcldxSkinsCoreRS16;dxSkinLilianRS16;vclx;dxSkinValentineRS16;dxFlowChartRS16;dxGDIPlusRS16;dxSkinSharpPlusRS16;dxdborRS16;dxPScxVGridLnkRS16;dxLayoutControlRS16;dxPScxPivotGridLnkRS16;dxCoreRS16;cxExportRS16;dxBarRS16;dxSkinsdxNavBarPainterRS16;cxSpreadSheetRS16;cxTreeListdxBarPopupMenuRS16;TeeDB;dxDBXServerModeRS16;dxSkinCoffeeRS16;vclib;dxRibbonRS16;DBXSybaseASEDriver;cxTreeListRS16;dxSkinOffice2007SilverRS16;dxSkinsdxRibbonPainterRS16;vcldsnap;dxSkinBlueRS16;DBXDb2Driver;dxSkinDarkRoomRS16;dxSkinscxSchedulerPainterRS16;vcl;dxSkinDevExpressDarkStyleRS16;DBXMSSQLDriver;webdsnap;dxSkinsdxDLPainterRS16;dxSkinTheAsphaltWorldRS16;dxSkinOffice2010BlackRS16;dxSkinMoneyTwinsRS16;dxSkinPumpkinRS16;adortl;dxSkinHighContrastRS16;dxSkiniMaginaryRS16;dxPSdxDBOCLnkRS16;dxSkinLondonLiquidSkyRS16;dxSkinsdxBarPainterRS16;Tee;dxSkinGlassOceansRS16;dxSkinLiquidSkyRS16;dxSkinsCoreRS16;dxPScxCommonRS16;dxmdsRS16;dxPSPrVwRibbonRS16;cxGridRS16;cxEditorsRS16;TeeUI;cxPivotGridRS16;dxSkinSevenClassicRS16;cxSchedulerRS16;vcltouch;dxSkinOffice2010SilverRS16;websnap;dxSkinOffice2007PinkRS16;VclSmp;dxSkinSpringTimeRS16;dxTabbedMDIRS16;DataSnapConnectors;dxSkinStardustRS16;dxPSdxOCLnkRS16;dxSkinOffice2010BlueRS16;dxPSdxFCLnkRS16;dxThemeRS16;dxPScxPCProdRS16;dxSkinCaramelRS16;dxSkinMcSkinRS16;dxBarDBNavRS16;$(DCC_UsePackage)</DCC_UsePackage>
 		</PropertyGroup>
@@ -92,7 +91,6 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
 			<DCC_MapFile>3</DCC_MapFile>
-			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
@@ -119,7 +117,6 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
 			<Debugger_RunParams>-noupdate</Debugger_RunParams>
-			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 			<DCC_LocalDebugSymbols>true</DCC_LocalDebugSymbols>
 			<DCC_DebugInformation>true</DCC_DebugInformation>
 			<DCC_MapFile>3</DCC_MapFile>
@@ -140,6 +137,7 @@
 			<DCCReference Include="3rdparty\protobufs\pbOutput.pas"/>
 			<DCCReference Include="3rdparty\protobufs\pbPublic.pas"/>
 			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
+			<DCCReference Include="3rdparty\AsphyreSphinx\Source\Asphyre.Streams.pas"/>
 			<DCCReference Include="3rdparty\icsv8\OverbyteIcsHttpProt.pas"/>
 			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
@@ -254,13 +252,15 @@
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas"/>
 			<DCCReference Include="modules\common\Poker.Common.ModalDialogs.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.SSLCert.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.SafeMutex.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.CPUUsage.pas"/>
 			<DCCReference Include="modules\settings\Poker.HardcodedSettings.pas"/>
 			<DCCReference Include="modules\settings\Poker.Settings.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.Settings.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.Validators.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.MessageContainer.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.MessageCallbacks.pas"/>
-			<DCCReference Include="modules\server\Poker.Server.SSLCerts.pas"/>
 			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Core.pas"/>
 			<DCCReference Include="modules\server\socket\Poker.Server.Socket.pas"/>
 			<DCCReference Include="modules\server\socket\Poker.Server.Socket.ConnectThread.pas"/>
@@ -368,7 +368,6 @@
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableMessage.pas"/>
-			<DCCReference Include="modules\common\Poker.Common.SafeMutex.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas"/>
@@ -407,6 +406,9 @@
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>SubClass1ServerCertificate</ResourceId>
 			</RcItem>
+			<None Include="3rdparty\FastMM\FastMM4Options.inc"/>
+			<None Include="3rdparty\AsphyreSphinx\Asphyre.StreamUtils.inc"/>
+			<None Include="3rdparty\AsphyreSphinx\Source\Asphyre.StreamUtils.inc"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -554,7 +556,7 @@
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
-					<Platform value="Win64">False</Platform>
+					<Platform value="Win64">True</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>
 				<ModelSupport>False</ModelSupport>

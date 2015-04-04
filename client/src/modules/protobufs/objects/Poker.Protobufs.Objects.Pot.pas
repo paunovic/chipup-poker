@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.Pot;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.WinnerData;
 
 type
@@ -23,7 +25,7 @@ type
       FMembers: TList<Integer>;
       FWinnerData: TList<TPB_WinnerData>;
       FRake: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Value;
     procedure clear_has_Value;
@@ -67,7 +69,6 @@ type
     function has_Rake: Boolean;
     procedure clear_Rake;
     property Rake: UInt32 read FRake write SetRake;
-
   end;
 
   TPB_PotList = class(TObjectList<TPB_Pot>)
@@ -77,7 +78,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_Pot.Create(const AFrom: TPB_Pot; const ALightweight: Boolean = FALSE);
@@ -165,7 +166,7 @@ function TPB_Pot.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   for pbobj in WinnerData do
     if not pbobj.IsInitialized then
@@ -181,17 +182,17 @@ end;
 
 function TPB_Pot.has_Value: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_Pot.set_has_Value;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_Pot.clear_has_Value;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_Pot.SetValue(const AValue: UInt32);
@@ -217,17 +218,17 @@ end;
 
 function TPB_Pot.has_Members: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_Pot.set_has_Members;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_Pot.clear_has_Members;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
@@ -251,17 +252,17 @@ end;
 
 function TPB_Pot.has_WinnerData: Boolean;
 begin
-  result := (_has_bits_ and 4) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_Pot.set_has_WinnerData;
 begin
-  _has_bits_ := _has_bits_ or 4;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_Pot.clear_has_WinnerData;
 begin
-  _has_bits_ := _has_bits_ and not 4;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_Pot.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
@@ -284,17 +285,17 @@ end;
 
 function TPB_Pot.has_Rake: Boolean;
 begin
-  result := (_has_bits_ and 8) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_Pot.set_has_Rake;
 begin
-  _has_bits_ := _has_bits_ or 8;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_Pot.clear_has_Rake;
 begin
-  _has_bits_ := _has_bits_ and not 8;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_Pot.SetRake(const AValue: UInt32);
@@ -309,7 +310,7 @@ end;
 
 procedure TPB_Pot.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Value;

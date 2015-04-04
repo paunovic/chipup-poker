@@ -28,5 +28,5 @@ CssEditor::~CssEditor()
 }
 void CssEditor::on_css_textChanged() {
 	qDebug() << "updating css";
-	core->app->setStyleSheet(ui->css->toPlainText());
+	qApp->setStyleSheet(ui->css->toPlainText());
 }

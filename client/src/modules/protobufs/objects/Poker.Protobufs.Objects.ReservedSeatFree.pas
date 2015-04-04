@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ReservedSeatFree;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -19,7 +21,7 @@ type
     var
       FTs: TPB_TableStatus;
       FSeatIndex: UInt32;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Ts;
     procedure clear_has_Ts;
@@ -44,7 +46,6 @@ type
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
     property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
-
   end;
 
   TPB_ReservedSeatFreeList = class(TObjectList<TPB_ReservedSeatFree>)
@@ -54,7 +55,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ReservedSeatFree.Create(const AFrom: TPB_ReservedSeatFree; const ALightweight: Boolean = FALSE);
@@ -105,7 +106,7 @@ end;
 
 function TPB_ReservedSeatFree.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   if (has_Ts) then
     if not FTs.IsInitialized then
@@ -121,17 +122,17 @@ end;
 
 function TPB_ReservedSeatFree.has_Ts: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ReservedSeatFree.set_has_Ts;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ReservedSeatFree.clear_has_Ts;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ReservedSeatFree.SetTs(const AValue: TPB_TableStatus);
@@ -152,17 +153,17 @@ end;
 
 function TPB_ReservedSeatFree.has_SeatIndex: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ReservedSeatFree.set_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ReservedSeatFree.clear_has_SeatIndex;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ReservedSeatFree.SetSeatIndex(const AValue: UInt32);
@@ -177,7 +178,7 @@ end;
 
 procedure TPB_ReservedSeatFree.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Ts;

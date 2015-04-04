@@ -284,7 +284,7 @@ begin
     end;
 
     if move.ContainsEvent(teCheck) then
-      ALines.Add(Format('%s%s%s checks', [ATags.PlayerNick, player_nick, ATags.NormalText, player_nick]));
+      ALines.Add(Format('%s%s%s checks', [ATags.PlayerNick, player_nick, ATags.NormalText]));
 
     if move.ContainsEvent(teCall) then
     begin
@@ -606,7 +606,7 @@ begin
   begin
     FLock.Acquire;
     try
-      while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
+      while Count >= Settings.Hardcoded.TABLE_HAND_HISTORY_LIMIT do
         inherited Remove(Last);
       inherited Add(THandHistoryItem.Create(self, AHandHistory));
     finally

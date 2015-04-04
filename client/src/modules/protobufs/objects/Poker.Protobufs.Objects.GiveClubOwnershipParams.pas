@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.GiveClubOwnershipParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_GiveClubOwnershipParams = class(TProtobufBaseObject)
@@ -18,7 +20,7 @@ type
     var
       FClubMongoId: TMongoId;
       FPlayerMongoId: TMongoId;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_ClubMongoId;
     procedure clear_has_ClubMongoId;
@@ -43,7 +45,6 @@ type
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
-
   end;
 
   TPB_GiveClubOwnershipParamsList = class(TObjectList<TPB_GiveClubOwnershipParams>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_GiveClubOwnershipParams.Create(const AFrom: TPB_GiveClubOwnershipParams; const ALightweight: Boolean = FALSE);
@@ -100,7 +101,7 @@ end;
 
 function TPB_GiveClubOwnershipParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +114,17 @@ end;
 
 function TPB_GiveClubOwnershipParams.has_ClubMongoId: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_GiveClubOwnershipParams.set_has_ClubMongoId;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_GiveClubOwnershipParams.clear_has_ClubMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_GiveClubOwnershipParams.SetClubMongoId(const AValue: TMongoId);
@@ -148,17 +149,17 @@ end;
 
 function TPB_GiveClubOwnershipParams.has_PlayerMongoId: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_GiveClubOwnershipParams.set_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_GiveClubOwnershipParams.clear_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_GiveClubOwnershipParams.SetPlayerMongoId(const AValue: TMongoId);
@@ -177,7 +178,7 @@ end;
 
 procedure TPB_GiveClubOwnershipParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_ClubMongoId;

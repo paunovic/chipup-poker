@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.GetUserParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
@@ -19,7 +21,7 @@ type
     var
       FUserMongoIds: TList<TMongoId>;
       FUsers: TList<TPB_User>;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_UserMongoIds;
     procedure clear_has_UserMongoIds;
@@ -47,7 +49,6 @@ type
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
-
   end;
 
   TPB_GetUserParamsList = class(TObjectList<TPB_GetUserParams>)
@@ -57,7 +58,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams; const ALightweight: Boolean = FALSE);
@@ -131,7 +132,7 @@ function TPB_GetUserParams.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $0) <> $0 then
+  if (FHasBits and $0) <> $0 then
     Exit(FALSE);
   for pbobj in Users do
     if not pbobj.IsInitialized then
@@ -152,17 +153,17 @@ end;
 
 function TPB_GetUserParams.has_UserMongoIds: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_GetUserParams.set_has_UserMongoIds;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_GetUserParams.clear_has_UserMongoIds;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
@@ -190,17 +191,17 @@ end;
 
 function TPB_GetUserParams.has_Users: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_GetUserParams.set_has_Users;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_GetUserParams.clear_has_Users;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_GetUserParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
@@ -217,7 +218,7 @@ end;
 
 procedure TPB_GetUserParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_UserMongoIds;

@@ -2,8 +2,6 @@ unit Poker.Forms.Login;
 
 interface
 
-{$I defines.inc}
-
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Dialogs, Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels,
@@ -11,7 +9,7 @@ uses
   Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
   OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit,
   ChipUpPokerDarkSkin, System.Generics.Collections, Poker.Common.AlphaBlendThread,
-  Vcl.Menus;
+  Vcl.Menus, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -49,6 +47,7 @@ type
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
+    FPopupMenu: TPopupMenu;
     FAlphaBlendThread: TAlphaBlendThread;
 
     procedure ApplySettings;
@@ -57,6 +56,7 @@ type
     procedure ModalFormClose(Sender: TObject);
 
     procedure CreateServerCombobox;
+    procedure CreatePopupMenu;
 
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
@@ -75,7 +75,7 @@ type
     procedure HelloServer;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
-    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
+    procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
   public
     property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
   end;
@@ -90,7 +90,8 @@ uses
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
-  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions;
+  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions,
+  Poker.Server.Validators;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
@@ -109,6 +110,8 @@ begin
 
   if Settings.DeveloperMode then
     EnterDeveloperMode;
+
+  tiLoginTimeout.Interval := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
 
   EnableGUI(FCurrentStatus = lsHelloOk);
 end;
@@ -146,23 +149,40 @@ begin
   FServerComboBox.Left := btLogin.Left;
   FServerComboBox.Properties.DropDownListStyle := lsFixedList;
   FServerComboBox.Properties.Items.Clear;
-  for C1 := Low(Settings.Hardcoded.SERVER_CONFIG) to High(Settings.Hardcoded.SERVER_CONFIG) do
-    FServerComboBox.Properties.Items.Add(Settings.Hardcoded.SERVER_CONFIG[C1].TCPAddress);
+  for C1 := Low(Settings.Hardcoded.SERVER_LIST) to High(Settings.Hardcoded.SERVER_LIST) do
+    FServerComboBox.Properties.Items.Add(Settings.Hardcoded.SERVER_LIST[C1].Address);
   FServerComboBox.ItemIndex := Settings.ServerIndex;
   FServerComboBox.Properties.OnChange := ServerComboboxChange;
+end;
+
+procedure TfrmChipUpLogin.CreatePopupMenu;
+var
+  C1: Integer;
+  mi: TMenuItem;
+begin
+  FPopupMenu := TPopupMenu.Create(self);
+
+  for C1 := 0 to frmChipUpMain.ActionManager.ActionCount - 1 do
+    if frmChipUpMain.ActionManager.Actions[C1].Category = 'Dev' then
+    begin
+      mi := TMenuItem.Create(FPopupMenu);
+      mi.Action := frmChipUpMain.ActionManager.Actions[C1];
+      FPopupMenu.Items.Add(mi);
+    end;
+
+  imgBackground.PopupMenu := FPopupMenu;
 end;
 
 procedure TfrmChipUpLogin.FormShow(Sender: TObject);
 begin
   if DXCore.Device.IsAtFault then
-    MessageDlg('Failed to initialize DirectX.'#10 +
-      'Please check that your graphic drivers are up-to-date and that your system meets the minimum requirements.',
-      mtError, [mbOK], 0);
+    ModalDialogs.ShowError('Failed to initialize DirectX.'#10 +
+      'Please check that your graphic drivers are up-to-date and that your system meets the minimum requirements.');
 
   case ServerSocket.Socket.State of
     wsClosed: begin
       CurrentStatus := lsConnecting;
-      ServerSocket.Connect;
+      dmMain.ServerSocketConnect;
     end;
     wsConnected: CurrentStatus := lsConnected;
   end;
@@ -239,8 +259,7 @@ var
 begin
   item_index := (Sender as TcxComboBox).ItemIndex;
   Settings.ServerIndex := item_index;
-  TServerSocket.Deinitialize;
-  TServerSocket.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
+  ServerSocket.Disconnect;
 end;
 
 procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
@@ -292,14 +311,14 @@ begin
   if CurrentStatus = lsIdle then
   begin
     CurrentStatus := lsConnecting;
-    ServerSocket.Connect;
+    dmMain.ServerSocketConnect;
   end;
 
   if (ServerSocket.IsConnected) and
      (CurrentStatus = lsConnected) then
   begin
     HelloServer;
-    tiConnect.Interval := 2000;
+    tiConnect.Interval := 1000;
   end;
 end;
 
@@ -309,9 +328,9 @@ begin
   tiLoginTimeout.Enabled := FALSE;
 end;
 
-procedure TfrmChipUpLogin.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+procedure TfrmChipUpLogin.WMEraseBkgnd(var AMessage: TWMEraseBkgnd);
 begin
-  Message.Result := 0;
+  AMessage.Result := 0;
 end;
 
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
@@ -324,11 +343,14 @@ end;
 procedure TfrmChipUpLogin.EnterDeveloperMode;
 begin
   CreateServerCombobox;
+  CreatePopupMenu;
 end;
 
 procedure TfrmChipUpLogin.LeaveDeveloperMode;
 begin
   FreeAndNil(FServerComboBox);
+  imgBackground.PopupMenu := nil;
+  FreeAndNil(FPopupMenu);
 end;
 
 procedure TfrmChipUpLogin.FormKeyPress(Sender: TObject; var Key: Char);
@@ -360,11 +382,30 @@ begin
 end;
 
 procedure TfrmChipUpLogin.acLoginExecute(Sender: TObject);
+var
+  err: String;
 begin
-  CurrentStatus := lsLoggingIn;
-  EnableGUI(FALSE);
-  tiLoginTimeout.Enabled := TRUE;
-  ServerSocket.Login(edLogin.Text, edPassword.Text);
+  if (ValidateUsername(edLogin.Text, err)) or
+     (ValidateEMail(edLogin.Text, err)) then
+  begin
+    if ValidateUserPassword(edPassword.Text, err) then
+    begin
+      CurrentStatus := lsLoggingIn;
+      EnableGUI(FALSE);
+      tiLoginTimeout.Enabled := TRUE;
+      ServerSocket.Login(edLogin.Text, edPassword.Text)
+    end
+    else
+    begin
+      ModalDialogs.ShowWarning(err);
+      edPassword.SetFocus;
+    end;
+  end
+  else
+  begin
+    ModalDialogs.ShowWarning('Invalid username/E-Mail address');
+    edLogin.SetFocus;
+  end;
 end;
 
 procedure TfrmChipUpLogin.acShowCreateAccountFormExecute(Sender: TObject);
@@ -384,18 +425,17 @@ begin
   if not TTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
     Exit;
 
-  if (not TCommandLineParams.NoUpdateFlag) and
-     (pbhello.UpdateFiles.Count > 0) then
+  if pbhello.UpdateFiles.Count > 0 then
   begin
-    dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
-    acUpdate.Execute;
-  end
-  else
-  begin
-    {$IFDEF DEBUG}
     if TCommandLineParams.NoUpdateFlag then
-      DebugLn('Ignoring update (-noupdate parameter found)', ditApplication);
-    {$ENDIF}
+    begin
+      {$IFDEF DEBUG} DebugLn('Ignoring update (-noupdate parameter found)', ditApplication); {$ENDIF}
+    end
+    else
+    begin
+      dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
+      acUpdate.Execute;
+    end;
   end;
 
   ServerSettings.ParseHelloMessage(pbhello);
@@ -441,8 +481,6 @@ begin
     SoftException(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.LoginStatus)]));
     edLogin.SetFocus;
   end;
-
-  {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
 procedure TfrmChipUpLogin.AlphaBlendThreadNotify(Sender: TObject);
@@ -458,6 +496,7 @@ begin
   begin
     if AlphaBlendValue = 0 then
       Close;
+    dmMain.RefreshSkinControllerDelayed;
   end;
 end;
 

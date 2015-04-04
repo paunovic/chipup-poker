@@ -275,7 +275,6 @@ end;
 
 procedure TTableRenderer.MouseMove(Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
 var
-  dxbutton: TDXButton;
   percent: Single;
   seat_index: Integer;
   seat: TSeatInfo;
@@ -284,9 +283,6 @@ var
 begin
   ASetRaiseAmount := FALSE;
   render_it := FALSE;
-
-  for dxbutton in FDXButtons do
-    dxbutton.MouseMove(Shift, X, Y);
 
   if FRaiseThumbDown then
   begin

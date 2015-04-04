@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.TournamentPrize;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TournamentPrize = class(TProtobufBaseObject)
@@ -18,7 +20,7 @@ type
     var
       FPlace: Integer;
       FName: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_Place;
     procedure clear_has_Place;
@@ -43,7 +45,6 @@ type
     function has_Name: Boolean;
     procedure clear_Name;
     property Name: String read FName write SetName;
-
   end;
 
   TPB_TournamentPrizeList = class(TObjectList<TPB_TournamentPrize>)
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_TournamentPrize.Create(const AFrom: TPB_TournamentPrize; const ALightweight: Boolean = FALSE);
@@ -100,7 +101,7 @@ end;
 
 function TPB_TournamentPrize.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $3) <> $3 then
+  if (FHasBits and $3) <> $3 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -113,17 +114,17 @@ end;
 
 function TPB_TournamentPrize.has_Place: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_TournamentPrize.set_has_Place;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_TournamentPrize.clear_has_Place;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_TournamentPrize.SetPlace(const AValue: Integer);
@@ -144,17 +145,17 @@ end;
 
 function TPB_TournamentPrize.has_Name: Boolean;
 begin
-  result := (_has_bits_ and 2) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TournamentPrize.set_has_Name;
 begin
-  _has_bits_ := _has_bits_ or 2;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TournamentPrize.clear_has_Name;
 begin
-  _has_bits_ := _has_bits_ and not 2;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TournamentPrize.SetName(const AValue: String);
@@ -169,7 +170,7 @@ end;
 
 procedure TPB_TournamentPrize.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_Place;

@@ -6,7 +6,9 @@ unit Poker.Protobufs.Objects.ChangePasswordParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
+  System.SysUtils,
+  {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF},
+  pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChangePasswordParams = class(TProtobufBaseObject)
@@ -16,7 +18,7 @@ type
 
     var
       FNewPassword: String;
-      _has_bits_: UINT32;
+      FHasBits: UINT32;
 
     procedure set_has_NewPassword;
     procedure clear_has_NewPassword;
@@ -33,7 +35,6 @@ type
     function has_NewPassword: Boolean;
     procedure clear_NewPassword;
     property NewPassword: String read FNewPassword write SetNewPassword;
-
   end;
 
   TPB_ChangePasswordParamsList = class(TObjectList<TPB_ChangePasswordParams>)
@@ -43,7 +44,7 @@ type
 implementation
 
 uses
-  pbPublic, Poker.Common.Misc;
+  pbPublic;
 
 
 constructor TPB_ChangePasswordParams.Create(const AFrom: TPB_ChangePasswordParams; const ALightweight: Boolean = FALSE);
@@ -83,7 +84,7 @@ end;
 
 function TPB_ChangePasswordParams.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (FHasBits and $1) <> $1 then
     Exit(FALSE);
   Exit(TRUE);
 end;
@@ -96,17 +97,17 @@ end;
 
 function TPB_ChangePasswordParams.has_NewPassword: Boolean;
 begin
-  result := (_has_bits_ and 1) > 0;
+  result := (FHasBits and 1) > 0;
 end;
 
 procedure TPB_ChangePasswordParams.set_has_NewPassword;
 begin
-  _has_bits_ := _has_bits_ or 1;
+  FHasBits := FHasBits or 1;
 end;
 
 procedure TPB_ChangePasswordParams.clear_has_NewPassword;
 begin
-  _has_bits_ := _has_bits_ and not 1;
+  FHasBits := FHasBits and not 1;
 end;
 
 procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
@@ -121,7 +122,7 @@ end;
 
 procedure TPB_ChangePasswordParams.Clear;
 begin
-  if _has_bits_ = 0 then
+  if FHasBits = 0 then
     Exit;
 
   clear_NewPassword;

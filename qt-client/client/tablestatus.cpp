@@ -28,7 +28,7 @@ void TableStatus::update(const Poker::TableStatus &in) {
 	}
 	locked = in.locked();
 	seq = in.seq();
-	minimum_bet = in.minimum_bet();
+	minimumBet_ = in.minimum_bet();
 	maximum_raise = in.maximum_raise();
 	minimum_raise = in.minimum_raise();
 	sb = in.small_blind();
