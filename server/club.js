@@ -874,7 +874,6 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 		}
 		if (params.default_balance_limit != club.default_balance_limit) club.obj.default_balance_limit = params.default_balance_limit;
 		club.obj.buyin_reset = params.buyin_reset;
-		club.obj.max_rake_per_hand = params.max_rake_per_hand;
 		if (!doit) {
 			this.log('params:%j',params);
 			this.reply("000","no changes found");

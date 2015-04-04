@@ -228,7 +228,6 @@ message Club {
 	optional uint32 default_balance_limit = 10;
 	optional bool unlimited_default_balance = 11;
 	optional uint32 buyin_reset = 12;
-	optional uint32 max_rake_per_hand = 13;
 }
 
 message User {
@@ -298,6 +297,7 @@ message Game {
 	optional uint32 small_blind = 17;
 	optional uint32 big_blind = 18;
 	optional bool final_table = 19;
+	optional uint32 max_rake_per_hand = 20;
 }
 
 message ListClubsReply {

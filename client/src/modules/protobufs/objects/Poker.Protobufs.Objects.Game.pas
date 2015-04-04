@@ -37,6 +37,7 @@ type
       kSmallBlindFieldNumber = 17;
       kBigBlindFieldNumber = 18;
       kFinalTableFieldNumber = 19;
+      kMaxRakePerHandFieldNumber = 20;
 
     var
       FId: TMongoId;
@@ -57,6 +58,7 @@ type
       FSmallBlind: UInt32;
       FBigBlind: UInt32;
       FFinalTable: Boolean;
+      FMaxRakePerHand: UInt32;
       FHasBits: UINT32;
 
     procedure set_has_MongoId;
@@ -113,6 +115,9 @@ type
     procedure set_has_FinalTable;
     procedure clear_has_FinalTable;
     procedure SetFinalTable(const AValue: Boolean);
+    procedure set_has_MaxRakePerHand;
+    procedure clear_has_MaxRakePerHand;
+    procedure SetMaxRakePerHand(const AValue: UInt32);
   public
     constructor Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
@@ -210,6 +215,11 @@ type
     function has_FinalTable: Boolean;
     procedure clear_FinalTable;
     property FinalTable: Boolean read FFinalTable write SetFinalTable;
+
+    // optional uint32 MaxRakePerHand = 20;
+    function has_MaxRakePerHand: Boolean;
+    procedure clear_MaxRakePerHand;
+    property MaxRakePerHand: UInt32 read FMaxRakePerHand write SetMaxRakePerHand;
   end;
 
   TPB_GameList = class(TObjectList<TPB_Game>)
@@ -331,6 +341,11 @@ begin
         FFinalTable := AProtobufReader.readBoolean;
         set_has_FinalTable;
       end;
+      kMaxRakePerHandFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FMaxRakePerHand := AProtobufReader.readUInt32;
+        set_has_MaxRakePerHand;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -374,6 +389,8 @@ begin
     SetBigBlind(AFrom.BigBlind);
   if AFrom.has_FinalTable then
     SetFinalTable(AFrom.FinalTable);
+  if AFrom.has_MaxRakePerHand then
+    SetMaxRakePerHand(AFrom.MaxRakePerHand);
 end;
 
 function TPB_Game.IsInitialized: Boolean;
@@ -957,6 +974,37 @@ begin
   set_has_FinalTable;
 end;
 
+procedure TPB_Game.clear_MaxRakePerHand;
+begin
+  FMaxRakePerHand := 0;
+  clear_has_MaxRakePerHand;
+end;
+
+function TPB_Game.has_MaxRakePerHand: Boolean;
+begin
+  result := (FHasBits and 524288) > 0;
+end;
+
+procedure TPB_Game.set_has_MaxRakePerHand;
+begin
+  FHasBits := FHasBits or 524288;
+end;
+
+procedure TPB_Game.clear_has_MaxRakePerHand;
+begin
+  FHasBits := FHasBits and not 524288;
+end;
+
+procedure TPB_Game.SetMaxRakePerHand(const AValue: UInt32);
+begin
+  if not Lightweight then
+    Assert(not has_MaxRakePerHand);
+  FMaxRakePerHand := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kMaxRakePerHandFieldNumber, AValue);
+  set_has_MaxRakePerHand;
+end;
+
 procedure TPB_Game.Clear;
 begin
   if FHasBits = 0 then
@@ -980,6 +1028,7 @@ begin
   clear_SmallBlind;
   clear_BigBlind;
   clear_FinalTable;
+  clear_MaxRakePerHand;
 end;
 
 procedure TPB_GameList.Assign(const APB_GameList: TList<TPB_Game>);

@@ -143,6 +143,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 			return;
 		}
 		doc.clubid = club.clubid;
+		if (params.max_rake_per_hand) doc.max_rake_per_hand = params.max_rake_per_hand;
 		models.Game.create(doc,function (err,game) {
 			var x,key;
 			if (err) {

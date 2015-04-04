@@ -2328,13 +2328,6 @@ class Club : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 buyin_reset() const;
   inline void set_buyin_reset(::google::protobuf::uint32 value);
 
-  // optional uint32 max_rake_per_hand = 13;
-  inline bool has_max_rake_per_hand() const;
-  inline void clear_max_rake_per_hand();
-  static const int kMaxRakePerHandFieldNumber = 13;
-  inline ::google::protobuf::uint32 max_rake_per_hand() const;
-  inline void set_max_rake_per_hand(::google::protobuf::uint32 value);
-
   // @@protoc_insertion_point(class_scope:Poker.Club)
  private:
   inline void set_has__id();
@@ -2359,8 +2352,6 @@ class Club : public ::google::protobuf::Message {
   inline void clear_has_unlimited_default_balance();
   inline void set_has_buyin_reset();
   inline void clear_has_buyin_reset();
-  inline void set_has_max_rake_per_hand();
-  inline void clear_has_max_rake_per_hand();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2376,10 +2367,9 @@ class Club : public ::google::protobuf::Message {
   ::google::protobuf::uint32 rake_;
   ::google::protobuf::uint32 default_balance_limit_;
   ::google::protobuf::uint32 buyin_reset_;
-  ::google::protobuf::uint32 max_rake_per_hand_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -2989,6 +2979,13 @@ class Game : public ::google::protobuf::Message {
   inline bool final_table() const;
   inline void set_final_table(bool value);
 
+  // optional uint32 max_rake_per_hand = 20;
+  inline bool has_max_rake_per_hand() const;
+  inline void clear_max_rake_per_hand();
+  static const int kMaxRakePerHandFieldNumber = 20;
+  inline ::google::protobuf::uint32 max_rake_per_hand() const;
+  inline void set_max_rake_per_hand(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:Poker.Game)
  private:
   inline void set_has__id();
@@ -3027,6 +3024,8 @@ class Game : public ::google::protobuf::Message {
   inline void clear_has_big_blind();
   inline void set_has_final_table();
   inline void clear_has_final_table();
+  inline void set_has_max_rake_per_hand();
+  inline void clear_has_max_rake_per_hand();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3048,9 +3047,10 @@ class Game : public ::google::protobuf::Message {
   ::google::protobuf::uint32 small_blind_;
   ::google::protobuf::uint32 big_blind_;
   bool final_table_;
+  ::google::protobuf::uint32 max_rake_per_hand_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(19 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -12392,28 +12392,6 @@ inline void Club::set_buyin_reset(::google::protobuf::uint32 value) {
   buyin_reset_ = value;
 }
 
-// optional uint32 max_rake_per_hand = 13;
-inline bool Club::has_max_rake_per_hand() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
-}
-inline void Club::set_has_max_rake_per_hand() {
-  _has_bits_[0] |= 0x00001000u;
-}
-inline void Club::clear_has_max_rake_per_hand() {
-  _has_bits_[0] &= ~0x00001000u;
-}
-inline void Club::clear_max_rake_per_hand() {
-  max_rake_per_hand_ = 0u;
-  clear_has_max_rake_per_hand();
-}
-inline ::google::protobuf::uint32 Club::max_rake_per_hand() const {
-  return max_rake_per_hand_;
-}
-inline void Club::set_max_rake_per_hand(::google::protobuf::uint32 value) {
-  set_has_max_rake_per_hand();
-  max_rake_per_hand_ = value;
-}
-
 // -------------------------------------------------------------------
 
 // User
@@ -13552,6 +13530,28 @@ inline bool Game::final_table() const {
 inline void Game::set_final_table(bool value) {
   set_has_final_table();
   final_table_ = value;
+}
+
+// optional uint32 max_rake_per_hand = 20;
+inline bool Game::has_max_rake_per_hand() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void Game::set_has_max_rake_per_hand() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void Game::clear_has_max_rake_per_hand() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void Game::clear_max_rake_per_hand() {
+  max_rake_per_hand_ = 0u;
+  clear_has_max_rake_per_hand();
+}
+inline ::google::protobuf::uint32 Game::max_rake_per_hand() const {
+  return max_rake_per_hand_;
+}
+inline void Game::set_max_rake_per_hand(::google::protobuf::uint32 value) {
+  set_has_max_rake_per_hand();
+  max_rake_per_hand_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -27,7 +27,6 @@ type
       kDefaultBalanceLimitFieldNumber = 10;
       kUnlimitedDefaultBalanceFieldNumber = 11;
       kBuyinResetFieldNumber = 12;
-      kMaxRakePerHandFieldNumber = 13;
 
     var
       FId: TMongoId;
@@ -42,7 +41,6 @@ type
       FDefaultBalanceLimit: UInt32;
       FUnlimitedDefaultBalance: Boolean;
       FBuyinReset: UInt32;
-      FMaxRakePerHand: UInt32;
       FHasBits: UINT32;
 
     procedure set_has_MongoId;
@@ -80,9 +78,6 @@ type
     procedure set_has_BuyinReset;
     procedure clear_has_BuyinReset;
     procedure SetBuyinReset(const AValue: UInt32);
-    procedure set_has_MaxRakePerHand;
-    procedure clear_has_MaxRakePerHand;
-    procedure SetMaxRakePerHand(const AValue: UInt32);
     procedure MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
   protected
     procedure InitObjects; override;
@@ -154,11 +149,6 @@ type
     function has_BuyinReset: Boolean;
     procedure clear_BuyinReset;
     property BuyinReset: UInt32 read FBuyinReset write SetBuyinReset;
-
-    // optional uint32 MaxRakePerHand = 13;
-    function has_MaxRakePerHand: Boolean;
-    procedure clear_MaxRakePerHand;
-    property MaxRakePerHand: UInt32 read FMaxRakePerHand write SetMaxRakePerHand;
   end;
 
   TPB_ClubList = class(TObjectList<TPB_Club>)
@@ -267,11 +257,6 @@ begin
         FBuyinReset := AProtobufReader.readUInt32;
         set_has_BuyinReset;
       end;
-      kMaxRakePerHandFieldNumber: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FMaxRakePerHand := AProtobufReader.readUInt32;
-        set_has_MaxRakePerHand;
-      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -305,8 +290,6 @@ begin
     SetUnlimitedDefaultBalance(AFrom.UnlimitedDefaultBalance);
   if AFrom.has_BuyinReset then
     SetBuyinReset(AFrom.BuyinReset);
-  if AFrom.has_MaxRakePerHand then
-    SetMaxRakePerHand(AFrom.MaxRakePerHand);
 end;
 
 function TPB_Club.IsInitialized: Boolean;
@@ -708,37 +691,6 @@ begin
   set_has_BuyinReset;
 end;
 
-procedure TPB_Club.clear_MaxRakePerHand;
-begin
-  FMaxRakePerHand := 0;
-  clear_has_MaxRakePerHand;
-end;
-
-function TPB_Club.has_MaxRakePerHand: Boolean;
-begin
-  result := (FHasBits and 4096) > 0;
-end;
-
-procedure TPB_Club.set_has_MaxRakePerHand;
-begin
-  FHasBits := FHasBits or 4096;
-end;
-
-procedure TPB_Club.clear_has_MaxRakePerHand;
-begin
-  FHasBits := FHasBits and not 4096;
-end;
-
-procedure TPB_Club.SetMaxRakePerHand(const AValue: UInt32);
-begin
-  if not Lightweight then
-    Assert(not has_MaxRakePerHand);
-  FMaxRakePerHand := AValue;
-  if not Lightweight then
-    ProtobufOutput.writeUInt32(kMaxRakePerHandFieldNumber, AValue);
-  set_has_MaxRakePerHand;
-end;
-
 procedure TPB_Club.Clear;
 begin
   if FHasBits = 0 then
@@ -756,7 +708,6 @@ begin
   clear_DefaultBalanceLimit;
   clear_UnlimitedDefaultBalance;
   clear_BuyinReset;
-  clear_MaxRakePerHand;
 end;
 
 procedure TPB_ClubList.Assign(const APB_ClubList: TList<TPB_Club>);
