@@ -523,13 +523,17 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scLogin:
 			if (args.length > 1000) return this.error('message too big');
 			if (this.loginProcessing) return this.reply(0,'login in progress');
-			this.loginProcessing = true;
 			try {
 				params = pb.Parse(args,'Poker.LoginParams');
 			} catch (e) {
 				this.error(e);
 				return;
 			}
+			if ((!regexLimits.username.exec(params.username)) && (!regexLimits.email.exec(params.username)) ) {
+				this.reply(0,"invalid username");
+				return;
+			}
+			this.loginProcessing = true;
 			models.UserModel.findOne({email:{$regex:new RegExp('^'+params.username+'$','i')}},function (err,row) {
 				assert.ifError(err);
 				if (row) {
@@ -1220,10 +1224,10 @@ function recheckAssets(cb) {
 		return;
 	}
 	fs.stat('assets',function (err,stats) {
-		//console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
 		if (assetMtime == stats.mtime.getTime()) {
 			if (cb) cb();
 		} else {
+			console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
 			hashAssets(cb);
 			assetMtime = stats.mtime.getTime();
 		}

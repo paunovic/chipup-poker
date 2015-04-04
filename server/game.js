@@ -781,7 +781,7 @@ Game.prototype.setBet = function (seat,bet) {
 	this.members[seat].chips -= (bet - oldbet);
 	if (bet > this.minBet) {
 		this.minimum_raise = bet - this.minBet;
-		this.log('min raise A %d',this.minimum_raise);
+		this.log('setBet() seat:%d min raise A %d',seat,this.minimum_raise);
 		this.minBet = bet;
 	}
 };
@@ -1013,6 +1013,18 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		if (wins[seat]) wins[seat] += chips;
 		else wins[seat] = chips;
 	}
+	this.log('max total rake:%d',this.club.obj.max_rake_per_hand);
+	var rake_list = [];
+	for (y=0; y<this.pots.length; y++) {
+		var pot = this.pots[y];
+		if (pot.value == 0) continue;
+		var rake = Math.round(pot.value * (this.rake / 100));
+		var rakesplit = rake / pot.trueMembers.length;
+		rake = rakesplit * pot.trueMembers.length;
+		totalrake += rake;
+	}
+	this.log('totaltake pre-limit:%d',totalrake);
+	totalrake = 0;
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
 		if (pot.value == 0) continue;
@@ -1588,6 +1600,7 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	var seat = this.findSeat(conn);
 	assert.equal(this.current_seat,seat);
 	conn.log('putchips, counter==%d',this.stateRow.moveCounter);
+	this.log('putchips, counter==%d',this.stateRow.moveCounter);
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		this.log('putChips fail 1');
 		cb();
@@ -1644,7 +1657,7 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 		cb([],0);
 		return;
 	}
-	this.log('MOVE '+event+' '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
+	this.log('MOVE %s %s %s %d',event,this.seats[seat].conn.nick,this.seats[seat].userid,chips);
 	this.addHistory({seat:seat,bet:chips,code:[event]});
 	this.stateRow.keycount--;
 	this.stateRow.moveCounter++;
@@ -2171,7 +2184,7 @@ Game.prototype.roundEnd = function () {
 		if (this.members[x].status == 'psFolded') continue;
 		if (this.members[x].status == 'psAllIn') continue;
 		if (this.members[x].chips > 0) {
-			this.log('roundend found one',x,this.members[x].status,this.members[x].chips);
+			this.log('roundend found one seat:%d status:%s chips:%d',x,this.members[x].status,this.members[x].chips);
 			havechips++;
 		}
 	}

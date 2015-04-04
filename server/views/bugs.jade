@@ -15,3 +15,18 @@ block content
         td=val.MailBody
         td
           a(href='/secure/bug?id='+val._id)='info'
+  table(border=1)
+    tr
+      th date
+      th IP
+      th user
+      th Exception
+      th Data
+    each val in minor
+      tr
+        td=val._id.getTimestamp()
+        td=val.ip
+        td
+          a(href='user?id='+val.userid)=val.userid
+        td=val.exception
+        td=val.data

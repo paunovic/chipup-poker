@@ -74,7 +74,7 @@ var ClubSchema = new Schema({
 	seq: Number,
 	testmode: Boolean,
 	buyin_reset: Number,
-	max_rake_per_hand: Number
+	max_rake_per_hand:{ type:Number, default: 0}
 },{collection:'clubs'});
 var AvatarSchema = new Schema({
 	_id: String,

@@ -2,12 +2,14 @@ extends secure
 block content
   table(border=1)
     tr
+      th date registered
       th club name
       th seq
-      th rake
+      th rake&max
     each val in clubs
       tr
+        td=val._id.getTimestamp()
         td
           a(href='/secure/club?id='+val._id)=val.name
         td=val.seq
-        td=val.rake+'%'
+        td=val.rake+'% '+val.max_rake_per_hand
