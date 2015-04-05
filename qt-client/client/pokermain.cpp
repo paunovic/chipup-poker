@@ -374,6 +374,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::srReinstatePlayerOk: // 32
 		qDebug() << "srReinstatePlayerOk";
 		break;
+	case Poker::srTableAddonOk: // 33
+		seTableStatus(data,true);
+		break;
 	case Poker::srTableStatsReply: // 35
 		qDebug() << "srTableStatsReply";
 		break;
@@ -445,7 +448,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		seGameDelete(data);
 		break;
 	case Poker::seTableStatus: // 58
-		seTableStatus(data);
+		seTableStatus(data,false);
 		break;
 	case Poker::sePlayerClubStatus: // 63
 		sePlayerClubStatus(data);
@@ -522,12 +525,13 @@ void PokerMain::seGameDelete(std::string data) {
 		}
 	}
 }
-void PokerMain::seTableStatus(std::string data) {
+void PokerMain::seTableStatus(std::string data, bool addonok) {
 	Poker::TableStatus ts;
 	ts.ParseFromString(data);
 	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
 	out->update(ts);
 	emit table_status(out);
+	if (addonok) emit tableAddonOk(out->gameid);
 }
 Data::User *PokerMain::findUser(QByteArray userid) {
 	QList<Data::User*>::Iterator i;

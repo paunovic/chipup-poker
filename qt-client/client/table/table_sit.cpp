@@ -30,6 +30,10 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	setGeometry(QStyle::alignedRect(Qt::RightToLeft,Qt::AlignCenter,size(),
 									QApplication::desktop()->availableGeometry()));
+	addonMode = false;
+}
+void TableSit::setAddon(bool in) {
+	addonMode = in;
 }
 void TableSit::updateLimits() {
 	double buyinmin = GetBuyinMin();
@@ -50,8 +54,11 @@ void TableSit::on_btOK_clicked() {
 	qDebug() << ui->seBuyin->text() << chips;
 	ts.set_game_id(g->gameid.data(),g->gameid.length());
 	ts.set_chips(chips);
-	ts.set_seat_index(seat);
-	core->sendMessage(Poker::scTableSit,&ts);
+	if (addonMode) core->sendMessage(Poker::scTableAddOn,&ts);
+	else {
+		ts.set_seat_index(seat);
+		core->sendMessage(Poker::scTableSit,&ts);
+	}
 }
 double TableSit::GetBuyinMin() {
 	// FIXME, also fetch via PlayerTableStatus
@@ -71,23 +78,23 @@ void TableSit::on_btCancel_clicked() {
 }
 void TableSit::on_btMin_clicked() {
 	ui->seBuyin->setText(QString("%1").arg(GetBuyinMin()));
+	ui->btOK->setEnabled(ui->seBuyin->hasAcceptableInput());
 }
 void TableSit::on_btMax_clicked() {
 	ui->seBuyin->setText(QString("%1").arg(GetBuyinMax()));
+	ui->btOK->setEnabled(ui->seBuyin->hasAcceptableInput());
 }
 void TableSit::on_seBuyin_textEdited() {
 	ui->btOK->setEnabled(ui->seBuyin->hasAcceptableInput());
 }
 void TableSit::On_sit_ok(QByteArray gameid) {
-	if (gameid == g->gameid) {
-		close();
-	}
+	if (gameid == g->gameid) close();
 }
 void TableSit::On_seat_taken(QByteArray gameid) {
 #ifndef Q_OS_WIN
 #warning finish this later
 #endif
-	qDebug() << "FIXME, seat taken" << gameid;
+	qDebug() << "FIXME, seat taken" << gameid.toHex();
 }
 void TableSit::On_sit_timeout(QByteArray gameid) {
 	if (g->gameid != gameid) return;
@@ -97,4 +104,7 @@ void TableSit::On_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
 	qDebug() << pcs.buyin_min << pcs.buyin_max;
 	lastPcs = pcs;
 	updateLimits();
+}
+void TableSit::On_tableAddonOk(QByteArray gameid) {
+	if (gameid == g->gameid) close();
 }

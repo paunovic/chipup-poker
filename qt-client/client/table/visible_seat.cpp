@@ -171,7 +171,10 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 		if (my_seat->seat_index != jsobj->getSeat()) { // you clicked a seat thats not yours, while sitting
 			return;
 		} else {
-			qDebug() << "TODO, add-on";
+			QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
+			sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
+			sitwindow->setAddon(true);
+			sitwindow->show();
 		}
 	} else {
 		if (jsobj->reserved()) {
@@ -180,6 +183,7 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
+		sitwindow->setAddon(false);
 		sitwindow->show();
 	}
 }

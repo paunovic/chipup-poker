@@ -86,6 +86,7 @@ signals:
 	void startHashing(QString scriptspath);
 	void sit_timeout(QByteArray gameid);
 	void chat_event(Data::Chat packet);
+	void tableAddonOk(QByteArray gameid);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -104,7 +105,7 @@ private:
 	void seGameChange(std::string data);
 	void seGameCreate(std::string data);
 	void seGameDelete(std::string data);
-	void seTableStatus(std::string data);
+	void seTableStatus(std::string data, bool addonok);
 	void srInvalidTableBuyin(std::string data);
 	void srTableSitOk(std::string data);
 	void srTableStandUpOk(std::string data);
