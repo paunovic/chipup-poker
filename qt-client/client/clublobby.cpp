@@ -22,7 +22,9 @@ void ClubLobby::setClub(Data::Club *club) {
 	this->club = club;
 	ui->lbClubName->setText(club->name);
 	const Data::User *owner = core->findUser(club->owner);
-	ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
+	if (owner) {
+		ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
+	} else ui->lbOwner->setText("Loading...");
 	ui->lbMembers->setText(QString(tr("Members: %1")).arg(club->members.length()));
 	ui->lbClubSeq->setText(QString(tr("Club ID: %1")).arg(club->seq));
 	ui->lbClubName->setText(club->name);
