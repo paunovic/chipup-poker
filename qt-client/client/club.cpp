@@ -104,7 +104,7 @@ void ClubListModel::modified(Club *item) {
 		}
 	}
 }
-void ClubListModel::remove(Data::Club *item) {
+void ClubListModel::remove(const Data::Club *item) {
 	for (int i=0; i< m_entries.size(); i++) {
 		if (m_entries.at(i) == item) {
 			beginRemoveRows(QModelIndex(),i,i);
@@ -135,4 +135,8 @@ const Club *ClubList::getClub(QByteArray clubid) const {
 		if (c->clubid == clubid) return c;
 	}
 	return 0;
+}
+void ClubList::remove(const Club *item) {
+	private_club_model.remove(item);
+	public_club_model.remove(item);
 }

@@ -28,7 +28,11 @@ public slots:
 	void on_btMute_clicked();
 	void on_btRemove_clicked();
 	void On_club_changed(const Data::Club *club);
+	void On_clubLeft(const Data::Club *club);
 	void user_selected(const QItemSelection&selected, const QItemSelection&);
+private slots:
+	void on_btLeaveClub_clicked();
+
 private:
 	void refreshSelection();
 

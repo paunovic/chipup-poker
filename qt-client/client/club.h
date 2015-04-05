@@ -53,7 +53,7 @@ public:
 protected:
 	void clear();
 	void append(Club*);
-	void remove(Club*);
+	void remove(const Club *);
 
 	QList<Club*> m_entries;
 };
@@ -67,6 +67,7 @@ public:
 		return clubs.size();
 	}
 	void modified(Club *item, bool old_private);
+	void remove(const Club *item);
 	Club *at(int i) {
 		return clubs.at(i);
 	}

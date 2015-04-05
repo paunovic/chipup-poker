@@ -10,6 +10,7 @@ ClubLobby::ClubLobby(QWidget *parent) :
 {
 	ui->setupUi(this);
 	core->RegisterListener(this);
+	setAttribute(Qt::WA_DeleteOnClose,true);
 }
 
 ClubLobby::~ClubLobby()
@@ -42,6 +43,9 @@ void ClubLobby::setClub(Data::Club *club) {
 	ui->btRemove->setVisible(visible);
 	ui->btSetLimit->setVisible(visible);
 	ui->btMute->setVisible(visible);
+
+	if (club->owner == core->self()->id) ui->stackOwner->setCurrentIndex(0);
+	else ui->stackOwner->setCurrentIndex(1);
 }
 void ClubLobby::on_btClubHome_clicked() {
 	ui->stackedWidget->setCurrentIndex(0);
@@ -107,4 +111,12 @@ void ClubLobby::on_btRemove_clicked() {
 	core->sendMessage(Poker::scKickPlayer,&kpp);
 	currentMember = 0;
 	refreshSelection();
+}
+void ClubLobby::on_btLeaveClub_clicked() {
+	Poker::Club c;
+	c.set__id(club->clubid);
+	core->sendMessage(Poker::scLeaveClub,&c);
+}
+void ClubLobby::On_clubLeft(const Data::Club *club) {
+	if (club == this->club) close();
 }

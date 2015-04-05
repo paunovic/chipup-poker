@@ -339,6 +339,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}
 		break; }
+	case Poker::srLeaveClubReply: // 6
+		srLeaveClubReply(data);
+		break;
 	case Poker::srLogout: // 8
 		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		delayQuit = false;
@@ -733,4 +736,14 @@ void PokerMain::doLogin(QString username, QString password) {
 	this->username = username;
 	this->password = password;
 	core->sendMessage(Poker::scLogin,&lp);
+}
+void PokerMain::srLeaveClubReply(std::string data) {
+	Poker::ClubCommandReply ccr;
+	ccr.ParseFromString(data);
+	std::string clubid = ccr.club()._id();
+	const Data::Club *club = clubs.getClub(QByteArray(clubid.data(),clubid.length()));
+	if (club) {
+		clubs.remove(club);
+		emit clubLeft(club);
+	}
 }
