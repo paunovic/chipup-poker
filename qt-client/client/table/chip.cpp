@@ -8,7 +8,7 @@
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	value_ = 1;
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
-	setSize(0.05);
+	setSize(0.09);
 	parent->getUi()->addElement(internal);
 }
 
