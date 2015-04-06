@@ -350,6 +350,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 	case Poker::srKickPlayerReply: // 11
 		qDebug() << "srKickPlayerReply";
 		break;
+	case Poker::srGetPlayers: // 14
+		srGetPlayers(data);
+		break;
 	case Poker::srTableSitOk: // 27
 		srTableSitOk(data);
 		break;
@@ -425,6 +428,13 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 				Data::Club *c = new Data::Club();
 				c->update(ccr.club());
 				clubs.add(c);
+			}
+			for (i=0; i<ccr.games_size(); i++) {
+				Poker::Game g = ccr.games(i);
+				Data::Game *g_out = new Data::Game;
+				g_out->update(g);
+				games.append(g_out);
+				qDebug() << "found game" << g_out->gameid.toHex();
 			}
 			emit clubs_changed();
 			break; }
@@ -753,5 +763,21 @@ void PokerMain::srLeaveClubReply(std::string data) {
 	if (club) {
 		clubs.remove(club);
 		emit clubLeft(club);
+	}
+}
+void PokerMain::srGetPlayers(std::string data) {
+	Poker::GetUserParams gup;
+	gup.ParseFromString(data);
+	Data::User *user;
+	for (int i=0; i<gup.users_size(); i++) {
+		const Poker::User u = gup.users(i);
+		QByteArray userid(u._id().data(),u._id().size());
+		user = findUser(userid);
+		if (!user) {
+			user = new Data::User();
+			user->update(u);
+			users.append(user);
+		} else user->update(u);
+		emit UserFetched(user);
 	}
 }
