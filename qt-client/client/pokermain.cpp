@@ -535,6 +535,14 @@ void PokerMain::seTableStatus(std::string data, bool addonok) {
 	out->update(ts);
 	emit table_status(out);
 	if (addonok) emit tableAddonOk(out->gameid);
+#if 0
+	QByteArray rawts(data.data(),data.length());
+	static int packetid = 0;
+	QFile fh(QString("recording-%1.proto").arg(packetid++));
+	fh.open(QFile::WriteOnly);
+	fh.write(rawts);
+	fh.close();
+#endif
 }
 Data::User *PokerMain::findUser(QByteArray userid) {
 	QList<Data::User*>::Iterator i;

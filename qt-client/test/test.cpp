@@ -398,7 +398,7 @@ void TestCase::simplegame() {
 	AnimateCore ac(true);
 	animateCore = &ac;
 	QSharedPointer<Data::TableStatus> ts(new Data::TableStatus);
-	tbl.resize(600,500);
+	tbl.resize(tbl.sizeHint());
 	Data::Game g;
 	g.seats = 6;
 #ifdef WIN32
@@ -507,9 +507,9 @@ void TestCase::simplegame() {
 	for (int i=0; i<10; i++) {
 		ac.setTime(i*1000);
 		ac.tick();
+		tbl.render(&image);
+		image.save(QString("simplegame2.%1.png").arg(i));
 	}
-	tbl.render(&image);
-	image.save("simplegame2.png");
 
 	/*root.resize(1000,600);
 	QPixmap bigger(root.size());
@@ -561,4 +561,103 @@ void TestCase::render_login_form() {
 	lw->render(&output);
 	output.save("loginwindow.png");
 	core = 0;
+}
+void TestCase::replayRecording_data() {
+	QTest::addColumn<QString>("setname");
+	QTest::newRow("demo1") << QFINDTESTDATA("../demo1/");
+}
+void TestCase::replayRecording() {
+	QFETCH(QString,setname);
+	qDebug() << setname;
+	int result;
+	PokerMain pm;
+	pm.setDataDir(QDir("datadir"));
+	core = &pm;
+	Table tbl;
+	tbl.resize(tbl.sizeHint());
+
+		Data::User *u = new Data::User(&pm);
+		u->id = QByteArray::fromHex("533da8660427a9b039155625");
+		u->setDisplayName("set10");
+		pm.users.append(u);
+		
+		u = new Data::User(&pm);
+		u->id = QByteArray::fromHex("533d9ea52498bd8331676dc9");
+		u->setDisplayName("mike");
+		pm.users.append(u);
+		pm.self()->id = u->id;
+	
+	QFile styles(":/stylesheet.css");
+	if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load css";
+	} else {
+		QByteArray buffer;
+		while (!styles.atEnd()) {
+			buffer.append(styles.readAll());
+		}
+		QString css(buffer);
+		tbl.setStyleSheet(css);
+	}
+	AnimateCore ac(true);
+	animateCore = &ac;
+
+	Data::Game g;
+	g.seats = 9;
+	g.gameid = QByteArray::fromHex("551c7caad1853f634e80a47f");
+#ifdef WIN32
+	QFile input("../../qt-client/client/table.js");
+#else
+	QFile input("../../qt-client/client/table.js");
+#endif
+	if (!input.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "failed to load js";
+		QVERIFY(false);
+	} else {
+		QTextStream stream(&input);
+		QString code = stream.readAll();
+		input.close();
+		result = tbl.setGameForTesting(&g,code);
+		QVERIFY(result);
+	}
+	tbl.eval("testcase = true");
+	QPixmap image(tbl.size());
+	int frame = 0;
+	saveFrame(tbl,image,frame++,"demo1-%1.png");
+
+	int packet = 0;
+	int time = 0;
+	while (true) {
+		QString filename = QString("%1/recording-%2.proto").arg(setname).arg(packet++);
+		QFile fh(filename);
+		if (fh.open(QFile::ReadOnly)) {
+			QByteArray data = fh.readAll();
+			fh.close();
+			Poker::TableStatus ts;
+			ts.ParseFromArray(data.data(),data.size());
+			QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+			out->update(ts);
+			qDebug() << ts.seq() << out->gameid.toHex();
+			result = tbl.On_table_status(out);
+			QVERIFY(result);
+			saveFrame(tbl,image,frame++,"demo1-%1.png");
+			int remaining = tbl.global().property("actions").property("length").toInt32();
+			int limit = 60;
+			while (remaining) {
+				qDebug() << remaining << "actions in queue" << time;
+				remaining = tbl.global().property("actions").property("length").toInt32();
+				ac.setTime(time);
+				time += 50;
+				ac.tick();
+				saveFrame(tbl,image,frame++,"demo1-%1.png");
+				//if (!limit--) break;
+			}
+		} else break;
+	}
+
+	core = 0;
+	animateCore = 0;
+}
+void TestCase::saveFrame(Table &tbl, QPixmap &img, int frame, QString format) {
+	tbl.render(&img);
+	img.save(format.arg(frame));
 }
