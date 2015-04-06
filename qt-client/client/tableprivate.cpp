@@ -113,6 +113,7 @@ TablePrivate::TablePrivate(QObject *parent) :
 	global.setProperty("root",engine.newQObject(this));
 	global.setProperty("QTimer",engine.newQMetaObject(&QTimer::staticMetaObject,engine.newFunction(NewTimer)));
 	tableui = 0;
+	game = 0;
 }
 TablePrivate::~TablePrivate() {
 	// tableui is a child of the QWidget in the window, it will die with the parent

@@ -410,3 +410,6 @@ void Table::tryAutoAction() {
 		on_btCheck_clicked();
 	}
 }
+QScriptValue Table::global() {
+	return p->global();
+}

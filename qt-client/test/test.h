@@ -1,5 +1,7 @@
 #include <QtTest/QtTest>
 
+class Table;
+
 class TestCase : public QObject {
 Q_OBJECT
 private slots:
@@ -18,4 +20,8 @@ private slots:
 	void render_login_form();
 	void alignment_data();
 	void alignment();
+	void replayRecording_data();
+	void replayRecording();
+private:
+	void saveFrame(Table &tbl, QPixmap &image, int frame, QString format);
 };

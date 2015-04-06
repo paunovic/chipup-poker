@@ -226,7 +226,10 @@ function AnimateCards(opts) {
 var actions = [];
 function queueAction(action) {
 	actions.push(action);
-	if (actions.length == 1) actions[0].begin();
+	if (actions.length == 1) {
+		//log("starting first action:"+JSON.stringify(actions[0]));
+		actions[0].begin();
+	}
 }
 function AnimateFlop(cards,offset) {
 	this.cards = cards;
@@ -527,13 +530,13 @@ function setInput(x) {
 function calcSeatPosition(index) {
 	var interval = (Math.PI*2) / game.seats;
 	var fakeindex = index+0.5;
-	log("index "+index+" goes in slot "+fakeindex);
+	//log("index "+index+" goes in slot "+fakeindex);
 	var rawx = Math.sin(fakeindex*interval);
 	var rawy = Math.cos(fakeindex*interval);
 	
 	var x = ((rawx/2)*0.65)+0.495;
 	var y = ((rawy/2)*-0.62)+0.45;
-	log("seat:"+index+" angle:"+(index*interval)+" x:"+rawx+" y:"+rawy);
+	//log("seat:"+index+" angle:"+(index*interval)+" x:"+rawx+" y:"+rawy);
 
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
@@ -549,7 +552,7 @@ function calcCardPosition(seat,card,cards) {
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
-	log("splitting ring into "+game.seats+" pieces");
+	//log("splitting ring into "+game.seats+" pieces");
 	for (var i=0; i<game.seats; i++) {
 		var pos = calcSeatPosition(i);
 		var fakeindex = i+0.5;
@@ -666,7 +669,6 @@ function once(fn) {
 	}
 }
 initSeats();
-dump(game);
 
 // seat images should be 90x32 by default
 //card = new Card();

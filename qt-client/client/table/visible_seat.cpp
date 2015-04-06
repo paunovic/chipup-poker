@@ -154,6 +154,7 @@ SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	left_ = false;
 	empty = true;
 	tournament = false;
+	_reserved = false;
 	connect(core->manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
 	//qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
