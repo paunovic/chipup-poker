@@ -33,6 +33,7 @@ function updatePots() {
 		}
 	}
 	queueAction(new AnimateBetsToPot(toAnimate));
+	var rake = 0;
 	for (var i=0; i<lastTS.pots.length; i++) {
 		if (!localPots[i]) {
 			localPots[i] = getChipStack();
@@ -41,9 +42,10 @@ function updatePots() {
 		localPots[i].setPosition(0.5 + (0.1*i),0.3);
 		queueAction(new ShowBet(localPots[i]));
 		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
+		rake += lastTS.pots[i].rake;
 		// TODO, render rake
-		// TODO, animate player bets into this pot
 	}
+	log("total rake:"+rake);
 }
 function AnimateBetsToPot(bets) {
 	this.bets = bets;
