@@ -16,8 +16,7 @@ ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 
 ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(parent),
 	jsobj(jsobj) {
-	font.setPixelSize(tbl->width()*0.02);
-	font.setBold(true);
+	font.setPixelSize(tbl->width()*0.015);
 	fm = new QFontMetrics(font);
 	c1 = QPixmap(":/resources/chips/1.png");
 	c5 = QPixmap(":/resources/chips/5.png");
