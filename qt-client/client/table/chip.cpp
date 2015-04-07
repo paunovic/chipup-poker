@@ -58,7 +58,7 @@ void ChipObjectUi::updateValue() {
 	updateGeometry();
 	text = QString("%1").arg((float)jsobj->value()/100);
 
-	int chipWidth = (qreal)tbl->width() * 0.03;
+	int chipWidth = (qreal)tbl->width() * 0.02;
 	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
 
 	int new_width = tbl->width() * w;
@@ -96,7 +96,7 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	style()->drawItemText(&p,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
 }
 QSize ChipObjectUi::sizeHint() const {
-	int chipWidth = (qreal)tbl->width() * 0.03;
+	int chipWidth = (qreal)tbl->width() * 0.02;
 	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
 
 	int new_width = tbl->width() * w;
