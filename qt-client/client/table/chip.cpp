@@ -67,7 +67,7 @@ void ChipObjectUi::updateValue() {
 	qDebug() << textRegion << "chip text";
 }
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight, int tblwidth) {
-	int chipWidth = (qreal)tblwidth * 0.03;
+	int chipWidth = (qreal)tblwidth * 0.02;
 	int chipHeight = ((qreal)chip.height()*chipWidth)/chip.width();
 	p.drawPixmap(x,rootheight-(y+chipHeight),chipWidth,chipHeight,chip);
 }
