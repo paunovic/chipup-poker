@@ -57,6 +57,13 @@ void ChipObjectUi::updateValue() {
 	updateGeometry();
 	text = QString("%1").arg((float)jsobj->value()/100);
 
+	resizeEvent(0);
+}
+void ChipObjectUi::resizeEvent(QResizeEvent *event) {
+	font.setPixelSize(tbl->width()*0.015);
+	if (!fm) delete fm;
+	fm = new QFontMetrics(font);
+
 	int chipWidth = (qreal)tbl->width() * 0.025;
 	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
 
@@ -65,6 +72,7 @@ void ChipObjectUi::updateValue() {
 	textRegion = QRect(chipWidth,0,(qreal)pix.width()*1.1,height);
 	qDebug() << textRegion << "chip text";
 }
+
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight, int tblwidth) {
 	int chipWidth = (qreal)tblwidth * 0.025;
 	int chipHeight = ((qreal)chip.height()*chipWidth)/chip.width();

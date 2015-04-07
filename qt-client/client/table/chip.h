@@ -15,6 +15,7 @@ public:
 	QSize sizeHint() const;
 protected:
 	void paintEvent(QPaintEvent *);
+	virtual void resizeEvent(QResizeEvent *event);
 private:
 	ChipObject *jsobj;
 	QPixmap c1,c5,c25,c100,c500,c1000;

@@ -136,6 +136,11 @@ void MainWindow::On_secondary_login() {
 
 bool MainWindow::event(QEvent *event) {
 	if (event->type() == QEvent::Close) {
+		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+			qDebug() << widget << widget->metaObject()->className();
+			Table *tbl = qobject_cast<Table*>(widget);
+			if (tbl) tbl->close();
+		}
 		qDebug() << "close detected";
 		core->delayQuit = true;
 		core->sendMessage(Poker::scLogout);

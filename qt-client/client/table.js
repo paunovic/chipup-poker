@@ -71,6 +71,7 @@ function tableStatus(ts) {
 	updateSeats(ts);
 	lastTS = ts;
 	if (ts.state == 'tsIdle') {
+		controls.hideAllControls();
 		for (var x=0; x<seat_objects.length; x++) {
 			var local = seat_objects[x];
 			if (!local) continue;
