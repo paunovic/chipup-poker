@@ -3,7 +3,9 @@
 
 #include "chip.h"
 
-#define CHIP_SEP 3
+static inline int chipSep(int tblwidth) {
+	return tblwidth * 0.005;
+}
 
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	value_ = 1;
@@ -55,9 +57,13 @@ void ChipObjectUi::updateValue() {
 	update();
 	updateGeometry();
 	text = QString("%1").arg((float)jsobj->value()/100);
+
+	int chipWidth = (qreal)tbl->width() * 0.03;
+	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
+
 	int new_width = tbl->width() * w;
-	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
-	textRegion = QRect((qreal)pix.width()*0.45,0,(qreal)pix.width()*1.1,height);
+	int height = (chips.length() * chipSep(tbl->width())) + chipHeight;
+	textRegion = QRect(chipWidth,0,(qreal)pix.width()*1.1,height);
 	qDebug() << textRegion << "chip text";
 }
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight, int tblwidth) {
@@ -77,7 +83,7 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	p.save();
 	QList<QPixmap>::Iterator i;
 	int y=0;
-	for (i=chips.begin(); i!=chips.end(); ++i, y+=CHIP_SEP) {
+	for (i=chips.begin(); i!=chips.end(); ++i, y+=chipSep(tbl->width())) {
 		QPixmap chip = *i;
 		drawChip(p,chip,0,y,height(),tbl->width());
 	}
@@ -90,8 +96,11 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	style()->drawItemText(&p,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
 }
 QSize ChipObjectUi::sizeHint() const {
+	int chipWidth = (qreal)tbl->width() * 0.03;
+	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
+
 	int new_width = tbl->width() * w;
-	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
+	int height = (chips.length() * chipSep(tbl->width())) + chipHeight;
 	QSize ret(new_width+textRegion.width(),height);
 	QPoint x = textRegion.bottomRight();
 	if (height < x.y()) height = x.y();
