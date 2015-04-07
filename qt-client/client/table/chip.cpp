@@ -60,9 +60,10 @@ void ChipObjectUi::updateValue() {
 	textRegion = QRect((qreal)pix.width()*0.45,0,(qreal)pix.width()*1.1,height);
 	qDebug() << textRegion << "chip text";
 }
-static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight) {
-	float scale = 0.45;
-	p.drawPixmap(x,rootheight-(y+(chip.height()*scale)),chip.width()*scale,chip.height()*scale,chip);
+static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight, int tblwidth) {
+	int chipWidth = (qreal)tblwidth * 0.03;
+	int chipHeight = ((qreal)chip.height()*chipWidth)/chip.width();
+	p.drawPixmap(x,rootheight-(y+chipHeight),chipWidth,chipHeight,chip);
 }
 
 void ChipObjectUi::paintEvent(QPaintEvent *) {
@@ -78,7 +79,7 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 	int y=0;
 	for (i=chips.begin(); i!=chips.end(); ++i, y+=CHIP_SEP) {
 		QPixmap chip = *i;
-		drawChip(p,chip,0,y,height());
+		drawChip(p,chip,0,y,height(),tbl->width());
 	}
 	p.restore();
 
