@@ -50,6 +50,7 @@ public:
 	void setDataDir(QDir datadir);
 	bool loadCachedAvatar(QString id, QPixmap *output);
 	void saveAvatar(QString id, QByteArray rawdata);
+	void GetPlayers(QList<QByteArray> &toFetch);
 
 	QSettings& config() { return *settings; }
 	QAbstractSocket::SocketState socketState() { return socket.state(); }
@@ -86,6 +87,9 @@ signals:
 	void startHashing(QString scriptspath);
 	void sit_timeout(QByteArray gameid);
 	void chat_event(Data::Chat packet);
+	void tableAddonOk(QByteArray gameid);
+	void clubLeft(const Data::Club *club);
+	void UserFetched(const Data::User *user);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);
@@ -104,7 +108,7 @@ private:
 	void seGameChange(std::string data);
 	void seGameCreate(std::string data);
 	void seGameDelete(std::string data);
-	void seTableStatus(std::string data);
+	void seTableStatus(std::string data, bool addonok);
 	void srInvalidTableBuyin(std::string data);
 	void srTableSitOk(std::string data);
 	void srTableStandUpOk(std::string data);
@@ -115,6 +119,8 @@ private:
 	void seReservedSeatFree(std::string data);
 	void seReservedSeatTimeout(std::string data);
 	void seChat(std::string data);
+	void srLeaveClubReply(std::string data);
+	void srGetPlayers(std::string data);
 	void doUpdate(const Poker::HelloReply hr);
 
 	enum ReconnectState { notSignedIn, SignedIn };

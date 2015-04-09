@@ -25,6 +25,7 @@ Table::Table(QWidget *parent) :
 	ui->statusbar->setVisible(false);
 	ui->btLeaveWaitingList->setVisible(false);
 	ui->btJoinWaitingList->setVisible(false);
+	_AutoFoldVisible = false;
 }
 Table::~Table() {
 	delete ui;
@@ -409,4 +410,10 @@ void Table::tryAutoAction() {
 	} else if (ui->cbAutoCallAny->isChecked()) {
 		on_btCheck_clicked();
 	}
+}
+QScriptValue Table::global() {
+	return p->global();
+}
+void Table::hideAllControls() {
+	ui->stackedWidget->setCurrentIndex(0);
 }

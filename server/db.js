@@ -73,8 +73,7 @@ var ClubSchema = new Schema({
 	suspended: [ObjectId],
 	seq: Number,
 	testmode: Boolean,
-	buyin_reset: Number,
-	max_rake_per_hand:{ type:Number, default: 0}
+	buyin_reset: Number
 },{collection:'clubs'});
 var AvatarSchema = new Schema({
 	_id: String,
@@ -141,7 +140,8 @@ var GameSchema = new Schema({
 	gameState:Schema.Types.Mixed,
 	clubid:ObjectId,
 	tournament:ObjectId,
-	final_table:Boolean
+	final_table:Boolean,
+	max_rake_per_hand:{ type:Number, default: 0}
 },{collection:'games'});
 var WinnerDataSchema = new Schema({
 	seat:Number,

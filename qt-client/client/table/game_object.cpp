@@ -72,7 +72,7 @@ float GameObject::getRenderHeight() const {
 }
 
 void GameObject::setSide(int side){
-	qDebug() << "chip" << internal << side;
+	//qDebug() << "chip" << internal << side;
 	internal->keyside = (AlignmentSide) side;
 	internal->updateGeometry();
 }

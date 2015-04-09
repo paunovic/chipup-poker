@@ -339,6 +339,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 			qDebug() << "unhandled srCreateClubReply status" << ccr.status();
 		}
 		break; }
+	case Poker::srLeaveClubReply: // 6
+		srLeaveClubReply(data);
+		break;
 	case Poker::srLogout: // 8
 		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		delayQuit = false;
@@ -346,6 +349,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		break;
 	case Poker::srKickPlayerReply: // 11
 		qDebug() << "srKickPlayerReply";
+		break;
+	case Poker::srGetPlayers: // 14
+		srGetPlayers(data);
 		break;
 	case Poker::srTableSitOk: // 27
 		srTableSitOk(data);
@@ -373,6 +379,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		break; }
 	case Poker::srReinstatePlayerOk: // 32
 		qDebug() << "srReinstatePlayerOk";
+		break;
+	case Poker::srTableAddonOk: // 33
+		seTableStatus(data,true);
 		break;
 	case Poker::srTableStatsReply: // 35
 		qDebug() << "srTableStatsReply";
@@ -420,6 +429,13 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 				c->update(ccr.club());
 				clubs.add(c);
 			}
+			for (i=0; i<ccr.games_size(); i++) {
+				Poker::Game g = ccr.games(i);
+				Data::Game *g_out = new Data::Game;
+				g_out->update(g);
+				games.append(g_out);
+				qDebug() << "found game" << g_out->gameid.toHex();
+			}
 			emit clubs_changed();
 			break; }
 		default:
@@ -445,7 +461,7 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		seGameDelete(data);
 		break;
 	case Poker::seTableStatus: // 58
-		seTableStatus(data);
+		seTableStatus(data,false);
 		break;
 	case Poker::sePlayerClubStatus: // 63
 		sePlayerClubStatus(data);
@@ -522,12 +538,21 @@ void PokerMain::seGameDelete(std::string data) {
 		}
 	}
 }
-void PokerMain::seTableStatus(std::string data) {
+void PokerMain::seTableStatus(std::string data, bool addonok) {
 	Poker::TableStatus ts;
 	ts.ParseFromString(data);
 	QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
 	out->update(ts);
 	emit table_status(out);
+	if (addonok) emit tableAddonOk(out->gameid);
+#if 0
+	QByteArray rawts(data.data(),data.length());
+	static int packetid = 0;
+	QFile fh(QString("recording-%1.proto").arg(packetid++));
+	fh.open(QFile::WriteOnly);
+	fh.write(rawts);
+	fh.close();
+#endif
 }
 Data::User *PokerMain::findUser(QByteArray userid) {
 	QList<Data::User*>::Iterator i;
@@ -729,4 +754,30 @@ void PokerMain::doLogin(QString username, QString password) {
 	this->username = username;
 	this->password = password;
 	core->sendMessage(Poker::scLogin,&lp);
+}
+void PokerMain::srLeaveClubReply(std::string data) {
+	Poker::ClubCommandReply ccr;
+	ccr.ParseFromString(data);
+	std::string clubid = ccr.club()._id();
+	const Data::Club *club = clubs.getClub(QByteArray(clubid.data(),clubid.length()));
+	if (club) {
+		clubs.remove(club);
+		emit clubLeft(club);
+	}
+}
+void PokerMain::srGetPlayers(std::string data) {
+	Poker::GetUserParams gup;
+	gup.ParseFromString(data);
+	Data::User *user;
+	for (int i=0; i<gup.users_size(); i++) {
+		const Poker::User u = gup.users(i);
+		QByteArray userid(u._id().data(),u._id().size());
+		user = findUser(userid);
+		if (!user) {
+			user = new Data::User();
+			user->update(u);
+			users.append(user);
+		} else user->update(u);
+		emit UserFetched(user);
+	}
 }

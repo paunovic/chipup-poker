@@ -17,6 +17,7 @@ class TableSit : public QWidget
 public:
 	explicit TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::TableStatus> ts);
 	~TableSit();
+	void setAddon(bool in);
 
 private slots:
 	void on_btOK_clicked();
@@ -28,6 +29,7 @@ private slots:
 	void On_seat_taken(QByteArray gameid);
 	void On_PlayerClubStatus(Data::PlayerClubStatus &pcs);
 	void On_sit_timeout(QByteArray gameid);
+	void On_tableAddonOk(QByteArray gameid);
 private:
 	double GetBuyinMin();
 	double GetBuyinMax();
@@ -37,6 +39,7 @@ private:
 	const Data::Game *g;
 	int seat;
 	Data::PlayerClubStatus lastPcs;
+	bool addonMode;
 };
 
 #endif // JOINTABLE_H

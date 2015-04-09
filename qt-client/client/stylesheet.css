@@ -105,7 +105,7 @@ QPushButton#btMin,QPushButton#btMax,QPushButton#btPot,QPushButton#bt3BB {
 	border-image: none;
 	padding-left: 6px;
 	padding-right: 6px;
-	font-size: 6pt;
+	font-size: 10pt;
 }
 QPushButton#btMin:pressed,QPushButton#btMax:pressed,QPushButton#btPot:pressed,QPushButton#bt3BB:pressed {
 	border-top: 1px solid #714848;

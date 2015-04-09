@@ -456,7 +456,7 @@ void protobuf_AssignDesc_message_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ClubMember));
   Club_descriptor_ = file->message_type(10);
-  static const int Club_offsets_[13] = {
+  static const int Club_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, _id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, members_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, name_),
@@ -469,7 +469,6 @@ void protobuf_AssignDesc_message_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, default_balance_limit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, unlimited_default_balance_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, buyin_reset_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Club, max_rake_per_hand_),
   };
   Club_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -521,7 +520,7 @@ void protobuf_AssignDesc_message_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SubscriptionPlanChange));
   Game_descriptor_ = file->message_type(13);
-  static const int Game_offsets_[18] = {
+  static const int Game_offsets_[19] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, _id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, creator_mongo_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, gamename_),
@@ -540,6 +539,7 @@ void protobuf_AssignDesc_message_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, small_blind_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, big_blind_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, final_table_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Game, max_rake_per_hand_),
   };
   Game_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1889,35 +1889,35 @@ void protobuf_AddDesc_message_2eproto() {
     "\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\021\n\tsuspended\030\002 \001(\010\022\025\n"
     "\rbalance_limit\030\003 \001(\r\022\024\n\014club_balance\030\004 \001"
     "(\005\022\027\n\017unlimited_limit\030\005 \001(\010\022\r\n\005muted\030\006 \001"
-    "(\010\022\017\n\007manager\030\007 \001(\010\"\254\002\n\004Club\022\021\n\003_id\030\001 \001("
+    "(\010\022\017\n\007manager\030\007 \001(\010\"\221\002\n\004Club\022\021\n\003_id\030\001 \001("
     "\014B\004\200\265\030\001\022\"\n\007members\030\002 \003(\0132\021.Poker.ClubMem"
     "ber\022\014\n\004name\030\003 \001(\t\022\023\n\005owner\030\004 \001(\014B\004\200\265\030\001\022\020"
     "\n\010password\030\005 \001(\t\022\022\n\nis_private\030\006 \001(\010\022\013\n\003"
     "seq\030\007 \001(\005\022\027\n\017password_exists\030\010 \001(\010\022\014\n\004ra"
     "ke\030\t \001(\r\022\035\n\025default_balance_limit\030\n \001(\r\022"
     "!\n\031unlimited_default_balance\030\013 \001(\010\022\023\n\013bu"
-    "yin_reset\030\014 \001(\r\022\031\n\021max_rake_per_hand\030\r \001"
-    "(\r\"\341\001\n\004User\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\016\n\006avatar"
-    "\030\002 \001(\014\022\023\n\013displayname\030\003 \002(\t\022\r\n\005email\030\005 \001"
-    "(\t\022\016\n\006authed\030\006 \001(\010\022=\n\021subscription_plan\030"
-    "\007 \001(\0162\".Poker.User.PlayerSubscriptionPla"
-    "n\"C\n\026PlayerSubscriptionPlan\022\014\n\010pspBasic\020"
-    "\000\022\r\n\tpspNormal\020\001\022\014\n\010pspSuper\020\002\"z\n\026Subscr"
-    "iptionPlanChange\022=\n\021subscription_plan\030\001 "
-    "\002(\0162\".Poker.User.PlayerSubscriptionPlan\022"
-    "\013\n\003url\030\002 \001(\t\022\024\n\014stripe_token\030\003 \001(\t\"\362\005\n\004G"
-    "ame\022\021\n\003_id\030\001 \001(\014B\004\200\265\030\001\022\036\n\020creator_mongo_"
-    "id\030\002 \001(\014B\004\200\265\030\001\022\020\n\010gamename\030\003 \001(\t\022\032\n\014club"
-    "_mongoid\030\004 \001(\014B\004\200\265\030\001\022\'\n\tgame_type\030\005 \001(\0162"
-    "\024.Poker.Game.GameType\022)\n\ngame_limit\030\006 \001("
-    "\0162\025.Poker.Game.GameLimit\022&\n\006blinds\030\007 \001(\016"
-    "2\026.Poker.Game.GameBlinds\022\r\n\005seats\030\t \001(\005\022"
-    "\017\n\007sitting\030\n \001(\005\022\021\n\tbuyin_min\030\013 \001(\r\022\021\n\tb"
-    "uyin_max\030\014 \001(\r\022$\n\005state\030\r \001(\0162\025.Poker.Ga"
-    "me.GameState\022\021\n\tclosetime\030\016 \001(\r\022\022\n\nlasth"
-    "andid\030\017 \001(\r\022\030\n\ntournament\030\020 \001(\014B\004\200\265\030\001\022\023\n"
-    "\013small_blind\030\021 \001(\r\022\021\n\tbig_blind\030\022 \001(\r\022\023\n"
-    "\013final_table\030\023 \001(\010\"<\n\tGameLimit\022\r\n\tglNoL"
+    "yin_reset\030\014 \001(\r\"\341\001\n\004User\022\021\n\003_id\030\001 \002(\014B\004\200"
+    "\265\030\001\022\016\n\006avatar\030\002 \001(\014\022\023\n\013displayname\030\003 \002(\t"
+    "\022\r\n\005email\030\005 \001(\t\022\016\n\006authed\030\006 \001(\010\022=\n\021subsc"
+    "ription_plan\030\007 \001(\0162\".Poker.User.PlayerSu"
+    "bscriptionPlan\"C\n\026PlayerSubscriptionPlan"
+    "\022\014\n\010pspBasic\020\000\022\r\n\tpspNormal\020\001\022\014\n\010pspSupe"
+    "r\020\002\"z\n\026SubscriptionPlanChange\022=\n\021subscri"
+    "ption_plan\030\001 \002(\0162\".Poker.User.PlayerSubs"
+    "criptionPlan\022\013\n\003url\030\002 \001(\t\022\024\n\014stripe_toke"
+    "n\030\003 \001(\t\"\215\006\n\004Game\022\021\n\003_id\030\001 \001(\014B\004\200\265\030\001\022\036\n\020c"
+    "reator_mongo_id\030\002 \001(\014B\004\200\265\030\001\022\020\n\010gamename\030"
+    "\003 \001(\t\022\032\n\014club_mongoid\030\004 \001(\014B\004\200\265\030\001\022\'\n\tgam"
+    "e_type\030\005 \001(\0162\024.Poker.Game.GameType\022)\n\nga"
+    "me_limit\030\006 \001(\0162\025.Poker.Game.GameLimit\022&\n"
+    "\006blinds\030\007 \001(\0162\026.Poker.Game.GameBlinds\022\r\n"
+    "\005seats\030\t \001(\005\022\017\n\007sitting\030\n \001(\005\022\021\n\tbuyin_m"
+    "in\030\013 \001(\r\022\021\n\tbuyin_max\030\014 \001(\r\022$\n\005state\030\r \001"
+    "(\0162\025.Poker.Game.GameState\022\021\n\tclosetime\030\016"
+    " \001(\r\022\022\n\nlasthandid\030\017 \001(\r\022\030\n\ntournament\030\020"
+    " \001(\014B\004\200\265\030\001\022\023\n\013small_blind\030\021 \001(\r\022\021\n\tbig_b"
+    "lind\030\022 \001(\r\022\023\n\013final_table\030\023 \001(\010\022\031\n\021max_r"
+    "ake_per_hand\030\024 \001(\r\"<\n\tGameLimit\022\r\n\tglNoL"
     "imit\020\000\022\016\n\nglPotLimit\020\001\022\020\n\014glFixedLimit\020\002"
     "\";\n\010GameType\022\014\n\010gtHoldem\020\000\022\013\n\007gtOmaha\020\001\022"
     "\024\n\020gtRotationNLHPLO\020\002\"C\n\tGameState\022\014\n\010gs"
@@ -6587,7 +6587,6 @@ const int Club::kRakeFieldNumber;
 const int Club::kDefaultBalanceLimitFieldNumber;
 const int Club::kUnlimitedDefaultBalanceFieldNumber;
 const int Club::kBuyinResetFieldNumber;
-const int Club::kMaxRakePerHandFieldNumber;
 #endif  // !_MSC_VER
 
 Club::Club()
@@ -6617,7 +6616,6 @@ void Club::SharedCtor() {
   default_balance_limit_ = 0u;
   unlimited_default_balance_ = false;
   buyin_reset_ = 0u;
-  max_rake_per_hand_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -6694,7 +6692,6 @@ void Club::Clear() {
     default_balance_limit_ = 0u;
     unlimited_default_balance_ = false;
     buyin_reset_ = 0u;
-    max_rake_per_hand_ = 0u;
   }
   members_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -6891,22 +6888,6 @@ bool Club::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(104)) goto parse_max_rake_per_hand;
-        break;
-      }
-
-      // optional uint32 max_rake_per_hand = 13;
-      case 13: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_max_rake_per_hand:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &max_rake_per_hand_)));
-          set_has_max_rake_per_hand();
-        } else {
-          goto handle_uninterpreted;
-        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -7000,11 +6981,6 @@ void Club::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(12, this->buyin_reset(), output);
   }
 
-  // optional uint32 max_rake_per_hand = 13;
-  if (has_max_rake_per_hand()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(13, this->max_rake_per_hand(), output);
-  }
-
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -7087,11 +7063,6 @@ void Club::SerializeWithCachedSizes(
   // optional uint32 buyin_reset = 12;
   if (has_buyin_reset()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(12, this->buyin_reset(), target);
-  }
-
-  // optional uint32 max_rake_per_hand = 13;
-  if (has_max_rake_per_hand()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(13, this->max_rake_per_hand(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -7178,13 +7149,6 @@ int Club::ByteSize() const {
           this->buyin_reset());
     }
 
-    // optional uint32 max_rake_per_hand = 13;
-    if (has_max_rake_per_hand()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->max_rake_per_hand());
-    }
-
   }
   // repeated .Poker.ClubMember members = 2;
   total_size += 1 * this->members_size();
@@ -7256,9 +7220,6 @@ void Club::MergeFrom(const Club& from) {
     if (from.has_buyin_reset()) {
       set_buyin_reset(from.buyin_reset());
     }
-    if (from.has_max_rake_per_hand()) {
-      set_max_rake_per_hand(from.max_rake_per_hand());
-    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -7297,7 +7258,6 @@ void Club::Swap(Club* other) {
     std::swap(default_balance_limit_, other->default_balance_limit_);
     std::swap(unlimited_default_balance_, other->unlimited_default_balance_);
     std::swap(buyin_reset_, other->buyin_reset_);
-    std::swap(max_rake_per_hand_, other->max_rake_per_hand_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -8251,6 +8211,7 @@ const int Game::kTournamentFieldNumber;
 const int Game::kSmallBlindFieldNumber;
 const int Game::kBigBlindFieldNumber;
 const int Game::kFinalTableFieldNumber;
+const int Game::kMaxRakePerHandFieldNumber;
 #endif  // !_MSC_VER
 
 Game::Game()
@@ -8287,6 +8248,7 @@ void Game::SharedCtor() {
   small_blind_ = 0u;
   big_blind_ = 0u;
   final_table_ = false;
+  max_rake_per_hand_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -8379,6 +8341,7 @@ void Game::Clear() {
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     big_blind_ = 0u;
     final_table_ = false;
+    max_rake_per_hand_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -8686,6 +8649,22 @@ bool Game::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(160)) goto parse_max_rake_per_hand;
+        break;
+      }
+
+      // optional uint32 max_rake_per_hand = 20;
+      case 20: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_max_rake_per_hand:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &max_rake_per_hand_)));
+          set_has_max_rake_per_hand();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -8810,6 +8789,11 @@ void Game::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(19, this->final_table(), output);
   }
 
+  // optional uint32 max_rake_per_hand = 20;
+  if (has_max_rake_per_hand()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(20, this->max_rake_per_hand(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -8923,6 +8907,11 @@ void Game::SerializeWithCachedSizes(
   // optional bool final_table = 19;
   if (has_final_table()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(19, this->final_table(), target);
+  }
+
+  // optional uint32 max_rake_per_hand = 20;
+  if (has_max_rake_per_hand()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(20, this->max_rake_per_hand(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -9060,6 +9049,13 @@ int Game::ByteSize() const {
       total_size += 2 + 1;
     }
 
+    // optional uint32 max_rake_per_hand = 20;
+    if (has_max_rake_per_hand()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->max_rake_per_hand());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -9145,6 +9141,9 @@ void Game::MergeFrom(const Game& from) {
     if (from.has_final_table()) {
       set_final_table(from.final_table());
     }
+    if (from.has_max_rake_per_hand()) {
+      set_max_rake_per_hand(from.max_rake_per_hand());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -9186,6 +9185,7 @@ void Game::Swap(Game* other) {
     std::swap(small_blind_, other->small_blind_);
     std::swap(big_blind_, other->big_blind_);
     std::swap(final_table_, other->final_table_);
+    std::swap(max_rake_per_hand_, other->max_rake_per_hand_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

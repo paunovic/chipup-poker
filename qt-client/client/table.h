@@ -12,6 +12,7 @@
 class TablePrivate;
 class JsEditor;
 class TableSit;
+class QScriptValue;
 
 namespace Ui {
 class Table;
@@ -45,6 +46,8 @@ public:
 	bool AutoCallVisible() { return _AutoCallVisible; }
 	void SetAutoCallVisible(bool in);
 	int findMySeatIndex();
+	QScriptValue global();
+
 	Q_PROPERTY(bool AutoFoldVisible READ AutoFoldVisible WRITE SetAutoFoldVisible)
 	Q_PROPERTY(bool AutoCheckFoldVisible READ AutoCheckFoldVisible WRITE SetAutoCheckFoldVisible)
 	Q_PROPERTY(bool AutoCallVisible READ AutoCallVisible WRITE SetAutoCallVisible)
@@ -60,6 +63,7 @@ public slots:
 	void tryAutoAction();
 	bool canFold();
 	bool canCheck();
+	void hideAllControls();
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();

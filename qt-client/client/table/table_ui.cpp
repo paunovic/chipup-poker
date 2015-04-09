@@ -7,14 +7,14 @@ TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 	pix = QPixmap(":/resources/table/Table.png");
 	yoffset = 0;
 	int em = fontMetrics().boundingRect("M").width();
-	setMinimumSize(85*em,41*em);
+	setMinimumSize(85*em,43*em);
 }
 void TableUi::resizeEvent(QResizeEvent *) {
 	int em = fontMetrics().boundingRect("M").width();
 	qDebug() << "tableui size" << size() << (size()/em);
 
 	float h = rootHeight();
-	yoffset = h * 0.1;
+	yoffset = h * 0.05;
 
 	for (int i=0; i<uiElements.length(); i++) {
 		GameObjectUi *el = uiElements.at(i);
@@ -27,8 +27,8 @@ void TableUi::resizeEvent(QResizeEvent *) {
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Maximum);
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
-	setMinimumHeight(((qreal)(41*em)*width())/(85*em));
-	setMaximumHeight(((qreal)(41*em)*width())/(85*em));
+	setMinimumHeight(((qreal)(43*em)*width())/(85*em));
+	setMaximumHeight(((qreal)(43*em)*width())/(85*em));
 }
 int TableUi::rootHeight() {
 	return ((float)pix.height()*width())/pix.width();
@@ -49,7 +49,7 @@ void TableUi::paintEvent(QPaintEvent *) {
 	float scale = 0.81;
 	float w = (float)width() * scale;
 	float h = (((float)pix.height() * width()) / pix.width()) * scale;
-	painter.drawPixmap(0.095*width(),0,w,h,pix);
+	painter.drawPixmap(0.095*width(),rootHeight() * 0.05,w,h,pix);
 	painter.restore();
 	//painter.drawEllipse(ring);
 	//drawGrid(painter);
@@ -80,7 +80,7 @@ void TableUi::element_deleted(QObject *item) {
 }
 QSize TableUi::sizeHint() const {
 	int em = fontMetrics().boundingRect("M").width();
-	QSize ret(width(),((qreal)(41*em)*width())/(85*em));
+	QSize ret(width(),((qreal)(43*em)*width())/(85*em));
 	qDebug() << "sizeHint" << ret;
 	return ret;
 }

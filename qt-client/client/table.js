@@ -33,6 +33,7 @@ function updatePots() {
 		}
 	}
 	queueAction(new AnimateBetsToPot(toAnimate));
+	var rake = 0;
 	for (var i=0; i<lastTS.pots.length; i++) {
 		if (!localPots[i]) {
 			localPots[i] = getChipStack();
@@ -41,9 +42,10 @@ function updatePots() {
 		localPots[i].setPosition(0.5 + (0.1*i),0.3);
 		queueAction(new ShowBet(localPots[i]));
 		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
+		rake += lastTS.pots[i].rake;
 		// TODO, render rake
-		// TODO, animate player bets into this pot
 	}
+	log("total rake:"+rake);
 }
 function AnimateBetsToPot(bets) {
 	this.bets = bets;
@@ -69,6 +71,7 @@ function tableStatus(ts) {
 	updateSeats(ts);
 	lastTS = ts;
 	if (ts.state == 'tsIdle') {
+		controls.hideAllControls();
 		for (var x=0; x<seat_objects.length; x++) {
 			var local = seat_objects[x];
 			if (!local) continue;
@@ -224,7 +227,10 @@ function AnimateCards(opts) {
 var actions = [];
 function queueAction(action) {
 	actions.push(action);
-	if (actions.length == 1) actions[0].begin();
+	if (actions.length == 1) {
+		//log("starting first action:"+JSON.stringify(actions[0]));
+		actions[0].begin();
+	}
 }
 function AnimateFlop(cards,offset) {
 	this.cards = cards;
@@ -525,29 +531,29 @@ function setInput(x) {
 function calcSeatPosition(index) {
 	var interval = (Math.PI*2) / game.seats;
 	var fakeindex = index+0.5;
-	log("index "+index+" goes in slot "+fakeindex);
+	//log("index "+index+" goes in slot "+fakeindex);
 	var rawx = Math.sin(fakeindex*interval);
 	var rawy = Math.cos(fakeindex*interval);
 	
 	var x = ((rawx/2)*0.65)+0.495;
 	var y = ((rawy/2)*-0.62)+0.45;
-	log("seat:"+index+" angle:"+(index*interval)+" x:"+rawx+" y:"+rawy);
+	//log("seat:"+index+" angle:"+(index*interval)+" x:"+rawx+" y:"+rawy);
 
 	return { rawx:rawx, rawy:rawy, x:x, y:y };
 }
 function calcCardPosition(seat,card,cards) {
 	var seatpos = seat_objects[seat].renderPosition();
-	log('seat pos is:'+JSON.stringify(seatpos));
+	//log('seat pos is:'+JSON.stringify(seatpos));
 	var cardOffset = cardWidth;
 	if (cards == 4) cardOffset = 0.029;
 	var seatWidth = 0.16;
 	var handWidth = ((cards - 1) * cardOffset)+cardWidth;
 	var center = (seatpos.x + (seatWidth/2)) - (handWidth/2);
-	return { x:center + (card * cardOffset), y:seatpos.y - 0.0 };
+	return { x:center + (card * cardOffset), y:seatpos.y - 0.015 };
 }
 function adjustSeats() {
 	var interval = (Math.PI*2) / game.seats;
-	log("splitting ring into "+game.seats+" pieces");
+	//log("splitting ring into "+game.seats+" pieces");
 	for (var i=0; i<game.seats; i++) {
 		var pos = calcSeatPosition(i);
 		var fakeindex = i+0.5;
@@ -664,7 +670,6 @@ function once(fn) {
 	}
 }
 initSeats();
-dump(game);
 
 // seat images should be 90x32 by default
 //card = new Card();

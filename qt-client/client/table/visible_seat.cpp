@@ -154,6 +154,7 @@ SeatObject::SeatObject(TablePrivate *root) : GameObject(root) {
 	left_ = false;
 	empty = true;
 	tournament = false;
+	_reserved = false;
 	connect(core->manager(), SIGNAL(finished(QNetworkReply*)),this, SLOT(replyFinished(QNetworkReply*)));
 
 	//qDebug() << "table info" << root->getUi()->size() << root->getUi()->pos();
@@ -171,15 +172,23 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 		if (my_seat->seat_index != jsobj->getSeat()) { // you clicked a seat thats not yours, while sitting
 			return;
 		} else {
-			qDebug() << "TODO, add-on";
+			QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
+			sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
+			sitwindow->setAddon(true);
+			sitwindow->show();
 		}
 	} else {
 		if (jsobj->reserved()) {
 			qDebug() << "that seat is reserved!";
 			return;
 		}
+		if (!jsobj->getEmpty()) {
+			qDebug() << "that seat isnt empty!";
+			return;
+		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
+		sitwindow->setAddon(false);
 		sitwindow->show();
 	}
 }

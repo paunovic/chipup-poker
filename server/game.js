@@ -1013,7 +1013,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		if (wins[seat]) wins[seat] += chips;
 		else wins[seat] = chips;
 	}
-	this.log('max total rake:%d',this.club.obj.max_rake_per_hand);
+	this.log('max total rake:%d',this.obj.max_rake_per_hand);
 	var rake_list = [];
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
