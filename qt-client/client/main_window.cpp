@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QAbstractItemView>
+#include <QDesktopWidget>
 
 #include "table.h"
 #include "selftest.h"
@@ -63,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	ui->actionConfirmation_on_fold->setChecked(core->config().value("table/confirmFold").toBool());
 	ui->actionAlways_Check_Fold->setChecked(core->config().value("table/autoCheckFold").toBool());
 	setWindowTitle(QString("ChipUP Poker version %1").arg(build_number));
+	setGeometry(QStyle::alignedRect(Qt::RightToLeft,Qt::AlignCenter,size(),
+									QApplication::desktop()->availableGeometry()));
 }
 MainWindow::~MainWindow() {
 	delete ui;
