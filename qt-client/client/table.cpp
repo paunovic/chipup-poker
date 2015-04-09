@@ -25,6 +25,7 @@ Table::Table(QWidget *parent) :
 	ui->statusbar->setVisible(false);
 	ui->btLeaveWaitingList->setVisible(false);
 	ui->btJoinWaitingList->setVisible(false);
+	_AutoFoldVisible = false;
 }
 Table::~Table() {
 	delete ui;
