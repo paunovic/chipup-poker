@@ -414,3 +414,6 @@ void Table::tryAutoAction() {
 QScriptValue Table::global() {
 	return p->global();
 }
+void Table::hideAllControls() {
+	ui->stackedWidget->setCurrentIndex(0);
+}

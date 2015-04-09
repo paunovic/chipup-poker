@@ -66,7 +66,7 @@ QVariant GameListModel::data(const QModelIndex &index,int role) const {
 		case 1:
 			return g.typeToString();
 		case 2: return QString("%1/%2").arg(g.sb).arg(g.bb);
-		case 3: return "limits";
+		case 3: return QString("%1-%2").arg(g.buyin_min/100).arg(g.buyin_max/100);
 		case 4: return QString("%1/%2").arg(g.sitting).arg(g.seats);
 		case 5:
 			switch (g.state) {
@@ -96,7 +96,6 @@ QString Game::typeToLongString() const {
 	}
 	return "internal-error";
 }
-
 QVariant GameListModel::headerData(int row, Qt::Orientation, int role) const {
 	if (role == Qt::SizeHintRole) return QVariant(); // QSize
 	if (role != Qt::DisplayRole) return QVariant();

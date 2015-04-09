@@ -63,6 +63,7 @@ public slots:
 	void tryAutoAction();
 	bool canFold();
 	bool canCheck();
+	void hideAllControls();
 private slots:
 	void on_actionReload_triggered();
 	void on_teChatInput_returnPressed();

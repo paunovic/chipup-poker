@@ -13,6 +13,7 @@
 #include "table.h"
 #include "selftest.h"
 #include "notifywindow.h"
+#include "version.h"
 
 void crash()
 {
@@ -20,7 +21,7 @@ void crash()
   *a = 1;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow), private_club_header(Qt::Horizontal), game_header(Qt::Horizontal) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow) {
 	currentClub = 0;
 
 	ui->setupUi(this);
@@ -30,18 +31,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	public_club_selection_model = new QItemSelectionModel(&core->clubs.public_club_model);
 	connect(public_club_selection_model,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(public_club_selected(QItemSelection,QItemSelection)));
 	ui->gridPublicClubs->setModel(&core->clubs.public_club_model);
-	ui->gridPublicClubs->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridPublicClubs->setSelectionModel(public_club_selection_model);
-	ui->gridPublicClubs->setRootIsDecorated(false);
 	ui->gridPublicClubs->hideColumn(0);
 	ui->gridPublicClubs->hideColumn(2);
 	
 	private_club_selection_model = new QItemSelectionModel(&core->clubs.private_club_model);
 	connect(private_club_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(private_club_selected(const QItemSelection&,const QItemSelection&)));
 	ui->gridPrivateClubs->setModel(&core->clubs.private_club_model);
-	ui->gridPrivateClubs->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridPrivateClubs->setSelectionModel(private_club_selection_model);
-	ui->gridPrivateClubs->setRootIsDecorated(false);
 	//ui->gridPrivateClubs->setSortingEnabled(true);
 
 	core->game_model.setFilter(NULL);
@@ -49,24 +46,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	game_selection_model = new QItemSelectionModel(&core->game_model);
 	connect(game_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(game_selected(const QItemSelection&,const QItemSelection&)));
 	ui->gridGames->setModel(&core->game_model);
-	ui->gridGames->setHeader(&game_header);
-	ui->gridGames->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->gridGames->setSelectionModel(game_selection_model);
-	ui->gridGames->setRootIsDecorated(false);
 	core->RegisterListener(this);
 	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
 	ui->gridPublicClubs->setMinimumWidth(em*31);
 	ui->gridPrivateClubs->setMinimumWidth(em*31);
 	ui->gridPrivateClubs->setMinimumHeight(em*18);
 	ui->gridGames->setMinimumHeight(em*18);
-	for (int i=0; i<6; i++) {
-		ui->gridGames->resizeColumnToContents(i);
-	}
+	//for (int i=0; i<5; i++) {
+	//	ui->gridGames->resizeColumnToContents(i);
+	//}
 	//setFixedSize(size());
 
 	ui->actionAlways_Run_it_Twice->setChecked(core->config().value("table/autoDouble").toBool());
 	ui->actionConfirmation_on_fold->setChecked(core->config().value("table/confirmFold").toBool());
 	ui->actionAlways_Check_Fold->setChecked(core->config().value("table/autoCheckFold").toBool());
+	setWindowTitle(QString("ChipUP Poker version %1").arg(build_number));
 }
 MainWindow::~MainWindow() {
 	delete ui;
@@ -94,9 +89,9 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
 	core->game_model.setFilter(currentClub);
-	for (int i=0; i<6; i++) {
-		ui->gridGames->resizeColumnToContents(i);
-	}
+	//for (int i=0; i<5; i++) {
+	//	ui->gridGames->resizeColumnToContents(i);
+	//}
 }
 void MainWindow::public_club_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
@@ -107,9 +102,9 @@ void MainWindow::public_club_selected(const QItemSelection &selected, const QIte
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
 	core->game_model.setFilter(currentClub);
-	for (int i=0; i<6; i++) {
-		ui->gridGames->resizeColumnToContents(i);
-	}
+	//for (int i=0; i<5; i++) {
+	//	ui->gridGames->resizeColumnToContents(i);
+	//}
 }
 void MainWindow::on_btJoinClub_clicked() {
 	JoinClub *jc = new JoinClub(this);
@@ -137,6 +132,11 @@ void MainWindow::On_secondary_login() {
 
 bool MainWindow::event(QEvent *event) {
 	if (event->type() == QEvent::Close) {
+		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+			qDebug() << widget << widget->metaObject()->className();
+			Table *tbl = qobject_cast<Table*>(widget);
+			if (tbl) tbl->close();
+		}
 		qDebug() << "close detected";
 		core->delayQuit = true;
 		core->sendMessage(Poker::scLogout);
