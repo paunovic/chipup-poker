@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	//	ui->gridGames->resizeColumnToContents(i);
 	//}
 	//setFixedSize(size());
+	ui->gridGames->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 	ui->actionAlways_Run_it_Twice->setChecked(core->config().value("table/autoDouble").toBool());
 	ui->actionConfirmation_on_fold->setChecked(core->config().value("table/confirmFold").toBool());
