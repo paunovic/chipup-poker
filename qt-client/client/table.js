@@ -14,6 +14,7 @@ var tableCardOffset = 0.075;
 
 var idleChips = [];
 function getChipStack() {
+	log("getting chip stack");
 	if (idleChips.length) return idleChips.pop();
 	else return new ChipStack();
 }
@@ -49,7 +50,8 @@ function updatePots() {
 	log("total rake:"+rake);
 	if (!localRake) localRake = getChipStack();
 	localRake.rake = true;
-	localRake.setPosition(0.4,0.2);
+	localRake.keyside = 1;
+	localRake.setPosition(0.90,0);
 	localRake.value = rake;
 	queueAction(new ShowBet(localRake,{sound:false,nohide:true}));
 }

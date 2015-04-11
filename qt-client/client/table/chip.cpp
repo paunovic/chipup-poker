@@ -8,7 +8,7 @@ static inline int chipSep(int tblwidth) {
 }
 
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
-	value_ = 1;
+	value_ = 12345;
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
 	setSize(0.09);
 	parent->getUi()->addElement(internal);
@@ -74,7 +74,7 @@ void ChipObjectUi::resizeEvent(QResizeEvent *event) {
 	int new_width = tbl->width() * w;
 	int height = (chips.length() * chipSep(tbl->width())) + chipHeight;
 	textRegion = QRect(chipWidth,0,(qreal)pix.width()*1.1,height);
-	qDebug() << textRegion << "chip text";
+	qDebug() << this << textRegion << "chip text" << pos() << jsobj->value();
 	redraw = true;
 }
 
