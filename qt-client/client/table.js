@@ -4,6 +4,7 @@ var localFlop = [];
 var localTurn = [];
 var localRiver = [];
 var localPots = [];
+var localRake;
 var db = new DealerButton();
 var testcase = false;
 
@@ -46,6 +47,11 @@ function updatePots() {
 		// TODO, render rake
 	}
 	log("total rake:"+rake);
+	if (!localRake) localRake = getChipStack();
+	localRake.rake = true;
+	localRake.setPosition(0.4,0.2);
+	localRake.value = rake;
+	queueAction(new ShowBet(localRake,{sound:false,nohide:true}));
 }
 function AnimateBetsToPot(bets) {
 	this.bets = bets;
@@ -640,13 +646,16 @@ function eventDone() {
 	var self = actions.shift();
 	if (actions.length > 0) actions[0].begin();
 }
-function ShowBet(chipobj) {
+function ShowBet(chipobj,opts) {
 	this.chipobj = chipobj;
-	this.chipobj.visible = false;
+	if (opts && opts.nohide) {
+	} else this.chipobj.visible = false;
+	if (opts && (opts.sound != undefined)) this.sound = opts.sound;
+	else this.sound = true;
 }
 ShowBet.prototype.begin = function ShowBetBegin() {
 	this.chipobj.visible = true;
-	PlaySound(1);
+	if (this.sound) PlaySound(1);
 	this.timer = setTimeout(eventDone,200);
 }
 function setTimeout(cb,delay) {

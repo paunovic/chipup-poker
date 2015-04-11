@@ -12,6 +12,7 @@ ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
 	setSize(0.09);
 	parent->getUi()->addElement(internal);
+	rake_ = false;
 }
 
 ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(parent),
@@ -25,6 +26,7 @@ ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(pa
 	c500 = QPixmap(":/resources/chips/500.png");
 	c1000 = QPixmap(":/resources/chips/1000.png");
 	pix = c1;
+	redraw = true;
 	updateValue();
 }
 
@@ -52,7 +54,9 @@ void ChipObjectUi::updateValue() {
 			v -= 1;
 		}
 	}
+	if (jsobj->rake() && (chips.length() == 0)) chips.append(c1);
 	qDebug() << "chip stack changed";
+	redraw = true;
 	update();
 	updateGeometry();
 	text = QString("%1").arg((float)jsobj->value()/100);
@@ -71,6 +75,7 @@ void ChipObjectUi::resizeEvent(QResizeEvent *event) {
 	int height = (chips.length() * chipSep(tbl->width())) + chipHeight;
 	textRegion = QRect(chipWidth,0,(qreal)pix.width()*1.1,height);
 	qDebug() << textRegion << "chip text";
+	redraw = true;
 }
 
 static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight, int tblwidth) {
@@ -80,27 +85,36 @@ static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheig
 }
 
 void ChipObjectUi::paintEvent(QPaintEvent *) {
-	// TODO, draw text on left or right
-	QPainter p(this);
-	//drawDebug(p);
-	p.setBrush(QColor(127,0,0));
-	p.setPen(Qt::NoPen);
-	//p.drawRect(0,0,width(),height());
+	if (redraw) {
+		offscreenbuffer = QPixmap(size());
+		offscreenbuffer.fill(Qt::transparent);
 
-	p.save();
-	QList<QPixmap>::Iterator i;
-	int y=0;
-	for (i=chips.begin(); i!=chips.end(); ++i, y+=chipSep(tbl->width())) {
-		QPixmap chip = *i;
-		drawChip(p,chip,0,y,height(),tbl->width());
+		QPainter p2(&offscreenbuffer);
+		// TODO, draw text on left or right
+		//drawDebug(p);
+		p2.setBrush(QColor(127,0,0));
+		p2.setPen(Qt::NoPen);
+		//p.drawRect(0,0,width(),height());
+
+		p2.save();
+		QList<QPixmap>::Iterator i;
+		int y=0;
+		for (i=chips.begin(); i!=chips.end(); ++i, y+=chipSep(tbl->width())) {
+			QPixmap chip = *i;
+			drawChip(p2,chip,0,y,height(),tbl->width());
+		}
+		p2.restore();
+
+		//p.setBrush(Qt::green);
+
+		p2.setPen(QColor(255,255,255));
+		p2.setFont(font);
+		style()->drawItemText(&p2,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
+		redraw = false;
 	}
-	p.restore();
-
-	//p.setBrush(Qt::green);
-
-	p.setPen(QColor(255,255,255));
-	p.setFont(font);
-	style()->drawItemText(&p,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
+	QPainter p(this);
+	if (jsobj->rake()) p.setOpacity(0.5);
+	p.drawPixmap(0,0,width(),height(),offscreenbuffer);
 }
 QSize ChipObjectUi::sizeHint() const {
 	int chipWidth = (qreal)tbl->width() * 0.025;
