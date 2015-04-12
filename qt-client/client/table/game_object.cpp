@@ -5,6 +5,11 @@
 GameObject::GameObject(TablePrivate *table) {
 	this->table = table;
 }
+GameObject::~GameObject() {
+	qDebug() << "deleting";
+	qDebug() << this;
+}
+
 void GameObject::setPosition(float x, float y) {
 	Q_ASSERT(x >= 0);
 	Q_ASSERT(y >= 0);
@@ -18,6 +23,7 @@ void GameObject::setSize(float w) {
 GameObjectUi::GameObjectUi(TableUi *parent) : QWidget(parent), tbl(parent) {
 	keyside = Left;
 	x = y = 0;
+	redraw = true;
 }
 QSize GameObjectUi::sizeHint() const {
 	int new_width = tbl->width() * w;
@@ -59,6 +65,7 @@ void GameObjectUi::setSize(float w) {
 	this->w = w;
 	int new_width = tbl->width() * w;
 	resize(new_width,heightForWidth(new_width));
+	redraw = true;
 }
 int GameObjectUi::heightForWidth( int width ) const {
 	Q_ASSERT(pix.height());
@@ -72,11 +79,14 @@ float GameObject::getRenderHeight() const {
 }
 
 void GameObject::setSide(int side){
+	qDebug() << internal << "setting side to" << side;
 	//qDebug() << "chip" << internal << side;
 	internal->keyside = (AlignmentSide) side;
+	internal->redraw = true;
 	internal->updateGeometry();
 }
 void GameObjectUi::drawDebug(QPainter &p) {
+	qDebug() << this << "current side" << keyside;
 	switch (keyside) {
 	case Top:
 		p.setBrush(QColor(255,0,0));

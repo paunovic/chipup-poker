@@ -25,7 +25,6 @@ private:
 	QString text;
 	QRect textRegion;
 	QSize sizeHintInternal;
-	bool redraw;
 };
 
 class ChipObject : public GameObject {

@@ -22,6 +22,7 @@ void TableUi::resizeEvent(QResizeEvent *) {
 		//int new_width = width() * el->w;
 		QPoint pos = el->getPosition();
 		QSize size = el->sizeHint();
+		if (pos.y() < 0) pos.setY(0);
 		el->setGeometry(pos.x(),pos.y(), size.width(),size.height());
 	}
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Maximum);

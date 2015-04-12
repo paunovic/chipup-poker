@@ -26,7 +26,6 @@ ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(pa
 	c500 = QPixmap(":/resources/chips/500.png");
 	c1000 = QPixmap(":/resources/chips/1000.png");
 	pix = c1;
-	redraw = true;
 	updateValue();
 }
 
@@ -91,9 +90,9 @@ void ChipObjectUi::paintEvent(QPaintEvent *) {
 
 		QPainter p2(&offscreenbuffer);
 		// TODO, draw text on left or right
-		//drawDebug(p);
-		p2.setBrush(QColor(127,0,0));
-		p2.setPen(Qt::NoPen);
+		//drawDebug(p2);
+		//p2.setBrush(QColor(127,0,0));
+		//p2.setPen(Qt::NoPen);
 		//p.drawRect(0,0,width(),height());
 
 		p2.save();
