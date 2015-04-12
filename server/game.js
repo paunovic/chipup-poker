@@ -82,6 +82,30 @@ Game.decodeBlinds = function (blinds) {
 		g.small_blind = 5000;
 		g.big_blind = 10000;
 		break;
+	case 'gb2x5':
+		g.small_blind = 200;
+		g.big_blind = 500;
+		break;
+	case 'gb3x6':
+		g.small_blind = 300;
+		g.big_blind = 600;
+		break;
+	case 'gb4x8':
+		g.small_blind = 400;
+		g.big_blind = 800;
+		break;
+	case 'gb10x10':
+		g.small_blind = 1000;
+		g.big_blind = 1000;
+		break;
+	case 'gb25x25':
+		g.small_blind = 2500;
+		g.big_blind = 2500;
+		break;
+	case 'gb20x40':
+		g.small_blind = 2000;
+		g.big_blind = 4000;
+		break;
 	}
 	return g;
 };
@@ -1054,8 +1078,8 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 			assert(!isNaN(split));
 			this.log('rake:%d/%d pot:%j split:%d between:%j',rake,rakesplit,pot,split,pot.winners[bussiness]);
 			for (x=0; x<pot.trueMembers.length; x++) {
-				if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit;
-				else rakestats[pot.trueMembers[x]] = { rake:rakesplit, userid: pot.trueUsers[x] };
+				if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit/2;
+				else rakestats[pot.trueMembers[x]] = { rake:rakesplit/2, userid: pot.trueUsers[x] };
 			}
 			for (x=0; x<pot.winners[bussiness].length; x++) {
 				var priv = this.seats[pot.winners[bussiness][x]];
