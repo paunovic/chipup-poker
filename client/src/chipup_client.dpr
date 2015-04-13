@@ -1,4 +1,4 @@
-program client;
+program chipup_client;
 
 {$R 'Poker.Resources.Fonts.res' 'resources\Poker.Resources.Fonts.rc'}
 {$R 'Poker.Resources.Sounds.res' 'resources\Poker.Resources.Sounds.rc'}

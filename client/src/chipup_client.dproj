@@ -3,7 +3,7 @@
 			<ProjectGuid>{1A41B8B6-5D64-46ED-ADE7-23A67BE0BC1D}</ProjectGuid>
 			<ProjectVersion>13.4</ProjectVersion>
 			<FrameworkType>VCL</FrameworkType>
-			<MainSource>client.dpr</MainSource>
+			<MainSource>chipup_client.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
@@ -459,16 +459,16 @@
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
-						<Source Name="MainSource">client.dpr</Source>
+						<Source Name="MainSource">chipup_client.dpr</Source>
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile LocalName="..\bin\Win32\Debug\client.rsm" Configuration="Debug" Class="DebugSymbols">
+					<DeployFile LocalName="..\bin\Win32\Debug\chipup_client.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win32">
-							<RemoteName>client.rsm</RemoteName>
+							<RemoteName>chipup_client.rsm</RemoteName>
 						</Platform>
 					</DeployFile>
-					<DeployFile LocalName="..\bin\Win32\Debug\client.exe" Configuration="Debug" Class="ProjectOutput">
+					<DeployFile LocalName="..\bin\Win32\Debug\chipup_client.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win32"/>
 					</DeployFile>
 					<DeployClass Name="ProjectOutput" Required="true">
