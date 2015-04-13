@@ -253,7 +253,7 @@ begin
   FDXImages := TAsphyreImages.Create;
 
   AddDXImage('RoomBackground.image', FRoomBackgroundImage);
-  AddDXImage('RoomBackground_ParketRed.image', FFinalRoomBackgroundImage);
+  AddDXImage('RoomBackgroundFinal.image', FFinalRoomBackgroundImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
   AddDXImage('SeatLeft.image', FSeatLeftImage, FSeatAspectRatio);
   AddDXImage('SeatLeftActive.image', FSeatLeftActiveImage);

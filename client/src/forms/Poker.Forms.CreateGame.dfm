@@ -269,16 +269,17 @@ object frmCreateGame: TfrmCreateGame
   object lbsMaxRakePerHand: TcxLabel
     Left = 18
     Top = 182
-    Caption = 'Maximum rake per hand (in $):'
+    Caption = 'Maximum rake per hand:'
     Transparent = True
   end
   object seMaxRakePerHand: TcxSpinEdit
-    Left = 168
+    Left = 142
     Top = 181
+    Properties.AssignedValues.DisplayFormat = True
+    Properties.AssignedValues.EditFormat = True
     Properties.AssignedValues.MinValue = True
-    Properties.DisplayFormat = '$0'
-    Properties.EditFormat = '$0'
     Properties.UseDisplayFormatWhenEditing = True
+    Properties.ValueType = vtFloat
     TabOrder = 7
     Width = 88
   end
