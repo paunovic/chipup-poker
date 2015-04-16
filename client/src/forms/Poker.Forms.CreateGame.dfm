@@ -4,7 +4,7 @@ object frmCreateGame: TfrmCreateGame
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Create a Table'
-  ClientHeight = 226
+  ClientHeight = 253
   ClientWidth = 376
   Color = clWindow
   Ctl3D = False
@@ -22,7 +22,7 @@ object frmCreateGame: TfrmCreateGame
   OnKeyPress = FormKeyPress
   DesignSize = (
     376
-    226)
+    253)
   PixelsPerInch = 96
   TextHeight = 14
   object edGameName: TcxTextEdit
@@ -62,13 +62,13 @@ object frmCreateGame: TfrmCreateGame
   end
   object btOK: TcxButton
     Left = 169
-    Top = 187
+    Top = 214
     Width = 93
     Height = 27
     Action = acOK
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 9
+    TabOrder = 8
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -78,13 +78,13 @@ object frmCreateGame: TfrmCreateGame
   end
   object btCancel: TcxButton
     Left = 268
-    Top = 187
+    Top = 214
     Width = 93
     Height = 27
     Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 10
+    TabOrder = 9
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -265,6 +265,23 @@ object frmCreateGame: TfrmCreateGame
     Style.TextStyle = []
     Style.IsFontAssigned = True
     Transparent = True
+  end
+  object lbsMaxRakePerHand: TcxLabel
+    Left = 18
+    Top = 182
+    Caption = 'Maximum rake per hand:'
+    Transparent = True
+  end
+  object seMaxRakePerHand: TcxSpinEdit
+    Left = 142
+    Top = 181
+    Properties.AssignedValues.DisplayFormat = True
+    Properties.AssignedValues.EditFormat = True
+    Properties.AssignedValues.MinValue = True
+    Properties.UseDisplayFormatWhenEditing = True
+    Properties.ValueType = vtFloat
+    TabOrder = 7
+    Width = 88
   end
   object alCreateGame: TActionList
     Left = 24

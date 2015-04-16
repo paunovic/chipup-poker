@@ -125,6 +125,7 @@ type
     acMuteUnmutePlayer: TAction;
     btPromoteToManager: TcxButton;
     acPromoteDemoteUser: TAction;
+    gridGamesTableRakeCap: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -164,6 +165,9 @@ type
     procedure acMuteUnmutePlayerExecute(Sender: TObject);
     procedure acPromoteDemoteUserExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure gridGamesTableRakeCapGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -489,6 +493,14 @@ begin
   end;
 
   acCloseTable.Enabled := close_table_act;
+end;
+
+procedure TfrmClubLobby.gridGamesTableRakeCapGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: string);
+begin
+  if AText = '0' then
+    AText := 'No cap';
 end;
 
 procedure TfrmClubLobby.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -945,6 +957,7 @@ begin
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%s/%s', [ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind)]));
         c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%s-%s', [ChipsToStr(game.BuyinMin), ChipsToStr(game.BuyinMax)]));
+        c.SetValue(recidx, gridGamesTableRakeCap.Index, game.MaxRakePerHand / 100);
         c.SetValue(recidx, gridGamesSeats.Index, Format('%d/%d', [game.Sitting, game.Seats]));
         c.SetValue(recidx, gridGamesTableStatus.Index, game.StateAsStr);
       end;

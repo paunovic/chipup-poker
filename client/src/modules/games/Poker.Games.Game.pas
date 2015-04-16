@@ -71,6 +71,30 @@ begin
       ASmallBlind := 0;
       ABigBlind := 0;
     end;
+    gb2x5: begin
+      ASmallBlind := 2;
+      ABigBlind := 5;
+    end;
+    gb3x6: begin
+      ASmallBlind := 3;
+      ABigBlind := 6;
+    end;
+    gb4x8: begin
+      ASmallBlind := 4;
+      ABigBlind := 8;
+    end;
+    gb10x10: begin
+      ASmallBlind := 10;
+      ABigBlind := 10;
+    end;
+    gb25x25: begin
+      ASmallBlind := 25;
+      ABigBlind := 25;
+    end;
+    gb20x40: begin
+      ASmallBlind := 20;
+      ABigBlind := 40;
+    end;
   end;
 end;
 

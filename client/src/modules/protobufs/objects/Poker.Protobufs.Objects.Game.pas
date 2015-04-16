@@ -14,7 +14,7 @@ type
   TGameLimit = (glNoLimit = 0, glPotLimit, glFixedLimit);
   TGameType = (gtHoldem = 0, gtOmaha, gtRotationNLHPLO);
   TGameState = (gsActive = 0, gsClosing, gsClosed, gsEmpty);
-  TGameBlinds = (gb1x2 = 0, gb5x5, gb5x10, gb10x25, gb25x50, gb50x100, gbOther);
+  TGameBlinds = (gb1x2 = 0, gb5x5, gb5x10, gb10x25, gb25x50, gb50x100, gbOther, gb2x5, gb3x6, gb4x8, gb10x10, gb25x25, gb20x40);
 
   TPB_Game = class(TProtobufBaseObject)
   private

@@ -33,6 +33,8 @@ type
     lbsBuyinMin: TcxLabel;
     lbsBuyinMax: TcxLabel;
     lbsBuyinChips: TcxLabel;
+    lbsMaxRakePerHand: TcxLabel;
+    seMaxRakePerHand: TcxSpinEdit;
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
@@ -147,7 +149,8 @@ begin
           ServerSocket.CreateGame(FClubId, edGameName.Text, TGameType(cbGameType.ItemIndex),
              TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex),
              seBuyinMin.Value * 100, seBuyinMax.Value * 100,
-             StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+             StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]),
+             seMaxRakePerHand.Value * 100);
         end;
 
   if err <> '' then

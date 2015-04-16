@@ -661,7 +661,7 @@ begin
      (ServerSocket.Socket.Addr <> '') then
   begin
     line := ServerSocket.Socket.Addr;
-    cpos := Pos('.chipuppoker.com', line);
+    cpos := Pos('.', line);
     if cpos > 0 then
       line := Copy(line, 1, cpos - 1);
     lbvServer.Caption := line;
