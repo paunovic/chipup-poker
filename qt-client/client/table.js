@@ -18,6 +18,7 @@ function getChipStack() {
 	if (idleChips.length) {
 		var x = idleChips.pop();
 		x.keySide = 4;
+		x.rake = false;
 		return x;
 	} else return new ChipStack();
 }
@@ -49,7 +50,6 @@ function updatePots() {
 		queueAction(new ShowBet(localPots[i]));
 		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
 		rake += lastTS.pots[i].rake;
-		// TODO, render rake
 	}
 	log("total rake:"+rake);
 	if (!localRake) localRake = getChipStack();
@@ -381,10 +381,10 @@ function tableEvent(event) {
 				var potvalue = event.pots[i].value - event.pots[i].rake;
 				var gain = 0;
 				if (winnerCount == 1) {
-					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips"));
+					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips ("+event.pots[i].WinnerData[k].msg+")"));
 					gain = potvalue;
 				} else {
-					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips"));
+					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips ("+event.pots[i].WinnerData[k].msg+")"));
 					gain = potvalue/winnerCount;
 				}
 				// TODO, rake
@@ -475,6 +475,8 @@ AnimateChipWin.prototype.check = function () {
 	for (var i=0; i<this.stack.length; i++) {
 		hideChips(this.stack[i]);
 	}
+	hideChips(localRake);
+	localRake = null;
 	eventDone();
 }
 function UpdateChat(msg) {
