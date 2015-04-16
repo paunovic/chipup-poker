@@ -667,9 +667,18 @@ begin
     if cpos > 0 then
       line := Copy(line, 1, cpos - 1);
     lbvServer.Caption := line;
+    lbvServer.Hint := Format('%s:%s', [ServerSocket.Socket.Addr, ServerSocket.Socket.Port]);
+    if ServerSocket.Socket.SslEnable then
+      lbvServer.Hint := lbvServer.Hint + ' (SSL enabled)'
+    else
+      lbvServer.Hint := lbvServer.Hint + ' (SSL disabled)';
   end
   else
+  begin
     lbvServer.Caption := 'Unknown';
+    lbvServer.Hint := '';
+  end;
+
   lbvServer.Refresh;
 end;
 

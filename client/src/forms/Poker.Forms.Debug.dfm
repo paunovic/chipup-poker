@@ -204,6 +204,8 @@ object frmDebug: TfrmDebug
         AutoSize = False
         Caption = 'Unknown'
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
         Style.Font.Charset = DEFAULT_CHARSET
         Style.Font.Color = clWindowText
         Style.Font.Height = -11
