@@ -224,7 +224,7 @@ uses
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
                       TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
                       TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),

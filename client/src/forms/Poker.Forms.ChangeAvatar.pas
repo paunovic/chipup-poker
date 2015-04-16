@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls,
   Vcl.Forms, Vcl.Dialogs, cxButtons, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg,
   OverbyteIcsHttpProt, cxProgressBar, OverbyteIcsWSocket, cxGraphics, cxLookAndFeels,
-  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls,
+  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUPPokerDarkSkin, cxControls,
   cxContainer, cxEdit, OverbyteIcsWndControl, Vcl.StdCtrls;
 
 type
@@ -58,10 +58,11 @@ procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
 var
   avatar: TAvatar;
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                      TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
   ]);
 
+  HttpClient.Agent := Format('%s client', [Settings.Hardcoded.PROJECT_CAPTION]);
   HttpClient.RcvdStream := TMemoryStream.Create;
 
   FAvatarJPG := TJPEGImage.Create;
@@ -271,5 +272,6 @@ end;
 
 
 end.
+
 
 

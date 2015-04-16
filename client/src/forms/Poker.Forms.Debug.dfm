@@ -1,7 +1,6 @@
 object frmDebug: TfrmDebug
   Left = 0
   Top = 0
-  Caption = 'ChipUP Poker - Debug'
   ClientHeight = 380
   ClientWidth = 621
   Color = clWindow
@@ -558,6 +557,8 @@ object frmDebug: TfrmDebug
         AutoSize = False
         Caption = 'Unknown'
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
         Style.Font.Charset = DEFAULT_CHARSET
         Style.Font.Color = clWindowText
         Style.Font.Height = -11

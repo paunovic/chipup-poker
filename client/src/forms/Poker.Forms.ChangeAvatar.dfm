@@ -112,7 +112,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     LocalAddr = '0.0.0.0'
     LocalAddr6 = '::'
     ProxyPort = '80'
-    Agent = 'ChipUP Poker Client'
+    Agent = 'Mozilla/4.0'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
     Connection = 'Keep-Alive'
     NoCache = False

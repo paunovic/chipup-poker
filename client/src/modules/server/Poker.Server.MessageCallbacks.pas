@@ -11,9 +11,11 @@ type
   TCallbackSet = class(TObjectList<TObject>)
   private
     FId: Integer;
+    FName: String;
   public
-    constructor Create(const AId: Integer; const ACallbacks: array of TObject);
+    constructor Create(const AName: String; const AId: Integer; const ACallbacks: array of TObject);
 
+    property Name: String read FName;
     property Id: Integer read FId;
   end;
 
@@ -46,10 +48,11 @@ implementation
 
 { TCallbackSet }
 
-constructor TCallbackSet.Create(const AId: Integer; const ACallbacks: array of TObject);
+constructor TCallbackSet.Create(const AName: String; const AId: Integer; const ACallbacks: array of TObject);
 begin
   inherited Create(TRUE);
 
+  FName := AName;
   FId := AId;
   AddRange(ACallbacks);
 end;

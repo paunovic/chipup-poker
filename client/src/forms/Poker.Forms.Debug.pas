@@ -9,7 +9,7 @@ uses
   Vcl.Dialogs, cxContainer, cxEdit, cxMemo, Vcl.ExtCtrls, Vcl.Menus, cxButtons,
   Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel,
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  ChipUPPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
   Poker.Common.SafeMutex, Poker.Common.CPUUsage, dxScreenTip, dxCustomHint,
   cxHint;
@@ -158,7 +158,7 @@ uses
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
-  RectMarks;
+  RectMarks, Poker.Settings;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -283,6 +283,7 @@ begin
   Height := Round(Screen.Monitors[0].Height / 2.3);
 
   FSelfCPUCounter := TCPUUsage.CreateCounter(GetCurrentProcessId);
+  Caption := Format('%s - Debug', [Settings.Hardcoded.PROJECT_CAPTION]);
 
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
@@ -649,6 +650,7 @@ end;
 procedure TfrmDebug.RefreshCallbacksData;
 begin
   lbvCallbacks.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+  lbvCallbacks.Hint := MessageContainer.CallbackSetsNames;
   lbvCallbacks.Refresh;
 end;
 
@@ -919,4 +921,5 @@ finalization
   FreeAndNil(ActiveNotifyObjects);
 
 end.
+
 

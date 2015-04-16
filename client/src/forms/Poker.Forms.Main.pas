@@ -293,7 +293,7 @@ begin
 
   FRegisteredTournamentsMap := TDictionary<Integer, TMongoId>.Create;
 
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TSocketStateChangeCallback.Create(SocketStateChange),
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
                       TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
@@ -671,7 +671,7 @@ procedure TfrmChipUpMain.UpdateFormCaption;
 var
   cpt: String;
 begin
-  cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Displayname]);
+  cpt := Format('%s - %s', [Settings.Hardcoded.PROJECT_CAPTION, dmMain.SelfInfo.Displayname]);
   if not dmMain.SelfInfo.Authed then
     cpt := cpt + ' (account verification pending)';
   Caption := cpt;

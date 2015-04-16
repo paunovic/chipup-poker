@@ -49,7 +49,7 @@ uses
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub)
                   ]);
   edClubPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.ClubInvCode;

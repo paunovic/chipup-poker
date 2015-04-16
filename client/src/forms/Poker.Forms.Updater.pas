@@ -73,9 +73,12 @@ begin
   dmMain.il20px.GetImage(2, imgMinimize.Picture.Bitmap);
 
   FUpdateFileIndex := -1;
+
+  HttpClient.Agent := Format('%s client', [Settings.Hardcoded.PROJECT_CAPTION]);
   HttpClient.RcvdStream := TMemoryStream.Create;
 
-  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter('chipuppoker_update'));
+  Caption := Format('%s - Updating', [Settings.Hardcoded.PROJECT_CAPTION]);
+  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter(Format('%s update', [Settings.Hardcoded.PROJECT_CAPTION])));
 
   FTotalSize := 0;
   FCurrentDownloadedSize := 0;
@@ -360,7 +363,7 @@ begin
   FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
 
   pbProgress.Position := ((FDownloadedSize + FCurrentDownloadedSize) / FTotalSize) * 100;
-  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
+  Caption := Format('%s - Updating [%d%%]', [Settings.Hardcoded.PROJECT_CAPTION, Trunc(pbProgress.Position)]);
   lbsCaption.Caption := Caption;
 end;
 
@@ -371,8 +374,8 @@ begin
   begin
     if FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + 'install_chipuppoker.exe');
-      dmMain.SetUpdaterInstaller(TempPath + 'install_chipuppoker.exe');
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
+      dmMain.SetUpdaterInstaller(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
       Close;
       Exit;
     end;

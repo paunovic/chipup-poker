@@ -650,7 +650,6 @@ object frmSystemTrayPopup: TfrmSystemTrayPopup
     Margins.Right = 10
     Margins.Bottom = 0
     Align = alTop
-    Caption = 'ChipUP Poker'
     Style.TextColor = 9079434
     Style.TextStyle = [fsBold]
     Transparent = True

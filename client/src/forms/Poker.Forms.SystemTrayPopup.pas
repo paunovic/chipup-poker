@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
   cxGraphics, cxControls, cxEdit, cxImage, cxLabel, Vcl.ExtCtrls, dxBevel, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, dxGDIPlusClasses;
+  cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUPPokerDarkSkin, dxGDIPlusClasses;
 
 type
   TfrmSystemTrayPopup = class(TForm)
@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Common.Misc, Poker.Common.FormsContainer;
+  Poker.DataModule, Poker.Common.Misc, Poker.Common.FormsContainer, Poker.Settings;
 
 var
   frmSystemTrayPopup: TfrmSystemTrayPopup;
@@ -63,6 +63,8 @@ procedure TfrmSystemTrayPopup.FormCreate(Sender: TObject);
 begin
   AlphaBlendValue := 0;
   SetFormSize;
+
+  lbsCaption.Caption := Settings.Hardcoded.PROJECT_CAPTION;
 
   dmMain.il20px.GetImage(0, imgClose.Picture.Bitmap);
   FPopupText := '';
@@ -203,3 +205,4 @@ begin
 end;
 
 end.
+

@@ -3,7 +3,6 @@ object frmUpdater: TfrmUpdater
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsNone
-  Caption = 'ChipUP Poker - Updating'
   ClientHeight = 50
   ClientWidth = 365
   Color = clWindow
@@ -60,7 +59,6 @@ object frmUpdater: TfrmUpdater
     Margins.Right = 50
     Margins.Bottom = 0
     Align = alTop
-    Caption = 'ChipUP Poker - Updating'
     Style.TextStyle = [fsBold]
     Transparent = True
     OnMouseDown = FormMouseDown
@@ -245,7 +243,7 @@ object frmUpdater: TfrmUpdater
     LocalAddr = '0.0.0.0'
     LocalAddr6 = '::'
     ProxyPort = '80'
-    Agent = 'ChipUP Poker Client'
+    Agent = 'Mozilla/4.0'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
     Connection = 'Keep-Alive'
     NoCache = False

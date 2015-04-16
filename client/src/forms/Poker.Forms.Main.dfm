@@ -1,7 +1,6 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  Caption = 'ChipUP Poker'
   ClientHeight = 582
   ClientWidth = 841
   Color = clBlack

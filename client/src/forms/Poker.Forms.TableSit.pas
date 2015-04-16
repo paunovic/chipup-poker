@@ -75,7 +75,7 @@ uses
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
                       TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
                       TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
