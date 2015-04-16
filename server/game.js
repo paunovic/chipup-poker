@@ -1048,6 +1048,8 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		totalrake += rake;
 	}
 	this.log('totaltake pre-limit:%d',totalrake);
+	var secondPercent = 1;
+	if (totalrake > this.obj.max_rake_per_hand) secondPercent = this.obj.max_rake_per_hand / totalrake;
 	totalrake = 0;
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
@@ -1059,6 +1061,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		assert(pot.trueMembers.length > 0);
 		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
+		rake = rake * secondPercent;
 		pot.rake = rake;
 		this.history.WinnerPotData[y].rake = rake;
 		this.log('pot %d initial value %d, going to %j',y,pot.value,pot.winners);
@@ -2082,8 +2085,16 @@ Game.prototype.broadcastStatus = function (conn,forceunlock,events) {
 }
 var counter = 0;
 Game.prototype.updatePotRakes = function () {
+	var totalrake = 0;
 	for (var x=0; x<this.pots.length; x++) {
 		this.pots[x].rake = this.pots[x].value - this.pots[x].getPostRake(this.rake);
+		totalrake += this.pots[x].rake;
+	}
+	if (totalrake > this.obj.max_rake_per_hand) {
+		var percent = this.obj.max_rake_per_hand / totalrake;
+		for (var x=0; x<this.pots.length; x++) {
+			this.pots[x].rake = this.pots[x].rake * percent;
+		}
 	}
 }
 Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events) {
