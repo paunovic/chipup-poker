@@ -322,6 +322,8 @@ begin
   Settings.LoadFormSettings(self,
     Screen.Width div 2 - Width div 2, Screen.Height div 2 - Height div 2);
 
+  acShowAboutForm.Caption := Format('About %s...', [Settings.Hardcoded.PROJECT_CAPTION]);
+
   LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
 
   ActionManager.Style := ActionMainMenuBarStyle;

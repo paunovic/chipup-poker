@@ -344,7 +344,7 @@ begin
     btGiveOwnership.Visible := is_owner;
     acGiveOwnership.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
     btRemovePlayerFromClub.Visible := is_owner;
-    acRemovePlayer.Enabled := acGiveOwnership.Enabled;
+    acRemovePlayer.Enabled := (Assigned(member)) and (is_owner);
     btSuspendUnsuspend.Visible := is_owner;
     acDeleteTableStats.Enabled := is_owner;
     acDeleteTableStats.Visible := is_owner;

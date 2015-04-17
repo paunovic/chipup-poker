@@ -4469,7 +4469,7 @@ object frmChipUpMain: TfrmChipUpMain
               end
               item
                 Action = acShowAboutForm
-                Caption = '&About ChipUP Poker...'
+                Caption = '&About %s...'
               end>
             Caption = '&Help'
           end
@@ -4570,7 +4570,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acShowAboutForm: TAction
       Category = 'Help'
-      Caption = 'About ChipUP Poker...'
+      Caption = 'About %s...'
       OnExecute = acShowAboutFormExecute
     end
     object acSoundsOnOff: TAction
