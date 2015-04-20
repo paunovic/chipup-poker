@@ -78,6 +78,8 @@ begin
   HttpClient.RcvdStream := TMemoryStream.Create;
 
   Caption := Format('%s - Updating', [Settings.Hardcoded.PROJECT_CAPTION]);
+  lbsCaption.Caption := Caption;
+
   FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter(Format('%s update', [Settings.Hardcoded.PROJECT_CAPTION])));
 
   FTotalSize := 0;
