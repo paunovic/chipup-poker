@@ -155,7 +155,7 @@ function tableStatus(ts) {
 		var event = ts.events[j];
 		tableEvent(event);
 	}
-	updateSeats(ts);
+	queueAction(new UpdateAllSeats(ts));
 	var mySeat = controls.MySeatIndex;
 	if (mySeat >= 0) {
 		log("myBet:"+ts.bets[mySeat]+" minBet:"+ts.minimumBet);
@@ -174,6 +174,13 @@ function tableStatus(ts) {
 			ClearCheckBoxes();
 		}
 	}
+}
+function UpdateAllSeats(ts) {
+	this.ts = ts;
+}
+UpdateAllSeats.prototype.begin = function () {
+	updateSeats(this.ts);
+	eventDone();
 }
 function updateSeats(ts,opts) {
 	var i;
