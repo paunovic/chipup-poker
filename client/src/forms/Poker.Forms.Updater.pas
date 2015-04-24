@@ -203,12 +203,14 @@ begin
   mbu_res := MakeBatchUpdater(batch_file);
   if (pnr_res = 2) or
      (mbu_res = 2) then
-    DownloadFullInstaller;
-
-  FRequiresReboot := mbu_res = 1;
-  if FRequiresReboot then
-    dmMain.SetUpdaterBatchFile(batch_file);
-  Close;
+    DownloadFullInstaller
+  else
+  begin
+    FRequiresReboot := mbu_res = 1;
+    if FRequiresReboot then
+      dmMain.SetUpdaterBatchFile(batch_file);
+    Close;
+  end;
 end;
 
 procedure TfrmUpdater.DownloadFullInstaller;
