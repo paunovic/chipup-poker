@@ -800,10 +800,23 @@ end;
 procedure TfrmTable.acTableStatsExecute(Sender: TObject);
 var
   table: TTable;
+  form: TForm;
+  found: Boolean;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
+    found := FALSE;
+    for form in FormsContainer.Items do
+      if (form is TfrmClubLobby) and
+         ((form as TfrmClubLobby).SelectedStatsTableId = table.GameId) then
+      begin
+        form.Show;
+        found := TRUE;
+        Break;
+      end;
+
+    if not found then
+      FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
   finally
     Tables.Unlock;
   end;
