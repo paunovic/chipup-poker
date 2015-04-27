@@ -1058,6 +1058,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		this.seats[y].rakecontrib = Math.ceil(this.seats[y].rakecontrib);
 		extrarake += this.seats[y].rakecontrib - temp;
 	}
+	extrarake = Math.floor(extrarake);
 	console.log('extra rake'.green,extrarake);
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
