@@ -789,10 +789,15 @@ exports.game = {
 		}
 	},
 	rakecontrib: function (test) {
+		console.log('starting test1'.green);
 		rakecontrib_template({bets:[100,200],cap:25,mainrake:26,contrib:13},test,template2);
 		function template2() {
+			console.log('starting test2'.green);
 			rakecontrib_template({bets:[1000,2000],cap:100,mainrake:100,contrib:50},test,function () {
-				test.done();
+				console.log('starting test3'.green);
+				rakecontrib_template({bets:[26917,53834],cap:2500,mainrake:2500,contrib:1250},test,function () {
+					test.done();
+				});
 			});
 		}
 	}
