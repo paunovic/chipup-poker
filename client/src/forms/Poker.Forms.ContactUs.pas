@@ -100,7 +100,7 @@ begin
     if Length(AParams) > 1 then
     begin
       cbType.ItemIndex := PInteger(AParams[1])^;
-      meMessage.SelStart := Length(meMessage.Text) * 2; // i feel a bit dirty now. fixme!
+      meMessage.SelStart := Length(meMessage.Text);
     end;
   end;
 end;
