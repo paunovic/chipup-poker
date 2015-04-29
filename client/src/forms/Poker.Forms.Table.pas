@@ -613,24 +613,18 @@ end;
 
 procedure TfrmTable.UpdateHandHistoryLabel;
 var
-  hhis: THandHistoryItems;
-  lbl: String;
+  lhi: Integer;
 begin
-  lbl := '';
+  lhi := 0;
   if FTableType in [ttTournament, ttLive] then
-  begin
-    HandHistory.Lock;
-    try
-      if (HandHistory.TryGetValue(FGameId, hhis)) and
-         (hhis.LastHandId > 0) then
-        lbl := Format('Previous Hand (#%d)', [hhis.LastHandId]);
-    finally
-      HandHistory.Unlock;
-    end;
-  end;
+    lhi := HandHistory.RetrieveLastHandId(FGameId);
 
-  lbvHandHistory.Caption := lbl;
-  lbvHandHistory.Visible := lbl <> '';
+  if lhi > 0 then
+    lbvHandHistory.Caption := Format('Previous Hand (#%d)', [lhi])
+  else
+    lbvHandHistory.Caption := '';
+
+  lbvHandHistory.Visible := lbvHandHistory.Caption <> '';
   lbvHandHistory.Refresh;
 end;
 
@@ -1739,16 +1733,8 @@ procedure TfrmTable.acHandHistoryExecute(Sender: TObject);
 var
   form: TForm;
   handid: UINT32;
-  hhis: THandHistoryItems;
 begin
-  handid := 0;
-  HandHistory.Lock;
-  try
-    if HandHistory.TryGetValue(FGameId, hhis) then
-      handid := hhis.LastHandId;
-  finally
-    HandHistory.Unlock;
-  end;
+  handid := HandHistory.RetrieveLastHandId(FGameId);
 
   if FormsContainer.Find(TfrmHandHistory, form) then
   begin
