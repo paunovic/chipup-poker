@@ -203,12 +203,14 @@ begin
   mbu_res := MakeBatchUpdater(batch_file);
   if (pnr_res = 2) or
      (mbu_res = 2) then
-    DownloadFullInstaller;
-
-  FRequiresReboot := mbu_res = 1;
-  if FRequiresReboot then
-    dmMain.SetUpdaterBatchFile(batch_file);
-  Close;
+    DownloadFullInstaller
+  else
+  begin
+    FRequiresReboot := mbu_res = 1;
+    if FRequiresReboot then
+      dmMain.SetUpdaterBatchFile(batch_file);
+    Close;
+  end;
 end;
 
 procedure TfrmUpdater.DownloadFullInstaller;
@@ -351,9 +353,10 @@ begin
       ufRemove: result := ProcessNextFile;
     else
       HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
-      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB] %s',
+      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB]',
           [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].Path,
-           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
+           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024]), ditNetInc,
+           Format('URL: %s', [HttpClient.URL])); {$ENDIF}
       HttpClient.GetASync;
       Exit(TRUE);
     end;

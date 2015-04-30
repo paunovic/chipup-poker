@@ -204,6 +204,7 @@ type
     procedure SetParams(const AParams: array of pointer);
 
     property ClubId: TMongoId read FClubId;
+    property SelectedStatsTableId: TMongoId read FSelectedStatsTableId;
   end;
 
 

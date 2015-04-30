@@ -613,24 +613,18 @@ end;
 
 procedure TfrmTable.UpdateHandHistoryLabel;
 var
-  hhis: THandHistoryItems;
-  lbl: String;
+  lhi: Integer;
 begin
-  lbl := '';
+  lhi := 0;
   if FTableType in [ttTournament, ttLive] then
-  begin
-    HandHistory.Lock;
-    try
-      if (HandHistory.TryGetValue(FGameId, hhis)) and
-         (hhis.LastHandId > 0) then
-        lbl := Format('Previous Hand (#%d)', [hhis.LastHandId]);
-    finally
-      HandHistory.Unlock;
-    end;
-  end;
+    lhi := HandHistory.RetrieveLastHandId(FGameId);
 
-  lbvHandHistory.Caption := lbl;
-  lbvHandHistory.Visible := lbl <> '';
+  if lhi > 0 then
+    lbvHandHistory.Caption := Format('Previous Hand (#%d)', [lhi])
+  else
+    lbvHandHistory.Caption := '';
+
+  lbvHandHistory.Visible := lbvHandHistory.Caption <> '';
   lbvHandHistory.Refresh;
 end;
 
@@ -800,10 +794,23 @@ end;
 procedure TfrmTable.acTableStatsExecute(Sender: TObject);
 var
   table: TTable;
+  form: TForm;
+  found: Boolean;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
+    found := FALSE;
+    for form in FormsContainer.Items do
+      if (form is TfrmClubLobby) and
+         ((form as TfrmClubLobby).SelectedStatsTableId = table.GameId) then
+      begin
+        form.Show;
+        found := TRUE;
+        Break;
+      end;
+
+    if not found then
+      FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
   finally
     Tables.Unlock;
   end;
@@ -1726,16 +1733,8 @@ procedure TfrmTable.acHandHistoryExecute(Sender: TObject);
 var
   form: TForm;
   handid: UINT32;
-  hhis: THandHistoryItems;
 begin
-  handid := 0;
-  HandHistory.Lock;
-  try
-    if HandHistory.TryGetValue(FGameId, hhis) then
-      handid := hhis.LastHandId;
-  finally
-    HandHistory.Unlock;
-  end;
+  handid := HandHistory.RetrieveLastHandId(FGameId);
 
   if FormsContainer.Find(TfrmHandHistory, form) then
   begin

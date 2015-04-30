@@ -678,6 +678,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			this.members[x].can_show = true;
 			this.members[x].muck = true;
+			this.seats[x].rakecontrib = 0;
 			this.balance_changes[x] = 0;
 		}
 		assert(players > 1,util.format('gamename:%s players:%d canplay:%d',this.obj.gamename,players,canplay));
@@ -967,7 +968,6 @@ Game.prototype.removeSuspended = function () {
 Game.prototype.doWin = function (cb,extradelay,cb3) {
 	var x,y;
 	var totalrake = 0;
-	var rakestats = [];
 
 	assert.equal(this.Lock.readers,-1);
 	assert.equal(typeof extradelay,'number');
@@ -977,7 +977,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	this.log('delay is %d',delay);
 	function finish() {
 		this.current_seat = -1;
-		cb(rakestats);
+		cb();
 
 		function finish2() {
 			this.Lock.writeLock(function (release) {
@@ -1037,7 +1037,6 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		if (wins[seat]) wins[seat] += chips;
 		else wins[seat] = chips;
 	}
-	this.log('max total rake:%d',this.obj.max_rake_per_hand);
 	var rake_list = [];
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
@@ -1047,10 +1046,20 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		rake = rakesplit * pot.trueMembers.length;
 		totalrake += rake;
 	}
-	this.log('totaltake pre-limit:%d',totalrake);
+	this.log('rake: %d% totaltake pre-limit:%d max:%d',this.rake,totalrake,this.obj.max_rake_per_hand);
 	var secondPercent = 1;
-	if (totalrake > this.obj.max_rake_per_hand) secondPercent = this.obj.max_rake_per_hand / totalrake;
+	if ( (this.obj.max_rake_per_hand != 0) && (totalrake > this.obj.max_rake_per_hand) ) secondPercent = this.obj.max_rake_per_hand / totalrake;
 	totalrake = 0;
+	var extrarake = 0;
+	for (y=0; y<this.members.length; y++) {
+		if (!this.members[y]) continue;
+		this.seats[y].rakecontrib = secondPercent * this.seats[y].rakecontrib;
+		var temp = this.seats[y].rakecontrib;
+		this.seats[y].rakecontrib = Math.ceil(this.seats[y].rakecontrib);
+		extrarake += this.seats[y].rakecontrib - temp;
+	}
+	extrarake = Math.floor(extrarake);
+	console.log('extra rake'.green,extrarake);
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
 		if (pot.value == 0) continue;
@@ -1062,6 +1071,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
 		rake = rake * secondPercent;
+		if (y == 0) rake += extrarake;
 		pot.rake = rake;
 		this.history.WinnerPotData[y].rake = rake;
 		this.log('pot %d initial value %d, going to %j',y,pot.value,pot.winners);
@@ -1080,10 +1090,6 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 			assert(!isNaN(rakesplit));
 			assert(!isNaN(split));
 			this.log('rake:%d/%d pot:%j split:%d between:%j',rake,rakesplit,pot,split,pot.winners[bussiness]);
-			for (x=0; x<pot.trueMembers.length; x++) {
-				if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit/2;
-				else rakestats[pot.trueMembers[x]] = { rake:rakesplit/2, userid: pot.trueUsers[x] };
-			}
 			for (x=0; x<pot.winners[bussiness].length; x++) {
 				var priv = this.seats[pot.winners[bussiness][x]];
 				assert(priv);
@@ -1271,26 +1277,35 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 		cb(events,0);
 	}
 };
-Game.prototype.postWinSaveStats = function (rakestats,cb) {
+Game.prototype.postWinSaveStats = function (cb) {
 	var jobs = [];
-	this.log('rake info: %j, balances:%j',rakestats,this.balance_changes);
+	this.log('balances:%j',this.balance_changes);
 	for (var x=0; x<this.balance_changes.length; x++) {
 		if (!this.balance_changes[x]) continue;
 		if (this.balance_changes[x] != 0) {
-			if (!rakestats[x]) rakestats[x] = {rake:0};
-			var mods = { $inc:{balance:this.balance_changes[x], rakecontrib:rakestats[x].rake, hands:1 }};
-			var key = {gameid:this.obj._id,userid:rakestats[x].userid};
-			var job = {mods:mods, key:key, change:this.balance_changes[x], userid:rakestats[x].userid};
+			var mods = { $inc:{balance:this.balance_changes[x], rakecontrib:this.seats[x].rakecontrib, hands:1 }};
+			var key = {gameid:this.obj._id,userid:this.seats[x].userid};
+			var doc = {gameid:this.obj._id,userid:this.seats[x].userid,balance:this.balance_changes[x], rakecontrib:this.seats[x].rakecontrib, hands:1};
+			var job = {mods:mods, key:key, change:this.balance_changes[x], userid:this.seats[x].userid, doc:doc};
 			jobs.push(job);
 		}
 	}
 	async.parallel([function a(cbA) {
 		async.each(jobs,function hack(job,cb2) {
 			//global.log('updating stats %j',job);
-			models.GameStats.findOneAndUpdate(job.key,job.mods,function (err) {
+			models.GameStats.findOne(job.key,function (err,row) {
 				error.handleError(err);
-				if (this.club) this.club.updateLimitPostWin(job.change,job.userid,cb2);
-				else cb2();
+				if (!row) {
+					global.log('inserting %j',job.doc);
+					global.log('inserting %j',job.doc);
+				} else {
+					models.GameStats.findOneAndUpdate(job.key,job.mods,finish.bind(this));
+				}
+				function finish(err) {
+					error.handleError(err);
+					if (this.club) this.club.updateLimitPostWin(job.change,job.userid,cb2);
+					else cb2();
+				}
 			}.bind(this));
 		}.bind(this),cbA);
 	}.bind(this),function b(cbB) {
@@ -1440,8 +1455,8 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 	function finish1() {
 		events.push(this.makeEvent('teWinning',null,WinnerPotData));
 		this.addHistory({code:['teWinning'],WinnerPotData:WinnerPotData,seat:-1},winnercount);
-		this.doWin(function (rakestats) {
-			this.postWinSaveStats(rakestats,function () {
+		this.doWin(function () {
+			this.postWinSaveStats(function () {
 				cb(events,0);
 			}.bind(this));
 		}.bind(this),extradelay,cb3);
@@ -1563,6 +1578,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				assert(priv.userid);
 				assert.equal(typeof betsToRemove[job.seat],'number');
 				this.balance_changes[job.seat] -= betsToRemove[job.seat];
+				priv.rakecontrib += (this.rake / 100) * betsToRemove[job.seat];
 				cb();
 			}.bind(this),function finish(err) {
 				error.handleError(err);
@@ -1907,7 +1923,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			if (this.ignoreOffline && this.members[x].disconnected) continue;
 			if (this.members[x].chips > 0) {
 				activeSeats.push(x);
-				this.log('sm found one',x,this.members[x].status,this.members[x].chips);
+				//this.log('sm found one',x,this.members[x].status,this.members[x].chips);
 				havechips++;
 			} else if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
@@ -2090,7 +2106,7 @@ Game.prototype.updatePotRakes = function () {
 		this.pots[x].rake = this.pots[x].value - this.pots[x].getPostRake(this.rake);
 		totalrake += this.pots[x].rake;
 	}
-	if (totalrake > this.obj.max_rake_per_hand) {
+	if ( (this.obj.max_rake_per_hand != 0) && (totalrake > this.obj.max_rake_per_hand) ) {
 		var percent = this.obj.max_rake_per_hand / totalrake;
 		for (var x=0; x<this.pots.length; x++) {
 			this.pots[x].rake = this.pots[x].rake * percent;
@@ -2165,7 +2181,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
 	tableStatus.table_message = this.message;
-	this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
+	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	if (this.sitQueue.indexOf(self.userid) != -1) {
 		tableStatus.queue_position = this.sitQueue.indexOf(self.userid) + 1;
 	}

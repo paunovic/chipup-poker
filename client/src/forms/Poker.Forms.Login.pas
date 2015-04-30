@@ -91,7 +91,7 @@ uses
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
   Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions,
-  Poker.Server.Validators;
+  Poker.Server.Validators, Soap.EncdDecd;
 
 
 procedure TfrmChipUPLogin.FormCreate(Sender: TObject);
@@ -360,7 +360,8 @@ procedure TfrmChipUPLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
-      if SHA256String(edLogin.Text) = '1ÕŒ²ƒ{¹ú†ßãi£œq7wP9†Ór2?Û~î2' then // devmodeon!
+      if EncodeString(String(SHA256String(edLogin.Text))) =
+             'MdWMsoN7ufqG3+Npo5xxN3dQOYYODw7TcjI/237uFTI=' then // devmodeon!
       begin
         Settings.DeveloperMode := not Settings.DeveloperMode;
         if Settings.DeveloperMode then
