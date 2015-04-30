@@ -40,6 +40,7 @@ private slots:
 	void on_actionAlways_Run_it_Twice_toggled(bool arg1);
 	void on_actionConfirmation_on_fold_toggled(bool arg1);
 	void on_actionAlways_Check_Fold_toggled(bool arg1);
+	void on_actionContact_Us_triggered();
 
 protected:
 	void resizeEvent(QResizeEvent *event);

@@ -482,7 +482,7 @@ AnimateChipWin.prototype.check = function () {
 	for (var i=0; i<this.stack.length; i++) {
 		hideChips(this.stack[i]);
 	}
-	hideChips(localRake);
+	if (localRake) hideChips(localRake);
 	localRake = null;
 	eventDone();
 }
