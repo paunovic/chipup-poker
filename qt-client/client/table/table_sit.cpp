@@ -31,9 +31,11 @@ TableSit::TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::Tabl
 	setGeometry(QStyle::alignedRect(Qt::RightToLeft,Qt::AlignCenter,size(),
 									QApplication::desktop()->availableGeometry()));
 	addonMode = false;
+	currentChips = 0;
 }
-void TableSit::setAddon(bool in) {
+void TableSit::setAddon(bool in, quint32 curentChips) {
 	addonMode = in;
+	this->currentChips = curentChips;
 }
 void TableSit::updateLimits() {
 	double buyinmin = GetBuyinMin();
@@ -62,12 +64,17 @@ void TableSit::on_btOK_clicked() {
 }
 double TableSit::GetBuyinMin() {
 	// FIXME, also fetch via PlayerTableStatus
-	if (lastPcs.buyin_min > 0) return (double)lastPcs.buyin_min / 100;
+	if (lastPcs.buyin_min > 0) {
+		if (currentChips > lastPcs.buyin_min) return 1;
+		return (double)(lastPcs.buyin_min - currentChips) / 100;
+	}
 	return (double)g->buyin_min/100;
 }
 double TableSit::GetBuyinMax() {
 	// FIXME also fetch via several means
-	if (lastPcs.buyin_max > 0) return (double)lastPcs.buyin_max/100;
+	if (lastPcs.buyin_max > 0) {
+		return (double)(lastPcs.buyin_max - currentChips)/100;
+	}
 	return (double)g->buyin_max/100;
 }
 void TableSit::on_btCancel_clicked() {
@@ -101,7 +108,7 @@ void TableSit::On_sit_timeout(QByteArray gameid) {
 	close();
 }
 void TableSit::On_PlayerClubStatus(Data::PlayerClubStatus &pcs) {
-	qDebug() << pcs.buyin_min << pcs.buyin_max;
+	qDebug() << " min/max" << pcs.buyin_min << pcs.buyin_max;
 	lastPcs = pcs;
 	updateLimits();
 }
