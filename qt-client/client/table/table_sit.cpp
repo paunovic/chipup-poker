@@ -65,8 +65,8 @@ void TableSit::on_btOK_clicked() {
 double TableSit::GetBuyinMin() {
 	// FIXME, also fetch via PlayerTableStatus
 	if (lastPcs.buyin_min > 0) {
-		if (currentChips > lastPcs.buyin_min) return 1;
-		return (double)(lastPcs.buyin_min - currentChips) / 100;
+		if (currentChips == 0) return (double)(lastPcs.buyin_min - currentChips) / 100;
+		else return 1;
 	}
 	return (double)g->buyin_min/100;
 }

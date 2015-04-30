@@ -189,7 +189,7 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
-		sitwindow->setAddon(false,chips);
+		sitwindow->setAddon(false,0);
 		sitwindow->show();
 	}
 }
