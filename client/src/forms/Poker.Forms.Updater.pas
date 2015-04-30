@@ -375,6 +375,7 @@ end;
 procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
   if (ErrCode = 0) and
+     (HttpClient.StatusCode = 200) and
      (Assigned(HttpClient.RcvdStream)) then
   begin
     if FFullInstaller then
@@ -383,16 +384,16 @@ begin
       dmMain.SetUpdaterInstaller(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
       Close;
       Exit;
-    end;
-
-    if not StoreDownloadedFile then
-    begin
-      DownloadFullInstaller;
-      Exit;
-    end;
-
-    ProcessNextFile;
+    end
+    else
+      if not StoreDownloadedFile then
+      begin
+        DownloadFullInstaller;
+        Exit;
+      end;
   end;
+
+  ProcessNextFile;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
