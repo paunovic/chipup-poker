@@ -40,6 +40,8 @@ type
     FInternalId: Integer;
     FSeatIndex: Integer;
     FCloseCallback: TNotifyEvent;
+    FBuyinPhrase: String;
+    FPlayerStatusReceived: Boolean;
 
     procedure SetBuyin(const ABuyin: UINT32);
     procedure CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
@@ -52,6 +54,7 @@ type
     procedure CSRNotSitting(const AMethodId: Integer; const AObject: TObject);
     procedure CSEPlayerClubStatus(const AMethodId: Integer; const AObject: TObject);
     procedure ConfigureGUI;
+    function IsAddon: Boolean;
 
     function GetMaxBuyin: UINT32;
     function GetMinBuyin: UINT32;
@@ -86,6 +89,8 @@ begin
                       TServerMessageCallback.Create(srNotSitting, CSRNotSitting),
                       TServerMessageCallback.Create(sePlayerClubStatus, CSEPlayerClubStatus)
                   ]);
+
+  FPlayerStatusReceived := FALSE;
 end;
 
 procedure TfrmTableSit.FormDestroy(Sender: TObject);
@@ -129,23 +134,20 @@ begin
   result := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto) then
-      if pcsproto.has_BuyinMax then
-      begin
-        result := pcsproto.BuyinMax;
-        Exit;
-      end;
-
     if (table.Status.SelfSeatIndex <> -1) and
        (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
       seat_chips := seat_info.Chips
     else
       seat_chips := 0;
 
-    if seat_chips > table.Game.BuyinMax then
-      result := 0
+    if (dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto)) and
+       (pcsproto.has_BuyinMax) then
+      result := pcsproto.BuyinMax - seat_chips
     else
-      result := table.Game.BuyinMax - seat_chips;
+      if seat_chips > table.Game.BuyinMax then
+        result := 0
+      else
+        result := table.Game.BuyinMax - seat_chips;
   finally
     Tables.Unlock;
   end;
@@ -159,24 +161,51 @@ begin
   result := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto) then
-      if pcsproto.has_BuyinMin then
-      begin
-        result := pcsproto.BuyinMin;
-        Exit;
-      end;
+    if IsAddon then // addon
+      result := 100
+    else // buyin
+    if (dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto)) and
+       (pcsproto.has_BuyinMin) then
+      result := pcsproto.BuyinMin
+    else
+      result := table.Game.BuyinMin;
 
-    result := table.Game.BuyinMin;
+    if result < 100 then
+      result := 100;
+
+    if result > GetMaxBuyin then
+      result := GetMaxBuyin;
   finally
     Tables.Unlock;
   end;
  end;
 
+function TfrmTableSit.IsAddon: Boolean;
+var
+  table: TTable;
+  seat_info: TSeatInfo;
+begin
+  result := FALSE;
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Status.SelfSeatIndex <> -1) and
+       (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
+       (seat_info.Chips > 0) then
+      result := TRUE;
+  finally
+    Tables.Unlock;
+  end;
+end;
+
 procedure TfrmTableSit.seBuyinPropertiesChange(Sender: TObject);
 var
   val: Single;
 begin
-  acOK.Enabled := (seBuyin.Value > 0) and (TryStrToFloat(seBuyin.Text, val));
+  acOK.Enabled := (FPlayerStatusReceived) and
+                  (TryStrToFloat(seBuyin.Text, val)) and
+                  (Round(val * 100) > 0) and
+                  (Round(val * 100) >= GetMinBuyin) and
+                  (Round(val * 100) <= GetMaxBuyin);
 end;
 
 procedure TfrmTableSit.FormKeyPress(Sender: TObject; var Key: Char);
@@ -220,6 +249,7 @@ begin
   finally
     Tables.Unlock;
   end;
+
   SetBuyin(GetMaxBuyin);
   ConfigureGUI;
 end;
@@ -246,15 +276,8 @@ begin
 end;
 
 procedure TfrmTableSit.acMinExecute(Sender: TObject);
-var
-  table: TTable;
 begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    SetBuyin(GetMinBuyin);
-  finally
-    Tables.Unlock;
-  end;
+  SetBuyin(GetMinBuyin);
 end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
@@ -269,9 +292,15 @@ begin
   try
     if not TryStrToFloat(seBuyin.Text, buyin) then
     begin
-      err := 'Invalid buyin';
+      err := Format('Invalid %s amount', [FBuyinPhrase]);
       seBuyin.SelectAll;
-    end;
+    end
+    else
+      if buyin < 1 then
+      begin
+        err := Format('Invalid %s amount', [FBuyinPhrase]);
+        seBuyin.SelectAll;
+      end;
 
     if err = '' then
     begin
@@ -281,7 +310,7 @@ begin
           err := 'Table is closed';
 
         if err = '' then
-          ServerSocket.TableSit(table.Game.MongoId, FSeatIndex, Round(seBuyin.Value * 100))
+          ServerSocket.TableSit(table.Game.MongoId, FSeatIndex, Round(buyin * 100))
         else
           seBuyin.SelectAll;
       end
@@ -393,20 +422,28 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
+    lbsTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename,
+      ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind),
+      table.Game.AsString(FALSE)]);
+
     min_buyin := GetMinBuyin;
     max_buyin := GetMaxBuyin;
 
-    lbsTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Gamename, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
-    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(min_buyin),
-        ChipsToStr(max_buyin)]);
-{    if table.Status.SelfSeatIndex <> -1 then
+    if IsAddon then
       FBuyinPhrase := 'add-on'
     else
-      FBuyinPhrase := 'buy-in';}
+      FBuyinPhrase := 'buy-in';
+
+    lbsTableBuyins.Caption := Format('(min %s %s, max %s %s)', [FBuyinPhrase,
+        ChipsToStr(min_buyin), FBuyinPhrase, ChipsToStr(max_buyin)]);
+
     if UINT32(seBuyin.Value) * 100 < min_buyin then
       seBuyin.Value := min_buyin / 100;
+
     if UINT32(seBuyin.Value) * 100 > max_buyin then
       seBuyin.Value := max_buyin / 100;
+
+    seBuyin.Enabled := FPlayerStatusReceived;
    finally
     Tables.Unlock;
   end;
@@ -419,7 +456,9 @@ begin
   if not TTypes.TryCast<TPB_PlayerClubStatus>(AObject, proto) then
     Exit;
 
+  FPlayerStatusReceived := TRUE;
   ConfigureGUI;
+  seBuyin.Properties.OnChange(nil);
 end;
 
 procedure TfrmTableSit.CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);
