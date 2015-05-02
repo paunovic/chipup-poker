@@ -591,7 +591,7 @@ var
 begin
   protobuf := TPB_HelloParams.Create;
   try
-    protobuf.Appcode := DelphiWindows;
+    protobuf.Appcode := acDelphiWindows;
     protobuf.Debug := ADebug;
     protobuf.Files.AddRange(AFiles);
     SendProtobuf(scHello, protobuf);

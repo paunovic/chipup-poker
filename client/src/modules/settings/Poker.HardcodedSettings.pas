@@ -10,6 +10,8 @@ type
     type
       THardcodedSettingsRec = record
         VERSION: String;
+        PROJECT_CAPTION: String;
+        INSTALLER_FILENAME: String;
         REVISION: String;
         INSTANCE_MUTEX_NAME: String;
         SETTINGS_FILENAME: String;
@@ -66,6 +68,8 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         VERSION: '0.01a';
+        PROJECT_CAPTION: 'ChipUP Poker';
+        INSTALLER_FILENAME: 'install_chipuppoker.exe';
         REVISION: {$I revision.inc};
 
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';

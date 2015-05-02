@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Controls, Vcl.Forms, cxLabel,
   Poker.Forms.LayeredForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
-  cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin;
+  cxContainer, cxEdit, dxSkinsCore, ChipUPPokerDarkSkin;
 
 type
   TfrmAbout = class(TForm)
@@ -31,11 +31,21 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Settings, Poker.Common.FormsContainer, PNGImage, Poker.Common.Misc;
+  Poker.DataModule, Poker.Settings, Poker.Common.FormsContainer, PNGImage,
+  Poker.Common.Misc, System.SysUtils;
 
 procedure TfrmAbout.FormCreate(Sender: TObject);
+var
+  url: String;
 begin
   FLayeredForm := TfrmLayered.Create(self, 'AboutBackground');
+  Caption := Settings.Hardcoded.PROJECT_CAPTION;
+  lbsCopyright.Caption := Format('Copyright © 2015 %s', [Settings.Hardcoded.PROJECT_CAPTION]);
+
+  url := Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL;
+  if Pos('://', url) > 0 then
+    Delete(url, 1, Pos('://', url) + 2);
+  lbsURL.Caption := url;
 end;
 
 procedure TfrmAbout.FormDestroy(Sender: TObject);
@@ -98,3 +108,4 @@ begin
 end;
 
 end.
+

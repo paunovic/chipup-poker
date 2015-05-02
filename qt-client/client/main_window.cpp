@@ -15,6 +15,7 @@
 #include "selftest.h"
 #include "notifywindow.h"
 #include "version.h"
+#include "contactus.h"
 
 void crash()
 {
@@ -187,6 +188,10 @@ void MainWindow::clubTriggered(Data::Club *club) {
 	ClubLobby *cl = new ClubLobby();
 	cl->setClub(club);
 	cl->show();
+}
+void MainWindow::on_actionContact_Us_triggered() {
+	ContactUs *cu = new ContactUs();
+	cu->show();
 }
 void MainWindow::on_actionDisconnect_triggered() {
 	core->testDisconnect();

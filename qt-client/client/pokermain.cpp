@@ -13,6 +13,7 @@
 #endif
 #include <QProcess>
 #include <QResource>
+#include <QMessageBox>
 
 #include "pokermain.h"
 #include "cpp/message.pb.h"
@@ -88,8 +89,17 @@ void PokerMain::replyFinished(QNetworkReply *reply) {
 	qDebug() << reply;
 	foreach (Core::UpdateFileInfo item, files_in) {
 		if (item.reply != reply) continue;
-        //qDebug() << "found it" << item.path;
-		FileSaver *fs = new FileSaver(reply,item);
+		//qDebug() << "found it" << item.path;
+		int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+		if (reply->error() == QNetworkReply::ConnectionRefusedError) {
+			qDebug() << "connection refused while auto-updating";
+			reply->deleteLater();
+			return;
+		}
+		qDebug() << "status code" << status << reply->error();
+		if (status == 200) {
+			FileSaver *fs = new FileSaver(reply,item);
+		}
 		return;
 	}
 	reply->deleteLater();
@@ -437,6 +447,9 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 				qDebug() << "found game" << g_out->gameid.toHex();
 			}
 			emit clubs_changed();
+			break; }
+		case ClubCommandReply::csInvalidClubId: {
+			QMessageBox::warning(0,tr("Error"),tr("Invalid Club ID"));
 			break; }
 		default:
 			// TODO

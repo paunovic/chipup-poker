@@ -63,7 +63,7 @@ begin
   FDots := 3;
   SetStatusMessage;
 
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TSocketStateChangeCallback.Create(SocketStateChange),
                       TServerMessageCallback.Create(srHello, CSRHello),
                       TServerMessageCallback.Create(srLoginReply, CSRLogin)

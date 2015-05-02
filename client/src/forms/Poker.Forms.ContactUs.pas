@@ -6,10 +6,10 @@ uses
   Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
   cxDropDownEdit, cxTextEdit, cxLabel, cxButtons, cxMemo, Vcl.ActnList, cxGraphics,
   cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit;
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Interfaces.FormParams;
 
 type
-  TfrmContactUs = class(TForm)
+  TfrmContactUs = class(TForm, IFormParams)
     lbsMessage: TcxLabel;
     cbType: TcxComboBox;
     lbsType: TcxLabel;
@@ -30,6 +30,7 @@ type
 
     procedure CSRContactUsOk(const AMethodId: Integer; const AObject: TObject);
   public
+    procedure SetParams(const AParams: array of pointer);
   end;
 
 implementation
@@ -44,7 +45,7 @@ uses
 
 procedure TfrmContactUs.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                      TServerMessageCallback.Create(srContactUsOk, CSRContactUsOk)
   ]);
 
@@ -91,6 +92,19 @@ begin
     acCancel.Execute;
 end;
 
+procedure TfrmContactUs.SetParams(const AParams: array of pointer);
+begin
+  if Length(AParams) > 0 then
+  begin
+    meMessage.Text := PString(AParams[0])^;
+    if Length(AParams) > 1 then
+    begin
+      cbType.ItemIndex := PInteger(AParams[1])^;
+      meMessage.SelStart := Length(meMessage.Text);
+    end;
+  end;
+end;
+
 procedure TfrmContactUs.CSRContactUsOk(const AMethodId: Integer; const AObject: TObject);
 begin
   ModalDialogs.ShowInformation('Ticket successfully created. Please check your inbox for more details.');
@@ -98,3 +112,4 @@ begin
 end;
 
 end.
+

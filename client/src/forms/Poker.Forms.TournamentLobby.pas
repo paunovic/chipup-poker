@@ -120,7 +120,7 @@ uses
 
 procedure TfrmTournamentLobby.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
                       TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply)

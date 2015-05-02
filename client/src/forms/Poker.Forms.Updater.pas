@@ -73,9 +73,14 @@ begin
   dmMain.il20px.GetImage(2, imgMinimize.Picture.Bitmap);
 
   FUpdateFileIndex := -1;
+
+  HttpClient.Agent := Format('%s client', [Settings.Hardcoded.PROJECT_CAPTION]);
   HttpClient.RcvdStream := TMemoryStream.Create;
 
-  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter('chipuppoker_update'));
+  Caption := Format('%s - Updating', [Settings.Hardcoded.PROJECT_CAPTION]);
+  lbsCaption.Caption := Caption;
+
+  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter(Format('%s update', [Settings.Hardcoded.PROJECT_CAPTION])));
 
   FTotalSize := 0;
   FCurrentDownloadedSize := 0;
@@ -198,12 +203,14 @@ begin
   mbu_res := MakeBatchUpdater(batch_file);
   if (pnr_res = 2) or
      (mbu_res = 2) then
-    DownloadFullInstaller;
-
-  FRequiresReboot := mbu_res = 1;
-  if FRequiresReboot then
-    dmMain.SetUpdaterBatchFile(batch_file);
-  Close;
+    DownloadFullInstaller
+  else
+  begin
+    FRequiresReboot := mbu_res = 1;
+    if FRequiresReboot then
+      dmMain.SetUpdaterBatchFile(batch_file);
+    Close;
+  end;
 end;
 
 procedure TfrmUpdater.DownloadFullInstaller;
@@ -346,9 +353,10 @@ begin
       ufRemove: result := ProcessNextFile;
     else
       HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
-      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB] %s',
+      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB]',
           [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].Path,
-           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
+           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024]), ditNetInc,
+           Format('URL: %s', [HttpClient.URL])); {$ENDIF}
       HttpClient.GetASync;
       Exit(TRUE);
     end;
@@ -360,31 +368,32 @@ begin
   FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
 
   pbProgress.Position := ((FDownloadedSize + FCurrentDownloadedSize) / FTotalSize) * 100;
-  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
+  Caption := Format('%s - Updating [%d%%]', [Settings.Hardcoded.PROJECT_CAPTION, Trunc(pbProgress.Position)]);
   lbsCaption.Caption := Caption;
 end;
 
 procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
   if (ErrCode = 0) and
+     (HttpClient.StatusCode = 200) and
      (Assigned(HttpClient.RcvdStream)) then
   begin
     if FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + 'install_chipuppoker.exe');
-      dmMain.SetUpdaterInstaller(TempPath + 'install_chipuppoker.exe');
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
+      dmMain.SetUpdaterInstaller(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
       Close;
       Exit;
-    end;
-
-    if not StoreDownloadedFile then
-    begin
-      DownloadFullInstaller;
-      Exit;
-    end;
-
-    ProcessNextFile;
+    end
+    else
+      if not StoreDownloadedFile then
+      begin
+        DownloadFullInstaller;
+        Exit;
+      end;
   end;
+
+  ProcessNextFile;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

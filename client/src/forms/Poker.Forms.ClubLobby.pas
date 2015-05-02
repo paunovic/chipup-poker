@@ -204,6 +204,7 @@ type
     procedure SetParams(const AParams: array of pointer);
 
     property ClubId: TMongoId read FClubId;
+    property SelectedStatsTableId: TMongoId read FSelectedStatsTableId;
   end;
 
 
@@ -217,14 +218,14 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams,
+  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Helpers.PB_ClubMember,
   Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs, Poker.SoftExceptions;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
                       TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
                       TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
@@ -344,7 +345,7 @@ begin
     btGiveOwnership.Visible := is_owner;
     acGiveOwnership.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
     btRemovePlayerFromClub.Visible := is_owner;
-    acRemovePlayer.Enabled := acGiveOwnership.Enabled;
+    acRemovePlayer.Enabled := (Assigned(member)) and (is_owner);
     btSuspendUnsuspend.Visible := is_owner;
     acDeleteTableStats.Enabled := is_owner;
     acDeleteTableStats.Visible := is_owner;
@@ -367,8 +368,8 @@ begin
 
     if btSuspendUnsuspend.Visible then
     begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.Owner);
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (member.MongoId <> club.Owner);
+      acSuspendPlayer.Enabled := (Assigned(member)) and (member.Status = msActive) and (member.MongoId <> club.Owner);
+      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Status = msSuspended) and (member.MongoId <> club.Owner);
       if acReinstatePlayer.Enabled then
         btSuspendUnsuspend.Action := acReinstatePlayer
       else
@@ -693,13 +694,8 @@ var
     if AMember.MongoId = club.Owner then
       status := 'Owner'
     else
-      if AMember.Suspended then
-        status := 'Suspended'
-      else
-        if AMember.Manager then
-          status := 'Manager'
-        else
-          status := 'Member';
+      status := AMember.StatusAsString;
+
     if AMember.Muted then
       status := status + ' (Muted)';
 

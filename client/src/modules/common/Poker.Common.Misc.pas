@@ -39,9 +39,10 @@ function MinutesToString(const AMinutes: UINT32): String;
 implementation
 
 uses
-  System.Rtti, System.TypInfo,
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, System.Generics.Collections, System.RegularExpressionsAPI,
-  Vcl.Dialogs;
+  System.Rtti, System.TypInfo, System.ZLib, System.Generics.Collections,
+  System.RegularExpressionsAPI, Vcl.Dialogs, Winapi.PsApi, Winapi.TlHelp32,
+  Winapi.ShlObj, dxGDIPlusClasses;
+
 
 function ValueToStr(const AProperty: TRttiProperty; const AValue: TValue): String;
 var

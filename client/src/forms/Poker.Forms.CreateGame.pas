@@ -65,7 +65,7 @@ uses
 
 procedure TfrmCreateGame.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk)
                   ]);
 end;

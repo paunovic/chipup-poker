@@ -46,7 +46,7 @@ uses
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                        TServerMessageCallback.Create(srChangeMailReply, CSRChangeMail)
                    ]);
 

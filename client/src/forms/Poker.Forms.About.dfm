@@ -3,7 +3,6 @@ object frmAbout: TfrmAbout
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsNone
-  Caption = 'ChipUP Poker'
   ClientHeight = 281
   ClientWidth = 345
   Color = clFuchsia
@@ -30,7 +29,7 @@ object frmAbout: TfrmAbout
   object lbsCopyright: TcxLabel
     Left = 142
     Top = 122
-    Caption = 'Copyright '#169' 2014 ChipUP Poker'
+    Caption = 'Copyright '#169' 2015 %s'
     ParentColor = False
     Style.Color = clBlack
     Style.TextStyle = [fsBold]

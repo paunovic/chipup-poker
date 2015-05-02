@@ -30,8 +30,12 @@ QPushButton:disabled {
 	border-image: url(:resources/button_mainform_disabled.png) 0 0 0 0 stretch stretch;
 	color: #6e6e6e;
 }
-QMainWindow, QDialog, QWidget#TableSit {
+QMainWindow, QDialog, QWidget#TableSit, QWidget#ContactUs {
 	background-color: black;
+}
+QTextEdit {
+	background-color: #454545;
+	border: none;
 }
 QTreeView {
 	background-color: #505050;
@@ -90,11 +94,6 @@ QLineEdit#teChatInput {
 	color: #808080;
 	border: none;
 }
-QTextEdit#teChat {
-	background-color: #454545;
-	border: none;
-}
-
 QMainWindow#Table {
 	border-image: url(e:/poker/poker/qt-client/client/resources/table/RoomBackground.png) 0 0 0 0 stretch stretch;
 }

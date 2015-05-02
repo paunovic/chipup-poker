@@ -2536,6 +2536,8 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2826,6 +2828,8 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)

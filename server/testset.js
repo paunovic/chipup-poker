@@ -787,8 +787,144 @@ exports.game = {
 				},1000);
 			},owner,{},[],0);
 		}
+	},
+	rakecontrib: function (test) {
+		console.log('starting test1'.green);
+		rakecontrib_template({bets:[100,200],cap:25,mainrake:26,contrib:13},test,template2);
+		function template2() {
+			console.log('starting test2'.green);
+			rakecontrib_template({bets:[1000,2000],cap:100,mainrake:100,contrib:50},test,function () {
+				console.log('starting test3'.green);
+				rakecontrib_template({bets:[26917,53834],cap:2500,mainrake:2500,contrib:1250},test,function () {
+					test.done();
+				});
+			});
+		}
 	}
 };
+function rakecontrib_template(opts,test,finalcb) {
+	global.activeUsers = {};
+	global.sharedconfig = {max_play_time:15,max_timebank:30};
+	global.log = console.log;
+	global.pb = Core.pb;
+	global.ignoreThrottle = true;
+	var activeGames = {};
+	var Club = require('./club').Club;
+	var Game = require('./game').Game;
+	var profiler = require('profiler');
+	mdb.open('nodeunit');
+	Club.init(activeGames);
+	myutils.init();
+	profiler.setup(mdb.models.PokerProfile);
+	Game.init(activeGames);
+	mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+		assert.ifError(err);
+		var owner = users[0];
+		var opponent = users[1];
+		test.ok(owner);
+		test.ok(opponent);
+		mdb.models.Clubs.remove({name:'clubname'},function (err) {
+			assert.ifError(err);
+			Club.createClub('clubname','password',owner._id,5,30,function (worked,clubObj) {
+				test.ok(worked);
+				clubid = clubObj.obj.seq;
+				var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:2,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:100000,buyin_max:150000,rake:10,rotation:0,hands:0,max_rake_per_hand:opts.cap});
+				gamerow.save(function (err) {
+					assert.ifError(err);
+					Game.getGame(gamerow._id,function (err,gameObj) {
+						assert.ifError(err);
+						test.ok(gameObj);
+						phase2(new DummyConn(owner),new DummyConn(opponent),gameObj);
+					});
+				});
+			});
+		});
+	});
+	function phase2(owner,opponent,gameObj) {
+		owner.nick = 'owner';
+		opponent.nick = 'opponent';
+		owner.send = function (code,obj,type) {
+			console.log('owner send:',code,obj,type);
+		}
+		opponent.send = function (code,obj,type) {
+			console.log('opponent send:',code,obj,type);
+		}
+		//console.log('this game is:',gameObj.id);
+		gameObj.Lock.writeLock(function (release) {
+			gameObj.join(owner,function (err) {
+				test.ifError(err);
+				gameObj.join(opponent,function (err) {
+					test.ifError(err);
+					gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
+						test.ok(worked);
+						console.log(worked,events);
+						gameObj.sitDown(opponent,{chips:100000,seat_index:1},function (worked,events) {
+							test.ok(worked);
+							console.log(worked,events);
+							phase3(owner,opponent,gameObj,release);
+						});
+					});
+				});
+			});
+		});
+	}
+	function phase3(owner,opponent,game,release) {
+		game.members[0].status = 'psInHand';
+		game.members[1].status = 'psInHand';
+		game.members[0].hand = new Hand();
+		game.members[1].hand = new Hand();
+		game.members[0].sitOutNextRound = true;
+		game.seats[0].rakecontrib = 0;
+		game.seats[1].rakecontrib = 0;
+		game.state = 'tsPreFlop';
+		game.flops = [ new Hand() ];
+		game.turns = [ new Hand() ];
+		game.rivers = [ new Hand() ];
+		game.history = { cards:[], moves:[], players:[{},{}] };
+		game.balance_changes = [0,0];
+		game.bets = [ opts.bets[0], opts.bets[0] ];
+		game.current_seat = 0;
+		game.dealer = 0;
+		game.rake = 0;
+		game.real_rake = 10;
+		game.deck.cards = [1,40,17,41,29,51,48,20,9,25,13,19,46,42,10,8,16,47,0,11,18,14,31,4,2,24,32,33,6,15,12,39,21,37,30,26,34,7,22,3,35,27,44,5,36,50,49,28,23,43,38,45];
+		game.deck.draw(2,game.members[0].hand);
+		game.deck.draw(2,game.members[1].hand);
+		game.deck.draw(2,game.members[0].hand);
+		game.stateRow.moveCounter = 0;
+		game.putChips(owner,opts.bets[1],function (events,offset) {
+			test.equal(events[0].event,'teRaise');
+			game.putChips(opponent,opts.bets[1],function (events,offset) {
+				var contrib = (game.real_rake / 100) * opts.bets[1];
+				test.equal(game.seats[0].rakecontrib,contrib);
+				test.equal(game.seats[1].rakecontrib,contrib);
+				game.putChips(opponent,0,function (events,offset) {
+					game.putChips(owner,0,function (events,offset) {
+						game.putChips(opponent,0,function (events,offset) {
+							game.putChips(owner,0,function (events,offset) {
+								game.putChips(opponent,0,function (events,offset) {
+									game.putChips(owner,0,function (events,offset) {
+										console.log('EVENT'.green,events[2]);
+										test.equal(events[2].pots[0].rake,opts.mainrake);
+										phase4(game);
+										game.stopTimer();
+										release();
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+	function phase4(game) {
+		test.equal(game.seats[0].rakecontrib,opts.contrib);
+		test.equal(game.seats[1].rakecontrib,opts.contrib);
+		mdb.close();
+		finalcb();
+	}
+}
 exports.user = {
 	changePassword: function (test) {
 		var user = require('./user');

@@ -74,7 +74,7 @@ function initConfig() {
 	regex.password = '^[a-zA-Z0-9_\\!@#$%^&*\\(\\)+=~`\\.-]{6,32}$';
 	regex.clubname = "^[a-zA-Z0-9!()\\[\\]{}@#$%&*+=/\\' -]{5,64}$";
 	regex.clubpassword = '^[a-zA-Z0-9]{3,32}$';
-	regex.gamename = "^[a-zA-Z0-9!()\\[\\]{}@#$%&*+=/\\' -]{3,32}$";
+	regex.gamename = "^[a-zA-Z0-9!()\\[\\]{}@#$%&*+=/\\' ,-]{3,32}$";
 	sharedconfig.valid_chars_regex = regex;
 	regex2 = {};
 	for (key in regex) {

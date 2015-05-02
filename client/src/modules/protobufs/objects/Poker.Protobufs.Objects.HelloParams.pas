@@ -12,7 +12,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
-  TAppCode = (DelphiWindows = 1, QtLinux32, QtLinuxArm, QtMac, QtWindows32);
+  TAppCode = (acDelphiWindows = 0, acQtLinux32, acQtLinuxArm, acQtMac, acQtWindows32);
 
   TPB_HelloParams = class(TProtobufBaseObject)
   private

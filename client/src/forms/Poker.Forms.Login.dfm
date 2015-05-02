@@ -5,7 +5,6 @@ object frmChipUpLogin: TfrmChipUpLogin
   AlphaBlendValue = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'Welcome to ChipUP Poker'
   ClientHeight = 371
   ClientWidth = 558
   Color = clBlack

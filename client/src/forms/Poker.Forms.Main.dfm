@@ -1,7 +1,6 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  Caption = 'ChipUP Poker'
   ClientHeight = 582
   ClientWidth = 841
   Color = clBlack
@@ -4470,7 +4469,7 @@ object frmChipUpMain: TfrmChipUpMain
               end
               item
                 Action = acShowAboutForm
-                Caption = '&About ChipUP Poker...'
+                Caption = '&About %s...'
               end>
             Caption = '&Help'
           end
@@ -4571,7 +4570,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acShowAboutForm: TAction
       Category = 'Help'
-      Caption = 'About ChipUP Poker...'
+      Caption = 'About %s...'
       OnExecute = acShowAboutFormExecute
     end
     object acSoundsOnOff: TAction
