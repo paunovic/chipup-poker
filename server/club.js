@@ -507,8 +507,11 @@ handlers[codes.scCreateClub] = function (args,token) {
 		}
 		Club.createClub(params.name,params.password,this.userid,params.rake,params.buyin_reset,function (worked,club) {
 			if (worked) {
-				var out = Club.makeClubProtobuf(club.obj,null,[]);
-				this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+				models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
+					console.log(err,stats);
+					var out = Club.makeClubProtobuf(club.obj,null,stats,club);
+					this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+				}.bind(this));
 			}
 		}.bind(this));
 	}.bind(this));
