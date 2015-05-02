@@ -68,6 +68,7 @@ procedure TPlayerInfo.Flush;
 begin
   Clear;
   FClubs.Clear;
+//  FPendingClubs.Clear;
   FPassword := '';
   FRegisteredTournaments.Clear;
   FTableStatuses.Clear;
