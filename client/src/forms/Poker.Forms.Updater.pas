@@ -104,6 +104,8 @@ begin
   HttpClient.RcvdStream := nil;
   (obj as TMemoryStream).Free;
 
+  FSSLCert.Free;
+
   FormsContainer.Remove(self);
 
   if Assigned(FCloseCallback) then
