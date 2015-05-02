@@ -20,6 +20,7 @@ type
 
     function GetAndLock(const AClubId: TMongoId; out AClub: TClubInfo): Boolean; overload;
     function GetAndLockByGame(const AGameId: TMongoId; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+    function ClubIdExists(const AClubId: Integer): Boolean;
 
     procedure AddClub(const AProtobufObject: TPB_Club);
   end;
@@ -75,6 +76,21 @@ begin
     end;
   Unlock;
   Exit(FALSE);
+end;
+
+function TClubList.ClubIdExists(const AClubId: Integer): Boolean;
+var
+  club: TClubInfo;
+begin
+  result := FALSE;
+  Lock;
+  try
+    for club in Values do
+      if club.Seq = AClubId then
+        Exit(TRUE);
+  finally
+    Unlock;
+  end;
 end;
 
 function TClubList.GetAndLock(const AClubId: TMongoId; out AClub: TClubInfo): Boolean;

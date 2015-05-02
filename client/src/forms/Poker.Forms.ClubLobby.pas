@@ -218,7 +218,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams,
+  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Helpers.PB_ClubMember,
   Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs, Poker.SoftExceptions;
 
@@ -368,8 +368,8 @@ begin
 
     if btSuspendUnsuspend.Visible then
     begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.Owner);
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (member.MongoId <> club.Owner);
+      acSuspendPlayer.Enabled := (Assigned(member)) and (member.Status = msActive) and (member.MongoId <> club.Owner);
+      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Status = msSuspended) and (member.MongoId <> club.Owner);
       if acReinstatePlayer.Enabled then
         btSuspendUnsuspend.Action := acReinstatePlayer
       else
@@ -694,13 +694,8 @@ var
     if AMember.MongoId = club.Owner then
       status := 'Owner'
     else
-      if AMember.Suspended then
-        status := 'Suspended'
-      else
-        if AMember.Manager then
-          status := 'Manager'
-        else
-          status := 'Member';
+      status := AMember.StatusAsString;
+
     if AMember.Muted then
       status := status + ' (Muted)';
 

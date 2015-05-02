@@ -275,7 +275,7 @@ uses
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
   Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Forms.Table, Poker.Forms.TournamentFinishDialog,
   Poker.Protobufs.Objects.PlayerClubStatus, Poker.Common.ModalDialogs, Poker.Common.InstanceController,
-  Poker.SoftExceptions;
+  Poker.SoftExceptions, Poker.Helpers.PB_ClubMember;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -642,7 +642,7 @@ begin
         Exit;
 
       if (Assigned(member)) and
-         (member.Suspended) then
+         (member.Status = msSuspended) then
         err := 'You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.'
       else
         if Tables.GetAndLockTable(game.MongoId, ttLive, table) then
@@ -909,15 +909,7 @@ begin
             status := 'Owner'
           else
             if club.GetMemberInfo(dmMain.SelfInfo.Mongoid, member) then
-            begin
-              if member.Suspended then
-                status := 'Suspended'
-              else
-                if member.Manager then
-                  status := 'Manager'
-                else
-                  status := 'Member';
-            end
+              status := member.StatusAsString
             else
               status := 'Unknown';
           c.SetValue(rcount - 1, gridHomeClubsStatus.Index, status);

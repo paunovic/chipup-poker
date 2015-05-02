@@ -555,7 +555,7 @@ begin
 
     // if user is suspended, abort
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     // if cursor is in some seat..
@@ -1383,7 +1383,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     if (table.TableType = ttLive) and
@@ -1805,7 +1805,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     ServerSocket.TableSit(FGameId, -1, 0);
@@ -1822,7 +1822,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     ServerSocket.TableStandUp(FGameId);

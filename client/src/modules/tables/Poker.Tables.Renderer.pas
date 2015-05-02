@@ -554,7 +554,7 @@ begin
         case seat_info.Status of
           psOutOfPlay: begin
             if (table.Club.GetMemberInfo(seat_info.PlayerMongoId, member)) and
-               (member.Suspended) then
+               (member.Status = msSuspended) then
             begin
               seat_lower_text := 'Suspended';
               seat_lower_text_color := cColor2($FFFF3535);
