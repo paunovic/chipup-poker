@@ -218,9 +218,12 @@ end;
 procedure TfrmUpdater.DownloadFullInstaller;
 begin
   FFullInstaller := TRUE;
+  FDownloadedSize := 0;
+  FTotalSize := 0;
   (HttpClient.RcvdStream as TMemoryStream).Clear;
   HttpClient.URL := Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.LATEST_VERSION;
   HttpClient.GetASync;
+  {$IFDEF DEBUG} DebugLn('Downloading full installer...', ditNetInc, HttpClient.URL); {$ENDIF}
 end;
 
 function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Integer;
@@ -367,7 +370,13 @@ end;
 
 procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
 begin
-  FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
+  if FFullInstaller then
+  begin
+    FCurrentDownloadedSize := HttpClient.RcvdCount;
+    FTotalSize := HttpClient.ContentLength;
+  end
+  else
+    FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
 
   pbProgress.Position := ((FDownloadedSize + FCurrentDownloadedSize) / FTotalSize) * 100;
   Caption := Format('%s - Updating [%d%%]', [Settings.Hardcoded.PROJECT_CAPTION, Trunc(pbProgress.Position)]);
@@ -380,22 +389,33 @@ begin
      (HttpClient.StatusCode = 200) and
      (Assigned(HttpClient.RcvdStream)) then
   begin
-    if FFullInstaller then
+    if not FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
-      dmMain.SetUpdaterInstaller(TempPath + Settings.Hardcoded.INSTALLER_FILENAME);
-      Close;
-      Exit;
-    end
-    else
       if not StoreDownloadedFile then
       begin
         DownloadFullInstaller;
         Exit;
       end;
+      ProcessNextFile;
+    end
+    else
+    begin
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(FUpdateDir + Settings.Hardcoded.INSTALLER_FILENAME);
+      dmMain.SetUpdaterInstaller(FUpdateDir + Settings.Hardcoded.INSTALLER_FILENAME);
+      FRequiresReboot := TRUE;
+      Close;
+      Exit;
+    end;
+  end
+  else
+  begin
+    if not FFullInstaller then
+    begin
+      {$IFDEF DEBUG} DebugLn(Format('Error while downloading file [%d]', [HttpClient.StatusCode]), ditException); {$ENDIF}
+      DownloadFullInstaller;
+      Exit;
+    end;
   end;
-
-  ProcessNextFile;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
