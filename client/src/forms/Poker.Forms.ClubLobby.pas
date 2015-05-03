@@ -683,12 +683,19 @@ var
       query_players[Length(query_players) - 1] := AMember.MongoId;
     end;
 
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
-
-    if AMember.UnlimitedLimit then
-      status := 'Unlimited'
+    if AMember.Status = msPending then
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, 0)
     else
-      status := '-' + ChipsToStr(AMember.BalanceLimit);
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
+
+    if AMember.Status = msPending then
+      status := 'N/A'
+    else
+      if AMember.UnlimitedLimit then
+        status := 'Unlimited'
+      else
+        status := '-' + ChipsToStr(AMember.BalanceLimit);
+
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
     if AMember.MongoId = club.Owner then

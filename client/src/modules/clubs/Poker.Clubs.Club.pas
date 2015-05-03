@@ -21,7 +21,8 @@ type
     procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
     procedure UpdateMember(const AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure SetMemberInfo(const AMemberInfo: TPB_ClubMember);
-
+    function MemberCount: Integer;
+    function PendingMemberCount: Integer;
     procedure AddMember(const AClubMemberInfo: TPB_ClubMember);
     function GetMemberInfo(const AMongoId: TMongoId; out AMemberInfo: TPB_ClubMember): Boolean;
 
@@ -124,6 +125,26 @@ var
 begin
   cmi := TPB_ClubMember.Create(AClubMemberInfo, TRUE);
   Members.Add(cmi);
+end;
+
+function TClubInfo.MemberCount: Integer;
+var
+  member: TPB_ClubMember;
+begin
+  result := 0;
+  for member in Members do
+    if member.Status <> msPending then
+      Inc(result);
+end;
+
+function TClubInfo.PendingMemberCount: Integer;
+var
+  member: TPB_ClubMember;
+begin
+  result := 0;
+  for member in Members do
+    if member.Status = msPending then
+      Inc(result);
 end;
 
 end.
