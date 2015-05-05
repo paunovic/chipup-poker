@@ -1005,7 +1005,7 @@ begin
     for C2 := Low(card_points_final[C1]) to High(card_points_final[C1]) do
     begin
       card_points_final[C1][C2].x := FMetrics.TableCenter.X - (FMetrics.CardWidth * 5) / 2 - 4 * 3 + (C2 * FMetrics.CardWidth) + (C2 * 3);
-      card_points_final[C1][C2].y := FMetrics.TableCenter.Y - FMetrics.CardHeight / 2 + C1 * FMetrics.CardHeight / 3;
+      card_points_final[C1][C2].y := FMetrics.TableCenter.Y - FMetrics.CardHeight / 1.85 + C1 * FMetrics.CardHeight / 1.8;
       card_points_curr[C1][C2] := card_points_final[C1][C2];
       card_points_mid[C1][C2] := card_points_final[C1][C2];
     end;
