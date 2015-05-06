@@ -428,7 +428,7 @@ begin
   begin
     if not FFullInstaller then
     begin
-      {$IFDEF DEBUG} DebugLn(Format('Error while downloading file [%d]', [HttpClient.StatusCode]), ditException); {$ENDIF}
+      SoftException(Format('Error while downloading file [%d]', [HttpClient.StatusCode]));
       DownloadFullInstaller;
       Exit;
     end;
