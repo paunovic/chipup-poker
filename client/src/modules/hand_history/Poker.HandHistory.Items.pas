@@ -150,7 +150,7 @@ begin
   FMoves := TPB_HandHistoryMoveList.Create;
 //  FLines := TStringList.Create;
   FRVLines := TStringList.Create;
-  FBalanceChanges := TList<Integer>.Create;;
+  FBalanceChanges := TList<Integer>.Create;
   FCards := TList<TBytes>.Create;
   Assign(AHandHistory);
 end;
@@ -212,15 +212,28 @@ var
   index: Integer;
   cards_set: TBytes;
   hand_strength: String;
+  gamename: String;
 begin
   ALines.Clear;
 
   tablestate := tsPreFlop;
 
   // basic info
+  if FParentItems.Game.GameType = gtRotationNLHPLO then
+  begin
+    case FCurrentGame of
+      gtHoldem: gamename := FParentItems.Game.GameTypeToStr(FCurrentGame, glNoLimit, FALSE);
+      gtOmaha: gamename := FParentItems.Game.GameTypeToStr(FCurrentGame, glPotLimit, FALSE);
+    end;
+  end
+  else
+    gamename := FParentItems.Game.GameName;
+
   ALines.Add(Format('%sHand %s#%d%s: %s%s (%s/%s)%s - %s%s', [
-      ATags.HeaderNormal, ATags.HandId, FHandId, ATags.HeaderNormal, ATags.GameType, TGameInfo.GameTypeToStr(FCurrentGame, FParentItems.Game.GameLimit, FALSE),
-      ChipsToStr(FParentItems.Game.SmallBlind), ChipsToStr(FParentItems.Game.BigBlind), ATags.HeaderNormal, ATags.GameTime, FStartTimeStr
+      ATags.HeaderNormal, ATags.HandId, FHandId, ATags.HeaderNormal,
+      ATags.GameType, gamename, ChipsToStr(FParentItems.Game.SmallBlind),
+      ChipsToStr(FParentItems.Game.BigBlind), ATags.HeaderNormal,
+      ATags.GameTime, FStartTimeStr
   ]));
 
   if Assigned(FParentItems.Tournament) then
@@ -229,8 +242,9 @@ begin
     parent_name := FParentItems.Club.Name;
 
   ALines.Add(Format('%sTable ''%s%s%s'' (%s%d-max%s) - %s%s', [
-      ATags.HeaderNormal, ATags.TableName, FParentItems.Game.Gamename, ATags.HeaderNormal, ATags.TableMaxSeats, FParentItems.Game.Seats, ATags.HeaderNormal,
-      ATags.ClubName, parent_name
+      ATags.HeaderNormal, ATags.TableName, gamename,
+      ATags.HeaderNormal, ATags.TableMaxSeats, FParentItems.Game.Seats,
+      ATags.HeaderNormal, ATags.ClubName, parent_name
   ]));
 
   ALines.Add('');
@@ -526,7 +540,7 @@ var
   pbgame: TPB_Game;
   tournament: TTournamentInfo;
 begin
-  inherited Create(TRUE);
+   inherited Create(TRUE);
 
   FLock := TSafeMutex.Create;
 

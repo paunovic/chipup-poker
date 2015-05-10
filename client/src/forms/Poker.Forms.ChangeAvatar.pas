@@ -119,7 +119,7 @@ begin
     HttpClient.RcvdStream.Position := 0;
     SetLength(FAvatarId, HttpClient.RcvdStream.Size);
     Move((HttpClient.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], HttpClient.RcvdStream.Size);
-    {$IFDEF DEBUG} DebugLn(Format('Avatar received [%s]', [BytesToHex(FAvatarId)]), ditNetInc); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('Avatar received', ditNetInc, BytesToHex(FAvatarId)); {$ENDIF}
     ServerSocket.SetAvatar(FAvatarId);
   end
   else
