@@ -370,7 +370,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 	else key1 = 'installerid';
 	key1 = prefix+'_'+key1;
 	if (!params.appcode) {
-	} else if (params.appcode != 'DelphiWindows') key1 = params.appcode + '_' + key1;
+	} else if (params.appcode != 'acDelphiWindows') key1 = params.appcode + '_' + key1;
 	console.log('final key %s',key1);
 	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
@@ -431,7 +431,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 					//console.log('need to patch %s',clientFile.path);
 					models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
-						if (diffRow && (params.appcode == 'DelphiWindows')) {
+						if (diffRow && (params.appcode == 'acDelphiWindows')) {
 							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
 							toUpdate.push(UFI);
 							cb();
