@@ -62,49 +62,35 @@ Game.decodeBlinds = function (blinds) {
 		g.small_blind = 100;
 		g.big_blind = 200;
 		break;
-	case 'gb5x5':
-		g.small_blind = 500;
-		g.big_blind = 500;
-		break;
-	case 'gb5x10':
-		g.small_blind = 500;
-		g.big_blind = 1000;
-		break;
-	case 'gb10x25':
-		g.small_blind = 1000;
+	case 'gb2x4': g.small_blind = 200; g.big_blind = 400; break;
+	case 'gb2x5': g.small_blind = 200; g.big_blind = 500; break;
+	case 'gb5x5': g.small_blind = 500; g.big_blind = 500; break;
+	case 'gb3x6': g.small_blind = 300; g.big_blind = 600; break;
+	case 'gb4x8': g.small_blind = 400; g.big_blind = 800; break;
+	case 'gb5x10': g.small_blind = 500; g.big_blind = 1000; break;
+	case 'gb10x25': g.small_blind = 1000; g.big_blind = 2500; break;
+	case 'gb25x25':
+		g.small_blind = 2500;
 		g.big_blind = 2500;
+		break;
+	case 'gb15x30': g.small_blind = 1500; g.big_blind = 3000; break;
+	case 'gb20x40':
+		g.small_blind = 2000;
+		g.big_blind = 4000;
 		break;
 	case 'gb25x50':
 		g.small_blind = 2500;
 		g.big_blind = 5000;
 		break;
+	case 'gb30x60': g.small_blind = 3000; g.big_blind = 6000; break;
+	case 'gb40x80': g.small_blind = 4000; g.big_blind = 8000; break;
 	case 'gb50x100':
 		g.small_blind = 5000;
 		g.big_blind = 10000;
 		break;
-	case 'gb2x5':
-		g.small_blind = 200;
-		g.big_blind = 500;
-		break;
-	case 'gb3x6':
-		g.small_blind = 300;
-		g.big_blind = 600;
-		break;
-	case 'gb4x8':
-		g.small_blind = 400;
-		g.big_blind = 800;
-		break;
 	case 'gb10x10':
 		g.small_blind = 1000;
 		g.big_blind = 1000;
-		break;
-	case 'gb25x25':
-		g.small_blind = 2500;
-		g.big_blind = 2500;
-		break;
-	case 'gb20x40':
-		g.small_blind = 2000;
-		g.big_blind = 4000;
 		break;
 	}
 	return g;
