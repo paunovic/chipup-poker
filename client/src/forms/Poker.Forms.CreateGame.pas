@@ -47,6 +47,7 @@ type
     FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
 
+    procedure PopulateBlindsCombobox;
     procedure CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
   public
     procedure SetParams(const AParams: array of pointer);
@@ -68,6 +69,9 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk)
                   ]);
+
+  PopulateBlindsCombobox;
+  cbBlinds.ItemIndex := 0;
 end;
 
 procedure TfrmCreateGame.FormDestroy(Sender: TObject);
@@ -111,6 +115,20 @@ begin
   FClubId := AParams[0];
 end;
 
+procedure TfrmCreateGame.PopulateBlindsCombobox;
+var
+  blinds: TGameBlinds;
+  sb, bb: Cardinal;
+begin
+  cbBlinds.Properties.Items.Clear;
+  for blinds := Low(TGameBlinds) to High(TGameBlinds) do
+    if blinds <> gbOther then
+    begin
+      TGameInfo.BlindsEnumToInts(blinds, sb, bb);
+      cbBlinds.Properties.Items.Add(Format('%d/%d', [sb, bb]));
+    end;
+end;
+
 procedure TfrmCreateGame.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
@@ -119,11 +137,10 @@ end;
 
 procedure TfrmCreateGame.acOKExecute(Sender: TObject);
 var
-  sb, bb: Integer;
+  sb, bb: Cardinal;
   err: String;
 begin
-  if not GetBlinds(cbBlinds.Text, sb, bb) then
-    Exit;
+  TGameInfo.BlindsEnumToInts(TGameBlinds(cbBlinds.ItemIndex), sb, bb);
 
   if seBuyinMin.Value < bb * 5 then
   begin

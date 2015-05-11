@@ -183,15 +183,8 @@ object frmCreateGame: TfrmCreateGame
     Left = 88
     Top = 98
     Properties.DropDownListStyle = lsFixedList
-    Properties.Items.Strings = (
-      '1/2'
-      '5/5'
-      '5/10'
-      '10/25'
-      '25/50'
-      '50/100')
+    Properties.DropDownRows = 16
     TabOrder = 3
-    Text = '1/2'
     Width = 273
   end
   object lbsBuyinLimit: TcxLabel

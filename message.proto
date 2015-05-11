@@ -278,18 +278,21 @@ message Game {
 	
 	enum GameBlinds {
 		gb1x2 = 0;
-		gb5x5 = 1;
-		gb5x10 = 2;
-		gb10x25 = 3;
-		gb25x50 = 4;
-		gb50x100 = 5;
-		gbOther = 6;
-		gb2x5 = 7;
-		gb3x6 = 8;
-		gb4x8 = 9;
-		gb10x10 = 10;
-		gb25x25 = 11;
-		gb20x40 = 12;
+		gb2x4 = 1;
+		gb2x5 = 2;
+		gb5x5 = 3;
+		gb3x6 = 4;
+		gb4x8 = 5;
+		gb5x10 = 6;
+		gb10x25 = 7;
+		gb25x25 = 8;
+		gb15x30 = 9;
+		gb20x40 = 10;
+		gb25x50 = 11;
+		gb30x60 = 12;
+		gb40x80 = 13;
+		gb50x100 = 14;
+		gbOther =  15;
 	}
 	
 	optional bytes _id = 1 [(ObjectId)=true];

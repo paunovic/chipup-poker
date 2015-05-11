@@ -17,7 +17,6 @@ function GetFileSize(const AFile: String): DWORD;
 function GetThreadsCount(const APID: DWORD): Integer;
 function GetWorkingSetSize: DWORD;
 function EncodeURL(const ASrc: String): String;
-function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
 procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: String);
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
