@@ -71,9 +71,18 @@ begin
       else
         parentid := AHandHistoryInfo.TournamentId;
 
-      inherited Add(AHandHistoryInfo.Gameid, THandHistoryItems.Create(parentid, AHandHistoryInfo.Gameid));
-      if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
+      hhis := THandHistoryItems.Create(parentid, AHandHistoryInfo.Gameid);
+      if not hhis.Game.MongoId.IsEmpty then
+      begin
+        inherited Add(AHandHistoryInfo.Gameid, hhis);
+        if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
+          Exit(FALSE);
+      end
+      else
+      begin
+        hhis.Free;
         Exit(FALSE);
+      end;
     end;
 
     for pbhh in AHandHistoryInfo.Rows do
