@@ -69,7 +69,7 @@ global.sharedconfig = sharedconfig; // FIXME, always reference it via global
 var regexLimits;
 function initConfig() {
 	var regex = {},key,regex2;
-	regex.email = '^[a-zA-Z0-9\\.+]+@[a-zA-Z0-9\\.]+$';
+	regex.email = '^[a-zA-Z0-9\\._+]+@[a-zA-Z0-9\\.]+$';
 	regex.username = '^[a-zA-Z0-9 _\\. -]{3,20}$';
 	regex.password = '^[a-zA-Z0-9_\\!@#$%^&*\\(\\)+=~`\\.-]{6,32}$';
 	regex.clubname = "^[a-zA-Z0-9!()\\[\\]{}@#$%&*+=/\\' -]{5,64}$";
