@@ -63,6 +63,7 @@ object frmTableSit: TfrmTableSit
     Style.TextColor = clWhite
     Style.TextStyle = [fsBold]
     TabOrder = 1
+    Value = 1.000000000000000000
     Width = 72
   end
   object btOK: TcxButton

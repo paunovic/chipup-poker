@@ -466,6 +466,8 @@ begin
   if not TTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
     Exit;
 
+  tiLoginTimeout.Enabled := FALSE;
+
   case pbreply.LoginStatus of
     lrSuccess: begin
       if not Assigned(TableResources) then

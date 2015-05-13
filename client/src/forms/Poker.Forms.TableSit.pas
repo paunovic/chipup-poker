@@ -142,7 +142,12 @@ begin
 
     if (dmMain.SelfInfo.TableStatuses.TryGetValue(table.GameId, pcsproto)) and
        (pcsproto.has_BuyinMax) then
-      result := pcsproto.BuyinMax - seat_chips
+    begin
+      if seat_chips > pcsproto.BuyinMax then
+        result := 0
+      else
+        result := pcsproto.BuyinMax - seat_chips;
+    end
     else
       if seat_chips > table.Game.BuyinMax then
         result := 0
