@@ -20,6 +20,7 @@ type
     FFontScaleRatio: Single;
 
     function GetCurrentImage: TAsphyreImage;
+    function PointInButton(const X, Y: Integer): Boolean;
   public
     procedure RenderTo(const ACanvas: TAsphyreCanvas; const AMetrics: TTableRenderMetrics);
 
@@ -41,7 +42,9 @@ type
 implementation
 
 uses
-  Poker.Common.Misc, System.Types, Asphyre.Fonts, Poker.Tables.Resources, Asphyre.Math;
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  Poker.Common.Misc, System.Types, Asphyre.Fonts, Poker.Tables.Resources, Asphyre.Math,
+  System.SysUtils;
 
 { TDXButton }
 
@@ -58,12 +61,11 @@ end;
 
 procedure TDXButton.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (Button <> mbLeft) or
-     (not Assigned(FAction)) or
+  if (not Assigned(FAction)) or
      (not FAction.Enabled) then
     Exit;
 
-  FDown := PtInBounds(Point(X, Y), FBounds^);
+  FDown := PointInButton(X, Y);
 end;
 
 procedure TDXButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -72,11 +74,27 @@ begin
   begin
     if (Assigned(FAction)) and
        (FAction.Enabled) and
-       (PtInBounds(Point(X, Y), FBounds^)) then
+       (PointInButton(X, Y)) then
       FAction.Execute;
 
     FDown := FALSE;
   end;
+end;
+
+function TDXButton.PointInButton(const X, Y: Integer): Boolean;
+var
+  relx, rely: Integer;
+begin
+  if PtInBounds(Point(X, Y), FBounds^) then
+  begin
+    relx := Round((X - FBounds^[0].x) *
+                  (FImageNormal.Texture[0].Width / (FBounds^[1].x - FBounds^[0].x)));
+    rely := Round((Y - FBounds^[0].y) *
+                  (FImageNormal.Texture[0].Height / (FBounds^[2].y - FBounds^[0].y)));
+    result := (FImageNormal.Texture[0].Pixels[relx, rely] shr 24) <> $00;
+  end
+  else
+    result := FALSE;
 end;
 
 procedure TDXButton.RenderTo(const ACanvas: TAsphyreCanvas; const AMetrics: TTableRenderMetrics);
