@@ -598,7 +598,7 @@ begin
     Integer(sePlayerClubStatus): ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(seReservedSeatFree): ADataObject := TPB_ReservedSeatFree.Create(ADataPointer, ARpcMessage.DataSize);
   else
-    SoftException(Format('Unhandled code received: %d',
+    SoftException(Format('Unhandled code received: %s',
       [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
     Exit(FALSE);
   end;

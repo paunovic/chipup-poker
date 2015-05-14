@@ -172,7 +172,7 @@ uses
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
-  RectMarks, Poker.Settings, Vcl.Clipbrd;
+  RectMarks, Poker.Settings, Vcl.Clipbrd, synacode;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -436,19 +436,20 @@ end;
 
 procedure TfrmDebug.acSendSocketIOExecute(Sender: TObject);
 var
-  buffer: pointer;
-  hex: String;
-  len: Integer;
+  buffer: AnsiString;
+  ms: TMemoryStream;
 begin
-  hex := teSocketIO.Text;
-  len := Length(hex) div 2;
-  buffer := AllocMem(len);
+  ms := TMemoryStream.Create;
   try
-    len := HexToBin(PChar(hex), buffer, len);
-    if len > 0 then
-      ServerSocket.SendRaw(buffer, len);
+    buffer := DecodeBase64(AnsiString(teSocketIO.Text));
+    if Length(buffer) > 0 then
+    begin
+      ms.WriteBuffer(buffer[1], Length(buffer));
+      DecompressStream(ms);
+      ServerSocket.SendRaw(ms.Memory, ms.Size);
+    end;
   finally
-    FreeMem(buffer);
+    ms.Free;
   end;
 
   teSocketIO.Clear;
@@ -456,19 +457,21 @@ end;
 
 procedure TfrmDebug.acRecvSocketIOExecute(Sender: TObject);
 var
-  buffer: pointer;
-  hex: String;
-  len: Integer;
+  buffer: AnsiString;
+  ms: TMemoryStream;
 begin
-  hex := teSocketIO.Text;
-  len := Length(hex) div 2;
-  buffer := AllocMem(len);
+  ms := TMemoryStream.Create;
   try
-    len := HexToBin(PChar(hex), buffer, len);
-    ServerSocket.AppendToReceiveBuffer(buffer, len);
-    ServerSocket.ParseReceiveBuffer;
+    buffer := DecodeBase64(AnsiString(teSocketIO.Text));
+    if Length(buffer) > 0 then
+    begin
+      ms.WriteBuffer(buffer[1], Length(buffer));
+      DecompressStream(ms);
+      ServerSocket.AppendToReceiveBuffer(ms.Memory, ms.Size);
+      ServerSocket.ParseReceiveBuffer;
+    end;
   finally
-    FreeMem(buffer);
+    ms.Free;
   end;
 
   teSocketIO.Clear;
@@ -1004,6 +1007,8 @@ class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATyp
 var
   dfl: TDebugFormLog;
   buffer_str: String;
+  buffer_raw: AnsiString;
+  ms: TMemoryStream;
 begin
   dfl := TDebugFormLog.Create;
   ActiveNotifyObjects.Add(dfl);
@@ -1015,8 +1020,15 @@ begin
 
   if ABufferSize > 0 then
   begin
-    SetLength(buffer_str, ABufferSize * 2);
-    BinToHex(ABuffer, PChar(buffer_str), ABufferSize);
+    ms := TMemoryStream.Create;
+    try
+      ms.WriteBuffer(ABuffer^, ABufferSize);
+      CompressStream(ms);
+      SetString(buffer_raw, PAnsiChar(ms.Memory), ms.Size);
+      buffer_str := String(EncodeBase64(buffer_raw));
+    finally
+      ms.Free;
+    end;
   end
   else
     buffer_str := '';
