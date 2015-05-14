@@ -912,7 +912,7 @@ object frmDebug: TfrmDebug
       ShowHint = False
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
-      TabOrder = 0
+      TabOrder = 1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -932,7 +932,7 @@ object frmDebug: TfrmDebug
       ShowHint = False
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
-      TabOrder = 1
+      TabOrder = 2
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -941,12 +941,11 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object teSocketIO: TcxTextEdit
-      Left = 0
+      Left = 20
       Top = 0
       Align = alClient
       AutoSize = False
       ParentFont = False
-      Properties.OnChange = teFindTextPropertiesChange
       Style.BorderStyle = ebsUltraFlat
       Style.Edges = [bTop, bRight, bBottom]
       Style.Font.Charset = DEFAULT_CHARSET
@@ -955,11 +954,51 @@ object frmDebug: TfrmDebug
       Style.Font.Name = 'Consolas'
       Style.Font.Style = []
       Style.IsFontAssigned = True
-      TabOrder = 2
-      OnEnter = teFindTextEnter
-      OnExit = teFindTextExit
+      TabOrder = 3
       Height = 19
-      Width = 507
+      Width = 412
+    end
+    object btAutoClearSocketIO: TcxButton
+      Left = 432
+      Top = 0
+      Width = 75
+      Height = 19
+      Align = alRight
+      Caption = 'Auto clear'
+      Colors.PressedText = 4227327
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.GroupIndex = 4
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      SpeedButtonOptions.Down = True
+      TabOrder = 0
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object btClearSocketIO: TcxButton
+      Left = 0
+      Top = 0
+      Width = 20
+      Height = 19
+      Align = alLeft
+      Action = acClearSocketIO
+      Colors.PressedText = clRed
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      TabOrder = 4
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
   end
   object alDebug: TActionList
@@ -988,6 +1027,10 @@ object frmDebug: TfrmDebug
     object acRecvSocketIO: TAction
       Caption = 'Recv'
       OnExecute = acRecvSocketIOExecute
+    end
+    object acClearSocketIO: TAction
+      Caption = 'x'
+      OnExecute = acClearSocketIOExecute
     end
   end
   object SaveDialog: TSaveDialog

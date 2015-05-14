@@ -109,6 +109,9 @@ type
     acShowSocketIO: TAction;
     acSendSocketIO: TAction;
     acRecvSocketIO: TAction;
+    btAutoClearSocketIO: TcxButton;
+    btClearSocketIO: TcxButton;
+    acClearSocketIO: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -128,6 +131,7 @@ type
     procedure acShowSocketIOExecute(Sender: TObject);
     procedure acSendSocketIOExecute(Sender: TObject);
     procedure acRecvSocketIOExecute(Sender: TObject);
+    procedure acClearSocketIOExecute(Sender: TObject);
   private
     const
       SCROLLBACK_LINES = 500;
@@ -420,6 +424,11 @@ begin
   rvLog.Format;
 end;
 
+procedure TfrmDebug.acClearSocketIOExecute(Sender: TObject);
+begin
+  teSocketIO.Clear;
+end;
+
 procedure TfrmDebug.acCopyLogSelectionExecute(Sender: TObject);
 begin
   rvLog.CopyText;
@@ -452,7 +461,8 @@ begin
     ms.Free;
   end;
 
-  teSocketIO.Clear;
+  if btAutoClearSocketIO.Down then
+    teSocketIO.Clear;
 end;
 
 procedure TfrmDebug.acRecvSocketIOExecute(Sender: TObject);
@@ -474,7 +484,8 @@ begin
     ms.Free;
   end;
 
-  teSocketIO.Clear;
+  if btAutoClearSocketIO.Down then
+    teSocketIO.Clear;
 end;
 
 procedure TfrmDebug.acShowSocketIOExecute(Sender: TObject);
@@ -634,6 +645,7 @@ begin
      (X in [(rvLog.LeftMargin + table.Cells[0, 2].Left)..(rvLog.LeftMargin + table.Cells[0, 2].Left + table.Cells[0, 2].Width)]) then
   begin
     buffer := table.Cells[0, 2].GetItemTag(0);
+    teSocketIO.Text := buffer;
     Clipboard.AsText := buffer;
     table.Cells[0, 2].Clear;
     table.Cells[0, 2].AddFmt('B', [], FindStyleWithName('Buffer-Copied'), 1);
