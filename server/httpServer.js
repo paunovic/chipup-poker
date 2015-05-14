@@ -125,14 +125,21 @@ function Server(activeUsersIN) {
 		var self;
 		if (config.diffserver) self='dev';
 		else self = 'live';
-		models.Config.findOne({_id:self+'_installerid'},function (err,row) {
+		models.Config.findOne({_id:self+'_installerid'},function (err,row1) {
 			assert.ifError(err);
-			models.Installer.findOne({_id:row.value},function (err,row) {
-				global.log('sending installer %j',row);
-				if (config.diffserver) {
-					res.sendfile('installers/'+row.name);
+			models.Installer.findOne({_id:row1.value},function (err,row) {
+				if (err) console.log(err);
+				if (row) {
+					global.log('sending installer %j',row);
+					if (config.diffserver) {
+						res.sendfile('installers/'+row.name);
+					} else {
+						res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
+						res.end();
+					}
 				} else {
-					res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
+					console.log("warning, installer missing",err,row,row1);
+					res.writeHead(500);
 					res.end();
 				}
 			});
@@ -322,6 +329,9 @@ Server.prototype.buildDone = function (req,res) {
 		});
 	});
 	res.end('OK\n');
+	start.on('error',function (e) {
+		console.log('error while checking mac symbols',e);
+	});
 };
 Server.prototype.minidumpUpload = function (req,res) {
 	console.log(req.files.minidump.path,req.files.minidump.originalFilename,req.query);
