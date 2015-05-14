@@ -286,14 +286,14 @@ Server.prototype.addMac = function (req,res) {
 		var debug ='release';
 		fs.rename(localFile,'installers/'+name1,function (err) {
 			assert.ifError(err);
-			var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.dmg.size,appcode:'QtMac'});
+			var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.dmg.size,appcode:'acQtMac'});
 			obj.save(function (err) {
 				assert.ifError(err);
 				global.log('new version recorded: %j',obj);
 				installer.unpackTar(obj,req.files.tar.path,function (success) {
 					var key1;
 					if (success) {
-						models.Config.update({_id:'QtMac_dev_installerid'},{$set:{value:obj._id}},function(err,res2) {
+						models.Config.update({_id:'acQtMac_dev_installerid'},{$set:{value:obj._id}},function(err,res2) {
 							assert.ifError(err);
 						});
 						obj.ts = obj._id.getTimestamp().toString();
