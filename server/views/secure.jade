@@ -1,32 +1,36 @@
 extends base
 block links
   div
-    a(href="/secure/billing") billing
-    | 
-    a(href='/secure/clubs') clubs
-    | 
-    a(href='/secure/installers') installers
-    | 
-    a(href='/secure/bugs') bugs
-    | 
-    a(href='/secure/users') users
-    | 
-    a(href='/secure/serverBugs') server errors
-    | 
-    a(href='/secure/disk') disk space
-    | 
-    a(href='/secure/profile') profile
-    | 
-    a(href='/secure/performance') performance
-    | 
-    a(href='/secure/broadcast') broadcast msg
-    | 
-    a(href='/secure/paypal') paypal log
-    | 
-    a(href='/secure/tournament_create') tournament_create
-    | 
-    a(href='/secure/tournaments') tournaments
-    | 
-    a(href='/secure/breakpadReports') Breakpad reports
-    | 
-    a(href='/secure/logout') logout
+    table(border=1,class="header")
+      tr
+        td
+          a(href='/secure/clubs') Clubs
+        td
+          a(href='/secure/users') Users
+        td
+          a(href='/secure/tournaments') Tournaments
+        td
+          a(href='/secure/installers') Installers
+        td
+          a(href='/secure/broadcast') Broadcast message
+        td
+          a(href='/secure/tournament_create') Create tournament
+        td
+          a(href="/secure/billing") Billing
+        td
+          a(href='/secure/paypal') PayPal log
+        td
+          a(href='/secure/bugs') Bugs
+        td
+          a(href='/secure/serverBugs') Server errors
+        td
+          a(href='/secure/disk') Disk space
+        td
+          a(href='/secure/profile') Profiling
+        td
+          a(href='/secure/performance') Performance
+        td
+          a(href='/secure/breakpadReports') Breakpad reports
+        td
+          a(href='/secure/logout') Logout
+  br

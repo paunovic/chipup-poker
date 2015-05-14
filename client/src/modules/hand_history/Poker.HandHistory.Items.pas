@@ -128,6 +128,7 @@ type
 
     procedure Unlock;
 
+    property GameId: TMongoId read FGameId;
     property Club: TClubInfo read FClub;
     property Game: TGameInfo read FGame;
     property Tournament: TTournamentInfo read FTournament;
@@ -540,7 +541,7 @@ var
   pbgame: TPB_Game;
   tournament: TTournamentInfo;
 begin
-   inherited Create(TRUE);
+  inherited Create(TRUE);
 
   FLock := TSafeMutex.Create;
 
@@ -574,7 +575,7 @@ begin
   // fixme
   if FGame.MongoId.IsEmpty then
   begin
-    SoftException('HandHistory: Game.MongoId is emtpy');
+    SoftException('HandHistory: Game.MongoId is empty');
   end;
 end;
 

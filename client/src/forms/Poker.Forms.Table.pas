@@ -64,6 +64,7 @@ type
     acJoinWaitingList: TAction;
     acLeaveWaitingList: TAction;
     lbvWaitingListPosition: TcxLabel;
+    acAddChips: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -110,6 +111,7 @@ type
     procedure cbSplitTableCardsPropertiesChange(Sender: TObject);
     procedure acJoinWaitingListExecute(Sender: TObject);
     procedure acLeaveWaitingListExecute(Sender: TObject);
+    procedure acAddChipsExecute(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -415,11 +417,6 @@ begin
     SetFocus;
     FWindowFocused := TRUE;
 
-    // if chat is not focused, focus raise box, otherwise keep chatbox focus
-    if (not edChat.Focused) and
-       (seRaiseAmount.Visible) then
-      seRaiseAmount.SetFocus;
-
     if Tables.GetAndLockTable(FInternalId, table) then
     try
       table.PlaySound(Sounds.SOUND_TIMEBAR, TRUE);
@@ -537,7 +534,6 @@ end;
 
 procedure TfrmTable.FormClick(Sender: TObject);
 var
-  seat_info: TSeatInfo;
   client_cursor_pos: TPoint;
   seat_index: Integer;
   table: TTable;
@@ -561,12 +557,10 @@ begin
     // if cursor is in some seat..
     if table.Renderer.Metrics.IsPointInSeat(table.game, client_cursor_pos.X, client_cursor_pos.Y, seat_index) then
     begin
-      // if we are sitting at that seat, and we are out of play or out of hand
+      // if we are sitting at that seat, add chips
       if (table.Status.IsSitting) and
-         (table.Status.SelfSeatIndex = seat_index) and
-         (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
-         (seat_info.Status in [psOutOfPlay, psOutOfHand]) then
-        FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose))
+         (table.Status.SelfSeatIndex = seat_index) then
+        acAddChips.Execute
       else // if we are not sitting and seat is free
         if (not table.Status.IsSitting) and
            (table.Status.IsSeatFree(seat_index)) then
@@ -1330,6 +1324,21 @@ begin
     DefocusControl(seRaiseAmount, FALSE);
 end;
 
+procedure TfrmTable.acAddChipsExecute(Sender: TObject);
+var
+  table: TTable;
+  seat_index: Integer;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    seat_index := table.Status.SelfSeatIndex;
+    if table.Status.ActionAddChips then
+      FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose))
+  finally
+    Tables.Unlock;
+  end;
+end;
+
 procedure TfrmTable.acCallExecute(Sender: TObject);
 var
   table_state: TTableState;
@@ -1593,6 +1602,12 @@ begin
 
   RefreshAll;
 
+  // if chat is not focused, focus raise box, otherwise keep chatbox focus
+  if (not edChat.Focused) and
+     (seRaiseAmount.Visible) then
+    seRaiseAmount.SetFocus;
+
+  // focus window if needed
   if focus_window then
   begin
     FocusWindow;
