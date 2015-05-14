@@ -1,31 +1,31 @@
 tr
-  td=val._id.getTimestamp()
   td
-    a(href="https://dev-server.chipuppoker.com/rawinstallers/"+val.name) installer
-  td=val.version
-  td=val.revision
-  td=Math.round(val.size/1024/1024)+'MB'
+    script="document.write(formatDate(new Date('" + val._id.getTimestamp().toJSON() + "')))"
   td
-    input(type="radio",name="activate_live_"+val.debug,value=val._id,class="activate")
+    a(href="https://dev-server.chipuppoker.com/rawinstallers/"+val.name)=val.version
+  td(class="revision")=val.revision
+  td=(val.size/1024/1024).toFixed(2) +'MB'
   td
     input(type="radio",name="activate_dev_"+val.debug,value=val._id,class="activate")
   td
+    input(type="radio",name="activate_live_"+val.debug,value=val._id,class="activate")
+  td
     if (val.debug == 'release')
       if (dev_pubver == live_pubver) && (dev_pubver == val._id)
-        | Both public
+        | DEV & LIVE
       else if (dev_pubver == val._id)
-        | Dev Public
+        | DEV
       else if (live_pubver == val._id)
-        | Live Public
+        | LIVE
       else
         input(class='deleteCheckbox',type="checkbox",name="delete_"+val._id)
     else if (val.debug == 'debug')
       if (dev_debugver == live_debugver) && (dev_debugver == val._id)
-        | Both Debug
+        | DEV & LIVE
       else if (dev_debugver == val._id)
-        | Dev Debug
+        | DEV
       else if (live_debugver == val._id)
-        | Live Debug
+        | LIVE
       else
         input(class='deleteCheckbox',type="checkbox",name="delete_"+val._id)
   td
@@ -38,4 +38,4 @@ tr
       input(type="radio",name="diff_dest",onchange="changeDest('"+val.hashes['chipuppoker:exe']+"')")
     else
       | corrupt installer
-  td=val.used_by
+  td(style="text-align: right;")=val.used_by

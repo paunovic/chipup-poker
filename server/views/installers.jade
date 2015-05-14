@@ -3,75 +3,58 @@ block header
   script(src="/socket.io/socket.io.js")
   script(src="/installers.js")
 block content
+  br
+  h1(style="text-align: center")
+   a(href='installers?appcode=acDelphiWindows') Windows
+   div(class="divider15px")
+   a(href='installers?appcode=acQtMac') MAC
   if showlist
     form(method="post")
-      p Release builds:
+      h2(style="text-align: center") Release builds
       table(border=1,id="release_installers",class="installers")
         tr
-          th ts
-          th links
-          th version
-          th revision
-          th size
-          th activate live
-          th activate dev
-          th status/delete
-          th source
-          th dest
-          th used by
+          th TIMESTAMP
+          th VERSION
+          th REVISION
+          th SIZE
+          th ACTIVATE DEV
+          th ACTIVATE LIVE
+          th STATUS/DELETE
+          th DIFF SOURCE
+          th DIFF DEST
+          th USED BY
         each val in installers
-          if val.debug == 'release'
+          if (val.debug == 'release') && (val.appcode == appcode)
             include installer_row.jade
-      p Debug builds:
+      h2(style="text-align: center") Debug builds
       table(border=1,id="debug_installers",class="installers")
         tr
-          th ts
-          th links
-          th version
-          th revision
-          th size
-          th activate live
-          th activate dev
-          th status/delete
-          th source
-          th dest
-          th used by
+          th TIMESTAMP
+          th VERSION
+          th REVISION
+          th SIZE
+          th ACTIVATE DEV
+          th ACTIVATE LIVE
+          th STATUS/DELETE
+          th DIFF SOURCE
+          th DIFF DEST
+          th USED BY
         each val in installers
-          if val.debug == 'debug'
+          if (val.debug == 'debug') && (val.appcode == appcode)
             include installer_row.jade
-      input(type="button",onclick="masscheck()",value="checkEverything")
-      input(type="button",onclick="checkLatest()",value="check latest")
       br
-      input(type="submit",value="Apply")
+      div
+        input(type="button",onclick="masscheck()",value="Check everything")
+        div(class="divider5px")
+        input(type="button",onclick="checkLatest()",value="Check latest")
+        div(class="divider5px")
+        input(type="submit",value="Apply",style="float: right;")
+        if diffserver
+          div(class="divider5px")
+          span(id="makeDiff",style="display:none")
+            input(type="button",value="Make diff",onclick="makeDiff2()")
+  br
   div
-    if activeRelease
-      div='version:'+activeRelease.version
-      div='revision:'+activeRelease.revision
-      div='size:'+(activeRelease.size/1024/1024)+'MB'
-      a(href="/rawinstallers/"+activeRelease.name) raw installer
-    else
-      p active release MISSING!
-  if diffserver
-    div(style="border: 1px solid blue")
-      div(id="diffStats")
-      div(id="makeDiff",style="display:none")
-        input(type="button",value="make diff",onclick="makeDiff2()")
-    div(style="border: 1px solid red")
-      form(method="post",action="/secure/newVersion",enctype="multipart/form-data")
-       div
-         | installer:
-         input(type="file",name="installer")
-       div
-         | version:
-         input(type="text",name="version")
-       div
-         | git revision:
-         input(type="text",name="revision")
-       input(type="hidden",name="debug",value="release")
-       p always set to release mode
-       input(type="submit",value="upload")
-    div(style="border: 1px solid red")
-      | buildbot controls
-      pre(id="lastMsg")=latestMsg
-      input(id="buildButton",type="button",value="build!",onclick="buildRevision('" +revision+ "')")
-  div(id="diffs")
+    h1 Buildbot
+    pre(id="lastMsg")=latestMsg
+    input(id="buildButton",type="button",value="Build",onclick="buildRevision('" +revision+ "')")

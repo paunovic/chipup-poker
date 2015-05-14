@@ -656,6 +656,8 @@ Server.prototype.installers_func = function (req,res) {
 	var start = Date.now();
 	console.log(req.body);
 	var showlist = true;
+	var appcode = 'acDelphiWindows';
+	if (req.query.appcode) appcode = req.query.appcode;
 	if (req.query.showlist) showlist = true;
 	function makeDeleter(id) {
 		return function (cb) {
@@ -814,7 +816,7 @@ Server.prototype.installers_func = function (req,res) {
 				}
 				res.render('installers',{installers:data,start:start,
 					live_pubver:live_pubver, live_debugver:live_debugver,
-					dev_pubver:dev_pubver, dev_debugver:dev_debugver,
+					dev_pubver:dev_pubver, dev_debugver:dev_debugver,appcode:appcode,
 					activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 			}.bind(this));
 		}.bind(this));
@@ -1174,7 +1176,7 @@ Server.prototype.newVersion = function newVersion(req,res) {
 
 	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 		assert.ifError(err);
-		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size,appcode:'DelphiWindows'});
+		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size,appcode:'acDelphiWindows'});
 		obj.save(function (err) {
 			assert.ifError(err);
 			global.log('new version recorded: %j',obj);
