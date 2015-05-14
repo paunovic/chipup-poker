@@ -255,7 +255,7 @@ Game.prototype.getLimit = function (seat) {
 
 	var pot = 0;
 	for (x=0; x<this.pots.length; x++) {
-		pot += this.pots[x].getPostRake(this.rake);
+		pot += this.pots[x].value - this.pots[x].rake;
 	}
 	for (var x=0; x<this.bets.length; x++) {
 		if (typeof this.bets[x] != 'number') this.bets[x] = 0;
@@ -1162,8 +1162,9 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 		if (min == max) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
-				this.log('flopping');
 				this.deck.draw(3,this.flops[0]);
+				this.log('flopping',this.flops[0]);
+				assert.equal(this.flops[0].cards.length,3);
 				this.history.cards[0] = { cards:this.flops[0].cards };
 				this.stateRow.flop.cards = this.flops[0].cards;
 				if (this.doingSplit) {
