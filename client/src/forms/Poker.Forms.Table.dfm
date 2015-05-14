@@ -688,6 +688,11 @@ object frmTable: TfrmTable
       Caption = 'acLeaveWaitingList'
       OnExecute = acLeaveWaitingListExecute
     end
+    object acAddChips: TAction
+      Category = 'Game'
+      Caption = 'ADD CHIPS'
+      OnExecute = acAddChipsExecute
+    end
   end
   object RVStyle: TRVStyle
     TextStyles = <

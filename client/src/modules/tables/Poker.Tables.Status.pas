@@ -43,6 +43,7 @@ type
     FReservedSeats: TList<UINT32>;
 
     FActionStandUp: Boolean;
+    FActionAddChips: Boolean;
     FActionFold: Boolean;
     FActionCall: Boolean;
     FActionCheck: Boolean;
@@ -119,6 +120,7 @@ type
     function IsSitting: Boolean;
 
     property ActionStandUp: Boolean read FActionStandUp write FActionStandUp;
+    property ActionAddChips: Boolean read FActionAddChips write FActionAddChips;
     property ActionFold: Boolean read FActionFold write FActionFold;
     property ActionCall: Boolean read FActionCall write FActionCall;
     property ActionCheck: Boolean read FActionCheck write FActionCheck;

@@ -54,7 +54,9 @@ type
     procedure KillPingTimeoutTimer;
 
     {$IFDEF DEBUG}
-    procedure DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
+    procedure DebugRpcMessage(const ADebugType: TDebugInfoType;
+      const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject;
+      const AStreamSize: Int64 = 0; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
     {$ENDIF}
 
   public
@@ -68,7 +70,10 @@ type
     function IsConnected: Boolean;
 
     procedure SendProtobuf(const AServerCode: TServerCodes; const AProtobuf: TProtobufBaseObject);
-    procedure SendRawBytes(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
+    procedure SendRawProtobuf(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
+    procedure SendRaw(const ABuffer: pointer; const ASize: Integer);
+    procedure AppendToReceiveBuffer(const APointer: pointer; const ASize: Integer);
+    procedure ParseReceiveBuffer;
 
     procedure Ping;
 
@@ -90,7 +95,7 @@ uses
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club,
   Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
-  Poker.Protobufs.Objects.GiveClubOwnershipParams, Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply,
+  Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams,
   Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
@@ -98,7 +103,7 @@ uses
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.HandHistoryReply, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
-  Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
+  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
   Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished,
   Poker.Protobufs.Objects.TableMessage, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Protobufs.Objects.PlayerClubStatus,
   Poker.Protobufs.Objects.ReservedSeatFree;
@@ -304,7 +309,7 @@ begin
 end;
 
 {$IFDEF DEBUG}
-procedure TServerSocketCore.DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
+procedure TServerSocketCore.DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
 var
   dbgtype: TDebugInfoType;
   serialized_object: String;
@@ -315,7 +320,7 @@ begin
     dbgtype := ADebugType;
 
   if ARpcMessage.DataSize = 0 then
-    DebugLn(Format('Code: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype)
+    DebugLn(Format('Code: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype, '', ABuffer, ABufferSize)
   else
   begin
     if (IsDebugFormAssigned) and
@@ -325,49 +330,30 @@ begin
       serialized_object := '';
 
     if AStreamSize = 0 then
-      DebugLn(Format('Code: %s; data size: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
+      DebugLn(Format('Code: %s; data size: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object, ABuffer, ABufferSize)
     else
-      DebugLn(Format('Code: %s; data size: %d; stream size: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
+      DebugLn(Format('Code: %s; data size: %d; stream size: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object, ABuffer, ABufferSize);
   end;
 end;
 {$ENDIF}
 
-procedure TServerSocketCore.SocketDataAvailable(Sender: TObject; Error: Word);
-const
-  BUFFER_SIZE = 16 * 1024;
+procedure TServerSocketCore.AppendToReceiveBuffer(const APointer: pointer;
+  const ASize: Integer);
+begin
+  Inc(FReceiveBufferSize, ASize);
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
+  Inc(FBytesDownloaded, ASize);
+  ReallocMem(FReceiveBuffer, FReceiveBufferSize);
+  Move(APointer^, FReceiveBuffer[FReceiveBufferSize - ASize], ASize);
+end;
+
+procedure TServerSocketCore.ParseReceiveBuffer;
 var
-  len: Integer;
-  rcv_buf: TArray<AnsiChar>;
   rpc_size: Word;
   rpc_message: TPB_RpcMessage;
   data_obj: TObject;
   ptmp: pointer;
 begin
-  if Error <> 0 then
-  begin
-    FSocket.LastError := Error;
-    SocketError(Sender);
-    Exit;
-  end;
-
-  SetLength(rcv_buf, BUFFER_SIZE);
-  FillChar(rcv_buf[0], BUFFER_SIZE, 0);
-  len := FSocket.Receive(@rcv_buf[0], FSocket.RcvdCount);
-
-  if len < 0 then
-  begin
-    FSocket.LastError := WSAGetLastError;
-    SocketError(Sender);
-  end
-  else
-  begin
-    Inc(FReceiveBufferSize, len);
-    {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
-    Inc(FBytesDownloaded, len);
-    ReallocMem(FReceiveBuffer, FReceiveBufferSize);
-    Move(rcv_buf[0], FReceiveBuffer[FReceiveBufferSize - len], len);
-  end;
-
   if FReceiveBufferSize = 0 then
     Exit;
 
@@ -389,7 +375,8 @@ begin
     if ParseRpcMessage(rpc_message, pointer(NativeUInt(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
-      {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj, 0,
+        FReceiveBuffer, SizeOf(rpc_size) + rpc_size + rpc_message.DataSize); {$ENDIF}
       PostMessage(MessageContainer.HWND, WM_MESSAGE_CALLBACK_PROTO, NativeUInt(data_obj), rpc_message.MethodId);
     end;
 
@@ -400,6 +387,35 @@ begin
   finally
     rpc_message.Free;
   end;
+end;
+
+procedure TServerSocketCore.SocketDataAvailable(Sender: TObject; Error: Word);
+const
+  BUFFER_SIZE = 16 * 1024;
+var
+  len: Integer;
+  rcv_buf: TArray<AnsiChar>;
+begin
+  if Error <> 0 then
+  begin
+    FSocket.LastError := Error;
+    SocketError(Sender);
+    Exit;
+  end;
+
+  SetLength(rcv_buf, BUFFER_SIZE);
+  FillChar(rcv_buf[0], BUFFER_SIZE, 0);
+  len := FSocket.Receive(@rcv_buf[0], FSocket.RcvdCount);
+
+  if len < 0 then
+  begin
+    FSocket.LastError := WSAGetLastError;
+    SocketError(Sender);
+  end
+  else
+    AppendToReceiveBuffer(@rcv_buf[0], len);
+
+  ParseReceiveBuffer;
 end;
 
 procedure TServerSocketCore.SocketChangeState(Sender: TObject; OldState, NewState: TSocketState);
@@ -502,6 +518,7 @@ begin
    ((not FSocket.SslEnable) or (FSSLHandshakeDone));
 end;
 
+
 function TServerSocketCore.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
 var
   err: String;
@@ -572,7 +589,6 @@ begin
     Integer(srInvalidTableBuyin): ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(srHandHistoryMsg): ADataObject := TPB_HandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(srQueryAssetsReply): ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
-    Integer(srSubscriptionPlanChange): ADataObject := TPB_SubscriptionPlanChange.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(seTournamentList): ADataObject := TPB_TournamentList.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(srTournamentReply): ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(srTournamentDetails): ADataObject := TPB_TournamentInfo.Create(ADataPointer, ARpcMessage.DataSize);
@@ -582,7 +598,7 @@ begin
     Integer(sePlayerClubStatus): ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(seReservedSeatFree): ADataObject := TPB_ReservedSeatFree.Create(ADataPointer, ARpcMessage.DataSize);
   else
-    SoftException(Format('Unhandled code received: %d',
+    SoftException(Format('Unhandled code received: %s',
       [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
     Exit(FALSE);
   end;
@@ -599,7 +615,33 @@ begin
   Exit(TRUE);
 end;
 
-procedure TServerSocketCore.SendRawBytes(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
+procedure TServerSocketCore.SendRaw(const ABuffer: pointer; const ASize: Integer);
+var
+  rpc_size: Word;
+  rpc_message: TPB_RpcMessage;
+begin
+  rpc_size := PWord(ABuffer)^;
+  if ASize < SizeOf(rpc_size) + rpc_size then
+    Exit;
+
+  rpc_message := TPB_RpcMessage.Create(pointer(NativeUInt(ABuffer) + SizeOf(rpc_size)), rpc_size);
+  try
+    if rpc_message.IsInitialized then
+    begin
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, nil, ASize, ABuffer, ASize); {$ENDIF}
+    end
+    else
+    begin
+      {$IFDEF DEBUG} DebugLn('Buffer sent', ditSocketOut, '', ABuffer, ASize); {$ENDIF}
+    end;
+  finally
+    rpc_message.Free;
+  end;
+
+  FSocket.Send(ABuffer, ASize);
+end;
+
+procedure TServerSocketCore.SendRawProtobuf(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
 var
   rpc_message: TPB_RpcMessage;
   mstream: TMemoryStream;
@@ -618,7 +660,8 @@ begin
       if ASize > 0 then
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, nil, mstream.Size); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, nil, mstream.Size,
+        mstream.Memory, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -647,7 +690,8 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, AProtobuf, mstream.Size); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, AProtobuf, mstream.Size,
+        mstream.Memory, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
