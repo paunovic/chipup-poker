@@ -41,9 +41,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>protoc-gen-delphi</TargetName>
+    <IncludePath>C:\Users\Marko Paunovic\VisualStudio Libs\protobuf-master\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>protoc-gen-delphi</TargetName>
+    <IncludePath>C:\Users\reiser\VSInclude\protobuf-2.5.0\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
