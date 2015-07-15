@@ -12,12 +12,12 @@ type
   private
     FPassword: String;
     FClubs: TClubList;
-//    FPendingClubs: TClubList;
+    FPendingClubs: TClubList;
     FRegisteredTournaments: TList<TMongoId>;
     FTableStatuses: TObjectDictionary<TMongoId, TPB_PlayerClubStatus>;
 
     procedure ProcessClubsObject(const AClubs: TList<TPB_Club>);
-//    procedure ProcessPendingClubsObject(const AClubs: TList<TPB_Club>);
+    procedure ProcessPendingClubsObject(const AClubs: TList<TPB_Club>);
 
   public
     constructor Create;
@@ -29,7 +29,7 @@ type
 
     property Password: String read FPassword write FPassword;
     property Clubs: TClubList read FClubs;
-//    property PendingClubs: TClubList read FPendingClubs;
+    property PendingClubs: TClubList read FPendingClubs;
     property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
     property TableStatuses: TObjectDictionary<TMongoId, TPB_PlayerClubStatus> read FTableStatuses;
   end;
@@ -49,7 +49,7 @@ begin
   inherited Create(TRUE);
 
   FClubs := TClubList.Create;
-//  FPendingClubs := TClubList.Create;
+  FPendingClubs := TClubList.Create;
   FRegisteredTournaments := TList<TMongoId>.Create;
   FTableStatuses := TObjectDictionary<TMongoId, TPB_PlayerClubStatus>.Create([doOwnsValues]);
 end;
@@ -58,7 +58,7 @@ destructor TPlayerInfo.Destroy;
 begin
   FTableStatuses.Free;
   FRegisteredTournaments.Free;
-//  FPendingClubs.Free;
+  FPendingClubs.Free;
   FClubs.Free;
 
   inherited;
@@ -68,7 +68,7 @@ procedure TPlayerInfo.Flush;
 begin
   Clear;
   FClubs.Clear;
-//  FPendingClubs.Clear;
+  FPendingClubs.Clear;
   FPassword := '';
   FRegisteredTournaments.Clear;
   FTableStatuses.Clear;
@@ -132,7 +132,7 @@ begin
     to_remove.Free;
   end;
 end;
-{
+
 procedure TPlayerInfo.ProcessPendingClubsObject(const AClubs: TList<TPB_Club>);
 var
   to_remove: TList<TMongoId>;
@@ -188,7 +188,7 @@ begin
     to_remove.Free;
   end;
 end;
- }
+
 procedure TPlayerInfo.LoadFromLoginReply(const ALoginReply: TPB_LoginReply);
 var
   pcs: TPB_PlayerClubStatus;
@@ -204,7 +204,7 @@ begin
   MergeFrom(ALoginReply.Self);
 
   ProcessClubsObject(ALoginReply.Clubs);
-//  ProcessPendingClubsObject(ALoginReply.PendingClubs);
+  ProcessPendingClubsObject(ALoginReply.PendingClubs);
 
   for pbgame in ALoginReply.Games do
   begin

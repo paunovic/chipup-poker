@@ -258,8 +258,9 @@ var
 begin
   ASetRaiseAmount := FALSE;
 
-  for dxbutton in FDXButtons do
-    dxbutton.MouseDown(Button, Shift, X, Y);
+  if Button = mbLeft then
+    for dxbutton in FDXButtons do
+      dxbutton.MouseDown(Button, Shift, X, Y);
 
   // check click on raise thumb button
   if not FRaiseThumbDown then
@@ -586,6 +587,7 @@ begin
       // render seat cards
       if table.Status.State > tsIdle then
       begin
+        card_point := FMetrics.GetCardPoint(AGame, seat_info, 1);
         case seat_info.Status of
           psInHand, psAllIn: begin
             for C1 := 0 to seat_info.DealtCards - 1 do

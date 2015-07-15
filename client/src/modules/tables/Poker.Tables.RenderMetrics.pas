@@ -52,6 +52,10 @@ type
     FStandUpButtonWidth: Single;
     FStandUpButtonHeight: Single;
     FStandUpButtonBounds: TPoint4;
+    FAddChipsResizeRatio: Single;
+    FAddChipsButtonWidth: Single;
+    FAddChipsButtonHeight: Single;
+    FAddChipsButtonBounds: TPoint4;
     FTotalRakePoint: TPoint2;
     FPlayNowResizeRatio: Single;
     FPlayNowButtonWidth: Single;
@@ -131,6 +135,7 @@ type
     property HandPlaybackNextHand: TRect read FHandPlaybackNextHand;
     property HandPlaybackPreviousHand: TRect read FHandPlaybackPreviousHand;
     property StandUpButtonBounds: TPoint4 read FStandUpButtonBounds;
+    property AddChipsButtonBounds: TPoint4 read FAddChipsButtonBounds;
     property PlayNowButtonBounds: TPoint4 read FPlayNowButtonBounds;
     property JoinWaitingListButtonBounds: TPoint4 read FJoinWaitingListButtonBounds;
     property LeaveWaitingListButtonBounds: TPoint4 read FLeaveWaitingListButtonBounds;
@@ -426,15 +431,23 @@ begin
     FSeatActionFrameWidth := TableResources.SeatActionCheck.Texture[0].Width * FSeatActionResizeRatio;
     FSeatActionFrameHeight := FSeatActionFrameWidth / TableResources.SeatActionFrameAspectRatio;
 
-    // standup button resize ratio
+    // standup and addchips buttons resize ratio
     FStandUpResizeRatio := FTableResizeRatio * 1.5;
     if FStandUpResizeRatio > 1 then
       FStandUpResizeRatio := 1;
+    FAddChipsResizeRatio := FStandUpResizeRatio;
 
     // standup button bounds
     FStandUpButtonWidth := TableResources.StandUpButtonNormalImage.Texture[0].Width * FStandUpResizeRatio;
     FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
-    FStandUpButtonBounds := pBounds4(ADXAreaSize.x - FStandUpButtonWidth + 1, -1, FStandUpButtonWidth, FStandUpButtonHeight);
+    FStandUpButtonBounds := pBounds4(ADXAreaSize.x - FStandUpButtonWidth + 1, -1,
+      FStandUpButtonWidth, FStandUpButtonHeight);
+
+    // addchips button bounds
+    FAddChipsButtonWidth := TableResources.AddChipsButtonNormalImage.Texture[0].Width * FAddChipsResizeRatio;
+    FAddChipsButtonHeight := FAddChipsButtonWidth / TableResources.AddChipsButtonAspectRatio;
+    FAddChipsButtonBounds := pBounds4(ADXAreaSize.x - FStandUpButtonWidth - FAddChipsButtonWidth + 26 * FAddChipsResizeRatio, -1,
+      FAddChipsButtonWidth, FAddChipsButtonHeight);
 
     // action buttons bounds
     FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
@@ -551,11 +564,16 @@ begin
                                 FRaiseTrackBounds[0].y + (FRaiseTrackBounds[2].y - FRaiseTrackBounds[0].y) / 2 - h / 2, w, h);
 
   // total rake bounds
-  if ((ATable as TTable).Status.IsSitting) and
-     ((ATable as TTable).TableType <> ttHandReplay) then
-    FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
+  if (ATable as TTable).Status.ActionAddChips then
+    FTotalRakePoint := Point2(FAddChipsButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2,
+       FAddChipsButtonBounds[0].y + (FAddChipsButtonBounds[2].y - FAddChipsButtonBounds[0].y) / 4)
   else
-    FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);
+    if (ATable as TTable).Status.ActionStandUp then
+      FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2,
+         FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
+    else
+      FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2,
+         FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);
 
   if area_resized then
     FLastDXAreaSize := ADXAreaSize;

@@ -44,7 +44,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Server.Validators, Poker.Types, Poker.Common.Misc,
-  Poker.Common.ModalDialogs, Poker.SoftExceptions;
+  Poker.Common.ModalDialogs, Poker.SoftExceptions, Poker.DataModule, Poker.Clubs.Club;
 
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);
@@ -121,6 +121,13 @@ begin
     edClubPassword.SelectAll;
   end;
 
+  if dmMain.SelfInfo.PendingClubs.ClubIdExists(edClubID.Value) then
+  begin
+    error := 'You''ve already sent a request to join this club';
+    edClubID.SelectAll;
+    edClubID.SetFocus;
+  end;
+
   if error <> '' then
   begin
     ModalDialogs.ShowWarning(error);
@@ -162,6 +169,11 @@ begin
       edClubPassword.SetFocus;
       edClubPassword.SelectAll;
     end;
+    csWaitingForApproval: begin
+      ModalDialogs.ShowInformation('Your request to join the club has been sent to the club owner for approval');
+      dmMain.SelfInfo.PendingClubs.AddClub(pbreply.Club);
+      Close;
+    end
   else
     SoftException(Format('CSRJoinClub: invalid status received [%d]]', [Integer(pbreply.Status)]));
   end;
@@ -171,3 +183,4 @@ end;
 
 
 end.
+

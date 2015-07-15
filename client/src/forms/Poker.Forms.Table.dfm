@@ -295,7 +295,7 @@ object frmTable: TfrmTable
   object paTopLeftHeader: TPanel
     Left = 0
     Top = 0
-    Width = 246
+    Width = 379
     Height = 26
     BevelOuter = bvNone
     Color = clBlack
@@ -313,7 +313,7 @@ object frmTable: TfrmTable
       Left = 89
       Top = 0
       Cursor = crHandPoint
-      Align = alClient
+      Align = alLeft
       AutoSize = False
       ParentFont = False
       Style.Edges = []
@@ -342,7 +342,7 @@ object frmTable: TfrmTable
       Transparent = True
       OnClick = lbvHandHistoryClick
       Height = 26
-      Width = 157
+      Width = 114
       AnchorY = 13
     end
     object lbsTableStats: TcxLabel
@@ -381,6 +381,40 @@ object frmTable: TfrmTable
       OnClick = lbsTableStatsClick
       Height = 26
       Width = 82
+      AnchorY = 13
+    end
+    object lbvClubBalance: TcxLabel
+      Left = 203
+      Top = 0
+      Align = alClient
+      AutoSize = False
+      Caption = 'Your club balance:'
+      ParentFont = False
+      Style.Edges = []
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -9
+      Style.Font.Name = 'Sintony'
+      Style.Font.Style = [fsBold]
+      Style.Font.Quality = fqAntialiased
+      Style.HotTrack = True
+      Style.LookAndFeel.NativeStyle = True
+      Style.LookAndFeel.SkinName = ''
+      Style.TextColor = 13158600
+      Style.TextStyle = []
+      Style.TransparentBorder = True
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.SkinName = ''
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.SkinName = ''
+      StyleHot.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.SkinName = ''
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.Alignment.Vert = taVCenter
+      Transparent = True
+      Height = 26
+      Width = 176
       AnchorY = 13
     end
   end
@@ -611,10 +645,10 @@ object frmTable: TfrmTable
       Caption = 'MIN'
       OnExecute = acRaiseMinExecute
     end
-    object acRaise3BB: TAction
+    object acRaiseHalfPot: TAction
       Category = 'Game'
-      Caption = '3BB'
-      OnExecute = acRaise3BBExecute
+      Caption = '1/2 POT'
+      OnExecute = acRaiseHalfPotExecute
     end
     object acRaisePot: TAction
       Category = 'Game'
@@ -744,6 +778,13 @@ object frmTable: TfrmTable
         FontName = 'Arial'
         Size = 8
         Color = 4227327
+        Unicode = True
+      end
+      item
+        StyleName = 'Observer Text'
+        FontName = 'Arial'
+        Size = 8
+        Color = clGray
         Unicode = True
       end>
     ParaStyles = <

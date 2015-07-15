@@ -38,10 +38,9 @@ function MinutesToString(const AMinutes: UINT32): String;
 implementation
 
 uses
-  System.Rtti, System.TypInfo, System.ZLib, System.Generics.Collections,
-  System.RegularExpressionsAPI, Vcl.Dialogs, Winapi.PsApi, Winapi.TlHelp32,
-  Winapi.ShlObj, dxGDIPlusClasses;
-
+  System.Rtti, System.TypInfo,
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, System.Generics.Collections, System.RegularExpressionsAPI,
+  Vcl.Dialogs;
 
 function ValueToStr(const AProperty: TRttiProperty; const AValue: TValue): String;
 var
@@ -422,25 +421,6 @@ begin
   end;
 
   SetLength(result, J - 1);
-end;
-
-function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
-var
-  slash_pos: Integer;
-begin
-  slash_pos := Pos('/', AString);
-  if slash_pos = 0 then
-    Exit(FALSE);
-
-  ASmallBlind := StrToIntDef(Copy(AString, 1, slash_pos - 1), -1);
-  if ASmallBlind = -1 then
-    Exit(FALSE);
-
-  ABigBlind := StrToIntDef(Copy(AString, slash_pos + 1, Length(AString) - slash_pos), -1);
-  if ABigBlind = -1 then
-    Exit(FALSE);
-
-  Exit(TRUE);
 end;
 
 function IsJPEGStream(const AStream: TStream): Boolean;

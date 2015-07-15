@@ -26,6 +26,7 @@ type
       kSelfFieldNumber = 8;
       kGamesFieldNumber = 9;
       kPlayerClubStatusesFieldNumber = 10;
+      kPendingClubsFieldNumber = 11;
 
     var
       FLoginStatus: TLoginStatus;
@@ -37,6 +38,7 @@ type
       FSelf: TPB_User;
       FGames: TList<TPB_Game>;
       FPlayerClubStatuses: TList<TPB_PlayerClubStatus>;
+      FPendingClubs: TList<TPB_Club>;
       FHasBits: UINT32;
 
     procedure set_has_LoginStatus;
@@ -59,6 +61,8 @@ type
     procedure clear_has_Games;
     procedure set_has_PlayerClubStatuses;
     procedure clear_has_PlayerClubStatuses;
+    procedure set_has_PendingClubs;
+    procedure clear_has_PendingClubs;
     procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
     procedure TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
     procedure RegisteredTournamentsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
@@ -66,6 +70,7 @@ type
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
     procedure PlayerClubStatusesNotifyEvent(Sender: TObject; const Item: TPB_PlayerClubStatus; Action: TCollectionNotification);
+    procedure PendingClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
   protected
     procedure InitObjects; override;
     procedure HookNotifiers; override;
@@ -121,6 +126,11 @@ type
     function has_PlayerClubStatuses: Boolean;
     procedure clear_PlayerClubStatuses;
     property PlayerClubStatuses: TList<TPB_PlayerClubStatus> read FPlayerClubStatuses;
+
+    // repeated Club PendingClubs = 11;
+    function has_PendingClubs: Boolean;
+    procedure clear_PendingClubs;
+    property PendingClubs: TList<TPB_Club> read FPendingClubs;
   end;
 
   TPB_LoginReplyList = class(TObjectList<TPB_LoginReply>)
@@ -177,6 +187,11 @@ begin
     FPlayerClubStatuses.OnNotify := nil;
     FreeAndNil(FPlayerClubStatuses);
   end;
+  if Assigned(FPendingClubs) then
+  begin
+    FPendingClubs.OnNotify := nil;
+    FreeAndNil(FPendingClubs);
+  end;
   inherited;
 end;
 
@@ -190,6 +205,7 @@ begin
   FUsers := TObjectList<TPB_User>.Create;
   FGames := TObjectList<TPB_Game>.Create;
   FPlayerClubStatuses := TObjectList<TPB_PlayerClubStatus>.Create;
+  FPendingClubs := TObjectList<TPB_Club>.Create;
 end;
 
 procedure TPB_LoginReply.HookNotifiers;
@@ -202,6 +218,7 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
   FGames.OnNotify := GamesNotifyEvent;
   FPlayerClubStatuses.OnNotify := PlayerClubStatusesNotifyEvent;
+  FPendingClubs.OnNotify := PendingClubsNotifyEvent;
 end;
 
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -259,6 +276,11 @@ begin
         FPlayerClubStatuses.Add(TPB_PlayerClubStatus.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_PlayerClubStatuses;
       end;
+      kPendingClubsFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPendingClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_PendingClubs;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -272,6 +294,7 @@ var
   pbobj5: TPB_User;
   pbobj7: TPB_Game;
   pbobj8: TPB_PlayerClubStatus;
+  pbobj9: TPB_Club;
 begin
   if AFrom.has_LoginStatus then
     SetLoginStatus(AFrom.LoginStatus);
@@ -290,6 +313,8 @@ begin
     FGames.Add(TPB_Game.Create(pbobj7, Lightweight));
   for pbobj8 in AFrom.PlayerClubStatuses do
     FPlayerClubStatuses.Add(TPB_PlayerClubStatus.Create(pbobj8, Lightweight));
+  for pbobj9 in AFrom.PendingClubs do
+    FPendingClubs.Add(TPB_Club.Create(pbobj9, Lightweight));
 end;
 
 function TPB_LoginReply.IsInitialized: Boolean;
@@ -317,6 +342,9 @@ begin
     if not pbobj.IsInitialized then
       Exit(FALSE);
   for pbobj in PlayerClubStatuses do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in PendingClubs do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
@@ -650,6 +678,44 @@ begin
   end;
 end;
 
+procedure TPB_LoginReply.clear_PendingClubs;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Club>;
+begin
+  on_notify := FPendingClubs.OnNotify;
+  FPendingClubs.OnNotify := nil;
+  FPendingClubs.Clear;
+  FPendingClubs.OnNotify := on_notify;
+  clear_has_PendingClubs;
+end;
+
+function TPB_LoginReply.has_PendingClubs: Boolean;
+begin
+  result := (FHasBits and 1024) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_PendingClubs;
+begin
+  FHasBits := FHasBits or 1024;
+end;
+
+procedure TPB_LoginReply.clear_has_PendingClubs;
+begin
+  FHasBits := FHasBits and not 1024;
+end;
+
+procedure TPB_LoginReply.PendingClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_PendingClubs;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPendingClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
 procedure TPB_LoginReply.Clear;
 begin
   if FHasBits = 0 then
@@ -664,6 +730,7 @@ begin
   clear_Self;
   clear_Games;
   clear_PlayerClubStatuses;
+  clear_PendingClubs;
 end;
 
 procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
