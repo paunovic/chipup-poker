@@ -2530,15 +2530,16 @@ object frmClubLobby: TfrmClubLobby
     TabOrder = 2
     Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
-    ClientRectBottom = 442
-    ClientRectRight = 894
-    ClientRectTop = 0
+    ClientRectBottom = 441
+    ClientRectLeft = 1
+    ClientRectRight = 893
+    ClientRectTop = 1
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
       DesignSize = (
-        894
-        442)
+        892
+        440)
       object gbClubSettings: TcxGroupBox
         Left = 8
         Top = 0
@@ -2547,8 +2548,8 @@ object frmClubLobby: TfrmClubLobby
         TabOrder = 0
         DesignSize = (
           250
-          435)
-        Height = 435
+          427)
+        Height = 433
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
@@ -2615,14 +2616,14 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Members'
         TabOrder = 1
         DesignSize = (
-          628
-          435)
-        Height = 435
-        Width = 628
+          626
+          427)
+        Height = 433
+        Width = 626
         object gridPlayersList: TcxGrid
-          Left = 2
-          Top = 19
-          Width = 624
+          Left = 3
+          Top = 16
+          Width = 620
           Height = 377
           Align = alTop
           BevelInner = bvNone
@@ -2695,7 +2696,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 250
-          Top = 118
+          Top = 110
           Width = 115
           Height = 26
           Action = acGiveOwnership
@@ -2711,7 +2712,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 129
-          Top = 150
+          Top = 142
           Width = 115
           Height = 26
           Action = acRemovePlayer
@@ -2725,9 +2726,9 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
-        object btSuspendUnsuspend: TcxButton
+        object btSuspendUnsuspendApprove: TcxButton
           Left = 8
-          Top = 150
+          Top = 142
           Width = 115
           Height = 26
           Action = acSuspendPlayer
@@ -2743,7 +2744,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetBalance: TcxButton
           Left = 129
-          Top = 118
+          Top = 110
           Width = 115
           Height = 26
           Action = acResetBalance
@@ -2759,7 +2760,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSetLimit: TcxButton
           Left = 250
-          Top = 150
+          Top = 142
           Width = 115
           Height = 26
           Action = acSetLimit
@@ -2775,7 +2776,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetAllPlayerBalances: TcxButton
           Left = 8
-          Top = 118
+          Top = 110
           Width = 115
           Height = 26
           Action = acResetPlayerBalances
@@ -2791,7 +2792,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btMuteUnmutePlayer: TcxButton
           Left = 371
-          Top = 150
+          Top = 142
           Width = 115
           Height = 26
           Action = acMuteUnmutePlayer
@@ -2807,7 +2808,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btPromoteToManager: TcxButton
           Left = 371
-          Top = 118
+          Top = 110
           Width = 115
           Height = 26
           Action = acPromoteDemoteUser
@@ -2826,11 +2827,9 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
-        894
-        442)
+        892
+        440)
       object gbTables: TcxGroupBox
         Left = 7
         Top = 0
@@ -2838,15 +2837,15 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Tables'
         TabOrder = 0
         DesignSize = (
-          880
-          435)
-        Height = 435
-        Width = 880
+          878
+          427)
+        Height = 433
+        Width = 878
         object gridGames: TcxGrid
-          Left = 2
-          Top = 19
-          Width = 876
-          Height = 313
+          Left = 3
+          Top = 16
+          Width = 872
+          Height = 305
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2938,7 +2937,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 303
+          Top = 295
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2954,7 +2953,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 303
+          Top = 295
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2973,16 +2972,14 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
-        894
-        442)
+        892
+        440)
       object gridTables: TcxGrid
         Left = 8
         Top = 2
         Width = 337
-        Height = 392
+        Height = 390
         Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -3072,8 +3069,8 @@ object frmClubLobby: TfrmClubLobby
       object paPlayerStats: TPanel
         Left = 348
         Top = 2
-        Width = 538
-        Height = 432
+        Width = 536
+        Height = 430
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         ShowCaption = False
@@ -3081,8 +3078,8 @@ object frmClubLobby: TfrmClubLobby
         object gridStats: TcxGrid
           Left = 0
           Top = 0
-          Width = 538
-          Height = 392
+          Width = 536
+          Height = 390
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -3201,8 +3198,8 @@ object frmClubLobby: TfrmClubLobby
         end
         object gridTotalStats: TcxGrid
           Left = 0
-          Top = 392
-          Width = 538
+          Top = 390
+          Width = 536
           Height = 40
           Align = alBottom
           BevelInner = bvNone
@@ -3317,7 +3314,7 @@ object frmClubLobby: TfrmClubLobby
       end
       object btDeleteSelectedStats: TcxButton
         Left = 8
-        Top = 406
+        Top = 404
         Width = 124
         Height = 28
         Action = acDeleteTableStats
@@ -3449,6 +3446,10 @@ object frmClubLobby: TfrmClubLobby
     object acPromoteDemoteUser: TAction
       Caption = 'Promote to Manager'
       OnExecute = acPromoteDemoteUserExecute
+    end
+    object acApprovePlayer: TAction
+      Caption = 'Approve Player'
+      OnExecute = acApprovePlayerExecute
     end
   end
   object pmTablesStats: TPopupMenu

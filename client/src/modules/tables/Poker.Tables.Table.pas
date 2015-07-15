@@ -742,6 +742,7 @@ var
 begin
   FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
+  FStatus.ActionAddChips := FALSE;
   FStatus.ActionFold := FALSE;
   FStatus.ActionCall := FALSE;
   FStatus.ActionCheck := FALSE;
@@ -777,6 +778,7 @@ begin
   end;
 
   FStatus.ActionStandUp := FTableType = ttLive;
+  FStatus.ActionAddChips := (FTableType = ttLive) and (seat.Status in [psOutOfPlay, psOutOfHand]);
   FStatus.FocusWindow := FALSE;
 
   if seat.AutoPlay then

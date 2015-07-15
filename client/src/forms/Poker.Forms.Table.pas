@@ -24,7 +24,7 @@ type
     acRaise: TAction;
     acPlayNow: TAction;
     acRaiseMin: TAction;
-    acRaise3BB: TAction;
+    acRaiseHalfPot: TAction;
     acRaisePot: TAction;
     acRaiseMax: TAction;
     acShowCards: TAction;
@@ -65,6 +65,7 @@ type
     acLeaveWaitingList: TAction;
     lbvWaitingListPosition: TcxLabel;
     acAddChips: TAction;
+    lbvClubBalance: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -79,7 +80,7 @@ type
     procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
     procedure acRaiseMinExecute(Sender: TObject);
-    procedure acRaise3BBExecute(Sender: TObject);
+    procedure acRaiseHalfPotExecute(Sender: TObject);
     procedure acRaisePotExecute(Sender: TObject);
     procedure acRaiseMaxExecute(Sender: TObject);
     procedure cbSitOutNextBBPropertiesChange(Sender: TObject);
@@ -153,9 +154,11 @@ type
     procedure UpdateTableCaption;
     procedure UpdateHandHistoryLabel;
     procedure UpdateHandStrength;
+    procedure UpdateClubBalanceInfo;
     procedure UpdateWaitingListPositionCaption;
     procedure FocusWindow;
     procedure UncheckAutoplayOptions;
+    procedure UpdateHeaderLabelOrder;
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -196,7 +199,7 @@ uses
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
   Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club, Poker.Common.ModalDialogs,
-  Poker.Protobufs.Objects.ReservedSeatFree;
+  Poker.Protobufs.Objects.ReservedSeatFree, Poker.Forms.ContactUs, Poker.Protobufs.Objects.Pot;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -244,6 +247,7 @@ begin
       edChat.Visible := FALSE;
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
+      lbvClubBalance.Visible := FALSE;
       lbsTableStats.Visible := FALSE;
       lbvWaitingListPosition.Visible := FALSE;
 
@@ -254,6 +258,8 @@ begin
       btStepBackwards.Visible := TRUE;
       btNextHand.Visible := TRUE;
       btPreviousHand.Visible := TRUE;
+
+      UpdateHeaderLabelOrder;
     end;
   end;
 
@@ -267,6 +273,7 @@ begin
     table.Renderer.OnUpdateHandStrength := RendererUpdateHandStrength;
 
     table.Renderer.AddDXButton(acStandUp, @table.Renderer.Metrics.StandUpButtonBounds, TableResources.StandUpButtonNormalImage, TableResources.StandUpButtonPressedImage, nil);
+    table.Renderer.AddDXButton(acAddChips, @table.Renderer.Metrics.AddChipsButtonBounds, TableResources.AddChipsButtonNormalImage, TableResources.AddChipsButtonPressedImage, nil);
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
     FDXBJoinWaitingList := table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
     table.Renderer.AddDXButton(acLeaveWaitingList, @table.Renderer.Metrics.LeaveWaitingListButtonBounds, TableResources.LeaveWaitingListNormal, TableResources.LeaveWaitingListPressed, nil, FALSE, 0.15);
@@ -284,7 +291,7 @@ begin
 
     FDXBRaisePresets[0] := table.Renderer.AddDXButton(acRaiseMin, @table.Renderer.Metrics.RaisePresetButtonsBounds[0],
          TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
-    FDXBRaisePresets[1] := table.Renderer.AddDXButton(acRaise3BB, @table.Renderer.Metrics.RaisePresetButtonsBounds[1],
+    FDXBRaisePresets[1] := table.Renderer.AddDXButton(acRaiseHalfPot, @table.Renderer.Metrics.RaisePresetButtonsBounds[1],
          TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
     FDXBRaisePresets[2] := table.Renderer.AddDXButton(acRaisePot, @table.Renderer.Metrics.RaisePresetButtonsBounds[2],
          TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
@@ -605,6 +612,49 @@ begin
   cbAutoCallAny.Checked := FALSE;
 end;
 
+procedure TfrmTable.UpdateClubBalanceInfo;
+var
+  club_balance: Integer;
+  table: TTable;
+  club: TClubInfo;
+  member: TPB_ClubMember;
+  cstr: String;
+begin
+  club_balance := -1;
+
+  if FTableType in [ttLive] then
+  begin
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      if dmMain.SelfInfo.Clubs.GetAndLock(table.ClubId, club) then
+      try
+        if club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
+          club_balance := member.ClubBalance;
+      finally
+        dmMain.SelfInfo.Clubs.Unlock;
+      end;
+    finally
+      Tables.Unlock;
+    end;
+  end;
+
+  if club_balance <> -1 then
+  begin
+    cstr := ChipsToStr(Abs(club_balance));
+    if club_balance < 0 then
+      cstr := '-' + cstr;
+
+    lbvClubBalance.Caption := Format('Your club balance: %s', [cstr])
+  end
+  else
+    lbvClubBalance.Caption := '';
+
+  lbvClubBalance.Visible := lbvClubBalance.Caption <> '';
+  lbvClubBalance.Refresh;
+
+  UpdateHeaderLabelOrder;
+end;
+
 procedure TfrmTable.UpdateHandHistoryLabel;
 var
   lhi: Integer;
@@ -620,6 +670,8 @@ begin
 
   lbvHandHistory.Visible := lbvHandHistory.Caption <> '';
   lbvHandHistory.Refresh;
+
+  UpdateHeaderLabelOrder;
 end;
 
 procedure TfrmTable.UpdateHandStrength;
@@ -677,6 +729,23 @@ begin
       lbvHandStrength.Caption := '';
   finally
     Tables.Unlock;
+  end;
+  lbvHandStrength.Refresh;
+end;
+
+procedure TfrmTable.UpdateHeaderLabelOrder;
+begin
+  beTopLeftHeaderSpacer.Left := 0;
+  if lbsTableStats.Left > lbvHandHistory.Left then
+  begin
+    lbsTableStats.Left := 1;
+    lbvHandHistory.Left := 2;
+  end;
+
+  if lbvHandHistory.Left > lbvClubBalance.Left then
+  begin
+    lbvHandHistory.Left := 2;
+    lbvClubBalance.Left := 3;
   end;
 end;
 
@@ -837,11 +906,28 @@ end;
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 var
   msg_style: Integer;
+  table: TTable;
+  seat: TSeatInfo;
+  player_info: TPlayerInfo;
 begin
   if AUser = dmMain.SelfInfo.Displayname then
     msg_style := 4
   else
-    msg_style := 1;
+  begin
+    msg_style := 7;
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      for seat in table.Status.Seats do
+        if (Players.TryGetValue(seat.PlayerMongoId, player_info)) and
+           (player_info.Displayname = AUser) then
+        begin
+          msg_style := 1;
+          Break;
+        end;
+    finally
+      Tables.Unlock;
+    end;
+  end;
 
   AddChatMessage(Format('%s: ', [AUser]), 0, 0, AMessage, msg_style, -1);
 end;
@@ -1026,13 +1112,14 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     acStandUp.Enabled := table.Status.ActionStandUp;
+    acAddChips.Enabled := table.Status.ActionAddChips;
     acFold.Enabled := table.Status.ActionFold;
     acCall.Enabled := table.Status.ActionCall;
     acCheck.Enabled := table.Status.ActionCheck;
     acRaise.Enabled := table.Status.ActionRaise;
     acRaise.Enabled := (table.Status.ActionBet) or (table.Status.ActionRaise);
     acRaiseMin.Enabled := acRaise.Enabled;
-    acRaise3BB.Enabled := acRaise.Enabled;
+    acRaiseHalfPot.Enabled := acRaise.Enabled;
     acRaisePot.Enabled := acRaise.Enabled;
     acRaiseMax.Enabled := acRaise.Enabled;
     acPlayNow.Enabled := table.Status.ActionPlayNow;
@@ -1150,7 +1237,7 @@ begin
 
         seRaiseAmount.Visible := acRaise.Enabled;
         acRaiseMin.Enabled := acRaise.Enabled;
-        acRaise3BB.Enabled := acRaise.Enabled;
+        acRaiseHalfPot.Enabled := acRaise.Enabled;
         acRaisePot.Enabled := acRaise.Enabled;
         acRaiseMax.Enabled := acRaise.Enabled;
 
@@ -1161,13 +1248,13 @@ begin
           begin
             table.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := nil;
             table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaiseMin;
-            table.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaise3BB;
+            table.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaiseHalfPot;
             table.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaisePot;
           end
           else
           begin
             table.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := acRaiseMin;
-            table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaise3BB;
+            table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaiseHalfPot;
             table.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaisePot;
             table.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaiseMax;
           end;
@@ -1212,6 +1299,7 @@ begin
         btPreviousHand.BoundsRect := table.Renderer.Metrics.HandPlaybackPreviousHand;
         btNextHand.BoundsRect := table.Renderer.Metrics.HandPlaybackNextHand;
         pbHandPlaybackProgress.Position := table.HandHistoryPlayback.CurrentStateIndex;
+        lbvClubBalance.Visible := FALSE;
       end;
     end;
   finally
@@ -1220,7 +1308,9 @@ begin
 
   UpdateHandStrength;
   UpdateHandHistoryLabel;
+  UpdateClubBalanceInfo;
   UpdateTableCaption;
+  UpdateHeaderLabelOrder;
 end;
 
 function TfrmTable.ConfirmLeaveTable: Boolean;
@@ -1411,17 +1501,21 @@ begin
   end;
 end;
 
-procedure TfrmTable.acRaise3BBExecute(Sender: TObject);
+procedure TfrmTable.acRaiseHalfPotExecute(Sender: TObject);
 var
   val: UINT32;
   table: TTable;
+  pot: TPB_Pot;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    val := table.Status.MinimumBet;
+    val := 0;
+    for pot in table.Status.Pots do
+      Inc(val, pot.ValueWithoutRake);
+    val := val div 2;
     if val = 0 then
       val := table.game.BigBlind;
-    SetRaiseValue(val * 3);
+    SetRaiseValue(val);
   finally
     Tables.Unlock;
   end;
