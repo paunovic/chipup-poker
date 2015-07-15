@@ -79,14 +79,40 @@ Club.getClubById = function (id,cb) {
 Club.prototype.isOwner = function (user) {
 	return this.obj.owner.equals(user);
 };
-Club.prototype.handOver = function (gameObj,cb,handid) {
+Club.prototype.sendBalanceUpdate = function (userid) {
+	var user = activeUsers[userid];
+	if (!user) return;
+	models.ClubBalance.find({userid:userid},function (err,stats) {
+		var user = activeUsers[userid];
+		if (user) {
+			var out = Club.makeClubProtobuf(this.obj,null,stats,this,user);
+			console.log('sending',out);
+			user.send(codes.seClubChange,out,'Poker.Club');
+		}
+	}.bind(this));
+}
+Club.prototype.handOver = function (gameObj,cb,handid,reason,userid) {
 	var toFind = this.obj.manager.concat(this.obj.owner);
 	var foundOne = false;
+	console.log('handid',handid,reason,userid,new Error().stack);
 	for (var x=0; x<toFind.length; x++) {
 		if (global.activeUsers[toFind[x]]) {
 			foundOne = true;
 			break;
 		}
+	}
+	function step2() {
+		if (reason == 'updateCashOut') {
+			this.sendBalanceUpdate(userid);
+			return cb();
+		} else if (!handid) return cb();
+		models.HandHistory.findOne({seq:handid},function (err,record) {
+			async.each(record.players,function (member,cb2) {
+				if (!member) return cb2();
+				this.sendBalanceUpdate(member._id);
+				cb2();
+			}.bind(this),cb);
+		}.bind(this));
 	}
 	if (foundOne) {
 		//console.log('owner is online');
@@ -102,11 +128,11 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 							global.activeUsers[toFind[x]].send(codes.srTableStatsReply,packet,'Poker.TableStatsReplies');
 						}
 					}
-					cb();
+					step2.apply(this);
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
-	} else cb();
+	} else step2.apply(this);
 
 };
 Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
@@ -279,6 +305,7 @@ Club.prototype.updateLimitPostWin = function (change,userid,callback) {
 Club.prototype.buyin = function (userid,chips) {
 	if (!this.balance[userid]) this.balance[userid] = -chips;
 	else this.balance[userid] -= chips;
+	this.sendBalanceUpdate(userid);
 };
 Club.prototype.cashout = function (userid,chips) {
 	this.balance[userid] += chips;
@@ -336,18 +363,23 @@ function containsObjectID(list,id) {
 	}
 	return false;
 }
-Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
+Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self,connection) {
 	var c = JSON.parse(JSON.stringify(input));
 	assert(stats);
 	if (stats.length > 1) assert(self);
 	var memberList = [input.owner];
 	if (input.members) memberList = memberList.concat(input.members);
+	if (input.pendingApproval) memberList = memberList.concat(input.pendingApproval);
 	var out = [];
 	for (var y=0; y<memberList.length; y++) {
 		if (userlist && (userlist.indexOf(memberList[y]) == -1)) userlist.push(memberList[y]);
 		var suspended = false;
 		if (input.suspended) {
 			if (containsObjectID(input.suspended,memberList[y])) suspended = true;
+		}
+		var pending = false;
+		if (input.pendingApproval) {
+			if (containsObjectID(input.pendingApproval,memberList[y])) pending = true;
 		}
 		var muted = false;
 		if (input.muted) {
@@ -357,7 +389,10 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 		if (input.manager) {
 			if (containsObjectID(input.manager,memberList[y])) manager = true;
 		}
-		var obj = {_id:new Buffer(memberList[y].toString(),'hex'), suspended:suspended, balance_limit:0, club_balance: 0, muted:muted, manager:manager };
+		var obj = {_id:new Buffer(memberList[y].toString(),'hex'), balance_limit:0, club_balance: 0, muted:muted, manager:manager };
+		if (pending) obj.status = 'msPending';
+		else if (suspended) obj.status = 'msSuspended';
+		else obj.status = 'msActive';
 		assert.equal(obj._id.length,12);
 		for (var a=0; a<stats.length; a++) {
 			if (compareObjectID(stats[a].clubid,input._id)) {
@@ -422,6 +457,7 @@ Club.prototype.isSuspended = function (userid) {
 }
 Club.prototype.Leave = function (userid,cb) {
 	this.obj.members.pull(userid);
+	this.obj.pendingApproval.pull(userid);
 	this.obj.save(function (err) {
 		assert.ifError(err);
 		cb();
@@ -507,11 +543,8 @@ handlers[codes.scCreateClub] = function (args,token) {
 		}
 		Club.createClub(params.name,params.password,this.userid,params.rake,params.buyin_reset,function (worked,club) {
 			if (worked) {
-				models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
-					console.log(err,stats);
-					var out = Club.makeClubProtobuf(club.obj,null,stats,club);
-					this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
-				}.bind(this));
+				var out = Club.makeClubProtobuf(club.obj,null,[],club,this);
+				this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 			}
 		}.bind(this));
 	}.bind(this));
@@ -523,7 +556,7 @@ handlers[codes.scDeleteClub] = function (args,token) {
 			// FIXME, force end games in this club?
 			models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 				var userlist = [];
-				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
 				this.send(codes.srClubDisbandOk,out,'Poker.Club');
 				this.log('userlist to inform:',userlist);
 				for (var x=0; x<userlist.length; x++) {
@@ -571,13 +604,16 @@ handlers[codes.scKickPlayer] = function (args,token) {
 			}
 			models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
 				var userlist = [ userid ];
-				var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
+				var out = Club.makeClubProtobuf(club.obj,userlist,stats,club,this);
 				this.send(codes.srKickPlayerReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 				this.log('userlist to inform:',userlist);
 				this.log('out:%j',out);
 				for (var x=0; x<userlist.length; x++) {
 					var user = global.activeUsers[userlist[x]];
-					if (user) user.send(codes.seClubChange,out,'Poker.Club');
+					if (user) {
+						var out = Club.makeClubProtobuf(club.obj,null,stats,club,user);
+						user.send(codes.seClubChange,out,'Poker.Club');
+					}
 				}
 			}.bind(this));
 		}.bind(this));
@@ -641,12 +677,15 @@ handlers[codes.scSuspendPlayer] = function (args,token) {
 		Club.getClubById(clubid,function (err,clubObj) {
 			models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 				var userlist = [ ];
-				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
 				this.send(code,out,'Poker.Club');
 				this.log('userlist to inform:',userlist);
 				for (var x=0; x<userlist.length; x++) {
 					var user = global.activeUsers[userlist[x]];
-					if (user) user.send(codes.seClubChange,out,'Poker.Club');
+					if (user) {
+						var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+						user.send(codes.seClubChange,out,'Poker.Club');
+					}
 				}
 			}.bind(this));
 		}.bind(this));
@@ -695,6 +734,13 @@ handlers[codes.scJoinClub] = function (args,token) {
 				return;
 			}
 		}
+		if (clubObj.obj.pendingApproval) {
+			if (containsObjectID(clubObj.obj.pendingApproval,this.userid)) {
+				this.log('already pending approval');
+				this.reply(0,'your already pending approval');
+				return;
+			}
+		}
 		if (clubObj.obj.is_private && (pw != clubObj.obj.password)) {
 			this.send(codes.srJoinClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 			return;
@@ -703,30 +749,39 @@ handlers[codes.scJoinClub] = function (args,token) {
 			this.send(codes.srJoinClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 			return;
 		}
-		this.log('joining club %s',clubObj.obj._id);
-		clubObj.joinClub(this.userid,function () {
-			this.log('join2');
-			clubObj.updateLimitPostWin(0,this.userid,function (){
-				models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
-					models.Game.find({clubid:clubObj.obj._id},function (err,games) {
-						for (var x=0; x<games.length; x++) {
-							games[x] = makeGameProtobuf(games[x]);
-						}
-						var userlist = [ clubObj.obj.owner ];
-						var clubinfo = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
-						var joininfo = {status:'csSuccess',club:clubinfo,games:games};
+		clubObj.obj.pendingApproval.addToSet(this.userid);
+		clubObj.obj.save(function (err) {
+			assert.ifError(err);
+			var userlist = [ clubObj.obj.owner ];
+			//clubObj.joinClub(this.userid,function () {
+				this.log('join2');
+				clubObj.updateLimitPostWin(0,this.userid,function (){
+					models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
+						var clubinfo = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
+						var joininfo = {status:'csWaitingForApproval',club:clubinfo};
 						this.send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
-						this.log('userlist to inform:',userlist);
-						for (var x=0; x<userlist.length; x++) {
-							var user = global.activeUsers[userlist[x]];
-							if (user == this) continue;
-							if (user) user.send(codes.seClubChange,clubinfo,'Poker.Club');
-						}
+						models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
+							models.Game.find({clubid:clubObj.obj._id},function (err,games) {
+								for (var x=0; x<games.length; x++) {
+									games[x] = makeGameProtobuf(games[x]);
+								}
+								this.log('userlist to inform:',userlist);
+								for (var x=0; x<userlist.length; x++) {
+									var user = global.activeUsers[userlist[x]];
+									if (user == this) continue;
+									if (user) {
+										var clubinfo = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+										user.send(codes.seClubChange,clubinfo,'Poker.Club');
+									}
+								}
+							}.bind(this));
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
-			}.bind(this));
+			//}.bind(this));
 		}.bind(this));
-		this.log('join3',err,this.userid);
+		//this.log('joining club %s',clubObj.obj._id);
+		//this.log('join3',err,this.userid);
 	}.bind(this));
 }
 handlers[codes.scSetPlayerLimit] = function (args,token) {
@@ -786,7 +841,7 @@ handlers[codes.scResetPlayerBalance] = function (args,token) {
 			if (result) {
 				models.ClubBalance.find({clubid:clubid},function (err,balances) {
 					assert.ifError(err);
-					var obj = Club.makeClubProtobuf(clubObj.obj,[],balances,clubObj);
+					var obj = Club.makeClubProtobuf(clubObj.obj,[],balances,clubObj,this);
 					this.send(codes.srResetPlayerBalanceOk,obj,'Poker.Club');
 				}.bind(this));
 			} else this.reply(0,'player not found');
@@ -819,7 +874,7 @@ handlers[codes.scResetPlayerBalances] = function (args,token) {
 				models.ClubBalance.find({clubid:clubid},function (err,balances) {
 					assert.ifError(err);
 					console.log('post-reset balances',balances);
-					var obj = Club.makeClubProtobuf(clubObj.obj,[],balances,clubObj);
+					var obj = Club.makeClubProtobuf(clubObj.obj,[],balances,clubObj,this);
 					this.send(codes.srResetPlayerBalanceOk,obj,'Poker.Club');
 				}.bind(this));
 			} else this.reply(0,'player not found');
@@ -859,7 +914,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			Club.dupCheck(params.name,function (dup) {
 				if (dup) {
 					this.log('dup club name');
-					this.send(codes.srChangeClubDetailsReply,{status:'csNameExists',club:Club.makeClubProtobuf(club.obj,null,[],club)},'Poker.ClubCommandReply');
+					this.send(codes.srChangeClubDetailsReply,{status:'csNameExists',club:Club.makeClubProtobuf(club.obj,null,[],club,this)},'Poker.ClubCommandReply');
 				} else {
 					club.obj.name = params.name;
 					finish.call(this);
@@ -889,14 +944,14 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				this.log('detail update',clubid,params,err,ret);
 				if (err) {
 					this.log('name collision');
-					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists',club:Club.makeClubProtobuf(club.obj,null,null,club)},'Poker.ClubCommandReply');
+					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists',club:Club.makeClubProtobuf(club.obj,null,null,club,this)},'Poker.ClubCommandReply');
 				} else {
 					var userlist = [ ];
 					models.Game.find({clubid:club.clubid},function changeDetail_cb3(err,games) {
 						models.ClubBalance.find({clubid:club.clubid},function changeDetail_cb4(err,stats) {
 							var x;
 							assert.ifError(err);
-							var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
+							var out = Club.makeClubProtobuf(club.obj,userlist,stats,club,this);
 							for (x=0; x<games.length; x++) {
 								games[x] = makeGameProtobuf(games[x]);
 							}
@@ -905,7 +960,10 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 							this.log('userlist to inform:',userlist);
 							for (x=0; x<userlist.length; x++) {
 								var user = global.activeUsers[userlist[x]];
-								if (user) user.send(codes.seClubChange,out,'Poker.Club');
+								if (user) {
+									var out = Club.makeClubProtobuf(club.obj,null,stats,club,user);
+									user.send(codes.seClubChange,out,'Poker.Club');
+								}
 							}
 							token.stop();
 						}.bind(this));
@@ -927,12 +985,15 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 						clubObj.Leave(this.userid,function () {
 							models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 								var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
-								var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+								var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
 								this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 								this.log('userlist to inform:',userlist);
 								for (var x=0; x<userlist.length; x++) {
 									var user = global.activeUsers[userlist[x]];
-									if (user) user.send(codes.seClubChange,out,'Poker.Club');
+									if (user) {
+										var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+										user.send(codes.seClubChange,out,'Poker.Club');
+									}
 								}
 							}.bind(this));
 						}.bind(this));
@@ -955,7 +1016,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 		this.log('giving ownership away',clubid,newowner);
 		Club.getClubById(clubid,function (err,clubObj) {
 			if (err == 'not found') {
-				this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(clubObj.obj,null,null,clubObj),'Poker.Club');
+				this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(clubObj.obj,null,null,clubObj,this),'Poker.Club');
 				return;
 			}
 			models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
@@ -964,21 +1025,24 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 						this.log('adding self to members',this.userid);
 						clubObj.setOwner(newowner,function () {
 							var userlist = [ clubObj.obj.owner ];
-							var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+							var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
 							this.send(codes.srOwnershipGiveAwayOk,out,'Poker.Club');
 							this.log('i am %s, target is %s',this.userid,newowner);
 							this.log('userlist to inform:',userlist);
 							for (var x=0; x<userlist.length; x++) {
 								var user = global.activeUsers[userlist[x]];
 								if (user === this) continue;
-								if (user) user.send(codes.seClubChange,out,'Poker.Club');
+								if (user) {
+									var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+									user.send(codes.seClubChange,out,'Poker.Club');
+								}
 							}
 						}.bind(this));
 					} else {
-						this.send(codes.srOwnershipGiveAwayInvalidPlayerId,Club.makeClubProtobuf(clubObj.obj,stats,clubObj),'Poker.Club');
+						this.send(codes.srOwnershipGiveAwayInvalidPlayerId,Club.makeClubProtobuf(clubObj.obj,stats,clubObj,this),'Poker.Club');
 					}
 				} else {
-					this.send(codes.srOwnershipGiveAwayNotOwner,Club.makeClubProtobuf(clubObj.obj,stats,clubObj),'Poker.Club');
+					this.send(codes.srOwnershipGiveAwayNotOwner,Club.makeClubProtobuf(clubObj.obj,stats,clubObj,this),'Poker.Club');
 				}
 			}.bind(this));
 		}.bind(this));
@@ -1072,12 +1136,63 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				console.log('need seClubChange',clubObj);
 				models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 					var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
-					var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+					var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
 					this.log('userlist to inform:',userlist);
 					for (var x=0; x<userlist.length; x++) {
 						var user = global.activeUsers[userlist[x]];
-						if (user) user.send(codes.seClubChange,out,'Poker.Club');
+						if (user) {
+							var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+							user.send(codes.seClubChange,out,'Poker.Club');
+						}
 					}
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+	};
+	handlers[codes.scApproveClubMember] = function (args,token) {
+		var params,clubid,userid;
+		try {
+			params = pb.Parse(args,'Poker.ChangeClubPlayerFlag');
+			clubid = myutils.toMongoId(params.club_mongo_id);
+			userid = myutils.toMongoId(params.player_mongo_id);
+		} catch (e) {
+			this.error(e);
+			return;
+		}
+		Club.getClubById(clubid,function (err,clubObj) {
+			if (err == 'not found') {
+				this.reply(0,'club not found');
+				return;
+			}
+			if (!clubObj.isOwner(this.userid)) {
+				this.reply(0,'your not the owner');
+				return;
+			}
+			clubObj.obj.pendingApproval.pull(userid);
+			clubObj.obj.members.addToSet(userid);
+			clubObj.obj.save(function (err) {
+				assert.ifError(err);
+				console.log('need seClubChange',clubObj);
+				models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
+					var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
+					var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
+					this.log('userlist to inform:',userlist);
+					for (var x=0; x<userlist.length; x++) {
+						if (compareObjectID(userlist[x],userid)) continue;
+						var user = global.activeUsers[userlist[x]];
+						if (user) {
+							var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+							user.send(codes.seClubChange,out,'Poker.Club');
+						}
+					}
+					models.Game.find({clubid:clubObj.clubid},function (err,games) {
+						assert.ifError(err);
+						for (var x=0; x<games.length; x++) {
+							games[x] = makeGameProtobuf(games[x]);
+						}
+						var joininfo = {status:'csSuccess',club:out,games:games};
+						if (global.activeUsers[userid]) global.activeUsers[userid].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
@@ -1107,11 +1222,14 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				assert.ifError(err);
 				models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 					var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
-					var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+					var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
 					this.log('userlist to inform:',userlist);
 					for (var x=0; x<userlist.length; x++) {
 						var user = global.activeUsers[userlist[x]];
-						if (user) user.send(codes.seClubChange,out,'Poker.Club');
+						if (user) {
+							var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+							user.send(codes.seClubChange,out,'Poker.Club');
+						}
 					}
 				}.bind(this));
 			}.bind(this));

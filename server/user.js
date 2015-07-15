@@ -839,14 +839,23 @@ ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 		models.ClubBalance.find({clubid:{$in:ownedClubs}},function (err,balances) {
 			assert.ifError(err);
 			var clubsOut = [];
+			var pendingOut = [];
 			async.each(clubs,function getStatsAndClub(item,cb) {
 				Club.getClubById(item._id,function (err,club) {
+					// TODO, dont show userlist if you are pending
 					var obj = Club.makeClubProtobuf(item,userlist,balances,club);
-					clubsOut.push(obj);
+					if (myutils.containsObjectID(club.obj.members,this.userid)) {
+						clubsOut.push(obj);
+					} else if (myutils.containsObjectID(item.pendingApproval,this.userid)) {
+						pendingOut.push(obj);
+					} else if (club.isOwner(this.userid)) {
+						clubsOut.push(obj);
+					}
 					cb();
 				}.bind(this));
 			}.bind(this),function finished() {
 				status.clubs = clubsOut;
+				status.pending_clubs = pendingOut;
 				models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:"",subscription_plan:""},function(err,users) {
 					status.users = users;
 					models.UserModel.findOne({_id:this.userid},function(err,self) {
