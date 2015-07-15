@@ -437,13 +437,13 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 			error.handleError(err);
 			this.handOver(function () {
 				cb();
-			});
+			},undefined,'updateBuyin',key.userid);
 		}
 	}.bind(this));
 };
-Game.prototype.handOver = function (cb,handid,reason) {
+Game.prototype.handOver = function (cb,handid,reason,userid) {
 	this.log('handOver start');
-	if (this.club) this.club.handOver(this,cb);
+	if (this.club) this.club.handOver(this,cb,handid,reason,userid);
 	else if (this.tourn) {
 		if (reason == 'updateCashOut') cb();
 		else {
@@ -462,6 +462,8 @@ Game.prototype.handOver = function (cb,handid,reason) {
 			async.each(historyRow.players,function (player,cb) {
 				if (!player) return cb();
 				models.UserModel.findOne({_id:player._id},function (err,playerRow) {
+					assert.ifError(err);
+					assert(playerRow);
 					player.keyid = keyid++;
 					player.nick = playerRow.displayname;
 						if (player.cards) {
@@ -476,6 +478,7 @@ Game.prototype.handOver = function (cb,handid,reason) {
 			},function () {
 				// MARK
 				for (var x=0; x<historyRow.cards.length; x++) {
+					if (!historyRow.cards[x].cards) continue;
 					historyRow.cards[x] = new Buffer(historyRow.cards[x].cards);
 				}
 				var obj = {gameid:this.id, rows:[historyRow] };
@@ -1039,13 +1042,18 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	var extrarake = 0;
 	for (y=0; y<this.members.length; y++) {
 		if (!this.members[y]) continue;
+		console.log('prelimit',this.seats[y].rakecontrib);
+		if (!this.seats[y].rakecontrib) this.seats[y].rakecontrib = 0;
 		this.seats[y].rakecontrib = secondPercent * this.seats[y].rakecontrib;
 		var temp = this.seats[y].rakecontrib;
-		this.seats[y].rakecontrib = Math.ceil(this.seats[y].rakecontrib);
+		console.log('post-limit, pre-rounding',this.seats[y].rakecontrib);
+		this.seats[y].rakecontrib = Math.round(this.seats[y].rakecontrib);
+		console.log('post-rounding',this.seats[y].rakecontrib);
 		extrarake += this.seats[y].rakecontrib - temp;
 	}
-	extrarake = Math.floor(extrarake);
-	console.log('extra rake'.green,extrarake);
+	extrarake = Math.round(extrarake);
+	if (extrarake) console.log('extra rake'.green,extrarake);
+	assert(!isNaN(extrarake));
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
 		if (pot.value == 0) continue;
@@ -1061,7 +1069,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		pot.rake = rake;
 		this.history.WinnerPotData[y].rake = rake;
 		this.log('pot %d initial value %d, going to %j',y,pot.value,pot.winners);
-		var bussinessSplit = ((pot.value-rake)/pot.winners.length);
+		var bussinessSplit = Math.round(((pot.value-rake)/pot.winners.length));
 		this.log('bussiness will give %d to each side',bussinessSplit);
 		totalrake += rake;
 		for (var bussiness=0; bussiness<pot.winners.length; bussiness++) {
@@ -1279,14 +1287,14 @@ Game.prototype.postWinSaveStats = function (cb) {
 	}
 	async.parallel([function a(cbA) {
 		async.each(jobs,function hack(job,cb2) {
-			//global.log('updating stats %j',job);
+			global.log('updating stats %j',job);
 			models.GameStats.findOne(job.key,function (err,row) {
 				error.handleError(err);
 				if (!row) {
 					global.log('inserting %j',job.doc);
-					global.log('inserting %j',job.doc);
+					models.GameStats.create(job.doc,finish.bind(this));
 				} else {
-					models.GameStats.findOneAndUpdate(job.key,job.mods,finish.bind(this));
+					models.GameStats.findOneAndUpdate({_id:row._id},job.mods,finish.bind(this));
 				}
 				function finish(err) {
 					error.handleError(err);
@@ -1629,8 +1637,9 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	assert.equal(this.Lock.readers,-1);
 	var seat = this.findSeat(conn);
 	assert.equal(this.current_seat,seat);
-	conn.log('putchips, counter==%d',this.stateRow.moveCounter);
-	this.log('putchips, counter==%d',this.stateRow.moveCounter);
+	assert(!isNaN(chips));
+	//conn.log('putchips, counter==%d',this.stateRow.moveCounter);
+	//this.log('putchips, counter==%d',this.stateRow.moveCounter);
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		this.log('putChips fail 1');
 		cb();
@@ -1658,6 +1667,8 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	} else if (this.members[seat].chips == increase) {
 		this.members[seat].status = 'psAllIn';
 		event = 'teAllIn';
+		this.members[seat].muck = false;
+		this.history.players[seat].muck = false;
 	} else if (chips < this.minBet) { // cheater!
 		conn.reply(0,'not meeting min bet');
 		conn.error('cheater detected, betting low '+chips+','+this.minBet);
@@ -2168,7 +2179,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
 	tableStatus.table_message = this.message;
-	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
+	this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	if (this.sitQueue.indexOf(self.userid) != -1) {
 		tableStatus.queue_position = this.sitQueue.indexOf(self.userid) + 1;
 	}
@@ -2238,7 +2249,7 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 		error.handleError(err);
 		this.handOver(function () {
 			cb();
-		},null,'updateCashOut');
+		},null,'updateCashOut',userid);
 	}.bind(this));
 }
 Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
@@ -2828,6 +2839,7 @@ Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 
 				events.push(this.makeEvent('teExistingCards',ev));
 			}
+			this.log('reconnected a user',util.inspect(this));
 			var status = this.getTableStatus(conn,true,events);
 			release();
 			token.stop();

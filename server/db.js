@@ -71,6 +71,7 @@ var ClubSchema = new Schema({
 	muted: [ObjectId],
 	manager: [ObjectId],
 	suspended: [ObjectId],
+	pendingApproval: [ObjectId],
 	seq: Number,
 	testmode: Boolean,
 	buyin_reset: Number
