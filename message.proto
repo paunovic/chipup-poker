@@ -116,6 +116,7 @@ enum ServerCodes {
 	scSplitTableCards = 118;
 	scSoftException = 119;
 	scTableSitClose = 120;
+	scApproveClubMember = 121;
 }
 
 message StringSizes {
@@ -204,6 +205,7 @@ message LoginReply {
 	optional User self = 8;
 	repeated Game games = 9;
 	repeated PlayerClubStatus player_club_statuses = 10;
+	repeated Club pending_clubs = 11;
 }
 
 message ClubMember {
@@ -483,6 +485,7 @@ message ClubCommandReply {
 		csInvalidClubId = 4;
 		csAlreadyMember = 5;
 		csInvalidPlayerId = 6;
+		csWaitingForApproval = 7;
 	}
 	required ClubStatus status = 1;
 	optional Club club = 2;
