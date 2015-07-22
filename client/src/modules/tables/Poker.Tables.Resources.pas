@@ -70,7 +70,8 @@ type
       FLeaveWaitingListPressed: TAsphyreImage;
       FSeatLeftReservedImage: TAsphyreImage;
       FSeatRightReservedImage: TAsphyreImage;
-
+      FReportBugNormalImage: TAsphyreImage;
+      FReportBugPressedImage: TAsphyreImage;
       FGrayscaleImages: TObjectDictionary<TAsphyreImage, TAsphyreImage>;
 
       FBarmenoFonts: TBarmenoFonts;
@@ -94,6 +95,7 @@ type
       FSeatActionFrameAspectRatio: Single;
       FJoinWaitingListButtonAspectRatio: Single;
       FLeaveWaitingListButtonAspectRatio: Single;
+      FReportBugButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -193,6 +195,8 @@ type
     property LeaveWaitingListPressed: TAsphyreImage read FLeaveWaitingListPressed;
     property SeatLeftReservedImage: TAsphyreImage read FSeatLeftReservedImage;
     property SeatRightReservedImage: TAsphyreImage read FSeatRightReservedImage;
+    property ReportBugNormalImage: TAsphyreImage read FReportBugNormalImage;
+    property ReportBugPressedImage: TAsphyreImage read FReportBugPressedImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -215,6 +219,7 @@ type
     property SeatActionFrameAspectRatio: Single read FSeatActionFrameAspectRatio;
     property JoinWaitingListButtonAspectRatio: Single read FJoinWaitingListButtonAspectRatio;
     property LeaveWaitingListButtonAspectRatio: Single read FLeaveWaitingListButtonAspectRatio;
+    property ReportBugButtonAspectRatio: Single read FReportBugButtonAspectRatio;
   end;
 
 var
@@ -302,6 +307,8 @@ begin
   AddDXImage('LeaveWaitingList_Pressed.image', FLeaveWaitingListPressed);
   AddDXImage('SeatLeftReserved.image', FSeatLeftReservedImage);
   AddDXImage('SeatRightReserved.image', FSeatRightReservedImage);
+  AddDXImage('ReportBugNormal.image', FReportBugNormalImage, FReportBugButtonAspectRatio);
+  AddDXImage('ReportBugPressed.image', FReportBugPressedImage);
 
   FGrayscaleImages := TObjectDictionary<TAsphyreImage, TAsphyreImage>.Create([]);
 

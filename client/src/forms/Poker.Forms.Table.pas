@@ -66,6 +66,7 @@ type
     lbvWaitingListPosition: TcxLabel;
     acAddChips: TAction;
     lbvClubBalance: TcxLabel;
+    acReportBug: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -113,6 +114,7 @@ type
     procedure acJoinWaitingListExecute(Sender: TObject);
     procedure acLeaveWaitingListExecute(Sender: TObject);
     procedure acAddChipsExecute(Sender: TObject);
+    procedure acReportBugExecute(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -277,6 +279,7 @@ begin
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
     FDXBJoinWaitingList := table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
     table.Renderer.AddDXButton(acLeaveWaitingList, @table.Renderer.Metrics.LeaveWaitingListButtonBounds, TableResources.LeaveWaitingListNormal, TableResources.LeaveWaitingListPressed, nil, FALSE, 0.15);
+    table.Renderer.AddDXButton(acReportBug, @table.Renderer.Metrics.ReportBugButtonBounds, TableResources.ReportBugNormalImage, TableResources.ReportBugPressedImage, nil);
 
     FDXBFold := table.Renderer.AddDXButton(acFold, @table.Renderer.Metrics.ActionButtonsBounds[0],
          TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
@@ -1588,6 +1591,25 @@ begin
   end;
 
   SetRaiseValue(raise_value);
+end;
+
+procedure TfrmTable.acReportBugExecute(Sender: TObject);
+var
+  index: Integer;
+  text: String;
+begin
+  index := 2;
+  text := Format(
+    '--- DO NOT REMOVE THESE LINES ! ---'#13#10 +
+    'VER: %s (win)'#13#10 +
+    'GID: %s'#13#10 +
+    'LHI: %d'#13#10 +
+    '--- DO NOT REMOVE THESE LINES ! ---'#13#10#13#10 +
+    'Please give us more info below about the bug.'#13#10 +
+    'If possible, also specify the exact hand ID where the bug occured.'#13#10#13#10,
+    [Settings.Hardcoded.VERSION, FGameId.ToString, HandHistory.RetrieveLastHandId(FGameId)]);
+
+  FormsContainer.RunForm(TfrmContactUs, nil, [@text, @index], FALSE);
 end;
 
 procedure TfrmTable.SetActionCaptions;
