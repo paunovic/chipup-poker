@@ -13,6 +13,7 @@ var https = require('https');
 var heapdump = require('heapdump');
 var mongoose = require('mongoose');
 var jade = require('jade');
+var path = require('path');
 var generatePassword = require('password-generator');
 
 var config = require('./config');
@@ -30,9 +31,11 @@ var models = require('./db').models;
 var user = require('./user');
 var codes = require('./ServerCodes');
 var SmtpConnection = require('./smtp');
-var dag = require('dag');
+var dag = require('./build/Release/dag');
 var error = require('./error');
 var Tournament = require('./tournament');
+
+var project_root = path.dirname(process.mainModule.filename);
 
 module.exports.initHttpServer = initHttpServer;
 
@@ -63,11 +66,12 @@ function Server(activeUsersIN) {
 	app.use(express.cookieParser());
 	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
 	app.configure(function () {
-		assert(fs.statSync('./upload'));
-		app.use(express.bodyParser({uploadDir:'./upload'}));
+		assert(fs.statSync(config.upload_dir));
+		app.use(express.bodyParser({uploadDir:config.upload_dir}));
 	});
 	app.use('/sync/',express.basicAuth('sync',config.syncpassword));
 	app.use('/secure/',this.isSecureAuthed);
+        app.set('views', project_root + '/views');
 	app.set('view engine','jade');
 	app.get('/secure/',this.secureIndex.bind(this));
 

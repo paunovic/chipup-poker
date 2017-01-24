@@ -33,52 +33,52 @@ int cardToNumber(Local<Array> cards,int index) {
 	int value = cards->Get(index)->Int32Value();
 	return value;
 }
-Local<Array> getCards(Local<Object> game,const char *field) {
-	return Local<Array>::Cast(game->Get(String::NewSymbol(field))->ToObject()->Get(String::NewSymbol("cards")));
+Local<Array> getCards(Local<Object> game,const char *field, Isolate *isolate) {
+	return Local<Array>::Cast(game->Get(String::NewFromUtf8(isolate, field))->ToObject()->Get(String::NewFromUtf8(isolate, "cards")));
 }
-Handle<Value> RankHands(const Arguments& args) {
-	HandleScope scope;
-	char cards[7];
-	if (args.Length() < 2) {
-		ThrowException(Exception::TypeError(String::New("wrong number of arguments")));
-		return scope.Close(Undefined());
-	}
-	if (!args[0]->IsObject()) {
-		ThrowException(Exception::TypeError(String::New("first argument must be a Game")));
-		return scope.Close(Undefined());
-	}
-	if (!args[1]->IsArray()) {
-		ThrowException(Exception::TypeError(String::New("second argument must be an array")));
-		return scope.Close(Undefined());
-	}
-	Local<Object> root = Object::New();
-	Local<Array> outputs = Array::New();
-	root->Set(String::NewSymbol("outputs"),outputs);
+void RankHands(const FunctionCallbackInfo<Value>& args) {
+    Isolate *isolate = args.GetIsolate();
+    char cards[7];
+    if (args.Length() < 2) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "wrong number of arguments")));
+        return;
+    }
+    if (!args[0]->IsObject()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "first argument must be a Game")));
+        return;
+    }
+    if (!args[1]->IsArray()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "second argument must be an array")));
+        return;
+    }
+    Local<Object> root = Object::New(isolate);
+    Local<Array> outputs = Array::New(isolate);
+    root->Set(String::NewFromUtf8(isolate, "outputs"),outputs);
 
-	Local<Object> game = args[0]->ToObject();
-	Local<Array> flop = getCards(game,"flop");
-	if (flop->Length() != 3) {
-		ThrowException(Exception::TypeError(String::New("first argument must be a array of 3 Cards")));
-		return scope.Close(Undefined());
-	}
-	cards[0] = cardToNumber(flop,0);
-	cards[1] = cardToNumber(flop,1);
-	cards[2] = cardToNumber(flop,2);
-	cards[3] = cardToNumber(getCards(game,"turn"),0);
-	cards[4] = cardToNumber(getCards(game,"river"),0);
-	root->Set(String::NewSymbol("input"),String::New(hand_to_str(cards,5)));
-	Local<Array> hands = Local<Array>::Cast(args[1]);
-	for (unsigned int j=0; j<hands->Length(); j++) {
-		Local<Value> item = hands->Get(j);
-		handeval_eq_class *rank = 0;
-		char handcards[4];
-		int handsize = 0;
-		if (!item->IsObject()) {
-			ThrowException(Exception::TypeError(String::New("second argument must be an array of strings")));
-			return scope.Close(Undefined());
-		}
-		Local<Object> hand = item->ToObject();
-		Local<Array> cardlist = Local<Array>::Cast(hand->Get(String::NewSymbol("hand"))); // array of Card objects
+    Local<Object> game = args[0]->ToObject();
+    Local<Array> flop = getCards(game, "flop", isolate);
+    if (flop->Length() != 3) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "first argument must be a array of 3 Cards")));
+        return;
+    }
+    cards[0] = cardToNumber(flop,0);
+    cards[1] = cardToNumber(flop,1);
+    cards[2] = cardToNumber(flop,2);
+    cards[3] = cardToNumber(getCards(game, "turn", isolate),0);
+    cards[4] = cardToNumber(getCards(game, "river", isolate),0);
+    root->Set(String::NewFromUtf8(isolate, "input"), String::NewFromUtf8(isolate, hand_to_str(cards,5)));
+    Local<Array> hands = Local<Array>::Cast(args[1]);
+    for (unsigned int j=0; j<hands->Length(); j++) {
+        Local<Value> item = hands->Get(j);
+        handeval_eq_class *rank = 0;
+        char handcards[4];
+        int handsize = 0;
+        if (!item->IsObject()) {
+            isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "second argument must be an array of strings")));
+            return;
+        }
+        Local<Object> hand = item->ToObject();
+        Local<Array> cardlist = Local<Array>::Cast(hand->Get(String::NewFromUtf8(isolate, "hand"))); // array of Card objects
 		
 		if (cardlist->Length() == 2) {
 			handsize = 2;
@@ -86,23 +86,23 @@ Handle<Value> RankHands(const Arguments& args) {
 		} else if (cardlist->Length() == 4) {
 			handsize = 4;
 			rank = omahaEval(cardlist,cards,handcards);
-		} else {
-			ThrowException(Exception::TypeError(String::New("a user can only have 2 or 4 cards")));
-			return scope.Close(Undefined());
-		}
-		assert(rank);
-		Local<Object> handOut = Object::New();
+        } else {
+            isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "a user can only have 2 or 4 cards")));
+            return;
+        }
+        assert(rank);
+        Local<Object> handOut = Object::New(isolate);
 
-		handOut->Set(String::NewSymbol("id"),Number::New(rank->id));
-		handOut->Set(String::NewSymbol("desc"),String::New(rank->desc));
-		handOut->Set(String::NewSymbol("domination"),Number::New(rank->domination));
-		handOut->Set(String::NewSymbol("likelihood"),Number::New(rank->likelihood));
-		handOut->Set(String::NewSymbol("cards"),String::New(rank->cards));
-		handOut->Set(String::NewSymbol("input"),String::New(hand_to_str(handcards,handsize)));
-		handOut->Set(String::NewSymbol("seat"),hand->Get(String::NewSymbol("seat")));
-		outputs->Set(j,handOut);
-	}
-	return scope.Close(root);
+        handOut->Set(String::NewFromUtf8(isolate, "id"), Number::New(isolate, rank->id));
+        handOut->Set(String::NewFromUtf8(isolate, "desc"), String::NewFromUtf8(isolate, rank->desc));
+        handOut->Set(String::NewFromUtf8(isolate, "domination"), Number::New(isolate, rank->domination));
+        handOut->Set(String::NewFromUtf8(isolate, "likelihood"), Number::New(isolate, rank->likelihood));
+        handOut->Set(String::NewFromUtf8(isolate, "cards"), String::NewFromUtf8(isolate, rank->cards));
+        handOut->Set(String::NewFromUtf8(isolate, "input"), String::NewFromUtf8(isolate, hand_to_str(handcards,handsize)));
+        handOut->Set(String::NewFromUtf8(isolate, "seat"), hand->Get(String::NewFromUtf8(isolate, "seat")));
+        outputs->Set(j,handOut);
+    }
+    args.GetReturnValue().Set(root);
 }
 handeval_eq_class *holdemEval(int a, int b, char *cards) {
 	cards[5] = a;
@@ -141,14 +141,22 @@ handeval_eq_class *omahaEval(Local<Array> cardlist, char *cards,char *hand) {
 	printf("%d %s vs %d %s\n",best->id,best->desc,test->id,test->desc);
 	return best;
 }
-Handle<Value> InitDag(const Arguments& args) {
-	HandleScope scope;
-	handeval_init();
-	return scope.Close(Undefined());
+void InitDag(const FunctionCallbackInfo<Value>& args) {
+    Isolate *isolate = args.GetIsolate();
+    if (args.Length() != 1) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "wrong number of arguments")));
+        return;
+    }
+    if (!args[0]->IsString()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "first argument must be a path")));
+        return;
+    }
+    String::Utf8Value project_root(args[0]->ToString());
+    handeval_init(*project_root);
 }
 void init(Handle<Object> exports) {
-	exports->Set(String::NewSymbol("rankHands"),FunctionTemplate::New(RankHands)->GetFunction());
-	exports->Set(String::NewSymbol("init"),FunctionTemplate::New(InitDag)->GetFunction());
+    NODE_SET_METHOD(exports, "rankHands", RankHands);
+    NODE_SET_METHOD(exports, "init", InitDag);
 }
 
 NODE_MODULE(dag,init)

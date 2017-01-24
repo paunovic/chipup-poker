@@ -10,7 +10,7 @@ requestTracker.prototype.rest = function test(url,args,cb) {
 		console.log('response: ', response.entity);
 		if (cb) cb();
 	}).catch(function(e) {
-		console.log('error',e);
+		console.log('rest error',e);
 		cb(e);
 	});
 	return;
@@ -37,7 +37,7 @@ requestTracker.prototype.login = function login(cb) {
 	req.write(postbody);
 	req.end();
 	req.on('error',function (err) {
-		console.log('error',err);
+		console.log('login error',err);
 	});
 }
 requestTracker.prototype.createTicket = function (obj,cb) {

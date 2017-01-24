@@ -20,7 +20,7 @@ var myutils = require('./myutils');
 var config = require('./config');
 var differ = require('./differ');
 var SmtpConnection = require('./smtp');
-var profiler = require('profiler');
+var profiler = require('./profiler');
 var RT = require('./rt');
 var installer = require('./installer');
 var error = require('./error');
@@ -1199,30 +1199,31 @@ function hashAssets(cb) {
 }
 var asset_initial = true;
 function recheckAssets(cb) {
-	if (!config.diffserver) {
-		if (asset_initial) {
-			asset_initial = false;
-			var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
-				res.setEncoding('ascii');
-				var buffer = '';
-				res.on('data',function (chunk) {
-					buffer += chunk;
-				});
-				res.on('error',function (err) {
-					console.log('http error sending new assets:',err);
-				});
-				res.on('end',function () {
-					console.log('req ended',buffer);
-					assets = JSON.parse(buffer);
-					if (cb) return cb();
-				});
-			});
-			req.end();
-		} else {
-			if (cb) return cb();
-		}
-		return;
-	}
+    if (!config.diffserver) {
+        if (asset_initial) {
+            asset_initial = false;
+            var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
+                res.setEncoding('ascii');
+                var buffer = '';
+                res.on('data',function (chunk) {
+                    buffer += chunk;
+                });
+                res.on('error',function (err) {
+                    console.log('http error sending new assets:',err);
+                });
+                res.on('end',function () {
+                    console.log('req ended',buffer);
+                    assert(res.statusCode == 200);
+                    assets = JSON.parse(buffer);
+                    if (cb) return cb();
+                });
+            });
+            req.end();
+        } else {
+            if (cb) return cb();
+        }
+        return;
+    }
 	fs.stat('assets',function (err,stats) {
 		if (assetMtime == stats.mtime.getTime()) {
 			if (cb) cb();

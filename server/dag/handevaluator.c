@@ -159,9 +159,13 @@ char* str_to_cards(char* str, unsigned int number) {
 	return res;
 }
 
-void handeval_init() {
-	load_equivalenceclasses("eqcllist");
-	load_dag("carddag");
+void handeval_init(const char *project_root) {
+    assert(project_root);
+    char buffer[256];
+    snprintf(buffer, 255, "%s/eqcllist", project_root);
+    load_equivalenceclasses(buffer);
+    snprintf(buffer, 255, "%s/carddag", project_root);
+    load_dag(buffer);
 }
 
 void partial_evaluate(unsigned int cardcnt, char* cards, partial_evaluation* pe) {
