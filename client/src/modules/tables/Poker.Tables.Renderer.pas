@@ -258,8 +258,9 @@ var
 begin
   ASetRaiseAmount := FALSE;
 
-  for dxbutton in FDXButtons do
-    dxbutton.MouseDown(Button, Shift, X, Y);
+  if Button = mbLeft then
+    for dxbutton in FDXButtons do
+      dxbutton.MouseDown(Button, Shift, X, Y);
 
   // check click on raise thumb button
   if not FRaiseThumbDown then
@@ -554,7 +555,7 @@ begin
         case seat_info.Status of
           psOutOfPlay: begin
             if (table.Club.GetMemberInfo(seat_info.PlayerMongoId, member)) and
-               (member.Suspended) then
+               (member.Status = msSuspended) then
             begin
               seat_lower_text := 'Suspended';
               seat_lower_text_color := cColor2($FFFF3535);
@@ -586,6 +587,7 @@ begin
       // render seat cards
       if table.Status.State > tsIdle then
       begin
+        card_point := FMetrics.GetCardPoint(AGame, seat_info, 1);
         case seat_info.Status of
           psInHand, psAllIn: begin
             for C1 := 0 to seat_info.DealtCards - 1 do
@@ -1005,7 +1007,7 @@ begin
     for C2 := Low(card_points_final[C1]) to High(card_points_final[C1]) do
     begin
       card_points_final[C1][C2].x := FMetrics.TableCenter.X - (FMetrics.CardWidth * 5) / 2 - 4 * 3 + (C2 * FMetrics.CardWidth) + (C2 * 3);
-      card_points_final[C1][C2].y := FMetrics.TableCenter.Y - FMetrics.CardHeight / 2 + C1 * FMetrics.CardHeight / 3;
+      card_points_final[C1][C2].y := FMetrics.TableCenter.Y - FMetrics.CardHeight / 1.85 + C1 * FMetrics.CardHeight / 1.8;
       card_points_curr[C1][C2] := card_points_final[C1][C2];
       card_points_mid[C1][C2] := card_points_final[C1][C2];
     end;

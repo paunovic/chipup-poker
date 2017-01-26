@@ -17,6 +17,7 @@ type
     procedure WndProc(var AMessage: TMessage);
     procedure ProcessSocketReply(const AMethodId: Integer; const AObject: TObject);
     procedure ProcessSocketStateChange(const AOldState, ANewState: TSocketState);
+    function GetCallbackSetsNames: String;
 
   public
     class procedure Initialize;
@@ -25,10 +26,11 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
+    function AddCallbacks(const AName: String; const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
     procedure RemoveCallbacks(var AId: Integer);
 
     property CallbackSetsCount: Integer read GetCallbackSetsCount;
+    property CallbackSetsNames: String read GetCallbackSetsNames;
     property HWND: HWND read FInternalHWND;
   end;
 
@@ -85,7 +87,25 @@ begin
   end;
 end;
 
-function TMessageContainer.AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
+function TMessageContainer.GetCallbackSetsNames: String;
+var
+  C1: Integer;
+begin
+  result := '';
+  FLock.Acquire;
+  try
+    for C1 := 0 to FCallbackSets.Count - 1 do
+    begin
+      result := result + FCallbackSets[C1].Name;
+      if C1 < FCallbackSets.Count - 1 then
+        result := result + #10;
+    end;
+  finally
+    FLock.Release;
+  end;
+end;
+
+function TMessageContainer.AddCallbacks(const AName: String; const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
 var
   callback_set: TCallbackSet;
   id: Integer;
@@ -108,7 +128,7 @@ begin
     end;
   until not found;
 
-  callback_set := TCallbackSet.Create(id, ACallbacks);
+  callback_set := TCallbackSet.Create(AName, id, ACallbacks);
   FLock.Acquire;
   try
     if not APriority then
@@ -199,3 +219,4 @@ begin
 end;
 
 end.
+

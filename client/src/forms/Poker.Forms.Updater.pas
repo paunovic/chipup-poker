@@ -73,9 +73,14 @@ begin
   dmMain.il20px.GetImage(2, imgMinimize.Picture.Bitmap);
 
   FUpdateFileIndex := -1;
+
+  HttpClient.Agent := Format('%s client', [Settings.Hardcoded.PROJECT_CAPTION]);
   HttpClient.RcvdStream := TMemoryStream.Create;
 
-  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter('chipuppoker_update'));
+  Caption := Format('%s - Updating', [Settings.Hardcoded.PROJECT_CAPTION]);
+  lbsCaption.Caption := Caption;
+
+  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter(Format('%s update', [Settings.Hardcoded.PROJECT_CAPTION])));
 
   FTotalSize := 0;
   FCurrentDownloadedSize := 0;
@@ -98,6 +103,8 @@ begin
   obj := HttpClient.RcvdStream;
   HttpClient.RcvdStream := nil;
   (obj as TMemoryStream).Free;
+
+  FSSLCert.Free;
 
   FormsContainer.Remove(self);
 
@@ -163,22 +170,36 @@ begin
     if not requires_restart then
     begin
       ufipath := StringReplace(ufi.Path, '/', '\', [rfReplaceAll]);
+      {$IFDEF DEBUG} DebugLn(Format('Patching: %s...', [ufipath]), ditApplication); {$ENDIF}
       case ufi.FileType of
         ufFull, ufDiff: begin
           newfile := FUpdateDir + ufipath;
           if not FileExists(newfile) then
+          begin
+            SoftException('New file does not exist', newfile);
             Exit(2);
+          end;
 
           oldfile := SelfPath + ufipath;
           ForceDirectories(ExtractFilePath(oldfile));
 
           case ufi.FileType of
-            ufFull: CopyFile(PChar(newfile), PChar(oldfile), FALSE);
+            ufFull: begin
+              if not CopyFile(PChar(newfile), PChar(oldfile), FALSE) then
+              begin
+                SoftException(Format('CopyFile() failed [%d]', [GetLastError]), Format('%s > %s', [newfile, oldfile]));
+                Exit(2);
+              end;
+            end;
+
             ufDiff: begin
               if ShellOpen(PChar(SelfPath + 'bspatch.exe'), @exec_info, PChar(Format('"%s" "%s" "%s"', [oldfile, oldfile, newfile])), nil, SW_HIDE) then
                 WaitForSingleObject(exec_info.hProcess, INFINITE)
               else
+              begin
+                SoftException('Failed to run bspatch.exe', newfile);
                 Exit(2);
+              end;
             end;
           end;
         end;
@@ -198,20 +219,25 @@ begin
   mbu_res := MakeBatchUpdater(batch_file);
   if (pnr_res = 2) or
      (mbu_res = 2) then
-    DownloadFullInstaller;
-
-  FRequiresReboot := mbu_res = 1;
-  if FRequiresReboot then
-    dmMain.SetUpdaterBatchFile(batch_file);
-  Close;
+    DownloadFullInstaller
+  else
+  begin
+    FRequiresReboot := mbu_res = 1;
+    if FRequiresReboot then
+      dmMain.SetUpdaterBatchFile(batch_file);
+    Close;
+  end;
 end;
 
 procedure TfrmUpdater.DownloadFullInstaller;
 begin
   FFullInstaller := TRUE;
+  FDownloadedSize := 0;
+  FTotalSize := 0;
   (HttpClient.RcvdStream as TMemoryStream).Clear;
   HttpClient.URL := Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL + Settings.Hardcoded.URL.LATEST_VERSION;
   HttpClient.GetASync;
+  {$IFDEF DEBUG} DebugLn('Downloading full installer...', ditNetInc, HttpClient.URL); {$ENDIF}
 end;
 
 function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Integer;
@@ -252,7 +278,10 @@ begin
         ufFull, ufDiff: begin
           newfile := FUpdateDir + ufipath;
           if not FileExists(newfile) then
+          begin
+            SoftException('New file does not exist', newfile);
             Exit(2);
+          end;
 
           oldfile := SelfPath + ufipath;
           ForceDirectories(ExtractFilePath(oldfile));
@@ -276,7 +305,7 @@ begin
     DeleteFile(ABatchFile);
     if FileExists(ABatchFile) then
     begin
-      SoftException('Error while deleting old batch file');
+      SoftException('Error while deleting old batch file', ABatchFile);
       Exit(2);
     end;
 
@@ -290,7 +319,7 @@ begin
     else
     begin
       result := 2;
-      SoftException('Error while saving batch file');
+      SoftException('Error while saving batch file', ABatchFile);
     end;
   finally
     batch.Free;
@@ -346,9 +375,10 @@ begin
       ufRemove: result := ProcessNextFile;
     else
       HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
-      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB] %s',
+      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB]',
           [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].Path,
-           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
+           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024]), ditNetInc,
+           Format('URL: %s', [HttpClient.URL])); {$ENDIF}
       HttpClient.GetASync;
       Exit(TRUE);
     end;
@@ -357,33 +387,51 @@ end;
 
 procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
 begin
-  FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
+  if FFullInstaller then
+  begin
+    FCurrentDownloadedSize := HttpClient.RcvdCount;
+    FTotalSize := HttpClient.ContentLength;
+  end
+  else
+    FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
 
   pbProgress.Position := ((FDownloadedSize + FCurrentDownloadedSize) / FTotalSize) * 100;
-  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
+  Caption := Format('%s - Updating [%d%%]', [Settings.Hardcoded.PROJECT_CAPTION, Trunc(pbProgress.Position)]);
   lbsCaption.Caption := Caption;
 end;
 
 procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
   if (ErrCode = 0) and
+     (HttpClient.StatusCode = 200) and
      (Assigned(HttpClient.RcvdStream)) then
   begin
-    if FFullInstaller then
+    if not FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + 'install_chipuppoker.exe');
-      dmMain.SetUpdaterInstaller(TempPath + 'install_chipuppoker.exe');
+      if not StoreDownloadedFile then
+      begin
+        DownloadFullInstaller;
+        Exit;
+      end;
+      ProcessNextFile;
+    end
+    else
+    begin
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(FUpdateDir + Settings.Hardcoded.INSTALLER_FILENAME);
+      dmMain.SetUpdaterInstaller(FUpdateDir + Settings.Hardcoded.INSTALLER_FILENAME);
+      FRequiresReboot := TRUE;
       Close;
       Exit;
     end;
-
-    if not StoreDownloadedFile then
+  end
+  else
+  begin
+    if not FFullInstaller then
     begin
+      SoftException(Format('Error while downloading file [%d]', [HttpClient.StatusCode]));
       DownloadFullInstaller;
       Exit;
     end;
-
-    ProcessNextFile;
   end;
 end;
 

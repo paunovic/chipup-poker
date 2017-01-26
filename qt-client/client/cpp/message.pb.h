@@ -105,6 +105,25 @@ class DeleteTableStats;
 class SoftException;
 class ReservedSeatFree;
 
+enum HelloReply_PokerNetwork {
+  HelloReply_PokerNetwork_pnChipUpPoker = 1,
+  HelloReply_PokerNetwork_pnFantasyPoker = 2
+};
+bool HelloReply_PokerNetwork_IsValid(int value);
+const HelloReply_PokerNetwork HelloReply_PokerNetwork_PokerNetwork_MIN = HelloReply_PokerNetwork_pnChipUpPoker;
+const HelloReply_PokerNetwork HelloReply_PokerNetwork_PokerNetwork_MAX = HelloReply_PokerNetwork_pnFantasyPoker;
+const int HelloReply_PokerNetwork_PokerNetwork_ARRAYSIZE = HelloReply_PokerNetwork_PokerNetwork_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* HelloReply_PokerNetwork_descriptor();
+inline const ::std::string& HelloReply_PokerNetwork_Name(HelloReply_PokerNetwork value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    HelloReply_PokerNetwork_descriptor(), value);
+}
+inline bool HelloReply_PokerNetwork_Parse(
+    const ::std::string& name, HelloReply_PokerNetwork* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<HelloReply_PokerNetwork>(
+    HelloReply_PokerNetwork_descriptor(), name, value);
+}
 enum HelloParams_AppCode {
   HelloParams_AppCode_DelphiWindows = 1,
   HelloParams_AppCode_QtLinux32 = 2,
@@ -254,11 +273,17 @@ enum Game_GameBlinds {
   Game_GameBlinds_gb10x25 = 3,
   Game_GameBlinds_gb25x50 = 4,
   Game_GameBlinds_gb50x100 = 5,
-  Game_GameBlinds_gbOther = 6
+  Game_GameBlinds_gbOther = 6,
+  Game_GameBlinds_gb2x5 = 7,
+  Game_GameBlinds_gb3x6 = 8,
+  Game_GameBlinds_gb4x8 = 9,
+  Game_GameBlinds_gb10x10 = 10,
+  Game_GameBlinds_gb25x25 = 11,
+  Game_GameBlinds_gb20x40 = 12
 };
 bool Game_GameBlinds_IsValid(int value);
 const Game_GameBlinds Game_GameBlinds_GameBlinds_MIN = Game_GameBlinds_gb1x2;
-const Game_GameBlinds Game_GameBlinds_GameBlinds_MAX = Game_GameBlinds_gbOther;
+const Game_GameBlinds Game_GameBlinds_GameBlinds_MAX = Game_GameBlinds_gb20x40;
 const int Game_GameBlinds_GameBlinds_ARRAYSIZE = Game_GameBlinds_GameBlinds_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Game_GameBlinds_descriptor();
@@ -1096,6 +1121,30 @@ class HelloReply : public ::google::protobuf::Message {
 
   // nested types ----------------------------------------------------
 
+  typedef HelloReply_PokerNetwork PokerNetwork;
+  static const PokerNetwork pnChipUpPoker = HelloReply_PokerNetwork_pnChipUpPoker;
+  static const PokerNetwork pnFantasyPoker = HelloReply_PokerNetwork_pnFantasyPoker;
+  static inline bool PokerNetwork_IsValid(int value) {
+    return HelloReply_PokerNetwork_IsValid(value);
+  }
+  static const PokerNetwork PokerNetwork_MIN =
+    HelloReply_PokerNetwork_PokerNetwork_MIN;
+  static const PokerNetwork PokerNetwork_MAX =
+    HelloReply_PokerNetwork_PokerNetwork_MAX;
+  static const int PokerNetwork_ARRAYSIZE =
+    HelloReply_PokerNetwork_PokerNetwork_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor*
+  PokerNetwork_descriptor() {
+    return HelloReply_PokerNetwork_descriptor();
+  }
+  static inline const ::std::string& PokerNetwork_Name(PokerNetwork value) {
+    return HelloReply_PokerNetwork_Name(value);
+  }
+  static inline bool PokerNetwork_Parse(const ::std::string& name,
+      PokerNetwork* value) {
+    return HelloReply_PokerNetwork_Parse(name, value);
+  }
+
   // accessors -------------------------------------------------------
 
   // required .Poker.StringSizes stringSizes = 1;
@@ -1165,6 +1214,13 @@ class HelloReply : public ::google::protobuf::Message {
   inline ::Poker::ValidCharsRegex* release_valid_chars_regex();
   inline void set_allocated_valid_chars_regex(::Poker::ValidCharsRegex* valid_chars_regex);
 
+  // optional .Poker.HelloReply.PokerNetwork networkType = 9;
+  inline bool has_networktype() const;
+  inline void clear_networktype();
+  static const int kNetworkTypeFieldNumber = 9;
+  inline ::Poker::HelloReply_PokerNetwork networktype() const;
+  inline void set_networktype(::Poker::HelloReply_PokerNetwork value);
+
   // @@protoc_insertion_point(class_scope:Poker.HelloReply)
  private:
   inline void set_has_stringsizes();
@@ -1181,6 +1237,8 @@ class HelloReply : public ::google::protobuf::Message {
   inline void clear_has_minsizes();
   inline void set_has_valid_chars_regex();
   inline void clear_has_valid_chars_regex();
+  inline void set_has_networktype();
+  inline void clear_has_networktype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1192,9 +1250,10 @@ class HelloReply : public ::google::protobuf::Message {
   ::Poker::StringSizes* minsizes_;
   ::google::protobuf::RepeatedPtrField< ::Poker::UpdateFileInfo > update_files_;
   ::Poker::ValidCharsRegex* valid_chars_regex_;
+  int networktype_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_message_2eproto();
   friend void protobuf_AssignDesc_message_2eproto();
@@ -2805,6 +2864,12 @@ class Game : public ::google::protobuf::Message {
   static const GameBlinds gb25x50 = Game_GameBlinds_gb25x50;
   static const GameBlinds gb50x100 = Game_GameBlinds_gb50x100;
   static const GameBlinds gbOther = Game_GameBlinds_gbOther;
+  static const GameBlinds gb2x5 = Game_GameBlinds_gb2x5;
+  static const GameBlinds gb3x6 = Game_GameBlinds_gb3x6;
+  static const GameBlinds gb4x8 = Game_GameBlinds_gb4x8;
+  static const GameBlinds gb10x10 = Game_GameBlinds_gb10x10;
+  static const GameBlinds gb25x25 = Game_GameBlinds_gb25x25;
+  static const GameBlinds gb20x40 = Game_GameBlinds_gb20x40;
   static inline bool GameBlinds_IsValid(int value) {
     return Game_GameBlinds_IsValid(value);
   }
@@ -10697,6 +10762,29 @@ inline void HelloReply::set_allocated_valid_chars_regex(::Poker::ValidCharsRegex
   } else {
     clear_has_valid_chars_regex();
   }
+}
+
+// optional .Poker.HelloReply.PokerNetwork networkType = 9;
+inline bool HelloReply::has_networktype() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void HelloReply::set_has_networktype() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void HelloReply::clear_has_networktype() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void HelloReply::clear_networktype() {
+  networktype_ = 1;
+  clear_has_networktype();
+}
+inline ::Poker::HelloReply_PokerNetwork HelloReply::networktype() const {
+  return static_cast< ::Poker::HelloReply_PokerNetwork >(networktype_);
+}
+inline void HelloReply::set_networktype(::Poker::HelloReply_PokerNetwork value) {
+  assert(::Poker::HelloReply_PokerNetwork_IsValid(value));
+  set_has_networktype();
+  networktype_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -21288,6 +21376,10 @@ inline void ReservedSeatFree::set_seat_index(::google::protobuf::uint32 value) {
 namespace google {
 namespace protobuf {
 
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Poker::HelloReply_PokerNetwork>() {
+  return ::Poker::HelloReply_PokerNetwork_descriptor();
+}
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Poker::HelloParams_AppCode>() {
   return ::Poker::HelloParams_AppCode_descriptor();

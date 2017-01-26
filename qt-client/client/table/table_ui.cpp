@@ -7,7 +7,7 @@ TableUi::TableUi(QWidget *parent) : QWidget(parent) {
 	pix = QPixmap(":/resources/table/Table.png");
 	yoffset = 0;
 	int em = fontMetrics().boundingRect("M").width();
-	setMinimumSize(85*em,41*em);
+	setMinimumSize(85*em,43*em);
 }
 void TableUi::resizeEvent(QResizeEvent *) {
 	int em = fontMetrics().boundingRect("M").width();
@@ -22,13 +22,14 @@ void TableUi::resizeEvent(QResizeEvent *) {
 		//int new_width = width() * el->w;
 		QPoint pos = el->getPosition();
 		QSize size = el->sizeHint();
+		if (pos.y() < 0) pos.setY(0);
 		el->setGeometry(pos.x(),pos.y(), size.width(),size.height());
 	}
 	QSizePolicy qsp(QSizePolicy::Preferred,QSizePolicy::Maximum);
 	qsp.setHeightForWidth(true);
 	setSizePolicy(qsp);
-	setMinimumHeight(((qreal)(41*em)*width())/(85*em));
-	setMaximumHeight(((qreal)(41*em)*width())/(85*em));
+	setMinimumHeight(((qreal)(43*em)*width())/(85*em));
+	setMaximumHeight(((qreal)(43*em)*width())/(85*em));
 }
 int TableUi::rootHeight() {
 	return ((float)pix.height()*width())/pix.width();
@@ -80,7 +81,7 @@ void TableUi::element_deleted(QObject *item) {
 }
 QSize TableUi::sizeHint() const {
 	int em = fontMetrics().boundingRect("M").width();
-	QSize ret(width(),((qreal)(41*em)*width())/(85*em));
+	QSize ret(width(),((qreal)(43*em)*width())/(85*em));
 	qDebug() << "sizeHint" << ret;
 	return ret;
 }

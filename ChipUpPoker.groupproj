@@ -3,7 +3,7 @@
 			<ProjectGuid>{DE38688C-0643-4FFF-866E-240DAAECE07F}</ProjectGuid>
 		</PropertyGroup>
 		<ItemGroup>
-			<Projects Include="client\src\client.dproj">
+			<Projects Include="client\src\chipup_client.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="client\tests\clientTests.dproj">
@@ -20,14 +20,14 @@
 				<Default.Personality/>
 			</BorlandProject>
 		</ProjectExtensions>
-		<Target Name="client">
-			<MSBuild Projects="client\src\client.dproj"/>
+		<Target Name="chipup_client">
+			<MSBuild Projects="client\src\chipup_client.dproj"/>
 		</Target>
-		<Target Name="client:Clean">
-			<MSBuild Targets="Clean" Projects="client\src\client.dproj"/>
+		<Target Name="chipup_client:Clean">
+			<MSBuild Targets="Clean" Projects="client\src\chipup_client.dproj"/>
 		</Target>
-		<Target Name="client:Make">
-			<MSBuild Targets="Make" Projects="client\src\client.dproj"/>
+		<Target Name="chipup_client:Make">
+			<MSBuild Targets="Make" Projects="client\src\chipup_client.dproj"/>
 		</Target>
 		<Target Name="clientTests">
 			<MSBuild Projects="client\tests\clientTests.dproj"/>
@@ -48,13 +48,13 @@
 			<MSBuild Targets="Make" Projects="protocopier\src\protocopier.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="client;clientTests;protocopier"/>
+			<CallTarget Targets="chipup_client;clientTests;protocopier"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="client:Clean;clientTests:Clean;protocopier:Clean"/>
+			<CallTarget Targets="chipup_client:Clean;clientTests:Clean;protocopier:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="client:Make;clientTests:Make;protocopier:Make"/>
+			<CallTarget Targets="chipup_client:Make;clientTests:Make;protocopier:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

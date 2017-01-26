@@ -3,13 +3,16 @@ unit Poker.HandHistory.Playback;
 interface
 
 uses
-  System.Generics.Collections, Poker.HandHistory.Items, Poker.Protobufs.Objects.TableStatus;
+  System.Generics.Collections, Poker.HandHistory.Items,
+  Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.TableStatus;
 
 type
   THandHistoryPlayback = class
   private
     FStates: TObjectList<TPB_TableStatus>;
     FCurrentStateIndex: Integer;
+
+    function AddTableEvent(const ATableStatus: TPB_TableStatus; const AEventType: TTableEventType; const ASeatIndex: Integer): TPB_TableEvent;
   public
     constructor Create(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
     destructor Destroy; override;
@@ -28,7 +31,7 @@ type
 implementation
 
 uses
-  Poker.HandHistory.Players, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
+  Poker.HandHistory.Players, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.Pot,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.WinnerData, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HandHistoryMove,
   Poker.Helpers.HandHistoryMove, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Types;
 
@@ -52,220 +55,223 @@ begin
   CreateStates(AHandHistoryItems, AHandHistoryItem);
 end;
 
-procedure THandHistoryPlayback.CreateStates(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
+function THandHistoryPlayback.AddTableEvent(const ATableStatus: TPB_TableStatus; const AEventType: TTableEventType; const ASeatIndex: Integer): TPB_TableEvent;
 var
-  pbtablestatus: TPB_TableStatus;
-  pbseat: TPB_SeatInfo;
-  move: TPB_HandHistoryMove;
-  player: TPB_PlayerHandHistory;
-  tablestate: TTableState;
-  pbevent: TPB_TableEvent;
-  bets: TArray<UINT32>;
-  sbseat: Integer;
-  bbseat: Integer;
-  C1, C2, C3: Integer;
-  folded: TArray<Boolean>;
-  pots: TObjectList<TPB_Pot>;
-  player_chips_at_phase_beginning: TArray<UINT32>;
-  current_player_chips: TArray<UINT32>;
+  te: TPB_TableEvent;
 begin
-  bbseat := -1;
-  sbseat := -1;
+  te := TPB_TableEvent.Create;
+  te.Event := AEventType;
+  te.Seat := ASeatIndex;
+  ATableStatus.Events.Add(te);
+  result := te;
+end;
 
+procedure THandHistoryPlayback.CreateStates(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
+type
+  TPlayerState = record
+    PhaseStartChips: UINT32;
+    CurrentChips: UINT32;
+    CurrentBet: UINT32;
+    Folded: Boolean;
+  end;
+var
+  player: TPB_PlayerHandHistory;
+  player_states: TArray<TPlayerState>;
+  move: TPB_HandHistoryMove;
+  ts: TPB_TableStatus;
+  te: TPB_TableEvent;
+  si: TPB_SeatInfo;
+  table_state: TTableState;
+  contained_event: TTableEventType;
+  C1, C2: Integer;
+  sbseat, bbseat: Integer;
+  pots: TObjectList<TPB_Pot>;
+  current_split_count: Integer;
+  flop_move_index: Integer;
+begin
+  // initialize vars
   FStates.Clear;
-  tablestate := tsPreFlop;
+  table_state := tsPreFlop;
+  sbseat := -1; bbseat := -1;
+  current_split_count := 0;
+  flop_move_index := 0;
 
-  SetLength(bets, AHandHistoryItems.Game.Seats);
-  FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);
-  SetLength(folded, AHandHistoryItems.Game.Seats);
-  SetLength(current_player_chips, AHandHistoryItems.Game.Seats);
-  FillChar(current_player_chips[0], Length(current_player_chips) * SizeOf(UINT32), 0);
-  SetLength(player_chips_at_phase_beginning, AHandHistoryItems.Game.Seats);
-  FillChar(player_chips_at_phase_beginning[0], Length(player_chips_at_phase_beginning) * SizeOf(UINT32), 0);
+  // set player states array length to number of seats
+  SetLength(player_states, AHandHistoryItems.Game.Seats);
 
+  // initiate all players
   for player in AHandHistoryItem.Players do
   begin
-    player_chips_at_phase_beginning[player.Seat] := player.Chips;
-    current_player_chips[player.Seat] := player.Chips;
+    player_states[player.Seat].PhaseStartChips := player.Chips;
+    player_states[player.Seat].CurrentChips := player.Chips;
+    player_states[player.Seat].CurrentBet := 0;
+    player_states[player.Seat].Folded := FALSE;
   end;
 
   pots := TObjectList<TPB_Pot>.Create;
   try
-    for C1 := 0 to AHandHistoryItem.Moves.Count - 1 do
+    C1 := 0;
+    while C1 < AHandHistoryItem.Moves.Count do
     begin
       move := AHandHistoryItem.Moves[C1];
 
-      pbtablestatus := TPB_TableStatus.Create;
+      // set basic TS vars
+      ts := TPB_TableStatus.Create;
+      ts.TableMongoId := AHandHistoryItems.FGameId;
+      ts.Dealer := AHandHistoryItem.DealerIndex;
+      ts.CurrentSeat := move.Seat;
+      ts.RakePercent := AHandHistoryItem.Rake;
 
-      pbtablestatus.TableMongoId := AHandHistoryItems.FGameId;
-      pbtablestatus.Dealer := AHandHistoryItem.DealerIndex;
-      pbtablestatus.CurrentSeat := move.Seat;
-      pbtablestatus.RakePercent := AHandHistoryItem.Rake;
-
-      if move.ContainsEvent(teSB) then
+      // SB/BB events
+      if move.ContainsEvent([teSB, teBB], contained_event) then
       begin
-        if sbseat = -1 then
-          sbseat := move.Seat;
-        bets[move.Seat] := move.Bet;
-        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
+        case contained_event of
+          teSB: if sbseat = -1 then sbseat := move.Seat;
+          teBB: if bbseat = -1 then bbseat := move.Seat;
+        end;
+        player_states[move.Seat].CurrentBet := move.Bet;
+        player_states[move.Seat].CurrentChips := player_states[move.Seat].PhaseStartChips - player_states[move.Seat].CurrentBet;
       end;
 
-      if move.ContainsEvent(teBB) then
-      begin
-        if bbseat = -1 then
-          bbseat := move.Seat;
-        bets[move.Seat] := move.Bet;
-        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
-      end;
+      // set SB/BB vars in TS
+      ts.SmallBlind := sbseat;
+      ts.BigBlind := bbseat;
 
-      pbtablestatus.SmallBlind := sbseat;
-      pbtablestatus.BigBlind := bbseat;
-
+      // dealing event
       if move.ContainsEvent(teDealing) then
+        AddTableEvent(ts, teDealing, -1);
+
+      // flop/turn/river events
+      if move.ContainsEvent([teFlop, teTurn, teRiver], contained_event) then
       begin
-        pbevent := TPB_TableEvent.Create;
-        pbevent.Event := teDealing;
-        pbtablestatus.Events.Add(pbevent);
-      end;
+        for C2 := Low(player_states) to High(player_states) do
+          player_states[C2].PhaseStartChips := player_states[C2].CurrentChips;
 
-      for C2 := 0 to C1 do
-        if (move.ContainsEvent(teFlop)) or
-           (move.ContainsEvent(teTurn)) or
-           (move.ContainsEvent(teRiver)) then
+        // set pots only if it is first split pass
+        // subsequent split passes should not adjust the pot
+        if current_split_count = 0 then
         begin
-          for C3 := Low(player_chips_at_phase_beginning) to High(player_chips_at_phase_beginning) do
-            player_chips_at_phase_beginning[C3] := current_player_chips[C3];
-
           pots.Clear;
-          for C3 := 0 to move.Pots.Count - 1 do
-            pots.Add(TPB_Pot.Create(move.Pots[C3]));
-
-          pbevent := TPB_TableEvent.Create;
-          if move.ContainsEvent(teFlop) then
-          begin
-            tablestate := tsFlop;
-            pbevent.Event := teFlop;
-            for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
-              pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 0, 3));
-          end
-          else
-            if move.ContainsEvent(teTurn) then
-            begin
-              tablestate := tsTurn;
-              pbevent.Event := teTurn;
-              for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
-                if Length(AHandHistoryItem.Cards[C3]) > 3 then
-                  pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 3, 1))
-                else
-                  if Length(AHandHistoryItem.Cards[C3]) >= 2 then
-                    pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], 0, 1));
-            end
-            else
-              if move.ContainsEvent(teRiver) then
-              begin
-                tablestate := tsRiver;
-                pbevent.Event := teRiver;
-                for C3 := 0 to AHandHistoryItem.Cards.Count - 1 do
-                  if Length(AHandHistoryItem.Cards[C3]) > 0 then
-                    pbevent.Cards.Add(Copy(AHandHistoryItem.Cards[C3], Length(AHandHistoryItem.Cards[C3]) - 1, 1));
-              end;
-          pbevent.Bets.AddRange(bets);
-          FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);
-          pbtablestatus.Events.Add(pbevent);
+          for C2 := 0 to move.Pots.Count - 1 do
+            pots.Add(TPB_Pot.Create(move.Pots[C2]));
         end;
 
-      if move.ContainsEvent(teWinning) then
-      begin
-        pbevent := TPB_TableEvent.Create;
-        for C2 := 0 to move.WinnerPotData.Count - 1 do
-          pbevent.Pots.Add(TPB_Pot.Create(move.WinnerPotData[C2]));
-        FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);
-        pbevent.Event := teWinning;
-        pbtablestatus.Events.Add(pbevent);
-        tablestate := tsWinning;
+        te := AddTableEvent(ts, contained_event, -1);
+
+        case contained_event of
+          teFlop: begin
+            for C2 := 0 to current_split_count do
+              te.Cards.Add(Copy(AHandHistoryItem.Cards[C2], 0, 3));
+            flop_move_index := C1;
+
+            if table_state < tsFlop then
+              table_state := tsFlop;
+          end;
+
+          teTurn: begin
+            for C2 := 0 to current_split_count do
+              if Length(AHandHistoryItem.Cards[C2]) > 3 then
+                te.Cards.Add(Copy(AHandHistoryItem.Cards[C2], 3, 1))
+              else
+                if Length(AHandHistoryItem.Cards[C2]) >= 2 then
+                  te.Cards.Add(Copy(AHandHistoryItem.Cards[C2], 0, 1));
+
+            if table_state < tsTurn then
+              table_state := tsTurn;
+          end;
+
+          teRiver: begin
+            for C2 := 0 to current_split_count do
+              if Length(AHandHistoryItem.Cards[C2]) > 0 then
+                te.Cards.Add(Copy(AHandHistoryItem.Cards[C2], Length(AHandHistoryItem.Cards[C2]) - 1, 1));
+
+            if table_state < tsRiver then
+              table_state := tsRiver;
+
+            if current_split_count < AHandHistoryItem.Cards.Count - 1 then
+            begin
+              Inc(current_split_count);
+              C1 := flop_move_index - 1;
+            end;
+          end;
+        end;
+
+        for C2 := Low(player_states) to High(player_states) do
+        begin
+          te.Bets.Add(player_states[C2].CurrentBet);
+          player_states[C2].CurrentBet := 0;
+        end;
       end;
 
-      pbtablestatus.State := tablestate;
-
-      for C2 := 0 to pots.Count - 1 do
-        pbtablestatus.Pots.Add(TPB_Pot.Create(pots[C2]));
-
+      // fold event
       if move.ContainsEvent(teFold) then
       begin
-        folded[move.Seat] := TRUE;
-        pbevent := TPB_TableEvent.Create;
-        pbevent.Seat := move.Seat;
-        pbevent.Event := teFold;
-        pbtablestatus.Events.Add(pbevent);
+        player_states[move.Seat].Folded := TRUE;
+        AddTableEvent(ts, teFold, move.Seat);
       end;
 
+      // check event
       if move.ContainsEvent(teCheck) then
+        AddTableEvent(ts, teCheck, move.Seat);
+
+      // call/raise/all-in events
+      if move.ContainsEvent([teCall, teRaise, teAllIn], contained_event) then
       begin
-        pbevent := TPB_TableEvent.Create;
-        pbevent.Seat := move.Seat;
-        pbevent.Event := teCheck;
-        pbtablestatus.Events.Add(pbevent);
+        AddTableEvent(ts, contained_event, move.Seat);
+        player_states[move.Seat].CurrentBet := move.Bet;
+        player_states[move.Seat].CurrentChips := player_states[move.Seat].PhaseStartChips - player_states[move.Seat].CurrentBet;
       end;
 
-      if move.ContainsEvent(teRaise) then
+      // winning event
+      // create winning pots and clear player bets
+      if move.ContainsEvent(teWinning) then
       begin
-        pbevent := TPB_TableEvent.Create;
-        pbevent.Seat := move.Seat;
-        bets[move.Seat] := move.Bet;
-        pbevent.Event := teRaise;
-        pbtablestatus.Events.Add(pbevent);
-        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
+        te := AddTableEvent(ts, teWinning, -1);
+        for C2 := 0 to move.WinnerPotData.Count - 1 do
+          te.Pots.Add(TPB_Pot.Create(move.WinnerPotData[C2]));
+        for C2 := Low(player_states) to High(player_states) do
+          player_states[C2].CurrentBet := 0;
+        table_state := tsWinning;
       end;
 
-      if move.ContainsEvent(teCall) then
-      begin
-        pbevent := TPB_TableEvent.Create;
-        pbevent.Seat := move.Seat;
-        bets[move.Seat] := move.Bet;
-        pbevent.Event := teCall;
-        pbtablestatus.Events.Add(pbevent);
-        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
-      end;
+      // set TS pots
+      for C2 := 0 to pots.Count - 1 do
+        ts.Pots.Add(TPB_Pot.Create(pots[C2]));
 
-      if move.ContainsEvent(teAllIn) then
-      begin
-        pbevent := TPB_TableEvent.Create;
-        pbevent.Seat := move.Seat;
-        bets[move.Seat] := move.Bet;
-        pbevent.Event := teAllIn;
-        pbtablestatus.Events.Add(pbevent);
-        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
-      end;
+      // set TS state to the appropriate one
+      ts.State := table_state;
 
+      // set TS seats
       for player in AHandHistoryItem.Players do
       begin
-        pbseat := TPB_SeatInfo.Create;
-        pbseat.SeatIndex := player.Seat;
-        pbseat.PlayerMongoId := player.MongoId;
-        pbseat.Chips := current_player_chips[player.Seat];
-        pbseat.Cards := player.Cards;
-{        if (dmMain.SelfInfo.MongoId = player.MongoId) or
-           ((not player.Muck) and  THIS WILL HIDE CARDS UNTIL SHOWDOWN
-            (pbtablestatus.State >= tsWinning)) then
-          pbseat.Cards := player.Cards;}
-        if (player.Status in [psFolded]) and
-           (not folded[player.Seat]) then
-          pbseat.Status := psInHand
+        si := TPB_SeatInfo.Create;
+        si.SeatIndex := player.Seat;
+        si.PlayerMongoId := player.MongoId;
+        si.Chips := player_states[player.Seat].CurrentChips;
+        si.Cards := player.Cards;
+
+        if (player.Status = psFolded) and
+           (not player_states[player.Seat].Folded) then
+          si.Status := psInHand
         else
-          pbseat.Status := player.Status;
+          si.Status := player.Status;
+
         case AHandHistoryItem.CurrentGame of
-          gtHoldem: pbseat.CardCount := 2;
-          gtOmaha: pbseat.CardCount := 4;
+          gtHoldem: si.CardCount := 2;
+          gtOmaha: si.CardCount := 4;
         end;
-        pbseat.CardsVisible := TRUE;
-        pbtablestatus.Seats.Add(pbseat);
+
+        si.CardsVisible := TRUE;
+        ts.Seats.Add(si);
       end;
 
-      pbtablestatus.Bets.Clear;
-      for C2 := Low(bets) to High(bets) do
-        pbtablestatus.Bets.Add(bets[C2]);
+      // set TS bets
+      ts.Bets.Clear;
+      for C2 := Low(player_states) to High(player_states) do
+        ts.Bets.Add(player_states[C2].CurrentBet);
 
-      FStates.Add(pbtablestatus);
+      FStates.Add(ts);
+      Inc(C1);
     end;
   finally
     pots.Free;

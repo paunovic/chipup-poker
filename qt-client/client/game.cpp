@@ -48,6 +48,28 @@ void Game::update(Poker::Game &in) {
 		sb = in.small_blind();
 		bb = in.big_blind();
 		break;
+	case Poker::Game::gb2x5:
+		sb = 2;
+		bb = 5;
+		break;
+	case Poker::Game::gb3x6:
+		sb = 3;
+		bb = 6;
+		break;
+	case Poker::Game::gb4x8:
+		sb = 4;
+		bb = 8;
+		break;
+	case Poker::Game::gb10x10:
+		sb = bb = 10;
+		break;
+	case Poker::Game::gb25x25:
+		sb = bb = 25;
+		break;
+	case Poker::Game::gb20x40:
+		sb = 20;
+		bb = 40;
+		break;
 	}
 	sitting = in.sitting();
 	seats = in.seats();
@@ -66,7 +88,7 @@ QVariant GameListModel::data(const QModelIndex &index,int role) const {
 		case 1:
 			return g.typeToString();
 		case 2: return QString("%1/%2").arg(g.sb).arg(g.bb);
-		case 3: return "limits";
+		case 3: return QString("%1-%2").arg(g.buyin_min/100).arg(g.buyin_max/100);
 		case 4: return QString("%1/%2").arg(g.sitting).arg(g.seats);
 		case 5:
 			switch (g.state) {
@@ -96,7 +118,6 @@ QString Game::typeToLongString() const {
 	}
 	return "internal-error";
 }
-
 QVariant GameListModel::headerData(int row, Qt::Orientation, int role) const {
 	if (role == Qt::SizeHintRole) return QVariant(); // QSize
 	if (role != Qt::DisplayRole) return QVariant();

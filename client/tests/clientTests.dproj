@@ -157,7 +157,7 @@
 				<UnitTesting>
 					<TestFramework>DUnit / Delphi Win32</TestFramework>
 					<TestRunner>GUI</TestRunner>
-					<SourceProjectName>D:\projects\ChipUpPoker\client\src\client.dproj</SourceProjectName>
+					<SourceProjectName>D:\projects\chipup-poker\client\src\chipup_client.dproj</SourceProjectName>
 					<TestProjectName/>
 				</UnitTesting>
 			</BorlandProject>

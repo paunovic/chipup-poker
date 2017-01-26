@@ -65,25 +65,35 @@ Game.decodeBlinds = function (blinds) {
 		g.small_blind = 100;
 		g.big_blind = 200;
 		break;
-	case 'gb5x5':
-		g.small_blind = 500;
-		g.big_blind = 500;
-		break;
-	case 'gb5x10':
-		g.small_blind = 500;
-		g.big_blind = 1000;
-		break;
-	case 'gb10x25':
-		g.small_blind = 1000;
+	case 'gb2x4': g.small_blind = 200; g.big_blind = 400; break;
+	case 'gb2x5': g.small_blind = 200; g.big_blind = 500; break;
+	case 'gb5x5': g.small_blind = 500; g.big_blind = 500; break;
+	case 'gb3x6': g.small_blind = 300; g.big_blind = 600; break;
+	case 'gb4x8': g.small_blind = 400; g.big_blind = 800; break;
+	case 'gb5x10': g.small_blind = 500; g.big_blind = 1000; break;
+	case 'gb10x25': g.small_blind = 1000; g.big_blind = 2500; break;
+	case 'gb25x25':
+		g.small_blind = 2500;
 		g.big_blind = 2500;
+		break;
+	case 'gb15x30': g.small_blind = 1500; g.big_blind = 3000; break;
+	case 'gb20x40':
+		g.small_blind = 2000;
+		g.big_blind = 4000;
 		break;
 	case 'gb25x50':
 		g.small_blind = 2500;
 		g.big_blind = 5000;
 		break;
+	case 'gb30x60': g.small_blind = 3000; g.big_blind = 6000; break;
+	case 'gb40x80': g.small_blind = 4000; g.big_blind = 8000; break;
 	case 'gb50x100':
 		g.small_blind = 5000;
 		g.big_blind = 10000;
+		break;
+	case 'gb10x10':
+		g.small_blind = 1000;
+		g.big_blind = 1000;
 		break;
 	}
 	return g;
@@ -248,7 +258,7 @@ Game.prototype.getLimit = function (seat) {
 
 	var pot = 0;
 	for (x=0; x<this.pots.length; x++) {
-		pot += this.pots[x].getPostRake(this.rake);
+		pot += this.pots[x].value - this.pots[x].rake;
 	}
 	for (var x=0; x<this.bets.length; x++) {
 		if (typeof this.bets[x] != 'number') this.bets[x] = 0;
@@ -430,13 +440,13 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 			error.handleError(err);
 			this.handOver(function () {
 				cb();
-			});
+			},undefined,'updateBuyin',key.userid);
 		}
 	}.bind(this));
 };
-Game.prototype.handOver = function (cb,handid,reason) {
+Game.prototype.handOver = function (cb,handid,reason,userid) {
 	this.log('handOver start');
-	if (this.club) this.club.handOver(this,cb);
+	if (this.club) this.club.handOver(this,cb,handid,reason,userid);
 	else if (this.tourn) {
 		if (reason == 'updateCashOut') cb();
 		else {
@@ -455,6 +465,8 @@ Game.prototype.handOver = function (cb,handid,reason) {
 			async.each(historyRow.players,function (player,cb) {
 				if (!player) return cb();
 				models.UserModel.findOne({_id:player._id},function (err,playerRow) {
+					assert.ifError(err);
+					assert(playerRow);
 					player.keyid = keyid++;
 					player.nick = playerRow.displayname;
 						if (player.cards) {
@@ -469,6 +481,7 @@ Game.prototype.handOver = function (cb,handid,reason) {
 			},function () {
 				// MARK
 				for (var x=0; x<historyRow.cards.length; x++) {
+					if (!historyRow.cards[x].cards) continue;
 					historyRow.cards[x] = new Buffer(historyRow.cards[x].cards);
 				}
 				var obj = {gameid:this.id, rows:[historyRow] };
@@ -657,6 +670,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			this.members[x].can_show = true;
 			this.members[x].muck = true;
+			this.seats[x].rakecontrib = 0;
 			this.balance_changes[x] = 0;
 		}
 		assert(players > 1,util.format('gamename:%s players:%d canplay:%d',this.obj.gamename,players,canplay));
@@ -946,7 +960,6 @@ Game.prototype.removeSuspended = function () {
 Game.prototype.doWin = function (cb,extradelay,cb3) {
 	var x,y;
 	var totalrake = 0;
-	var rakestats = [];
 
 	assert.equal(this.Lock.readers,-1);
 	assert.equal(typeof extradelay,'number');
@@ -956,7 +969,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 	this.log('delay is %d',delay);
 	function finish() {
 		this.current_seat = -1;
-		cb(rakestats);
+		cb();
 
 		function finish2() {
 			this.Lock.writeLock(function (release) {
@@ -1016,7 +1029,6 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		if (wins[seat]) wins[seat] += chips;
 		else wins[seat] = chips;
 	}
-	this.log('max total rake:%d',this.obj.max_rake_per_hand);
 	var rake_list = [];
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
@@ -1026,8 +1038,25 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		rake = rakesplit * pot.trueMembers.length;
 		totalrake += rake;
 	}
-	this.log('totaltake pre-limit:%d',totalrake);
+	this.log('rake: %d% totaltake pre-limit:%d max:%d',this.rake,totalrake,this.obj.max_rake_per_hand);
+	var secondPercent = 1;
+	if ( (this.obj.max_rake_per_hand != 0) && (totalrake > this.obj.max_rake_per_hand) ) secondPercent = this.obj.max_rake_per_hand / totalrake;
 	totalrake = 0;
+	var extrarake = 0;
+	for (y=0; y<this.members.length; y++) {
+		if (!this.members[y]) continue;
+		console.log('prelimit',this.seats[y].rakecontrib);
+		if (!this.seats[y].rakecontrib) this.seats[y].rakecontrib = 0;
+		this.seats[y].rakecontrib = secondPercent * this.seats[y].rakecontrib;
+		var temp = this.seats[y].rakecontrib;
+		console.log('post-limit, pre-rounding',this.seats[y].rakecontrib);
+		this.seats[y].rakecontrib = Math.round(this.seats[y].rakecontrib);
+		console.log('post-rounding',this.seats[y].rakecontrib);
+		extrarake += this.seats[y].rakecontrib - temp;
+	}
+	extrarake = Math.round(extrarake);
+	if (extrarake) console.log('extra rake'.green,extrarake);
+	assert(!isNaN(extrarake));
 	for (y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
 		if (pot.value == 0) continue;
@@ -1038,10 +1067,12 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		assert(pot.trueMembers.length > 0);
 		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
+		rake = rake * secondPercent;
+		if (y == 0) rake += extrarake;
 		pot.rake = rake;
 		this.history.WinnerPotData[y].rake = rake;
 		this.log('pot %d initial value %d, going to %j',y,pot.value,pot.winners);
-		var bussinessSplit = ((pot.value-rake)/pot.winners.length);
+		var bussinessSplit = Math.round(((pot.value-rake)/pot.winners.length));
 		this.log('bussiness will give %d to each side',bussinessSplit);
 		totalrake += rake;
 		for (var bussiness=0; bussiness<pot.winners.length; bussiness++) {
@@ -1056,10 +1087,6 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 			assert(!isNaN(rakesplit));
 			assert(!isNaN(split));
 			this.log('rake:%d/%d pot:%j split:%d between:%j',rake,rakesplit,pot,split,pot.winners[bussiness]);
-			for (x=0; x<pot.trueMembers.length; x++) {
-				if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit;
-				else rakestats[pot.trueMembers[x]] = { rake:rakesplit, userid: pot.trueUsers[x] };
-			}
 			for (x=0; x<pot.winners[bussiness].length; x++) {
 				var priv = this.seats[pot.winners[bussiness][x]];
 				assert(priv);
@@ -1146,8 +1173,9 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 		if (min == max) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
-				this.log('flopping');
 				this.deck.draw(3,this.flops[0]);
+				this.log('flopping',this.flops[0]);
+				assert.equal(this.flops[0].cards.length,3);
 				this.history.cards[0] = { cards:this.flops[0].cards };
 				this.stateRow.flop.cards = this.flops[0].cards;
 				if (this.doingSplit) {
@@ -1247,26 +1275,35 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 		cb(events,0);
 	}
 };
-Game.prototype.postWinSaveStats = function (rakestats,cb) {
+Game.prototype.postWinSaveStats = function (cb) {
 	var jobs = [];
-	this.log('rake info: %j, balances:%j',rakestats,this.balance_changes);
+	this.log('balances:%j',this.balance_changes);
 	for (var x=0; x<this.balance_changes.length; x++) {
 		if (!this.balance_changes[x]) continue;
 		if (this.balance_changes[x] != 0) {
-			if (!rakestats[x]) rakestats[x] = {rake:0};
-			var mods = { $inc:{balance:this.balance_changes[x], rakecontrib:rakestats[x].rake, hands:1 }};
-			var key = {gameid:this.obj._id,userid:rakestats[x].userid};
-			var job = {mods:mods, key:key, change:this.balance_changes[x], userid:rakestats[x].userid};
+			var mods = { $inc:{balance:this.balance_changes[x], rakecontrib:this.seats[x].rakecontrib, hands:1 }};
+			var key = {gameid:this.obj._id,userid:this.seats[x].userid};
+			var doc = {gameid:this.obj._id,userid:this.seats[x].userid,balance:this.balance_changes[x], rakecontrib:this.seats[x].rakecontrib, hands:1};
+			var job = {mods:mods, key:key, change:this.balance_changes[x], userid:this.seats[x].userid, doc:doc};
 			jobs.push(job);
 		}
 	}
 	async.parallel([function a(cbA) {
 		async.each(jobs,function hack(job,cb2) {
-			//global.log('updating stats %j',job);
-			models.GameStats.findOneAndUpdate(job.key,job.mods,function (err) {
+			global.log('updating stats %j',job);
+			models.GameStats.findOne(job.key,function (err,row) {
 				error.handleError(err);
-				if (this.club) this.club.updateLimitPostWin(job.change,job.userid,cb2);
-				else cb2();
+				if (!row) {
+					global.log('inserting %j',job.doc);
+					models.GameStats.create(job.doc,finish.bind(this));
+				} else {
+					models.GameStats.findOneAndUpdate({_id:row._id},job.mods,finish.bind(this));
+				}
+				function finish(err) {
+					error.handleError(err);
+					if (this.club) this.club.updateLimitPostWin(job.change,job.userid,cb2);
+					else cb2();
+				}
 			}.bind(this));
 		}.bind(this),cbA);
 	}.bind(this),function b(cbB) {
@@ -1416,8 +1453,8 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 	function finish1() {
 		events.push(this.makeEvent('teWinning',null,WinnerPotData));
 		this.addHistory({code:['teWinning'],WinnerPotData:WinnerPotData,seat:-1},winnercount);
-		this.doWin(function (rakestats) {
-			this.postWinSaveStats(rakestats,function () {
+		this.doWin(function () {
+			this.postWinSaveStats(function () {
 				cb(events,0);
 			}.bind(this));
 		}.bind(this),extradelay,cb3);
@@ -1539,6 +1576,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				assert(priv.userid);
 				assert.equal(typeof betsToRemove[job.seat],'number');
 				this.balance_changes[job.seat] -= betsToRemove[job.seat];
+				priv.rakecontrib += (this.rake / 100) * betsToRemove[job.seat];
 				cb();
 			}.bind(this),function finish(err) {
 				error.handleError(err);
@@ -1602,8 +1640,9 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	assert.equal(this.Lock.readers,-1);
 	var seat = this.findSeat(conn);
 	assert.equal(this.current_seat,seat);
-	conn.log('putchips, counter==%d',this.stateRow.moveCounter);
-	this.log('putchips, counter==%d',this.stateRow.moveCounter);
+	assert(!isNaN(chips));
+	//conn.log('putchips, counter==%d',this.stateRow.moveCounter);
+	//this.log('putchips, counter==%d',this.stateRow.moveCounter);
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		this.log('putChips fail 1');
 		cb();
@@ -1631,6 +1670,8 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	} else if (this.members[seat].chips == increase) {
 		this.members[seat].status = 'psAllIn';
 		event = 'teAllIn';
+		this.members[seat].muck = false;
+		this.history.players[seat].muck = false;
 	} else if (chips < this.minBet) { // cheater!
 		conn.reply(0,'not meeting min bet');
 		conn.error('cheater detected, betting low '+chips+','+this.minBet);
@@ -1883,7 +1924,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			if (this.ignoreOffline && this.members[x].disconnected) continue;
 			if (this.members[x].chips > 0) {
 				activeSeats.push(x);
-				this.log('sm found one',x,this.members[x].status,this.members[x].chips);
+				//this.log('sm found one',x,this.members[x].status,this.members[x].chips);
 				havechips++;
 			} else if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
@@ -2061,8 +2102,16 @@ Game.prototype.broadcastStatus = function (conn,forceunlock,events) {
 }
 var counter = 0;
 Game.prototype.updatePotRakes = function () {
+	var totalrake = 0;
 	for (var x=0; x<this.pots.length; x++) {
 		this.pots[x].rake = this.pots[x].value - this.pots[x].getPostRake(this.rake);
+		totalrake += this.pots[x].rake;
+	}
+	if ( (this.obj.max_rake_per_hand != 0) && (totalrake > this.obj.max_rake_per_hand) ) {
+		var percent = this.obj.max_rake_per_hand / totalrake;
+		for (var x=0; x<this.pots.length; x++) {
+			this.pots[x].rake = this.pots[x].rake * percent;
+		}
 	}
 }
 Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events) {
@@ -2203,7 +2252,7 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 		error.handleError(err);
 		this.handOver(function () {
 			cb();
-		},null,'updateCashOut');
+		},null,'updateCashOut',userid);
 	}.bind(this));
 }
 Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
@@ -2793,6 +2842,7 @@ Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 
 				events.push(this.makeEvent('teExistingCards',ev));
 			}
+			this.log('reconnected a user',util.inspect(this));
 			var status = this.getTableStatus(conn,true,events);
 			release();
 			token.stop();

@@ -1,4 +1,4 @@
-program client;
+program chipup_client;
 
 {$R 'Poker.Resources.Fonts.res' 'resources\Poker.Resources.Fonts.rc'}
 {$R 'Poker.Resources.Sounds.res' 'resources\Poker.Resources.Sounds.rc'}
@@ -189,7 +189,8 @@ uses
   Poker.Protobufs.Objects.PlayerClubStatus in 'modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas',
   Poker.Protobufs.Objects.DeleteTableStats in 'modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas',
   Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas',
-  Poker.Protobufs.Objects.ReservedSeatFree in 'modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas';
+  Poker.Protobufs.Objects.ReservedSeatFree in 'modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas',
+  Poker.Helpers.PB_ClubMember in 'helpers\Poker.Helpers.PB_ClubMember.pas';
 
 procedure FocusApp;
 var

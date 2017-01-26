@@ -51,7 +51,7 @@ void TestCase::testsomething_data() {
 }
 void TestCase::renderChips_data() {
 	QTest::addColumn<QString>("value");
-	QTest::newRow("one") << "100,500,2500,10000,50000,100000";
+	QTest::newRow("one") << "50,100,500,2500,10000,50000,100000";
 }
 void TestCase::renderChips() {
 	int result;

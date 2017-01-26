@@ -80,7 +80,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Action = acOK
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 7
+    TabOrder = 6
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -96,7 +96,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 8
+    TabOrder = 7
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -110,7 +110,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Caption = 'Default player limit:'
     Properties.ImmediatePost = True
     Properties.OnChange = cbDefaultPlayerLimitPropertiesChange
-    TabOrder = 4
+    TabOrder = 3
     Transparent = True
     Width = 113
   end
@@ -121,7 +121,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Properties.MinValue = 1.000000000000000000
     Properties.UseDisplayFormatWhenEditing = True
     Properties.ValueType = vtFloat
-    TabOrder = 5
+    TabOrder = 4
     Value = 1000.000000000000000000
     Width = 95
   end
@@ -166,7 +166,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
       '60'
       '90'
       '120')
-    TabOrder = 6
+    TabOrder = 5
     Text = '30'
     Width = 56
   end
@@ -183,22 +183,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Style.TextStyle = []
     Style.IsFontAssigned = True
     Transparent = True
-  end
-  object lbsMaxRakePerHand: TcxLabel
-    Left = 140
-    Top = 70
-    Caption = 'Maximum rake per hand (in $):'
-    Transparent = True
-  end
-  object seMaxRakePerHand: TcxSpinEdit
-    Left = 294
-    Top = 69
-    Properties.AssignedValues.MinValue = True
-    Properties.DisplayFormat = '$0'
-    Properties.EditFormat = '$0'
-    Properties.UseDisplayFormatWhenEditing = True
-    TabOrder = 3
-    Width = 88
   end
   object acChangeClubDetails: TActionList
     Left = 24

@@ -116,6 +116,7 @@ enum ServerCodes {
 	scSplitTableCards = 118;
 	scSoftException = 119;
 	scTableSitClose = 120;
+	scApproveClubMember = 121;
 }
 
 message StringSizes {
@@ -149,14 +150,15 @@ message HelloReply {
 }
 
 message HelloParams {
-	required bool debug = 1;
 	enum AppCode {
-		DelphiWindows = 1;
-		QtLinux32 = 2;
-		QtLinuxArm = 3;
-		QtMac = 4;
-		QtWindows32 = 5;
+		acDelphiWindows = 0;
+		acQtLinux32 = 1;
+		acQtLinuxArm = 2;
+		acQtMac = 3;
+		acQtWindows32 = 4;
 	}
+
+	required bool debug = 1;
 	repeated UpdateFileInfo files = 2;
 	optional AppCode appcode = 3;
 }
@@ -203,11 +205,18 @@ message LoginReply {
 	optional User self = 8;
 	repeated Game games = 9;
 	repeated PlayerClubStatus player_club_statuses = 10;
+	repeated Club pending_clubs = 11;
 }
 
 message ClubMember {
+	enum MemberStatus {
+		msActive = 0;
+		msSuspended = 1;
+		msPending = 2;
+	}
+
 	required bytes _id = 1 [(ObjectId)=true];
-	optional bool suspended = 2;
+	optional MemberStatus status = 2;
 	optional uint32 balance_limit = 3;
 	optional int32 club_balance = 4;
 	optional bool unlimited_limit = 5;
@@ -271,12 +280,21 @@ message Game {
 	
 	enum GameBlinds {
 		gb1x2 = 0;
-		gb5x5 = 1;
-		gb5x10 = 2;
-		gb10x25 = 3;
-		gb25x50 = 4;
-		gb50x100 = 5;
-		gbOther = 6;
+		gb2x4 = 1;
+		gb2x5 = 2;
+		gb5x5 = 3;
+		gb3x6 = 4;
+		gb4x8 = 5;
+		gb5x10 = 6;
+		gb10x25 = 7;
+		gb25x25 = 8;
+		gb15x30 = 9;
+		gb20x40 = 10;
+		gb25x50 = 11;
+		gb30x60 = 12;
+		gb40x80 = 13;
+		gb50x100 = 14;
+		gbOther =  15;
 	}
 	
 	optional bytes _id = 1 [(ObjectId)=true];
@@ -467,6 +485,7 @@ message ClubCommandReply {
 		csInvalidClubId = 4;
 		csAlreadyMember = 5;
 		csInvalidPlayerId = 6;
+		csWaitingForApproval = 7;
 	}
 	required ClubStatus status = 1;
 	optional Club club = 2;

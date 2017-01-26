@@ -567,6 +567,10 @@ handlers[codes.scShowCards] = function (args,token) {
 				this.reply(0,'no sitting here!');
 				return;
 			}
+			if (params.seat_index === undefined) {
+				this.reply(0,'seat index missing');
+				return;
+			}
 			if (game.club.isSuspended(this.userid)) return;
 			var temp = this.userid;
 			game.Lock.writeLock(function (release) {

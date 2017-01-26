@@ -179,7 +179,11 @@ background-repeat: no-repeat;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QTreeView" name="gridPublicClubs"/>
+                  <widget class="QTreeView" name="gridPublicClubs">
+                   <property name="rootIsDecorated">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -196,14 +200,22 @@ background-repeat: no-repeat;</string>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QTreeView" name="gridPrivateClubs"/>
+                  <widget class="QTreeView" name="gridPrivateClubs">
+                   <property name="rootIsDecorated">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
               </layout>
              </item>
              <item>
-              <widget class="QTreeView" name="gridGames"/>
+              <widget class="QTreeView" name="gridGames">
+               <property name="rootIsDecorated">
+                <bool>false</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>

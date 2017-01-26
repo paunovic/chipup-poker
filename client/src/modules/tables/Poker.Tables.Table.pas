@@ -742,6 +742,7 @@ var
 begin
   FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
+  FStatus.ActionAddChips := FALSE;
   FStatus.ActionFold := FALSE;
   FStatus.ActionCall := FALSE;
   FStatus.ActionCheck := FALSE;
@@ -777,6 +778,7 @@ begin
   end;
 
   FStatus.ActionStandUp := FTableType = ttLive;
+  FStatus.ActionAddChips := (FTableType = ttLive) and (seat.Status in [psOutOfPlay, psOutOfHand]);
   FStatus.FocusWindow := FALSE;
 
   if seat.AutoPlay then
@@ -820,8 +822,11 @@ begin
               tsPreFlop, tsFlop, tsTurn, tsRiver: begin
                 FStatus.ActionFold := TRUE;
 
+                // focus only if some other window is not fullscreen and active
                 fgwnd := GetForegroundWindow;
-                if (IsWindowVisible(fgwnd)) and (not IsIconic(fgwnd)) and (IsZoomed(fgwnd)) then // make sure to not focus if some fullscreen window is active
+                if (IsWindowVisible(fgwnd)) and
+                   (not IsIconic(fgwnd)) and
+                   (IsZoomed(fgwnd)) then
                   FStatus.FocusWindow := TRUE;
 
                 // check if our current bet is smaller than minimumbet (call/raise situation)

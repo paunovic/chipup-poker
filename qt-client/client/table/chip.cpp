@@ -3,19 +3,21 @@
 
 #include "chip.h"
 
-#define CHIP_SEP 3
+static inline int chipSep(int tblwidth) {
+	return tblwidth * 0.005;
+}
 
 ChipObject::ChipObject(TablePrivate *parent) :GameObject(parent) {
-	value_ = 1;
+	value_ = 12345;
 	internal = chips = new ChipObjectUi(parent->getUi(),this);
-	setSize(0.05);
+	setSize(0.09);
 	parent->getUi()->addElement(internal);
+	rake_ = false;
 }
 
 ChipObjectUi::ChipObjectUi(TableUi *parent, ChipObject *jsobj) : GameObjectUi(parent),
 	jsobj(jsobj) {
-	font.setPointSize(7);
-	font.setBold(true);
+	font.setPixelSize(tbl->width()*0.015);
 	fm = new QFontMetrics(font);
 	c1 = QPixmap(":/resources/chips/1.png");
 	c5 = QPixmap(":/resources/chips/5.png");
@@ -51,46 +53,74 @@ void ChipObjectUi::updateValue() {
 			v -= 1;
 		}
 	}
+	if (jsobj->rake() && (chips.length() == 0)) chips.append(c1);
 	qDebug() << "chip stack changed";
+	redraw = true;
 	update();
 	updateGeometry();
 	text = QString("%1").arg((float)jsobj->value()/100);
-	int new_width = tbl->width() * w;
-	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
-	textRegion = QRect((qreal)pix.width()*0.45,0,(qreal)pix.width()*1.1,height);
-	qDebug() << textRegion << "chip text";
+
+	resizeEvent(0);
 }
-static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight) {
-	float scale = 0.45;
-	p.drawPixmap(x,rootheight-(y+(chip.height()*scale)),chip.width()*scale,chip.height()*scale,chip);
+void ChipObjectUi::resizeEvent(QResizeEvent *event) {
+	font.setPixelSize(tbl->width()*0.015);
+	if (!fm) delete fm;
+	fm = new QFontMetrics(font);
+
+	int chipWidth = (qreal)tbl->width() * 0.025;
+	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
+
+	int new_width = tbl->width() * w;
+	int height = (chips.length() * chipSep(tbl->width())) + chipHeight;
+	textRegion = QRect(chipWidth,0,(qreal)pix.width()*1.1,height);
+	qDebug() << this << textRegion << "chip text" << pos() << jsobj->value();
+	redraw = true;
+}
+
+static inline void drawChip(QPainter &p, QPixmap chip,int x, int y, int rootheight, int tblwidth) {
+	int chipWidth = (qreal)tblwidth * 0.025;
+	int chipHeight = ((qreal)chip.height()*chipWidth)/chip.width();
+	p.drawPixmap(x,rootheight-(y+chipHeight),chipWidth,chipHeight,chip);
 }
 
 void ChipObjectUi::paintEvent(QPaintEvent *) {
-	// TODO, draw text on left or right
-	QPainter p(this);
-	//drawDebug(p);
-	p.setBrush(QColor(127,0,0));
-	p.setPen(Qt::NoPen);
-	//p.drawRect(0,0,width(),height());
+	if (redraw) {
+		offscreenbuffer = QPixmap(size());
+		offscreenbuffer.fill(Qt::transparent);
 
-	p.save();
-	QList<QPixmap>::Iterator i;
-	int y=0;
-	for (i=chips.begin(); i!=chips.end(); ++i, y+=CHIP_SEP) {
-		QPixmap chip = *i;
-		drawChip(p,chip,0,y,height());
+		QPainter p2(&offscreenbuffer);
+		// TODO, draw text on left or right
+		//drawDebug(p2);
+		//p2.setBrush(QColor(127,0,0));
+		//p2.setPen(Qt::NoPen);
+		//p.drawRect(0,0,width(),height());
+
+		p2.save();
+		QList<QPixmap>::Iterator i;
+		int y=0;
+		for (i=chips.begin(); i!=chips.end(); ++i, y+=chipSep(tbl->width())) {
+			QPixmap chip = *i;
+			drawChip(p2,chip,0,y,height(),tbl->width());
+		}
+		p2.restore();
+
+		//p.setBrush(Qt::green);
+
+		p2.setPen(QColor(255,255,255));
+		p2.setFont(font);
+		style()->drawItemText(&p2,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
+		redraw = false;
 	}
-	p.restore();
-
-	//p.setBrush(Qt::green);
-
-	p.setPen(QColor(255,255,255));
-	p.setFont(font);
-	style()->drawItemText(&p,textRegion,Qt::AlignVCenter | Qt::AlignLeft,palette(),true,text);
+	QPainter p(this);
+	if (jsobj->rake()) p.setOpacity(0.5);
+	p.drawPixmap(0,0,width(),height(),offscreenbuffer);
 }
 QSize ChipObjectUi::sizeHint() const {
+	int chipWidth = (qreal)tbl->width() * 0.025;
+	int chipHeight = ((qreal)c1.height()*chipWidth)/c1.width();
+
 	int new_width = tbl->width() * w;
-	int height = (chips.length() * CHIP_SEP) + (pix.height() * 0.45);
+	int height = (chips.length() * chipSep(tbl->width())) + chipHeight;
 	QSize ret(new_width+textRegion.width(),height);
 	QPoint x = textRegion.bottomRight();
 	if (height < x.y()) height = x.y();

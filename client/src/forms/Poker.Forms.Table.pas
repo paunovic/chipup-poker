@@ -24,7 +24,7 @@ type
     acRaise: TAction;
     acPlayNow: TAction;
     acRaiseMin: TAction;
-    acRaise3BB: TAction;
+    acRaiseHalfPot: TAction;
     acRaisePot: TAction;
     acRaiseMax: TAction;
     acShowCards: TAction;
@@ -64,6 +64,9 @@ type
     acJoinWaitingList: TAction;
     acLeaveWaitingList: TAction;
     lbvWaitingListPosition: TcxLabel;
+    acAddChips: TAction;
+    lbvClubBalance: TcxLabel;
+    acReportBug: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -78,7 +81,7 @@ type
     procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
     procedure acRaiseMinExecute(Sender: TObject);
-    procedure acRaise3BBExecute(Sender: TObject);
+    procedure acRaiseHalfPotExecute(Sender: TObject);
     procedure acRaisePotExecute(Sender: TObject);
     procedure acRaiseMaxExecute(Sender: TObject);
     procedure cbSitOutNextBBPropertiesChange(Sender: TObject);
@@ -110,6 +113,8 @@ type
     procedure cbSplitTableCardsPropertiesChange(Sender: TObject);
     procedure acJoinWaitingListExecute(Sender: TObject);
     procedure acLeaveWaitingListExecute(Sender: TObject);
+    procedure acAddChipsExecute(Sender: TObject);
+    procedure acReportBugExecute(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -151,9 +156,11 @@ type
     procedure UpdateTableCaption;
     procedure UpdateHandHistoryLabel;
     procedure UpdateHandStrength;
+    procedure UpdateClubBalanceInfo;
     procedure UpdateWaitingListPositionCaption;
     procedure FocusWindow;
     procedure UncheckAutoplayOptions;
+    procedure UpdateHeaderLabelOrder;
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -194,7 +201,7 @@ uses
   Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
   Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
   Poker.Forms.ClubLobby, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.Club, Poker.Common.ModalDialogs,
-  Poker.Protobufs.Objects.ReservedSeatFree;
+  Poker.Protobufs.Objects.ReservedSeatFree, Poker.Forms.ContactUs, Poker.Protobufs.Objects.Pot;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -225,7 +232,7 @@ begin
   FCallbacksId := -1;
   case FTableType of
     ttLive, ttTournament: begin
-      FCallbacksId := MessageContainer.AddCallbacks([
+      FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                           TServerMessageCallback.Create(seChat, CSRChatEvent),
                           TServerMessageCallback.Create(seClubChange, CSEClubChange),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
@@ -242,6 +249,7 @@ begin
       edChat.Visible := FALSE;
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
+      lbvClubBalance.Visible := FALSE;
       lbsTableStats.Visible := FALSE;
       lbvWaitingListPosition.Visible := FALSE;
 
@@ -252,6 +260,8 @@ begin
       btStepBackwards.Visible := TRUE;
       btNextHand.Visible := TRUE;
       btPreviousHand.Visible := TRUE;
+
+      UpdateHeaderLabelOrder;
     end;
   end;
 
@@ -265,9 +275,11 @@ begin
     table.Renderer.OnUpdateHandStrength := RendererUpdateHandStrength;
 
     table.Renderer.AddDXButton(acStandUp, @table.Renderer.Metrics.StandUpButtonBounds, TableResources.StandUpButtonNormalImage, TableResources.StandUpButtonPressedImage, nil);
+    table.Renderer.AddDXButton(acAddChips, @table.Renderer.Metrics.AddChipsButtonBounds, TableResources.AddChipsButtonNormalImage, TableResources.AddChipsButtonPressedImage, nil);
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
     FDXBJoinWaitingList := table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
     table.Renderer.AddDXButton(acLeaveWaitingList, @table.Renderer.Metrics.LeaveWaitingListButtonBounds, TableResources.LeaveWaitingListNormal, TableResources.LeaveWaitingListPressed, nil, FALSE, 0.15);
+    table.Renderer.AddDXButton(acReportBug, @table.Renderer.Metrics.ReportBugButtonBounds, TableResources.ReportBugNormalImage, TableResources.ReportBugPressedImage, nil);
 
     FDXBFold := table.Renderer.AddDXButton(acFold, @table.Renderer.Metrics.ActionButtonsBounds[0],
          TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
@@ -282,7 +294,7 @@ begin
 
     FDXBRaisePresets[0] := table.Renderer.AddDXButton(acRaiseMin, @table.Renderer.Metrics.RaisePresetButtonsBounds[0],
          TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
-    FDXBRaisePresets[1] := table.Renderer.AddDXButton(acRaise3BB, @table.Renderer.Metrics.RaisePresetButtonsBounds[1],
+    FDXBRaisePresets[1] := table.Renderer.AddDXButton(acRaiseHalfPot, @table.Renderer.Metrics.RaisePresetButtonsBounds[1],
          TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
     FDXBRaisePresets[2] := table.Renderer.AddDXButton(acRaisePot, @table.Renderer.Metrics.RaisePresetButtonsBounds[2],
          TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
@@ -415,11 +427,6 @@ begin
     SetFocus;
     FWindowFocused := TRUE;
 
-    // if chat is not focused, focus raise box, otherwise keep chatbox focus
-    if (not edChat.Focused) and
-       (seRaiseAmount.Visible) then
-      seRaiseAmount.SetFocus;
-
     if Tables.GetAndLockTable(FInternalId, table) then
     try
       table.PlaySound(Sounds.SOUND_TIMEBAR, TRUE);
@@ -537,7 +544,6 @@ end;
 
 procedure TfrmTable.FormClick(Sender: TObject);
 var
-  seat_info: TSeatInfo;
   client_cursor_pos: TPoint;
   seat_index: Integer;
   table: TTable;
@@ -555,18 +561,16 @@ begin
 
     // if user is suspended, abort
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     // if cursor is in some seat..
     if table.Renderer.Metrics.IsPointInSeat(table.game, client_cursor_pos.X, client_cursor_pos.Y, seat_index) then
     begin
-      // if we are sitting at that seat, and we are out of play or out of hand
+      // if we are sitting at that seat, add chips
       if (table.Status.IsSitting) and
-         (table.Status.SelfSeatIndex = seat_index) and
-         (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
-         (seat_info.Status in [psOutOfPlay, psOutOfHand]) then
-        FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose))
+         (table.Status.SelfSeatIndex = seat_index) then
+        acAddChips.Execute
       else // if we are not sitting and seat is free
         if (not table.Status.IsSitting) and
            (table.Status.IsSeatFree(seat_index)) then
@@ -611,27 +615,66 @@ begin
   cbAutoCallAny.Checked := FALSE;
 end;
 
-procedure TfrmTable.UpdateHandHistoryLabel;
+procedure TfrmTable.UpdateClubBalanceInfo;
 var
-  hhis: THandHistoryItems;
-  lbl: String;
+  club_balance: Integer;
+  table: TTable;
+  club: TClubInfo;
+  member: TPB_ClubMember;
+  cstr: String;
 begin
-  lbl := '';
-  if FTableType in [ttTournament, ttLive] then
+  club_balance := -1;
+
+  if FTableType in [ttLive] then
   begin
-    HandHistory.Lock;
+    if Tables.GetAndLockTable(FInternalId, table) then
     try
-      if (HandHistory.TryGetValue(FGameId, hhis)) and
-         (hhis.LastHandId > 0) then
-        lbl := Format('Previous Hand (#%d)', [hhis.LastHandId]);
+      if dmMain.SelfInfo.Clubs.GetAndLock(table.ClubId, club) then
+      try
+        if club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
+          club_balance := member.ClubBalance;
+      finally
+        dmMain.SelfInfo.Clubs.Unlock;
+      end;
     finally
-      HandHistory.Unlock;
+      Tables.Unlock;
     end;
   end;
 
-  lbvHandHistory.Caption := lbl;
-  lbvHandHistory.Visible := lbl <> '';
+  if club_balance <> -1 then
+  begin
+    cstr := ChipsToStr(Abs(club_balance));
+    if club_balance < 0 then
+      cstr := '-' + cstr;
+
+    lbvClubBalance.Caption := Format('Your club balance: %s', [cstr])
+  end
+  else
+    lbvClubBalance.Caption := '';
+
+  lbvClubBalance.Visible := lbvClubBalance.Caption <> '';
+  lbvClubBalance.Refresh;
+
+  UpdateHeaderLabelOrder;
+end;
+
+procedure TfrmTable.UpdateHandHistoryLabel;
+var
+  lhi: Integer;
+begin
+  lhi := 0;
+  if FTableType in [ttTournament, ttLive] then
+    lhi := HandHistory.RetrieveLastHandId(FGameId);
+
+  if lhi > 0 then
+    lbvHandHistory.Caption := Format('Previous Hand (#%d)', [lhi])
+  else
+    lbvHandHistory.Caption := '';
+
+  lbvHandHistory.Visible := lbvHandHistory.Caption <> '';
   lbvHandHistory.Refresh;
+
+  UpdateHeaderLabelOrder;
 end;
 
 procedure TfrmTable.UpdateHandStrength;
@@ -689,6 +732,23 @@ begin
       lbvHandStrength.Caption := '';
   finally
     Tables.Unlock;
+  end;
+  lbvHandStrength.Refresh;
+end;
+
+procedure TfrmTable.UpdateHeaderLabelOrder;
+begin
+  beTopLeftHeaderSpacer.Left := 0;
+  if lbsTableStats.Left > lbvHandHistory.Left then
+  begin
+    lbsTableStats.Left := 1;
+    lbvHandHistory.Left := 2;
+  end;
+
+  if lbvHandHistory.Left > lbvClubBalance.Left then
+  begin
+    lbvHandHistory.Left := 2;
+    lbvClubBalance.Left := 3;
   end;
 end;
 
@@ -800,10 +860,23 @@ end;
 procedure TfrmTable.acTableStatsExecute(Sender: TObject);
 var
   table: TTable;
+  form: TForm;
+  found: Boolean;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
+    found := FALSE;
+    for form in FormsContainer.Items do
+      if (form is TfrmClubLobby) and
+         ((form as TfrmClubLobby).SelectedStatsTableId = table.GameId) then
+      begin
+        form.Show;
+        found := TRUE;
+        Break;
+      end;
+
+    if not found then
+      FormsContainer.RunForm(TfrmClubLobby, self, [table.ClubId.Memory, table.GameId.Memory], TRUE);
   finally
     Tables.Unlock;
   end;
@@ -836,11 +909,28 @@ end;
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 var
   msg_style: Integer;
+  table: TTable;
+  seat: TSeatInfo;
+  player_info: TPlayerInfo;
 begin
   if AUser = dmMain.SelfInfo.Displayname then
     msg_style := 4
   else
-    msg_style := 1;
+  begin
+    msg_style := 7;
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      for seat in table.Status.Seats do
+        if (Players.TryGetValue(seat.PlayerMongoId, player_info)) and
+           (player_info.Displayname = AUser) then
+        begin
+          msg_style := 1;
+          Break;
+        end;
+    finally
+      Tables.Unlock;
+    end;
+  end;
 
   AddChatMessage(Format('%s: ', [AUser]), 0, 0, AMessage, msg_style, -1);
 end;
@@ -1025,13 +1115,14 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     acStandUp.Enabled := table.Status.ActionStandUp;
+    acAddChips.Enabled := table.Status.ActionAddChips;
     acFold.Enabled := table.Status.ActionFold;
     acCall.Enabled := table.Status.ActionCall;
     acCheck.Enabled := table.Status.ActionCheck;
     acRaise.Enabled := table.Status.ActionRaise;
     acRaise.Enabled := (table.Status.ActionBet) or (table.Status.ActionRaise);
     acRaiseMin.Enabled := acRaise.Enabled;
-    acRaise3BB.Enabled := acRaise.Enabled;
+    acRaiseHalfPot.Enabled := acRaise.Enabled;
     acRaisePot.Enabled := acRaise.Enabled;
     acRaiseMax.Enabled := acRaise.Enabled;
     acPlayNow.Enabled := table.Status.ActionPlayNow;
@@ -1149,7 +1240,7 @@ begin
 
         seRaiseAmount.Visible := acRaise.Enabled;
         acRaiseMin.Enabled := acRaise.Enabled;
-        acRaise3BB.Enabled := acRaise.Enabled;
+        acRaiseHalfPot.Enabled := acRaise.Enabled;
         acRaisePot.Enabled := acRaise.Enabled;
         acRaiseMax.Enabled := acRaise.Enabled;
 
@@ -1160,13 +1251,13 @@ begin
           begin
             table.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := nil;
             table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaiseMin;
-            table.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaise3BB;
+            table.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaiseHalfPot;
             table.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaisePot;
           end
           else
           begin
             table.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := acRaiseMin;
-            table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaise3BB;
+            table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaiseHalfPot;
             table.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaisePot;
             table.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaiseMax;
           end;
@@ -1211,6 +1302,7 @@ begin
         btPreviousHand.BoundsRect := table.Renderer.Metrics.HandPlaybackPreviousHand;
         btNextHand.BoundsRect := table.Renderer.Metrics.HandPlaybackNextHand;
         pbHandPlaybackProgress.Position := table.HandHistoryPlayback.CurrentStateIndex;
+        lbvClubBalance.Visible := FALSE;
       end;
     end;
   finally
@@ -1219,7 +1311,9 @@ begin
 
   UpdateHandStrength;
   UpdateHandHistoryLabel;
+  UpdateClubBalanceInfo;
   UpdateTableCaption;
+  UpdateHeaderLabelOrder;
 end;
 
 function TfrmTable.ConfirmLeaveTable: Boolean;
@@ -1323,6 +1417,21 @@ begin
     DefocusControl(seRaiseAmount, FALSE);
 end;
 
+procedure TfrmTable.acAddChipsExecute(Sender: TObject);
+var
+  table: TTable;
+  seat_index: Integer;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    seat_index := table.Status.SelfSeatIndex;
+    if table.Status.ActionAddChips then
+      FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, @seat_index], ModalFormClose))
+  finally
+    Tables.Unlock;
+  end;
+end;
+
 procedure TfrmTable.acCallExecute(Sender: TObject);
 var
   table_state: TTableState;
@@ -1376,7 +1485,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     if (table.TableType = ttLive) and
@@ -1395,17 +1504,21 @@ begin
   end;
 end;
 
-procedure TfrmTable.acRaise3BBExecute(Sender: TObject);
+procedure TfrmTable.acRaiseHalfPotExecute(Sender: TObject);
 var
   val: UINT32;
   table: TTable;
+  pot: TPB_Pot;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    val := table.Status.MinimumBet;
+    val := 0;
+    for pot in table.Status.Pots do
+      Inc(val, pot.ValueWithoutRake);
+    val := val div 2;
     if val = 0 then
       val := table.game.BigBlind;
-    SetRaiseValue(val * 3);
+    SetRaiseValue(val);
   finally
     Tables.Unlock;
   end;
@@ -1478,6 +1591,25 @@ begin
   end;
 
   SetRaiseValue(raise_value);
+end;
+
+procedure TfrmTable.acReportBugExecute(Sender: TObject);
+var
+  index: Integer;
+  text: String;
+begin
+  index := 2;
+  text := Format(
+    '--- DO NOT REMOVE THESE LINES ! ---'#13#10 +
+    'VER: %s (win)'#13#10 +
+    'GID: %s'#13#10 +
+    'LHI: %d'#13#10 +
+    '--- DO NOT REMOVE THESE LINES ! ---'#13#10#13#10 +
+    'Please give us more info below about the bug.'#13#10 +
+    'If possible, also specify the exact hand ID where the bug occured.'#13#10#13#10,
+    [Settings.Hardcoded.VERSION, FGameId.ToString, HandHistory.RetrieveLastHandId(FGameId)]);
+
+  FormsContainer.RunForm(TfrmContactUs, nil, [@text, @index], FALSE);
 end;
 
 procedure TfrmTable.SetActionCaptions;
@@ -1586,6 +1718,12 @@ begin
 
   RefreshAll;
 
+  // if chat is not focused, focus raise box, otherwise keep chatbox focus
+  if (not edChat.Focused) and
+     (seRaiseAmount.Visible) then
+    seRaiseAmount.SetFocus;
+
+  // focus window if needed
   if focus_window then
   begin
     FocusWindow;
@@ -1726,16 +1864,8 @@ procedure TfrmTable.acHandHistoryExecute(Sender: TObject);
 var
   form: TForm;
   handid: UINT32;
-  hhis: THandHistoryItems;
 begin
-  handid := 0;
-  HandHistory.Lock;
-  try
-    if HandHistory.TryGetValue(FGameId, hhis) then
-      handid := hhis.LastHandId;
-  finally
-    HandHistory.Unlock;
-  end;
+  handid := HandHistory.RetrieveLastHandId(FGameId);
 
   if FormsContainer.Find(TfrmHandHistory, form) then
   begin
@@ -1806,7 +1936,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     ServerSocket.TableSit(FGameId, -1, 0);
@@ -1823,7 +1953,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if (table.Club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-       (member.Suspended) then
+       (member.Status = msSuspended) then
       Exit;
 
     ServerSocket.TableStandUp(FGameId);

@@ -1,7 +1,6 @@
 object frmDebug: TfrmDebug
   Left = 0
   Top = 0
-  Caption = 'ChipUP Poker - Debug'
   ClientHeight = 380
   ClientWidth = 621
   Color = clWindow
@@ -24,7 +23,7 @@ object frmDebug: TfrmDebug
     Left = 0
     Top = 18
     Width = 621
-    Height = 274
+    Height = 255
     Align = alClient
     TabOrder = 4
     Visible = False
@@ -65,14 +64,14 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    Height = 274
+    Height = 255
     Width = 621
   end
   object rvLog: TRichView
     Left = 0
     Top = 18
     Width = 621
-    Height = 274
+    Height = 255
     Align = alClient
     PopupMenu = pmLog
     TabOrder = 1
@@ -109,7 +108,7 @@ object frmDebug: TfrmDebug
       Margins.Right = 1
       Margins.Bottom = 5
       Align = alLeft
-      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      LookAndFeel.SkinName = 'FantasyDarkStyle'
       Shape = dxbsLineCenteredHorz
       ExplicitLeft = 140
       ExplicitTop = 9
@@ -126,14 +125,14 @@ object frmDebug: TfrmDebug
       Margins.Right = 1
       Margins.Bottom = 5
       Align = alLeft
-      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      LookAndFeel.SkinName = 'FantasyDarkStyle'
       Shape = dxbsLineCenteredHorz
       ExplicitLeft = 274
       ExplicitTop = 9
     end
     object btSeatPos: TcxButton
       Left = 584
-      Top = 6
+      Top = 54
       Width = 31
       Height = 29
       Hint = 'Seat positions'
@@ -176,7 +175,7 @@ object frmDebug: TfrmDebug
         0000000000000000000000000000000000000000000000000000}
       ParentShowHint = False
       ShowHint = True
-      SpeedButtonOptions.GroupIndex = 3
+      SpeedButtonOptions.GroupIndex = 2
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Transparent = True
@@ -205,18 +204,20 @@ object frmDebug: TfrmDebug
         AutoSize = False
         Caption = 'Unknown'
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
         Style.Font.Charset = DEFAULT_CHARSET
         Style.Font.Color = clWindowText
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -266,13 +267,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -305,13 +306,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -344,13 +345,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -366,13 +367,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -432,13 +433,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -473,13 +474,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -497,13 +498,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -558,18 +559,20 @@ object frmDebug: TfrmDebug
         AutoSize = False
         Caption = 'Unknown'
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
         Style.Font.Charset = DEFAULT_CHARSET
         Style.Font.Color = clWindowText
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -602,13 +605,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -658,13 +661,13 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
@@ -680,17 +683,39 @@ object frmDebug: TfrmDebug
         Style.Font.Height = -11
         Style.Font.Name = 'Consolas'
         Style.Font.Style = []
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
         Style.IsFontAssigned = True
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleDisabled.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'FantasyDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'FantasyDarkStyle'
         Transparent = True
         Height = 17
         Width = 90
       end
+    end
+    object btShowSocketIO: TcxButton
+      Left = 544
+      Top = 6
+      Width = 71
+      Height = 17
+      Action = acShowSocketIO
+      Anchors = [akTop, akRight]
+      Colors.PressedText = 65408
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.GroupIndex = 3
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      SpeedButtonOptions.Transparent = True
+      TabOrder = 4
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
   end
   object paTop: TPanel
@@ -866,6 +891,116 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
   end
+  object paSocketIO: TPanel
+    Left = 0
+    Top = 273
+    Width = 621
+    Height = 19
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 5
+    Visible = False
+    object btSocketIOSend: TcxButton
+      Left = 507
+      Top = 0
+      Width = 57
+      Height = 19
+      Align = alRight
+      Action = acSendSocketIO
+      Colors.PressedText = 65408
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      TabOrder = 1
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object btSocketIORecv: TcxButton
+      Left = 564
+      Top = 0
+      Width = 57
+      Height = 19
+      Align = alRight
+      Action = acRecvSocketIO
+      Colors.PressedText = 65408
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      TabOrder = 2
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object teSocketIO: TcxTextEdit
+      Left = 20
+      Top = 0
+      Align = alClient
+      AutoSize = False
+      ParentFont = False
+      Style.BorderStyle = ebsUltraFlat
+      Style.Edges = [bTop, bRight, bBottom]
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      TabOrder = 3
+      Height = 19
+      Width = 412
+    end
+    object btAutoClearSocketIO: TcxButton
+      Left = 432
+      Top = 0
+      Width = 75
+      Height = 19
+      Align = alRight
+      Caption = 'Auto clear'
+      Colors.PressedText = 4227327
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.GroupIndex = 4
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      SpeedButtonOptions.Down = True
+      TabOrder = 0
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object btClearSocketIO: TcxButton
+      Left = 0
+      Top = 0
+      Width = 20
+      Height = 19
+      Align = alLeft
+      Action = acClearSocketIO
+      Colors.PressedText = clRed
+      ParentShowHint = False
+      ShowHint = False
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      TabOrder = 4
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Consolas'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+  end
   object alDebug: TActionList
     Left = 68
     Top = 36
@@ -880,6 +1015,22 @@ object frmDebug: TfrmDebug
     object acCopyLogSelection: TAction
       Caption = 'Copy'
       OnExecute = acCopyLogSelectionExecute
+    end
+    object acShowSocketIO: TAction
+      Caption = 'Socket I/O'
+      OnExecute = acShowSocketIOExecute
+    end
+    object acSendSocketIO: TAction
+      Caption = 'Send'
+      OnExecute = acSendSocketIOExecute
+    end
+    object acRecvSocketIO: TAction
+      Caption = 'Recv'
+      OnExecute = acRecvSocketIOExecute
+    end
+    object acClearSocketIO: TAction
+      Caption = 'x'
+      OnExecute = acClearSocketIOExecute
     end
   end
   object SaveDialog: TSaveDialog
@@ -1118,6 +1269,22 @@ object frmDebug: TfrmDebug
         Size = 8
         Color = clWhite
         Unicode = True
+      end
+      item
+        StyleName = 'Buffer'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clGray
+        Unicode = True
+      end
+      item
+        StyleName = 'Buffer-Copied'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = 16744448
+        Unicode = True
       end>
     ParaStyles = <
       item
@@ -1296,5 +1463,11 @@ object frmDebug: TfrmDebug
     HintPause = 30
     Left = 264
     Top = 32
+  end
+  object tiBufferCopyIndicator: TTimer
+    Enabled = False
+    OnTimer = tiBufferCopyIndicatorTimer
+    Left = 236
+    Top = 88
   end
 end

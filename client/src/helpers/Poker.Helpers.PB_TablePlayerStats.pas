@@ -52,7 +52,7 @@ begin
     self.clear_Secondsplayed;
     self.Secondsplayed := tmppb.Secondsplayed + APlayerStats.Secondsplayed;
     self.clear_Chipsinplay;
-    self.Chipsinplay := APlayerStats.Chipsinplay;
+    self.Chipsinplay := tmppb.Chipsinplay + APlayerStats.Chipsinplay;
   finally
     tmppb.Free;
   end;

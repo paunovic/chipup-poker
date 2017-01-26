@@ -24,6 +24,7 @@ QVariant ClubListModel::data(const QModelIndex &index,int role) const {
 }
 void Club::update(const Poker::Club &in) {
 	int i,j;
+	QList<QByteArray> toFetch;
 
 	seq = in.seq();
 	name = in.name().c_str();
@@ -33,6 +34,8 @@ void Club::update(const Poker::Club &in) {
 	is_private = in.is_private();
 	std::string ownerid = in.owner();
 	owner = QByteArray(ownerid.data(),ownerid.length());
+	const Data::User *userTest = core->findUser(owner);
+	if (!userTest) toFetch.append(owner);
 	QList<QByteArray> valid_members;
 	for (i=0; i<in.members_size(); i++) {
 		Poker::ClubMember member = in.members(i);
@@ -58,8 +61,11 @@ void Club::update(const Poker::Club &in) {
 		if (append) members.append(out);
 		else members.modified(out);
 		valid_members.append(temp2);
+		userTest = core->findUser(out->_id);
+		if (!userTest) toFetch.append(out->_id);
 	}
 	members.checkMissing(valid_members);
+	if (toFetch.size()) core->GetPlayers(toFetch);
 }
 void ClubList::clear() {
 	public_club_model.beginResetModel();

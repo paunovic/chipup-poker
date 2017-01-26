@@ -11,11 +11,13 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  TMemberStatus = (msActive = 0, msSuspended, msPending);
+
   TPB_ClubMember = class(TProtobufBaseObject)
   private
     const
       kIdFieldNumber = 1;
-      kSuspendedFieldNumber = 2;
+      kStatusFieldNumber = 2;
       kBalanceLimitFieldNumber = 3;
       kClubBalanceFieldNumber = 4;
       kUnlimitedLimitFieldNumber = 5;
@@ -24,7 +26,7 @@ type
 
     var
       FId: TMongoId;
-      FSuspended: Boolean;
+      FStatus: TMemberStatus;
       FBalanceLimit: UInt32;
       FClubBalance: Integer;
       FUnlimitedLimit: Boolean;
@@ -35,9 +37,9 @@ type
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TMongoId);
-    procedure set_has_Suspended;
-    procedure clear_has_Suspended;
-    procedure SetSuspended(const AValue: Boolean);
+    procedure set_has_Status;
+    procedure clear_has_Status;
+    procedure SetStatus(const AValue: TMemberStatus);
     procedure set_has_BalanceLimit;
     procedure clear_has_BalanceLimit;
     procedure SetBalanceLimit(const AValue: UInt32);
@@ -66,10 +68,10 @@ type
     procedure clear_MongoId;
     property MongoId: TMongoId read FId write SetMongoId;
 
-    // optional bool Suspended = 2;
-    function has_Suspended: Boolean;
-    procedure clear_Suspended;
-    property Suspended: Boolean read FSuspended write SetSuspended;
+    // optional MemberStatus Status = 2;
+    function has_Status: Boolean;
+    procedure clear_Status;
+    property Status: TMemberStatus read FStatus write SetStatus;
 
     // optional uint32 BalanceLimit = 3;
     function has_BalanceLimit: Boolean;
@@ -131,10 +133,10 @@ begin
         FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
-      kSuspendedFieldNumber: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSuspended := AProtobufReader.readBoolean;
-        set_has_Suspended;
+        FStatus := TMemberStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
       kBalanceLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -170,8 +172,8 @@ procedure TPB_ClubMember.MergeFrom(const AFrom: TPB_ClubMember);
 begin
   if AFrom.has_MongoId then
     SetMongoId(AFrom.MongoId);
-  if AFrom.has_Suspended then
-    SetSuspended(AFrom.Suspended);
+  if AFrom.has_Status then
+    SetStatus(AFrom.Status);
   if AFrom.has_BalanceLimit then
     SetBalanceLimit(AFrom.BalanceLimit);
   if AFrom.has_ClubBalance then
@@ -226,35 +228,35 @@ begin
   set_has_MongoId;
 end;
 
-procedure TPB_ClubMember.clear_Suspended;
+procedure TPB_ClubMember.clear_Status;
 begin
-  FSuspended := false;
-  clear_has_Suspended;
+  FStatus := TMemberStatus(0);
+  clear_has_Status;
 end;
 
-function TPB_ClubMember.has_Suspended: Boolean;
+function TPB_ClubMember.has_Status: Boolean;
 begin
   result := (FHasBits and 2) > 0;
 end;
 
-procedure TPB_ClubMember.set_has_Suspended;
+procedure TPB_ClubMember.set_has_Status;
 begin
   FHasBits := FHasBits or 2;
 end;
 
-procedure TPB_ClubMember.clear_has_Suspended;
+procedure TPB_ClubMember.clear_has_Status;
 begin
   FHasBits := FHasBits and not 2;
 end;
 
-procedure TPB_ClubMember.SetSuspended(const AValue: Boolean);
+procedure TPB_ClubMember.SetStatus(const AValue: TMemberStatus);
 begin
   if not Lightweight then
-    Assert(not has_Suspended);
-  FSuspended := AValue;
+    Assert(not has_Status);
+  FStatus := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
-  set_has_Suspended;
+    ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
 end;
 
 procedure TPB_ClubMember.clear_BalanceLimit;
@@ -418,7 +420,7 @@ begin
     Exit;
 
   clear_MongoId;
-  clear_Suspended;
+  clear_Status;
   clear_BalanceLimit;
   clear_ClubBalance;
   clear_UnlimitedLimit;

@@ -370,7 +370,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 	else key1 = 'installerid';
 	key1 = prefix+'_'+key1;
 	if (!params.appcode) {
-	} else if (params.appcode != 'DelphiWindows') key1 = params.appcode + '_' + key1;
+	} else if (params.appcode != 'acDelphiWindows') key1 = params.appcode + '_' + key1;
 	console.log('final key %s',key1);
 	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
@@ -431,7 +431,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 					//console.log('need to patch %s',clientFile.path);
 					models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
-						if (diffRow && (params.appcode == 'DelphiWindows')) {
+						if (diffRow && (params.appcode == 'acDelphiWindows')) {
 							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
 							toUpdate.push(UFI);
 							cb();
@@ -839,14 +839,23 @@ ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 		models.ClubBalance.find({clubid:{$in:ownedClubs}},function (err,balances) {
 			assert.ifError(err);
 			var clubsOut = [];
+			var pendingOut = [];
 			async.each(clubs,function getStatsAndClub(item,cb) {
 				Club.getClubById(item._id,function (err,club) {
+					// TODO, dont show userlist if you are pending
 					var obj = Club.makeClubProtobuf(item,userlist,balances,club);
-					clubsOut.push(obj);
+					if (myutils.containsObjectID(club.obj.members,this.userid)) {
+						clubsOut.push(obj);
+					} else if (myutils.containsObjectID(item.pendingApproval,this.userid)) {
+						pendingOut.push(obj);
+					} else if (club.isOwner(this.userid)) {
+						clubsOut.push(obj);
+					}
 					cb();
 				}.bind(this));
 			}.bind(this),function finished() {
 				status.clubs = clubsOut;
+				status.pending_clubs = pendingOut;
 				models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:"",subscription_plan:""},function(err,users) {
 					status.users = users;
 					models.UserModel.findOne({_id:this.userid},function(err,self) {

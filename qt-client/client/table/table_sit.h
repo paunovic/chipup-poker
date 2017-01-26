@@ -17,7 +17,7 @@ class TableSit : public QWidget
 public:
 	explicit TableSit(const Data::Game *gamein, int seat, QSharedPointer<Data::TableStatus> ts);
 	~TableSit();
-	void setAddon(bool in);
+	void setAddon(bool in, quint32 curentChips);
 
 private slots:
 	void on_btOK_clicked();
@@ -37,9 +37,10 @@ private:
 
 	Ui::TableSit *ui;
 	const Data::Game *g;
-	int seat;
+	unsigned int seat;
 	Data::PlayerClubStatus lastPcs;
 	bool addonMode;
+	quint32 currentChips;
 };
 
 #endif // JOINTABLE_H
