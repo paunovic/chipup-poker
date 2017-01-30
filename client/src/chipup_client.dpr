@@ -8,15 +8,9 @@ program chipup_client;
 {$I defines.inc}
 
 uses
-  FastMM4 in '3rdparty\FastMM\FastMM4.pas',
-  FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
+  FastMM4,
   Winapi.Windows,
   Vcl.Forms,
-  pbInput in '3rdparty\protobufs\pbInput.pas',
-  pbOutput in '3rdparty\protobufs\pbOutput.pas',
-  pbPublic in '3rdparty\protobufs\pbPublic.pas',
-  StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
-  Asphyre.Streams in '3rdparty\AsphyreSphinx\Source\Asphyre.Streams.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
   Poker.Forms.Main in 'forms\Poker.Forms.Main.pas' {frmChipUpMain},
@@ -190,6 +184,7 @@ uses
   Poker.Protobufs.Objects.ChangeClubPlayerFlag in 'modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas',
   Poker.Protobufs.Objects.ReservedSeatFree in 'modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas',
   Poker.Helpers.PB_ClubMember in 'helpers\Poker.Helpers.PB_ClubMember.pas';
+
 
 procedure FocusApp;
 var
