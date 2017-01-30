@@ -232,6 +232,7 @@ object dmMain: TdmMain
       end>
   end
   object SkinController: TdxSkinController
+    NativeStyle = False
     SkinName = 'ChipUpPokerDarkStyle'
     OnSkinForm = SkinControllerSkinForm
     Left = 32

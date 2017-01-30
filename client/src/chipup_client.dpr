@@ -17,7 +17,6 @@ uses
   pbPublic in '3rdparty\protobufs\pbPublic.pas',
   StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
   Asphyre.Streams in '3rdparty\AsphyreSphinx\Source\Asphyre.Streams.pas',
-  OverbyteIcsHttpProt in '3rdparty\icsv8\OverbyteIcsHttpProt.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
   Poker.Forms.Main in 'forms\Poker.Forms.Main.pas' {frmChipUpMain},

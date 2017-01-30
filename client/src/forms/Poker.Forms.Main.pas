@@ -15,7 +15,8 @@ uses
   cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls,
   cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls,
   Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
-  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar, dxBevel;
+  Poker.Types, RVScroll, RichView, RVStyle, cxNavigator, dxBarBuiltInMenu,
+  cxCalendar;
 
 type
   TfrmChipUpMain = class(TForm)

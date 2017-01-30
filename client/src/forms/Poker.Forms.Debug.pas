@@ -12,7 +12,7 @@ uses
   ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
   Poker.Common.SafeMutex, Poker.Common.CPUUsage, dxScreenTip, dxCustomHint,
-  cxHint;
+  cxHint, cxClasses;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc,
@@ -176,7 +176,7 @@ uses
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
-  RectMarks, Poker.Settings, Vcl.Clipbrd, synacode;
+  {RectMarks, FIXME} Poker.Settings, Vcl.Clipbrd, synacode;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -357,14 +357,14 @@ begin
   else
     rv := rvLog;
 
-  ClearRectMarks(rv);
+  // ClearRectMarks(rv); FIXME
 
   if teFindText.Tag = 0 then
     Exit;
-
+    {
   if teFindText.Text <> '' then
     MarkSubstring(rv, teFindText.Text, clRed);
-
+     FIXME }
   rv.Format;
 end;
 
@@ -614,8 +614,8 @@ begin
   if (teFindText.Tag = 1) and
      (teFindText.Text <> '') then
   begin
-    ClearRectMarks(rvLog);
-    MarkSubstring(rvLog, teFindText.Text, clRed);
+    {ClearRectMarks(rvLog); FIXME
+    MarkSubstring(rvLog, teFindText.Text, clRed);}
   end;
 
   if rvLog.VScrollPos < rvLog.VScrollMax then
@@ -700,13 +700,13 @@ begin
 
   if rvMemoryState.Visible then
   begin
-    ClearRectMarks(rvLog);
+    //ClearRectMarks(rvLog); FIXME
     UpdateMemoryUsageDetails;
     rvMemoryState.BringToFront;
   end
   else
   begin
-    ClearRectMarks(rvMemoryState);
+    // ClearRectMarks(rvMemoryState); FIXME
     teFindText.Properties.OnChange(nil);
   end;
 end;

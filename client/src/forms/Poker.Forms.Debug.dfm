@@ -705,7 +705,6 @@ object frmDebug: TfrmDebug
       Colors.PressedText = 65408
       ParentShowHint = False
       ShowHint = False
-      SpeedButtonOptions.GroupIndex = 3
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Transparent = True
