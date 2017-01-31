@@ -11,7 +11,8 @@ uses
   cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
   ChipUpPokerDarkSkin, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage,
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
-  Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit;
+  Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit,
+  dxBarBuiltInMenu, cxNavigator;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -149,14 +150,11 @@ type
       const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
     procedure acTablesStatsUnselectAllExecute(Sender: TObject);
     procedure gridTablesEnabledPropertiesChange(Sender: TObject);
-    procedure gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
-    procedure gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridTablesTableDblClick(Sender: TObject);
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
     procedure acSetLimitExecute(Sender: TObject);
-    procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
@@ -170,6 +168,15 @@ type
       Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
       var AText: string);
     procedure acApprovePlayerExecute(Sender: TObject);
+    procedure gridStatsTableBalanceStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTablesStatusStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTablesTableStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -524,8 +531,9 @@ begin
   ConfigureGUI(FALSE);
 end;
 
-procedure TfrmClubLobby.gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmClubLobby.gridStatsTableBalanceStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   value: Variant;
 begin
@@ -599,8 +607,9 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   value: Variant;
 begin
@@ -647,8 +656,9 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 begin
   if ARecord.Values[gridTablesEnabled.Index] then
     AStyle := styleCheckedRow
@@ -1421,3 +1431,5 @@ begin
 end;
 
 end.
+
+

@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.CustomButtons.Buttons = <>
       Properties.HideTabs = True
       OnChange = pcTabsChange
@@ -4007,6 +4007,7 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
+              Styles.OnGetContentStyle = gridTournamentsNameStylesGetContentStyle
               Width = 215
             end
             object gridTournamentsPlayers: TcxGridColumn
@@ -4022,6 +4023,7 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
+              Styles.OnGetContentStyle = gridTournamentsStatusStylesGetContentStyle
               Width = 90
             end
           end

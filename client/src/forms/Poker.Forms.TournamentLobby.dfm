@@ -45,6 +45,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
     object gridPlayersTable: TcxGridTableView
+      Navigator.Buttons.CustomButtons = <>
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -79,7 +80,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       object gridPlayersName: TcxGridColumn
         Caption = 'Player'
         PropertiesClassName = 'TcxTextEditProperties'
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
         Width = 221
@@ -89,7 +89,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Currency'
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.Alignment.Horz = taRightJustify
-        Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
         Properties.EditFormat = '$,0.##;($,0.##)'
         Properties.UseDisplayFormatWhenEditing = True
@@ -110,6 +109,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 1
     object gridTablesTable: TcxGridTableView
+      Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridTablesTableCellDblClick
       OnFocusedRecordChanged = gridTablesTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
@@ -157,7 +157,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Integer'
         PropertiesClassName = 'TcxSpinEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Width = 69
       end
@@ -166,7 +165,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Currency'
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.Alignment.Horz = taRightJustify
-        Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
         Properties.EditFormat = ',0.##;(,0.##)'
         Properties.UseDisplayFormatWhenEditing = True
@@ -179,7 +177,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Currency'
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.Alignment.Horz = taRightJustify
-        Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
         Properties.EditFormat = ',0.##;(,0.##)'
         Properties.UseDisplayFormatWhenEditing = True
@@ -192,7 +189,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Currency'
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.Alignment.Horz = taRightJustify
-        Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
         Properties.EditFormat = ',0.##;(,0.##)'
         Properties.UseDisplayFormatWhenEditing = True
@@ -2610,8 +2606,8 @@ object frmTournamentLobby: TfrmTournamentLobby
         F9A78F54ABFED93B47AD6A149FF5F85A57EBA68738D54A9FFEB8E5C6DB511EEC
         9CFCD307473CD2ACCF3739E7F4EC6B71276EC4BF73B28FE2477A67D7797CC5E9
         FF074F1A310770D5CA710000000049454E44AE426082}
+      Properties.FitMode = ifmNormal
       Properties.PopupMenuLayout.MenuItems = []
-      Properties.Proportional = False
       Properties.ReadOnly = True
       Properties.ShowFocusRect = False
       Style.BorderStyle = ebsNone
@@ -2655,7 +2651,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       Top = 16
       Width = 143
       Height = 35
-      Margin = 15
       Action = acRegister
       Anchors = [akLeft, akBottom]
       Colors.NormalText = 48896
@@ -2746,6 +2741,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 3
     object gridAllPlayersTable: TcxGridTableView
+      Navigator.Buttons.CustomButtons = <>
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -2766,7 +2762,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       OptionsView.GridLines = glNone
       OptionsView.GroupByBox = False
       Styles.Inactive = dmMain.styleInactiveCell
-      Styles.OnGetContentStyle = gridPlayersTableStylesGetContentStyle
       object gridAllPlayersId: TcxGridColumn
         Caption = 'Club ID'
         DataBinding.ValueType = 'Variant'
@@ -2790,7 +2785,6 @@ object frmTournamentLobby: TfrmTournamentLobby
       object gridAllPlayersName: TcxGridColumn
         Caption = 'Player'
         PropertiesClassName = 'TcxTextEditProperties'
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
         Width = 221
@@ -2800,7 +2794,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Currency'
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.Alignment.Horz = taRightJustify
-        Properties.Alignment.Vert = taVCenter
         Properties.DisplayFormat = ',0.##;(,0.##)'
         Properties.EditFormat = ',0.##;(,0.##)'
         Properties.UseDisplayFormatWhenEditing = True
@@ -2821,6 +2814,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 4
     object gridBlindsTable: TcxGridTableView
+      Navigator.Buttons.CustomButtons = <>
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -2848,7 +2842,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Integer'
         PropertiesClassName = 'TcxSpinEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
         Width = 51
@@ -2857,7 +2850,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         Caption = 'Blinds'
         PropertiesClassName = 'TcxTextEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Width = 98
       end
@@ -2865,7 +2857,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         Caption = 'Minutes'
         PropertiesClassName = 'TcxTextEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Width = 75
       end
@@ -2970,6 +2961,7 @@ object frmTournamentLobby: TfrmTournamentLobby
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 9
     object gridPrizesTable: TcxGridTableView
+      Navigator.Buttons.CustomButtons = <>
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -2996,7 +2988,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         DataBinding.ValueType = 'Integer'
         PropertiesClassName = 'TcxSpinEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
         SortIndex = 0
@@ -3007,7 +2998,6 @@ object frmTournamentLobby: TfrmTournamentLobby
         Caption = 'Prize'
         PropertiesClassName = 'TcxTextEditProperties'
         Properties.Alignment.Horz = taCenter
-        Properties.Alignment.Vert = taVCenter
         HeaderAlignmentHorz = taCenter
         Width = 98
       end
