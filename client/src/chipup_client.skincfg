@@ -1,6 +1,6 @@
 [ExpressSkins]
 Default=0
-ShowNotifications=1
+ShowNotifications=0
 Enabled=1
 dxSkinBlack=0
 dxSkinBlue=0
@@ -50,3 +50,13 @@ ChipUpDarkButtons=1
 ChipUpMainRedButtons=1
 ChipUpPokerDarkSkin=1
 FantasyPokerDarkSkin=0
+dxSkinMetropolis=0
+dxSkinMetropolisDark=0
+dxSkinOffice2013DarkGray=0
+dxSkinOffice2013LightGray=0
+dxSkinOffice2013White=0
+dxSkinOffice2016Colorful=0
+dxSkinOffice2016Dark=0
+dxSkinVisualStudio2013Blue=0
+dxSkinVisualStudio2013Dark=0
+dxSkinVisualStudio2013Light=0

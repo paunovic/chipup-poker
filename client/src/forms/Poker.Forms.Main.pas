@@ -15,7 +15,8 @@ uses
   cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls,
   cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls,
   Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
-  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar, dxBevel;
+  Poker.Types, RVScroll, RichView, RVStyle, cxNavigator, dxBarBuiltInMenu,
+  cxCalendar;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -160,17 +161,20 @@ type
     procedure acTournamentRegisterExecute(Sender: TObject);
     procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acTournamentUnregisterExecute(Sender: TObject);
-    procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acTournamentItemOpenExecute(Sender: TObject);
     procedure acTournamentsOpenAllExecute(Sender: TObject);
     procedure tiTournamentInfoRefreshTimer(Sender: TObject);
-    procedure gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acConfirmationOnFoldExecute(Sender: TObject);
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
     procedure acLaunchNewInstanceExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure acOpenDebugFormExecute(Sender: TObject);
+    procedure gridTournamentsNameStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTournamentsStatusStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
   private
     const
       RESOURCE_CASHIER_NORMAL = 'CashierNormal';
@@ -1132,7 +1136,9 @@ begin
   UpdateGamelist;
 end;
 
-procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
 begin
@@ -1143,8 +1149,9 @@ begin
     AStyle := styleTournamentName;
 end;
 
-procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
   tournament: TTournamentInfo;
