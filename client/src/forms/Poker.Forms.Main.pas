@@ -138,7 +138,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acResendVerificationMailExecute(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
     procedure gridPublicClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure FormResize(Sender: TObject);
     procedure gridPublicClubsEnter(Sender: TObject);
@@ -364,6 +363,7 @@ end;
 
 procedure TfrmChipUpMain.FormActivate(Sender: TObject);
 begin
+  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
   dmMain.RefreshSkinControllerDelayed;
 end;
 
@@ -385,11 +385,6 @@ begin
     if dmMain.IsLoggedIn then
       ServerSocket.Logout;
   end;
-end;
-
-procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
-begin
-  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
 end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);

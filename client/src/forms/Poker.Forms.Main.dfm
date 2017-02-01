@@ -19,7 +19,6 @@ object frmChipUpMain: TfrmChipUpMain
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnDeactivate = FormDeactivate
   OnResize = FormResize
   DesignSize = (
     841
@@ -3583,7 +3582,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsTournaments
+      Properties.ActivePage = tsHomeGames
       Properties.CustomButtons.Buttons = <>
       Properties.HideTabs = True
       OnChange = pcTabsChange
@@ -4488,8 +4487,8 @@ object frmChipUpMain: TfrmChipUpMain
       end
       item
       end>
-    Left = 452
-    Top = 52
+    Left = 384
+    Top = 32
     StyleName = 'Standard'
     object acShowChangeEMailForm: TAction
       Category = 'Account'
@@ -4654,8 +4653,8 @@ object frmChipUpMain: TfrmChipUpMain
   end
   object ApplicationEvents: TApplicationEvents
     OnDeactivate = ApplicationEventsDeactivate
-    Left = 344
-    Top = 52
+    Left = 552
+    Top = 32
   end
   object RVStyle: TRVStyle
     TextStyles = <
@@ -4810,12 +4809,12 @@ object frmChipUpMain: TfrmChipUpMain
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 560
-    Top = 52
+    Left = 620
+    Top = 32
   end
   object StyleRepository: TcxStyleRepository
     Left = 464
-    Top = 112
+    Top = 32
     PixelsPerInch = 96
     object styleTournamentOpen: TcxStyle
       AssignedValues = [svFont, svTextColor]
@@ -4871,7 +4870,7 @@ object frmChipUpMain: TfrmChipUpMain
     Enabled = False
     Interval = 500
     OnTimer = tiTournamentInfoRefreshTimer
-    Left = 348
-    Top = 112
+    Left = 280
+    Top = 32
   end
 end
