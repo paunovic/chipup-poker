@@ -11,12 +11,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
   dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
   Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, cxStyles, cxClasses, Vcl.ExtCtrls,
-  dxSkinMetropolis, dxSkinMetropolisDark, dxSkinOffice2013DarkGray,
-  dxSkinOffice2013LightGray, dxSkinOffice2013White,
-  dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
-  dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
-  dxSkinVisualStudio2013Light;
+  Poker.Protobufs.Objects.Game, Vcl.ExtCtrls, cxStyles, cxClasses;
 
 type
   TdmMain = class(TDataModule)
