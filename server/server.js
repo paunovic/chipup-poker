@@ -229,8 +229,8 @@ var server = net.createServer(function listener(socket) {
 	var handler = new user.ClientSocket(socket);
 });
 var options = {
-	key: fs.readFileSync('key.pem'),
-	cert: fs.readFileSync('cert.pem')
+    key: fs.readFileSync(config.keypath),
+    cert: fs.readFileSync(config.certpath)
 };
 
 var secureServer = tls.createServer(options,function listener(socket) {

@@ -206,7 +206,7 @@ function Server(activeUsersIN) {
 	});
 	app.get('/pay',this.pay.bind(this));
 	this.addSync(app);
-	app.use(express.static('files'));
+	app.use(express.static('server/files'));
 	app.use('/rawinstallers',express.static('installers'));
 }
 Server.prototype.pay = function (req,res) {
@@ -314,6 +314,9 @@ Server.prototype.addMac = function (req,res) {
 	}
 }
 Server.prototype.buildDone = function (req,res) {
+        // TODO, resume using this code when mac gets up?
+        res.end('OK\n');
+        return;
 	console.log(req.query);
 	var buildnum = parseInt(req.query.buildnum);
 	var start = fs.createReadStream("/tmp/symbols-mac-"+buildnum+".txt",{start:0, end:128});
@@ -800,6 +803,7 @@ Server.prototype.installers_func = function (req,res) {
 				var live_pubver,live_debugver;
 				var dev_pubver,dev_debugver;
 				for (var x=0; x<configs.length; x++) {
+                                        if (!configs[x].value) continue;
 					var y = configs[x].value.toString();
 					switch (configs[x]._id) {
 					case 'dev_installerid':
@@ -1278,8 +1282,8 @@ Server.prototype.paypalLog = function (req,res) {
 }
 Server.prototype.contactPost = function (req,res) {
 	console.log(req.body);
-	RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function (err) { // FIXME, do something with error
+	//RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function (err) { // FIXME, do something with error
 		res.writeHead(302,{Location:'/contact.html?success=true'}); // FIXME
 		res.end();
-	});
+	//});
 }
