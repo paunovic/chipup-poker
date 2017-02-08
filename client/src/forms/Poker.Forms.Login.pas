@@ -360,8 +360,7 @@ procedure TfrmChipUPLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
-      if EncodeString(String(SHA256String(edLogin.Text))) =
-             'MdWMsoN7ufqG3+Npo5xxN3dQOYYODw7TcjI/237uFTI=' then // devmodeon!
+      if EncodeString(UTf8ToString(SHA256String(edLogin.Text))) = 'BD8/Px4/Az8/PxNCVT4eND90Vz9ab1ITP28/Pz8MP2o=' then // devmodeon!
       begin
         Settings.DeveloperMode := not Settings.DeveloperMode;
         if Settings.DeveloperMode then
