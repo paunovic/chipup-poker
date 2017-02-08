@@ -3,7 +3,7 @@ unit Poker.Common.Encryption;
 interface
 
 uses
-  System.Classes, System.SysUtils;
+  System.Classes;
 
 function SHA256Raw(const AData: RawByteString): RawByteString;
 function SHA256Stream(const AStream: TStream): RawByteString;
@@ -15,7 +15,7 @@ function AES256EncryptStream(const AStream: TMemoryStream; const APassword: Stri
 implementation
 
 uses
-  syncrypto;
+  System.SysUtils, syncrypto;
 
 
 function SHA256Raw(const AData: RawByteString): RawByteString;
