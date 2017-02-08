@@ -20,6 +20,7 @@ object frmChipUpMain: TfrmChipUpMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
+  OnShow = FormShow
   DesignSize = (
     841
     582)

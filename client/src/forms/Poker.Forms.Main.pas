@@ -174,6 +174,7 @@ type
     procedure gridTournamentsStatusStylesGetContentStyle(
       Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure FormShow(Sender: TObject);
   private
     const
       RESOURCE_CASHIER_NORMAL = 'CashierNormal';
@@ -363,7 +364,6 @@ end;
 
 procedure TfrmChipUpMain.FormActivate(Sender: TObject);
 begin
-  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
   dmMain.RefreshSkinControllerDelayed;
 end;
 
@@ -403,6 +403,11 @@ begin
   paTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
   paTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
   paTournamentInfo.Height := gridTournaments.Height - 1;
+end;
+
+procedure TfrmChipUpMain.FormShow(Sender: TObject);
+begin
+  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
 end;
 
 procedure TfrmChipUpMain.FlushData;
@@ -1903,18 +1908,20 @@ end;
 
 {$IFDEF ENABLE_EXCEPTION_LOGGING}
 procedure TfrmChipUpMain.ApplicationException(Sender: TObject; E: Exception);
+const
+  FILENAME = 'C:\chipup_poker_exception.txt';
 var
   sl: TStringList;
 begin
   sl := TStringList.Create;
   try
     JclLastExceptStackListToStrings(sl, TRUE, TRUE, TRUE, FALSE);
-    sl.SaveToFile('C:\exception.txt');
+    sl.SaveToFile(FILENAME);
     SoftException('Hard Exception', sl.Text);
-    MessageDlg('Exception happened. C:\exception.txt created', mtError, [mbOK], 0);
   finally
     sl.Free;
   end;
+  MessageDlg(Format('Exception happened. %s created.', [FILENAME]), mtError, [mbOK], 0);
 end;
 {$ENDIF}
 
