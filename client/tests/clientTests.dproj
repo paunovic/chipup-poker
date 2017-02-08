@@ -40,8 +40,11 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<Manifest_File>None</Manifest_File>
+			<VerInfo_Locale>2057</VerInfo_Locale>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;..\src\3rdparty\protobufs;..\src\3rdparty\asphyresphinx\source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>DBXInterBaseDriver;DataSnapServer;DataSnapCommon;DbxCommonDriver;dbxcds;CustomIPTransport;dsnap;IndyCore;IPIndyImpl;bindcompfmx;dbrtl;bindcomp;inetdb;xmlrtl;ibxpress;bindengine;soaprtl;DBXInformixDriver;DBXFirebirdDriver;inet;DBXSybaseASADriver;dbexpress;fmx;IndySystem;DataSnapClient;DataSnapProviderClient;DBXOracleDriver;fmxase;inetdbxpress;rtl;DbxClientDriver;IndyProtocols;DBXMySQLDriver;fmxobj;fmxdae;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Define>_CONSOLE_TESTRUNNER;$(DCC_Define)</DCC_Define>
 			<DCC_DcuOutput>.</DCC_DcuOutput>
@@ -80,10 +83,6 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\src\3rdparty\protobufs\pbOutput.pas"/>
-			<DCCReference Include="..\src\3rdparty\protobufs\StrBuffer.pas"/>
-			<DCCReference Include="..\src\3rdparty\protobufs\pbPublic.pas"/>
-			<DCCReference Include="..\src\3rdparty\protobufs\pbInput.pas"/>
 			<DCCReference Include="..\src\modules\common\Poker.Common.Misc.pas"/>
 			<DCCReference Include="..\src\interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="..\src\interfaces\Poker.Interfaces.FormParams.pas"/>
@@ -140,9 +139,10 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="C:\Users\reiser\Documents\DevExpress VCL\Library\Delphi16\dcldxPSDBTeeChartD16.bpl">ExpressPrinting System ReportLink for DBTeeChart by Developer Express Inc.</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Users\Public\Documents\RAD Studio\9.0\Bpl\dclcxPivotGridOLAPRS16.bpl">ExpressPivotGrid OLAP by Developer Express Inc.</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\Steema TeeChart Pro VCL 2015.15\Delphi16\Delphi16.win32\Bin\DclFMXTeePro916.bpl">TeeChart Pro 2015 for FireMonkey Components</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
 						<Source Name="MainSource">clientTests.dpr</Source>

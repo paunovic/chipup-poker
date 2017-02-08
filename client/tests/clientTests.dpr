@@ -16,10 +16,6 @@ program clientTests;
 
 uses
   DUnitTestRunner,
-  pbOutput in '..\src\3rdparty\protobufs\pbOutput.pas',
-  StrBuffer in '..\src\3rdparty\protobufs\StrBuffer.pas',
-  pbPublic in '..\src\3rdparty\protobufs\pbPublic.pas',
-  pbInput in '..\src\3rdparty\protobufs\pbInput.pas',
   Poker.Common.Misc in '..\src\modules\common\Poker.Common.Misc.pas',
   Poker.Interfaces.ModalForm in '..\src\interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Interfaces.FormParams in '..\src\interfaces\Poker.Interfaces.FormParams.pas',
