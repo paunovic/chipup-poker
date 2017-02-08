@@ -5,6 +5,7 @@ function Pot(game) {
 	this.members = []
 	this.trueMembers = []
 	this.trueUsers = [];
+	this.rake = 0;
 }
 Pot.prototype.getPostRake = function (rake) {
 	return Math.floor(this.value * ((100 - rake)/100)); // FIXME, double check the math

@@ -106,7 +106,8 @@ begin
         FHTTP.RcvdStream.Position := 0;
         FImage.LoadFromStream(FHTTP.RcvdStream);
         Save;
-        {$IFDEF DEBUG} DebugLn(Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc); {$ENDIF}
+        {$IFDEF DEBUG} DebugLn(Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc,
+          Format('Full URL: %s', [FHTTP.URL])); {$ENDIF}
       end
       else
         SoftException(Format('Avatar is not JPEG stream [%s]', [FIdAsString]));
@@ -147,7 +148,8 @@ begin
     FHTTP.SslContext.TrustCert(ServerSocket.SSLCertificate);
   end;
   FHTTP.GetAsync;
-  {$IFDEF DEBUG} DebugLn(Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc,
+     Format('Full URL: %s', [FHTTP.URL])); {$ENDIF}
 end;
 
 function TAvatar.GetImage: TJPEGImage;

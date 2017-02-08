@@ -21,6 +21,7 @@ type
     destructor Destroy; override;
 
     function Add(const AHandHistoryInfo: TPB_HandHistoryReply): Boolean;
+    function RetrieveLastHandId(const AGameId: TMongoId): UINT32;
   end;
 
 var
@@ -36,7 +37,6 @@ class procedure THandHistory.Initialize;
 begin
   HandHistory := THandHistory.Create;
 end;
-
 
 class procedure THandHistory.Deinitialize;
 begin
@@ -71,9 +71,18 @@ begin
       else
         parentid := AHandHistoryInfo.TournamentId;
 
-      inherited Add(AHandHistoryInfo.Gameid, THandHistoryItems.Create(parentid, AHandHistoryInfo.Gameid));
-      if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
+      hhis := THandHistoryItems.Create(parentid, AHandHistoryInfo.Gameid);
+      if not hhis.Game.MongoId.IsEmpty then
+      begin
+        inherited Add(AHandHistoryInfo.Gameid, hhis);
+        if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
+          Exit(FALSE);
+      end
+      else
+      begin
+        hhis.Free;
         Exit(FALSE);
+      end;
     end;
 
     for pbhh in AHandHistoryInfo.Rows do
@@ -94,4 +103,20 @@ begin
   FLock.Release;
 end;
 
+function THandHistory.RetrieveLastHandId(const AGameId: TMongoId): UINT32;
+var
+  hhis: THandHistoryItems;
+begin
+  result := 0;
+  Lock;
+  try
+    if (TryGetValue(AGameId, hhis)) and
+       (hhis.LastHandId > 0) then
+      result := hhis.LastHandId;
+  finally
+    Unlock;
+  end;
+end;
+
 end.
+

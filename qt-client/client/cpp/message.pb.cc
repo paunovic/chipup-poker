@@ -29,6 +29,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* HelloReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   HelloReply_reflection_ = NULL;
+const ::google::protobuf::EnumDescriptor* HelloReply_PokerNetwork_descriptor_ = NULL;
 const ::google::protobuf::Descriptor* HelloParams_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   HelloParams_reflection_ = NULL;
@@ -303,7 +304,7 @@ void protobuf_AssignDesc_message_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ValidCharsRegex));
   HelloReply_descriptor_ = file->message_type(2);
-  static const int HelloReply_offsets_[8] = {
+  static const int HelloReply_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, stringsizes_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, changeexpiretime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, forgotexpiretime_),
@@ -312,6 +313,7 @@ void protobuf_AssignDesc_message_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, minsizes_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, update_files_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, valid_chars_regex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloReply, networktype_),
   };
   HelloReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -324,6 +326,7 @@ void protobuf_AssignDesc_message_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(HelloReply));
+  HelloReply_PokerNetwork_descriptor_ = HelloReply_descriptor_->enum_type(0);
   HelloParams_descriptor_ = file->message_type(3);
   static const int HelloParams_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HelloParams, debug_),
@@ -1854,338 +1857,343 @@ void protobuf_AddDesc_message_2eproto() {
     "idCharsRegex\022\r\n\005email\030\001 \002(\t\022\020\n\010username\030"
     "\002 \002(\t\022\020\n\010password\030\003 \002(\t\022\020\n\010clubname\030\004 \002("
     "\t\022\024\n\014clubpassword\030\005 \002(\t\022\020\n\010gamename\030\006 \002("
-    "\t\"\243\002\n\nHelloReply\022\'\n\013stringSizes\030\001 \002(\0132\022."
+    "\t\"\217\003\n\nHelloReply\022\'\n\013stringSizes\030\001 \002(\0132\022."
     "Poker.StringSizes\022\030\n\020ChangeExpireTime\030\002 "
     "\002(\005\022\030\n\020ForgotExpireTime\030\003 \002(\005\022\025\n\rmax_pla"
     "y_time\030\004 \002(\005\022\033\n\014max_timebank\030\005 \002(\005:\0056000"
     "0\022$\n\010minSizes\030\006 \002(\0132\022.Poker.StringSizes\022"
     "+\n\014update_files\030\007 \003(\0132\025.Poker.UpdateFile"
     "Info\0221\n\021valid_chars_regex\030\010 \002(\0132\026.Poker."
-    "ValidCharsRegex\"\310\001\n\013HelloParams\022\r\n\005debug"
-    "\030\001 \002(\010\022$\n\005files\030\002 \003(\0132\025.Poker.UpdateFile"
-    "Info\022+\n\007appcode\030\003 \001(\0162\032.Poker.HelloParam"
-    "s.AppCode\"W\n\007AppCode\022\021\n\rDelphiWindows\020\001\022"
-    "\r\n\tQtLinux32\020\002\022\016\n\nQtLinuxArm\020\003\022\t\n\005QtMac\020"
-    "\004\022\017\n\013QtWindows32\020\005\"\275\001\n\016UpdateFileInfo\022\014\n"
-    "\004path\030\001 \002(\t\022\014\n\004hash\030\002 \001(\014\022\013\n\003url\030\003 \001(\t\0227"
-    "\n\tfile_type\030\004 \001(\0162$.Poker.UpdateFileInfo"
-    ".UpdateFileType\022\021\n\tfile_size\030\005 \001(\r\"6\n\016Up"
-    "dateFileType\022\n\n\006ufFull\020\000\022\n\n\006ufDiff\020\001\022\014\n\010"
-    "ufRemove\020\002\"1\n\013LoginParams\022\020\n\010username\030\001 "
-    "\002(\t\022\020\n\010password\030\002 \002(\t\"F\n\016RegisterParams\022"
-    "\r\n\005email\030\001 \002(\t\022\020\n\010password\030\002 \002(\t\022\023\n\013disp"
-    "layName\030\003 \002(\t\"%\n\024ForgotPasswordParams\022\r\n"
-    "\005email\030\001 \002(\t\"\231\003\n\nLoginReply\0223\n\014login_sta"
-    "tus\030\001 \002(\0162\035.Poker.LoginReply.LoginStatus"
-    "\022,\n\020reconnect_tables\030\003 \003(\0132\022.Poker.Table"
-    "Status\022/\n\020tournament_infos\030\004 \003(\0132\025.Poker"
-    ".TournamentInfo\022$\n\026registered_tournament"
-    "s\030\005 \003(\014B\004\200\265\030\001\022\032\n\005clubs\030\006 \003(\0132\013.Poker.Clu"
-    "b\022\032\n\005users\030\007 \003(\0132\013.Poker.User\022\031\n\004self\030\010 "
-    "\001(\0132\013.Poker.User\022\032\n\005games\030\t \003(\0132\013.Poker."
-    "Game\0225\n\024player_club_statuses\030\n \003(\0132\027.Pok"
-    "er.PlayerClubStatus\"+\n\013LoginStatus\022\r\n\tlr"
-    "Success\020\000\022\r\n\tlrInvalid\020\001\"\230\001\n\nClubMember\022"
-    "\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\021\n\tsuspended\030\002 \001(\010\022\025\n"
-    "\rbalance_limit\030\003 \001(\r\022\024\n\014club_balance\030\004 \001"
-    "(\005\022\027\n\017unlimited_limit\030\005 \001(\010\022\r\n\005muted\030\006 \001"
-    "(\010\022\017\n\007manager\030\007 \001(\010\"\221\002\n\004Club\022\021\n\003_id\030\001 \001("
-    "\014B\004\200\265\030\001\022\"\n\007members\030\002 \003(\0132\021.Poker.ClubMem"
-    "ber\022\014\n\004name\030\003 \001(\t\022\023\n\005owner\030\004 \001(\014B\004\200\265\030\001\022\020"
-    "\n\010password\030\005 \001(\t\022\022\n\nis_private\030\006 \001(\010\022\013\n\003"
-    "seq\030\007 \001(\005\022\027\n\017password_exists\030\010 \001(\010\022\014\n\004ra"
-    "ke\030\t \001(\r\022\035\n\025default_balance_limit\030\n \001(\r\022"
-    "!\n\031unlimited_default_balance\030\013 \001(\010\022\023\n\013bu"
-    "yin_reset\030\014 \001(\r\"\341\001\n\004User\022\021\n\003_id\030\001 \002(\014B\004\200"
-    "\265\030\001\022\016\n\006avatar\030\002 \001(\014\022\023\n\013displayname\030\003 \002(\t"
-    "\022\r\n\005email\030\005 \001(\t\022\016\n\006authed\030\006 \001(\010\022=\n\021subsc"
-    "ription_plan\030\007 \001(\0162\".Poker.User.PlayerSu"
-    "bscriptionPlan\"C\n\026PlayerSubscriptionPlan"
-    "\022\014\n\010pspBasic\020\000\022\r\n\tpspNormal\020\001\022\014\n\010pspSupe"
-    "r\020\002\"z\n\026SubscriptionPlanChange\022=\n\021subscri"
-    "ption_plan\030\001 \002(\0162\".Poker.User.PlayerSubs"
-    "criptionPlan\022\013\n\003url\030\002 \001(\t\022\024\n\014stripe_toke"
-    "n\030\003 \001(\t\"\215\006\n\004Game\022\021\n\003_id\030\001 \001(\014B\004\200\265\030\001\022\036\n\020c"
-    "reator_mongo_id\030\002 \001(\014B\004\200\265\030\001\022\020\n\010gamename\030"
-    "\003 \001(\t\022\032\n\014club_mongoid\030\004 \001(\014B\004\200\265\030\001\022\'\n\tgam"
-    "e_type\030\005 \001(\0162\024.Poker.Game.GameType\022)\n\nga"
-    "me_limit\030\006 \001(\0162\025.Poker.Game.GameLimit\022&\n"
-    "\006blinds\030\007 \001(\0162\026.Poker.Game.GameBlinds\022\r\n"
-    "\005seats\030\t \001(\005\022\017\n\007sitting\030\n \001(\005\022\021\n\tbuyin_m"
-    "in\030\013 \001(\r\022\021\n\tbuyin_max\030\014 \001(\r\022$\n\005state\030\r \001"
-    "(\0162\025.Poker.Game.GameState\022\021\n\tclosetime\030\016"
-    " \001(\r\022\022\n\nlasthandid\030\017 \001(\r\022\030\n\ntournament\030\020"
-    " \001(\014B\004\200\265\030\001\022\023\n\013small_blind\030\021 \001(\r\022\021\n\tbig_b"
-    "lind\030\022 \001(\r\022\023\n\013final_table\030\023 \001(\010\022\031\n\021max_r"
-    "ake_per_hand\030\024 \001(\r\"<\n\tGameLimit\022\r\n\tglNoL"
-    "imit\020\000\022\016\n\nglPotLimit\020\001\022\020\n\014glFixedLimit\020\002"
-    "\";\n\010GameType\022\014\n\010gtHoldem\020\000\022\013\n\007gtOmaha\020\001\022"
-    "\024\n\020gtRotationNLHPLO\020\002\"C\n\tGameState\022\014\n\010gs"
-    "Active\020\000\022\r\n\tgsClosing\020\001\022\014\n\010gsClosed\020\002\022\013\n"
-    "\007gsEmpty\020\003\"c\n\nGameBlinds\022\t\n\005gb1x2\020\000\022\t\n\005g"
-    "b5x5\020\001\022\n\n\006gb5x10\020\002\022\013\n\007gb10x25\020\003\022\013\n\007gb25x"
-    "50\020\004\022\014\n\010gb50x100\020\005\022\013\n\007gbOther\020\006\",\n\016ListC"
-    "lubsReply\022\032\n\005clubs\030\001 \003(\0132\013.Poker.Club\"N\n"
-    "\020KickPlayerParams\022\033\n\rclub_mongo_id\030\001 \002(\014"
-    "B\004\200\265\030\001\022\035\n\017player_mongo_id\030\002 \002(\014B\004\200\265\030\001\"U\n"
-    "\027GiveClubOwnershipParams\022\033\n\rclub_mongo_i"
-    "d\030\001 \002(\014B\004\200\265\030\001\022\035\n\017player_mongo_id\030\002 \002(\014B\004"
-    "\200\265\030\001\"%\n\021ChangeEMailParams\022\020\n\010new_mail\030\001 "
-    "\002(\t\",\n\024ChangePasswordParams\022\024\n\014new_passw"
-    "ord\030\001 \002(\t\"$\n\017SetAvatarParams\022\021\n\tavatar_i"
-    "d\030\001 \002(\014\"y\n\016SetAvatarReply\0225\n\006status\030\001 \002("
-    "\0162%.Poker.SetAvatarReply.SetAvatarStatus"
-    "\"0\n\017SetAvatarStatus\022\r\n\tsaSuccess\020\000\022\016\n\nsa"
-    "NotFound\020\001\"\244\001\n\tChatEvent\022)\n\005event\030\001 \002(\0162"
-    "\032.Poker.ChatEvent.EventType\022\037\n\003msg\030\002 \002(\013"
-    "2\022.Poker.ChatMessage\022\026\n\010table_id\030\003 \001(\014B\004"
-    "\200\265\030\001\"3\n\tEventType\022\021\n\rceUserMessage\020\000\022\023\n\017"
-    "ceServerMessage\020\001\"R\n\013ChatMessage\022\021\n\003_id\030"
-    "\001 \001(\014B\004\200\265\030\001\022\020\n\010username\030\002 \001(\t\022\013\n\003msg\030\003 \002"
-    "(\t\022\021\n\ttimestamp\030\004 \001(\r\"\034\n\nPingParams\022\016\n\006u"
-    "ptime\030\001 \002(\r\"/\n\tPingReply\022\016\n\006uptime\030\001 \002(\r"
-    "\022\022\n\nservertime\030\002 \002(\004\"D\n\010TableSit\022\025\n\007game"
-    "_id\030\001 \002(\014B\004\200\265\030\001\022\022\n\nseat_index\030\002 \001(\005\022\r\n\005c"
-    "hips\030\003 \002(\r\"e\n\003Pot\022\r\n\005value\030\001 \002(\r\022\017\n\007memb"
-    "ers\030\002 \003(\005\0220\n\nWinnerData\030\003 \003(\0132\034.Poker.Ta"
-    "bleEvent.WinnerData\022\014\n\004rake\030\004 \001(\r\"\307\006\n\013Ta"
-    "bleStatus\022\034\n\016table_mongo_id\030\001 \002(\014B\004\200\265\030\001\022"
-    "\036\n\005seats\030\002 \003(\0132\017.Poker.SeatInfo\022,\n\005state"
-    "\030\003 \002(\0162\035.Poker.TableStatus.TableState\022\016\n"
-    "\006dealer\030\004 \002(\005\022\024\n\014current_seat\030\005 \002(\005\022\014\n\004b"
-    "ets\030\006 \003(\r\022\016\n\006locked\030\013 \002(\010\022\013\n\003seq\030\014 \001(\005\022\023"
-    "\n\013minimum_bet\030\r \001(\r\022\025\n\rmaximum_raise\030\016 \001"
-    "(\r\022\023\n\013small_blind\030\017 \001(\r\022\021\n\tbig_blind\030\020 \001"
-    "(\r\022\016\n\006handid\030\021 \001(\r\022\014\n\004time\030\022 \001(\004\022!\n\006even"
-    "ts\030\023 \003(\0132\021.Poker.TableEvent\022\030\n\004pots\030\024 \003("
-    "\0132\n.Poker.Pot\022\024\n\014rake_percent\030\025 \001(\r\022*\n\014c"
-    "urrent_game\030\026 \001(\0162\024.Poker.Game.GameType\022"
-    "\020\n\010rotation\030\027 \001(\r\022)\n\ngame_limit\030\031 \001(\0162\025."
-    "Poker.Game.GameLimit\022\025\n\rminimum_raise\030\032 "
-    "\001(\r\0220\n\ntable_type\030\033 \002(\0162\034.Poker.TableSta"
-    "tus.TableType\022*\n\rtable_message\030\034 \003(\0132\023.P"
-    "oker.TableMessage\022\026\n\016queue_position\030\035 \001("
-    "\r\022\026\n\016reserved_seats\030\036 \003(\r\"k\n\nTableState\022"
-    "\n\n\006tsIdle\020\000\022\r\n\ttsPreFlop\020\001\022\n\n\006tsFlop\020\002\022\n"
-    "\n\006tsTurn\020\003\022\013\n\007tsRiver\020\004\022\r\n\ttsWinning\020\005\022\016"
-    "\n\ntsWinning2\020\006\";\n\tTableType\022\n\n\006ttLive\020\000\022"
-    "\020\n\014ttTournament\020\001\022\020\n\014ttHandReplay\020\002\"\333\002\n\010"
-    "SeatInfo\022\022\n\nseat_index\030\001 \002(\005\022\035\n\017player_m"
-    "ongo_id\030\002 \002(\014B\004\200\265\030\001\022\r\n\005chips\030\003 \002(\r\022\022\n\nca"
-    "rd_count\030\004 \001(\005\022\r\n\005cards\030\005 \001(\014\022,\n\006status\030"
-    "\006 \002(\0162\034.Poker.SeatInfo.PlayerStatus\022\020\n\010t"
-    "imebank\030\007 \002(\r\022\025\n\rcards_visible\030\010 \002(\010\022\024\n\014"
-    "disconnected\030\t \002(\010\022\020\n\010can_show\030\n \001(\010\022\020\n\010"
-    "autoplay\030\013 \001(\010\"Y\n\014PlayerStatus\022\017\n\013psOutO"
-    "fPlay\020\000\022\017\n\013psOutOfHand\020\001\022\014\n\010psInHand\020\002\022\014"
-    "\n\010psFolded\020\003\022\013\n\007psAllIn\020\004\"`\n\024ChangeClubP"
-    "layerFlag\022\033\n\rclub_mongo_id\030\001 \002(\014B\004\200\265\030\001\022\035"
-    "\n\017player_mongo_id\030\003 \002(\014B\004\200\265\030\001\022\014\n\004flag\030\002 "
-    "\002(\010\"\272\001\n\rRegisterReply\0223\n\006status\030\001 \002(\0162#."
-    "Poker.RegisterReply.RegisterStatus\"t\n\016Re"
-    "gisterStatus\022\016\n\nregSuccess\020\000\022\025\n\021regDupli"
-    "cateEmail\020\001\022\022\n\016regDupUsername\020\002\022\023\n\017regIn"
-    "validEmail\020\003\022\022\n\016regInvalidName\020\004\"\230\002\n\020Clu"
-    "bCommandReply\0222\n\006status\030\001 \002(\0162\".Poker.Cl"
-    "ubCommandReply.ClubStatus\022\031\n\004club\030\002 \001(\0132"
-    "\013.Poker.Club\022\032\n\005games\030\003 \003(\0132\013.Poker.Game"
-    "\"\230\001\n\nClubStatus\022\r\n\tcsSuccess\020\000\022\021\n\rcsInva"
-    "lidName\020\001\022\025\n\021csInvalidPassword\020\002\022\020\n\014csNa"
-    "meExists\020\003\022\023\n\017csInvalidClubId\020\004\022\023\n\017csAlr"
-    "eadyMember\020\005\022\025\n\021csInvalidPlayerId\020\006\"\226\001\n\017"
-    "ChangeMailReply\0227\n\006status\030\001 \002(\0162\'.Poker."
-    "ChangeMailReply.ChangeMailStatus\"J\n\020Chan"
-    "geMailStatus\022\r\n\tcmSuccess\020\000\022\023\n\017cmDuplica"
-    "teMail\020\001\022\022\n\016cmInvalidEmail\020\002\"I\n\rGetUserP"
-    "arams\022\034\n\016user_mongo_ids\030\001 \003(\014B\004\200\265\030\001\022\032\n\005u"
-    "sers\030\002 \003(\0132\013.Poker.User\"\371\004\n\nTableEvent\022/"
-    "\n\005event\030\001 \002(\0162 .Poker.TableEvent.TableEv"
-    "entType\022\014\n\004seat\030\002 \001(\005\022\030\n\004pots\030\004 \003(\0132\n.Po"
-    "ker.Pot\022\014\n\004bets\030\005 \003(\r\022\r\n\005cards\030\006 \003(\014\032\335\001\n"
-    "\nWinnerData\022\014\n\004seat\030\003 \002(\005\022\013\n\003msg\030\004 \002(\t\"\263"
-    "\001\n\014CardRankings\022\020\n\014crRoyalFlush\020\000\022\023\n\017crS"
-    "traightFlush\020\001\022\r\n\tcr4OfKind\020\002\022\017\n\013crFullH"
-    "ouse\020\003\022\013\n\007crFlush\020\004\022\016\n\ncrStraight\020\005\022\021\n\rc"
-    "rThreeOfKind\020\006\022\r\n\tcrTwoPair\020\007\022\r\n\tcrOnePa"
-    "ir\020\010\022\016\n\ncrHighCard\020\t\"\224\002\n\016TableEventType\022"
-    "\n\n\006teFold\020\000\022\t\n\005teSit\020\001\022\r\n\tteStandUp\020\002\022\r\n"
-    "\tteWinning\020\003\022\r\n\tteDealing\020\004\022\013\n\007teCheck\020\005"
-    "\022\n\n\006teCall\020\006\022\013\n\007teRaise\020\007\022\013\n\007teAllIn\020\010\022\n"
-    "\n\006teFlop\020\t\022\n\n\006teTurn\020\n\022\013\n\007teRiver\020\013\022\017\n\013t"
-    "ePostRiver\020\014\022\014\n\010tePreWin\020\r\022\023\n\017teExisting"
-    "Cards\020\016\022\020\n\014teDisconnect\020\017\022\010\n\004teSB\020\020\022\010\n\004t"
-    "eBB\020\021\022\014\n\010teForced\020\022\"s\n\010PutChips\022\034\n\016table"
-    "_mongo_id\030\001 \002(\014B\004\200\265\030\001\022\023\n\013chip_amount\030\002 \002"
-    "(\r\0224\n\rcurrent_state\030\003 \002(\0162\035.Poker.TableS"
-    "tatus.TableState\";\n\rTableBoolFlag\022\034\n\016tab"
-    "le_mongo_id\030\001 \002(\014B\004\200\265\030\001\022\014\n\004flag\030\002 \002(\010\".\n"
-    "\020UserChangeParams\022\032\n\005users\030\001 \003(\0132\013.Poker"
-    ".User\"\254\001\n\rCloseGameData\022\024\n\006gameid\030\001 \002(\014B"
-    "\004\200\265\030\001\0225\n\ttimestamp\030\002 \002(\0162\".Poker.CloseGa"
-    "meData.CloseGameTime\"N\n\rCloseGameTime\022\022\n"
-    "\016cgtCurrentHand\020\000\022\022\n\016cgtFiveMinutes\020\001\022\025\n"
-    "\021cgtFifteenMinutes\020\002\"\'\n\017QueryTableStats\022"
-    "\024\n\006gameid\030\001 \003(\014B\004\200\265\030\001\"\203\001\n\021TableStatsRepl"
-    "ies\022%\n\005reply\030\001 \003(\0132\026.Poker.TableStatsRep"
-    "ly\022\034\n\007players\030\002 \003(\0132\013.Poker.User\022)\n\nclub"
-    "_stats\030\003 \003(\0132\025.Poker.ClubStatsReply\"z\n\017T"
-    "ableStatsReply\022\024\n\006clubid\030\001 \002(\014B\004\200\265\030\001\022\024\n\006"
-    "gameid\030\002 \002(\014B\004\200\265\030\001\022,\n\013playerstats\030\003 \003(\0132"
-    "\027.Poker.TablePlayerStats\022\r\n\005hands\030\004 \001(\r\""
-    "\253\001\n\020TablePlayerStats\022\024\n\006userid\030\001 \002(\014B\004\200\265"
-    "\030\001\022\017\n\007balance\030\003 \001(\005\022\016\n\006buyins\030\004 \003(\r\022\020\n\010c"
-    "ashouts\030\005 \003(\r\022\023\n\013rakecontrib\030\006 \001(\r\022\025\n\rse"
-    "condsplayed\030\007 \001(\r\022\023\n\013chipsinplay\030\010 \001(\r\022\r"
-    "\n\005hands\030\t \001(\r\"T\n\016ClubStatsReply\022\024\n\006clubi"
-    "d\030\001 \002(\014B\004\200\265\030\001\022,\n\014player_stats\030\002 \003(\0132\026.Po"
-    "ker.ClubPlayerStats\"=\n\017ClubPlayerStats\022\024"
-    "\n\006userid\030\001 \002(\014B\004\200\265\030\001\022\024\n\014club_balance\030\002 \002"
-    "(\005\"\251\001\n\016ContactMessage\0223\n\006reason\030\001 \002(\0162#."
-    "Poker.ContactMessage.ContactReason\022\017\n\007me"
-    "ssage\030\002 \002(\t\"Q\n\rContactReason\022\017\n\013cmQuesti"
-    "ons\020\000\022\021\n\rcmSuggestions\020\001\022\017\n\013cmBugReport\020"
-    "\002\022\013\n\007cmOther\020\003\"9\n\nBuyinError\022\025\n\007game_id\030"
-    "\001 \002(\014B\004\200\265\030\001\022\024\n\014last_cashout\030\002 \002(\r\"a\n\021Pla"
-    "yerLimitParams\022\024\n\006clubid\030\001 \002(\014B\004\200\265\030\001\022\024\n\006"
-    "userid\030\002 \001(\014B\004\200\265\030\001\022\r\n\005limit\030\003 \001(\r\022\021\n\tunl"
-    "imited\030\004 \001(\010\"~\n\020HandHistoryReply\022\025\n\007club"
-    "_id\030\001 \001(\014B\004\200\265\030\001\022\024\n\006gameid\030\002 \002(\014B\004\200\265\030\001\022 \n"
-    "\004rows\030\003 \003(\0132\022.Poker.HandHistory\022\033\n\rtourn"
-    "ament_id\030\004 \001(\014B\004\200\265\030\001\"\203\005\n\013HandHistory\022\021\n\003"
-    "_id\030\001 \002(\014B\004\200\265\030\001\022\013\n\003seq\030\002 \002(\r\022\021\n\ttotalrak"
-    "e\030\003 \002(\r\0225\n\007players\030\004 \003(\0132$.Poker.HandHis"
-    "tory.PlayerHandHistory\022\r\n\005cards\030\005 \003(\014\022\017\n"
-    "\007endtime\030\006 \002(\r\022\027\n\017balance_changes\030\007 \003(\005\022"
-    "1\n\005moves\030\010 \003(\0132\".Poker.HandHistory.HandH"
-    "istoryMove\022\016\n\006dealer\030\t \002(\r\022\031\n\004game\030\n \001(\013"
-    "2\013.Poker.Game\022*\n\014current_game\030\013 \001(\0162\024.Po"
-    "ker.Game.GameType\022\014\n\004rake\030\014 \002(\005\032\234\001\n\021Play"
-    "erHandHistory\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\014\n\004seat"
-    "\030\002 \002(\005\022\r\n\005cards\030\003 \001(\014\022\r\n\005chips\030\004 \002(\r\022\014\n\004"
-    "nick\030\005 \002(\t\022\014\n\004muck\030\006 \001(\010\022,\n\006status\030\007 \002(\016"
-    "2\034.Poker.SeatInfo.PlayerStatus\032\231\001\n\017HandH"
-    "istoryMove\022.\n\004code\030\001 \003(\0162 .Poker.TableEv"
-    "ent.TableEventType\022\013\n\003bet\030\002 \001(\r\022\014\n\004seat\030"
-    "\003 \001(\005\022!\n\rWinnerPotData\030\004 \003(\0132\n.Poker.Pot"
-    "\022\030\n\004pots\030\005 \003(\0132\n.Poker.Pot\"2\n\tAssetList\022"
-    "%\n\006assets\030\001 \003(\0132\025.Poker.UpdateFileInfo\"6"
-    "\n\016TournamentList\022$\n\005items\030\001 \003(\0132\025.Poker."
-    "TournamentInfo\"&\n\021TournamentDetails\022\021\n\003_"
-    "id\030\001 \002(\014B\004\200\265\030\001\"\205\001\n\020TournamentMember\022\021\n\003_"
-    "id\030\001 \002(\014B\004\200\265\030\001\022\023\n\013displayname\030\002 \002(\t\022\r\n\005c"
-    "hips\030\003 \002(\r\022\024\n\006gameid\030\004 \001(\014B\004\200\265\030\001\022\020\n\010posi"
-    "tion\030\005 \001(\005\022\022\n\nseat_index\030\006 \001(\r\"\274\005\n\016Tourn"
-    "amentInfo\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\014\n\004name\030\002 \002"
-    "(\t\022\023\n\013description\030\003 \002(\t\022&\n\010gametype\030\004 \002("
-    "\0162\024.Poker.Game.GameType\022$\n\005limit\030\005 \002(\0162\025"
-    ".Poker.Game.GameLimit\022\027\n\017seats_per_table"
-    "\030\006 \002(\r\022\022\n\nminplayers\030\007 \002(\r\022\022\n\nmaxplayers"
-    "\030\010 \002(\r\022\025\n\rstartingchips\030\t \002(\r\022\024\n\014timeper"
-    "level\030\n \002(\r\022\032\n\022registered_players\030\013 \002(\r\022"
-    "\022\n\nstart_time\030\014 \002(\r\022(\n\007players\030\r \003(\0132\027.P"
-    "oker.TournamentMember\0224\n\005state\030\016 \002(\0162%.P"
-    "oker.TournamentInfo.TournamentState\022\032\n\005g"
-    "ames\030\017 \003(\0132\013.Poker.Game\022*\n\017blind_structu"
-    "re\030\020 \003(\0132\021.Poker.GameBlinds\022\033\n\023current_b"
-    "lind_level\030\021 \001(\r\022$\n\034current_blind_level_"
-    "end_time\030\022 \001(\004\022&\n\006prizes\030\023 \003(\0132\026.Poker.T"
-    "ournamentPrize\"u\n\017TournamentState\022\013\n\007tns"
-    "Open\020\000\022\021\n\rtnsInProgress\020\001\022\020\n\014tnsCancelle"
-    "d\020\002\022\016\n\ntnsOnBreak\020\003\022\017\n\013tnsStarting\020\004\022\017\n\013"
-    "tnsFinished\020\005\"\230\002\n\027TournamentCommandParam"
-    "s\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022J\n\014reply_status\030\002 \001"
-    "(\01624.Poker.TournamentCommandParams.Tourn"
-    "amentCommandEnum\"\235\001\n\025TournamentCommandEn"
-    "um\022\021\n\rtceRegisterOk\020\000\022\030\n\024tceAlreadyRegis"
-    "tered\020\001\022\033\n\027tceRegisterLimitReached\020\002\022\025\n\021"
-    "tceRegisterFailed\020\003\022\023\n\017tceUnregisterOk\020\004"
-    "\022\016\n\ntceNotOpen\020\005\"[\n\024TournamentTableStart"
-    "\022\031\n\004game\030\001 \002(\0132\013.Poker.Game\022(\n\014table_sta"
-    "tus\030\002 \002(\0132\022.Poker.TableStatus\"\236\001\n\030Tourna"
-    "mentPlayerFinished\022\033\n\rtournament_id\030\001 \002("
-    "\014B\004\200\265\030\001\022\027\n\tplayer_id\030\002 \002(\014B\004\200\265\030\001\022\r\n\005plac"
-    "e\030\003 \002(\005\022%\n\005prize\030\004 \001(\0132\026.Poker.Tournamen"
-    "tPrize\022\026\n\010table_id\030\005 \002(\014B\004\200\265\030\001\"$\n\nGameBl"
-    "inds\022\n\n\002sb\030\001 \002(\r\022\n\n\002bb\030\002 \002(\r\"\253\001\n\014TableMe"
-    "ssage\0225\n\007message\030\001 \002(\0162$.Poker.TableMess"
-    "age.TableMessageType\022\020\n\010end_time\030\002 \001(\004\"R"
-    "\n\020TableMessageType\022\016\n\ntmtClosing\020\000\022\026\n\022tm"
-    "tTournamentBreak\020\001\022\026\n\022tmtTournamentStart"
-    "\020\002\"\233\001\n\030TournamentPlayerTransfer\022\031\n\013game_"
-    "source\030\001 \002(\014B\004\200\265\030\001\022\036\n\020game_destination\030\002"
-    " \002(\014B\004\200\265\030\001\022\025\n\007user_id\030\003 \002(\014B\004\200\265\030\001\022\023\n\013sea"
-    "t_source\030\004 \002(\r\022\030\n\020seat_destination\030\005 \002(\r"
-    "\".\n\017TournamentPrize\022\r\n\005place\030\001 \002(\005\022\014\n\004na"
-    "me\030\002 \002(\t\"e\n\020PlayerClubStatus\022\024\n\006clubid\030\001"
-    " \002(\014B\004\200\265\030\001\022\025\n\007tableid\030\002 \001(\014B\004\200\265\030\001\022\021\n\tbuy"
-    "in_min\030\003 \001(\r\022\021\n\tbuyin_max\030\004 \001(\r\"A\n\020Delet"
-    "eTableStats\022\025\n\007club_id\030\001 \002(\014B\004\200\265\030\001\022\026\n\010ta"
-    "ble_id\030\002 \003(\014B\004\200\265\030\001\"0\n\rSoftException\022\021\n\te"
-    "xception\030\001 \002(\t\022\014\n\004data\030\002 \001(\t\"F\n\020Reserved"
-    "SeatFree\022\036\n\002ts\030\001 \002(\0132\022.Poker.TableStatus"
-    "\022\022\n\nseat_index\030\002 \002(\r*\377\022\n\013ServerCodes\022\024\n\020"
-    "srNotImplemented\020\000\022\013\n\007srHello\020\001\022\020\n\014srLog"
-    "inReply\020\002\022\023\n\017srRegisterReply\020\003\022\025\n\021srCrea"
-    "teClubReply\020\004\022\023\n\017srJoinClubReply\020\005\022\024\n\020sr"
-    "LeaveClubReply\020\006\022\034\n\030srChangeClubDetailsR"
-    "eply\020\007\022\014\n\010srLogout\020\010\022\025\n\021srKickPlayerRepl"
-    "y\020\013\022\024\n\020srSetAvatarReply\020\014\022\025\n\021srChangeMai"
-    "lReply\020\r\022\020\n\014srGetPlayers\020\016\022\034\n\030srSubscrip"
-    "tionPlanChange\020\017\022\037\n\033srOwnershipGiveAwayN"
-    "otOwner\020\020\022&\n\"srOwnershipGiveAwayInvalidP"
-    "layerId\020\021\022$\n srOwnershipGiveAwayInvalidC"
-    "lubId\020\022\022\031\n\025srOwnershipGiveAwayOk\020\023\022\023\n\017sr"
-    "ClubDisbandOk\020\024\022\031\n\025srTournamentOpenTable"
-    "\020\025\022\026\n\022srChangePasswordOk\020\027\022\022\n\016srCreateGa"
-    "meOk\020\030\022\022\n\016srDeleteGameOk\020\031\022\020\n\014srTableSit"
-    "Ok\020\033\022\027\n\023srTableSitSeatTaken\020\034\022\024\n\020srTable"
-    "StandUpOk\020\035\022\n\n\006srPong\020\036\022\025\n\021srSuspendPlay"
-    "erOk\020\037\022\027\n\023srReinstatePlayerOk\020 \022\022\n\016srTab"
-    "leAddonOk\020!\022\031\n\025srTableAddonOverLimit\020\"\022\025"
-    "\n\021srTableStatsReply\020#\022\021\n\rsrContactUsOk\020$"
-    "\022\037\n\033srTableBuyinLessThanCashout\020%\022\027\n\023srI"
-    "nvalidTableBuyin\020&\022\023\n\017srPlayerLimitOk\020\'\022"
-    "\032\n\026srResetPlayerBalanceOk\020(\022\030\n\024srClubBal"
-    "anceReached\020)\022\024\n\020srHandHistoryMsg\020*\022\026\n\022s"
-    "rQueryAssetsReply\020+\022\020\n\014srNotSitting\020,\022\025\n"
-    "\021srTournamentReply\020-\022\027\n\023srTournamentDeta"
-    "ils\020.\022\n\n\006seChat\0202\022\034\n\030seSecondaryLoginDet"
-    "ected\0203\022\026\n\022seAccountConfirmed\0204\022\020\n\014seClu"
-    "bChange\0205\022\021\n\rseClubDeleted\0206\022\020\n\014seGameCh"
-    "ange\0207\022\020\n\014seGameCreate\0208\022\020\n\014seGameDelete"
-    "\0209\022\021\n\rseTableStatus\020:\022\024\n\020seTournamentLis"
-    "t\020;\022\020\n\014seUserChange\020<\022\036\n\032seTournamentPla"
-    "yerFinished\020=\022\036\n\032seTournamentPlayerTrans"
-    "fer\020>\022\026\n\022sePlayerClubStatus\020\?\022\026\n\022seReser"
-    "vedSeatFree\020@\022\031\n\025seReservedSeatTimeout\020A"
-    "\022\013\n\007scHello\020F\022\013\n\007scLogin\020G\022\030\n\024scTourname"
-    "ntRegister\020H\022\016\n\nscRegister\020I\022\024\n\020scForgot"
-    "Password\020J\022\014\n\010scLogout\020K\022\020\n\014scCreateClub"
-    "\020L\022\016\n\nscJoinClub\020M\022\020\n\014scKickPlayer\020N\022\017\n\013"
-    "scLeaveClub\020O\022\027\n\023scGiveClubOwnership\020P\022\027"
-    "\n\023scChangeClubDetails\020Q\022\020\n\014scDeleteClub\020"
-    "R\022\034\n\030scSubscriptionPlanChange\020S\022\021\n\rscCha"
-    "ngeEmail\020T\022\024\n\020scChangePassword\020U\022\017\n\013scSe"
-    "tAvatar\020V\022\020\n\014scCreateGame\020W\022\017\n\013scCloseGa"
-    "me\020X\022\017\n\013scTableJoin\020Y\022\020\n\014scTableLeave\020Z\022"
-    "\016\n\nscTableSit\020[\022\022\n\016scTableStandUp\020\\\022\n\n\006s"
-    "cPing\020]\022\023\n\017scSuspendPlayer\020^\022\020\n\014scGetPla"
-    "yers\020_\022\n\n\006scFold\020`\022\016\n\nscPutChips\020a\022\020\n\014sc"
-    "TableAddOn\020b\022\022\n\016scTablePlayNow\020c\022\031\n\025scTa"
-    "bleSitOutNextHand\020d\022\027\n\023scTableSitOutNext"
-    "BB\020e\022\034\n\030scResendVerificationMail\020f\022\017\n\013sc"
-    "ShowCards\020g\022\025\n\021scQueryTableStats\020h\022\017\n\013sc"
-    "ContactUs\020i\022\024\n\020scSetPlayerLimit\020j\022\030\n\024scR"
-    "esetPlayerBalance\020k\022\021\n\rscQueryAssets\020l\022\032"
-    "\n\026scTournamentUnregister\020m\022\031\n\025scTourname"
-    "ntLobbyOpen\020n\022\032\n\026scTournamentLobbyClose\020"
-    "o\022\031\n\025scTournamentQueryInfo\020p\022\022\n\016scTableS"
-    "itOpen\020q\022\031\n\025scResetPlayerBalances\020r\022\026\n\022s"
-    "cDeleteTableStats\020s\022\020\n\014scMutePlayer\020t\022\036\n"
-    "\032scChangePlayerManagerState\020u\022\025\n\021scSplit"
-    "TableCards\020v\022\023\n\017scSoftException\020w\022\023\n\017scT"
-    "ableSitClose\020x28\n\006Server\022.\n\005Login\022\022.Poke"
-    "r.LoginParams\032\021.Poker.LoginReply", 13592);
+    "ValidCharsRegex\0223\n\013networkType\030\t \001(\0162\036.P"
+    "oker.HelloReply.PokerNetwork\"5\n\014PokerNet"
+    "work\022\021\n\rpnChipUpPoker\020\001\022\022\n\016pnFantasyPoke"
+    "r\020\002\"\310\001\n\013HelloParams\022\r\n\005debug\030\001 \002(\010\022$\n\005fi"
+    "les\030\002 \003(\0132\025.Poker.UpdateFileInfo\022+\n\007appc"
+    "ode\030\003 \001(\0162\032.Poker.HelloParams.AppCode\"W\n"
+    "\007AppCode\022\021\n\rDelphiWindows\020\001\022\r\n\tQtLinux32"
+    "\020\002\022\016\n\nQtLinuxArm\020\003\022\t\n\005QtMac\020\004\022\017\n\013QtWindo"
+    "ws32\020\005\"\275\001\n\016UpdateFileInfo\022\014\n\004path\030\001 \002(\t\022"
+    "\014\n\004hash\030\002 \001(\014\022\013\n\003url\030\003 \001(\t\0227\n\tfile_type\030"
+    "\004 \001(\0162$.Poker.UpdateFileInfo.UpdateFileT"
+    "ype\022\021\n\tfile_size\030\005 \001(\r\"6\n\016UpdateFileType"
+    "\022\n\n\006ufFull\020\000\022\n\n\006ufDiff\020\001\022\014\n\010ufRemove\020\002\"1"
+    "\n\013LoginParams\022\020\n\010username\030\001 \002(\t\022\020\n\010passw"
+    "ord\030\002 \002(\t\"F\n\016RegisterParams\022\r\n\005email\030\001 \002"
+    "(\t\022\020\n\010password\030\002 \002(\t\022\023\n\013displayName\030\003 \002("
+    "\t\"%\n\024ForgotPasswordParams\022\r\n\005email\030\001 \002(\t"
+    "\"\231\003\n\nLoginReply\0223\n\014login_status\030\001 \002(\0162\035."
+    "Poker.LoginReply.LoginStatus\022,\n\020reconnec"
+    "t_tables\030\003 \003(\0132\022.Poker.TableStatus\022/\n\020to"
+    "urnament_infos\030\004 \003(\0132\025.Poker.TournamentI"
+    "nfo\022$\n\026registered_tournaments\030\005 \003(\014B\004\200\265\030"
+    "\001\022\032\n\005clubs\030\006 \003(\0132\013.Poker.Club\022\032\n\005users\030\007"
+    " \003(\0132\013.Poker.User\022\031\n\004self\030\010 \001(\0132\013.Poker."
+    "User\022\032\n\005games\030\t \003(\0132\013.Poker.Game\0225\n\024play"
+    "er_club_statuses\030\n \003(\0132\027.Poker.PlayerClu"
+    "bStatus\"+\n\013LoginStatus\022\r\n\tlrSuccess\020\000\022\r\n"
+    "\tlrInvalid\020\001\"\230\001\n\nClubMember\022\021\n\003_id\030\001 \002(\014"
+    "B\004\200\265\030\001\022\021\n\tsuspended\030\002 \001(\010\022\025\n\rbalance_lim"
+    "it\030\003 \001(\r\022\024\n\014club_balance\030\004 \001(\005\022\027\n\017unlimi"
+    "ted_limit\030\005 \001(\010\022\r\n\005muted\030\006 \001(\010\022\017\n\007manage"
+    "r\030\007 \001(\010\"\221\002\n\004Club\022\021\n\003_id\030\001 \001(\014B\004\200\265\030\001\022\"\n\007m"
+    "embers\030\002 \003(\0132\021.Poker.ClubMember\022\014\n\004name\030"
+    "\003 \001(\t\022\023\n\005owner\030\004 \001(\014B\004\200\265\030\001\022\020\n\010password\030\005"
+    " \001(\t\022\022\n\nis_private\030\006 \001(\010\022\013\n\003seq\030\007 \001(\005\022\027\n"
+    "\017password_exists\030\010 \001(\010\022\014\n\004rake\030\t \001(\r\022\035\n\025"
+    "default_balance_limit\030\n \001(\r\022!\n\031unlimited"
+    "_default_balance\030\013 \001(\010\022\023\n\013buyin_reset\030\014 "
+    "\001(\r\"\341\001\n\004User\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\016\n\006avata"
+    "r\030\002 \001(\014\022\023\n\013displayname\030\003 \002(\t\022\r\n\005email\030\005 "
+    "\001(\t\022\016\n\006authed\030\006 \001(\010\022=\n\021subscription_plan"
+    "\030\007 \001(\0162\".Poker.User.PlayerSubscriptionPl"
+    "an\"C\n\026PlayerSubscriptionPlan\022\014\n\010pspBasic"
+    "\020\000\022\r\n\tpspNormal\020\001\022\014\n\010pspSuper\020\002\"z\n\026Subsc"
+    "riptionPlanChange\022=\n\021subscription_plan\030\001"
+    " \002(\0162\".Poker.User.PlayerSubscriptionPlan"
+    "\022\013\n\003url\030\002 \001(\t\022\024\n\014stripe_token\030\003 \001(\t\"\326\006\n\004"
+    "Game\022\021\n\003_id\030\001 \001(\014B\004\200\265\030\001\022\036\n\020creator_mongo"
+    "_id\030\002 \001(\014B\004\200\265\030\001\022\020\n\010gamename\030\003 \001(\t\022\032\n\014clu"
+    "b_mongoid\030\004 \001(\014B\004\200\265\030\001\022\'\n\tgame_type\030\005 \001(\016"
+    "2\024.Poker.Game.GameType\022)\n\ngame_limit\030\006 \001"
+    "(\0162\025.Poker.Game.GameLimit\022&\n\006blinds\030\007 \001("
+    "\0162\026.Poker.Game.GameBlinds\022\r\n\005seats\030\t \001(\005"
+    "\022\017\n\007sitting\030\n \001(\005\022\021\n\tbuyin_min\030\013 \001(\r\022\021\n\t"
+    "buyin_max\030\014 \001(\r\022$\n\005state\030\r \001(\0162\025.Poker.G"
+    "ame.GameState\022\021\n\tclosetime\030\016 \001(\r\022\022\n\nlast"
+    "handid\030\017 \001(\r\022\030\n\ntournament\030\020 \001(\014B\004\200\265\030\001\022\023"
+    "\n\013small_blind\030\021 \001(\r\022\021\n\tbig_blind\030\022 \001(\r\022\023"
+    "\n\013final_table\030\023 \001(\010\022\031\n\021max_rake_per_hand"
+    "\030\024 \001(\r\"<\n\tGameLimit\022\r\n\tglNoLimit\020\000\022\016\n\ngl"
+    "PotLimit\020\001\022\020\n\014glFixedLimit\020\002\";\n\010GameType"
+    "\022\014\n\010gtHoldem\020\000\022\013\n\007gtOmaha\020\001\022\024\n\020gtRotatio"
+    "nNLHPLO\020\002\"C\n\tGameState\022\014\n\010gsActive\020\000\022\r\n\t"
+    "gsClosing\020\001\022\014\n\010gsClosed\020\002\022\013\n\007gsEmpty\020\003\"\253"
+    "\001\n\nGameBlinds\022\t\n\005gb1x2\020\000\022\t\n\005gb5x5\020\001\022\n\n\006g"
+    "b5x10\020\002\022\013\n\007gb10x25\020\003\022\013\n\007gb25x50\020\004\022\014\n\010gb5"
+    "0x100\020\005\022\013\n\007gbOther\020\006\022\t\n\005gb2x5\020\007\022\t\n\005gb3x6"
+    "\020\010\022\t\n\005gb4x8\020\t\022\013\n\007gb10x10\020\n\022\013\n\007gb25x25\020\013\022"
+    "\013\n\007gb20x40\020\014\",\n\016ListClubsReply\022\032\n\005clubs\030"
+    "\001 \003(\0132\013.Poker.Club\"N\n\020KickPlayerParams\022\033"
+    "\n\rclub_mongo_id\030\001 \002(\014B\004\200\265\030\001\022\035\n\017player_mo"
+    "ngo_id\030\002 \002(\014B\004\200\265\030\001\"U\n\027GiveClubOwnershipP"
+    "arams\022\033\n\rclub_mongo_id\030\001 \002(\014B\004\200\265\030\001\022\035\n\017pl"
+    "ayer_mongo_id\030\002 \002(\014B\004\200\265\030\001\"%\n\021ChangeEMail"
+    "Params\022\020\n\010new_mail\030\001 \002(\t\",\n\024ChangePasswo"
+    "rdParams\022\024\n\014new_password\030\001 \002(\t\"$\n\017SetAva"
+    "tarParams\022\021\n\tavatar_id\030\001 \002(\014\"y\n\016SetAvata"
+    "rReply\0225\n\006status\030\001 \002(\0162%.Poker.SetAvatar"
+    "Reply.SetAvatarStatus\"0\n\017SetAvatarStatus"
+    "\022\r\n\tsaSuccess\020\000\022\016\n\nsaNotFound\020\001\"\244\001\n\tChat"
+    "Event\022)\n\005event\030\001 \002(\0162\032.Poker.ChatEvent.E"
+    "ventType\022\037\n\003msg\030\002 \002(\0132\022.Poker.ChatMessag"
+    "e\022\026\n\010table_id\030\003 \001(\014B\004\200\265\030\001\"3\n\tEventType\022\021"
+    "\n\rceUserMessage\020\000\022\023\n\017ceServerMessage\020\001\"R"
+    "\n\013ChatMessage\022\021\n\003_id\030\001 \001(\014B\004\200\265\030\001\022\020\n\010user"
+    "name\030\002 \001(\t\022\013\n\003msg\030\003 \002(\t\022\021\n\ttimestamp\030\004 \001"
+    "(\r\"\034\n\nPingParams\022\016\n\006uptime\030\001 \002(\r\"/\n\tPing"
+    "Reply\022\016\n\006uptime\030\001 \002(\r\022\022\n\nservertime\030\002 \002("
+    "\004\"D\n\010TableSit\022\025\n\007game_id\030\001 \002(\014B\004\200\265\030\001\022\022\n\n"
+    "seat_index\030\002 \001(\005\022\r\n\005chips\030\003 \002(\r\"e\n\003Pot\022\r"
+    "\n\005value\030\001 \002(\r\022\017\n\007members\030\002 \003(\005\0220\n\nWinner"
+    "Data\030\003 \003(\0132\034.Poker.TableEvent.WinnerData"
+    "\022\014\n\004rake\030\004 \001(\r\"\307\006\n\013TableStatus\022\034\n\016table_"
+    "mongo_id\030\001 \002(\014B\004\200\265\030\001\022\036\n\005seats\030\002 \003(\0132\017.Po"
+    "ker.SeatInfo\022,\n\005state\030\003 \002(\0162\035.Poker.Tabl"
+    "eStatus.TableState\022\016\n\006dealer\030\004 \002(\005\022\024\n\014cu"
+    "rrent_seat\030\005 \002(\005\022\014\n\004bets\030\006 \003(\r\022\016\n\006locked"
+    "\030\013 \002(\010\022\013\n\003seq\030\014 \001(\005\022\023\n\013minimum_bet\030\r \001(\r"
+    "\022\025\n\rmaximum_raise\030\016 \001(\r\022\023\n\013small_blind\030\017"
+    " \001(\r\022\021\n\tbig_blind\030\020 \001(\r\022\016\n\006handid\030\021 \001(\r\022"
+    "\014\n\004time\030\022 \001(\004\022!\n\006events\030\023 \003(\0132\021.Poker.Ta"
+    "bleEvent\022\030\n\004pots\030\024 \003(\0132\n.Poker.Pot\022\024\n\014ra"
+    "ke_percent\030\025 \001(\r\022*\n\014current_game\030\026 \001(\0162\024"
+    ".Poker.Game.GameType\022\020\n\010rotation\030\027 \001(\r\022)"
+    "\n\ngame_limit\030\031 \001(\0162\025.Poker.Game.GameLimi"
+    "t\022\025\n\rminimum_raise\030\032 \001(\r\0220\n\ntable_type\030\033"
+    " \002(\0162\034.Poker.TableStatus.TableType\022*\n\rta"
+    "ble_message\030\034 \003(\0132\023.Poker.TableMessage\022\026"
+    "\n\016queue_position\030\035 \001(\r\022\026\n\016reserved_seats"
+    "\030\036 \003(\r\"k\n\nTableState\022\n\n\006tsIdle\020\000\022\r\n\ttsPr"
+    "eFlop\020\001\022\n\n\006tsFlop\020\002\022\n\n\006tsTurn\020\003\022\013\n\007tsRiv"
+    "er\020\004\022\r\n\ttsWinning\020\005\022\016\n\ntsWinning2\020\006\";\n\tT"
+    "ableType\022\n\n\006ttLive\020\000\022\020\n\014ttTournament\020\001\022\020"
+    "\n\014ttHandReplay\020\002\"\333\002\n\010SeatInfo\022\022\n\nseat_in"
+    "dex\030\001 \002(\005\022\035\n\017player_mongo_id\030\002 \002(\014B\004\200\265\030\001"
+    "\022\r\n\005chips\030\003 \002(\r\022\022\n\ncard_count\030\004 \001(\005\022\r\n\005c"
+    "ards\030\005 \001(\014\022,\n\006status\030\006 \002(\0162\034.Poker.SeatI"
+    "nfo.PlayerStatus\022\020\n\010timebank\030\007 \002(\r\022\025\n\rca"
+    "rds_visible\030\010 \002(\010\022\024\n\014disconnected\030\t \002(\010\022"
+    "\020\n\010can_show\030\n \001(\010\022\020\n\010autoplay\030\013 \001(\010\"Y\n\014P"
+    "layerStatus\022\017\n\013psOutOfPlay\020\000\022\017\n\013psOutOfH"
+    "and\020\001\022\014\n\010psInHand\020\002\022\014\n\010psFolded\020\003\022\013\n\007psA"
+    "llIn\020\004\"`\n\024ChangeClubPlayerFlag\022\033\n\rclub_m"
+    "ongo_id\030\001 \002(\014B\004\200\265\030\001\022\035\n\017player_mongo_id\030\003"
+    " \002(\014B\004\200\265\030\001\022\014\n\004flag\030\002 \002(\010\"\272\001\n\rRegisterRep"
+    "ly\0223\n\006status\030\001 \002(\0162#.Poker.RegisterReply"
+    ".RegisterStatus\"t\n\016RegisterStatus\022\016\n\nreg"
+    "Success\020\000\022\025\n\021regDuplicateEmail\020\001\022\022\n\016regD"
+    "upUsername\020\002\022\023\n\017regInvalidEmail\020\003\022\022\n\016reg"
+    "InvalidName\020\004\"\230\002\n\020ClubCommandReply\0222\n\006st"
+    "atus\030\001 \002(\0162\".Poker.ClubCommandReply.Club"
+    "Status\022\031\n\004club\030\002 \001(\0132\013.Poker.Club\022\032\n\005gam"
+    "es\030\003 \003(\0132\013.Poker.Game\"\230\001\n\nClubStatus\022\r\n\t"
+    "csSuccess\020\000\022\021\n\rcsInvalidName\020\001\022\025\n\021csInva"
+    "lidPassword\020\002\022\020\n\014csNameExists\020\003\022\023\n\017csInv"
+    "alidClubId\020\004\022\023\n\017csAlreadyMember\020\005\022\025\n\021csI"
+    "nvalidPlayerId\020\006\"\226\001\n\017ChangeMailReply\0227\n\006"
+    "status\030\001 \002(\0162\'.Poker.ChangeMailReply.Cha"
+    "ngeMailStatus\"J\n\020ChangeMailStatus\022\r\n\tcmS"
+    "uccess\020\000\022\023\n\017cmDuplicateMail\020\001\022\022\n\016cmInval"
+    "idEmail\020\002\"I\n\rGetUserParams\022\034\n\016user_mongo"
+    "_ids\030\001 \003(\014B\004\200\265\030\001\022\032\n\005users\030\002 \003(\0132\013.Poker."
+    "User\"\371\004\n\nTableEvent\022/\n\005event\030\001 \002(\0162 .Pok"
+    "er.TableEvent.TableEventType\022\014\n\004seat\030\002 \001"
+    "(\005\022\030\n\004pots\030\004 \003(\0132\n.Poker.Pot\022\014\n\004bets\030\005 \003"
+    "(\r\022\r\n\005cards\030\006 \003(\014\032\335\001\n\nWinnerData\022\014\n\004seat"
+    "\030\003 \002(\005\022\013\n\003msg\030\004 \002(\t\"\263\001\n\014CardRankings\022\020\n\014"
+    "crRoyalFlush\020\000\022\023\n\017crStraightFlush\020\001\022\r\n\tc"
+    "r4OfKind\020\002\022\017\n\013crFullHouse\020\003\022\013\n\007crFlush\020\004"
+    "\022\016\n\ncrStraight\020\005\022\021\n\rcrThreeOfKind\020\006\022\r\n\tc"
+    "rTwoPair\020\007\022\r\n\tcrOnePair\020\010\022\016\n\ncrHighCard\020"
+    "\t\"\224\002\n\016TableEventType\022\n\n\006teFold\020\000\022\t\n\005teSi"
+    "t\020\001\022\r\n\tteStandUp\020\002\022\r\n\tteWinning\020\003\022\r\n\tteD"
+    "ealing\020\004\022\013\n\007teCheck\020\005\022\n\n\006teCall\020\006\022\013\n\007teR"
+    "aise\020\007\022\013\n\007teAllIn\020\010\022\n\n\006teFlop\020\t\022\n\n\006teTur"
+    "n\020\n\022\013\n\007teRiver\020\013\022\017\n\013tePostRiver\020\014\022\014\n\010teP"
+    "reWin\020\r\022\023\n\017teExistingCards\020\016\022\020\n\014teDiscon"
+    "nect\020\017\022\010\n\004teSB\020\020\022\010\n\004teBB\020\021\022\014\n\010teForced\020\022"
+    "\"s\n\010PutChips\022\034\n\016table_mongo_id\030\001 \002(\014B\004\200\265"
+    "\030\001\022\023\n\013chip_amount\030\002 \002(\r\0224\n\rcurrent_state"
+    "\030\003 \002(\0162\035.Poker.TableStatus.TableState\";\n"
+    "\rTableBoolFlag\022\034\n\016table_mongo_id\030\001 \002(\014B\004"
+    "\200\265\030\001\022\014\n\004flag\030\002 \002(\010\".\n\020UserChangeParams\022\032"
+    "\n\005users\030\001 \003(\0132\013.Poker.User\"\254\001\n\rCloseGame"
+    "Data\022\024\n\006gameid\030\001 \002(\014B\004\200\265\030\001\0225\n\ttimestamp\030"
+    "\002 \002(\0162\".Poker.CloseGameData.CloseGameTim"
+    "e\"N\n\rCloseGameTime\022\022\n\016cgtCurrentHand\020\000\022\022"
+    "\n\016cgtFiveMinutes\020\001\022\025\n\021cgtFifteenMinutes\020"
+    "\002\"\'\n\017QueryTableStats\022\024\n\006gameid\030\001 \003(\014B\004\200\265"
+    "\030\001\"\203\001\n\021TableStatsReplies\022%\n\005reply\030\001 \003(\0132"
+    "\026.Poker.TableStatsReply\022\034\n\007players\030\002 \003(\013"
+    "2\013.Poker.User\022)\n\nclub_stats\030\003 \003(\0132\025.Poke"
+    "r.ClubStatsReply\"z\n\017TableStatsReply\022\024\n\006c"
+    "lubid\030\001 \002(\014B\004\200\265\030\001\022\024\n\006gameid\030\002 \002(\014B\004\200\265\030\001\022"
+    ",\n\013playerstats\030\003 \003(\0132\027.Poker.TablePlayer"
+    "Stats\022\r\n\005hands\030\004 \001(\r\"\253\001\n\020TablePlayerStat"
+    "s\022\024\n\006userid\030\001 \002(\014B\004\200\265\030\001\022\017\n\007balance\030\003 \001(\005"
+    "\022\016\n\006buyins\030\004 \003(\r\022\020\n\010cashouts\030\005 \003(\r\022\023\n\013ra"
+    "kecontrib\030\006 \001(\r\022\025\n\rsecondsplayed\030\007 \001(\r\022\023"
+    "\n\013chipsinplay\030\010 \001(\r\022\r\n\005hands\030\t \001(\r\"T\n\016Cl"
+    "ubStatsReply\022\024\n\006clubid\030\001 \002(\014B\004\200\265\030\001\022,\n\014pl"
+    "ayer_stats\030\002 \003(\0132\026.Poker.ClubPlayerStats"
+    "\"=\n\017ClubPlayerStats\022\024\n\006userid\030\001 \002(\014B\004\200\265\030"
+    "\001\022\024\n\014club_balance\030\002 \002(\005\"\251\001\n\016ContactMessa"
+    "ge\0223\n\006reason\030\001 \002(\0162#.Poker.ContactMessag"
+    "e.ContactReason\022\017\n\007message\030\002 \002(\t\"Q\n\rCont"
+    "actReason\022\017\n\013cmQuestions\020\000\022\021\n\rcmSuggesti"
+    "ons\020\001\022\017\n\013cmBugReport\020\002\022\013\n\007cmOther\020\003\"9\n\nB"
+    "uyinError\022\025\n\007game_id\030\001 \002(\014B\004\200\265\030\001\022\024\n\014last"
+    "_cashout\030\002 \002(\r\"a\n\021PlayerLimitParams\022\024\n\006c"
+    "lubid\030\001 \002(\014B\004\200\265\030\001\022\024\n\006userid\030\002 \001(\014B\004\200\265\030\001\022"
+    "\r\n\005limit\030\003 \001(\r\022\021\n\tunlimited\030\004 \001(\010\"~\n\020Han"
+    "dHistoryReply\022\025\n\007club_id\030\001 \001(\014B\004\200\265\030\001\022\024\n\006"
+    "gameid\030\002 \002(\014B\004\200\265\030\001\022 \n\004rows\030\003 \003(\0132\022.Poker"
+    ".HandHistory\022\033\n\rtournament_id\030\004 \001(\014B\004\200\265\030"
+    "\001\"\203\005\n\013HandHistory\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\013\n\003"
+    "seq\030\002 \002(\r\022\021\n\ttotalrake\030\003 \002(\r\0225\n\007players\030"
+    "\004 \003(\0132$.Poker.HandHistory.PlayerHandHist"
+    "ory\022\r\n\005cards\030\005 \003(\014\022\017\n\007endtime\030\006 \002(\r\022\027\n\017b"
+    "alance_changes\030\007 \003(\005\0221\n\005moves\030\010 \003(\0132\".Po"
+    "ker.HandHistory.HandHistoryMove\022\016\n\006deale"
+    "r\030\t \002(\r\022\031\n\004game\030\n \001(\0132\013.Poker.Game\022*\n\014cu"
+    "rrent_game\030\013 \001(\0162\024.Poker.Game.GameType\022\014"
+    "\n\004rake\030\014 \002(\005\032\234\001\n\021PlayerHandHistory\022\021\n\003_i"
+    "d\030\001 \002(\014B\004\200\265\030\001\022\014\n\004seat\030\002 \002(\005\022\r\n\005cards\030\003 \001"
+    "(\014\022\r\n\005chips\030\004 \002(\r\022\014\n\004nick\030\005 \002(\t\022\014\n\004muck\030"
+    "\006 \001(\010\022,\n\006status\030\007 \002(\0162\034.Poker.SeatInfo.P"
+    "layerStatus\032\231\001\n\017HandHistoryMove\022.\n\004code\030"
+    "\001 \003(\0162 .Poker.TableEvent.TableEventType\022"
+    "\013\n\003bet\030\002 \001(\r\022\014\n\004seat\030\003 \001(\005\022!\n\rWinnerPotD"
+    "ata\030\004 \003(\0132\n.Poker.Pot\022\030\n\004pots\030\005 \003(\0132\n.Po"
+    "ker.Pot\"2\n\tAssetList\022%\n\006assets\030\001 \003(\0132\025.P"
+    "oker.UpdateFileInfo\"6\n\016TournamentList\022$\n"
+    "\005items\030\001 \003(\0132\025.Poker.TournamentInfo\"&\n\021T"
+    "ournamentDetails\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\"\205\001\n\020"
+    "TournamentMember\022\021\n\003_id\030\001 \002(\014B\004\200\265\030\001\022\023\n\013d"
+    "isplayname\030\002 \002(\t\022\r\n\005chips\030\003 \002(\r\022\024\n\006gamei"
+    "d\030\004 \001(\014B\004\200\265\030\001\022\020\n\010position\030\005 \001(\005\022\022\n\nseat_"
+    "index\030\006 \001(\r\"\274\005\n\016TournamentInfo\022\021\n\003_id\030\001 "
+    "\002(\014B\004\200\265\030\001\022\014\n\004name\030\002 \002(\t\022\023\n\013description\030\003"
+    " \002(\t\022&\n\010gametype\030\004 \002(\0162\024.Poker.Game.Game"
+    "Type\022$\n\005limit\030\005 \002(\0162\025.Poker.Game.GameLim"
+    "it\022\027\n\017seats_per_table\030\006 \002(\r\022\022\n\nminplayer"
+    "s\030\007 \002(\r\022\022\n\nmaxplayers\030\010 \002(\r\022\025\n\rstartingc"
+    "hips\030\t \002(\r\022\024\n\014timeperlevel\030\n \002(\r\022\032\n\022regi"
+    "stered_players\030\013 \002(\r\022\022\n\nstart_time\030\014 \002(\r"
+    "\022(\n\007players\030\r \003(\0132\027.Poker.TournamentMemb"
+    "er\0224\n\005state\030\016 \002(\0162%.Poker.TournamentInfo"
+    ".TournamentState\022\032\n\005games\030\017 \003(\0132\013.Poker."
+    "Game\022*\n\017blind_structure\030\020 \003(\0132\021.Poker.Ga"
+    "meBlinds\022\033\n\023current_blind_level\030\021 \001(\r\022$\n"
+    "\034current_blind_level_end_time\030\022 \001(\004\022&\n\006p"
+    "rizes\030\023 \003(\0132\026.Poker.TournamentPrize\"u\n\017T"
+    "ournamentState\022\013\n\007tnsOpen\020\000\022\021\n\rtnsInProg"
+    "ress\020\001\022\020\n\014tnsCancelled\020\002\022\016\n\ntnsOnBreak\020\003"
+    "\022\017\n\013tnsStarting\020\004\022\017\n\013tnsFinished\020\005\"\230\002\n\027T"
+    "ournamentCommandParams\022\021\n\003_id\030\001 \002(\014B\004\200\265\030"
+    "\001\022J\n\014reply_status\030\002 \001(\01624.Poker.Tourname"
+    "ntCommandParams.TournamentCommandEnum\"\235\001"
+    "\n\025TournamentCommandEnum\022\021\n\rtceRegisterOk"
+    "\020\000\022\030\n\024tceAlreadyRegistered\020\001\022\033\n\027tceRegis"
+    "terLimitReached\020\002\022\025\n\021tceRegisterFailed\020\003"
+    "\022\023\n\017tceUnregisterOk\020\004\022\016\n\ntceNotOpen\020\005\"[\n"
+    "\024TournamentTableStart\022\031\n\004game\030\001 \002(\0132\013.Po"
+    "ker.Game\022(\n\014table_status\030\002 \002(\0132\022.Poker.T"
+    "ableStatus\"\236\001\n\030TournamentPlayerFinished\022"
+    "\033\n\rtournament_id\030\001 \002(\014B\004\200\265\030\001\022\027\n\tplayer_i"
+    "d\030\002 \002(\014B\004\200\265\030\001\022\r\n\005place\030\003 \002(\005\022%\n\005prize\030\004 "
+    "\001(\0132\026.Poker.TournamentPrize\022\026\n\010table_id\030"
+    "\005 \002(\014B\004\200\265\030\001\"$\n\nGameBlinds\022\n\n\002sb\030\001 \002(\r\022\n\n"
+    "\002bb\030\002 \002(\r\"\253\001\n\014TableMessage\0225\n\007message\030\001 "
+    "\002(\0162$.Poker.TableMessage.TableMessageTyp"
+    "e\022\020\n\010end_time\030\002 \001(\004\"R\n\020TableMessageType\022"
+    "\016\n\ntmtClosing\020\000\022\026\n\022tmtTournamentBreak\020\001\022"
+    "\026\n\022tmtTournamentStart\020\002\"\233\001\n\030TournamentPl"
+    "ayerTransfer\022\031\n\013game_source\030\001 \002(\014B\004\200\265\030\001\022"
+    "\036\n\020game_destination\030\002 \002(\014B\004\200\265\030\001\022\025\n\007user_"
+    "id\030\003 \002(\014B\004\200\265\030\001\022\023\n\013seat_source\030\004 \002(\r\022\030\n\020s"
+    "eat_destination\030\005 \002(\r\".\n\017TournamentPrize"
+    "\022\r\n\005place\030\001 \002(\005\022\014\n\004name\030\002 \002(\t\"e\n\020PlayerC"
+    "lubStatus\022\024\n\006clubid\030\001 \002(\014B\004\200\265\030\001\022\025\n\007table"
+    "id\030\002 \001(\014B\004\200\265\030\001\022\021\n\tbuyin_min\030\003 \001(\r\022\021\n\tbuy"
+    "in_max\030\004 \001(\r\"A\n\020DeleteTableStats\022\025\n\007club"
+    "_id\030\001 \002(\014B\004\200\265\030\001\022\026\n\010table_id\030\002 \003(\014B\004\200\265\030\001\""
+    "0\n\rSoftException\022\021\n\texception\030\001 \002(\t\022\014\n\004d"
+    "ata\030\002 \001(\t\"F\n\020ReservedSeatFree\022\036\n\002ts\030\001 \002("
+    "\0132\022.Poker.TableStatus\022\022\n\nseat_index\030\002 \002("
+    "\r*\377\022\n\013ServerCodes\022\024\n\020srNotImplemented\020\000\022"
+    "\013\n\007srHello\020\001\022\020\n\014srLoginReply\020\002\022\023\n\017srRegi"
+    "sterReply\020\003\022\025\n\021srCreateClubReply\020\004\022\023\n\017sr"
+    "JoinClubReply\020\005\022\024\n\020srLeaveClubReply\020\006\022\034\n"
+    "\030srChangeClubDetailsReply\020\007\022\014\n\010srLogout\020"
+    "\010\022\025\n\021srKickPlayerReply\020\013\022\024\n\020srSetAvatarR"
+    "eply\020\014\022\025\n\021srChangeMailReply\020\r\022\020\n\014srGetPl"
+    "ayers\020\016\022\034\n\030srSubscriptionPlanChange\020\017\022\037\n"
+    "\033srOwnershipGiveAwayNotOwner\020\020\022&\n\"srOwne"
+    "rshipGiveAwayInvalidPlayerId\020\021\022$\n srOwne"
+    "rshipGiveAwayInvalidClubId\020\022\022\031\n\025srOwners"
+    "hipGiveAwayOk\020\023\022\023\n\017srClubDisbandOk\020\024\022\031\n\025"
+    "srTournamentOpenTable\020\025\022\026\n\022srChangePassw"
+    "ordOk\020\027\022\022\n\016srCreateGameOk\020\030\022\022\n\016srDeleteG"
+    "ameOk\020\031\022\020\n\014srTableSitOk\020\033\022\027\n\023srTableSitS"
+    "eatTaken\020\034\022\024\n\020srTableStandUpOk\020\035\022\n\n\006srPo"
+    "ng\020\036\022\025\n\021srSuspendPlayerOk\020\037\022\027\n\023srReinsta"
+    "tePlayerOk\020 \022\022\n\016srTableAddonOk\020!\022\031\n\025srTa"
+    "bleAddonOverLimit\020\"\022\025\n\021srTableStatsReply"
+    "\020#\022\021\n\rsrContactUsOk\020$\022\037\n\033srTableBuyinLes"
+    "sThanCashout\020%\022\027\n\023srInvalidTableBuyin\020&\022"
+    "\023\n\017srPlayerLimitOk\020\'\022\032\n\026srResetPlayerBal"
+    "anceOk\020(\022\030\n\024srClubBalanceReached\020)\022\024\n\020sr"
+    "HandHistoryMsg\020*\022\026\n\022srQueryAssetsReply\020+"
+    "\022\020\n\014srNotSitting\020,\022\025\n\021srTournamentReply\020"
+    "-\022\027\n\023srTournamentDetails\020.\022\n\n\006seChat\0202\022\034"
+    "\n\030seSecondaryLoginDetected\0203\022\026\n\022seAccoun"
+    "tConfirmed\0204\022\020\n\014seClubChange\0205\022\021\n\rseClub"
+    "Deleted\0206\022\020\n\014seGameChange\0207\022\020\n\014seGameCre"
+    "ate\0208\022\020\n\014seGameDelete\0209\022\021\n\rseTableStatus"
+    "\020:\022\024\n\020seTournamentList\020;\022\020\n\014seUserChange"
+    "\020<\022\036\n\032seTournamentPlayerFinished\020=\022\036\n\032se"
+    "TournamentPlayerTransfer\020>\022\026\n\022sePlayerCl"
+    "ubStatus\020\?\022\026\n\022seReservedSeatFree\020@\022\031\n\025se"
+    "ReservedSeatTimeout\020A\022\013\n\007scHello\020F\022\013\n\007sc"
+    "Login\020G\022\030\n\024scTournamentRegister\020H\022\016\n\nscR"
+    "egister\020I\022\024\n\020scForgotPassword\020J\022\014\n\010scLog"
+    "out\020K\022\020\n\014scCreateClub\020L\022\016\n\nscJoinClub\020M\022"
+    "\020\n\014scKickPlayer\020N\022\017\n\013scLeaveClub\020O\022\027\n\023sc"
+    "GiveClubOwnership\020P\022\027\n\023scChangeClubDetai"
+    "ls\020Q\022\020\n\014scDeleteClub\020R\022\034\n\030scSubscription"
+    "PlanChange\020S\022\021\n\rscChangeEmail\020T\022\024\n\020scCha"
+    "ngePassword\020U\022\017\n\013scSetAvatar\020V\022\020\n\014scCrea"
+    "teGame\020W\022\017\n\013scCloseGame\020X\022\017\n\013scTableJoin"
+    "\020Y\022\020\n\014scTableLeave\020Z\022\016\n\nscTableSit\020[\022\022\n\016"
+    "scTableStandUp\020\\\022\n\n\006scPing\020]\022\023\n\017scSuspen"
+    "dPlayer\020^\022\020\n\014scGetPlayers\020_\022\n\n\006scFold\020`\022"
+    "\016\n\nscPutChips\020a\022\020\n\014scTableAddOn\020b\022\022\n\016scT"
+    "ablePlayNow\020c\022\031\n\025scTableSitOutNextHand\020d"
+    "\022\027\n\023scTableSitOutNextBB\020e\022\034\n\030scResendVer"
+    "ificationMail\020f\022\017\n\013scShowCards\020g\022\025\n\021scQu"
+    "eryTableStats\020h\022\017\n\013scContactUs\020i\022\024\n\020scSe"
+    "tPlayerLimit\020j\022\030\n\024scResetPlayerBalance\020k"
+    "\022\021\n\rscQueryAssets\020l\022\032\n\026scTournamentUnreg"
+    "ister\020m\022\031\n\025scTournamentLobbyOpen\020n\022\032\n\026sc"
+    "TournamentLobbyClose\020o\022\031\n\025scTournamentQu"
+    "eryInfo\020p\022\022\n\016scTableSitOpen\020q\022\031\n\025scReset"
+    "PlayerBalances\020r\022\026\n\022scDeleteTableStats\020s"
+    "\022\020\n\014scMutePlayer\020t\022\036\n\032scChangePlayerMana"
+    "gerState\020u\022\025\n\021scSplitTableCards\020v\022\023\n\017scS"
+    "oftException\020w\022\023\n\017scTableSitClose\020x28\n\006S"
+    "erver\022.\n\005Login\022\022.Poker.LoginParams\032\021.Pok"
+    "er.LoginReply", 13773);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "message.proto", &protobuf_RegisterTypes);
   StringSizes::default_instance_ = new StringSizes();
@@ -3420,6 +3428,27 @@ void ValidCharsRegex::Swap(ValidCharsRegex* other) {
 
 // ===================================================================
 
+const ::google::protobuf::EnumDescriptor* HelloReply_PokerNetwork_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return HelloReply_PokerNetwork_descriptor_;
+}
+bool HelloReply_PokerNetwork_IsValid(int value) {
+  switch(value) {
+    case 1:
+    case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+#ifndef _MSC_VER
+const HelloReply_PokerNetwork HelloReply::pnChipUpPoker;
+const HelloReply_PokerNetwork HelloReply::pnFantasyPoker;
+const HelloReply_PokerNetwork HelloReply::PokerNetwork_MIN;
+const HelloReply_PokerNetwork HelloReply::PokerNetwork_MAX;
+const int HelloReply::PokerNetwork_ARRAYSIZE;
+#endif  // _MSC_VER
 #ifndef _MSC_VER
 const int HelloReply::kStringSizesFieldNumber;
 const int HelloReply::kChangeExpireTimeFieldNumber;
@@ -3429,6 +3458,7 @@ const int HelloReply::kMaxTimebankFieldNumber;
 const int HelloReply::kMinSizesFieldNumber;
 const int HelloReply::kUpdateFilesFieldNumber;
 const int HelloReply::kValidCharsRegexFieldNumber;
+const int HelloReply::kNetworkTypeFieldNumber;
 #endif  // !_MSC_VER
 
 HelloReply::HelloReply()
@@ -3457,6 +3487,7 @@ void HelloReply::SharedCtor() {
   max_timebank_ = 60000;
   minsizes_ = NULL;
   valid_chars_regex_ = NULL;
+  networktype_ = 1;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -3508,6 +3539,9 @@ void HelloReply::Clear() {
     if (has_valid_chars_regex()) {
       if (valid_chars_regex_ != NULL) valid_chars_regex_->::Poker::ValidCharsRegex::Clear();
     }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    networktype_ = 1;
   }
   update_files_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -3636,6 +3670,27 @@ bool HelloReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(72)) goto parse_networkType;
+        break;
+      }
+
+      // optional .Poker.HelloReply.PokerNetwork networkType = 9;
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_networkType:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::Poker::HelloReply_PokerNetwork_IsValid(value)) {
+            set_networktype(static_cast< ::Poker::HelloReply_PokerNetwork >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(9, value);
+          }
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3702,6 +3757,12 @@ void HelloReply::SerializeWithCachedSizes(
       8, this->valid_chars_regex(), output);
   }
 
+  // optional .Poker.HelloReply.PokerNetwork networkType = 9;
+  if (has_networktype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      9, this->networktype(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3756,6 +3817,12 @@ void HelloReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         8, this->valid_chars_regex(), target);
+  }
+
+  // optional .Poker.HelloReply.PokerNetwork networkType = 9;
+  if (has_networktype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      9, this->networktype(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3819,6 +3886,14 @@ int HelloReply::ByteSize() const {
     }
 
   }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional .Poker.HelloReply.PokerNetwork networkType = 9;
+    if (has_networktype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->networktype());
+    }
+
+  }
   // repeated .Poker.UpdateFileInfo update_files = 7;
   total_size += 1 * this->update_files_size();
   for (int i = 0; i < this->update_files_size(); i++) {
@@ -3876,6 +3951,11 @@ void HelloReply::MergeFrom(const HelloReply& from) {
       mutable_valid_chars_regex()->::Poker::ValidCharsRegex::MergeFrom(from.valid_chars_regex());
     }
   }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_networktype()) {
+      set_networktype(from.networktype());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -3919,6 +3999,7 @@ void HelloReply::Swap(HelloReply* other) {
     std::swap(minsizes_, other->minsizes_);
     update_files_.Swap(&other->update_files_);
     std::swap(valid_chars_regex_, other->valid_chars_regex_);
+    std::swap(networktype_, other->networktype_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -8174,6 +8255,12 @@ bool Game_GameBlinds_IsValid(int value) {
     case 4:
     case 5:
     case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
       return true;
     default:
       return false;
@@ -8188,6 +8275,12 @@ const Game_GameBlinds Game::gb10x25;
 const Game_GameBlinds Game::gb25x50;
 const Game_GameBlinds Game::gb50x100;
 const Game_GameBlinds Game::gbOther;
+const Game_GameBlinds Game::gb2x5;
+const Game_GameBlinds Game::gb3x6;
+const Game_GameBlinds Game::gb4x8;
+const Game_GameBlinds Game::gb10x10;
+const Game_GameBlinds Game::gb25x25;
+const Game_GameBlinds Game::gb20x40;
 const Game_GameBlinds Game::GameBlinds_MIN;
 const Game_GameBlinds Game::GameBlinds_MAX;
 const int Game::GameBlinds_ARRAYSIZE;

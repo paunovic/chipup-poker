@@ -2417,8 +2417,8 @@ object frmClubLobby: TfrmClubLobby
       F9A78F54ABFED93B47AD6A149FF5F85A57EBA68738D54A9FFEB8E5C6DB511EEC
       9CFCD307473CD2ACCF3739E7F4EC6B71276EC4BF73B28FE2477A67D7797CC5E9
       FF074F1A310770D5CA710000000049454E44AE426082}
+    Properties.FitMode = ifmNormal
     Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
     Style.BorderStyle = ebsNone
@@ -2529,6 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
     Properties.ActivePage = tsStats
+    Properties.CustomButtons.Buttons = <>
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2536,8 +2537,6 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2632,6 +2631,7 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 0
           object gridPlayersListTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
@@ -2697,7 +2697,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 250
-          Top = 118
+          Top = 112
           Width = 115
           Height = 26
           Action = acGiveOwnership
@@ -2713,7 +2713,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 129
-          Top = 150
+          Top = 144
           Width = 115
           Height = 26
           Action = acRemovePlayer
@@ -2727,9 +2727,9 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
-        object btSuspendUnsuspend: TcxButton
+        object btSuspendUnsuspendApprove: TcxButton
           Left = 8
-          Top = 150
+          Top = 144
           Width = 115
           Height = 26
           Action = acSuspendPlayer
@@ -2745,7 +2745,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetBalance: TcxButton
           Left = 129
-          Top = 118
+          Top = 112
           Width = 115
           Height = 26
           Action = acResetBalance
@@ -2761,7 +2761,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSetLimit: TcxButton
           Left = 250
-          Top = 150
+          Top = 144
           Width = 115
           Height = 26
           Action = acSetLimit
@@ -2777,7 +2777,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetAllPlayerBalances: TcxButton
           Left = 8
-          Top = 118
+          Top = 112
           Width = 115
           Height = 26
           Action = acResetPlayerBalances
@@ -2793,7 +2793,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btMuteUnmutePlayer: TcxButton
           Left = 371
-          Top = 150
+          Top = 144
           Width = 115
           Height = 26
           Action = acMuteUnmutePlayer
@@ -2809,7 +2809,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btPromoteToManager: TcxButton
           Left = 371
-          Top = 118
+          Top = 112
           Width = 115
           Height = 26
           Action = acPromoteDemoteUser
@@ -2828,8 +2828,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2848,7 +2846,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 876
-          Height = 313
+          Height = 307
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2856,6 +2854,7 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 0
           object gridGamesTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2912,6 +2911,14 @@ object frmClubLobby: TfrmClubLobby
               HeaderAlignmentHorz = taCenter
               Width = 80
             end
+            object gridGamesTableRakeCap: TcxGridColumn
+              Caption = 'Rake Cap'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taCenter
+              Properties.ValueType = vtFloat
+              OnGetDisplayText = gridGamesTableRakeCapGetDisplayText
+              HeaderAlignmentHorz = taCenter
+            end
             object gridGamesSeats: TcxGridColumn
               Caption = 'Seats'
               PropertiesClassName = 'TcxTextEditProperties'
@@ -2932,7 +2939,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 303
+          Top = 297
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2948,7 +2955,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 303
+          Top = 297
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2967,8 +2974,6 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2985,6 +2990,7 @@ object frmClubLobby: TfrmClubLobby
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
           OnDblClick = gridTablesTableDblClick
+          Navigator.Buttons.CustomButtons = <>
           OnFocusedRecordChanged = gridTablesTableFocusedRecordChanged
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
@@ -3083,6 +3089,7 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 0
           object gridStatsTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
@@ -3204,6 +3211,7 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 1
           object gridTotalStatsTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
             DataController.Summary.SummaryGroups = <>
@@ -3443,6 +3451,10 @@ object frmClubLobby: TfrmClubLobby
     object acPromoteDemoteUser: TAction
       Caption = 'Promote to Manager'
       OnExecute = acPromoteDemoteUserExecute
+    end
+    object acApprovePlayer: TAction
+      Caption = 'Approve Player'
+      OnExecute = acApprovePlayerExecute
     end
   end
   object pmTablesStats: TPopupMenu

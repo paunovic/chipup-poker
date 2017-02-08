@@ -34,6 +34,7 @@ VisibleSeat::VisibleSeat(TableUi *parent, SeatObject *jsobj)
 	ticker.setInterval(100);
 	connect(&ticker,SIGNAL(timeout()),this,SLOT(tick()));
 	lastTimebarMode = tbmIdle;
+	chips = 0;
 }
 VisibleSeat::~VisibleSeat() {
 	delete fontMetric;
@@ -174,7 +175,7 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 		} else {
 			QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 			sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
-			sitwindow->setAddon(true);
+			sitwindow->setAddon(true,chips);
 			sitwindow->show();
 		}
 	} else {
@@ -182,9 +183,13 @@ void VisibleSeat::mouseReleaseEvent(QMouseEvent *) {
 			qDebug() << "that seat is reserved!";
 			return;
 		}
+		if (!jsobj->getEmpty()) {
+			qDebug() << "that seat isnt empty!";
+			return;
+		}
 		QSharedPointer<Data::TableStatus> ts = jsobj->getTable()->getLastTs();
 		sitwindow = new TableSit(jsobj->getTable()->getRawGame(),jsobj->getSeat(),ts);
-		sitwindow->setAddon(false);
+		sitwindow->setAddon(false,0);
 		sitwindow->show();
 	}
 }

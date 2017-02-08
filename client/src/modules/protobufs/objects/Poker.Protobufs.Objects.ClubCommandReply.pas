@@ -12,7 +12,7 @@ uses
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
 
 type
-  TClubStatus = (csSuccess = 0, csInvalidName, csInvalidPassword, csNameExists, csInvalidClubId, csAlreadyMember, csInvalidPlayerId);
+  TClubStatus = (csSuccess = 0, csInvalidName, csInvalidPassword, csNameExists, csInvalidClubId, csAlreadyMember, csInvalidPlayerId, csWaitingForApproval);
 
   TPB_ClubCommandReply = class(TProtobufBaseObject)
   private

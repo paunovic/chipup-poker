@@ -24,12 +24,12 @@ type
     procedure LeaveClub(const AClubId: TMongoId);
     procedure KickPlayer(const AClubId: TMongoId; const APlayerId: TMongoId);
     procedure GiveOwnership(const AClubId: TMongoId; const APlayerId: TMongoId);
-    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const AMaxRakePerHand: UINT32; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
+    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
     procedure DisbandClub(const AClubId: TMongoId);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
-    procedure CreateGame(const AClubId: TMongoId; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+    procedure CreateGame(const AClubId: TMongoId; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer; const AMaxRakePerHand: UINT32);
     procedure CloseGame(const AGameId: TMongoId; const ATimestamp: TCloseGameTime);
     procedure SendTableChatLine(const AGameId: TMongoId; const ALine: String);
     procedure JoinTable(const AGameId: TMongoId);
@@ -216,7 +216,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const AMaxRakePerHand: UINT32; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
+procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean; const AResetBuyinLimits: UINT32);
 var
   protobuf: TPB_Club;
 begin
@@ -226,7 +226,6 @@ begin
     protobuf.Name := AClubName;
     protobuf.Password := AClubCode;
     protobuf.Rake := AClubRake;
-    protobuf.MaxRakePerHand := AMaxRakePerHand;
     protobuf.DefaultBalanceLimit := ADefaultPlayerLimit;
     protobuf.UnlimitedDefaultBalance := AUnlimitedDefaultBalance;
     protobuf.BuyinReset := AResetBuyinLimits;
@@ -288,7 +287,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.CreateGame(const AClubId: TMongoId; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+procedure TServerSocket.CreateGame(const AClubId: TMongoId; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer; const AMaxRakePerHand: UINT32);
 var
   protobuf: TPB_Game;
 begin
@@ -302,6 +301,7 @@ begin
     protobuf.BuyinMin := ABuyinMin;
     protobuf.BuyinMax := ABuyinMax;
     protobuf.Seats := ASeats;
+    protobuf.MaxRakePerHand := AMaxRakePerHand;
     SendProtobuf(scCreateGame, protobuf);
   finally
     protobuf.Free;
@@ -591,9 +591,9 @@ var
 begin
   protobuf := TPB_HelloParams.Create;
   try
+    protobuf.Appcode := acDelphiWindows;
     protobuf.Debug := ADebug;
     protobuf.Files.AddRange(AFiles);
-    protobuf.Appcode := DelphiWindows;
     SendProtobuf(scHello, protobuf);
   finally
     protobuf.Free;

@@ -129,14 +129,21 @@ function Server(activeUsersIN) {
 		var self;
 		if (config.diffserver) self='dev';
 		else self = 'live';
-		models.Config.findOne({_id:self+'_installerid'},function (err,row) {
+		models.Config.findOne({_id:self+'_installerid'},function (err,row1) {
 			assert.ifError(err);
-			models.Installer.findOne({_id:row.value},function (err,row) {
-				global.log('sending installer %j',row);
-				if (config.diffserver) {
-					res.sendfile('installers/'+row.name);
+			models.Installer.findOne({_id:row1.value},function (err,row) {
+				if (err) console.log(err);
+				if (row) {
+					global.log('sending installer %j',row);
+					if (config.diffserver) {
+						res.sendfile('installers/'+row.name);
+					} else {
+						res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
+						res.end();
+					}
 				} else {
-					res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
+					console.log("warning, installer missing",err,row,row1);
+					res.writeHead(500);
 					res.end();
 				}
 			});
@@ -283,14 +290,14 @@ Server.prototype.addMac = function (req,res) {
 		var debug ='release';
 		fs.rename(localFile,'installers/'+name1,function (err) {
 			assert.ifError(err);
-			var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.dmg.size,appcode:'QtMac'});
+			var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.dmg.size,appcode:'acQtMac'});
 			obj.save(function (err) {
 				assert.ifError(err);
 				global.log('new version recorded: %j',obj);
 				installer.unpackTar(obj,req.files.tar.path,function (success) {
 					var key1;
 					if (success) {
-						models.Config.update({_id:'QtMac_dev_installerid'},{$set:{value:obj._id}},function(err,res2) {
+						models.Config.update({_id:'acQtMac_dev_installerid'},{$set:{value:obj._id}},function(err,res2) {
 							assert.ifError(err);
 						});
 						obj.ts = obj._id.getTimestamp().toString();
@@ -329,6 +336,9 @@ Server.prototype.buildDone = function (req,res) {
 		});
 	});
 	res.end('OK\n');
+	start.on('error',function (e) {
+		console.log('error while checking mac symbols',e);
+	});
 };
 Server.prototype.minidumpUpload = function (req,res) {
 	console.log(req.files.minidump.path,req.files.minidump.originalFilename,req.query);
@@ -663,6 +673,8 @@ Server.prototype.installers_func = function (req,res) {
 	var start = Date.now();
 	console.log(req.body);
 	var showlist = true;
+	var appcode = 'acDelphiWindows';
+	if (req.query.appcode) appcode = req.query.appcode;
 	if (req.query.showlist) showlist = true;
 	function makeDeleter(id) {
 		return function (cb) {
@@ -822,7 +834,7 @@ Server.prototype.installers_func = function (req,res) {
 				}
 				res.render('installers',{installers:data,start:start,
 					live_pubver:live_pubver, live_debugver:live_debugver,
-					dev_pubver:dev_pubver, dev_debugver:dev_debugver,
+					dev_pubver:dev_pubver, dev_debugver:dev_debugver,appcode:appcode,
 					activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 			}.bind(this));
 		}.bind(this));
@@ -1182,7 +1194,7 @@ Server.prototype.newVersion = function newVersion(req,res) {
 
 	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 		assert.ifError(err);
-		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size,appcode:'DelphiWindows'});
+		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size,appcode:'acDelphiWindows'});
 		obj.save(function (err) {
 			assert.ifError(err);
 			global.log('new version recorded: %j',obj);

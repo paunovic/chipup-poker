@@ -1,0 +1,572 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{1A41B8B6-5D64-46ED-ADE7-23A67BE0BC1D}</ProjectGuid>
+			<ProjectVersion>13.4</ProjectVersion>
+			<FrameworkType>VCL</FrameworkType>
+			<MainSource>chipup_client.dpr</MainSource>
+			<Base>True</Base>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Platform Condition="'$(Platform)'==''">Win32</Platform>
+			<TargetedPlatforms>3</TargetedPlatforms>
+			<AppType>Application</AppType>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+			<Base_Win64>true</Base_Win64>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+			<Base_Win32>true</Base_Win32>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
+			<Cfg_1_Win64>true</Cfg_1_Win64>
+			<CfgParent>Cfg_1</CfgParent>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
+			<Cfg_1_Win32>true</Cfg_1_Win32>
+			<CfgParent>Cfg_1</CfgParent>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
+			<Cfg_2_Win64>true</Cfg_2_Win64>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+			<Cfg_2_Win32>true</Cfg_2_Win32>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_UnitSearchPath>3rdparty\FastMM;3rdparty\AsphyreSphinx\Source;3rdparty\icsv8;3rdparty\protobufs;3rdparty\superobject;3rdparty\DEC\Part_I;3rdparty\synapse;3rdparty\mormot;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_Define>USE_SSL;$(DCC_Define)</DCC_Define>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<Manifest_File>None</Manifest_File>
+			<VerInfo_Locale>2057</VerInfo_Locale>
+			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+			<Icon_MainIcon>resources\Icon.ico</Icon_MainIcon>
+			<DCC_UsePackage>DBXInterBaseDriver;DataSnapServer;DataSnapCommon;DbxCommonDriver;dbxcds;CustomIPTransport;dsnap;IndyCore;IPIndyImpl;bindcompfmx;dbrtl;bindcomp;inetdb;xmlrtl;ibxpress;bindengine;soaprtl;DBXInformixDriver;DBXFirebirdDriver;inet;DBXSybaseASADriver;dbexpress;fmx;IndySystem;DataSnapClient;DataSnapProviderClient;DBXOracleDriver;fmxase;inetdbxpress;rtl;DbxClientDriver;IndyProtocols;DBXMySQLDriver;fmxobj;fmxdae;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
+			<DCC_DcuOutput>..\bin\$(Platform)\$(Config)\dcu</DCC_DcuOutput>
+			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base_Win64)'!=''">
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+			<DCC_UsePackage>cxLibraryRS16;dxSkinSevenRS16;dxPsPrVwAdvRS16;dxSkinSummer2008RS16;dxPSCoreRS16;cxPivotGridOLAPRS16;dxPScxGridLnkRS16;dxPScxTLLnkRS16;cxPageControlRS16;dxSkinVS2010RS16;vclimg;dxSkinDevExpressStyleRS16;dxSkinWhiteprintRS16;dxComnRS16;vcldb;dxSkinBlackRS16;dxADOServerModeRS16;dxBarExtDBItemsRS16;dxSkinXmas2008BlueRS16;dxSkinOffice2007BlueRS16;dxSkinOffice2007GreenRS16;cxDataRS16;cxBarEditItemRS16;dxDockingRS16;cxPageControldxBarPopupMenuRS16;dxPSDBTeeChartRS16;dxPSLnksRS16;dxBarExtItemsRS16;dxPSTeeChartRS16;dxPSdxLCLnkRS16;cxVerticalGridRS16;dxSkinSharpRS16;dxSkinOffice2007BlackRS16;dxorgcRS16;dxSkinBlueprintRS16;dxPScxExtCommonRS16;dxNavBarRS16;DBXOdbcDriver;dxdbtrRS16;dxSkinFoggyRS16;dxPScxSSLnkRS16;dxSkinDarkSideRS16;dxSkinscxPCPainterRS16;dxPSdxDBTVLnkRS16;vclactnband;dxPScxSchedulerLnkRS16;dxServerModeRS16;bindcompvcl;vclie;dxSkinSilverRS16;dsnapcon;dcldxSkinsCoreRS16;dxSkinLilianRS16;vclx;dxSkinValentineRS16;dxFlowChartRS16;dxGDIPlusRS16;dxSkinSharpPlusRS16;dxdborRS16;dxPScxVGridLnkRS16;dxLayoutControlRS16;dxPScxPivotGridLnkRS16;dxCoreRS16;cxExportRS16;dxBarRS16;dxSkinsdxNavBarPainterRS16;cxSpreadSheetRS16;cxTreeListdxBarPopupMenuRS16;TeeDB;dxDBXServerModeRS16;dxSkinCoffeeRS16;vclib;dxRibbonRS16;DBXSybaseASEDriver;cxTreeListRS16;dxSkinOffice2007SilverRS16;dxSkinsdxRibbonPainterRS16;vcldsnap;dxSkinBlueRS16;DBXDb2Driver;dxSkinDarkRoomRS16;dxSkinscxSchedulerPainterRS16;vcl;dxSkinDevExpressDarkStyleRS16;DBXMSSQLDriver;webdsnap;dxSkinsdxDLPainterRS16;dxSkinTheAsphaltWorldRS16;dxSkinOffice2010BlackRS16;dxSkinMoneyTwinsRS16;dxSkinPumpkinRS16;adortl;dxSkinHighContrastRS16;dxSkiniMaginaryRS16;dxPSdxDBOCLnkRS16;dxSkinLondonLiquidSkyRS16;dxSkinsdxBarPainterRS16;Tee;dxSkinGlassOceansRS16;dxSkinLiquidSkyRS16;dxSkinsCoreRS16;dxPScxCommonRS16;dxmdsRS16;dxPSPrVwRibbonRS16;cxGridRS16;cxEditorsRS16;TeeUI;cxPivotGridRS16;dxSkinSevenClassicRS16;cxSchedulerRS16;vcltouch;dxSkinOffice2010SilverRS16;websnap;dxSkinOffice2007PinkRS16;VclSmp;dxSkinSpringTimeRS16;dxTabbedMDIRS16;DataSnapConnectors;dxSkinStardustRS16;dxPSdxOCLnkRS16;dxSkinOffice2010BlueRS16;dxPSdxFCLnkRS16;dxThemeRS16;dxPScxPCProdRS16;dxSkinCaramelRS16;dxSkinMcSkinRS16;dxBarDBNavRS16;$(DCC_UsePackage)</DCC_UsePackage>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base_Win32)'!=''">
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<DCC_UsePackage>dxTileControlRS16;cxLibraryRS16;TMSCloudPkgDXE2;dxSkinSevenRS16;TP_LockBox3;dxPsPrVwAdvRS16;dxSkinSummer2008RS16;dxPSCoreRS16;cxPivotGridOLAPRS16;dxPScxGridLnkRS16;dxPScxTLLnkRS16;cxPageControlRS16;dxSkinVS2010RS16;vclimg;dxSkinDevExpressStyleRS16;dxSkinWhiteprintRS16;fmi;dxComnRS16;vcldb;dxSkinBlackRS16;dxADOServerModeRS16;dxBarExtDBItemsRS16;dxSkinXmas2008BlueRS16;dxSkinOffice2007BlueRS16;CloudService;dxSkinOffice2007GreenRS16;FmxTeeUI;cxDataRS16;cxBarEditItemRS16;dxDockingRS16;cxPageControldxBarPopupMenuRS16;tmsexdxe2;dxPSDBTeeChartRS16;dxPSLnksRS16;dxBarExtItemsRS16;JclDeveloperTools;dxPSTeeChartRS16;dxPSdxLCLnkRS16;cxVerticalGridRS16;dxSkinSharpRS16;dxSkinOffice2007BlackRS16;dxorgcRS16;dxSkinBlueprintRS16;dxPScxExtCommonRS16;vcldbx;dxNavBarRS16;OverbyteIcsDXe2Run;DBXOdbcDriver;dxdbtrRS16;dxSkinFoggyRS16;madDisAsm_;dxPScxSSLnkRS16;dxSkinDarkSideRS16;intrawebdb_120_160;dxSkinscxPCPainterRS16;dxPSdxDBTVLnkRS16;FMXTee;vclactnband;dxPScxSchedulerLnkRS16;dxServerModeRS16;bindcompvcl;Jcl;vclie;madExcept_;dxSkinSilverRS16;dsnapcon;dcldxSkinsCoreRS16;CoolTrayIcon_D140;dxSkinLilianRS16;vclx;dxSkinValentineRS16;dxFlowChartRS16;dxGDIPlusRS16;dxSkinSharpPlusRS16;dxdborRS16;dxPScxVGridLnkRS16;dxLayoutControlRS16;dxPScxPivotGridLnkRS16;dxCoreRS16;cxExportRS16;ZComponent;dxBarRS16;dxSkinsdxNavBarPainterRS16;cxSpreadSheetRS16;cxTreeListdxBarPopupMenuRS16;TeeDB;FlexCelXE2;dxDBXServerModeRS16;dxSkinCoffeeRS16;Rave100VCL;vclib;inetdbbde;dxRibbonRS16;DBXSybaseASEDriver;cxTreeListRS16;dxSkinOffice2007SilverRS16;dxSkinsdxRibbonPainterRS16;vcldsnap;dxSkinBlueRS16;DBXDb2Driver;Intraweb_120_160;dwsLibRuntime;vclribbon;dxSkinDarkRoomRS16;dxSkinscxSchedulerPainterRS16;vcl;dxSkinDevExpressDarkStyleRS16;DBXMSSQLDriver;tmsdxe2;cxSchedulerGridRS16;webdsnap;dxtrmdRS16;dxSkinsdxDLPainterRS16;dxSkinTheAsphaltWorldRS16;dxSkinOffice2010BlackRS16;dxSkinMoneyTwinsRS16;dxSkinPumpkinRS16;adortl;madBasic_;dxSkinHighContrastRS16;dxSkiniMaginaryRS16;ShellChangeNotify;ZDbc;dxPSdxDBOCLnkRS16;dxSkinLondonLiquidSkyRS16;dxSkinsdxBarPainterRS16;ZPlain;Tee;JclContainers;dxSkinGlassOceansRS16;dxSkinLiquidSkyRS16;dxSkinsCoreRS16;svnui;cxPivotGridChartRS16;dxPScxCommonRS16;dxmdsRS16;dxSpellCheckerRS16;dxPSPrVwRibbonRS16;cxGridRS16;cxEditorsRS16;TeeUI;cxPivotGridRS16;dxSkinSevenClassicRS16;cxSchedulerRS16;tmsxlsdxe2;vcltouch;dxSkinOffice2010SilverRS16;ZCore;websnap;dxSkinOffice2007PinkRS16;VclSmp;dxSkinSpringTimeRS16;dxTabbedMDIRS16;DataSnapConnectors;dxSkinStardustRS16;dxPSdxOCLnkRS16;dxSkinOffice2010BlueRS16;dxPSdxFCLnkRS16;dxThemeRS16;JclVcl;dxPScxPCProdRS16;ZParseSql;tmswizdxe2;svn;dxSkinCaramelRS16;bdertl;dxSkinMcSkinRS16;dxBarDBNavRS16</DCC_UsePackage>
+			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<DCC_RemoteDebug>true</DCC_RemoteDebug>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<DCC_MapFile>3</DCC_MapFile>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<DCC_DebugDCUs>true</DCC_DebugDCUs>
+			<Debugger_RunParams>-noupdate</Debugger_RunParams>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUpPoker;LegalCopyright=;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUp Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
+			<DCC_MapFile>3</DCC_MapFile>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<DCC_RemoteDebug>false</DCC_RemoteDebug>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+			<DCC_DebugInformation>false</DCC_DebugInformation>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<DCC_LocalDebugSymbols>true</DCC_LocalDebugSymbols>
+			<DCC_DebugInformation>true</DCC_DebugInformation>
+			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
+			<DCC_MapFile>3</DCC_MapFile>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Debugger_RunParams>-noupdate</Debugger_RunParams>
+			<DCC_LocalDebugSymbols>true</DCC_LocalDebugSymbols>
+			<DCC_DebugInformation>true</DCC_DebugInformation>
+			<DCC_MapFile>3</DCC_MapFile>
+		</PropertyGroup>
+		<ItemGroup>
+			<DelphiCompile Include="$(MainSource)">
+				<MainSource>MainSource</MainSource>
+			</DelphiCompile>
+			<RcCompile Include="resources\Poker.Resources.Fonts.rc">
+				<Form>Poker.Resources.Fonts.res</Form>
+			</RcCompile>
+			<RcCompile Include="resources\Poker.Resources.Sounds.rc">
+				<Form>Poker.Resources.Sounds.res</Form>
+			</RcCompile>
+			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
+			<DCCReference Include="Poker.DataModule.pas">
+				<Form>dmMain</Form>
+				<DesignClass>TDataModule</DesignClass>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Main.pas">
+				<Form>frmChipUpMain</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Login.pas">
+				<Form>frmChipUpLogin</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.CreateAccount.pas">
+				<Form>frmCreateAccount</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ForgotPassword.pas">
+				<Form>frmForgotPassword</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.CreateClub.pas">
+				<Form>frmCreateClub</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.JoinClub.pas">
+				<Form>frmJoinClub</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ChangeClubDetails.pas">
+				<Form>frmChangeClubDetails</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ChangeEMail.pas">
+				<Form>frmChangeEMail</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ChangePassword.pas">
+				<Form>frmChangePassword</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Table.pas">
+				<Form>frmTable</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.CreateGame.pas">
+				<Form>frmCreateGame</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Debug.pas">
+				<Form>frmDebug</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ChangeAvatar.pas">
+				<Form>frmChangeAvatar</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.TableSit.pas">
+				<Form>frmTableSit</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ClubLobby.pas">
+				<Form>frmClubLobby</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Updater.pas">
+				<Form>frmUpdater</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.CloseTable.pas">
+				<Form>frmCloseTable</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ImageCrop.pas">
+				<Form>frmImageCrop</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ContactUs.pas">
+				<Form>frmContactUs</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Reconnect.pas">
+				<Form>frmReconnect</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.About.pas">
+				<Form>frmAbout</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.SystemTrayPopup.pas">
+				<Form>frmSystemTrayPopup</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.CloseClubConfirmation.pas">
+				<Form>frmCloseClubConfirmation</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.HandHistory.pas">
+				<Form>frmHandHistory</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ClubMemberOptions.pas">
+				<Form>frmClubMemberOptions</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.LayeredForm.pas">
+				<Form>frmLayered</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Subscriptions.pas">
+				<Form>frmSubscriptions</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Settings.pas">
+				<Form>frmSettings</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.TournamentLobby.pas">
+				<Form>frmTournamentLobby</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.TournamentFinishDialog.pas">
+				<Form>frmTournamentFinishDialog</Form>
+			</DCCReference>
+			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
+			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.DX9Canvas.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.PB_Pot.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.HandHistoryMove.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.PB_TablePlayerStats.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.Misc.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.Encryption.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.FormsContainer.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.InstanceController.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.AlphaBlendThread.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.CommandLineParams.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.ModalDialogs.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.SSLCert.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.SafeMutex.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.CPUUsage.pas"/>
+			<DCCReference Include="modules\settings\Poker.HardcodedSettings.pas"/>
+			<DCCReference Include="modules\settings\Poker.Settings.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.Settings.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.Validators.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.MessageContainer.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.MessageCallbacks.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Core.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.ConnectThread.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Core.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Timer.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Animation.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Button.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Animations.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.AnimationNew.pas"/>
+			<DCCReference Include="modules\players\Poker.Players.Player.pas"/>
+			<DCCReference Include="modules\players\Poker.Players.PlayerList.pas"/>
+			<DCCReference Include="modules\clubs\Poker.Clubs.Club.pas"/>
+			<DCCReference Include="modules\clubs\Poker.Clubs.ClubList.pas"/>
+			<DCCReference Include="modules\games\Poker.Games.Game.pas"/>
+			<DCCReference Include="modules\games\Poker.Games.GameList.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.Status.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.Table.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.TableList.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.Resources.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.Renderer.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.RenderMetrics.pas"/>
+			<DCCReference Include="modules\tables\Poker.Tables.StatsList.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Items.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Players.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Playback.pas"/>
+			<DCCReference Include="modules\avatars\Poker.Avatars.Avatar.pas"/>
+			<DCCReference Include="modules\avatars\Poker.Avatars.AvatarList.pas"/>
+			<DCCReference Include="modules\chip_stack_maker\Poker.ChipStackMaker.pas"/>
+			<DCCReference Include="modules\chip_stack_maker\Poker.ChipStackMaker.ChipStack.pas"/>
+			<DCCReference Include="modules\seats\Poker.Seats.Seat.pas"/>
+			<DCCReference Include="modules\seats\Poker.Seats.SeatList.pas"/>
+			<DCCReference Include="modules\Poker.ActionMainMenuBarStyle.pas"/>
+			<DCCReference Include="modules\Poker.Cards.pas"/>
+			<DCCReference Include="modules\Poker.Sounds.pas"/>
+			<DCCReference Include="modules\Poker.WindowMessages.pas"/>
+			<DCCReference Include="modules\Poker.HandStrengthCalculator.pas"/>
+			<DCCReference Include="modules\database\Poker.Database.Core.pas"/>
+			<DCCReference Include="modules\Poker.Types.pas"/>
+			<DCCReference Include="modules\tournaments\Poker.Tournaments.pas"/>
+			<DCCReference Include="modules\tournaments\Poker.Tournaments.Info.pas"/>
+			<DCCReference Include="modules\Poker.SoftExceptions.pas"/>
+			<DCCReference Include="modules\protobufs\Poker.Protobufs.Objects.Base.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SoftException.pas"/>
+			<DCCReference Include="modules\protobufs\Poker.Protobufs.Reader.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Enum.ServerCodes.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.RpcMessage.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.LoginParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.Club.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.StringSizes.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.RegisterParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ForgotPasswordParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.User.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.GiveClubOwnershipParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.KickPlayerParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChangeEMailParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChangePasswordParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.Game.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SetAvatarParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChatMessage.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChatEvent.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableSit.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableStatus.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SeatInfo.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.RegisterReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubCommandReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.LoginReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SetAvatarReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChangeMailReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.GetUserParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableEvent.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PutChips.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.WinnerData.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PingParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PingReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.Pot.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableStatsReplies.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableStatsReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TablePlayerStats.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ContactMessage.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.BuyinError.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HelloReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HelloParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubMember.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ClubStatsReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.AssetList.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryMove.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentCommandParams.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentInfo.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentList.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentDetails.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentMember.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.GameBlinds.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TableMessage.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerTransfer.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPrize.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.PlayerClubStatus.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.DeleteTableStats.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ChangeClubPlayerFlag.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.PB_ClubMember.pas"/>
+			<RcItem Include="resources\cashier\Normal.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>CashierNormal</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\cashier\Pressed.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>CashierPressed</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\avatar\RetrievingAvatar.jpg">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>RetrievingAvatar</ResourceId>
+			</RcItem>
+			<None Include="defines.inc"/>
+			<RcItem Include="resources\ssl_certs\DevServerCertificate.pem">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>DevServerCertificate</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\ssl_certs\OfficialServerCertificate.pem">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>OfficialServerCertificate</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\about_form\About.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>AboutBackground</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\ssl_certs\sub.class1.server.ca.pem">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>SubClass1ServerCertificate</ResourceId>
+			</RcItem>
+			<None Include="3rdparty\FastMM\FastMM4Options.inc"/>
+			<None Include="3rdparty\AsphyreSphinx\Asphyre.StreamUtils.inc"/>
+			<None Include="3rdparty\AsphyreSphinx\Source\Asphyre.StreamUtils.inc"/>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Delphi.Personality>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">2057</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfs16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfs16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfrx16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfrx16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfsDB16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfsDB16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfrxDB16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfrxDB16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfrxe16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfrxe16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2015 for RAD XE2\Delphi16.win32\Bin\DclFMXTeePro916.bpl">TeeChart Pro 2015 for FireMonkey Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Users\Public\Documents\RAD Studio\9.0\Bpl\dclcxPivotGridOLAPRS16.bpl">ExpressPivotGrid OLAP by Developer Express Inc.</Excluded_Packages>
+					</Excluded_Packages>
+					<Source>
+						<Source Name="MainSource">chipup_client.dpr</Source>
+					</Source>
+				</Delphi.Personality>
+				<Deployment>
+					<DeployFile LocalName="..\bin\Win32\Debug\chipup_client.rsm" Configuration="Debug" Class="DebugSymbols">
+						<Platform Name="Win32">
+							<RemoteName>chipup_client.rsm</RemoteName>
+						</Platform>
+					</DeployFile>
+					<DeployFile LocalName="..\bin\Win32\Debug\chipup_client.exe" Configuration="Debug" Class="ProjectOutput">
+						<Platform Name="Win32"/>
+					</DeployFile>
+					<DeployClass Name="ProjectOutput" Required="true">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>1</Operation>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="DependencyPackage" Required="true">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>1</Operation>
+							<Extensions>.dylib</Extensions>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+							<Extensions>.bpl</Extensions>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="DependencyModule">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>1</Operation>
+							<Extensions>.dylib</Extensions>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+							<Extensions>.dll;.bpl</Extensions>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="ProjectOSXInfoPList">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents</RemoteDir>
+							<Operation>1</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="File">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>0</Operation>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="DebugSymbols">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>1</Operation>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="DependencyFramework">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>1</Operation>
+							<Extensions>.framework</Extensions>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="AdditionalDebugSymbols">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\MacOS</RemoteDir>
+							<Operation>1</Operation>
+						</Platform>
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="ProjectOSXResource">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\Resources</RemoteDir>
+							<Operation>1</Operation>
+						</Platform>
+					</DeployClass>
+					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
+				</Deployment>
+				<Platforms>
+					<Platform value="Win64">True</Platform>
+					<Platform value="Win32">True</Platform>
+				</Platforms>
+				<ModelSupport>False</ModelSupport>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
+		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
+		<Import Condition="Exists('$(MSBuildProjectName).deployproj')" Project="$(MSBuildProjectName).deployproj"/>
+	</Project>

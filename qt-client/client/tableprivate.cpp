@@ -16,6 +16,7 @@
 #include "sound_effects.h"
 #include "pokermain.h"
 #include "table.h"
+#include "refholder.h"
 
 static QScriptValue js_log(QScriptContext *context, QScriptEngine *engine) {
 	qDebug() << /*QDateTime::currentDateTime() <<*/ "JS:" << context->argument(0).toString();
@@ -157,6 +158,9 @@ bool TablePrivate::table_status(QSharedPointer<Data::TableStatus> ts) {
 	}
 	QScriptValueList args;
 	QScriptValue jsts = engine.newQObject(ts.data());
+	RefHolder *holder = new RefHolder;
+	holder->ts = ts;
+	jsts.setProperty("refholder",engine.newQObject(holder));
 	QList<Data::Pot*>::Iterator i1;
 	QScriptValue pots = engine.newArray();
 	jsts.setProperty("pots",pots);

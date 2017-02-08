@@ -55,6 +55,8 @@ type
       FRaisePresetButtonPressedImage: TAsphyreImage;
       FStandUpButtonNormalImage: TAsphyreImage;
       FStandUpButtonPressedImage: TAsphyreImage;
+      FAddChipsButtonNormalImage: TAsphyreImage;
+      FAddChipsButtonPressedImage: TAsphyreImage;
       FPlayNowButtonNormalImage: TAsphyreImage;
       FPlayNowButtonPressedImage: TAsphyreImage;
       FSeatActionCheck: TAsphyreImage;
@@ -68,7 +70,8 @@ type
       FLeaveWaitingListPressed: TAsphyreImage;
       FSeatLeftReservedImage: TAsphyreImage;
       FSeatRightReservedImage: TAsphyreImage;
-
+      FReportBugNormalImage: TAsphyreImage;
+      FReportBugPressedImage: TAsphyreImage;
       FGrayscaleImages: TObjectDictionary<TAsphyreImage, TAsphyreImage>;
 
       FBarmenoFonts: TBarmenoFonts;
@@ -87,10 +90,12 @@ type
       FActionButtonAspectRatio: Single;
       FRaisePresetButtonAspectRatio: Single;
       FStandUpButtonAspectRatio: Single;
+      FAddChipsButtonAspectRatio: Single;
       FPlayNowButtonAspectRatio: Single;
       FSeatActionFrameAspectRatio: Single;
       FJoinWaitingListButtonAspectRatio: Single;
       FLeaveWaitingListButtonAspectRatio: Single;
+      FReportBugButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -116,19 +121,18 @@ type
       );
       {$ENDIF}
 
-      RAISE_VALUEBOX_WIDTH      = 109;
-      RAISE_VALUEBOX_HEIGHT     = 18;
-      RAISE_VALUEBOX_X          = 14;
-      RAISE_VALUEBOX_Y          = 6;
-      RAISE_TRACK_LEFT_OFFSET   = 140;
-      RAISE_TRACK_TOP_OFFSET    = 9;
-      RAISE_TRACK_SLIDER_WIDTH  = 283;
-      RAISE_TRACK_SLIDER_HEIGHT = 9;
-      STANDUP_BUTTON_TRIANGLE_W = 26;
-      SEAT_AVATAR_WIDTH         = 66;
-      SEAT_AVATAR_HEIGHT        = 66;
-      SEAT_LEFT_AVATAR_X        = 199;
-      SEAT_RIGHT_AVATAR_X       = 43;
+      RAISE_VALUEBOX_WIDTH       = 109;
+      RAISE_VALUEBOX_HEIGHT      = 18;
+      RAISE_VALUEBOX_X           = 14;
+      RAISE_VALUEBOX_Y           = 6;
+      RAISE_TRACK_LEFT_OFFSET    = 140;
+      RAISE_TRACK_TOP_OFFSET     = 9;
+      RAISE_TRACK_SLIDER_WIDTH   = 283;
+      RAISE_TRACK_SLIDER_HEIGHT  = 9;
+      SEAT_AVATAR_WIDTH          = 66;
+      SEAT_AVATAR_HEIGHT         = 66;
+      SEAT_LEFT_AVATAR_X         = 199;
+      SEAT_RIGHT_AVATAR_X        = 43;
 
     {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
     class var
@@ -176,6 +180,8 @@ type
     property RaisePresetButtonPressedImage: TAsphyreImage read FRaisePresetButtonPressedImage;
     property StandUpButtonNormalImage: TAsphyreImage read FStandUpButtonNormalImage;
     property StandUpButtonPressedImage: TAsphyreImage read FStandUpButtonPressedImage;
+    property AddChipsButtonNormalImage: TAsphyreImage read FAddChipsButtonNormalImage;
+    property AddChipsButtonPressedImage: TAsphyreImage read FAddChipsButtonPressedImage;
     property PlayNowButtonNormalImage: TAsphyreImage read FPlayNowButtonNormalImage;
     property PlayNowButtonPressedImage: TAsphyreImage read FPlayNowButtonPressedImage;
     property SeatActionCheck: TAsphyreImage read FSeatActionCheck;
@@ -189,6 +195,8 @@ type
     property LeaveWaitingListPressed: TAsphyreImage read FLeaveWaitingListPressed;
     property SeatLeftReservedImage: TAsphyreImage read FSeatLeftReservedImage;
     property SeatRightReservedImage: TAsphyreImage read FSeatRightReservedImage;
+    property ReportBugNormalImage: TAsphyreImage read FReportBugNormalImage;
+    property ReportBugPressedImage: TAsphyreImage read FReportBugPressedImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -206,10 +214,12 @@ type
     property ActionButtonAspectRatio: Single read FActionButtonAspectRatio;
     property RaisePresetButtonAspectRatio: Single read FRaisePresetButtonAspectRatio;
     property StandUpButtonAspectRatio: Single read FStandUpButtonAspectRatio;
+    property AddChipsButtonAspectRatio: Single read FAddChipsButtonAspectRatio;
     property PlayNowButtonAspectRatio: Single read FPlayNowButtonAspectRatio;
     property SeatActionFrameAspectRatio: Single read FSeatActionFrameAspectRatio;
     property JoinWaitingListButtonAspectRatio: Single read FJoinWaitingListButtonAspectRatio;
     property LeaveWaitingListButtonAspectRatio: Single read FLeaveWaitingListButtonAspectRatio;
+    property ReportBugButtonAspectRatio: Single read FReportBugButtonAspectRatio;
   end;
 
 var
@@ -253,7 +263,7 @@ begin
   FDXImages := TAsphyreImages.Create;
 
   AddDXImage('RoomBackground.image', FRoomBackgroundImage);
-  AddDXImage('RoomBackground_ParketRed.image', FFinalRoomBackgroundImage);
+  AddDXImage('RoomBackgroundFinal.image', FFinalRoomBackgroundImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
   AddDXImage('SeatLeft.image', FSeatLeftImage, FSeatAspectRatio);
   AddDXImage('SeatLeftActive.image', FSeatLeftActiveImage);
@@ -282,6 +292,8 @@ begin
   AddDXImage('RaisePresetButtonPressed.image', FRaisePresetButtonPressedImage);
   AddDXImage('StandUpButtonNormal.image', FStandUpButtonNormalImage, FStandUpButtonAspectRatio);
   AddDXImage('StandUpButtonPressed.image', FStandUpButtonPressedImage);
+  AddDXImage('AddChipsNormal.image', FAddChipsButtonNormalImage, FAddChipsButtonAspectRatio);
+  AddDXImage('AddChipsPressed.image', FAddChipsButtonPressedImage);
   AddDXImage('PlayNowButtonNormal.image', FPlayNowButtonNormalImage, FPlayNowButtonAspectRatio);
   AddDXImage('PlayNowButtonPressed.image', FPlayNowButtonPressedImage);
   AddDXImage('ActionCall.image', FSeatActionCall, FSeatActionFrameAspectRatio);
@@ -295,6 +307,8 @@ begin
   AddDXImage('LeaveWaitingList_Pressed.image', FLeaveWaitingListPressed);
   AddDXImage('SeatLeftReserved.image', FSeatLeftReservedImage);
   AddDXImage('SeatRightReserved.image', FSeatRightReservedImage);
+  AddDXImage('ReportBugNormal.image', FReportBugNormalImage, FReportBugButtonAspectRatio);
+  AddDXImage('ReportBugPressed.image', FReportBugPressedImage);
 
   FGrayscaleImages := TObjectDictionary<TAsphyreImage, TAsphyreImage>.Create([]);
 

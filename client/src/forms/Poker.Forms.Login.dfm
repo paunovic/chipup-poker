@@ -5,7 +5,6 @@ object frmChipUpLogin: TfrmChipUpLogin
   AlphaBlendValue = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'Welcome to ChipUP Poker'
   ClientHeight = 371
   ClientWidth = 558
   Color = clBlack
@@ -3173,7 +3172,6 @@ object frmChipUpLogin: TfrmChipUpLogin
     Style.IsFontAssigned = True
     TabOrder = 2
     Transparent = True
-    Width = 129
   end
   object cbRememberPassword: TcxCheckBox
     Left = 134
@@ -3182,7 +3180,6 @@ object frmChipUpLogin: TfrmChipUpLogin
     ParentFont = False
     TabOrder = 3
     Transparent = True
-    Width = 129
   end
   object btLogin: TcxButton
     Left = 138
@@ -3240,14 +3237,17 @@ object frmChipUpLogin: TfrmChipUpLogin
     Top = 147
     AutoSize = False
     ParentFont = False
-    Properties.Alignment.Vert = taVCenter
     Properties.MaxLength = 200
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
+    Style.LookAndFeel.NativeStyle = False
     Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.NativeStyle = False
+    StyleFocused.LookAndFeel.NativeStyle = False
+    StyleHot.LookAndFeel.NativeStyle = False
     TabOrder = 0
     Height = 30
     Width = 174
@@ -3257,7 +3257,6 @@ object frmChipUpLogin: TfrmChipUpLogin
     Top = 178
     AutoSize = False
     ParentFont = False
-    Properties.Alignment.Vert = taVCenter
     Properties.EchoMode = eemPassword
     Properties.MaxLength = 32
     Properties.PasswordChar = '*'
@@ -3266,7 +3265,11 @@ object frmChipUpLogin: TfrmChipUpLogin
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
+    Style.LookAndFeel.NativeStyle = False
     Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.NativeStyle = False
+    StyleFocused.LookAndFeel.NativeStyle = False
+    StyleHot.LookAndFeel.NativeStyle = False
     TabOrder = 1
     Height = 30
     Width = 174

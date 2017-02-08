@@ -40,6 +40,7 @@ private slots:
 	void on_actionAlways_Run_it_Twice_toggled(bool arg1);
 	void on_actionConfirmation_on_fold_toggled(bool arg1);
 	void on_actionAlways_Check_Fold_toggled(bool arg1);
+	void on_actionContact_Us_triggered();
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -47,7 +48,6 @@ private:
 	void clubTriggered(Data::Club *club);
 
 	Ui::MainWindow *ui;
-	QHeaderView private_club_header,game_header;
 	QItemSelectionModel *public_club_selection_model,*private_club_selection_model, *game_selection_model;
 	Data::Club *currentClub;
 };

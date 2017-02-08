@@ -113,7 +113,8 @@ type
     scChangePlayerManagerState = 117,
     scSplitTableCards = 118,
     scSoftException = 119,
-    scTableSitClose = 120
+    scTableSitClose = 120,
+    scApproveClubMember = 121
   );
 
 
@@ -238,6 +239,7 @@ begin
     Integer(scSplitTableCards): result := 'scSplitTableCards';
     Integer(scSoftException): result := 'scSoftException';
     Integer(scTableSitClose): result := 'scTableSitClose';
+    Integer(scApproveClubMember): result := 'scApproveClubMember';
   else
     result := Format('%d', [ACode]);
   end;

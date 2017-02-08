@@ -1,7 +1,6 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  Caption = 'ChipUP Poker'
   ClientHeight = 582
   ClientWidth = 841
   Color = clBlack
@@ -20,8 +19,8 @@ object frmChipUpMain: TfrmChipUpMain
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnDeactivate = FormDeactivate
   OnResize = FormResize
+  OnShow = FormShow
   DesignSize = (
     841
     582)
@@ -3528,8 +3527,8 @@ object frmChipUpMain: TfrmChipUpMain
       4E835BF9A3BEAB367F72C53337F33B3FCD9A9BDC8C8FB873FC2D1E8B27EA393D
       FB1ECD883F97DF6926B7E367EE5D1BBFE9EAFF078F3BD0750BD25FE900000000
       49454E44AE426082}
+    Properties.FitMode = ifmNormal
     Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
     Style.BorderStyle = ebsNone
@@ -3546,8 +3545,8 @@ object frmChipUpMain: TfrmChipUpMain
     Left = 688
     Top = 15
     Anchors = [akTop, akRight]
+    Properties.FitMode = ifmNormal
     Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
     Style.BorderStyle = ebsNone
@@ -3585,6 +3584,7 @@ object frmChipUpMain: TfrmChipUpMain
       Align = alClient
       TabOrder = 3
       Properties.ActivePage = tsHomeGames
+      Properties.CustomButtons.Buttons = <>
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 438
@@ -3605,6 +3605,7 @@ object frmChipUpMain: TfrmChipUpMain
           TabOrder = 0
           OnEnter = gridPublicClubsEnter
           object gridPublicClubsTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnCellDblClick = gridPublicClubsTableCellDblClick
             OnFocusedRecordChanged = gridPublicClubsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3703,6 +3704,7 @@ object frmChipUpMain: TfrmChipUpMain
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
           object gridGamesTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3784,7 +3786,6 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 278
           Width = 143
           Height = 35
-          Margin = 15
           Action = acOpenClubLobby
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
@@ -3803,7 +3804,6 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 316
           Width = 143
           Height = 35
-          Margin = 15
           Action = acShowGameTableForm
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
@@ -3822,7 +3822,6 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 354
           Width = 143
           Height = 35
-          Margin = 15
           Action = acShowCreateClubForm
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
@@ -3841,7 +3840,6 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 392
           Width = 143
           Height = 35
-          Margin = 15
           Action = acShowJoinClubForm
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
@@ -3864,6 +3862,7 @@ object frmChipUpMain: TfrmChipUpMain
           TabOrder = 8
           OnEnter = gridPrivateClubsEnter
           object gridPrivateClubsTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnCellDblClick = gridPrivateClubsTableCellDblClick
             OnFocusedRecordChanged = gridPublicClubsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3957,6 +3956,7 @@ object frmChipUpMain: TfrmChipUpMain
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 1
           object gridTournamentsTable: TcxGridTableView
+            Navigator.Buttons.CustomButtons = <>
             OnCellDblClick = gridTournamentsTableCellDblClick
             OnFocusedRecordChanged = gridTournamentsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3993,7 +3993,7 @@ object frmChipUpMain: TfrmChipUpMain
               Properties.DisplayFormat = 'dd MMM, hh:mm'
               Properties.EditFormat = 'dd MMM, hh:mm'
               Properties.ImmediatePost = True
-              Properties.InputKind = ikStandard
+              Properties.InputKind = ikRegExpr
               Properties.Kind = ckDateTime
               Properties.ReadOnly = False
               Properties.UseLeftAlignmentOnEditing = False
@@ -4036,7 +4036,6 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 392
           Width = 143
           Height = 35
-          Margin = 15
           Action = acTournamentLobby
           Anchors = [akLeft, akBottom]
           Caption = 'TOURNAMENT LOBBY'
@@ -4056,7 +4055,6 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 354
           Width = 143
           Height = 35
-          Margin = 15
           Action = acTournamentRegister
           Anchors = [akLeft, akBottom]
           Colors.NormalText = 48896
@@ -4215,8 +4213,6 @@ object frmChipUpMain: TfrmChipUpMain
       Top = 34
       Width = 143
       Height = 56
-      Margin = 18
-      Spacing = 10
       Action = acShowHomeGamesLayout
       Colors.PressedText = 2910453
       LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormBigButtons'
@@ -4250,9 +4246,7 @@ object frmChipUpMain: TfrmChipUpMain
         00000000000000000000}
       OptionsImage.Margin = 18
       OptionsImage.Spacing = 10
-      SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
-      SpeedButtonOptions.Down = True
       TabOrder = 1
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -4266,8 +4260,6 @@ object frmChipUpMain: TfrmChipUpMain
       Top = 92
       Width = 143
       Height = 56
-      Margin = 18
-      Spacing = 10
       Action = acShowTournamentLayout
       Colors.PressedText = 2910453
       LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormBigButtons'
@@ -4301,7 +4293,6 @@ object frmChipUpMain: TfrmChipUpMain
         00000000000000000000}
       OptionsImage.Margin = 18
       OptionsImage.Spacing = 10
-      SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 0
       Font.Charset = ANSI_CHARSET
@@ -4343,8 +4334,8 @@ object frmChipUpMain: TfrmChipUpMain
     AnimateDuration = 50
     AnimationStyle = asFade
     ColorMap.HighlightColor = clBtnHighlight
-    ColorMap.UnusedColor = 14673125
-    ColorMap.SelectedColor = clHighlight
+    ColorMap.UnusedColor = clWhite
+    ColorMap.MenuColor = clMenu
     EdgeInner = esNone
     EdgeOuter = esNone
     Font.Charset = DEFAULT_CHARSET
@@ -4470,7 +4461,7 @@ object frmChipUpMain: TfrmChipUpMain
               end
               item
                 Action = acShowAboutForm
-                Caption = '&About ChipUP Poker...'
+                Caption = '&About %s...'
               end>
             Caption = '&Help'
           end
@@ -4497,8 +4488,8 @@ object frmChipUpMain: TfrmChipUpMain
       end
       item
       end>
-    Left = 452
-    Top = 52
+    Left = 384
+    Top = 32
     StyleName = 'Standard'
     object acShowChangeEMailForm: TAction
       Category = 'Account'
@@ -4571,7 +4562,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acShowAboutForm: TAction
       Category = 'Help'
-      Caption = 'About ChipUP Poker...'
+      Caption = 'About %s...'
       OnExecute = acShowAboutFormExecute
     end
     object acSoundsOnOff: TAction
@@ -4663,8 +4654,8 @@ object frmChipUpMain: TfrmChipUpMain
   end
   object ApplicationEvents: TApplicationEvents
     OnDeactivate = ApplicationEventsDeactivate
-    Left = 344
-    Top = 52
+    Left = 552
+    Top = 32
   end
   object RVStyle: TRVStyle
     TextStyles = <
@@ -4819,12 +4810,12 @@ object frmChipUpMain: TfrmChipUpMain
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 560
-    Top = 52
+    Left = 620
+    Top = 32
   end
   object StyleRepository: TcxStyleRepository
     Left = 464
-    Top = 112
+    Top = 32
     PixelsPerInch = 96
     object styleTournamentOpen: TcxStyle
       AssignedValues = [svFont, svTextColor]
@@ -4880,7 +4871,7 @@ object frmChipUpMain: TfrmChipUpMain
     Enabled = False
     Interval = 500
     OnTimer = tiTournamentInfoRefreshTimer
-    Left = 348
-    Top = 112
+    Left = 280
+    Top = 32
   end
 end

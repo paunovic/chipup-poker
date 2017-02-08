@@ -16,6 +16,8 @@ QMAKE_INFO_PLIST = Info.plist
 QMAKE_CXXFLAGS += -g
 INCLUDEPATH += ../protobuf/ ../google-breakpad/
 TARGET = chipuppoker
+target.path = /${out}/bin
+INSTALLS += target
 
 # to compile into a dmg:
 # codesign -f -s "Tox CI (jenkins) CSA" qtox.app --deep
@@ -73,7 +75,7 @@ SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
     filesaver.cpp \
     version.cpp \
     minidumpuploader.cpp \
-    notifywindow.cpp
+    notifywindow.cpp contactus.cpp
 
 HEADERS  += loginwindow.h data/chat.h \
     pokermain.h \
@@ -107,10 +109,10 @@ HEADERS  += loginwindow.h data/chat.h \
     filesaver.h \
     version.h \
     minidumpuploader.h \
-    notifywindow.h
+    notifywindow.h contactus.h
 
 SOURCES += sound_effects.cpp selftest.cpp
-HEADERS += sound_effects.h selftest.h
+HEADERS += sound_effects.h selftest.h refholder.h
 
 FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     registerwindow.ui \
@@ -119,7 +121,7 @@ FORMS    += loginwindow.ui main_window.ui join_club.ui createclub.ui \
     jseditor.ui \
     table/table_sit.ui selftest.ui \
     clublobby.ui \
-    NotifyWindow.ui
+    NotifyWindow.ui contactus.ui
 
 RESOURCES += \
     resources.qrc

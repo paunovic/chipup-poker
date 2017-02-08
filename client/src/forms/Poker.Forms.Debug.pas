@@ -12,7 +12,7 @@ uses
   ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
   Poker.Common.SafeMutex, Poker.Common.CPUUsage, dxScreenTip, dxCustomHint,
-  cxHint;
+  cxHint, cxClasses;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc,
@@ -28,10 +28,11 @@ type
     FTypeStr: String;
     FData: String;
     FSubData: String;
+    FBuffer: String;
   protected
     procedure DoNotify; override;
   public
-    class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
+    class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ABuffer: pointer; const ABufferSize: Integer);
   end;
 
   TDebugFormRefresh = class(TIdSync)
@@ -99,6 +100,18 @@ type
     lbvMemoryUsage: TcxLabel;
     lbsMemoryUsage: TcxLabel;
     HintStyleController: TcxHintStyleController;
+    tiBufferCopyIndicator: TTimer;
+    btShowSocketIO: TcxButton;
+    paSocketIO: TPanel;
+    btSocketIOSend: TcxButton;
+    btSocketIORecv: TcxButton;
+    teSocketIO: TcxTextEdit;
+    acShowSocketIO: TAction;
+    acSendSocketIO: TAction;
+    acRecvSocketIO: TAction;
+    btAutoClearSocketIO: TcxButton;
+    btClearSocketIO: TcxButton;
+    acClearSocketIO: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -114,6 +127,11 @@ type
     procedure teFindTextPropertiesChange(Sender: TObject);
     procedure cbDebugInfoPropertiesChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure tiBufferCopyIndicatorTimer(Sender: TObject);
+    procedure acShowSocketIOExecute(Sender: TObject);
+    procedure acSendSocketIOExecute(Sender: TObject);
+    procedure acRecvSocketIOExecute(Sender: TObject);
+    procedure acClearSocketIOExecute(Sender: TObject);
   private
     const
       SCROLLBACK_LINES = 500;
@@ -123,7 +141,7 @@ type
 
     function FindStyleWithName(const AName: String): Integer;
     procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
-    procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
+    procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData, ABuffer: String);
     procedure UpdateMemoryUsageDetails;
     procedure RefreshSocketState;
     procedure RefreshSocketLatency;
@@ -145,7 +163,7 @@ type
   function IsDebugFormAssigned: Boolean;
   function IsDebugRTTIEnabled: Boolean;
 
-  procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+  procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = ''; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
   procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
 
 implementation
@@ -158,7 +176,7 @@ uses
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
-  RectMarks;
+  {RectMarks, FIXME} Poker.Settings, Vcl.Clipbrd, synacode;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -182,7 +200,7 @@ begin
   result := frmDebug.pmiRTTIEnabled.Checked;
 end;
 
-procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = ''; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
 var
   time_str: String;
   type_str: String;
@@ -207,7 +225,7 @@ begin
   end;
 
   if IsDebugFormAssigned then
-    TDebugFormLog.Add(AType, time_str, type_str, AData, ASubData);
+    TDebugFormLog.Add(AType, time_str, type_str, AData, ASubData, ABuffer, ABufferSize);
 
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
 
@@ -283,6 +301,7 @@ begin
   Height := Round(Screen.Monitors[0].Height / 2.3);
 
   FSelfCPUCounter := TCPUUsage.CreateCounter(GetCurrentProcessId);
+  Caption := Format('%s - Debug', [Settings.Hardcoded.PROJECT_CAPTION]);
 
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
@@ -338,14 +357,14 @@ begin
   else
     rv := rvLog;
 
-  ClearRectMarks(rv);
+  // ClearRectMarks(rv); FIXME
 
   if teFindText.Tag = 0 then
     Exit;
-
+    {
   if teFindText.Text <> '' then
     MarkSubstring(rv, teFindText.Text, clRed);
-
+     FIXME }
   rv.Format;
 end;
 
@@ -372,6 +391,26 @@ begin
   RefreshStats([]);
 end;
 
+procedure TfrmDebug.tiBufferCopyIndicatorTimer(Sender: TObject);
+var
+  table: TRVTableItemInfo;
+  buffer: String;
+begin
+  table := rvLog.GetItem(tiBufferCopyIndicator.Tag) as TRVTableItemInfo;
+  buffer := table.Cells[0, 2].GetItemTag(0);
+  table.Cells[0, 2].Clear;
+  if Pos('B', table.Tag) > 0 then
+    table.Cells[0, 2].AddFmt('B', [], FindStyleWithName('Buffer'), 1)
+  else
+    table.Cells[0, 2].AddFmt('', [], FindStyleWithName('Buffer'), 1);
+  table.Cells[0, 2].SetItemTag(0, buffer);
+
+  rvLog.Format;
+
+  tiBufferCopyIndicator.Tag := -1;
+  tiBufferCopyIndicator.Enabled := FALSE;
+end;
+
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
@@ -383,6 +422,11 @@ procedure TfrmDebug.acClearLogExecute(Sender: TObject);
 begin
   rvLog.ClearAll;
   rvLog.Format;
+end;
+
+procedure TfrmDebug.acClearSocketIOExecute(Sender: TObject);
+begin
+  teSocketIO.Clear;
 end;
 
 procedure TfrmDebug.acCopyLogSelectionExecute(Sender: TObject);
@@ -399,6 +443,57 @@ begin
     end;
 end;
 
+procedure TfrmDebug.acSendSocketIOExecute(Sender: TObject);
+var
+  buffer: AnsiString;
+  ms: TMemoryStream;
+begin
+  ms := TMemoryStream.Create;
+  try
+    buffer := DecodeBase64(AnsiString(teSocketIO.Text));
+    if Length(buffer) > 0 then
+    begin
+      ms.WriteBuffer(buffer[1], Length(buffer));
+      DecompressStream(ms);
+      ServerSocket.SendRaw(ms.Memory, ms.Size);
+    end;
+  finally
+    ms.Free;
+  end;
+
+  if btAutoClearSocketIO.Down then
+    teSocketIO.Clear;
+end;
+
+procedure TfrmDebug.acRecvSocketIOExecute(Sender: TObject);
+var
+  buffer: AnsiString;
+  ms: TMemoryStream;
+begin
+  ms := TMemoryStream.Create;
+  try
+    buffer := DecodeBase64(AnsiString(teSocketIO.Text));
+    if Length(buffer) > 0 then
+    begin
+      ms.WriteBuffer(buffer[1], Length(buffer));
+      DecompressStream(ms);
+      ServerSocket.AppendToReceiveBuffer(ms.Memory, ms.Size);
+      ServerSocket.ParseReceiveBuffer;
+    end;
+  finally
+    ms.Free;
+  end;
+
+  if btAutoClearSocketIO.Down then
+    teSocketIO.Clear;
+end;
+
+procedure TfrmDebug.acShowSocketIOExecute(Sender: TObject);
+begin
+  paSocketIO.Visible := btShowSocketIO.Down;
+  rvLog.Format;
+end;
+
 function TfrmDebug.FindStyleWithName(const AName: String): Integer;
 var
   C1: Integer;
@@ -409,7 +504,7 @@ begin
   Exit(0);
 end;
 
-procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
+procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData, ABuffer: String);
 var
   table: TRVTableItemInfo;
   sl: TStringList;
@@ -437,7 +532,8 @@ begin
   if rvLog.ItemCount >= SCROLLBACK_LINES then
     rvLog.DeleteParas(0, rvLog.ItemCount - SCROLLBACK_LINES + 1);
 
-  table := TRVTableItemInfo.CreateEx(1, 4, rvLog.RVData);
+  table := TRVTableItemInfo.CreateEx(1, 5, rvLog.RVData);
+  table.Tag := '';
   with table do
   begin
     BorderWidth := 0;
@@ -450,28 +546,40 @@ begin
     Options := [rvtoRTFAllowAutofit];
 
     Cells[0, 0].BestWidth := 80;
-    Cells[0, 1].BestWidth := 40;
-    Cells[0, 2].BestWidth := 10;
+    Cells[0, 1].BestWidth := 30;
+    Cells[0, 2].BestWidth := 8;
+    Cells[0, 3].BestWidth := 8;
 
-    Cells[0, 0].Clear;
-    Cells[0, 1].Clear;
-    Cells[0, 2].Clear;
-    Cells[0, 3].Clear;
+    for C1 := 0 to table.ColCount - 1 do
+      Cells[0, C1].Clear;
 
     Cells[0, 0].AddFmt('%s', [ATime], FindStyleWithName('Time'), 0);
     Cells[0, 1].AddFmt('%s', [ATypeStr], FindStyleWithName('T-' + ATypeStr), 1);
-    if ASubData <> '' then
-      Cells[0, 2].AddFmt('+', [], FindStyleWithName('Subdata'), 1)
+
+    if ABuffer <> '' then
+    begin
+      Cells[0, 2].AddFmt('B', [], FindStyleWithName('Buffer'), 1);
+      Cells[0, 2].SetItemTag(0, ABuffer);
+      table.Tag := table.Tag + 'B';
+    end
     else
-      Cells[0, 2].AddFmt('', [], FindStyleWithName('Subdata'), 1);
-    Cells[0, 3].AddFmt('%s', [AData], FindStyleWithName('D-' + ATypeStr), 2);
+      Cells[0, 2].AddFmt('', [], FindStyleWithName('Buffer'), 1);
+
+    if ASubData <> '' then
+    begin
+      Cells[0, 3].AddFmt('+', [], FindStyleWithName('Subdata'), 1);
+      table.Tag := table.Tag + 'E';
+    end
+    else
+      Cells[0, 3].AddFmt('', [], FindStyleWithName('Subdata'), 1);
+
+    Cells[0, 4].AddFmt('%s', [AData], FindStyleWithName('D-' + ATypeStr), 2);
   end;
   rvLog.AddItem('', table);
 
   if ASubData <> '' then
   begin
-    table.Tag := 'E';
-    table := TRVTableItemInfo.CreateEx(1, 4, rvLog.RVData);
+    table := TRVTableItemInfo.CreateEx(1, 2, rvLog.RVData);
     with table do
     begin
       BorderWidth := 0;
@@ -483,23 +591,18 @@ begin
       BestWidth := 0;
       Options := [rvtoRTFAllowAutofit];
 
-      Cells[0, 0].BestWidth := 75;
-      Cells[0, 1].BestWidth := 40;
-      Cells[0, 2].BestWidth := 10;
+      Cells[0, 0].BestWidth := 40;
 
-      Cells[0, 0].Clear;
-      Cells[0, 1].Clear;
-      Cells[0, 2].Clear;
-      Cells[0, 3].Clear;
+      for C1 := 0 to ColCount - 1 do
+        Cells[0, C1].Clear;
 
       Cells[0, 0].AddFmt('', [], 0, 0);
-      Cells[0, 1].AddFmt('', [], 0, 0);
-      Cells[0, 2].AddFmt('', [], 0, 0);
+
       sl := TStringList.Create;
       try
         Split(#10, ASubData, sl);
         for C1 := 0 to sl.Count - 1 do
-          Cells[0, 3].AddFmt('%s', [sl[C1]], FindStyleWithName('Subdata'), 2);
+          Cells[0, 1].AddFmt('%s', [sl[C1]], FindStyleWithName('Subdata'), 2);
       finally
         sl.Free;
       end;
@@ -511,8 +614,8 @@ begin
   if (teFindText.Tag = 1) and
      (teFindText.Text <> '') then
   begin
-    ClearRectMarks(rvLog);
-    MarkSubstring(rvLog, teFindText.Text, clRed);
+    {ClearRectMarks(rvLog); FIXME
+    MarkSubstring(rvLog, teFindText.Text, clRed);}
   end;
 
   if rvLog.VScrollPos < rvLog.VScrollMax then
@@ -526,6 +629,7 @@ var
   is_hidden: Integer;
   rvtag: TRVTag;
   table: TRVTableItemInfo;
+  buffer: String;
 begin
   if ItemNo = -1 then
     Exit;
@@ -534,16 +638,40 @@ begin
     Exit;
 
   rvtag := rvLog.GetItemTag(ItemNo);
-  if rvtag = 'E' then // row is expandable
+  table := rvLog.GetItem(ItemNo) as TRVTableItemInfo;
+
+  // row has buffer data
+  if (Pos('B', rvtag) > 0) and
+     (X in [(rvLog.LeftMargin + table.Cells[0, 2].Left)..(rvLog.LeftMargin + table.Cells[0, 2].Left + table.Cells[0, 2].Width)]) then
+  begin
+    buffer := table.Cells[0, 2].GetItemTag(0);
+    teSocketIO.Text := buffer;
+    Clipboard.AsText := buffer;
+    table.Cells[0, 2].Clear;
+    table.Cells[0, 2].AddFmt('B', [], FindStyleWithName('Buffer-Copied'), 1);
+    table.Cells[0, 2].SetItemTag(0, buffer);
+    if tiBufferCopyIndicator.Enabled then
+      tiBufferCopyIndicator.OnTimer(self);
+    tiBufferCopyIndicator.Enabled := FALSE;
+    tiBufferCopyIndicator.Tag := ItemNo;
+    tiBufferCopyIndicator.Enabled := TRUE;
+
+    rvLog.Format;
+  end;
+
+  // row is expandable
+  if (Pos('E', rvtag) > 0) and
+     (X in [(rvLog.LeftMargin + table.Cells[0, 3].Left)..(rvLog.LeftMargin + table.Cells[0, 3].Left + table.Cells[0, 3].Width)]) then
   begin
     rvLog.GetItemExtraIntProperty(ItemNo + 1, rvepHidden, is_hidden);
     is_hidden := Abs(is_hidden - 1);
     rvLog.SetItemExtraIntProperty(ItemNo + 1, rvepHidden, is_hidden);
-    table := rvLog.GetItem(ItemNo) as TRVTableItemInfo;
+
     if is_hidden = 0 then
-      table.Cells[0, 2].SetItemText(0, '-')
+      table.Cells[0, 3].SetItemText(0, '-')
     else
-      table.Cells[0, 2].SetItemText(0, '+');
+      table.Cells[0, 3].SetItemText(0, '+');
+
     rvLog.Format;
   end;
 end;
@@ -572,13 +700,13 @@ begin
 
   if rvMemoryState.Visible then
   begin
-    ClearRectMarks(rvLog);
+    //ClearRectMarks(rvLog); FIXME
     UpdateMemoryUsageDetails;
     rvMemoryState.BringToFront;
   end
   else
   begin
-    ClearRectMarks(rvMemoryState);
+    // ClearRectMarks(rvMemoryState); FIXME
     teFindText.Properties.OnChange(nil);
   end;
 end;
@@ -649,6 +777,7 @@ end;
 procedure TfrmDebug.RefreshCallbacksData;
 begin
   lbvCallbacks.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+  lbvCallbacks.Hint := MessageContainer.CallbackSetsNames;
   lbvCallbacks.Refresh;
 end;
 
@@ -661,13 +790,22 @@ begin
      (ServerSocket.Socket.Addr <> '') then
   begin
     line := ServerSocket.Socket.Addr;
-    cpos := Pos('.chipuppoker.com', line);
+    cpos := Pos('.', line);
     if cpos > 0 then
       line := Copy(line, 1, cpos - 1);
     lbvServer.Caption := line;
+    lbvServer.Hint := Format('%s:%s', [ServerSocket.Socket.Addr, ServerSocket.Socket.Port]);
+    if ServerSocket.Socket.SslEnable then
+      lbvServer.Hint := lbvServer.Hint + ' (SSL enabled)'
+    else
+      lbvServer.Hint := lbvServer.Hint + ' (SSL disabled)';
   end
   else
+  begin
     lbvServer.Caption := 'Unknown';
+    lbvServer.Hint := '';
+  end;
+
   lbvServer.Refresh;
 end;
 
@@ -871,15 +1009,18 @@ end;
 procedure TDebugFormLog.DoNotify;
 begin
   if IsDebugFormAssigned then
-    frmDebug.Add(FType, FTime, FTypeStr, FData, FSubData);
+    frmDebug.Add(FType, FTime, FTypeStr, FData, FSubData, FBuffer);
 
   ActiveNotifyObjects.Extract(self);
   ActiveNotifyObjects.TrimExcess;
 end;
 
-class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
+class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ABuffer: pointer; const ABufferSize: Integer);
 var
   dfl: TDebugFormLog;
+  buffer_str: String;
+  buffer_raw: AnsiString;
+  ms: TMemoryStream;
 begin
   dfl := TDebugFormLog.Create;
   ActiveNotifyObjects.Add(dfl);
@@ -888,6 +1029,23 @@ begin
   dfl.FTypeStr := ATypeStr;
   dfl.FData := AData;
   dfl.FSubData := ASubData;
+
+  if ABufferSize > 0 then
+  begin
+    ms := TMemoryStream.Create;
+    try
+      ms.WriteBuffer(ABuffer^, ABufferSize);
+      CompressStream(ms);
+      SetString(buffer_raw, PAnsiChar(ms.Memory), ms.Size);
+      buffer_str := String(EncodeBase64(buffer_raw));
+    finally
+      ms.Free;
+    end;
+  end
+  else
+    buffer_str := '';
+
+  dfl.FBuffer := buffer_str;
   dfl.Notify;
 end;
 

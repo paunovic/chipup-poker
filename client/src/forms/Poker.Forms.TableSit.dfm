@@ -53,6 +53,7 @@ object frmTableSit: TfrmTableSit
     Left = 102
     Top = 54
     Anchors = [akLeft, akRight, akBottom]
+    Enabled = False
     Properties.MaxValue = 99999999.000000000000000000
     Properties.MinValue = 1.000000000000000000
     Properties.SpinButtons.Visible = False
@@ -62,7 +63,7 @@ object frmTableSit: TfrmTableSit
     Style.TextColor = clWhite
     Style.TextStyle = [fsBold]
     TabOrder = 1
-    Value = 100.000000000000000000
+    Value = 1.000000000000000000
     Width = 72
   end
   object btOK: TcxButton

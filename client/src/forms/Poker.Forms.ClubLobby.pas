@@ -11,7 +11,8 @@ uses
   cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
   ChipUpPokerDarkSkin, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage,
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
-  Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit;
+  Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit,
+  dxBarBuiltInMenu, cxNavigator;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -42,7 +43,7 @@ type
     btChangeClubDetails: TcxButton;
     gridPlayersListStatus: TcxGridColumn;
     Bevel1: TdxBevel;
-    btSuspendUnsuspend: TcxButton;
+    btSuspendUnsuspendApprove: TcxButton;
     gbTables: TcxGroupBox;
     gridGames: TcxGrid;
     gridGamesTable: TcxGridTableView;
@@ -125,6 +126,8 @@ type
     acMuteUnmutePlayer: TAction;
     btPromoteToManager: TcxButton;
     acPromoteDemoteUser: TAction;
+    gridGamesTableRakeCap: TcxGridColumn;
+    acApprovePlayer: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -147,14 +150,11 @@ type
       const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
     procedure acTablesStatsUnselectAllExecute(Sender: TObject);
     procedure gridTablesEnabledPropertiesChange(Sender: TObject);
-    procedure gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
-    procedure gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridTablesTableDblClick(Sender: TObject);
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
     procedure acSetLimitExecute(Sender: TObject);
-    procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
@@ -164,6 +164,19 @@ type
     procedure acMuteUnmutePlayerExecute(Sender: TObject);
     procedure acPromoteDemoteUserExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure gridGamesTableRakeCapGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
+    procedure acApprovePlayerExecute(Sender: TObject);
+    procedure gridStatsTableBalanceStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTablesStatusStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTablesTableStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -200,6 +213,7 @@ type
     procedure SetParams(const AParams: array of pointer);
 
     property ClubId: TMongoId read FClubId;
+    property SelectedStatsTableId: TMongoId read FSelectedStatsTableId;
   end;
 
 
@@ -213,14 +227,14 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams,
+  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Helpers.PB_ClubMember,
   Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Tables.Table, Poker.Forms.Main, Poker.Protobufs.Objects.ClubMember, Poker.Common.ModalDialogs, Poker.SoftExceptions;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
                       TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
                       TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
@@ -238,15 +252,15 @@ begin
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
-  btSuspendUnsuspend.Top := gbPlayers.Height - btGiveOwnership.Height - 13;
-  btRemovePlayerFromClub.Top := btSuspendUnsuspend.Top;
-  btSetLimit.Top := btSuspendUnsuspend.Top;
-  btResetAllPlayerBalances.Top := btSuspendUnsuspend.Top - 5 - btResetAllPlayerBalances.Height;
+  btSuspendUnsuspendApprove.Top := gbPlayers.Height - btGiveOwnership.Height - 13;
+  btRemovePlayerFromClub.Top := btSuspendUnsuspendApprove.Top;
+  btSetLimit.Top := btSuspendUnsuspendApprove.Top;
+  btResetAllPlayerBalances.Top := btSuspendUnsuspendApprove.Top - 5 - btResetAllPlayerBalances.Height;
   btResetBalance.Top := btResetAllPlayerBalances.Top;
   btGiveOwnership.Top := btResetAllPlayerBalances.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btCloseTable.Top := btNewGame.Top;
-  btMuteUnmutePlayer.Top := btSuspendUnsuspend.Top;
+  btMuteUnmutePlayer.Top := btSuspendUnsuspendApprove.Top;
   btPromoteToManager.Top := btGiveOwnership.Top;
 end;
 
@@ -310,7 +324,8 @@ begin
     if Players.TryGetValue(club.Owner, player) then
       owner_name := player.Displayname;
 
-    lbsSubheader.Caption := Format('Owner: %s           Members: %d           Club ID: %d', [owner_name, club.Members.Count, club.Seq]);
+    lbsSubheader.Caption := Format('Owner: %s           Members: %d (%d pending)           Club ID: %d',
+      [owner_name, club.MemberCount, club.PendingMemberCount, club.Seq]);
 
     is_manager := FALSE;
     if club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
@@ -319,7 +334,7 @@ begin
     if not club.GetMemberInfo(FSelectedPlayerId, member) then
       member := nil;
 
-    is_owner := club.Owner = dmMain.SelfInfo.MongoId;
+    is_owner := (club.Owner = dmMain.SelfInfo.MongoId);
 
     if not club.GetMemberInfo(FSelectedPlayerId, member) then
       member := nil;
@@ -329,25 +344,25 @@ begin
     btChangeClubDetails.Visible := is_owner;
     acShowClubChangeDetailsForm.Enabled := is_owner;
     acUpdateClubDetails.Enabled := is_owner;
-    btCloseClub.Visible := is_owner;
-    acCloseClub.Enabled := is_owner;
     btSetLimit.Visible := is_owner;
     acResetBalance.Visible := is_owner;
+    btGiveOwnership.Visible := is_owner;
+    acGiveOwnership.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
     acResetBalance.Enabled := (is_owner) and (Assigned(member));
     acResetPlayerBalances.Visible := is_owner;
     acResetPlayerBalances.Enabled := is_owner;
+    acRemovePlayer.Enabled := (Assigned(member)) and (is_owner);
     acSetLimit.Enabled := (is_owner) and (Assigned(member));
-    btGiveOwnership.Visible := is_owner;
-    acGiveOwnership.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
     btRemovePlayerFromClub.Visible := is_owner;
-    acRemovePlayer.Enabled := acGiveOwnership.Enabled;
-    btSuspendUnsuspend.Visible := is_owner;
+    btSuspendUnsuspendApprove.Visible := is_owner;
     acDeleteTableStats.Enabled := is_owner;
     acDeleteTableStats.Visible := is_owner;
     acMuteUnmutePlayer.Visible := is_owner;
     acMuteUnmutePlayer.Enabled := (is_owner) and (Assigned(member));
     acPromoteDemoteUser.Visible := is_owner;
     acPromoteDemoteUser.Enabled := (is_owner) and (Assigned(member)) and (member.MongoId <> dmMain.SelfInfo.MongoId);
+    acApprovePlayer.Enabled := (is_owner) and (Assigned(member)) and (member.Status = msPending);
+
     if Assigned(member) then
     begin
       if member.Muted then
@@ -361,27 +376,31 @@ begin
         acPromoteDemoteUser.Caption := 'Promote to manager';
     end;
 
-    if btSuspendUnsuspend.Visible then
+    if btSuspendUnsuspendApprove.Visible then
     begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.Owner);
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (member.MongoId <> club.Owner);
-      if acReinstatePlayer.Enabled then
-        btSuspendUnsuspend.Action := acReinstatePlayer
+      acSuspendPlayer.Enabled := (Assigned(member)) and (member.Status = msActive) and (member.MongoId <> club.Owner);
+      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Status = msSuspended) and (member.MongoId <> club.Owner);
+      acApprovePlayer.Enabled := (Assigned(member)) and (member.Status = msPending) and (member.MongoId <> club.Owner);
+      if acSuspendPlayer.Enabled then
+        btSuspendUnsuspendApprove.Action := acSuspendPlayer
       else
-        btSuspendUnsuspend.Action := acSuspendPlayer;
+        if acReinstatePlayer.Enabled then
+          btSuspendUnsuspendApprove.Action := acReinstatePlayer
+        else
+          if acApprovePlayer.Enabled then
+            btSuspendUnsuspendApprove.Action := acApprovePlayer;
     end;
     btNewGame.Visible := is_owner;
     acShowCreateGameForm.Enabled := is_owner;
     btCloseTable.Visible := is_owner;
     acCloseTable.Enabled := (is_owner) and (not FSelectedGameId.IsEmpty);
-    Bevel1.Visible := is_owner;
     btLeaveClub.Visible := not is_owner;
     acLeaveClub.Enabled := not is_owner;
     if is_owner then
     begin
       gridPlayersList.Align := alTop;
       gridGames.Align := alTop;
-      gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
+      gridPlayersList.Height := btSuspendUnsuspendApprove.Top - 5;
       gridGames.Height := btNewGame.Top - 5;
     end
     else
@@ -491,6 +510,14 @@ begin
   acCloseTable.Enabled := close_table_act;
 end;
 
+procedure TfrmClubLobby.gridGamesTableRakeCapGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: string);
+begin
+  if AText = '0' then
+    AText := 'No cap';
+end;
+
 procedure TfrmClubLobby.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
@@ -504,8 +531,9 @@ begin
   ConfigureGUI(FALSE);
 end;
 
-procedure TfrmClubLobby.gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmClubLobby.gridStatsTableBalanceStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   value: Variant;
 begin
@@ -579,8 +607,9 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   value: Variant;
 begin
@@ -627,8 +656,9 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 begin
   if ARecord.Values[gridTablesEnabled.Index] then
     AStyle := styleCheckedRow
@@ -670,24 +700,26 @@ var
       query_players[Length(query_players) - 1] := AMember.MongoId;
     end;
 
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
-
-    if AMember.UnlimitedLimit then
-      status := 'Unlimited'
+    if AMember.Status = msPending then
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, 0)
     else
-      status := '-' + ChipsToStr(AMember.BalanceLimit);
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
+
+    if AMember.Status = msPending then
+      status := 'N/A'
+    else
+      if AMember.UnlimitedLimit then
+        status := 'Unlimited'
+      else
+        status := '-' + ChipsToStr(AMember.BalanceLimit);
+
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
     if AMember.MongoId = club.Owner then
       status := 'Owner'
     else
-      if AMember.Suspended then
-        status := 'Suspended'
-      else
-        if AMember.Manager then
-          status := 'Manager'
-        else
-          status := 'Member';
+      status := AMember.StatusAsString;
+
     if AMember.Muted then
       status := status + ' (Muted)';
 
@@ -945,6 +977,7 @@ begin
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%s/%s', [ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind)]));
         c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%s-%s', [ChipsToStr(game.BuyinMin), ChipsToStr(game.BuyinMax)]));
+        c.SetValue(recidx, gridGamesTableRakeCap.Index, game.MaxRakePerHand / 100);
         c.SetValue(recidx, gridGamesSeats.Index, Format('%d/%d', [game.Sitting, game.Seats]));
         c.SetValue(recidx, gridGamesTableStatus.Index, game.StateAsStr);
       end;
@@ -955,6 +988,20 @@ begin
     c.EndFullUpdate;
   end;
   c.Refresh;
+end;
+
+procedure TfrmClubLobby.acApprovePlayerExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  member: TPB_ClubMember;
+begin
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    if club.GetMemberInfo(FSelectedPlayerId, member) then
+      ServerSocket.ChangeClubPlayerFlag(scApproveClubMember, FClubId, FSelectedPlayerId, TRUE);
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
 end;
 
 procedure TfrmClubLobby.acCloseClubExecute(Sender: TObject);
@@ -1384,3 +1431,5 @@ begin
 end;
 
 end.
+
+

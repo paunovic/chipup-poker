@@ -14,7 +14,7 @@ Protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
 var autoRestart = false;
 
 function Client(ip,port) {
-	this.socket = tls.connect(port,ip,{ca:[fs.readFileSync('cert.pem')],servername:'master.chipuppoker.com'},function (){});
+	this.socket = tls.connect(port,ip,{ca:[fs.readFileSync('cert.pem')],servername:'dev-server.chipuppoker.com'},function (){});
 	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.socket.on('end',function () {
 		this.log('connection lost');

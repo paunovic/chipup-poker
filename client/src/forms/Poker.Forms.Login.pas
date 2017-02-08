@@ -8,13 +8,13 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxGraphics, dxSkinsForm,
   Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
   OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit,
-  ChipUpPokerDarkSkin, System.Generics.Collections, Poker.Common.AlphaBlendThread,
+  ChipUPPokerDarkSkin, System.Generics.Collections, Poker.Common.AlphaBlendThread,
   Vcl.Menus, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
 
-  TfrmChipUpLogin = class(TForm)
+  TfrmChipUPLogin = class(TForm)
     alLogin: TActionList;
     acLogin: TAction;
     acShowCreateAccountForm: TAction;
@@ -91,18 +91,20 @@ uses
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
   Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Common.ModalDialogs, Poker.SoftExceptions,
-  Poker.Server.Validators;
+  Poker.Server.Validators, Soap.EncdDecd;
 
 
-procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
+procedure TfrmChipUPLogin.FormCreate(Sender: TObject);
 begin
   AlphaBlendValue := 0;
 
-  FCallbacksId := MessageContainer.AddCallbacks([
+  FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                      TSocketStateChangeCallback.Create(SocketStateChange),
                      TServerMessageCallback.Create(srHello, CSRHello),
                      TServerMessageCallback.Create(srLoginReply, CSRLogin)
                   ]);
+
+  Caption := Format('Welcome to %s', [Settings.Hardcoded.PROJECT_CAPTION]);
 
   CurrentStatus := lsIdle;
   edPassword.Properties.PasswordChar := Chr($25CF);
@@ -114,9 +116,10 @@ begin
   tiLoginTimeout.Interval := Settings.Hardcoded.SERVER_CONNECT_TIMEOUT * 1000;
 
   EnableGUI(FCurrentStatus = lsHelloOk);
+
 end;
 
-procedure TfrmChipUpLogin.FormDestroy(Sender: TObject);
+procedure TfrmChipUPLogin.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   SaveSettings;
@@ -124,20 +127,20 @@ begin
   TAlphaBlendThread.FreeAlpaBlendThread(FAlphaBlendThread);
 end;
 
-procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TfrmChipUPLogin.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  FormsContainer.Remove(TfrmChipUpLogin);
-  frmChipUpMain.LoginStatus(FCurrentStatus);
+  FormsContainer.Remove(TfrmChipUPLogin);
+  frmChipUPMain.LoginStatus(FCurrentStatus);
 end;
 
-procedure TfrmChipUpLogin.CreateParams(var AParams: TCreateParams);
+procedure TfrmChipUPLogin.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
   AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
 end;
 
-procedure TfrmChipUpLogin.CreateServerCombobox;
+procedure TfrmChipUPLogin.CreateServerCombobox;
 var
   C1: Integer;
 begin
@@ -155,25 +158,25 @@ begin
   FServerComboBox.Properties.OnChange := ServerComboboxChange;
 end;
 
-procedure TfrmChipUpLogin.CreatePopupMenu;
+procedure TfrmChipUPLogin.CreatePopupMenu;
 var
   C1: Integer;
   mi: TMenuItem;
 begin
   FPopupMenu := TPopupMenu.Create(self);
 
-  for C1 := 0 to frmChipUpMain.ActionManager.ActionCount - 1 do
-    if frmChipUpMain.ActionManager.Actions[C1].Category = 'Dev' then
+  for C1 := 0 to frmChipUPMain.ActionManager.ActionCount - 1 do
+    if frmChipUPMain.ActionManager.Actions[C1].Category = 'Dev' then
     begin
       mi := TMenuItem.Create(FPopupMenu);
-      mi.Action := frmChipUpMain.ActionManager.Actions[C1];
+      mi.Action := frmChipUPMain.ActionManager.Actions[C1];
       FPopupMenu.Items.Add(mi);
     end;
 
   imgBackground.PopupMenu := FPopupMenu;
 end;
 
-procedure TfrmChipUpLogin.FormShow(Sender: TObject);
+procedure TfrmChipUPLogin.FormShow(Sender: TObject);
 begin
   if DXCore.Device.IsAtFault then
     ModalDialogs.ShowError('Failed to initialize DirectX.'#10 +
@@ -190,7 +193,7 @@ begin
   TAlphaBlendThread.CreateAlphaBlendThread(FAlphaBlendThread, AlphaBlendValue, 255, 0.1, 0.15, AlphaBlendThreadNotify);
 end;
 
-procedure TfrmChipUpLogin.HelloServer;
+procedure TfrmChipUPLogin.HelloServer;
 var
   files: TObjectList<TPB_UpdateFileInfo>;
 begin
@@ -209,7 +212,7 @@ begin
   end;
 end;
 
-procedure TfrmChipUpLogin.ModalFormClose(Sender: TObject);
+procedure TfrmChipUPLogin.ModalFormClose(Sender: TObject);
 begin
   if (Sender is TfrmCreateAccount) and
      ((Sender as TfrmCreateAccount).ModalResult = mrOk) then
@@ -225,7 +228,7 @@ begin
   EnableWindow(Handle, TRUE);
 end;
 
-procedure TfrmChipUpLogin.ApplySettings;
+procedure TfrmChipUPLogin.ApplySettings;
 begin
   cbRememberLogin.Checked := Settings.RememberLogin;
   cbRememberPassword.Checked := Settings.RememberPassword;
@@ -237,7 +240,7 @@ begin
     edPassword.Text := Settings.LoginPassword;
 end;
 
-procedure TfrmChipUpLogin.SaveSettings;
+procedure TfrmChipUPLogin.SaveSettings;
 begin
   Settings.RememberLogin := cbRememberLogin.Checked;
   Settings.RememberPassword := cbRememberPassword.Checked;
@@ -253,7 +256,7 @@ begin
     Settings.LoginPassword := '';
 end;
 
-procedure TfrmChipUpLogin.ServerComboboxChange(Sender: TObject);
+procedure TfrmChipUPLogin.ServerComboboxChange(Sender: TObject);
 var
   item_index: Integer;
 begin
@@ -262,7 +265,7 @@ begin
   ServerSocket.Disconnect;
 end;
 
-procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
+procedure TfrmChipUPLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
   status: String;
 begin
@@ -277,7 +280,7 @@ begin
   btLogin.Caption := status;
 end;
 
-procedure TfrmChipUpLogin.SocketStateChange(const AOldState, ANewState: TSocketState);
+procedure TfrmChipUPLogin.SocketStateChange(const AOldState, ANewState: TSocketState);
 begin
   case ANewState of
     wsOpened,
@@ -303,7 +306,7 @@ begin
   end;
 end;
 
-procedure TfrmChipUpLogin.tiConnectTimer(Sender: TObject);
+procedure TfrmChipUPLogin.tiConnectTimer(Sender: TObject);
 begin
   if ServerSocket.Socket.State = wsClosed then
     FCurrentStatus := lsIdle;
@@ -322,42 +325,43 @@ begin
   end;
 end;
 
-procedure TfrmChipUpLogin.tiLoginTimeoutTimer(Sender: TObject);
+procedure TfrmChipUPLogin.tiLoginTimeoutTimer(Sender: TObject);
 begin
   ServerSocket.Disconnect;
   tiLoginTimeout.Enabled := FALSE;
 end;
 
-procedure TfrmChipUpLogin.WMEraseBkgnd(var AMessage: TWMEraseBkgnd);
+procedure TfrmChipUPLogin.WMEraseBkgnd(var AMessage: TWMEraseBkgnd);
 begin
   AMessage.Result := 0;
 end;
 
-procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
+procedure TfrmChipUPLogin.EnableGUI(const AEnable: Boolean);
 begin
   acLogin.Enabled := (AEnable) and (not DXCore.Device.IsAtFault);
   acShowCreateAccountForm.Enabled := AEnable;
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
 
-procedure TfrmChipUpLogin.EnterDeveloperMode;
+procedure TfrmChipUPLogin.EnterDeveloperMode;
 begin
   CreateServerCombobox;
   CreatePopupMenu;
 end;
 
-procedure TfrmChipUpLogin.LeaveDeveloperMode;
+procedure TfrmChipUPLogin.LeaveDeveloperMode;
 begin
   FreeAndNil(FServerComboBox);
   imgBackground.PopupMenu := nil;
   FreeAndNil(FPopupMenu);
 end;
 
-procedure TfrmChipUpLogin.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmChipUPLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
-      if SHA256String(edLogin.Text) = '1ÕŒ²ƒ{¹ú†ßãi£œq7wP9†Ór2?Û~î2' then // devmodeon!
+      if EncodeString(String(SHA256String(edLogin.Text))) =
+             'MdWMsoN7ufqG3+Npo5xxN3dQOYYODw7TcjI/237uFTI=' then // devmodeon!
       begin
         Settings.DeveloperMode := not Settings.DeveloperMode;
         if Settings.DeveloperMode then
@@ -375,13 +379,13 @@ begin
   end;
 end;
 
-procedure TfrmChipUpLogin.acUpdateExecute(Sender: TObject);
+procedure TfrmChipUPLogin.acUpdateExecute(Sender: TObject);
 begin
   CurrentStatus := lsUpdating;
   Close;
 end;
 
-procedure TfrmChipUpLogin.acLoginExecute(Sender: TObject);
+procedure TfrmChipUPLogin.acLoginExecute(Sender: TObject);
 var
   err: String;
 begin
@@ -408,17 +412,17 @@ begin
   end;
 end;
 
-procedure TfrmChipUpLogin.acShowCreateAccountFormExecute(Sender: TObject);
+procedure TfrmChipUPLogin.acShowCreateAccountFormExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmCreateAccount, self, [], ModalFormClose));
 end;
 
-procedure TfrmChipUpLogin.acShowForgotPasswordFormExecute(Sender: TObject);
+procedure TfrmChipUPLogin.acShowForgotPasswordFormExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmForgotPassword, self, [], ModalFormClose));
 end;
 
-procedure TfrmChipUpLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmChipUPLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
 var
   pbhello: TPB_HelloReply;
 begin
@@ -455,12 +459,14 @@ begin
     ServerSocket.Disconnect;
 end;
 
-procedure TfrmChipUpLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmChipUPLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_LoginReply;
 begin
   if not TTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
     Exit;
+
+  tiLoginTimeout.Enabled := FALSE;
 
   case pbreply.LoginStatus of
     lrSuccess: begin
@@ -483,7 +489,7 @@ begin
   end;
 end;
 
-procedure TfrmChipUpLogin.AlphaBlendThreadNotify(Sender: TObject);
+procedure TfrmChipUPLogin.AlphaBlendThreadNotify(Sender: TObject);
 var
   abthread: TAlphaBlendThread;
 begin
@@ -502,3 +508,4 @@ end;
 
 
 end.
+

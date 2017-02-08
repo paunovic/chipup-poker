@@ -4,6 +4,7 @@ var localFlop = [];
 var localTurn = [];
 var localRiver = [];
 var localPots = [];
+var localRake;
 var db = new DealerButton();
 var testcase = false;
 
@@ -13,8 +14,13 @@ var tableCardOffset = 0.075;
 
 var idleChips = [];
 function getChipStack() {
-	if (idleChips.length) return idleChips.pop();
-	else return new ChipStack();
+	log("getting chip stack");
+	if (idleChips.length) {
+		var x = idleChips.pop();
+		x.keySide = 4;
+		x.rake = false;
+		return x;
+	} else return new ChipStack();
 }
 function hideChips(input) {
 	input.visible = false;
@@ -33,17 +39,25 @@ function updatePots() {
 		}
 	}
 	queueAction(new AnimateBetsToPot(toAnimate));
+	var rake = 0;
 	for (var i=0; i<lastTS.pots.length; i++) {
+		if (lastTS.pots[i].value == 0) continue;
 		if (!localPots[i]) {
 			localPots[i] = getChipStack();
 		}
-		if (lastTS.pots[i].value == 0) continue;
+		localPots[i].keySide = 0;
 		localPots[i].setPosition(0.5 + (0.1*i),0.3);
 		queueAction(new ShowBet(localPots[i]));
 		localPots[i].value = lastTS.pots[i].value - lastTS.pots[i].rake;
-		// TODO, render rake
-		// TODO, animate player bets into this pot
+		rake += lastTS.pots[i].rake;
 	}
+	log("total rake:"+rake);
+	if (!localRake) localRake = getChipStack();
+	localRake.rake = true;
+	localRake.keySide = 1;
+	localRake.setPosition(0.90,0);
+	localRake.value = rake;
+	queueAction(new ShowBet(localRake,{sound:false,nohide:true}));
 }
 function AnimateBetsToPot(bets) {
 	this.bets = bets;
@@ -66,9 +80,9 @@ AnimateBetsToPot.prototype.check = function () {
 var lastTS;
 function tableStatus(ts) {
 	log("TS hook:"+ts.state+" JSON:"+JSON.stringify(ts));
-	updateSeats(ts);
 	lastTS = ts;
 	if (ts.state == 'tsIdle') {
+		controls.hideAllControls();
 		for (var x=0; x<seat_objects.length; x++) {
 			var local = seat_objects[x];
 			if (!local) continue;
@@ -141,6 +155,7 @@ function tableStatus(ts) {
 		var event = ts.events[j];
 		tableEvent(event);
 	}
+	queueAction(new UpdateAllSeats(ts));
 	var mySeat = controls.MySeatIndex;
 	if (mySeat >= 0) {
 		log("myBet:"+ts.bets[mySeat]+" minBet:"+ts.minimumBet);
@@ -159,6 +174,13 @@ function tableStatus(ts) {
 			ClearCheckBoxes();
 		}
 	}
+}
+function UpdateAllSeats(ts) {
+	this.ts = ts;
+}
+UpdateAllSeats.prototype.begin = function () {
+	updateSeats(this.ts);
+	eventDone();
 }
 function updateSeats(ts,opts) {
 	var i;
@@ -366,10 +388,10 @@ function tableEvent(event) {
 				var potvalue = event.pots[i].value - event.pots[i].rake;
 				var gain = 0;
 				if (winnerCount == 1) {
-					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips"));
+					queueAction(new UpdateChat(winnerName+" won "+(potvalue/100)+" chips ("+event.pots[i].WinnerData[k].msg+")"));
 					gain = potvalue;
 				} else {
-					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips"));
+					queueAction(new UpdateChat(winnerName+" won "+((potvalue/winnerCount)/100)+"/"+(potvalue/100)+" chips ("+event.pots[i].WinnerData[k].msg+")"));
 					gain = potvalue/winnerCount;
 				}
 				// TODO, rake
@@ -440,6 +462,7 @@ function AnimateChipWin(sets) {
 	this.chips = [];
 	for (var i=0; i<sets.length; i++) {
 		this.stack[i] = getChipStack();
+		this.stack[i].keySide = 0;
 		this.dest[i] = sets[i].position;
 		this.chips[i] = sets[i].gain;
 	}
@@ -459,6 +482,8 @@ AnimateChipWin.prototype.check = function () {
 	for (var i=0; i<this.stack.length; i++) {
 		hideChips(this.stack[i]);
 	}
+	if (localRake) hideChips(localRake);
+	localRake = null;
 	eventDone();
 }
 function UpdateChat(msg) {
@@ -488,10 +513,10 @@ function updateBets(opts) {
 		}
 		if (!local.bet) local.bet = getChipStack();
 		var pos = calcBetLocation(remote.seat_index);
+		local.bet.keySide = pos.keySide;
 		local.bet.setPosition(pos.x,pos.y);
 		if (local.bet.value != lastTS.bets[remote.seat_index]) {
 			local.bet.value = lastTS.bets[remote.seat_index];
-			local.bet.setSide(pos.keyside);
 			log("updating seat "+remote.seat_index+" bet to "+lastTS.bets[remote.seat_index]);
 			if (opts && opts.sound) {
 				log("queuing chip show");
@@ -556,9 +581,9 @@ function adjustSeats() {
 		var fakeindex = i+0.5;
 		seat_objects[i].left = pos.rawx < 0;
 
-		if (pos.rawy < -0.5) seat_objects[i].setSide(2);
-		else if (pos.rawx < 0) seat_objects[i].setSide(1);
-		else seat_objects[i].setSide(0);
+		if (pos.rawy < -0.5) seat_objects[i].keySide = 2;
+		else if (pos.rawx < 0) seat_objects[i].keySide = 1;
+		else seat_objects[i].keySide = 0;
 		
 		seat_objects[i].setPosition(pos.x,pos.y);
 	}
@@ -598,16 +623,16 @@ function calcBetLocation(seat) {
 
 	var scale = 0.7;
 	if (alignment_test || (lastTS.dealer == seat) ) scale = 0.55;
-	log("bet #"+seat+" scale:"+scale);
 	var x = (((rawx/2)*0.8)*scale)+0.495;
 	var y = (((rawy/2)*-0.62)*scale)+0.45;
-	var keyside;
+	var keySide;
 	if ( (rawy < 0.25) && (rawy > -0.25) ) {
-		if (rawx > 0) keyside = 0;
-		else keyside = 1;
-	} else if (rawy > 0) keyside = 2;
-	else if (rawy < 0) keyside = 3;
-	return {x:x, y:y, keyside:keyside };
+		if (rawx > 0) keySide = 1;
+		else keySide = 0;
+	} else if (rawy > 0) keySide = 2;
+	else if (rawy < 0) keySide = 3;
+	log("bet #"+seat+" scale:"+scale+" rawx:"+rawx+" rawy:"+rawy+" keySide:"+keySide);
+	return {x:x, y:y, keySide:keySide };
 }
 function DealCard(destx,desty,cardobj) {
 	this.destx = destx;
@@ -637,13 +662,16 @@ function eventDone() {
 	var self = actions.shift();
 	if (actions.length > 0) actions[0].begin();
 }
-function ShowBet(chipobj) {
+function ShowBet(chipobj,opts) {
 	this.chipobj = chipobj;
-	this.chipobj.visible = false;
+	if (opts && opts.nohide) {
+	} else this.chipobj.visible = false;
+	if (opts && (opts.sound != undefined)) this.sound = opts.sound;
+	else this.sound = true;
 }
 ShowBet.prototype.begin = function ShowBetBegin() {
 	this.chipobj.visible = true;
-	PlaySound(1);
+	if (this.sound) PlaySound(1);
 	this.timer = setTimeout(eventDone,200);
 }
 function setTimeout(cb,delay) {

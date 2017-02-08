@@ -43,7 +43,7 @@ requestTracker.prototype.login = function login(cb) {
 requestTracker.prototype.createTicket = function (obj,cb) {
 	var out = [];
 	for (var key in obj) {
-		out.push(key+': '+(obj[key].replace('\n','\n ')));
+		out.push(key+': '+(obj[key].replace(/\n/g,'\n ')));
 	}
 	out = out.join('\n');
 	var data = 'content='+escape(out);

@@ -76,6 +76,7 @@ CardObjectUi::CardObjectUi(TableUi *parent, CardObject *jsobj) : GameObjectUi(pa
 	font.setPixelSize(10);
 	fm = new QFontMetricsF(font);
 	updateFace();
+	lastsize = 0;
 }
 void CardObjectUi::paintEvent(QPaintEvent *) {
 	QPainter p(this);

@@ -17,7 +17,6 @@ function GetFileSize(const AFile: String): DWORD;
 function GetThreadsCount(const APID: DWORD): Integer;
 function GetWorkingSetSize: DWORD;
 function EncodeURL(const ASrc: String): String;
-function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
 procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: String);
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
@@ -422,25 +421,6 @@ begin
   end;
 
   SetLength(result, J - 1);
-end;
-
-function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
-var
-  slash_pos: Integer;
-begin
-  slash_pos := Pos('/', AString);
-  if slash_pos = 0 then
-    Exit(FALSE);
-
-  ASmallBlind := StrToIntDef(Copy(AString, 1, slash_pos - 1), -1);
-  if ASmallBlind = -1 then
-    Exit(FALSE);
-
-  ABigBlind := StrToIntDef(Copy(AString, slash_pos + 1, Length(AString) - slash_pos), -1);
-  if ABigBlind = -1 then
-    Exit(FALSE);
-
-  Exit(TRUE);
 end;
 
 function IsJPEGStream(const AStream: TStream): Boolean;

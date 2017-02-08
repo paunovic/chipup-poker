@@ -19,10 +19,10 @@ class Table;
 
 typedef enum {
 	Left=0,
-	Right,
-	Top,
-	Bottom,
-	Center
+	Right=1,
+	Top=2,
+	Bottom=3,
+	Center=4
 } AlignmentSide;
 
 class TableUi : public QWidget {
@@ -60,6 +60,7 @@ public:
 
 	float w, x,y;
 	AlignmentSide keyside;
+	bool redraw;
 protected:
 	void drawDebug(QPainter &p);
 
@@ -113,11 +114,13 @@ class GameObject : public QObject {
 Q_OBJECT
 public:
 	GameObject(TablePrivate *table);
+	~GameObject();
 	float x() { return internal->x; }
 	float y() { return internal->y; }
 	TablePrivate *getTable() { return table; }
 	bool visible() { return internal->isVisible(); }
 	int getKeySide() const { return (int)internal->keyside; }
+	void setSide(int side);
 
 	Q_PROPERTY(bool visible READ visible WRITE setVisible)
 	Q_PROPERTY(float renderHeight READ getRenderHeight)
@@ -125,7 +128,6 @@ public:
 public slots:
 	void setPosition(float x, float y);
 	void setSize(float w);
-	void setSide(int side);
 protected:
 	GameObjectUi *internal;
 	TablePrivate *table;
