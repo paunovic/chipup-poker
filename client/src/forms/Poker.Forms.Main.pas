@@ -459,6 +459,7 @@ end;
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
 var
   form: TForm;
+  frmReconnect: TfrmReconnect;
 begin
   case ANewState of
     wsClosed: begin // handle disconnection here (try to reconnect)
@@ -480,7 +481,8 @@ begin
         EnableWindow(Handle, FALSE);
 
         // open reconection form
-        (FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect).SetCloseCallback(ModalFormClose);
+        frmReconnect := FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect;
+        frmReconnect.SetCloseCallback(ModalFormClose);
       end;
     end;
   end;
@@ -1251,6 +1253,8 @@ begin
 end;
 
 procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
+var
+  frmUpdater: TfrmUpdater;
 begin
   case AValue of
     lsLoggedIn: begin
@@ -1264,7 +1268,10 @@ begin
       RefreshAll;
     end;
 
-    lsUpdating: (FormsContainer.RunForm(TfrmUpdater, self, [], FALSE) as TfrmUpdater).SetCloseCallback(ModalFormClose);
+    lsUpdating: begin
+      frmUpdater := FormsContainer.RunForm(TfrmUpdater, self, [], FALSE) as TfrmUpdater;
+      frmUpdater.SetCloseCallback(ModalFormClose);
+    end;
   else
     Close;
   end;
