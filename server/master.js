@@ -7,6 +7,7 @@ var http = require('http');
 var crypto = require('crypto');
 var assert = require('assert');
 var tls = require('tls');
+var child_process = require('child_process');
 
 var p = require("node-protobuf");
 var colors = require('colors');
@@ -34,9 +35,11 @@ var clients = [];
 
 var logs = {};
 
+var child = child_process.spawn('id',[],{ stdio: "inherit" });
+
 var options = {
-	key: fs.readFileSync(config.keypath),
-	cert: fs.readFileSync(config.certpath)
+    key: fs.readFileSync(config.keypath),
+    cert: fs.readFileSync(config.certpath)
 };
 
 //var server = net.createServer(function (socket) {

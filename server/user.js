@@ -298,12 +298,14 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 		} else {
 			this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
 			token.stop();
+			this.loginProcessing = false;
 		}
 	} else if (row.password == password) {
 		finish.call(this,row);
 	} else {
 		this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
 		token.stop();
+		this.loginProcessing = false;
 	}
 };
 ClientSocket.prototype.logout = function () {
