@@ -106,7 +106,6 @@ type
     btSocketIOSend: TcxButton;
     btSocketIORecv: TcxButton;
     teSocketIO: TcxTextEdit;
-    acShowSocketIO: TAction;
     acSendSocketIO: TAction;
     acRecvSocketIO: TAction;
     btAutoClearSocketIO: TcxButton;
@@ -128,10 +127,10 @@ type
     procedure cbDebugInfoPropertiesChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure tiBufferCopyIndicatorTimer(Sender: TObject);
-    procedure acShowSocketIOExecute(Sender: TObject);
     procedure acSendSocketIOExecute(Sender: TObject);
     procedure acRecvSocketIOExecute(Sender: TObject);
     procedure acClearSocketIOExecute(Sender: TObject);
+    procedure btShowSocketIOClick(Sender: TObject);
   private
     const
       SCROLLBACK_LINES = 500;
@@ -488,12 +487,6 @@ begin
     teSocketIO.Clear;
 end;
 
-procedure TfrmDebug.acShowSocketIOExecute(Sender: TObject);
-begin
-  paSocketIO.Visible := btShowSocketIO.Down;
-  rvLog.Format;
-end;
-
 function TfrmDebug.FindStyleWithName(const AName: String): Integer;
 var
   C1: Integer;
@@ -683,6 +676,12 @@ begin
   if meSeatPos.Visible then
     meSeatPos.BringToFront;
   {$ENDIF}
+end;
+
+procedure TfrmDebug.btShowSocketIOClick(Sender: TObject);
+begin
+  paSocketIO.Visible := btShowSocketIO.Down;
+  rvLog.Format;
 end;
 
 procedure TfrmDebug.cbDebugInfoPropertiesChange(Sender: TObject);
