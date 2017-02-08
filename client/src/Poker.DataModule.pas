@@ -11,7 +11,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
   dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
   Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, cxStyles, cxClasses, Vcl.ExtCtrls;
+  Poker.Protobufs.Objects.Game, Vcl.ExtCtrls, cxStyles, cxClasses;
 
 type
   TdmMain = class(TDataModule)
@@ -82,7 +82,7 @@ uses
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-  UserDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
+  UserDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + Settings.Hardcoded.PROJECT_CAPTION);
   ForceDirectories(UserDataPath);
 
   {$IFDEF DEBUG}
@@ -400,6 +400,7 @@ var
   query_users: TArray<TMongoId>;
   empty_avatar_id: TBytes;
   member: TPB_ClubMember;
+  found: Boolean;
 begin
   if AMethodId <> Integer(srClubDisbandOk) then
   begin
@@ -442,6 +443,23 @@ begin
       end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
+    end;
+
+    // we got kicked from club we weren't approved yet
+    if dmMain.SelfInfo.PendingClubs.GetAndLock(AClub.MongoId, club) then
+    try
+      found := FALSE;
+      for member in AClub.Members do
+        if member.MongoId = dmMain.SelfInfo.MongoId then
+        begin
+          found := TRUE;
+          Break;
+        end;
+
+      if not found then
+        dmMain.SelfInfo.PendingClubs.Remove(AClub.MongoId);
+    finally
+      dmMain.SelfInfo.PendingClubs.Unlock;
     end;
   end
   else

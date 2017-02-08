@@ -2,21 +2,25 @@
   "name": "poker",
   "version": "0.0.1",
   "description": "poker game server and tools",
+  "bin": {
+    "poker-master": "master.js"
+  },
   "author": {
     "name": "michael bishop"
   },
   "dependencies": {
     "async": "~0.2.10",
     "colors": "~0.6.2",
-    "dag": "0.0.1",
+    "jade": "1.11.0",
     "deep-diff": "~0.1.7",
     "express": "~3.4.8",
-    "heapdump": "~0.2.9",
+    "heapdump": "~0.3.7",
     "mongodb": "~1.3.23",
     "mongoose": "~3.8.12",
     "morgan": "~1.1.1",
     "node-uuid": "~1.4.1",
     "nodeunit": "^0.9.0",
+    "node-protobuf": "1.4.1",
     "password-generator": "~0.2.2",
     "rest": "^1.0.3",
     "socket.io": "~0.9.16",

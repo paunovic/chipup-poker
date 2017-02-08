@@ -1,9 +1,13 @@
 var fs = require('fs');
+var path = require('path');
+
 module.exports.evalHand = evalHand;
 module.exports.format = format;
 module.exports.doEval = doEval;
 
-var raweqc = fs.readFileSync('eqcllist',{encoding:'ascii'}).split('\n');
+var project_root = path.dirname(process.mainModule.filename);
+
+var raweqc = fs.readFileSync(project_root + '/eqcllist',{encoding:'ascii'}).split('\n');
 var eqc = [];
 var eqcindex = {};
 var flushindex = {};

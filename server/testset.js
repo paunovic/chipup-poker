@@ -216,7 +216,7 @@ exports.game = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('profiler');
+		var profiler = require('./profiler');
 		mdb.open('nodeunit');
 		global.pb = Core.pb;
 		Club.init(activeGames);
@@ -377,7 +377,7 @@ exports.game = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('profiler');
+		var profiler = require('./profiler');
 		mdb.open('nodeunit');
 		Club.init(activeGames);
 		myutils.init();
@@ -513,7 +513,7 @@ exports.game = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('profiler');
+		var profiler = require('./profiler');
 		mdb.open('nodeunit');
 		Club.init(activeGames);
 		myutils.init();
@@ -591,7 +591,7 @@ exports.game = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('profiler');
+		var profiler = require('./profiler');
 		mdb.open('nodeunit');
 		Club.init(activeGames);
 		myutils.init();
@@ -697,7 +697,7 @@ exports.game = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('profiler');
+		var profiler = require('./profiler');
 		mdb.open('nodeunit');
 		Club.init(activeGames);
 		myutils.init();
@@ -966,7 +966,7 @@ exports.tournament = {
 		var activeGames = {};
 		global.activeUsers = {};
 		var game = require('./game');
-		var profiler = require('profiler');
+		var profiler = require('./profiler');
 		game.Game.init(activeGames);
 		profiler.setup(mdb.models.PokerProfile);
 		function setupUsers() {

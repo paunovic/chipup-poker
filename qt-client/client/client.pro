@@ -16,6 +16,8 @@ QMAKE_INFO_PLIST = Info.plist
 QMAKE_CXXFLAGS += -g
 INCLUDEPATH += ../protobuf/ ../google-breakpad/
 TARGET = chipuppoker
+target.path = /${out}/bin
+INSTALLS += target
 
 # to compile into a dmg:
 # codesign -f -s "Tox CI (jenkins) CSA" qtox.app --deep

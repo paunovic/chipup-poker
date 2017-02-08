@@ -27,7 +27,7 @@
 #include "filesaver.h"
 #include "minidumpuploader.h"
 
-#define DEVSERVER
+// #define DEVSERVER
 
 using namespace Poker;
 

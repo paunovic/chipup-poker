@@ -727,6 +727,11 @@ object frmTable: TfrmTable
       Caption = 'ADD CHIPS'
       OnExecute = acAddChipsExecute
     end
+    object acReportBug: TAction
+      Category = 'Misc'
+      Caption = 'acReportBug'
+      OnExecute = acReportBugExecute
+    end
   end
   object RVStyle: TRVStyle
     TextStyles = <

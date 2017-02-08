@@ -1,20 +1,31 @@
+#!/usr/bin/env node
+
 var fs = require('fs');
-var p = require("node-protobuf");
+var path = require('path');
 var net = require('net');
-var colors = require('colors');
-var util = require('util');
-var express = require('express');
 var http = require('http');
-var MongoClient = require('mongodb').MongoClient
 var crypto = require('crypto');
 var assert = require('assert');
 var tls = require('tls');
+var child_process = require('child_process');
+
+var p = require("node-protobuf");
+var colors = require('colors');
+var util = require('util');
+var express = require('express');
+var MongoClient = require('mongodb').MongoClient
 
 var Protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
 var MongoStore = require('./mongoStore');
 
-var pb = new p(fs.readFileSync("../message.desc"));
+var config = JSON.parse(fs.readFileSync(process.env.CONFIG_FILE));
+
+console.log(process.mainModule.filename);
+
+var project_root = path.dirname(process.mainModule.filename);
+
+var pb = new p(fs.readFileSync(project_root + "/message.desc"));
 Protoreader.init(pb,codes);
 
 var ProtobufUtil = require('./ProtobufUtil');
@@ -24,9 +35,11 @@ var clients = [];
 
 var logs = {};
 
+var child = child_process.spawn('id',[],{ stdio: "inherit" });
+
 var options = {
-	key: fs.readFileSync('key.pem'),
-	cert: fs.readFileSync('cert.pem')
+    key: fs.readFileSync(config.keypath),
+    cert: fs.readFileSync(config.certpath)
 };
 
 //var server = net.createServer(function (socket) {
@@ -314,7 +327,7 @@ cactiServer.listen(45509);
 function getLog(name) {
 	name = name.replace('/','_');
 	if (!logs[name]) {
-		logs[name] = fs.createWriteStream('logs/'+name+'.log');
+		logs[name] = fs.createWriteStream(config.log_dir + '/'+name+'.log');
 	}
 	return logs[name];
 }
@@ -328,7 +341,7 @@ function startImHub() {
 	for (var x=0; x<clients.length; x++) {
 		clients[x].reply(codes.Starting);
 	}
-	main_server = require('child_process').fork('./server.js');
+	main_server = require('child_process').fork(project_root + '/server.js');
 	//im_hub.stdout.setEncoding('utf8');
 	//im_hub.stdout.on('data',readStdOut);
 	//im_hub.stderr.setEncoding('utf8');

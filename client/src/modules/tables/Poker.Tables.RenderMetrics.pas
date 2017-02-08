@@ -80,6 +80,10 @@ type
     FHandPlaybackPlay: TRect;
     FHandPlaybackBack: TRect;
     FHandPlaybackForward: TRect;
+    FReportBugButtonWidth: Single;
+    FReportBugButtonHeight: Single;
+    FReportBugResizeRatio: Single;
+    FReportBugButtonBounds: TPoint4;
   public
     const
       CARD_OPEN_PERC   = 0.55;
@@ -142,6 +146,7 @@ type
     property RaisePresetButtonsBounds: TArray<TPoint4> read FRaisePresetButtonsBounds;
     property ActionButtonsBounds: TArray<TPoint4> read FActionButtonsBounds;
     property TotalRakePoint: TPoint2 read FTotalRakePoint;
+    property ReportBugButtonBounds: TPoint4 read FReportBugButtonBounds;
   end;
 
 
@@ -518,12 +523,22 @@ begin
     FJoinWaitingListResizeRatio := FPlayNowResizeRatio;
     FLeaveWaitingListResizeRatio := FPlayNowResizeRatio;
 
+    // report bug resize ratio
+    FReportBugResizeRatio := FTableResizeRatio * 1.5;
+    if FReportBugResizeRatio> 1 then
+      FReportBugResizeRatio := 1;
+
     // playnow button bounds
     FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
     FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
     FPlayNowButtonBounds := pBounds4(FChatBoxBounds.Right + (ADXAreaSize.x - FChatBoxBounds.Right) / 2 - FPlayNowButtonWidth / 2,
                                      FChatBoxBounds.Top + (ADXAreaSize.y - FChatBoxBounds.Top) / 2.5 - FPlayNowButtonHeight / 2,
                                      FPlayNowButtonWidth, FPlayNowButtonHeight);
+
+    // report bug button bounds
+    FReportBugButtonWidth := TableResources.ReportBugNormalImage.Texture[0].Width * FReportBugResizeRatio;
+    FReportBugButtonHeight := FReportBugButtonWidth / TableResources.ReportBugButtonAspectRatio;
+    FReportBugButtonBounds := pBounds4(ADXAreaSize.x - FReportBugButtonWidth + 1, FStandUpButtonHeight, FReportBugButtonWidth, FReportBugButtonHeight);
 
     // join/leave waiting list button bounds
     FJoinWaitingListButtonWidth := TableResources.JoinWaitingListNormal.Texture[0].Width * FJoinWaitingListResizeRatio;

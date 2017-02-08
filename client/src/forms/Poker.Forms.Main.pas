@@ -15,7 +15,8 @@ uses
   cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls,
   cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls,
   Vcl.ActnMenus, Vcl.AppEvnts, System.Generics.Collections, Vcl.StdStyleActnCtrls,
-  Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar, dxBevel;
+  Poker.Types, RVScroll, RichView, RVStyle, cxNavigator, dxBarBuiltInMenu,
+  cxCalendar;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -137,7 +138,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acResendVerificationMailExecute(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
     procedure gridPublicClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure FormResize(Sender: TObject);
     procedure gridPublicClubsEnter(Sender: TObject);
@@ -160,17 +160,21 @@ type
     procedure acTournamentRegisterExecute(Sender: TObject);
     procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acTournamentUnregisterExecute(Sender: TObject);
-    procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acTournamentItemOpenExecute(Sender: TObject);
     procedure acTournamentsOpenAllExecute(Sender: TObject);
     procedure tiTournamentInfoRefreshTimer(Sender: TObject);
-    procedure gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acConfirmationOnFoldExecute(Sender: TObject);
     procedure acAlwaysRunItTwiceExecute(Sender: TObject);
     procedure acLaunchNewInstanceExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure acOpenDebugFormExecute(Sender: TObject);
+    procedure gridTournamentsNameStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTournamentsStatusStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure FormShow(Sender: TObject);
   private
     const
       RESOURCE_CASHIER_NORMAL = 'CashierNormal';
@@ -383,11 +387,6 @@ begin
   end;
 end;
 
-procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
-begin
-  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
-end;
-
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
 begin
   btPublicClubs.Width := (tsHomeGames.Width - btPublicClubs.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
@@ -404,6 +403,11 @@ begin
   paTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
   paTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
   paTournamentInfo.Height := gridTournaments.Height - 1;
+end;
+
+procedure TfrmChipUpMain.FormShow(Sender: TObject);
+begin
+  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
 end;
 
 procedure TfrmChipUpMain.FlushData;
@@ -1132,7 +1136,9 @@ begin
   UpdateGamelist;
 end;
 
-procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
 begin
@@ -1143,8 +1149,9 @@ begin
     AStyle := styleTournamentName;
 end;
 
-procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
   tournament: TTournamentInfo;
@@ -1901,18 +1908,20 @@ end;
 
 {$IFDEF ENABLE_EXCEPTION_LOGGING}
 procedure TfrmChipUpMain.ApplicationException(Sender: TObject; E: Exception);
+const
+  FILENAME = 'C:\chipup_poker_exception.txt';
 var
   sl: TStringList;
 begin
   sl := TStringList.Create;
   try
     JclLastExceptStackListToStrings(sl, TRUE, TRUE, TRUE, FALSE);
-    sl.SaveToFile('C:\exception.txt');
+    sl.SaveToFile(FILENAME);
     SoftException('Hard Exception', sl.Text);
-    MessageDlg('Exception happened. C:\exception.txt created', mtError, [mbOK], 0);
   finally
     sl.Free;
   end;
+  MessageDlg(Format('Exception happened. %s created.', [FILENAME]), mtError, [mbOK], 0);
 end;
 {$ENDIF}
 

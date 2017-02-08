@@ -38,7 +38,7 @@ typedef struct partial_evaluation {
 	char colors[4];						// counter for the colors
 } partial_evaluation;
 
-void handeval_init();
+void handeval_init(const char *project_root);
 char* hand_to_str(char* hand, unsigned int cards);
 char* str_to_cards(char* str, unsigned int number);
 handeval_eq_class* calculate_equivalence_class(char* hand);

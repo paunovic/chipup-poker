@@ -58,6 +58,8 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_UnitSearchPath>3rdparty\FastMM;3rdparty\AsphyreSphinx\Source;3rdparty\icsv8;3rdparty\protobufs;3rdparty\superobject;3rdparty\DEC\Part_I;3rdparty\synapse;3rdparty\mormot;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_Define>USE_SSL;$(DCC_Define)</DCC_Define>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>2057</VerInfo_Locale>
@@ -133,14 +135,6 @@
 			<RcCompile Include="resources\Poker.Resources.Sounds.rc">
 				<Form>Poker.Resources.Sounds.res</Form>
 			</RcCompile>
-			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
-			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
-			<DCCReference Include="3rdparty\protobufs\pbInput.pas"/>
-			<DCCReference Include="3rdparty\protobufs\pbOutput.pas"/>
-			<DCCReference Include="3rdparty\protobufs\pbPublic.pas"/>
-			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
-			<DCCReference Include="3rdparty\AsphyreSphinx\Source\Asphyre.Streams.pas"/>
-			<DCCReference Include="3rdparty\icsv8\OverbyteIcsHttpProt.pas"/>
 			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
 				<Form>dmMain</Form>
@@ -462,10 +456,10 @@
 						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfsDB16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfsDB16.bpl not found</Excluded_Packages>
 						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfrxDB16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfrxDB16.bpl not found</Excluded_Packages>
 						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\LibD16\dclfrxe16.bpl">File C:\Program Files (x86)\FastReports\LibD16\dclfrxe16.bpl not found</Excluded_Packages>
-						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.ios\Bin\DclFMITeePro916.bpl">TeeChart Pro 2014 for FireMonkey iOS Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.win32\Bin\DclFMXTeePro916.bpl">TeeChart Pro 2014 for FireMonkey Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2015 for RAD XE2\Delphi16.win32\Bin\DclFMXTeePro916.bpl">TeeChart Pro 2015 for FireMonkey Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Users\Public\Documents\RAD Studio\9.0\Bpl\dclcxPivotGridOLAPRS16.bpl">ExpressPivotGrid OLAP by Developer Express Inc.</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
 						<Source Name="MainSource">chipup_client.dpr</Source>

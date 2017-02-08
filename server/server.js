@@ -16,13 +16,14 @@ var async = require('async');
 var jade = require('jade');
 var child_process = require('child_process');
 var http = require('http');
+var path = require('path');
 
 var SmtpConnection = require('./smtp');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var deck = require('./deck');
 var codes = require('./ServerCodes');
 var bugsView = require('./bugs');
-var profiler = require('profiler');
+var profiler = require('./profiler');
 var Club = require('./club').Club;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
@@ -32,7 +33,9 @@ var mdb = require('./db');
 mdb.open('poker');
 var models = mdb.models;
 
-var pb = new p(fs.readFileSync("../message.desc"));
+var project_root = path.dirname(process.mainModule.filename);
+
+var pb = new p(fs.readFileSync(project_root + "/message.desc"));
 // NOTE: must be ran before requiring any module that uses it
 global.pb = pb; //FIXME, maybe always reference this via global too?
 
@@ -226,8 +229,8 @@ var server = net.createServer(function listener(socket) {
 	var handler = new user.ClientSocket(socket);
 });
 var options = {
-	key: fs.readFileSync('key.pem'),
-	cert: fs.readFileSync('cert.pem')
+    key: fs.readFileSync(config.keypath),
+    cert: fs.readFileSync(config.certpath)
 };
 
 var secureServer = tls.createServer(options,function listener(socket) {

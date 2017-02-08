@@ -61,74 +61,85 @@ function StreamGetAnsiString(const Stream: TStream): AnsiString;
 procedure StreamPutShortString(const Stream: TStream; const Text: ShortString;
  MaxCount: Integer = 0);
 var
-  Count: Integer;
+ i, Count: Integer;
 begin
  Count:= Length(Text);
  if (MaxCount > 0)and(MaxCount < 255) then Count:= Min2(Count, MaxCount);
 
  StreamPutByte(Stream, Count);
- Stream.WriteBuffer(Text[1], count);
+
+ for i:= 0 to Count - 1 do
+  StreamPutByte(Stream, Byte(Text[i + 1]));
 end;
 
 //---------------------------------------------------------------------------
 function StreamGetShortString(const Stream: TStream): ShortString;
 var
- Count: Integer;
+ Count, i: Integer;
 begin
  Count:= StreamGetByte(Stream);
  SetLength(Result, Count);
- if Count > 0 then
-   Stream.ReadBuffer(result[1], count);
+
+ for i:= 0 to Count - 1 do
+  Result[i + 1]:= AnsiChar(StreamGetByte(Stream));
 end;
 
 //---------------------------------------------------------------------------
 procedure StreamPutAnsi4String(const Stream: TStream;
  const Value: AnsiString);
+var
+ i: Integer;
 begin
  StreamPutLongInt(Stream, Length(Value));
- Stream.WriteBuffer(Value[1], Length(Value));
+
+ for i:= 0 to Length(Value) - 1 do
+  StreamPutByte(Stream, Byte(Value[i + 1]));
 end;
 
 //---------------------------------------------------------------------------
 function StreamGetAnsi4String(const Stream: TStream): AnsiString;
 var
- Count: Integer;
+ Count, i: Integer;
 begin
  Count:= StreamGetLongInt(Stream);
  SetLength(Result, Count);
- if Count > 0 then
-   Stream.ReadBuffer(result[1], count);
+
+ for i:= 0 to Count - 1 do
+  Result[i + 1]:= AnsiChar(StreamGetByte(Stream));
 end;
 
 //----------------------------------------------------------------------------
 procedure StreamPutAnsiString(const Stream: TStream; const Text: AnsiString;
  MaxCount: Integer = 0);
 var
- Count: Integer;
+ i, Count: Integer;
 begin
  Count:= Min2(Length(Text), 65535);
  if (MaxCount > 0)and(MaxCount < 65535) then Count:= Min2(Count, MaxCount);
 
  StreamPutWord(Stream, Count);
- Stream.WriteBuffer(Text[1], Count);
+
+ for i:= 0 to Count - 1 do
+  StreamPutByte(Stream, Byte(Text[i + 1]));
 end;
 
 //----------------------------------------------------------------------------
 function StreamGetAnsiString(const Stream: TStream): AnsiString;
 var
- Count: Integer;
+ Count, i: Integer;
 begin
  Count:= StreamGetWord(Stream);
  SetLength(Result, Count);
- if Count > 0 then
-   Stream.ReadBuffer(result[1], count);
+
+ for i:= 0 to Count - 1 do
+  Result[i + 1]:= AnsiChar(StreamGetByte(Stream));
 end;
 
 //----------------------------------------------------------------------------
 procedure StreamPutUtf8String(const Stream: TStream; const Text: UniString;
  MaxCount: Integer = 0);
 var
- Count: Integer;
+ i, Count: Integer;
  ShText: AnsiString;
 begin
  ShText:= UTF8Encode(Text);
@@ -137,20 +148,23 @@ begin
  if (MaxCount > 0)and(MaxCount < 65535) then Count:= Min2(Count, MaxCount);
 
  StreamPutWord(Stream, Count);
- Stream.WriteBuffer(ShText[1], Count);
+
+ for i:= 0 to Count - 1 do
+  StreamPutByte(Stream, Byte(ShText[i + 1]));
 end;
 
 //----------------------------------------------------------------------------
 function StreamGetUtf8String(const Stream: TStream): UniString;
 var
- Count: Integer;
+ Count, i: Integer;
  ShText: AnsiString;
 begin
  Count:= StreamGetWord(Stream);
 
  SetLength(ShText, Count);
- if count > 0 then
-   Stream.ReadBuffer(ShText[1], count);
+
+ for i:= 0 to Count - 1 do
+  ShText[i + 1]:= AnsiChar(StreamGetByte(Stream));
 
  {$if (defined(fpc))or(defined(DelphiLegacy))}
  Result:= UTF8Decode(ShText);
@@ -163,7 +177,7 @@ end;
 procedure StreamPutShortUtf8String(const Stream: TStream;
  const Text: UniString; MaxCount: Integer = 0);
 var
- Count: Integer;
+ i, Count: Integer;
  ShText: AnsiString;
 begin
  ShText:= UTF8Encode(Text);
@@ -172,20 +186,23 @@ begin
  if (MaxCount > 0)and(MaxCount < 255) then Count:= Min2(Count, MaxCount);
 
  StreamPutByte(Stream, Count);
- Stream.WriteBuffer(ShText[1], Count);
+
+ for i:= 0 to Count - 1 do
+  StreamPutByte(Stream, Byte(ShText[i + 1]));
 end;
 
 //----------------------------------------------------------------------------
 function StreamGetShortUtf8String(const Stream: TStream): UniString;
 var
- Count: Integer;
+ Count, i: Integer;
  ShText: AnsiString;
 begin
  Count:= StreamGetByte(Stream);
 
  SetLength(ShText, Count);
- if count > 0 then
-   Stream.ReadBuffer(shtext[1], count);
+
+ for i:= 0 to Count - 1 do
+  ShText[i + 1]:= AnsiChar(StreamGetByte(Stream));
 
  {$if (defined(fpc))or(defined(DelphiLegacy))}
  Result:= UTF8Decode(ShText);

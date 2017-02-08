@@ -4,7 +4,7 @@ var models = require('./db').models,
 	assert = require('assert'),
 	EventEmitter = require('events').EventEmitter,
 	myutils = require('./myutils'),
-	profiler = require('profiler');
+	profiler = require('./profiler');
 
 var error = require('./error'),
 	Game = require('./game').Game,

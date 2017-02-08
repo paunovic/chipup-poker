@@ -6,11 +6,14 @@ var async = require('async');
 
 var activeGames,activeUsers,sharedconfig;
 
+var path = require('path');
+
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
-var profiler = require('profiler');
-var dag = require('dag');
+var profiler = require('./profiler');
+var dag = require('./build/Release/dag');
 var omaha2 = require('./dag2/omaha');
-dag.init();
+var project_root = path.dirname(process.mainModule.filename);
+dag.init(project_root);
 var getGameLock = new ReadWriteLock();
 
 module.exports.makeGameProtobuf = makeGameProtobuf;

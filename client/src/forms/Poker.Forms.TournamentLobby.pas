@@ -10,7 +10,7 @@ uses
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView,
   cxClasses, cxGridCustomView, cxGrid, cxCurrencyEdit, Vcl.Menus, Vcl.ActnList,
   Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage,
-  cxLabel, Vcl.ExtCtrls, dxBevel;
+  cxLabel, Vcl.ExtCtrls, dxBevel, cxNavigator;
 
 type
   TfrmTournamentLobby = class(TForm, IFormParams)
@@ -74,14 +74,20 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure gridPlayersTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure acRegisterExecute(Sender: TObject);
     procedure acUnregisterExecute(Sender: TObject);
     procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure gridTablesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure tiGUIUpdateTimer(Sender: TObject);
-    procedure gridBlindsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
-    procedure gridAllPlayersPlaceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridAllPlayersPlaceStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridBlindsTableStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridPlayersTableStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
   private
     FTournamentId: TMongoId;
     FSelectedTableId: TMongoId;
@@ -482,7 +488,9 @@ begin
   end;
 end;
 
-procedure TfrmTournamentLobby.gridAllPlayersPlaceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmTournamentLobby.gridAllPlayersPlaceStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   chips: Currency;
 begin
@@ -493,8 +501,9 @@ begin
     AStyle := stylePlayersIngame;
 end;
 
-procedure TfrmTournamentLobby.gridBlindsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmTournamentLobby.gridBlindsTableStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   level_id: Integer;
   tournament: TTournamentInfo;
@@ -510,8 +519,9 @@ begin
   end;
 end;
 
-procedure TfrmTournamentLobby.gridPlayersTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+procedure TfrmTournamentLobby.gridPlayersTableStylesGetContentStyle(
+  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
 begin

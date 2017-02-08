@@ -14,7 +14,7 @@ function makeGameProtobuf() {
 	var self = require('./game').makeGameProtobuf;
 	return self.apply(this,arguments);
 }
-var profiler = require('profiler');
+var profiler = require('./profiler');
 var ReadWriteLock = require('./lock');
 var myutils = require('./myutils');
 var user = require('./user');
