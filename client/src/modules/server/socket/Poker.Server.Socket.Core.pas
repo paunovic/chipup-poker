@@ -523,6 +523,7 @@ function TServerSocketCore.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; co
 var
   err: String;
   gtc: DWORD;
+  hexdump: String;
 begin
   ADataObject := nil;
 
@@ -606,8 +607,10 @@ begin
   if (Assigned(ADataObject)) and
      (not (ADataObject as TProtobufBaseObject).IsInitialized) then
   begin
-    SoftException(Format('Data object not initialized for code: %s',
-      [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
+    SetLength(hexdump, ARpcMessage.DataSize * 2);
+    BinToHex(ADataPointer, PWideChar(@hexdump[1]), ARpcMessage.DataSize);
+    SoftException(Format('Data object not initialized for code: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]),
+       hexdump);
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;

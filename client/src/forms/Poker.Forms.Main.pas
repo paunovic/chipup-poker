@@ -459,6 +459,7 @@ end;
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
 var
   form: TForm;
+  frmReconnect: TfrmReconnect;
 begin
   case ANewState of
     wsClosed: begin // handle disconnection here (try to reconnect)
@@ -480,7 +481,8 @@ begin
         EnableWindow(Handle, FALSE);
 
         // open reconection form
-        (FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect).SetCloseCallback(ModalFormClose);
+        frmReconnect := FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect;
+        frmReconnect.SetCloseCallback(ModalFormClose);
       end;
     end;
   end;
@@ -889,11 +891,11 @@ var
   club: TClubInfo;
   status: String;
   rcount: Integer;
-  c: TcxDataController;
+  dc: TcxDataController;
   member: TPB_ClubMember;
 begin
-  c := gridPrivateClubsTable.DataController;
-  c.BeginFullUpdate;
+  dc := gridPrivateClubsTable.DataController;
+  dc.BeginFullUpdate;
   try
     rcount := 0;
     dmMain.SelfInfo.Clubs.Lock;
@@ -902,12 +904,12 @@ begin
         if club.IsPrivate then
         begin
           Inc(rcount);
-          if rcount > c.RecordCount then
-            c.SetRecordCount(rcount);
+          if rcount > dc.RecordCount then
+            dc.SetRecordCount(rcount);
 
-          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId.ToVariant);
-          c.SetValue(rcount - 1, gridHomeClubsId.Index, club.Seq);
-          c.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
+          dc.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId.ToVariant);
+          dc.SetValue(rcount - 1, gridHomeClubsId.Index, club.Seq);
+          dc.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
 
           if dmMain.SelfInfo.MongoId = club.Owner then
             status := 'Owner'
@@ -916,27 +918,27 @@ begin
               status := member.StatusAsString
             else
               status := 'Unknown';
-          c.SetValue(rcount - 1, gridHomeClubsStatus.Index, status);
+          dc.SetValue(rcount - 1, gridHomeClubsStatus.Index, status);
         end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
-    c.SetRecordCount(rcount);
+    dc.SetRecordCount(rcount);
   finally
-    c.EndFullUpdate;
+    dc.EndFullUpdate;
   end;
-  c.Refresh;
+  dc.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
 var
   game: TGameInfo;
-  c: TcxGridDataController;
+  dc: TcxGridDataController;
   club: TClubInfo;
   rcount: Integer;
 begin
-  c := gridGamesTable.DataController;
-  c.BeginFullUpdate;
+  dc := gridGamesTable.DataController;
+  dc.BeginFullUpdate;
   try
     rcount := 0;
     if dmMain.SelfInfo.Clubs.GetAndLock(FSelectedClub, club) then
@@ -947,35 +949,35 @@ begin
           Continue;
 
         Inc(rcount);
-        if rcount > c.RecordCount then
-          c.SetRecordCount(rcount);
+        if rcount > dc.RecordCount then
+          dc.SetRecordCount(rcount);
 
-        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId.ToVariant);
-        c.SetValue(rcount - 1, gridGamesName.Index, game.Gamename);
-        c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
-        c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%s/%s', [ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind)]));
-        c.SetValue(rcount - 1, gridGamesBuyinLimits.Index, Format('%s-%s', [ChipsToStr(game.BuyinMin), ChipsToStr(game.BuyinMax)]));
-        c.SetValue(rcount - 1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
-        c.SetValue(rcount - 1, gridGamesStatus.Index, game.StateAsStr);
+        dc.SetValue(rcount - 1, gridGamesId.Index, game.MongoId.ToVariant);
+        dc.SetValue(rcount - 1, gridGamesName.Index, game.Gamename);
+        dc.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
+        dc.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%s/%s', [ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind)]));
+        dc.SetValue(rcount - 1, gridGamesBuyinLimits.Index, Format('%s-%s', [ChipsToStr(game.BuyinMin), ChipsToStr(game.BuyinMax)]));
+        dc.SetValue(rcount - 1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
+        dc.SetValue(rcount - 1, gridGamesStatus.Index, game.StateAsStr);
       end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
-    c.SetRecordCount(rcount);
+    dc.SetRecordCount(rcount);
   finally
-    c.EndFullUpdate;
+    dc.EndFullUpdate;
   end;
-  c.Refresh;
+  dc.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdatePublicClublist;
 var
   rcount: Integer;
   club: TClubInfo;
-  c: TcxGridDataController;
+  dc: TcxGridDataController;
 begin
-  c := gridPublicClubsTable.DataController;
-  c.BeginFullUpdate;
+  dc := gridPublicClubsTable.DataController;
+  dc.BeginFullUpdate;
   try
     rcount := 0;
     dmMain.SelfInfo.Clubs.Lock;
@@ -984,58 +986,58 @@ begin
         if not club.IsPrivate then
         begin
           Inc(rcount);
-          if rcount > c.RecordCount then
-            c.SetRecordCount(rcount);
-          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId.ToVariant);
-          c.SetValue(rcount - 1, gridPublicClubsName.Index, club.Name);
+          if rcount > dc.RecordCount then
+            dc.SetRecordCount(rcount);
+          dc.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId.ToVariant);
+          dc.SetValue(rcount - 1, gridPublicClubsName.Index, club.Name);
         end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
-    c.SetRecordCount(rcount);
+    dc.SetRecordCount(rcount);
   finally
-    c.EndFullUpdate;
+    dc.EndFullUpdate;
   end;
-  c.Refresh;
+  dc.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdateTournamentList;
 var
-  c: TcxGridDataController;
+  dc: TcxGridDataController;
   rcount: Integer;
   tournament_info: TPB_TournamentInfo;
   sel_index: Integer;
 begin
-  c := gridTournamentsTable.DataController;
-  c.BeginFullUpdate;
+  dc := gridTournamentsTable.DataController;
+  dc.BeginFullUpdate;
   try
-    sel_index := c.FocusedRecordIndex;
+    sel_index := dc.FocusedRecordIndex;
     rcount := 0;
     Tournaments.Lock;
     try
       for tournament_info in Tournaments.Values do
       begin
         Inc(rcount);
-        if rcount > c.RecordCount then
-          c.SetRecordCount(rcount);
+        if rcount > dc.RecordCount then
+          dc.SetRecordCount(rcount);
 
-        c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
-        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament_info.StartTime)));
-        c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
-        c.SetValue(rcount - 1, gridTournamentsPlayers.Index, tournament_info.RegisteredPlayers);
-        c.SetValue(rcount - 1, gridTournamentsStatus.Index, (tournament_info as TTournamentInfo).StateToStr);
+        dc.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
+        dc.SetValue(rcount - 1, gridTournamentsStartTime.Index, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament_info.StartTime)));
+        dc.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
+        dc.SetValue(rcount - 1, gridTournamentsPlayers.Index, tournament_info.RegisteredPlayers);
+        dc.SetValue(rcount - 1, gridTournamentsStatus.Index, (tournament_info as TTournamentInfo).StateToStr);
       end;
     finally
       Tournaments.Unlock;
     end;
-    c.SetRecordCount(rcount);
+    dc.SetRecordCount(rcount);
     if (sel_index >= 0) and
-       (sel_index < c.RecordCount) then
-      c.FocusedRecordIndex := sel_index;
+       (sel_index < dc.RecordCount) then
+      dc.FocusedRecordIndex := sel_index;
   finally
-    c.EndFullUpdate;
+    dc.EndFullUpdate;
   end;
-  c.Refresh;
+  dc.Refresh;
 end;
 
 procedure TfrmChipUpMain.WMEndSession(var AMessage: TWMEndSession);
@@ -1251,6 +1253,8 @@ begin
 end;
 
 procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
+var
+  frmUpdater: TfrmUpdater;
 begin
   case AValue of
     lsLoggedIn: begin
@@ -1264,7 +1268,10 @@ begin
       RefreshAll;
     end;
 
-    lsUpdating: (FormsContainer.RunForm(TfrmUpdater, self, [], FALSE) as TfrmUpdater).SetCloseCallback(ModalFormClose);
+    lsUpdating: begin
+      frmUpdater := FormsContainer.RunForm(TfrmUpdater, self, [], FALSE) as TfrmUpdater;
+      frmUpdater.SetCloseCallback(ModalFormClose);
+    end;
   else
     Close;
   end;

@@ -138,7 +138,7 @@ begin
     mstream.LoadFromFile(FSettingsFile);
 
     if (DecompressStream(mstream)) and
-       (AES256DecryptStream(mstream, TSettings.Hardcoded.SETTINGS_ENCRYPTION_KEY)) then
+       (AES256EncryptStream(mstream, TSettings.Hardcoded.SETTINGS_ENCRYPTION_KEY, FALSE)) then
     begin
       mstream.Position := 0;
       FJSON := TSuperObject.ParseStream(mstream, FALSE);
@@ -158,7 +158,7 @@ begin
   mstream := TMemoryStream.Create;
   try
     FJSON.SaveTo(mstream);
-    if (AES256EncryptStream(mstream, TSettings.Hardcoded.SETTINGS_ENCRYPTION_KEY)) and
+    if (AES256EncryptStream(mstream, TSettings.Hardcoded.SETTINGS_ENCRYPTION_KEY, TRUE)) and
        (CompressStream(mstream)) then
       mstream.SaveToFile(FSettingsFile);
   finally

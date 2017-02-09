@@ -700,11 +700,12 @@ object frmDebug: TfrmDebug
       Top = 6
       Width = 71
       Height = 17
-      Action = acShowSocketIO
       Anchors = [akTop, akRight]
+      Caption = 'Socket I/O'
       Colors.PressedText = 65408
       ParentShowHint = False
       ShowHint = False
+      SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Transparent = True
@@ -715,6 +716,7 @@ object frmDebug: TfrmDebug
       Font.Name = 'Consolas'
       Font.Style = [fsBold]
       ParentFont = False
+      OnClick = btShowSocketIOClick
     end
   end
   object paTop: TPanel
@@ -1014,10 +1016,6 @@ object frmDebug: TfrmDebug
     object acCopyLogSelection: TAction
       Caption = 'Copy'
       OnExecute = acCopyLogSelectionExecute
-    end
-    object acShowSocketIO: TAction
-      Caption = 'Socket I/O'
-      OnExecute = acShowSocketIOExecute
     end
     object acSendSocketIO: TAction
       Caption = 'Send'

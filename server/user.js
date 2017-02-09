@@ -818,7 +818,7 @@ ClientSocket.prototype.handle = function (code,args) {
 	}
 };
 ClientSocket.prototype.getStatusPacket = function (status,maincb) {
-	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
+	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false}, {pendingApproval:this.userid} ]};
 	// owner should see password
 	// all need to see name, _id, seq, private, chips, and members
 	models.Clubs.find(query,function(err,clubs) {
@@ -846,6 +846,7 @@ ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 				Club.getClubById(item._id,function (err,club) {
 					// TODO, dont show userlist if you are pending
 					var obj = Club.makeClubProtobuf(item,userlist,balances,club);
+					console.log(item,this.userid);
 					if (myutils.containsObjectID(club.obj.members,this.userid)) {
 						clubsOut.push(obj);
 					} else if (myutils.containsObjectID(item.pendingApproval,this.userid)) {
@@ -874,7 +875,7 @@ ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 							//this.log('games list:%j',games);
 							status.games = games;
 							maincb(status);
-							//this.log('status reply:',status);
+							this.log('status reply:',status);
 						}.bind(this));
 					}.bind(this));
 				}.bind(this));

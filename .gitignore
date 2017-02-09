@@ -36,7 +36,6 @@ cpp-protobuf-generator/cpp-protobuf-generator/*.sdf
 cpp-protobuf-generator/cpp-protobuf-generator/*.suo
 cpp-generator/output
 generator
-icsv8w
 *.o
 moc_*
 cpp-protobuf-generator/cpp-protobuf-generator-vs/debug

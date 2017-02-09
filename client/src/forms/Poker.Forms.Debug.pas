@@ -106,7 +106,6 @@ type
     btSocketIOSend: TcxButton;
     btSocketIORecv: TcxButton;
     teSocketIO: TcxTextEdit;
-    acShowSocketIO: TAction;
     acSendSocketIO: TAction;
     acRecvSocketIO: TAction;
     btAutoClearSocketIO: TcxButton;
@@ -128,10 +127,10 @@ type
     procedure cbDebugInfoPropertiesChange(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure tiBufferCopyIndicatorTimer(Sender: TObject);
-    procedure acShowSocketIOExecute(Sender: TObject);
     procedure acSendSocketIOExecute(Sender: TObject);
     procedure acRecvSocketIOExecute(Sender: TObject);
     procedure acClearSocketIOExecute(Sender: TObject);
+    procedure btShowSocketIOClick(Sender: TObject);
   private
     const
       SCROLLBACK_LINES = 500;
@@ -176,7 +175,7 @@ uses
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
-  {RectMarks, FIXME} Poker.Settings, Vcl.Clipbrd, synacode;
+  RectMarks, Poker.Settings, Vcl.Clipbrd, synacode;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -357,14 +356,14 @@ begin
   else
     rv := rvLog;
 
-  // ClearRectMarks(rv); FIXME
+  ClearRectMarks(rv);
 
   if teFindText.Tag = 0 then
     Exit;
-    {
+
   if teFindText.Text <> '' then
     MarkSubstring(rv, teFindText.Text, clRed);
-     FIXME }
+
   rv.Format;
 end;
 
@@ -488,12 +487,6 @@ begin
     teSocketIO.Clear;
 end;
 
-procedure TfrmDebug.acShowSocketIOExecute(Sender: TObject);
-begin
-  paSocketIO.Visible := btShowSocketIO.Down;
-  rvLog.Format;
-end;
-
 function TfrmDebug.FindStyleWithName(const AName: String): Integer;
 var
   C1: Integer;
@@ -614,8 +607,8 @@ begin
   if (teFindText.Tag = 1) and
      (teFindText.Text <> '') then
   begin
-    {ClearRectMarks(rvLog); FIXME
-    MarkSubstring(rvLog, teFindText.Text, clRed);}
+    ClearRectMarks(rvLog);
+    MarkSubstring(rvLog, teFindText.Text, clRed);
   end;
 
   if rvLog.VScrollPos < rvLog.VScrollMax then
@@ -685,6 +678,12 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmDebug.btShowSocketIOClick(Sender: TObject);
+begin
+  paSocketIO.Visible := btShowSocketIO.Down;
+  rvLog.Format;
+end;
+
 procedure TfrmDebug.cbDebugInfoPropertiesChange(Sender: TObject);
 begin
   case cbDebugInfo.ItemIndex of
@@ -700,13 +699,13 @@ begin
 
   if rvMemoryState.Visible then
   begin
-    //ClearRectMarks(rvLog); FIXME
+    ClearRectMarks(rvLog);
     UpdateMemoryUsageDetails;
     rvMemoryState.BringToFront;
   end
   else
   begin
-    // ClearRectMarks(rvMemoryState); FIXME
+    ClearRectMarks(rvMemoryState);
     teFindText.Properties.OnChange(nil);
   end;
 end;
