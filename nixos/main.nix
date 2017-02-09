@@ -5,7 +5,17 @@ let
 in {
   imports = [ ./vim.nix ];
   services = {
-    bind.enable = true;
+    bind = {
+      enable = true;
+      blockedNetworks = [ "130.211.31.137" "110.68.84.72" "110.165.126.148" "111.250.82.160" ];
+      zones = [
+        {
+          name = "chipuppoker.com";
+          slaves = [ "190.124.250.111" ];
+          file = ./chipuppoker.zone;
+        }
+      ];
+    };
     openssh.enable = true;
     toxvpn = {
       enable = true;
@@ -17,15 +27,49 @@ in {
     };
     nginx = {
       enable = true;
-      virtualHosts."chipuppoker.com" = {
-        forceSSL = true;
-        enableACME = true;
-        locations."/".proxyPass = "http://127.0.0.1:3000/";
+      virtualHosts = {
+        "chipuppoker.com" = {
+          forceSSL = true;
+          enableACME = true;
+          locations = {
+            "/".proxyPass = "http://127.0.0.1:3000/";
+            #"/contactPost".proxyPass = "http://127.0.0.1:3000/";
+            #"/" = {
+            #root = /home/poker/chipuppoker/server/files;
+            #};
+          };
+          serverAliases = [ "www.chipuppoker.com" ];
+        };
+        "server.chipuppoker.com" = {
+          enableACME = true;
+          forceSSL = true;
+        };
+        "buildbot.chipuppoker.com" = {
+          forceSSL = true;
+          enableACME = true;
+          locations = {
+            "/".proxyPass = "http://127.0.0.1:8010/";
+            "/ws" = {
+              proxyPass = "http://127.0.0.1:8010/ws";
+              extraConfig = ''
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_read_timeout 6000s;
+              '';
+            };
+          };
+        };
       };
     };
     dovecot2.enable = false;
-    exim = {
+    postfix = {
       enable = true;
+      relayDomains = [ "chipuppoker.com" ];
+      #domain = "test.earthtools.ca";
+    };
+    exim = {
+      enable = false;
       config = ''
         domainlist local_domains = chipuppoker.com
         domainlist relay_to_domains =
@@ -82,24 +126,29 @@ in {
       '';
     };
   };
-  users.extraUsers = {
-    root.openssh.authorizedKeys.keys = [ keys.clever.desktop ];
-    poker = {
-      openssh.authorizedKeys.keys = [ keys.clever.desktop ];
-      isNormalUser = true;
-      uid = 1000;
+  users = {
+    extraUsers = {
+      root.openssh.authorizedKeys.keys = [ keys.clever.desktop ];
+      poker = {
+        openssh.authorizedKeys.keys = [ keys.clever.desktop ];
+        isNormalUser = true;
+        uid = 1000;
+        extraGroups = [ "sslkeys" ];
+      };
     };
+    extraGroups.sslkeys.gid = 500;
   };
   environment.systemPackages = with pkgs; [ nix-repl screen socat gitAndTools.gitFull ];
-  nixpkgs.config.packageOverrides = pkgs: rec {
-    toxvpn = pkgs.callPackage ./toxvpn.nix {};
-    poker = (pkgs.callPackage /home/poker/chipuppoker/server/default.nix {}).package;
+  nixpkgs.config = import ./config.nix;
+  networking.firewall = {
+    allowedTCPPorts = [ 25 80 443 12346 9989 53 ];
+    allowedUDPPorts = [ 33445 53 ]; # toxvpn, dns
   };
-  networking.firewall.allowedTCPPorts = [ 25 80 443 12346 ];
   systemd.services.poker = {
     description = "main poker process";
     wantedBy = [ "multi-user.target" ];
     path = [ pkgs.poker ];
+    enable = true;
     environment = {
       CONFIG_FILE = "/home/poker/chipuppoker/config.json";
     };

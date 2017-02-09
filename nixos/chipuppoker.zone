@@ -1,0 +1,41 @@
+$TTL 3D
+@ IN SOA ns1.chipuppoker.com hostmaster.chipuppoker.com. (
+		25 ; serial
+		7200 ; refresh
+		900 ; retry
+		1209600 ; expire
+		86400) ; max ttl
+			NS	ns1
+			NS	ns2
+
+www		IN	CNAME	chipuppoker.com.
+@ 		IN 	A	190.124.250.110
+ns1		IN	A	190.124.250.110
+ns2		IN	A	190.124.250.111
+dev-server	IN	A	190.124.250.111
+mail		IN	CNAME	@
+;mail		IN	A	54.209.50.137
+_amazonses	IN	TXT	"7U2wQXqL+puf5YUvEKhNc9IGsBcslP1HK3XMjG59JEE="
+jnjuvmkpjzkdlzyobj2o5cykk7v3fm5h._domainkey IN CNAME jnjuvmkpjzkdlzyobj2o5cykk7v3fm5h.dkim.amazonses.com
+r22rqhwc2ka6drlqwkxgmkdesdo74oqf._domainkey IN CNAME r22rqhwc2ka6drlqwkxgmkdesdo74oqf.dkim.amazonses.com
+z4rkundydxmkvlgn74kmcfba4za3ip76._domainkey IN CNAME z4rkundydxmkvlgn74kmcfba4za3ip76.dkim.amazonses.com
+@               IN      TXT     "google-site-verification=0t6Z_cPhSZFY4VAvlWrpHsJSGl5bNf-iKDA1AzMBros"
+buildbot	IN	CNAME	@
+control		IN	CNAME	dev-server
+dev-static	IN	CNAME	dev-server
+dev		IN	A	54.209.124.106
+internal	IN	CNAME	master
+master		IN	A	190.124.250.110
+;master		IN	MX	10 mail
+;@		IN	MX	10 mail
+@   1h          IN      MX      1 ASPMX.L.GOOGLE.COM.
+@   1h          IN      MX      5 ALT1.ASPMX.L.GOOGLE.COM.
+@   1h          IN      MX      5 ALT2.ASPMX.L.GOOGLE.COM.
+@   1h          IN      MX      10 ALT3.ASPMX.L.GOOGLE.COM.
+@   1h          IN      MX      10 ALT4.ASPMX.L.GOOGLE.COM.
+monitoring	IN	A	190.124.250.110
+;rt		IN	A	54.209.50.137
+rt		IN	A	190.124.250.110
+server		IN	CNAME	master
+dev-fantasy	IN	CNAME	dev-server
+dev-static-fantasy IN	CNAME	dev-server
