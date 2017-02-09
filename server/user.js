@@ -69,13 +69,13 @@ function UserInit(regexLimitsIN,cb2) {
 	Club.registerHandlers(handlers);
 	require('./game_network').registerHandlers(handlers,regexLimits); // FIXME
 	async.parallel([function (cb) {
-		fs.readFile('views/password_change1.jade',{encoding:'utf8'},function (err,data) {
-			emailChange1 = jade.compile(data,{filename:'views/password_change1.jade',pretty:true});
+		fs.readFile('server/views/password_change1.jade',{encoding:'utf8'},function (err,data) {
+			emailChange1 = jade.compile(data,{filename:'server/views/password_change1.jade',pretty:true});
 			cb();
 		});
 	},function (cb) {
-		fs.readFile('views/email_register.jade',{encoding:'utf8'},function (err,data) {
-			emailRegister = jade.compile(data,{filename:'views/email_register.jade',pretty:true});
+		fs.readFile('server/views/email_register.jade',{encoding:'utf8'},function (err,data) {
+			emailRegister = jade.compile(data,{filename:'server/views/email_register.jade',pretty:true});
 			cb();
 		});
 	},recheckAssets],function () {

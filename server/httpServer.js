@@ -1107,7 +1107,7 @@ Server.prototype.getAvatar = function (req,res) {
 	var id = req.query.id;
 	global.log('getting avatar %j %d %s',req.query,id.length,id);
 	if (id == 'default') {
-		fs.readFile('resources/default_avatar.jpg',function (err,data) {
+		fs.readFile('server/resources/default_avatar.jpg',function (err,data) {
 			if (err) throw err;
 			res.send(data);
 		});

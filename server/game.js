@@ -321,7 +321,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		else this.club.seGameChanged(this,finish2.bind(this),conn);
 	}
 	function doSit() {
-		this.members[params.seat_index] = { hand: new Hand(), status:'psOutOfPlay', chips:params.chips, seat:params.seat_index, sitOutNextRound:false, SittingOutRoundsCount:0, handsPlayed:0, want_split:false };
+		this.members[params.seat_index] = { hand: new Hand(), status:'psOutOfPlay', chips:params.chips, seat:params.seat_index, sitOutNextRound:false, SittingOutRoundsCount:0, handsPlayed:0, want_split:false, disconnected:false };
 		this.logEvent('geCashin',conn.userid,params.chips);
 		if (!this.timebanks[conn.userid]) this.timebanks[conn.userid] = sharedconfig.max_timebank * 1000;
 		this.seats[params.seat_index] = { conn:conn, userid:conn.userid };
@@ -2141,6 +2141,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
 		var obj = {seat_index:x, player_mongo_id:priv.userid, chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected, autoplay:seat.autoplay };
+                assert(typeof obj.disconnected == "boolean");
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if ((['tsWinning','tsWinning2'].indexOf(this.state) != -1) && !seat.muck) showcards = true;
