@@ -171,6 +171,7 @@ begin
     if not Assigned(FSocket.SslContext) then
     begin
       FSocket.SslContext := TSslContext.Create(nil);
+      FSocket.SslContext.sslVersionMethod := sslTLS_V1_2;
       FSocket.SslContext.SslVerifyPeer := TRUE;
       FSocket.SslContext.SslVerifyDepth := 9;
       FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
