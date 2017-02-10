@@ -363,119 +363,124 @@ ClientSocket.prototype.goneIdle = function () {
 	this.error('ping timeout');
 };
 ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles,assetsEnabled) {
-	var key1;
-	var prefix;
-	if (config.diffserver) prefix='dev';
-	else prefix = 'live';
-	console.log('hello params',params);
-	if (params.debug) key1 = 'debuginstallerid';
-	else key1 = 'installerid';
-	key1 = prefix+'_'+key1;
-	if (!params.appcode) {
-	} else if (params.appcode != 'acDelphiWindows') key1 = params.appcode + '_' + key1;
-	console.log('final key %s',key1);
-	assert(files.length > 0);
-	models.Config.findOne({_id:key1},function (err,row2) {
-		if (!row2) {
-			console.log('warning, config installer not found');
-			if (mainfiles) {
-				this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
-				token.stop();
-				return;
-			}
-		}
-		models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
-			if (!targetVersion) {
-				console.log('warning, installer missing');
-				if (mainfiles) {
-					this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
-					token.stop();
-				}
-				return;
-			}
-			var x;
-			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
-			var toUpdate = [];
-			var checked = {};
-			for (x=0; x<files.length; x++) {
-				var clientFile = files[x];
-				clientFile.key = clientFile.path.replace('.',':').replace('.',':');
-				checked[clientFile.key] = true;
-				console.log("client claims to have %s",clientFile.key);
-			}
-			if (mainfiles) {
-				for (var key in targetVersion.hashes) {
-					if (!checked[key]) {
-						console.log('file %s is missing',key);
-						var fake = { path:key.replace(':','.').replace(':','.'), hash:'', key:key };
-						files.push(fake);
-					}
-				}
-			}
-			if (assetsEnabled) {
-				if (!targetVersion.hashes) targetVersion.hashes = {};
-				for (x in assets) {
-					targetVersion.hashes[x] = assets[x];
-					console.log('adding asset',x);
-				}
-			}
-			async.each(files,function checkFile(clientFile,cb) {
-				if (clientFile.hash) clientFile.hash = clientFile.hash.toString('hex');
-				else clientFile.hash = '';
-				var targetFile = targetVersion.hashes[clientFile.key];
-				if (!targetFile) {
-					console.log('%s not found in server',clientFile.key);
-					toUpdate.push({file_type:'ufRemove',path:clientFile.path});
-					return cb();
-				}
-				if (clientFile.hash != targetFile) {
-					//console.log('clientFile:%j',clientFile);
-					//console.log('need to patch %s',clientFile.path);
-					models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
-						assert.ifError(err);
-						if (diffRow && (params.appcode == 'acDelphiWindows')) {
-							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
-							toUpdate.push(UFI);
-							cb();
-						} else {
-							models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
-								assert.ifError(err);
-								if (sizeRow) {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
-								} else {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
-									fetchSize(targetFile);
-									console.log('cant find original of %s',clientFile.path);
-								}
-								cb();
-							});
-							if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path);
-						}
-					}.bind(this));
-				} else {
-					cb();
-				}
-			}.bind(this),function () {
-				var msg;
-				if (toUpdate.length === 0) {
-					this.currentVersion = targetVersion._id;
-				} else {
-					console.log('%s toUpdate:%j',this.socket.remoteAddress,toUpdate);
-				}
-				if (mainfiles) {
-					msg = JSON.parse(JSON.stringify(global.sharedconfig));
-					msg.update_files = toUpdate;
-					this.send(codes.srHello,msg,'Poker.HelloReply');
-					token.stop();
-				} else {
-					msg = {assets:toUpdate};
-					this.send(codes.srQueryAssetsReply,msg,'Poker.AssetList');
-					token.stop();
-				}
-			}.bind(this));
-		}.bind(this));
-	}.bind(this));
+  var key1;
+  var prefix;
+  if (config.diffserver) prefix='dev';
+  else prefix = 'live';
+
+  console.log('hello params',params);
+
+  if (params.debug) key1 = 'debuginstallerid';
+  else key1 = 'installerid';
+  key1 = prefix+'_'+key1;
+
+  if (!params.appcode) {
+  } else if (params.appcode != 'acDelphiWindows') key1 = params.appcode + '_' + key1;
+  console.log('final key %s',key1);
+
+  assert(files.length > 0);
+  models.Config.findOne({_id:key1},function (err,row2) {
+    if (!row2) {
+      console.log('warning, config installer not found');
+      if (mainfiles) {
+        this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
+        token.stop();
+        return;
+      }
+    }
+    models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
+      if (!targetVersion) {
+        console.log('warning, installer missing');
+        if (mainfiles) {
+          this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
+          token.stop();
+        }
+        return;
+      }
+      var x;
+      console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+      var toUpdate = [];
+      var checked = {};
+      for (x=0; x<files.length; x++) {
+        var clientFile = files[x];
+        clientFile.key = clientFile.path.replace('.',':').replace('.',':');
+        checked[clientFile.key] = true;
+        console.log("client claims to have %s",clientFile.key);
+      }
+      if (mainfiles) {
+        for (var key in targetVersion.hashes) {
+          if (!checked[key]) {
+            console.log('file %s is missing',key);
+            var fake = { path:key.replace(':','.').replace(':','.'), hash:'', key:key };
+            files.push(fake);
+          }
+        }
+      }
+      if (assetsEnabled) {
+        if (!targetVersion.hashes) targetVersion.hashes = {};
+        for (x in assets) {
+          targetVersion.hashes[x] = assets[x];
+          console.log('adding asset',x);
+        }
+      }
+      async.each(files,function checkFile(clientFile,cb) {
+        if (clientFile.hash) clientFile.hash = clientFile.hash.toString('hex');
+        else clientFile.hash = '';
+        var targetFile = targetVersion.hashes[clientFile.key];
+        if (!targetFile) {
+          console.log('%s not found in server',clientFile.key);
+          toUpdate.push({file_type:'ufRemove',path:clientFile.path});
+          return cb();
+        }
+        if (clientFile.hash != targetFile) {
+          //console.log('clientFile:%j',clientFile);
+          //console.log('need to patch %s',clientFile.path);
+          models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
+            assert.ifError(err);
+            if (diffRow && (params.appcode == 'acDelphiWindows')) {
+              var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
+              toUpdate.push(UFI);
+              cb();
+            } else {
+              models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
+                assert.ifError(err);
+                if (sizeRow) {
+                  toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
+                } else {
+                  toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
+                  fetchSize(targetFile);
+                  console.log('cant find original of %s',clientFile.path);
+                }
+                cb();
+              });
+              if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path);
+            }
+          }.bind(this));
+        } else {
+          cb();
+        }
+      }.bind(this),function () {
+        var msg;
+        if (toUpdate.length === 0) {
+          this.currentVersion = targetVersion._id;
+        } else {
+          console.log('%s toUpdate:%j',this.socket.remoteAddress,toUpdate);
+        }
+        if (mainfiles) {
+          msg = JSON.parse(JSON.stringify(global.sharedconfig));
+          msg.update_files = toUpdate;
+          this.send(codes.srHello,msg,'Poker.HelloReply');
+          token.stop();
+        } else {
+          msg = {assets:toUpdate};
+          this.send(codes.srQueryAssetsReply,msg,'Poker.AssetList');
+          token.stop();
+        }
+      }.bind(this));
+    }.bind(this));
+  }.bind(this));
 };
+
 ClientSocket.prototype.handle = function (code,args) {
 	var params,doc;
 	clearTimeout(this.idleTimer);
