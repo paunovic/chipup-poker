@@ -2,9 +2,11 @@ var config = {};
 var month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 if (document.location.protocol == 'https:') {
-	url = 'https://dev-server.chipuppoker.com';
-	config.transports = ['xhr-polling'];
-} else url = 'http://dev-server.chipuppoker.com:3000';
+  url = 'https://chipuppoker.com';
+  config.transports = ['xhr-polling'];
+} else {
+  url = 'http://chipuppoker.com:3000';
+}
 var socket = io.connect(url,config);
 function buildRevision(hash) {
 	console.log(hash);

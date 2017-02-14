@@ -42,105 +42,112 @@ var assetMtime;
 var Club;
 
 function assetSync(obj) {
-	console.log('assets synced %j',obj);
-	assets = obj;
+  console.log('assets synced %j',obj);
+  assets = obj;
 }
+
 function getAssets() {
-	return assets;
+  return assets;
 }
+
 function changePassword(new_password,userid,cb) {
-	// FIXME, refactor into a dedicated function and add a test
-	deck.getRandom(200,function changePw_cb1(salt) {
-		var hasher = crypto.createHash('sha256');
-		hasher.update(salt);
-		hasher.update(new_password);
-		var hash = hasher.digest();
-		models.UserModel.findOne({_id:userid},function changePw_cb2(err,self) {
-			self.password = hash;
-			self.salt = salt;
-			self.save(cb);
-		}.bind(this));
-	}.bind(this));
+  // FIXME, refactor into a dedicated function and add a test
+  deck.getRandom(200,function changePw_cb1(salt) {
+    var hasher = crypto.createHash('sha256');
+    hasher.update(salt);
+    hasher.update(new_password);
+    var hash = hasher.digest();
+    models.UserModel.findOne({_id:userid},function changePw_cb2(err,self) {
+      self.password = hash;
+      self.salt = salt;
+      self.save(cb);
+    }.bind(this));
+  }.bind(this));
 }
+
 function UserInit(regexLimitsIN,cb2) {
-	assert(regexLimitsIN);
-	Club = require('./club').Club;
-	regexLimits = regexLimitsIN;
-	Club.registerHandlers(handlers);
-	require('./game_network').registerHandlers(handlers,regexLimits); // FIXME
-	async.parallel([function (cb) {
-		fs.readFile('server/views/password_change1.jade',{encoding:'utf8'},function (err,data) {
-			emailChange1 = jade.compile(data,{filename:'server/views/password_change1.jade',pretty:true});
-			cb();
-		});
-	},function (cb) {
-		fs.readFile('server/views/email_register.jade',{encoding:'utf8'},function (err,data) {
-			emailRegister = jade.compile(data,{filename:'server/views/email_register.jade',pretty:true});
-			cb();
-		});
-	},recheckAssets],function () {
-		cb2();
-	});
-	setInterval(recheckAssets,60000);
-	pb = global.pb;
+  assert(regexLimitsIN);
+  Club = require('./club').Club;
+  regexLimits = regexLimitsIN;
+  Club.registerHandlers(handlers);
+  require('./game_network').registerHandlers(handlers,regexLimits); // FIXME
+  async.parallel([function (cb) {
+    fs.readFile('server/views/password_change1.jade',{encoding:'utf8'},function (err,data) {
+      emailChange1 = jade.compile(data,{filename:'server/views/password_change1.jade',pretty:true});
+      cb();
+    });
+  },function (cb) {
+    fs.readFile('server/views/email_register.jade',{encoding:'utf8'},function (err,data) {
+      emailRegister = jade.compile(data,{filename:'server/views/email_register.jade',pretty:true});
+      cb();
+    });
+  },recheckAssets],function () {
+    cb2();
+  });
+  setInterval(recheckAssets,60000);
+  pb = global.pb;
 }
+
 function ClientSocket(socket) {
-	this.connid = connections++;
-	this.state = 1;
-	this.socket = socket;
-	this.boughtin = 0;
-	socket.on('end',function() {
-		clearTimeout(this.idleTimer);
-		this.state = -1;
-		this.log('client lost');
-		delete global.activeUsers[this.userid];
-		Game.handleDisconnect(this,'closed',function () {
-			this.log('DC done');
-		}.bind(this));
-		this.destroy();
-	}.bind(this));
-	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
-	socket.on('error',function(err) {
-		clearTimeout(this.idleTimer);
-		this.state = -2;
-		this.log('error!',err.code);
-		this.log('stack1:',new Error().stack);
-		Game.handleDisconnect(this,'error');
-		this.logout();
-	}.bind(this));
-	clearTimeout(this.idleTimer);
-	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
-	this.newTournHook = this.newTourn.bind(this);
-	this.stateChangeHook = this.stateChangeHandOver.bind(this);
-	Tournament.core.on('new_tournament',this.newTournHook);
-	Tournament.core.on('tournament_start',this.newTournHook);
-	Tournament.core.on('users_changed',this.newTournHook);
-	Tournament.core.on('state_changed',this.stateChangeHook);
-	this.lastTourn = 0;
-	this.lastTournDetail = {};
-	this.tournDetailTimer = {};
-	this.handOverHook = this.tournChangeHandOver2.bind(this);
+  this.connid = connections++;
+  this.state = 1;
+  this.socket = socket;
+  this.boughtin = 0;
+  socket.on('end',function() {
+    clearTimeout(this.idleTimer);
+    this.state = -1;
+    this.log('client lost');
+    delete global.activeUsers[this.userid];
+    Game.handleDisconnect(this,'closed',function () {
+      this.log('DC done');
+    }.bind(this));
+    this.destroy();
+  }.bind(this));
+  this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
+  socket.on('error',function(err) {
+    clearTimeout(this.idleTimer);
+    this.state = -2;
+    this.log('error!',err.code);
+    this.log('stack1:',new Error().stack);
+    Game.handleDisconnect(this,'error');
+    this.logout();
+  }.bind(this));
+  clearTimeout(this.idleTimer);
+  this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
+  this.newTournHook = this.newTourn.bind(this);
+  this.stateChangeHook = this.stateChangeHandOver.bind(this);
+  Tournament.core.on('new_tournament',this.newTournHook);
+  Tournament.core.on('tournament_start',this.newTournHook);
+  Tournament.core.on('users_changed',this.newTournHook);
+  Tournament.core.on('state_changed',this.stateChangeHook);
+  this.lastTourn = 0;
+  this.lastTournDetail = {};
+  this.tournDetailTimer = {};
+  this.handOverHook = this.tournChangeHandOver2.bind(this);
 }
+
 ClientSocket.prototype.error = function error(e) {
-	clearTimeout(this.idleTimer);
-	this.log('error!',e);
-	this.log('stack:',e.stack);
-	console.log('TEMP',this.nick,e.stack,e);
-	Game.handleDisconnect(this,'error2');
-	if (e != 'sendq overflow') this.logout();
-	this.socket.destroy();
-	this.destroy();
+  clearTimeout(this.idleTimer);
+  this.log('error!',e);
+  this.log('stack:',e.stack);
+  console.log('TEMP',this.nick,e.stack,e);
+  Game.handleDisconnect(this,'error2');
+  if (e != 'sendq overflow') this.logout();
+  this.socket.destroy();
+  this.destroy();
 };
+
 ClientSocket.prototype.newTourn = function (doc) {
-	if (this.state != 2) return;
-	var elapsed = Date.now() - this.lastTourn;
-	if (elapsed < 30000) { // 30 sec
-		if (this.tournTimer) clearTimeout(this.tournTimer);
-		this.tournTimer = setTimeout(this.flushTourn.bind(this),30000 - elapsed);
-	} else {
-		this.flushTourn();
-	}
+  if (this.state != 2) return;
+  var elapsed = Date.now() - this.lastTourn;
+  if (elapsed < 30000) { // 30 sec
+    if (this.tournTimer) clearTimeout(this.tournTimer);
+    this.tournTimer = setTimeout(this.flushTourn.bind(this),30000 - elapsed);
+  } else {
+    this.flushTourn();
+  }
 };
+
 ClientSocket.prototype.flushTourn = function () {
 	delete this.tournTimer;
 	models.Tournament.find(function (err,items) {
@@ -1172,84 +1179,90 @@ function bufferMatch(a,b) {
 	}
 	return true;
 }
+
 function hashAssets(cb) {
-	installer.recurse_dir('assets/','',function (err,files) {
-		assert.ifError(err);
-		var newassets = {};
-		async.each(files,function (file,cb) {
-			console.log('file',file);
-			if (file.indexOf('.filepart') != -1) return cb();
-			var hasher = crypto.createHash('sha256'),client = fs.createReadStream(file),size = 0;
-			client.on('data',function (data) {
-				hasher.update(data);
-				size += data.length;
-			});
-			client.on('end',function () {
-				var hash = hasher.digest('hex');
-				newassets[file.replace('.',':')] = hash;
-				console.log('hash of %s is %s',file,hash);
-				installer.copyFile(file,'unpacked/objects/'+hash,function () {
-					models.ObjectSize.create({_id:hash,size:size},function () {
-						cb();
-					});
-				});
-			});
-		},function () {
-			assets = newassets;
-			console.log('done hashing assets',assets);
-			var body = new Buffer(JSON.stringify(assets))
-			var req = https.request({hostname:'chipuppoker.com',method:'POST',path:'/sync/assets',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
-			req.on('data',function (chunk) {
-				console.log(chunk);
-			});
-			req.on('error',function (err) {
-				console.log('http error sending new assets:',err);
-			});
-			req.on('end',function () {
-				console.log('req ended',req);
-			});
-			req.write(body);
-			req.end();
-			if (cb) cb();
-		});
-	});
+  installer.recurse_dir('server/assets/','',function (err,files) {
+    assert.ifError(err);
+    var newassets = {};
+    async.each(files,function (file,cb) {
+      console.log('file',file);
+      if (file.indexOf('.filepart') != -1) return cb();
+      var hasher = crypto.createHash('sha256'),client = fs.createReadStream(file),size = 0;
+      client.on('data',function (data) {
+        hasher.update(data);
+        size += data.length;
+      });
+      client.on('end',function () {
+        var hash = hasher.digest('hex');
+        newassets[file.replace('.',':').replace("server/","")] = hash;
+        console.log('hash of %s is %s',file,hash);
+        installer.copyFile(file, config.unpacked + '/objects/'+hash,function () {
+          models.ObjectSize.create({_id:hash,size:size},function () {
+            cb();
+          });
+        });
+      });
+    },function () {
+      assets = newassets;
+      console.log('done hashing assets',assets);
+
+      // nixos isolation
+      if (cb) cb();
+      return;
+      var body = new Buffer(JSON.stringify(assets))
+      var req = https.request({hostname:'chipuppoker.com',method:'POST',path:'/sync/assets',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
+      req.on('data',function (chunk) {
+        console.log(chunk);
+      });
+      req.on('error',function (err) {
+        console.log('http error sending new assets:',err);
+      });
+      req.on('end',function () {
+        console.log('req ended',req);
+      });
+      req.write(body);
+      req.end();
+      if (cb) cb();
+    });
+  });
 }
+
 var asset_initial = true;
 function recheckAssets(cb) {
-    if (!config.diffserver) {
-        if (asset_initial) {
-            asset_initial = false;
-            var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
-                res.setEncoding('ascii');
-                var buffer = '';
-                res.on('data',function (chunk) {
-                    buffer += chunk;
-                });
-                res.on('error',function (err) {
-                    console.log('http error sending new assets:',err);
-                });
-                res.on('end',function () {
-                    console.log('req ended',buffer);
-                    assert(res.statusCode == 200);
-                    assets = JSON.parse(buffer);
-                    if (cb) return cb();
-                });
-            });
-            req.end();
-        } else {
-            if (cb) return cb();
-        }
-        return;
+  if (!config.diffserver) {
+    if (asset_initial) {
+      asset_initial = false;
+      var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
+        res.setEncoding('ascii');
+        var buffer = '';
+        res.on('data',function (chunk) {
+          buffer += chunk;
+        });
+        res.on('error',function (err) {
+          console.log('http error sending new assets:',err);
+        });
+        res.on('end',function () {
+          console.log('req ended',buffer);
+          assert(res.statusCode == 200);
+          assets = JSON.parse(buffer);
+          if (cb) return cb();
+        });
+      });
+      req.end();
+    } else {
+      if (cb) return cb();
     }
-	fs.stat('assets',function (err,stats) {
-		if (assetMtime == stats.mtime.getTime()) {
-			if (cb) cb();
-		} else {
-			console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
-			hashAssets(cb);
-			assetMtime = stats.mtime.getTime();
-		}
-	});
+    return;
+  }
+  fs.stat('server/assets',function (err,stats) {
+    if (assetMtime == stats.mtime.getTime()) {
+      if (cb) cb();
+    } else {
+      console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
+      hashAssets(cb);
+      assetMtime = stats.mtime.getTime();
+    }
+  });
 }
 function fetchSize(hash) {
 	var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/sizes?hash='+hash,auth:'sync:'+config.syncpassword},function (res) {

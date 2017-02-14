@@ -44,36 +44,36 @@ var badConfLink = "Invalid confirmation link.";
 var sharedconfig,emailChange2;
 
 function initHttpServer() {
-	sharedconfig = global.sharedconfig; // FIXME
-	fs.readFile('views/password_change2.jade',{encoding:'utf8'},function (err,data) {
-		emailChange2 = jade.compile(data,{filename:'views/password_change2.jade',pretty:true});
-	});
-	var server = new Server(global.activeUsers);
-	return server;
+  sharedconfig = global.sharedconfig; // FIXME
+  fs.readFile('views/password_change2.jade',{encoding:'utf8'},function (err,data) {
+    emailChange2 = jade.compile(data,{filename:'views/password_change2.jade',pretty:true});
+  });
+  var server = new Server(global.activeUsers);
+  return server;
 }
 
 function Server(activeUsersIN) {
-	var app = express();
-	this.httpServer = http.createServer(app);
-	this.IO = require('socket.io').listen(this.httpServer,{log:false});
-	differ.setIO(this.IO);
-	var logger = require('morgan');
-	app.use(logger());
-	this.activeUsers = activeUsersIN; // FIXME
+  var app = express();
+  this.httpServer = http.createServer(app);
+  this.IO = require('socket.io').listen(this.httpServer,{log:false});
+  differ.setIO(this.IO);
+  var logger = require('morgan');
+  app.use(logger());
+  this.activeUsers = activeUsersIN; // FIXME
 
-	this.sessionStore = new MongoStore(mongoose.connection.db,'sessions');
-	this.IO.set('authorization',this.socketAuth.bind(this));
-	app.use(express.cookieParser());
-	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
-	app.configure(function () {
-		assert(fs.statSync(config.upload_dir));
-		app.use(express.bodyParser({uploadDir:config.upload_dir}));
-	});
-	app.use('/sync/',express.basicAuth('sync',config.syncpassword));
-	app.use('/secure/',this.isSecureAuthed);
-        app.set('views', project_root + '/views');
-	app.set('view engine','jade');
-	app.get('/secure/',this.secureIndex.bind(this));
+  this.sessionStore = new MongoStore(mongoose.connection.db,'sessions');
+  this.IO.set('authorization',this.socketAuth.bind(this));
+  app.use(express.cookieParser());
+  app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
+  app.configure(function () {
+    assert(fs.statSync(config.upload_dir));
+    app.use(express.bodyParser({uploadDir:config.upload_dir}));
+  });
+  app.use('/sync/',express.basicAuth('sync',config.syncpassword));
+  app.use('/secure/',this.isSecureAuthed);
+  app.set('views', project_root + '/views');
+  app.set('view engine','jade');
+  app.get('/secure/',this.secureIndex.bind(this));
 
 	app.get('/secure/login',this.secureLogin.bind(this));
 	app.get('/secure/logout',this.secureLogout.bind(this));
@@ -771,7 +771,8 @@ Server.prototype.installers_func = function (req,res) {
 	}
 	var latestVersion = '';
 	var latestMsg = '';
-	if (config.diffserver) {
+	if (config.diffserver && false) {
+          // TODO, github
 		jobs.push(function (cb) {
 			fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
 				latestVersion = body.trim();
@@ -1127,41 +1128,43 @@ Server.prototype.getAvatar = function (req,res) {
 		res.send(row.image);
 	});
 }
+
 Server.prototype.uploadAvatar = function (req,res) {
-	//console.log('files',req.headers);
-	//console.log('version',req.httpVersionMajor,req.httpVersionMinor);
-	fs.readFile(req.files.avatar.path,function (err,data) {
-		var extension = req.files.avatar.originalFilename.split('.').pop();
-		var hasher = crypto.createHash('sha256');
-		hasher.update(data);
-		var hash = hasher.digest('base64');
-		models.Avatars.findOne({_id:hash},function (err,row) {
-			if (err) {
-				console.log('error',err);
-				res.send(JSON.stringify({error:err}));
-				return;
-			}
-			if (row) {
-				var out = new Buffer(hash,'base64');
-				console.log('sending dup id',out);
-				res.send(200,out);
-			} else {
-				var obj = new models.Avatars({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension});
-				obj.save(function (err) {
-					if (err) {
-						console.log('error',err);
-						res.send(JSON.stringify(err));
-						return;
-					}
-					var out = new Buffer(obj._id,'base64');
-					//console.log('sending unique id',out);
-					res.send(200,out);
-					fs.unlink(req.files.avatar.path);
-				});
-			}
-		}.bind(this));
-	}.bind(this));
+  //console.log('files',req.headers);
+  //console.log('version',req.httpVersionMajor,req.httpVersionMinor);
+  fs.readFile(req.files.avatar.path,function (err,data) {
+    var extension = req.files.avatar.originalFilename.split('.').pop();
+    var hasher = crypto.createHash('sha256');
+    hasher.update(data);
+    var hash = hasher.digest('base64');
+    models.Avatars.findOne({_id:hash},function (err,row) {
+      if (err) {
+        console.log('error',err);
+        res.send(JSON.stringify({error:err}));
+        return;
+      }
+      if (row) {
+        var out = new Buffer(hash,'base64');
+        console.log('sending dup id',out);
+        res.send(200,out);
+      } else {
+        var obj = new models.Avatars({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension});
+        obj.save(function (err) {
+          if (err) {
+            console.log('error',err);
+            res.send(JSON.stringify(err));
+            return;
+          }
+          var out = new Buffer(obj._id,'base64');
+          //console.log('sending unique id',out);
+          res.send(200,out);
+          fs.unlink(req.files.avatar.path);
+        });
+      }
+    }.bind(this));
+  }.bind(this));
 }
+
 Server.prototype.gitHook = function (req,res) {
 	res.end();
 	fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {

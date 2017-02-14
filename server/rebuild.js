@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var fs = require('fs');
 var p = require("node-protobuf");
 
@@ -19,7 +21,7 @@ for (var i=0; i<lines.length; i++) {
 
 
 var pb = new p(fs.readFileSync("server/descriptor.desc"));
-var messages = fs.readFileSync("message.desc");
+var messages = fs.readFileSync("server/message.desc");
 var data = pb.Parse(messages,"google.protobuf.FileDescriptorSet");
 for (var i=0; i<data.file.length; i++) {
 	var file = data.file[i];

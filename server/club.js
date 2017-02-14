@@ -76,21 +76,25 @@ Club.getClubById = function (id,cb) {
 		}
 	}.bind(this));
 };
+
 Club.prototype.isOwner = function (user) {
-	return this.obj.owner.equals(user);
+  return this.obj.owner.equals(user);
 };
+
 Club.prototype.sendBalanceUpdate = function (userid) {
-	var user = activeUsers[userid];
-	if (!user) return;
-	models.ClubBalance.find({userid:userid},function (err,stats) {
-		var user = activeUsers[userid];
-		if (user) {
-			var out = Club.makeClubProtobuf(this.obj,null,stats,this,user);
-			console.log('sending',out);
-			user.send(codes.seClubChange,out,'Poker.Club');
-		}
-	}.bind(this));
+  var user = activeUsers[userid];
+  if (!user) return;
+
+  models.ClubBalance.find({userid:userid}, function (err,stats) {
+    var user = activeUsers[userid];
+    if (user) {
+      var out = Club.makeClubProtobuf(this.obj, null, stats, this,user);
+      console.log('sending balance update', out);
+      user.send(codes.seClubChange, out, 'Poker.Club');
+    }
+  }.bind(this));
 }
+
 Club.prototype.handOver = function (gameObj,cb,handid,reason,userid) {
 	var toFind = this.obj.manager.concat(this.obj.owner);
 	var foundOne = false;

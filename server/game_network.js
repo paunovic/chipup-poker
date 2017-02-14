@@ -604,7 +604,8 @@ handlers[codes.scShowCards] = function (args,token) {
 					if (sucess) {
 						game.broadcastStatus(this,true,events); // sendEvent
 						var status = game.getTableStatus(this,true,events);
-						this.send(codes.srTableSitOk,status,'Poker.TableStatus');
+                                                console.log("sit ok status is", status);
+						this.send(codes.srTableSitOk, status, 'Poker.TableStatus');
 						this.sendClubStatus(game.club,game);
 					}
 					token.stop();
