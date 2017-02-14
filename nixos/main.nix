@@ -3,11 +3,12 @@
 let
   keys = import ./keys.nix;
 in {
-  imports = [ ./vim.nix ];
+  imports = [ ./core.nix ./poker.nix ];
   services = {
     fail2ban = {
       enable = true;
     };
+    poker.enable = true;
     bind = {
       enable = true;
       blockedNetworks = [ "130.211.31.137" "110.68.84.72" "110.165.126.148" "111.250.82.160" "64.62.138.21" ];
@@ -20,7 +21,6 @@ in {
       ];
     };
     openssh = {
-      enable = true;
       passwordAuthentication = false;
     };
     toxvpn = {
@@ -28,25 +28,10 @@ in {
       localip = "192.168.144.1";
     };
     zfs.autoSnapshot.enable = true;
-    mongodb = {
-      enable = true;
-    };
     nginx = {
       enable = true;
       virtualHosts = {
         "chipuppoker.com" = {
-          forceSSL = true;
-          enableACME = true;
-          locations = {
-            "/".proxyPass = "http://127.0.0.1:3000/";
-            #"/contactPost".proxyPass = "http://127.0.0.1:3000/";
-            #"/" = {
-            #root = /home/poker/chipuppoker/server/files;
-            #};
-            "/unpacked".root = "/home/poker/";
-            "/diffs".root = "/home/poker/";
-            "/rawinstallers".root = "/home/poker/";
-          };
           serverAliases = [ "www.chipuppoker.com" ];
         };
         "server.chipuppoker.com" = {
@@ -139,36 +124,13 @@ in {
     extraUsers = {
       root.openssh.authorizedKeys.keys = [ keys.clever.desktop ];
       poker = {
-        openssh.authorizedKeys.keys = [ keys.clever.desktop ];
-        isNormalUser = true;
-        uid = 1000;
         extraGroups = [ "sslkeys" ];
       };
     };
     extraGroups.sslkeys.gid = 500;
   };
-  environment.systemPackages = with pkgs; [ nix-repl screen socat gitAndTools.gitFull ncdu ];
-  nixpkgs.config = import ./config.nix;
   networking.firewall = {
     allowedTCPPorts = [ 25 80 443 12346 9989 53 ];
     allowedUDPPorts = [ 33445 53 ]; # toxvpn, dns
-  };
-  systemd.services.poker = {
-    description = "main poker process";
-    wantedBy = [ "multi-user.target" ];
-    path = with pkgs; [ poker innoextract ];
-    enable = true;
-    environment = {
-      CONFIG_FILE = "/home/poker/chipuppoker/config.json";
-    };
-    script = ''
-      cd /home/poker/chipuppoker
-      ${pkgs.poker}/bin/poker-master
-    '';
-    serviceConfig = {
-      User = "poker";
-    };
-    requires = [ "mongodb.service" "nginx.service" ];
-    after = [ "mongodb.service" "nginx.service" ];
   };
 }

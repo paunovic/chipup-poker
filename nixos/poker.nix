@@ -8,7 +8,7 @@ let
     keypath = "/home/poker/chipuppoker/key.pem";
     certpath = "/home/poker/chipuppoker/cert.pem";
     hostname = config.networking.hostName;
-    staticserver = "dev-static.chipuppoker.com";
+    staticserver = config.networking.hostName; # deprecated
     diffserver = true;
     syncpassword = "Aim8Aevu";
     upload_dir = "/home/poker/upload";
@@ -43,6 +43,9 @@ in {
             enableACME = true;
             locations = {
               "/".proxyPass = "http://127.0.0.1:3000/";
+              "/unpacked".root = "/home/poker/";
+              "/diffs".root = "/home/poker/";
+              "/rawinstallers".root = "/home/poker/";
             };
             #serverAliases = [ "www.chipuppoker.com" ];
           };
@@ -52,7 +55,7 @@ in {
     systemd.services.poker = {
       description = "main poker process";
       wantedBy = [ "multi-user.target" ];
-      path = [ pkgs.poker ];
+      path = with pkgs; [ poker innoextract ];
       enable = true;
       environment = {
         CONFIG_FILE = pkgs.writeText "poker.json" (builtins.toJSON poker_config);
@@ -64,7 +67,6 @@ in {
       '';
       serviceConfig = {
         User = "poker";
-        Restart = "no";
       };
       requires = [ "mongodb.service" "nginx.service" ];
       after = [ "mongodb.service" "nginx.service" ];

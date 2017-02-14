@@ -20,6 +20,9 @@ in {
       root.openssh.authorizedKeys.keys = [ keys.clever.desktop ];
     };
   };
-  environment.systemPackages = with pkgs; [ nix-repl screen socat gitAndTools.gitFull ];
+  environment.systemPackages = with pkgs; [ nix-repl screen socat gitAndTools.gitFull ncdu ];
   nixpkgs.config = import ./config.nix;
+  system.extraSystemBuilderCmds = ''
+    ln -sv ${./.} $out/nixcfg
+  '';
 }
