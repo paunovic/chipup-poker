@@ -141,7 +141,8 @@ object frmChangeAvatar: TfrmChangeAvatar
     SslVerifyPeerModes = [SslVerifyMode_PEER]
     SslSessionCacheModes = []
     SslCipherList = 'ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH'
-    SslVersionMethod = sslV3
+    SslVersionMethod = sslTLS_V1_2
+    SslECDHMethod = sslECDHNone
     SslSessionTimeout = 0
     SslSessionCacheSize = 20480
     Left = 124

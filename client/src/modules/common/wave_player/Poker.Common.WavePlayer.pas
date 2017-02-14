@@ -93,6 +93,9 @@ function TWavePlayer.Load(const AName: String; out ADirectSoundBuffer: TDirectSo
 var
   ds_buffer: TDirectSoundBuffer;
 begin
+  if not Assigned(FDirectSound) then
+    Exit(FALSE);
+
   ds_buffer := TDirectSoundBuffer.Create;
   if (ds_buffer.CreateBuffer(FDirectSound, AName)) and
      (ds_buffer.FillBuffer) then
