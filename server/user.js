@@ -371,9 +371,7 @@ ClientSocket.prototype.goneIdle = function () {
 };
 ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles,assetsEnabled) {
   var key1;
-  var prefix;
-  if (config.diffserver) prefix='dev';
-  else prefix = 'live';
+  var prefix = "live";
 
   console.log('hello params',params);
 
@@ -395,7 +393,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
         return;
       }
     }
-    models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
+    models.Installer.findOne({_id: row2.value},function (err, targetVersion) {
       if (!targetVersion) {
         console.log('warning, installer missing');
         if (mainfiles) {
@@ -452,9 +450,9 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
               models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
                 assert.ifError(err);
                 if (sizeRow) {
-                  toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
+                  toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.hostname+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
                 } else {
-                  toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
+                  toUpdate.push({file_type:'ufFull',path:clientFile.path,url:'https://'+config.hostname+'/unpacked/objects/'+targetFile,file_size:-1});
                   fetchSize(targetFile);
                   console.log('cant find original of %s',clientFile.path);
                 }
@@ -1258,7 +1256,7 @@ function recheckAssets(cb) {
     if (assetMtime == stats.mtime.getTime()) {
       if (cb) cb();
     } else {
-      console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
+      //console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
       hashAssets(cb);
       assetMtime = stats.mtime.getTime();
     }

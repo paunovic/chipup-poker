@@ -161,7 +161,7 @@ function Server(activeUsersIN) {
 		});
 	}.bind(this));
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
-		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
+		models.Config.findOne({_id:'live_debuginstallerid'},function (err,row) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
 				global.log('sending debug installer %j',row);
@@ -669,29 +669,32 @@ Server.prototype.getUser = function (req,res) {
 		}.bind(this));
 	}.bind(this));
 }
+
 Server.prototype.installers_func = function (req,res) {
-	var start = Date.now();
-	console.log(req.body);
-	var showlist = true;
-	var appcode = 'acDelphiWindows';
-	if (req.query.appcode) appcode = req.query.appcode;
-	if (req.query.showlist) showlist = true;
-	function makeDeleter(id) {
-		return function (cb) {
-			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
-				if (row) {
-					fs.unlink('installers/'+row.name,function (err) {
-					});
-					row.remove(function () {});
-				}
-				// FIXME, delete the raw objects if they are unused
-				cb();
-			}.bind(this));
-		}.bind(this);
-	}
-	function pushActivate(debug,id,cb) {
-		var obj = { debug:debug, id:id };
-		var body = new Buffer(JSON.stringify(obj));
+  var start = Date.now();
+  console.log(req.body);
+  var showlist = true;
+  var appcode = 'acDelphiWindows';
+
+  if (req.query.appcode) appcode = req.query.appcode;
+  if (req.query.showlist) showlist = true;
+
+  function makeDeleter(id) {
+    return function (cb) {
+      models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
+        if (row) {
+          fs.unlink('installers/'+row.name,function (err) {
+          });
+          row.remove(function () {});
+        }
+        // FIXME, delete the raw objects if they are unused
+        cb();
+      }.bind(this));
+    }.bind(this);
+  }
+  function pushActivate(debug,id,cb) {
+    var obj = { debug:debug, id:id };
+    var body = new Buffer(JSON.stringify(obj));
 		var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/setActive',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword},function (res) {
 			res.setEncoding('utf8');
 			res.on('data',function (chunk) {
@@ -1180,45 +1183,47 @@ Server.prototype.gitHook = function (req,res) {
 		}.bind(this));
 	}.bind(this));
 }
+
 Server.prototype.newVersion = function newVersion(req,res) {
-	// FIXME, add basicAuth
-	console.log('query',req.query);
-	console.log('files',req.files);
-	var name1 = req.files.installer.path.split('/')[1];
-	console.log(name1);
-	var version = req.query.version;
-	if (!version) version = req.body.version;
+  // FIXME, add basicAuth
+  console.log('query',req.query);
+  //console.log('files',req.files);
+  var name1 = req.files.installer.path.split('/')[4];
+  console.log('basename:', name1);
+  var version = req.query.version;
+  if (!version) version = req.body.version;
 
-	var revision = req.query.revision;
-	if (!revision) revision = req.body.revision;
+  var revision = req.query.revision;
+  if (!revision) revision = req.body.revision;
 
-	var debug = req.query.debug;
-	if (!debug) debug = req.body.debug;
+  var debug = req.query.debug;
+  if (!debug) debug = req.body.debug;
 
-	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
-		assert.ifError(err);
-		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size,appcode:'acDelphiWindows'});
-		obj.save(function (err) {
-			assert.ifError(err);
-			global.log('new version recorded: %j',obj);
-			installer.unpackInstaller(obj,function (success) {
-				var key1;
-				if (success) {
-					if (debug == 'debug') key1 = 'debuginstallerid';
-					else key1 = 'installerid';
-					//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
-					//	assert.ifError(err);
-					//});
-					obj.ts = obj._id.getTimestamp().toString();
-					this.IO.sockets.emit('new_installer',obj);
-					res.send('OK');
-				} else {
-					res.send('error');
-				}
-			}.bind(this));
-		}.bind(this));
-	}.bind(this));
+  fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
+    assert.ifError(err);
+    var obj = new models.Installer({name:name1, version:version, revision:revision, debug:debug, size:req.files.installer.size, appcode:'acDelphiWindows' });
+    obj.save(function (err) {
+      assert.ifError(err);
+      global.log('new version recorded: %j',obj);
+      installer.unpackInstaller(obj,function (success) {
+        var key1;
+        if (success) {
+          if (debug == 'debug') key1 = 'debuginstallerid';
+          else key1 = 'installerid';
+          //Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
+          //assert.ifError(err);
+          //});
+          obj.ts = obj._id.getTimestamp().toString();
+          this.IO.sockets.emit('new_installer',obj);
+          res.send('OK');
+        } else {
+          res.send('error');
+        }
+      }.bind(this));
+    }.bind(this));
+  }.bind(this));
 }
+
 Server.prototype.syncAssets = function (req,res) {
 	console.log(req.body);
 	user.assetSync(req.body);

@@ -29,15 +29,15 @@ function updateLive(doc,sizes,cb) {
 }
 
 function unpackInstaller(record,cb1) {
-  var prefix = 'unpacked/'+record._id+'/app/';
-  var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+record._id+'/','-e','installers/'+record.name],{stdio:'inherit'});
-  unpacker.on('close',function (code) {
+  var prefix = config.unpacked + '/'+record._id+'/app/';
+  var unpacker = child_process.spawn('innoextract', ['-l', '-d', config.unpacked + '/'+record._id+'/', '-e', 'installers/'+record.name ], {stdio:'inherit'});
+  unpacker.on('close',function (code, err) {
     console.log('result',arguments);
     if (code != 0) {
       cb1(false);
       return;
     }
-    assert.equal(code,0);
+    assert.equal(code, 0);
     recurse_dir('',prefix,function (err,files) {
       assert.ifError(err);
       console.log('all files:%j',files);
@@ -47,13 +47,11 @@ function unpackInstaller(record,cb1) {
           assert.ifError(err);
           if (err) console.log(err);
           console.log('inserted %j',newdoc);
-          deleteDir('unpacked/'+record._id);
+          deleteDir(config.unpacked + '/'+record._id);
           async.each(sizes,function (row,cb) {
             models.ObjectSize.create(row,cb);
           },function () {
-            updateLive(record,sizes,function () {
-              cb1(true);
-            });
+            cb1(true);
           });
         });
       });
@@ -130,7 +128,7 @@ function hashFiles(prefix,files,cb) {
       var key = filename.replace('.',':').replace('.',':');
       sizes.push({_id:hash, size:size});
       hashes[key] = hash;
-      copyFile(prefix+filename,'unpacked/objects/'+hash,function () {
+      copyFile(prefix+filename, config.unpacked + '/objects/'+hash,function () {
         fs.unlink(prefix+filename,function () {
           cb2();
         });
