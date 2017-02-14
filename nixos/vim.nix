@@ -7,7 +7,8 @@ let
       customRC = ''
         syntax on
         set nu
-        set foldmethod=syntax
+        set foldmethod=indent
+        set foldcolumn=5
         set listchars=tab:->
         set list
         set backspace=indent,eol,start
@@ -15,7 +16,8 @@ let
         map <F7> :tabp<enter>
         map <F8> :tabn<enter>
         set expandtab
-        set softtabstop=4
+        set softtabstop=2
+        set shiftwidth=2
       '';
       vam.pluginDictionaries = [ { names = [ "vim-nix" "youcompleteme" ]; } ];
     };

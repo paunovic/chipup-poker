@@ -5,9 +5,12 @@ let
 in {
   imports = [ ./vim.nix ];
   services = {
+    fail2ban = {
+      enable = true;
+    };
     bind = {
       enable = true;
-      blockedNetworks = [ "130.211.31.137" "110.68.84.72" "110.165.126.148" "111.250.82.160" ];
+      blockedNetworks = [ "130.211.31.137" "110.68.84.72" "110.165.126.148" "111.250.82.160" "64.62.138.21" ];
       zones = [
         {
           name = "chipuppoker.com";
@@ -16,7 +19,10 @@ in {
         }
       ];
     };
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      passwordAuthentication = false;
+    };
     toxvpn = {
       enable = true;
       localip = "192.168.144.1";
@@ -37,6 +43,9 @@ in {
             #"/" = {
             #root = /home/poker/chipuppoker/server/files;
             #};
+            "/unpacked".root = "/home/poker/";
+            "/diffs".root = "/home/poker/";
+            "/rawinstallers".root = "/home/poker/";
           };
           serverAliases = [ "www.chipuppoker.com" ];
         };
@@ -138,7 +147,7 @@ in {
     };
     extraGroups.sslkeys.gid = 500;
   };
-  environment.systemPackages = with pkgs; [ nix-repl screen socat gitAndTools.gitFull ];
+  environment.systemPackages = with pkgs; [ nix-repl screen socat gitAndTools.gitFull ncdu ];
   nixpkgs.config = import ./config.nix;
   networking.firewall = {
     allowedTCPPorts = [ 25 80 443 12346 9989 53 ];
@@ -147,7 +156,7 @@ in {
   systemd.services.poker = {
     description = "main poker process";
     wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.poker ];
+    path = with pkgs; [ poker innoextract ];
     enable = true;
     environment = {
       CONFIG_FILE = "/home/poker/chipuppoker/config.json";
