@@ -827,72 +827,74 @@ ClientSocket.prototype.handle = function (code,args) {
 		}
 	}
 };
+
 ClientSocket.prototype.getStatusPacket = function (status,maincb) {
-	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false}, {pendingApproval:this.userid} ]};
-	// owner should see password
-	// all need to see name, _id, seq, private, chips, and members
-	models.Clubs.find(query,function(err,clubs) {
-		status.clubs = clubs;
-		var x,y;
-		var userlist = [];
-		var clubids = [];
-		var ownedClubs = [];
-		for (x=0; x<clubs.length; x++) {
-			var c = clubs[x];
-			if (userlist.indexOf(c.owner) == -1) userlist.push(c.owner);
-			if (clubs[x].owner.equals(this.userid)) {
-				if (clubs[x].password === null) delete clubs[x].password;
-				ownedClubs.push(c._id);
-			} else {
-				delete clubs[x].password;
-			}
-			clubids.push(c._id);
-		}
-		models.ClubBalance.find({clubid:{$in:ownedClubs}},function (err,balances) {
-			assert.ifError(err);
-			var clubsOut = [];
-			var pendingOut = [];
-			async.each(clubs,function getStatsAndClub(item,cb) {
-				Club.getClubById(item._id,function (err,club) {
-					// TODO, dont show userlist if you are pending
-					var obj = Club.makeClubProtobuf(item,userlist,balances,club);
-					console.log(item,this.userid);
-					if (myutils.containsObjectID(club.obj.members,this.userid)) {
-						clubsOut.push(obj);
-					} else if (myutils.containsObjectID(item.pendingApproval,this.userid)) {
-						pendingOut.push(obj);
-					} else if (club.isOwner(this.userid)) {
-						clubsOut.push(obj);
-					}
-					cb();
-				}.bind(this));
-			}.bind(this),function finished() {
-				status.clubs = clubsOut;
-				status.pending_clubs = pendingOut;
-				models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:"",subscription_plan:""},function(err,users) {
-					status.users = users;
-					models.UserModel.findOne({_id:this.userid},function(err,self) {
-						status.self = self;
-						// FIXME, hide closed games, send them in a second array for just the owner
-						models.Game.find({clubid:{$in:clubids}},function (err,games) {
-							if (err) {
-								this.reply(0,"internal error");
-								return;
-							}
-							for (var x=0; x<games.length; x++) {
-								games[x] = game.makeGameProtobuf(games[x]);
-							}
-							//this.log('games list:%j',games);
-							status.games = games;
-							maincb(status);
-							this.log('status reply:',status);
-						}.bind(this));
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}.bind(this));
-	}.bind(this));
+  var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false}, {pendingApproval:this.userid} ]};
+  // owner should see password
+  // all need to see name, _id, seq, private, chips, and members
+  models.Clubs.find(query,function(err,clubs) {
+    status.clubs = clubs;
+    var x,y;
+    var userlist = [];
+    var clubids = [];
+    var ownedClubs = [];
+
+    for (x=0; x<clubs.length; x++) {
+      var c = clubs[x];
+      if (userlist.indexOf(c.owner) == -1) userlist.push(c.owner);
+      if (clubs[x].owner.equals(this.userid)) {
+        if (clubs[x].password === null) delete clubs[x].password;
+        ownedClubs.push(c._id);
+      } else {
+        delete clubs[x].password;
+      }
+      clubids.push(c._id);
+    }
+    models.ClubBalance.find({clubid:{$in:ownedClubs}},function (err,balances) {
+      assert.ifError(err);
+      var clubsOut = [];
+      var pendingOut = [];
+      async.each(clubs,function getStatsAndClub(item,cb) {
+        Club.getClubById(item._id,function (err,club) {
+          // TODO, dont show userlist if you are pending
+          var obj = Club.makeClubProtobuf(item,userlist,balances,club);
+          if (myutils.containsObjectID(club.obj.members,this.userid)) {
+            clubsOut.push(obj);
+          } else if (myutils.containsObjectID(item.pendingApproval,this.userid)) {
+            pendingOut.push(obj);
+          } else if (club.isOwner(this.userid)) {
+            clubsOut.push(obj);
+          }
+          cb();
+        }.bind(this));
+      }.bind(this),function finished() {
+        status.clubs = clubsOut;
+        status.pending_clubs = pendingOut;
+        models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:"",subscription_plan:""},function(err,users) {
+          status.users = users;
+          models.UserModel.findOne({_id:this.userid},function(err,self) {
+            status.self = self;
+            // FIXME, hide closed games, send them in a second array for just the owner
+            models.Game.find({clubid:{$in:clubids}},function (err,games) {
+              if (err) {
+                this.reply(0,"internal error");
+                return;
+              }
+              for (var x=0; x<games.length; x++) {
+                games[x] = game.makeGameProtobuf(games[x]);
+              }
+              //this.log('games list:%j',games);
+              status.games = games;
+              maincb(status);
+              this.log('status reply:',status);
+            }.bind(this));
+          }.bind(this));
+        }.bind(this));
+      }.bind(this));
+    }.bind(this));
+  }.bind(this));
 };
+
 ClientSocket.prototype.sendClubStatus = function (club,game) {
 	club.getPotentialLosses(this.userid,function (balance,unlimited,limit) {
 		var out = { clubid:club.clubid };
