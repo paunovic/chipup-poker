@@ -196,6 +196,7 @@ end;
 procedure TfrmChipUPLogin.HelloServer;
 var
   files: TObjectList<TPB_UpdateFileInfo>;
+  rstream: TResourceStream;
 begin
   CurrentStatus := lsHelloing;
 
@@ -204,6 +205,9 @@ begin
     dmMain.GetUpdateFilesList(files);
     {$IFDEF DEBUG}
     DebugLn(Format('Revision: %s', [ Settings.Hardcoded.REVISION ]), ditApplication);
+    rstream := TResourceStream.Create(HInstance, 'DevServerCertificate', RT_RCDATA);
+    DebugLn(Format('dev cert size: %d', [ rstream.Size ]), ditApplication);
+    rstream.Free;
     ServerSocket.Hello(TRUE, files);
     {$ELSE}
     ServerSocket.Hello(FALSE, files);
