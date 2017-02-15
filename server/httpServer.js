@@ -125,30 +125,28 @@ function Server(activeUsersIN) {
 	app.get("/getavatar",this.getAvatar.bind(this));
 	app.post("/uploadAvatar",this.uploadAvatar.bind(this));
 
-	app.get("/install_chipuppoker.exe",function (req,res) {
-		var self;
-		if (config.diffserver) self='dev';
-		else self = 'live';
-		models.Config.findOne({_id:self+'_installerid'},function (err,row1) {
-			assert.ifError(err);
-			models.Installer.findOne({_id:row1.value},function (err,row) {
-				if (err) console.log(err);
-				if (row) {
-					global.log('sending installer %j',row);
-					if (config.diffserver) {
-						res.sendfile('installers/'+row.name);
-					} else {
-						res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
-						res.end();
-					}
-				} else {
-					console.log("warning, installer missing",err,row,row1);
-					res.writeHead(500);
-					res.end();
-				}
-			});
-		}.bind(this));
-	}.bind(this));
+  app.get("/install_chipuppoker.exe",function (req,res) {
+    var self = "live";
+    models.Config.findOne({_id:self+'_installerid'},function (err,row1) {
+      assert.ifError(err);
+      models.Installer.findOne({_id:row1.value},function (err,row) {
+        if (err) console.log(err);
+        if (row) {
+          global.log('sending installer %j',row);
+          if (config.diffserver) {
+            res.sendfile('installers/'+row.name);
+          } else {
+            res.writeHead(302,{Location:'https://' + config.hostname + '/redirect/install_chipuppoker.exe?name='+row.name});
+            res.end();
+          }
+        } else {
+          console.log("warning, installer missing",err,row,row1);
+          res.writeHead(500);
+          res.end();
+        }
+      });
+    }.bind(this));
+  }.bind(this));
 	app.get("/redirect/install_chipuppoker.exe",function (req,res) {
 		models.Installer.findOne({name:req.query.name},function (err,row) {
 			if (!row) {
@@ -716,9 +714,7 @@ Server.prototype.installers_func = function (req,res) {
 			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
-					var self;
-					if (config.diffserver) self='dev';
-					else self = 'live';
+					var self = "live";
 					if (row.debug == 'release') {
 						models.Config.findOne({_id:server+'_installerid'},function (err,entry) {
 							console.log({_id:server+'_installerid'},entry);
