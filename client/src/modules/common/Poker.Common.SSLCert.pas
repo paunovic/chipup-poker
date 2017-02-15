@@ -9,10 +9,12 @@ type
   TSSLCert = class(TX509Base)
   private
     FResourceName: String;
+    FSize: Integer;
   public
     procedure LoadFromResource(const AResourceName: String; const APassword: PAnsiChar = nil);
 
     property CertResourceName: String read FResourceName;
+    property Size: Integer read FSize;
   end;
 
 implementation
@@ -31,6 +33,7 @@ begin
 
   rstream := TResourceStream.Create(HInstance, AResourceName, RT_RCDATA);
   try
+    FSize := rstream.Size;
     bio := f_BIO_new_mem_buf(rstream.Memory, rstream.Size);
     try
       X509 := f_PEM_read_bio_x509(bio, nil, nil, APassword);

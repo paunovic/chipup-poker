@@ -87,6 +87,7 @@ begin
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
+  DebugLn(Format('Revision: %s', [Settings.Hardcoded.REVISION]), ditApplication);
   {$ENDIF}
 
   LoadFonts;
