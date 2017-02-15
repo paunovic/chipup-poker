@@ -203,6 +203,7 @@ begin
   try
     dmMain.GetUpdateFilesList(files);
     {$IFDEF DEBUG}
+    DebugLn(Format('Revision: %s', [ Settings.Hardcoded.REVISION ]), ditApplication);
     ServerSocket.Hello(TRUE, files);
     {$ELSE}
     ServerSocket.Hello(FALSE, files);
