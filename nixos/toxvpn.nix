@@ -18,15 +18,14 @@ let
   });
 
 in stdenv.mkDerivation {
-  name = "toxvpn-20160909";
+  name = "toxvpn-20170215";
 
-  src2 = fetchFromGitHub {
+  src = fetchFromGitHub {
     owner  = "cleverca22";
     repo   = "toxvpn";
-    rev    = "6e188f26fff8bddc1014ee3cc7a7423f9f344a09";
-    sha256 = "1bshc6pzk7z7q7g17cwx9gmlcyzn4szqvdiy0ihbk2xmx9k31c6p";
+    rev    = "7450ba061229fd0e9e81f98b203d8e9964463f5e";
+    sha256 = "0yj1c3j9acc3rxgrwpv1qhms2f2v0hhhc6xc0ks4nfd72q24glrf";
   };
-  src = /root/toxvpn;
 
   dontStrip = true;
 

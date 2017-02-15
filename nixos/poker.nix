@@ -16,6 +16,7 @@ let
     unpacked = "/home/poker/unpacked";
   };
 in {
+  imports = [ ./snmpd.nix ];
   options = {
     services.poker = {
       enable = mkEnableOption "enable poker service";
