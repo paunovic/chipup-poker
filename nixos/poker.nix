@@ -22,6 +22,9 @@ in {
     };
   };
   config = mkIf config.services.poker.enable {
+    networking.firewall = {
+      allowedTCPPorts = [ 12346 80 443 ];
+    };
     users = {
       extraUsers = {
         poker = {
@@ -61,7 +64,8 @@ in {
         CONFIG_FILE = pkgs.writeText "poker.json" (builtins.toJSON poker_config);
       };
       script = ''
-        mkdir -pv /home/poker/chipuppoker/server/assets/ ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}
+        chmod 701 /home/poker
+        mkdir -pv /home/poker/chipuppoker/{server/assets,installers} ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}/objects
         cd /home/poker/chipuppoker
         ${pkgs.poker}/bin/poker-master
       '';

@@ -204,7 +204,7 @@ function Server(activeUsersIN) {
 	});
 	app.get('/pay',this.pay.bind(this));
 	this.addSync(app);
-	app.use(express.static('server/files'));
+	app.use(express.static(project_root + '/files'));
 	app.use('/rawinstallers',express.static('installers'));
 }
 Server.prototype.pay = function (req,res) {

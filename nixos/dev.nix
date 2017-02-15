@@ -7,7 +7,7 @@ in {
   networking = {
     hostName = "dev-server.chipuppoker.com";
     firewall = {
-      allowedTCPPorts = [ 80 ];
+      allowedTCPPorts = [ ];
       allowedUDPPorts = [ 33445 ];
     };
   };

@@ -130,7 +130,7 @@ in {
     extraGroups.sslkeys.gid = 500;
   };
   networking.firewall = {
-    allowedTCPPorts = [ 25 80 443 12346 9989 53 ];
+    allowedTCPPorts = [ 25 12346 9989 53 ];
     allowedUDPPorts = [ 33445 53 ]; # toxvpn, dns
   };
 }
