@@ -8,6 +8,8 @@ cpp-protobuf-generator/output
 *.fbpInf
 *.identcache
 *.tvsconfig
+*.res
+*.dres
 server/dag/handeval/*
 server/dag/build/*
 server/node_modules/*
