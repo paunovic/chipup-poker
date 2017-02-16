@@ -104,26 +104,21 @@ function SerializeObject(const AObject: TObject): String;
 var
   t: TRttiType;
   p: TRttiProperty;
+  properties: TArray<TRttiProperty>;
   method: TRttiMethod;
-  print_it: Boolean;
 begin
   result := '';
   if not Assigned(AObject) then
     Exit;
 
   t := TRttiContext.Create.GetType(AObject.ClassType);
-  for p in t.GetProperties do
+  properties := t.GetProperties;
+  for p in properties do
   begin
-    print_it := FALSE;
-
     method := t.GetMethod(Format('has_%s', [p.Name]));
-    if Assigned(method) then
-      print_it := method.Invoke(AObject, []).AsBoolean;
-
-    if print_it then
-    begin
+    if (Assigned(method)) and
+       (method.Invoke(AObject, []).AsBoolean) then
       result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
-    end;
   end;
 end;
 
