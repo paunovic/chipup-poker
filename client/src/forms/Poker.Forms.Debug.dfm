@@ -175,7 +175,7 @@ object frmDebug: TfrmDebug
         0000000000000000000000000000000000000000000000000000}
       ParentShowHint = False
       ShowHint = True
-      SpeedButtonOptions.GroupIndex = 2
+      SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Transparent = True
@@ -705,7 +705,7 @@ object frmDebug: TfrmDebug
       Colors.PressedText = 65408
       ParentShowHint = False
       ShowHint = False
-      SpeedButtonOptions.GroupIndex = 1
+      SpeedButtonOptions.GroupIndex = 2
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Transparent = True
@@ -880,7 +880,7 @@ object frmDebug: TfrmDebug
         0000000000000000000000000000000000000000000000000000}
       ParentShowHint = False
       ShowHint = True
-      SpeedButtonOptions.GroupIndex = 1
+      SpeedButtonOptions.GroupIndex = 3
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
       TabOrder = 3
@@ -1041,33 +1041,33 @@ object frmDebug: TfrmDebug
     object pmiShowPings: TMenuItem
       AutoCheck = True
       Caption = 'Show pings'
-      GroupIndex = 1
+      GroupIndex = 5
     end
     object pmiRTTIEnabled: TMenuItem
       AutoCheck = True
       Caption = 'Enable RTTI'
       Checked = True
-      GroupIndex = 2
+      GroupIndex = 6
     end
     object N1: TMenuItem
       Caption = '-'
-      GroupIndex = 2
+      GroupIndex = 20
     end
     object pmiLogSave: TMenuItem
       Action = acSaveLog
-      GroupIndex = 3
+      GroupIndex = 20
     end
     object pmiLogCopy: TMenuItem
       Action = acCopyLogSelection
-      GroupIndex = 3
+      GroupIndex = 20
     end
     object N2: TMenuItem
       Caption = '-'
-      GroupIndex = 3
+      GroupIndex = 20
     end
     object pmiLogClear: TMenuItem
       Action = acClearLog
-      GroupIndex = 3
+      GroupIndex = 20
     end
   end
   object tiAppInfoRefresh: TTimer
