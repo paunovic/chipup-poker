@@ -9,6 +9,7 @@ var fs = require('fs');
 var jade = require('jade');
 var https = require('https');
 var http = require('http');
+var path = require('path');
 
 var models = require('./db').models;
 var deck = require('./deck');
@@ -71,14 +72,16 @@ function UserInit(regexLimitsIN,cb2) {
   regexLimits = regexLimitsIN;
   Club.registerHandlers(handlers);
   require('./game_network').registerHandlers(handlers,regexLimits); // FIXME
+  var project_root = path.dirname(process.mainModule.filename);
+  var view_dir = project_root + "/views/";
   async.parallel([function (cb) {
-    fs.readFile('server/views/password_change1.jade',{encoding:'utf8'},function (err,data) {
-      emailChange1 = jade.compile(data,{filename:'server/views/password_change1.jade',pretty:true});
+    fs.readFile(view_dir + 'password_change1.jade',{encoding:'utf8'},function (err,data) {
+      emailChange1 = jade.compile(data, { filename: view_dir + 'password_change1.jade',pretty:true});
       cb();
     });
   },function (cb) {
-    fs.readFile('server/views/email_register.jade',{encoding:'utf8'},function (err,data) {
-      emailRegister = jade.compile(data,{filename:'server/views/email_register.jade',pretty:true});
+    fs.readFile(view_dir + 'email_register.jade',{encoding:'utf8'},function (err,data) {
+      emailRegister = jade.compile(data, { filename: view_dir + 'email_register.jade',pretty:true});
       cb();
     });
   },recheckAssets],function () {

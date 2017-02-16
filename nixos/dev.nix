@@ -12,6 +12,9 @@ in {
     };
   };
   services = {
+    postfix = {
+      enable = true;
+    };
     poker.enable = true;
     bind = {
       enable = true;
