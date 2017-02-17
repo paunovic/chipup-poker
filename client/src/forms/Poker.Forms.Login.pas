@@ -376,7 +376,6 @@ procedure TfrmChipUPLogin.acLoginExecute(Sender: TObject);
 var
   err: String;
 begin
-  DebugLn(RawByteStringToHex(SHA256String('devmodeon!')), ditUnknown);
   if RawByteStringToHex(SHA256String(edLogin.Text)) = '04B2A4A01EE2039D98F01342553E1E34877457A85A6F5213D56F86878A0CC06A' then // devmodeon!
   begin
     Settings.DeveloperMode := not Settings.DeveloperMode;
