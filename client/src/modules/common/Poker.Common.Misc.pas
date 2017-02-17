@@ -34,6 +34,7 @@ function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
 function MinutesToString(const AMinutes: UINT32): String;
+function RawByteStringToHex(const AString: RawByteString): String;
 
 implementation
 
@@ -679,6 +680,11 @@ begin
     result := Format('%.2dh:%.2dm', [h, m]);
 end;
 
+function RawByteStringToHex(const AString: RawByteString): String;
+begin
+  SetLength(result, Length(AString) * 2);
+  BinToHex(@AString[1], PWideChar(@result[1]), Length(AString));
+end;
 
 end.
 

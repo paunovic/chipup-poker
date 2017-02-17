@@ -376,10 +376,8 @@ procedure TfrmChipUPLogin.acLoginExecute(Sender: TObject);
 var
   err: String;
 begin
-  DebugLn(Format('sha: %s', [ SHA256String(edLogin.Text) ]), ditApplication);
-  DebugLn(Format('string: %s', [ UTf8ToString(SHA256String(edLogin.Text)) ]), ditApplication);
-  DebugLn(Format('encoded: %s', [ EncodeString(UTf8ToString(SHA256String(edLogin.Text))) ]), ditApplication);
-  if EncodeString(UTf8ToString(SHA256String(edLogin.Text))) = 'BD8/Px4/Az8/PxNCVT4eND90Vz9ab1ITP28/Pz8MP2o=' then // devmodeon!
+  DebugLn(RawByteStringToHex(SHA256String('devmodeon!')), ditUnknown);
+  if RawByteStringToHex(SHA256String(edLogin.Text)) = '04B2A4A01EE2039D98F01342553E1E34877457A85A6F5213D56F86878A0CC06A' then // devmodeon!
   begin
     Settings.DeveloperMode := not Settings.DeveloperMode;
     if Settings.DeveloperMode then
