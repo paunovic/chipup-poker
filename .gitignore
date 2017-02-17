@@ -23,7 +23,6 @@ cpp-protobuf-generator/main.o
 cpp-protobuf-generator/Makefile.win
 dev-server-key.ppk
 message.desc
-client/src/client.cfg
 server/generate_x509_key_pair_and_cert.sh script
 server/key.pem
 server/cert.pem
