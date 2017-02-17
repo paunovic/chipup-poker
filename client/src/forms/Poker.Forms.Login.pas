@@ -360,19 +360,7 @@ procedure TfrmChipUPLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
-      if EncodeString(UTf8ToString(SHA256String(edLogin.Text))) = 'BD8/Px4/Az8/PxNCVT4eND90Vz9ab1ITP28/Pz8MP2o=' then // devmodeon!
-      begin
-        Settings.DeveloperMode := not Settings.DeveloperMode;
-        if Settings.DeveloperMode then
-          EnterDeveloperMode
-        else
-          LeaveDeveloperMode;
-        edLogin.Clear;
-        edLogin.SetFocus;
-      end
-      else
-        acLogin.Execute;
-
+      acLogin.Execute;
       Key := #0;
     end;
   end;
@@ -388,6 +376,18 @@ procedure TfrmChipUPLogin.acLoginExecute(Sender: TObject);
 var
   err: String;
 begin
+  if EncodeString(UTf8ToString(SHA256String(edLogin.Text))) = 'BD8/Px4/Az8/PxNCVT4eND90Vz9ab1ITP28/Pz8MP2o=' then // devmodeon!
+  begin
+    Settings.DeveloperMode := not Settings.DeveloperMode;
+    if Settings.DeveloperMode then
+      EnterDeveloperMode
+    else
+      LeaveDeveloperMode;
+    edLogin.Clear;
+    edLogin.SetFocus;
+    Exit;
+  end;
+
   if (ValidateUsername(edLogin.Text, err)) or
      (ValidateEMail(edLogin.Text, err)) then
   begin
