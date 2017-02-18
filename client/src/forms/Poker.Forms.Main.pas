@@ -168,12 +168,8 @@ type
     procedure acLaunchNewInstanceExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure acOpenDebugFormExecute(Sender: TObject);
-    procedure gridTournamentsNameStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-    procedure gridTournamentsStatusStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure FormShow(Sender: TObject);
   private
     const

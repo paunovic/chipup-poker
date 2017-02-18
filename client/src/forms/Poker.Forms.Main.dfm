@@ -4328,7 +4328,7 @@ object frmChipUpMain: TfrmChipUpMain
     Left = 0
     Top = 0
     Width = 841
-    Height = 21
+    Height = 23
     UseSystemFont = False
     ActionManager = ActionManager
     AnimateDuration = 50
@@ -4340,8 +4340,8 @@ object frmChipUpMain: TfrmChipUpMain
     EdgeOuter = esNone
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
     Font.Style = []
     Shadows = False
     Spacing = 0
