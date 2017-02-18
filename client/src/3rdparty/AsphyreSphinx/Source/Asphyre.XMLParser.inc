@@ -48,13 +48,13 @@ var
 //---------------------------------------------------------------------------
 function IsNameCharacter(ScanCh: Char): Boolean;
 begin
- Result:= (not (ScanCh in XWhiteSpace))and(not (ScanCh in XSeparators));
+ Result:= (not (CharInSet(ScanCh, XWhiteSpace)))and(not (CharInSet(ScanCh, XSeparators)));
 end;
 
 //---------------------------------------------------------------------------
 procedure SkipBlankSpace(const Text: StdString; var TextPos: Integer);
 begin
- while (TextPos <= Length(Text))and(Text[TextPos] in XWhiteSpace) do
+ while (TextPos <= Length(Text))and(CharInSet(Text[TextPos], XWhiteSpace)) do
   Inc(TextPos);
 end;
 
@@ -116,7 +116,7 @@ begin
 
  SkipBlankSpace(Text, TextPos);
 
- if (TextPos > Length(Text))or(Text[TextPos] in XSeparators) then Exit;
+ if (TextPos > Length(Text))or(CharInSet(Text[TextPos], XSeparators)) then Exit;
 
  StartPos:= TextPos;
  CopyLen := 0;
@@ -143,11 +143,11 @@ begin
 
  SkipBlankSpace(Text, TextPos);
 
- if (TextPos > Length(Text))or((Text[TextPos] in XSeparators)and
-  (not (Text[TextPos] in XQuotes))) then Exit;
+ if (TextPos > Length(Text))or((CharInSet(Text[TextPos], XSeparators))and
+  (not (CharInSet(Text[TextPos], XQuotes)))) then Exit;
 
  // Opening quote?
- if (Text[TextPos] in XQuotes) then
+ if (CharInSet(Text[TextPos], XQuotes)) then
   begin
    QuoteCh:= Text[TextPos];
    Inc(TextPos);

@@ -434,12 +434,13 @@ begin
  if (Length(Path) > 0)and(Path[Length(Path)] <> '\') then
   Path:= Path + '\';
 
+ {$WARN SYMBOL_PLATFORM OFF}
  if (FindFirst(Path + '*.xml', faReadOnly or faArchive, Rec) <> 0) then
   begin
    FindClose(Rec);
    Exit;
   end;
-
+{$WARN SYMBOL_PLATFORM ON}
  repeat
   ParseLink(Link + Rec.Name);
   Found:= FindNext(Rec) = 0;

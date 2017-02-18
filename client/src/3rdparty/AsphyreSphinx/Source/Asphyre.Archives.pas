@@ -37,7 +37,7 @@ uses
 {$else}
  Types, SysUtils, Classes, Math,
 {$endif}
- Asphyre.TypeDef;
+ Asphyre.TypeDef, Asphyre.Types;
 
 //---------------------------------------------------------------------------
 {
