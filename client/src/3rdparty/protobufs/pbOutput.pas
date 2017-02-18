@@ -3,7 +3,7 @@ unit pbOutput;
 interface
 
 uses
-  Classes, StrBuffer, pbPublic, System.SysUtils;
+  Classes, StrBuffer, pbPublic, SysUtils;
 
 type
 
@@ -57,7 +57,7 @@ type
     (* Write a message field, including tag. *)
     procedure writeMessage(fieldNumber: integer; const value: IpbMessage);
     (*  Write a unsigned int32 field, including tag. *)
-    procedure writeUInt32(fieldNumber: integer; value: UINT32);
+    procedure writeUInt32(fieldNumber: integer; value: cardinal);
     (* Get serialized size *)
     function getSerializedSize: integer;
     (* Write to buffer *)
@@ -128,6 +128,11 @@ begin
   until value = 0;
 end;
 
+procedure TProtoBufOutput.writeString(fieldNumber: integer; const value: String);
+begin
+  writeString(fieldNumber, Utf8Encode(value));
+end;
+
 procedure TProtoBufOutput.writeBoolean(fieldNumber: integer; value: boolean);
 begin
   writeTag(fieldNumber, WIRETYPE_VARINT);
@@ -177,12 +182,7 @@ begin
   FBuffer.Add(value);
 end;
 
-procedure TProtoBufOutput.writeString(fieldNumber: integer; const value: String);
-begin
-  writeString(fieldNumber, Utf8Encode(value));
-end;
-
-procedure TProtoBufOutput.writeUInt32(fieldNumber: integer; value: UINT32);
+procedure TProtoBufOutput.writeUInt32(fieldNumber: integer; value: cardinal);
 begin
   writeTag(fieldNumber, WIRETYPE_VARINT);
   writeRawVarint32(value);
