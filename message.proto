@@ -197,14 +197,14 @@ message LoginReply {
 		lrInvalid = 1;
 	}
 	required LoginStatus login_status = 1;
-	repeated TableStatus reconnect_tables = 3;
-	repeated TournamentInfo tournament_infos = 4;
-	repeated bytes registered_tournaments = 5 [(ObjectId)=true];
-	repeated Club clubs = 6;
-	repeated User users = 7;
-	optional User self = 8;
-	repeated Game games = 9;
-	repeated PlayerClubStatus player_club_statuses = 10;
+	repeated TableStatus reconnect_tables = 2;
+	repeated TournamentInfo tournament_infos = 3;
+	repeated bytes registered_tournaments = 4 [(ObjectId)=true];
+	repeated Club clubs = 5;
+	repeated User users = 6;
+	optional User self = 7;
+	repeated Game games = 8;
+	repeated PlayerClubStatus player_club_statuses = 9;
 }
 
 message ClubMember {

@@ -18,14 +18,14 @@ type
   private
     const
       kLoginStatusFieldNumber = 1;
-      kReconnectTablesFieldNumber = 3;
-      kTournamentInfosFieldNumber = 4;
-      kRegisteredTournamentsFieldNumber = 5;
-      kClubsFieldNumber = 6;
-      kUsersFieldNumber = 7;
-      kSelfFieldNumber = 8;
-      kGamesFieldNumber = 9;
-      kPlayerClubStatusesFieldNumber = 10;
+      kReconnectTablesFieldNumber = 2;
+      kTournamentInfosFieldNumber = 3;
+      kRegisteredTournamentsFieldNumber = 4;
+      kClubsFieldNumber = 5;
+      kUsersFieldNumber = 6;
+      kSelfFieldNumber = 7;
+      kGamesFieldNumber = 8;
+      kPlayerClubStatusesFieldNumber = 9;
 
     var
       FLoginStatus: TLoginStatus;
@@ -82,42 +82,42 @@ type
     procedure clear_LoginStatus;
     property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
 
-    // repeated TableStatus ReconnectTables = 3;
+    // repeated TableStatus ReconnectTables = 2;
     function has_ReconnectTables: Boolean;
     procedure clear_ReconnectTables;
     property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
-    // repeated TournamentInfo TournamentInfos = 4;
+    // repeated TournamentInfo TournamentInfos = 3;
     function has_TournamentInfos: Boolean;
     procedure clear_TournamentInfos;
     property TournamentInfos: TList<TPB_TournamentInfo> read FTournamentInfos;
 
-    // repeated bytes RegisteredTournaments = 5;
+    // repeated bytes RegisteredTournaments = 4;
     function has_RegisteredTournaments: Boolean;
     procedure clear_RegisteredTournaments;
     property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
 
-    // repeated Club Clubs = 6;
+    // repeated Club Clubs = 5;
     function has_Clubs: Boolean;
     procedure clear_Clubs;
     property Clubs: TList<TPB_Club> read FClubs;
 
-    // repeated User Users = 7;
+    // repeated User Users = 6;
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
 
-    // optional User Self = 8;
+    // optional User Self = 7;
     function has_Self: Boolean;
     procedure clear_Self;
     property Self: TPB_User read FSelf write SetSelf;
 
-    // repeated Game Games = 9;
+    // repeated Game Games = 8;
     function has_Games: Boolean;
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;
 
-    // repeated PlayerClubStatus PlayerClubStatuses = 10;
+    // repeated PlayerClubStatus PlayerClubStatuses = 9;
     function has_PlayerClubStatuses: Boolean;
     procedure clear_PlayerClubStatuses;
     property PlayerClubStatuses: TList<TPB_PlayerClubStatus> read FPlayerClubStatuses;
@@ -366,17 +366,17 @@ end;
 
 function TPB_LoginReply.has_ReconnectTables: Boolean;
 begin
-  result := (FHasBits and 4) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_ReconnectTables;
 begin
-  FHasBits := FHasBits or 4;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_LoginReply.clear_has_ReconnectTables;
 begin
-  FHasBits := FHasBits and not 4;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
@@ -404,17 +404,17 @@ end;
 
 function TPB_LoginReply.has_TournamentInfos: Boolean;
 begin
-  result := (FHasBits and 8) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_TournamentInfos;
 begin
-  FHasBits := FHasBits or 8;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_LoginReply.clear_has_TournamentInfos;
 begin
-  FHasBits := FHasBits and not 8;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_LoginReply.TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
@@ -442,17 +442,17 @@ end;
 
 function TPB_LoginReply.has_RegisteredTournaments: Boolean;
 begin
-  result := (FHasBits and 16) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_RegisteredTournaments;
 begin
-  FHasBits := FHasBits or 16;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_LoginReply.clear_has_RegisteredTournaments;
 begin
-  FHasBits := FHasBits and not 16;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_LoginReply.RegisteredTournamentsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
@@ -480,17 +480,17 @@ end;
 
 function TPB_LoginReply.has_Clubs: Boolean;
 begin
-  result := (FHasBits and 32) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_Clubs;
 begin
-  FHasBits := FHasBits or 32;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_LoginReply.clear_has_Clubs;
 begin
-  FHasBits := FHasBits and not 32;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_LoginReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
@@ -518,17 +518,17 @@ end;
 
 function TPB_LoginReply.has_Users: Boolean;
 begin
-  result := (FHasBits and 64) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_Users;
 begin
-  FHasBits := FHasBits or 64;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_LoginReply.clear_has_Users;
 begin
-  FHasBits := FHasBits and not 64;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_LoginReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
@@ -551,17 +551,17 @@ end;
 
 function TPB_LoginReply.has_Self: Boolean;
 begin
-  result := (FHasBits and 128) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_Self;
 begin
-  FHasBits := FHasBits or 128;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_LoginReply.clear_has_Self;
 begin
-  FHasBits := FHasBits and not 128;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_LoginReply.SetSelf(const AValue: TPB_User);
@@ -587,17 +587,17 @@ end;
 
 function TPB_LoginReply.has_Games: Boolean;
 begin
-  result := (FHasBits and 256) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_Games;
 begin
-  FHasBits := FHasBits or 256;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_LoginReply.clear_has_Games;
 begin
-  FHasBits := FHasBits and not 256;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_LoginReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
@@ -625,17 +625,17 @@ end;
 
 function TPB_LoginReply.has_PlayerClubStatuses: Boolean;
 begin
-  result := (FHasBits and 512) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_LoginReply.set_has_PlayerClubStatuses;
 begin
-  FHasBits := FHasBits or 512;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_LoginReply.clear_has_PlayerClubStatuses;
 begin
-  FHasBits := FHasBits and not 512;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_LoginReply.PlayerClubStatusesNotifyEvent(Sender: TObject; const Item: TPB_PlayerClubStatus; Action: TCollectionNotification);
