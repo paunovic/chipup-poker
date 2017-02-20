@@ -8,6 +8,8 @@ uses
 type
   TProtobufBaseObjectClass = class of TProtobufBaseObject;
 
+  {$TYPEINFO ON}
+  {$METHODINFO ON}
   TProtobufBaseObject = class
   private
     FProtobufOutput: TProtoBufOutput;
@@ -27,7 +29,6 @@ type
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); virtual; abstract;
     function IsInitialized: Boolean; virtual; abstract;
-
     property ProtobufOutput: TProtoBufOutput read FProtobufOutput;
     property ProtobufOutputSize: Word read GetProtobufOutputSize;
     property Lightweight: Boolean read FLightweight;
