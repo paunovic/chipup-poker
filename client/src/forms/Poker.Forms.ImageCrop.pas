@@ -22,6 +22,8 @@ type
     acOK: TAction;
     acCancel: TAction;
     PaintBox: TPaintBox32;
+    cxButton1: TcxButton;
+    acNoCrop: TAction;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -32,11 +34,13 @@ type
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure acNoCropExecute(Sender: TObject);
   private
     FUnselectedBitmap: TBitmap32;
     FBitmap: TBitmap32;
     FSelectionBitmap: TBitmap32;
     FSelectionRect: TRect;
+    FNoCrop: Boolean;
     FImageX, FImageY: Integer;
     FCloseCallback: TNotifyEvent;
     FInitialX, FInitialY: Integer;
@@ -48,7 +52,9 @@ type
     procedure SetParams(const AParams: array of pointer);
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
 
+    property Bitmap: TBitmap32 read FBitmap;
     property SelectionBitmap: TBitmap32 read FSelectionBitmap;
+    property NoCrop: Boolean read FNoCrop;
   end;
 
 implementation
@@ -161,9 +167,9 @@ begin
   w := FBitmap.Width + PaintBox.Margins.Left + PaintBox.Margins.Right;
   h := FBitmap.Height + PaintBox.Margins.Top + PaintBox.Margins.Bottom;
   if w > Screen.Width then
-    w := Screen.Width;
+    w := Screen.Width - 100;
   if h > Screen.Height then
-    h := Screen.Height;
+    h := Screen.Height - 100;
 
   ClientWidth := w;
   ClientHeight := h;
@@ -353,6 +359,13 @@ end;
 procedure TfrmImageCrop.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+  Close;
+end;
+
+procedure TfrmImageCrop.acNoCropExecute(Sender: TObject);
+begin
+  FNoCrop := TRUE;
+  ModalResult := mrOk;
   Close;
 end;
 

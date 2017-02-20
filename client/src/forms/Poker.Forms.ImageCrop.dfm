@@ -78,6 +78,22 @@ object frmImageCrop: TfrmImageCrop
     OnMouseMove = PaintBoxMouseMove
     OnMouseUp = PaintBoxMouseUp
   end
+  object cxButton1: TcxButton
+    Left = 346
+    Top = 443
+    Width = 93
+    Height = 27
+    Action = acNoCrop
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 3
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+  end
   object ActionList: TActionList
     Left = 48
     Top = 232
@@ -88,6 +104,10 @@ object frmImageCrop: TfrmImageCrop
     object acCancel: TAction
       Caption = 'Cancel'
       OnExecute = acCancelExecute
+    end
+    object acNoCrop: TAction
+      Caption = 'Don'#39't Crop'
+      OnExecute = acNoCropExecute
     end
   end
 end

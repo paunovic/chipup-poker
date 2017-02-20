@@ -193,39 +193,46 @@ var
   bmp: TBitmap;
   sha256: RawByteString;
   mstream: TMemoryStream;
+  form: TfrmImageCrop;
 begin
-  if (Sender is TfrmImageCrop) and
-     ((Sender as TfrmImageCrop).ModalResult = mrOk) then
+  if Sender is TfrmImageCrop then
   begin
-    acChange.Enabled := FALSE;
-    FAvatarChanged := TRUE;
+    form := Sender as TfrmImageCrop;
+    if form.ModalResult = mrOk then
+    begin
+      acChange.Enabled := FALSE;
+      FAvatarChanged := TRUE;
 
-    bmp := TBitmap.Create;
-    try
+      bmp := TBitmap.Create;
+      try
+        mstream := TMemoryStream.Create;
+        try
+          if form.NoCrop then
+            form.Bitmap.SaveToStream(mstream, TRUE)
+          else
+            form.SelectionBitmap.SaveToStream(mstream, TRUE);
+          mstream.Position := 0;
+          bmp.LoadFromStream(mstream);
+          FAvatarJPG.Assign(bmp);
+        finally
+          mstream.Free;
+        end;
+      finally
+        bmp.Free;
+      end;
+
       mstream := TMemoryStream.Create;
       try
-        (Sender as TfrmImageCrop).SelectionBitmap.SaveToStream(mstream, TRUE);
+        FAvatarJPG.SaveToStream(mstream);
         mstream.Position := 0;
-        bmp.LoadFromStream(mstream);
-        FAvatarJPG.Assign(bmp);
+        sha256 := SHA256Stream(mstream);
+        SetLength(FAvatarId, Length(sha256));
+        Move(sha256[1], FAvatarId[0], Length(sha256));
       finally
         mstream.Free;
       end;
-    finally
-      bmp.Free;
+      ServerSocket.SetAvatar(FAvatarId);
     end;
-
-    mstream := TMemoryStream.Create;
-    try
-      FAvatarJPG.SaveToStream(mstream);
-      mstream.Position := 0;
-      sha256 := SHA256Stream(mstream);
-      SetLength(FAvatarId, Length(sha256));
-      Move(sha256[1], FAvatarId[0], Length(sha256));
-    finally
-      mstream.Free;
-    end;
-    ServerSocket.SetAvatar(FAvatarId);
   end;
 
   EnableWindow(Handle, TRUE);
