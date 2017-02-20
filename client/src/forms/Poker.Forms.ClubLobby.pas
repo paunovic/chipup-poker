@@ -146,8 +146,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure btStatsClick(Sender: TObject);
     procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;  ANewItemRecordFocusingChanged: Boolean);
-    procedure gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo;
-      const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+    procedure gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
     procedure acTablesStatsUnselectAllExecute(Sender: TObject);
     procedure gridTablesEnabledPropertiesChange(Sender: TObject);
     procedure gridTablesTableDblClick(Sender: TObject);
@@ -155,28 +154,18 @@ type
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
     procedure acSetPlayerLimitExecute(Sender: TObject);
-    procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView;
-      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-      AShift: TShiftState; var AHandled: Boolean);
+    procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acResetPlayerBalancesExecute(Sender: TObject);
     procedure acDeleteTableStatsExecute(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure acMuteUnmutePlayerExecute(Sender: TObject);
     procedure acPromoteDemoteUserExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-    procedure gridGamesTableRakeCapGetDisplayText(
-      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-      var AText: string);
+    procedure gridGamesTableRakeCapGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
     procedure acApprovePlayerExecute(Sender: TObject);
-    procedure gridStatsTableBalanceStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-    procedure gridTablesStatusStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-    procedure gridTablesTableStylesGetContentStyle(
-      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -464,8 +453,7 @@ begin
   acCloseTable.Enabled := close_table_act;
 end;
 
-procedure TfrmClubLobby.gridGamesTableRakeCapGetDisplayText(
-  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+procedure TfrmClubLobby.gridGamesTableRakeCapGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
   var AText: string);
 begin
   if AText = '0' then
@@ -561,9 +549,7 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(
-  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   value: Variant;
 begin
@@ -610,9 +596,7 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(
-  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 begin
   if ARecord.Values[gridTablesEnabled.Index] then
     AStyle := styleCheckedRow
