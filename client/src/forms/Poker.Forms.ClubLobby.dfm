@@ -2553,14 +2553,14 @@ object frmClubLobby: TfrmClubLobby
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
-          Top = 198
+          Top = 197
           Width = 225
           Height = 1
           Anchors = [akLeft, akTop, akRight]
         end
         object btCloseClub: TcxButton
           Left = 10
-          Top = 205
+          Top = 204
           Width = 231
           Height = 28
           Action = acCloseClub
@@ -2591,7 +2591,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btLeaveClub: TcxButton
           Left = 10
-          Top = 205
+          Top = 204
           Width = 231
           Height = 28
           Action = acLeaveClub
