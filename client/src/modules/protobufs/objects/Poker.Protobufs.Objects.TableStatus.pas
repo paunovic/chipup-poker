@@ -24,25 +24,25 @@ type
       kDealerFieldNumber = 4;
       kCurrentSeatFieldNumber = 5;
       kBetsFieldNumber = 6;
-      kLockedFieldNumber = 11;
-      kSeqFieldNumber = 12;
-      kMinimumBetFieldNumber = 13;
-      kMaximumRaiseFieldNumber = 14;
-      kSmallBlindFieldNumber = 15;
-      kBigBlindFieldNumber = 16;
-      kHandidFieldNumber = 17;
-      kTimeFieldNumber = 18;
-      kEventsFieldNumber = 19;
-      kPotsFieldNumber = 20;
-      kRakePercentFieldNumber = 21;
-      kCurrentGameFieldNumber = 22;
-      kRotationFieldNumber = 23;
-      kGameLimitFieldNumber = 25;
-      kMinimumRaiseFieldNumber = 26;
-      kTableTypeFieldNumber = 27;
-      kTableMessageFieldNumber = 28;
-      kQueuePositionFieldNumber = 29;
-      kReservedSeatsFieldNumber = 30;
+      kLockedFieldNumber = 7;
+      kSeqFieldNumber = 8;
+      kMinimumBetFieldNumber = 9;
+      kMaximumRaiseFieldNumber = 10;
+      kSmallBlindFieldNumber = 11;
+      kBigBlindFieldNumber = 12;
+      kHandidFieldNumber = 13;
+      kTimeFieldNumber = 14;
+      kEventsFieldNumber = 15;
+      kPotsFieldNumber = 16;
+      kRakePercentFieldNumber = 17;
+      kCurrentGameFieldNumber = 18;
+      kRotationFieldNumber = 19;
+      kGameLimitFieldNumber = 20;
+      kMinimumRaiseFieldNumber = 21;
+      kTableTypeFieldNumber = 22;
+      kTableMessageFieldNumber = 23;
+      kQueuePositionFieldNumber = 24;
+      kReservedSeatsFieldNumber = 25;
 
     var
       FTableMongoId: TMongoId;
@@ -188,97 +188,97 @@ type
     procedure clear_Bets;
     property Bets: TList<UInt32> read FBets;
 
-    // required bool Locked = 11;
+    // required bool Locked = 7;
     function has_Locked: Boolean;
     procedure clear_Locked;
     property Locked: Boolean read FLocked write SetLocked;
 
-    // optional int32 Seq = 12;
+    // optional int32 Seq = 8;
     function has_Seq: Boolean;
     procedure clear_Seq;
     property Seq: Integer read FSeq write SetSeq;
 
-    // optional uint32 MinimumBet = 13;
+    // optional uint32 MinimumBet = 9;
     function has_MinimumBet: Boolean;
     procedure clear_MinimumBet;
     property MinimumBet: UInt32 read FMinimumBet write SetMinimumBet;
 
-    // optional uint32 MaximumRaise = 14;
+    // optional uint32 MaximumRaise = 10;
     function has_MaximumRaise: Boolean;
     procedure clear_MaximumRaise;
     property MaximumRaise: UInt32 read FMaximumRaise write SetMaximumRaise;
 
-    // optional uint32 SmallBlind = 15;
+    // optional uint32 SmallBlind = 11;
     function has_SmallBlind: Boolean;
     procedure clear_SmallBlind;
     property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
 
-    // optional uint32 BigBlind = 16;
+    // optional uint32 BigBlind = 12;
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
     property BigBlind: UInt32 read FBigBlind write SetBigBlind;
 
-    // optional uint32 Handid = 17;
+    // optional uint32 Handid = 13;
     function has_Handid: Boolean;
     procedure clear_Handid;
     property Handid: UInt32 read FHandid write SetHandid;
 
-    // optional uint64 Time = 18;
+    // optional uint64 Time = 14;
     function has_Time: Boolean;
     procedure clear_Time;
     property Time: UInt64 read FTime write SetTime;
 
-    // repeated TableEvent Events = 19;
+    // repeated TableEvent Events = 15;
     function has_Events: Boolean;
     procedure clear_Events;
     property Events: TList<TPB_TableEvent> read FEvents;
 
-    // repeated Pot Pots = 20;
+    // repeated Pot Pots = 16;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
 
-    // optional uint32 RakePercent = 21;
+    // optional uint32 RakePercent = 17;
     function has_RakePercent: Boolean;
     procedure clear_RakePercent;
     property RakePercent: UInt32 read FRakePercent write SetRakePercent;
 
-    // optional GameType CurrentGame = 22;
+    // optional GameType CurrentGame = 18;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
 
-    // optional uint32 Rotation = 23;
+    // optional uint32 Rotation = 19;
     function has_Rotation: Boolean;
     procedure clear_Rotation;
     property Rotation: UInt32 read FRotation write SetRotation;
 
-    // optional GameLimit GameLimit = 25;
+    // optional GameLimit GameLimit = 20;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
 
-    // optional uint32 MinimumRaise = 26;
+    // optional uint32 MinimumRaise = 21;
     function has_MinimumRaise: Boolean;
     procedure clear_MinimumRaise;
     property MinimumRaise: UInt32 read FMinimumRaise write SetMinimumRaise;
 
-    // required TableType TableType = 27;
+    // required TableType TableType = 22;
     function has_TableType: Boolean;
     procedure clear_TableType;
     property TableType: TTableType read FTableType write SetTableType;
 
-    // repeated TableMessage TableMessage = 28;
+    // repeated TableMessage TableMessage = 23;
     function has_TableMessage: Boolean;
     procedure clear_TableMessage;
     property TableMessage: TList<TPB_TableMessage> read FTableMessage;
 
-    // optional uint32 QueuePosition = 29;
+    // optional uint32 QueuePosition = 24;
     function has_QueuePosition: Boolean;
     procedure clear_QueuePosition;
     property QueuePosition: UInt32 read FQueuePosition write SetQueuePosition;
 
-    // repeated uint32 ReservedSeats = 30;
+    // repeated uint32 ReservedSeats = 25;
     function has_ReservedSeats: Boolean;
     procedure clear_ReservedSeats;
     property ReservedSeats: TList<UInt32> read FReservedSeats;
@@ -556,7 +556,7 @@ function TPB_TableStatus.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (FHasBits and $400041d) <> $400041d then
+  if (FHasBits and $20005d) <> $20005d then
     Exit(FALSE);
   for pbobj in Seats do
     if not pbobj.IsInitialized then
@@ -781,17 +781,17 @@ end;
 
 function TPB_TableStatus.has_Locked: Boolean;
 begin
-  result := (FHasBits and 1024) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Locked;
 begin
-  FHasBits := FHasBits or 1024;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_TableStatus.clear_has_Locked;
 begin
-  FHasBits := FHasBits and not 1024;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
@@ -812,17 +812,17 @@ end;
 
 function TPB_TableStatus.has_Seq: Boolean;
 begin
-  result := (FHasBits and 2048) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Seq;
 begin
-  FHasBits := FHasBits or 2048;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_TableStatus.clear_has_Seq;
 begin
-  FHasBits := FHasBits and not 2048;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_TableStatus.SetSeq(const AValue: Integer);
@@ -843,17 +843,17 @@ end;
 
 function TPB_TableStatus.has_MinimumBet: Boolean;
 begin
-  result := (FHasBits and 4096) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_MinimumBet;
 begin
-  FHasBits := FHasBits or 4096;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_TableStatus.clear_has_MinimumBet;
 begin
-  FHasBits := FHasBits and not 4096;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_TableStatus.SetMinimumBet(const AValue: UInt32);
@@ -874,17 +874,17 @@ end;
 
 function TPB_TableStatus.has_MaximumRaise: Boolean;
 begin
-  result := (FHasBits and 8192) > 0;
+  result := (FHasBits and 512) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_MaximumRaise;
 begin
-  FHasBits := FHasBits or 8192;
+  FHasBits := FHasBits or 512;
 end;
 
 procedure TPB_TableStatus.clear_has_MaximumRaise;
 begin
-  FHasBits := FHasBits and not 8192;
+  FHasBits := FHasBits and not 512;
 end;
 
 procedure TPB_TableStatus.SetMaximumRaise(const AValue: UInt32);
@@ -905,17 +905,17 @@ end;
 
 function TPB_TableStatus.has_SmallBlind: Boolean;
 begin
-  result := (FHasBits and 16384) > 0;
+  result := (FHasBits and 1024) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_SmallBlind;
 begin
-  FHasBits := FHasBits or 16384;
+  FHasBits := FHasBits or 1024;
 end;
 
 procedure TPB_TableStatus.clear_has_SmallBlind;
 begin
-  FHasBits := FHasBits and not 16384;
+  FHasBits := FHasBits and not 1024;
 end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: UInt32);
@@ -936,17 +936,17 @@ end;
 
 function TPB_TableStatus.has_BigBlind: Boolean;
 begin
-  result := (FHasBits and 32768) > 0;
+  result := (FHasBits and 2048) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_BigBlind;
 begin
-  FHasBits := FHasBits or 32768;
+  FHasBits := FHasBits or 2048;
 end;
 
 procedure TPB_TableStatus.clear_has_BigBlind;
 begin
-  FHasBits := FHasBits and not 32768;
+  FHasBits := FHasBits and not 2048;
 end;
 
 procedure TPB_TableStatus.SetBigBlind(const AValue: UInt32);
@@ -967,17 +967,17 @@ end;
 
 function TPB_TableStatus.has_Handid: Boolean;
 begin
-  result := (FHasBits and 65536) > 0;
+  result := (FHasBits and 4096) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Handid;
 begin
-  FHasBits := FHasBits or 65536;
+  FHasBits := FHasBits or 4096;
 end;
 
 procedure TPB_TableStatus.clear_has_Handid;
 begin
-  FHasBits := FHasBits and not 65536;
+  FHasBits := FHasBits and not 4096;
 end;
 
 procedure TPB_TableStatus.SetHandid(const AValue: UInt32);
@@ -998,17 +998,17 @@ end;
 
 function TPB_TableStatus.has_Time: Boolean;
 begin
-  result := (FHasBits and 131072) > 0;
+  result := (FHasBits and 8192) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Time;
 begin
-  FHasBits := FHasBits or 131072;
+  FHasBits := FHasBits or 8192;
 end;
 
 procedure TPB_TableStatus.clear_has_Time;
 begin
-  FHasBits := FHasBits and not 131072;
+  FHasBits := FHasBits and not 8192;
 end;
 
 procedure TPB_TableStatus.SetTime(const AValue: UInt64);
@@ -1034,17 +1034,17 @@ end;
 
 function TPB_TableStatus.has_Events: Boolean;
 begin
-  result := (FHasBits and 262144) > 0;
+  result := (FHasBits and 16384) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Events;
 begin
-  FHasBits := FHasBits or 262144;
+  FHasBits := FHasBits or 16384;
 end;
 
 procedure TPB_TableStatus.clear_has_Events;
 begin
-  FHasBits := FHasBits and not 262144;
+  FHasBits := FHasBits and not 16384;
 end;
 
 procedure TPB_TableStatus.EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -1072,17 +1072,17 @@ end;
 
 function TPB_TableStatus.has_Pots: Boolean;
 begin
-  result := (FHasBits and 524288) > 0;
+  result := (FHasBits and 32768) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Pots;
 begin
-  FHasBits := FHasBits or 524288;
+  FHasBits := FHasBits or 32768;
 end;
 
 procedure TPB_TableStatus.clear_has_Pots;
 begin
-  FHasBits := FHasBits and not 524288;
+  FHasBits := FHasBits and not 32768;
 end;
 
 procedure TPB_TableStatus.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -1105,17 +1105,17 @@ end;
 
 function TPB_TableStatus.has_RakePercent: Boolean;
 begin
-  result := (FHasBits and 1048576) > 0;
+  result := (FHasBits and 65536) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_RakePercent;
 begin
-  FHasBits := FHasBits or 1048576;
+  FHasBits := FHasBits or 65536;
 end;
 
 procedure TPB_TableStatus.clear_has_RakePercent;
 begin
-  FHasBits := FHasBits and not 1048576;
+  FHasBits := FHasBits and not 65536;
 end;
 
 procedure TPB_TableStatus.SetRakePercent(const AValue: UInt32);
@@ -1136,17 +1136,17 @@ end;
 
 function TPB_TableStatus.has_CurrentGame: Boolean;
 begin
-  result := (FHasBits and 2097152) > 0;
+  result := (FHasBits and 131072) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_CurrentGame;
 begin
-  FHasBits := FHasBits or 2097152;
+  FHasBits := FHasBits or 131072;
 end;
 
 procedure TPB_TableStatus.clear_has_CurrentGame;
 begin
-  FHasBits := FHasBits and not 2097152;
+  FHasBits := FHasBits and not 131072;
 end;
 
 procedure TPB_TableStatus.SetCurrentGame(const AValue: TGameType);
@@ -1167,17 +1167,17 @@ end;
 
 function TPB_TableStatus.has_Rotation: Boolean;
 begin
-  result := (FHasBits and 4194304) > 0;
+  result := (FHasBits and 262144) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_Rotation;
 begin
-  FHasBits := FHasBits or 4194304;
+  FHasBits := FHasBits or 262144;
 end;
 
 procedure TPB_TableStatus.clear_has_Rotation;
 begin
-  FHasBits := FHasBits and not 4194304;
+  FHasBits := FHasBits and not 262144;
 end;
 
 procedure TPB_TableStatus.SetRotation(const AValue: UInt32);
@@ -1198,17 +1198,17 @@ end;
 
 function TPB_TableStatus.has_GameLimit: Boolean;
 begin
-  result := (FHasBits and 16777216) > 0;
+  result := (FHasBits and 524288) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_GameLimit;
 begin
-  FHasBits := FHasBits or 16777216;
+  FHasBits := FHasBits or 524288;
 end;
 
 procedure TPB_TableStatus.clear_has_GameLimit;
 begin
-  FHasBits := FHasBits and not 16777216;
+  FHasBits := FHasBits and not 524288;
 end;
 
 procedure TPB_TableStatus.SetGameLimit(const AValue: TGameLimit);
@@ -1229,17 +1229,17 @@ end;
 
 function TPB_TableStatus.has_MinimumRaise: Boolean;
 begin
-  result := (FHasBits and 33554432) > 0;
+  result := (FHasBits and 1048576) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_MinimumRaise;
 begin
-  FHasBits := FHasBits or 33554432;
+  FHasBits := FHasBits or 1048576;
 end;
 
 procedure TPB_TableStatus.clear_has_MinimumRaise;
 begin
-  FHasBits := FHasBits and not 33554432;
+  FHasBits := FHasBits and not 1048576;
 end;
 
 procedure TPB_TableStatus.SetMinimumRaise(const AValue: UInt32);
@@ -1260,17 +1260,17 @@ end;
 
 function TPB_TableStatus.has_TableType: Boolean;
 begin
-  result := (FHasBits and 67108864) > 0;
+  result := (FHasBits and 2097152) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_TableType;
 begin
-  FHasBits := FHasBits or 67108864;
+  FHasBits := FHasBits or 2097152;
 end;
 
 procedure TPB_TableStatus.clear_has_TableType;
 begin
-  FHasBits := FHasBits and not 67108864;
+  FHasBits := FHasBits and not 2097152;
 end;
 
 procedure TPB_TableStatus.SetTableType(const AValue: TTableType);
@@ -1296,17 +1296,17 @@ end;
 
 function TPB_TableStatus.has_TableMessage: Boolean;
 begin
-  result := (FHasBits and 134217728) > 0;
+  result := (FHasBits and 4194304) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_TableMessage;
 begin
-  FHasBits := FHasBits or 134217728;
+  FHasBits := FHasBits or 4194304;
 end;
 
 procedure TPB_TableStatus.clear_has_TableMessage;
 begin
-  FHasBits := FHasBits and not 134217728;
+  FHasBits := FHasBits and not 4194304;
 end;
 
 procedure TPB_TableStatus.TableMessageNotifyEvent(Sender: TObject; const Item: TPB_TableMessage; Action: TCollectionNotification);
@@ -1329,17 +1329,17 @@ end;
 
 function TPB_TableStatus.has_QueuePosition: Boolean;
 begin
-  result := (FHasBits and 268435456) > 0;
+  result := (FHasBits and 8388608) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_QueuePosition;
 begin
-  FHasBits := FHasBits or 268435456;
+  FHasBits := FHasBits or 8388608;
 end;
 
 procedure TPB_TableStatus.clear_has_QueuePosition;
 begin
-  FHasBits := FHasBits and not 268435456;
+  FHasBits := FHasBits and not 8388608;
 end;
 
 procedure TPB_TableStatus.SetQueuePosition(const AValue: UInt32);
@@ -1365,17 +1365,17 @@ end;
 
 function TPB_TableStatus.has_ReservedSeats: Boolean;
 begin
-  result := (FHasBits and 536870912) > 0;
+  result := (FHasBits and 16777216) > 0;
 end;
 
 procedure TPB_TableStatus.set_has_ReservedSeats;
 begin
-  FHasBits := FHasBits or 536870912;
+  FHasBits := FHasBits or 16777216;
 end;
 
 procedure TPB_TableStatus.clear_has_ReservedSeats;
 begin
-  FHasBits := FHasBits and not 536870912;
+  FHasBits := FHasBits and not 16777216;
 end;
 
 procedure TPB_TableStatus.ReservedSeatsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);

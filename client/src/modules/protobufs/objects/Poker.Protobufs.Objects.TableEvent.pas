@@ -19,9 +19,9 @@ type
     const
       kEventFieldNumber = 1;
       kSeatFieldNumber = 2;
-      kPotsFieldNumber = 4;
-      kBetsFieldNumber = 5;
-      kCardsFieldNumber = 6;
+      kPotsFieldNumber = 3;
+      kBetsFieldNumber = 4;
+      kCardsFieldNumber = 5;
 
     var
       FEvent: TTableEventType;
@@ -67,17 +67,17 @@ type
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // repeated Pot Pots = 4;
+    // repeated Pot Pots = 3;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
 
-    // repeated uint32 Bets = 5;
+    // repeated uint32 Bets = 4;
     function has_Bets: Boolean;
     procedure clear_Bets;
     property Bets: TList<UInt32> read FBets;
 
-    // repeated bytes Cards = 6;
+    // repeated bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
     property Cards: TList<TBytes> read FCards;
@@ -274,17 +274,17 @@ end;
 
 function TPB_TableEvent.has_Pots: Boolean;
 begin
-  result := (FHasBits and 8) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Pots;
 begin
-  FHasBits := FHasBits or 8;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TableEvent.clear_has_Pots;
 begin
-  FHasBits := FHasBits and not 8;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -312,17 +312,17 @@ end;
 
 function TPB_TableEvent.has_Bets: Boolean;
 begin
-  result := (FHasBits and 16) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Bets;
 begin
-  FHasBits := FHasBits or 16;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TableEvent.clear_has_Bets;
 begin
-  FHasBits := FHasBits and not 16;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
@@ -346,17 +346,17 @@ end;
 
 function TPB_TableEvent.has_Cards: Boolean;
 begin
-  result := (FHasBits and 32) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TableEvent.set_has_Cards;
 begin
-  FHasBits := FHasBits or 32;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TableEvent.clear_has_Cards;
 begin
-  FHasBits := FHasBits and not 32;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TableEvent.CardsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);

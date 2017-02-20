@@ -15,13 +15,13 @@ type
   private
     const
       kUseridFieldNumber = 1;
-      kBalanceFieldNumber = 3;
-      kBuyinsFieldNumber = 4;
-      kCashoutsFieldNumber = 5;
-      kRakecontribFieldNumber = 6;
-      kSecondsplayedFieldNumber = 7;
-      kChipsinplayFieldNumber = 8;
-      kHandsFieldNumber = 9;
+      kBalanceFieldNumber = 2;
+      kBuyinsFieldNumber = 3;
+      kCashoutsFieldNumber = 4;
+      kRakecontribFieldNumber = 5;
+      kSecondsplayedFieldNumber = 6;
+      kChipsinplayFieldNumber = 7;
+      kHandsFieldNumber = 8;
 
     var
       FUserid: TMongoId;
@@ -74,37 +74,37 @@ type
     procedure clear_Userid;
     property Userid: TMongoId read FUserid write SetUserid;
 
-    // optional int32 Balance = 3;
+    // optional int32 Balance = 2;
     function has_Balance: Boolean;
     procedure clear_Balance;
     property Balance: Integer read FBalance write SetBalance;
 
-    // repeated uint32 Buyins = 4;
+    // repeated uint32 Buyins = 3;
     function has_Buyins: Boolean;
     procedure clear_Buyins;
     property Buyins: TList<UInt32> read FBuyins;
 
-    // repeated uint32 Cashouts = 5;
+    // repeated uint32 Cashouts = 4;
     function has_Cashouts: Boolean;
     procedure clear_Cashouts;
     property Cashouts: TList<UInt32> read FCashouts;
 
-    // optional uint32 Rakecontrib = 6;
+    // optional uint32 Rakecontrib = 5;
     function has_Rakecontrib: Boolean;
     procedure clear_Rakecontrib;
     property Rakecontrib: UInt32 read FRakecontrib write SetRakecontrib;
 
-    // optional uint32 Secondsplayed = 7;
+    // optional uint32 Secondsplayed = 6;
     function has_Secondsplayed: Boolean;
     procedure clear_Secondsplayed;
     property Secondsplayed: UInt32 read FSecondsplayed write SetSecondsplayed;
 
-    // optional uint32 Chipsinplay = 8;
+    // optional uint32 Chipsinplay = 7;
     function has_Chipsinplay: Boolean;
     procedure clear_Chipsinplay;
     property Chipsinplay: UInt32 read FChipsinplay write SetChipsinplay;
 
-    // optional uint32 Hands = 9;
+    // optional uint32 Hands = 8;
     function has_Hands: Boolean;
     procedure clear_Hands;
     property Hands: UInt32 read FHands write SetHands;
@@ -276,17 +276,17 @@ end;
 
 function TPB_TablePlayerStats.has_Balance: Boolean;
 begin
-  result := (FHasBits and 4) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Balance;
 begin
-  FHasBits := FHasBits or 4;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Balance;
 begin
-  FHasBits := FHasBits and not 4;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
@@ -312,17 +312,17 @@ end;
 
 function TPB_TablePlayerStats.has_Buyins: Boolean;
 begin
-  result := (FHasBits and 8) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Buyins;
 begin
-  FHasBits := FHasBits or 8;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Buyins;
 begin
-  FHasBits := FHasBits and not 8;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
@@ -346,17 +346,17 @@ end;
 
 function TPB_TablePlayerStats.has_Cashouts: Boolean;
 begin
-  result := (FHasBits and 16) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Cashouts;
 begin
-  FHasBits := FHasBits or 16;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Cashouts;
 begin
-  FHasBits := FHasBits and not 16;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
@@ -375,17 +375,17 @@ end;
 
 function TPB_TablePlayerStats.has_Rakecontrib: Boolean;
 begin
-  result := (FHasBits and 32) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Rakecontrib;
 begin
-  FHasBits := FHasBits or 32;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Rakecontrib;
 begin
-  FHasBits := FHasBits and not 32;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UInt32);
@@ -406,17 +406,17 @@ end;
 
 function TPB_TablePlayerStats.has_Secondsplayed: Boolean;
 begin
-  result := (FHasBits and 64) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Secondsplayed;
 begin
-  FHasBits := FHasBits or 64;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Secondsplayed;
 begin
-  FHasBits := FHasBits and not 64;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UInt32);
@@ -437,17 +437,17 @@ end;
 
 function TPB_TablePlayerStats.has_Chipsinplay: Boolean;
 begin
-  result := (FHasBits and 128) > 0;
+  result := (FHasBits and 64) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Chipsinplay;
 begin
-  FHasBits := FHasBits or 128;
+  FHasBits := FHasBits or 64;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Chipsinplay;
 begin
-  FHasBits := FHasBits and not 128;
+  FHasBits := FHasBits and not 64;
 end;
 
 procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UInt32);
@@ -468,17 +468,17 @@ end;
 
 function TPB_TablePlayerStats.has_Hands: Boolean;
 begin
-  result := (FHasBits and 256) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_TablePlayerStats.set_has_Hands;
 begin
-  FHasBits := FHasBits or 256;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_TablePlayerStats.clear_has_Hands;
 begin
-  FHasBits := FHasBits and not 256;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_TablePlayerStats.SetHands(const AValue: UInt32);

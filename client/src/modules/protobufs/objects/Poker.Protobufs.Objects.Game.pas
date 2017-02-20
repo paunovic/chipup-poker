@@ -26,18 +26,18 @@ type
       kGameTypeFieldNumber = 5;
       kGameLimitFieldNumber = 6;
       kBlindsFieldNumber = 7;
-      kSeatsFieldNumber = 9;
-      kSittingFieldNumber = 10;
-      kBuyinMinFieldNumber = 11;
-      kBuyinMaxFieldNumber = 12;
-      kStateFieldNumber = 13;
-      kClosetimeFieldNumber = 14;
-      kLasthandidFieldNumber = 15;
-      kTournamentFieldNumber = 16;
-      kSmallBlindFieldNumber = 17;
-      kBigBlindFieldNumber = 18;
-      kFinalTableFieldNumber = 19;
-      kMaxRakePerHandFieldNumber = 20;
+      kSeatsFieldNumber = 8;
+      kSittingFieldNumber = 9;
+      kBuyinMinFieldNumber = 10;
+      kBuyinMaxFieldNumber = 11;
+      kStateFieldNumber = 12;
+      kClosetimeFieldNumber = 13;
+      kLasthandidFieldNumber = 14;
+      kTournamentFieldNumber = 15;
+      kSmallBlindFieldNumber = 16;
+      kBigBlindFieldNumber = 17;
+      kFinalTableFieldNumber = 18;
+      kMaxRakePerHandFieldNumber = 19;
 
     var
       FId: TMongoId;
@@ -161,62 +161,62 @@ type
     procedure clear_Blinds;
     property Blinds: TGameBlinds read FBlinds write SetBlinds;
 
-    // optional int32 Seats = 9;
+    // optional int32 Seats = 8;
     function has_Seats: Boolean;
     procedure clear_Seats;
     property Seats: Integer read FSeats write SetSeats;
 
-    // optional int32 Sitting = 10;
+    // optional int32 Sitting = 9;
     function has_Sitting: Boolean;
     procedure clear_Sitting;
     property Sitting: Integer read FSitting write SetSitting;
 
-    // optional uint32 BuyinMin = 11;
+    // optional uint32 BuyinMin = 10;
     function has_BuyinMin: Boolean;
     procedure clear_BuyinMin;
     property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
 
-    // optional uint32 BuyinMax = 12;
+    // optional uint32 BuyinMax = 11;
     function has_BuyinMax: Boolean;
     procedure clear_BuyinMax;
     property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
 
-    // optional GameState State = 13;
+    // optional GameState State = 12;
     function has_State: Boolean;
     procedure clear_State;
     property State: TGameState read FState write SetState;
 
-    // optional uint32 Closetime = 14;
+    // optional uint32 Closetime = 13;
     function has_Closetime: Boolean;
     procedure clear_Closetime;
     property Closetime: UInt32 read FClosetime write SetClosetime;
 
-    // optional uint32 Lasthandid = 15;
+    // optional uint32 Lasthandid = 14;
     function has_Lasthandid: Boolean;
     procedure clear_Lasthandid;
     property Lasthandid: UInt32 read FLasthandid write SetLasthandid;
 
-    // optional bytes Tournament = 16;
+    // optional bytes Tournament = 15;
     function has_Tournament: Boolean;
     procedure clear_Tournament;
     property Tournament: TMongoId read FTournament write SetTournament;
 
-    // optional uint32 SmallBlind = 17;
+    // optional uint32 SmallBlind = 16;
     function has_SmallBlind: Boolean;
     procedure clear_SmallBlind;
     property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
 
-    // optional uint32 BigBlind = 18;
+    // optional uint32 BigBlind = 17;
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
     property BigBlind: UInt32 read FBigBlind write SetBigBlind;
 
-    // optional bool FinalTable = 19;
+    // optional bool FinalTable = 18;
     function has_FinalTable: Boolean;
     procedure clear_FinalTable;
     property FinalTable: Boolean read FFinalTable write SetFinalTable;
 
-    // optional uint32 MaxRakePerHand = 20;
+    // optional uint32 MaxRakePerHand = 19;
     function has_MaxRakePerHand: Boolean;
     procedure clear_MaxRakePerHand;
     property MaxRakePerHand: UInt32 read FMaxRakePerHand write SetMaxRakePerHand;
@@ -637,17 +637,17 @@ end;
 
 function TPB_Game.has_Seats: Boolean;
 begin
-  result := (FHasBits and 256) > 0;
+  result := (FHasBits and 128) > 0;
 end;
 
 procedure TPB_Game.set_has_Seats;
 begin
-  FHasBits := FHasBits or 256;
+  FHasBits := FHasBits or 128;
 end;
 
 procedure TPB_Game.clear_has_Seats;
 begin
-  FHasBits := FHasBits and not 256;
+  FHasBits := FHasBits and not 128;
 end;
 
 procedure TPB_Game.SetSeats(const AValue: Integer);
@@ -668,17 +668,17 @@ end;
 
 function TPB_Game.has_Sitting: Boolean;
 begin
-  result := (FHasBits and 512) > 0;
+  result := (FHasBits and 256) > 0;
 end;
 
 procedure TPB_Game.set_has_Sitting;
 begin
-  FHasBits := FHasBits or 512;
+  FHasBits := FHasBits or 256;
 end;
 
 procedure TPB_Game.clear_has_Sitting;
 begin
-  FHasBits := FHasBits and not 512;
+  FHasBits := FHasBits and not 256;
 end;
 
 procedure TPB_Game.SetSitting(const AValue: Integer);
@@ -699,17 +699,17 @@ end;
 
 function TPB_Game.has_BuyinMin: Boolean;
 begin
-  result := (FHasBits and 1024) > 0;
+  result := (FHasBits and 512) > 0;
 end;
 
 procedure TPB_Game.set_has_BuyinMin;
 begin
-  FHasBits := FHasBits or 1024;
+  FHasBits := FHasBits or 512;
 end;
 
 procedure TPB_Game.clear_has_BuyinMin;
 begin
-  FHasBits := FHasBits and not 1024;
+  FHasBits := FHasBits and not 512;
 end;
 
 procedure TPB_Game.SetBuyinMin(const AValue: UInt32);
@@ -730,17 +730,17 @@ end;
 
 function TPB_Game.has_BuyinMax: Boolean;
 begin
-  result := (FHasBits and 2048) > 0;
+  result := (FHasBits and 1024) > 0;
 end;
 
 procedure TPB_Game.set_has_BuyinMax;
 begin
-  FHasBits := FHasBits or 2048;
+  FHasBits := FHasBits or 1024;
 end;
 
 procedure TPB_Game.clear_has_BuyinMax;
 begin
-  FHasBits := FHasBits and not 2048;
+  FHasBits := FHasBits and not 1024;
 end;
 
 procedure TPB_Game.SetBuyinMax(const AValue: UInt32);
@@ -761,17 +761,17 @@ end;
 
 function TPB_Game.has_State: Boolean;
 begin
-  result := (FHasBits and 4096) > 0;
+  result := (FHasBits and 2048) > 0;
 end;
 
 procedure TPB_Game.set_has_State;
 begin
-  FHasBits := FHasBits or 4096;
+  FHasBits := FHasBits or 2048;
 end;
 
 procedure TPB_Game.clear_has_State;
 begin
-  FHasBits := FHasBits and not 4096;
+  FHasBits := FHasBits and not 2048;
 end;
 
 procedure TPB_Game.SetState(const AValue: TGameState);
@@ -792,17 +792,17 @@ end;
 
 function TPB_Game.has_Closetime: Boolean;
 begin
-  result := (FHasBits and 8192) > 0;
+  result := (FHasBits and 4096) > 0;
 end;
 
 procedure TPB_Game.set_has_Closetime;
 begin
-  FHasBits := FHasBits or 8192;
+  FHasBits := FHasBits or 4096;
 end;
 
 procedure TPB_Game.clear_has_Closetime;
 begin
-  FHasBits := FHasBits and not 8192;
+  FHasBits := FHasBits and not 4096;
 end;
 
 procedure TPB_Game.SetClosetime(const AValue: UInt32);
@@ -823,17 +823,17 @@ end;
 
 function TPB_Game.has_Lasthandid: Boolean;
 begin
-  result := (FHasBits and 16384) > 0;
+  result := (FHasBits and 8192) > 0;
 end;
 
 procedure TPB_Game.set_has_Lasthandid;
 begin
-  FHasBits := FHasBits or 16384;
+  FHasBits := FHasBits or 8192;
 end;
 
 procedure TPB_Game.clear_has_Lasthandid;
 begin
-  FHasBits := FHasBits and not 16384;
+  FHasBits := FHasBits and not 8192;
 end;
 
 procedure TPB_Game.SetLasthandid(const AValue: UInt32);
@@ -854,17 +854,17 @@ end;
 
 function TPB_Game.has_Tournament: Boolean;
 begin
-  result := (FHasBits and 32768) > 0;
+  result := (FHasBits and 16384) > 0;
 end;
 
 procedure TPB_Game.set_has_Tournament;
 begin
-  FHasBits := FHasBits or 32768;
+  FHasBits := FHasBits or 16384;
 end;
 
 procedure TPB_Game.clear_has_Tournament;
 begin
-  FHasBits := FHasBits and not 32768;
+  FHasBits := FHasBits and not 16384;
 end;
 
 procedure TPB_Game.SetTournament(const AValue: TMongoId);
@@ -889,17 +889,17 @@ end;
 
 function TPB_Game.has_SmallBlind: Boolean;
 begin
-  result := (FHasBits and 65536) > 0;
+  result := (FHasBits and 32768) > 0;
 end;
 
 procedure TPB_Game.set_has_SmallBlind;
 begin
-  FHasBits := FHasBits or 65536;
+  FHasBits := FHasBits or 32768;
 end;
 
 procedure TPB_Game.clear_has_SmallBlind;
 begin
-  FHasBits := FHasBits and not 65536;
+  FHasBits := FHasBits and not 32768;
 end;
 
 procedure TPB_Game.SetSmallBlind(const AValue: UInt32);
@@ -920,17 +920,17 @@ end;
 
 function TPB_Game.has_BigBlind: Boolean;
 begin
-  result := (FHasBits and 131072) > 0;
+  result := (FHasBits and 65536) > 0;
 end;
 
 procedure TPB_Game.set_has_BigBlind;
 begin
-  FHasBits := FHasBits or 131072;
+  FHasBits := FHasBits or 65536;
 end;
 
 procedure TPB_Game.clear_has_BigBlind;
 begin
-  FHasBits := FHasBits and not 131072;
+  FHasBits := FHasBits and not 65536;
 end;
 
 procedure TPB_Game.SetBigBlind(const AValue: UInt32);
@@ -951,17 +951,17 @@ end;
 
 function TPB_Game.has_FinalTable: Boolean;
 begin
-  result := (FHasBits and 262144) > 0;
+  result := (FHasBits and 131072) > 0;
 end;
 
 procedure TPB_Game.set_has_FinalTable;
 begin
-  FHasBits := FHasBits or 262144;
+  FHasBits := FHasBits or 131072;
 end;
 
 procedure TPB_Game.clear_has_FinalTable;
 begin
-  FHasBits := FHasBits and not 262144;
+  FHasBits := FHasBits and not 131072;
 end;
 
 procedure TPB_Game.SetFinalTable(const AValue: Boolean);
@@ -982,17 +982,17 @@ end;
 
 function TPB_Game.has_MaxRakePerHand: Boolean;
 begin
-  result := (FHasBits and 524288) > 0;
+  result := (FHasBits and 262144) > 0;
 end;
 
 procedure TPB_Game.set_has_MaxRakePerHand;
 begin
-  FHasBits := FHasBits or 524288;
+  FHasBits := FHasBits or 262144;
 end;
 
 procedure TPB_Game.clear_has_MaxRakePerHand;
 begin
-  FHasBits := FHasBits and not 524288;
+  FHasBits := FHasBits and not 262144;
 end;
 
 procedure TPB_Game.SetMaxRakePerHand(const AValue: UInt32);

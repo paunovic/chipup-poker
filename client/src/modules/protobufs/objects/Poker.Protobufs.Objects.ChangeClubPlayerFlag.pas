@@ -15,8 +15,8 @@ type
   private
     const
       kClubMongoIdFieldNumber = 1;
-      kPlayerMongoIdFieldNumber = 3;
-      kFlagFieldNumber = 2;
+      kPlayerMongoIdFieldNumber = 2;
+      kFlagFieldNumber = 3;
 
     var
       FClubMongoId: TMongoId;
@@ -46,12 +46,12 @@ type
     procedure clear_ClubMongoId;
     property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
 
-    // required bytes PlayerMongoId = 3;
+    // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
 
-    // required bool Flag = 2;
+    // required bool Flag = 3;
     function has_Flag: Boolean;
     procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;
@@ -166,17 +166,17 @@ end;
 
 function TPB_ChangeClubPlayerFlag.has_PlayerMongoId: Boolean;
 begin
-  result := (FHasBits and 4) > 0;
+  result := (FHasBits and 2) > 0;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.set_has_PlayerMongoId;
 begin
-  FHasBits := FHasBits or 4;
+  FHasBits := FHasBits or 2;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.clear_has_PlayerMongoId;
 begin
-  FHasBits := FHasBits and not 4;
+  FHasBits := FHasBits and not 2;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.SetPlayerMongoId(const AValue: TMongoId);
@@ -201,17 +201,17 @@ end;
 
 function TPB_ChangeClubPlayerFlag.has_Flag: Boolean;
 begin
-  result := (FHasBits and 2) > 0;
+  result := (FHasBits and 4) > 0;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.set_has_Flag;
 begin
-  FHasBits := FHasBits or 2;
+  FHasBits := FHasBits or 4;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.clear_has_Flag;
 begin
-  FHasBits := FHasBits and not 2;
+  FHasBits := FHasBits and not 4;
 end;
 
 procedure TPB_ChangeClubPlayerFlag.SetFlag(const AValue: Boolean);

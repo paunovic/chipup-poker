@@ -19,9 +19,9 @@ type
       kIdFieldNumber = 1;
       kAvatarFieldNumber = 2;
       kDisplaynameFieldNumber = 3;
-      kEmailFieldNumber = 5;
-      kAuthedFieldNumber = 6;
-      kSubscriptionPlanFieldNumber = 7;
+      kEmailFieldNumber = 4;
+      kAuthedFieldNumber = 5;
+      kSubscriptionPlanFieldNumber = 6;
 
     var
       FId: TMongoId;
@@ -73,17 +73,17 @@ type
     procedure clear_Displayname;
     property Displayname: String read FDisplayname write SetDisplayname;
 
-    // optional string Email = 5;
+    // optional string Email = 4;
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
 
-    // optional bool Authed = 6;
+    // optional bool Authed = 5;
     function has_Authed: Boolean;
     procedure clear_Authed;
     property Authed: Boolean read FAuthed write SetAuthed;
 
-    // optional PlayerSubscriptionPlan SubscriptionPlan = 7;
+    // optional PlayerSubscriptionPlan SubscriptionPlan = 6;
     function has_SubscriptionPlan: Boolean;
     procedure clear_SubscriptionPlan;
     property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
@@ -281,17 +281,17 @@ end;
 
 function TPB_User.has_Email: Boolean;
 begin
-  result := (FHasBits and 16) > 0;
+  result := (FHasBits and 8) > 0;
 end;
 
 procedure TPB_User.set_has_Email;
 begin
-  FHasBits := FHasBits or 16;
+  FHasBits := FHasBits or 8;
 end;
 
 procedure TPB_User.clear_has_Email;
 begin
-  FHasBits := FHasBits and not 16;
+  FHasBits := FHasBits and not 8;
 end;
 
 procedure TPB_User.SetEmail(const AValue: String);
@@ -312,17 +312,17 @@ end;
 
 function TPB_User.has_Authed: Boolean;
 begin
-  result := (FHasBits and 32) > 0;
+  result := (FHasBits and 16) > 0;
 end;
 
 procedure TPB_User.set_has_Authed;
 begin
-  FHasBits := FHasBits or 32;
+  FHasBits := FHasBits or 16;
 end;
 
 procedure TPB_User.clear_has_Authed;
 begin
-  FHasBits := FHasBits and not 32;
+  FHasBits := FHasBits and not 16;
 end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
@@ -343,17 +343,17 @@ end;
 
 function TPB_User.has_SubscriptionPlan: Boolean;
 begin
-  result := (FHasBits and 64) > 0;
+  result := (FHasBits and 32) > 0;
 end;
 
 procedure TPB_User.set_has_SubscriptionPlan;
 begin
-  FHasBits := FHasBits or 64;
+  FHasBits := FHasBits or 32;
 end;
 
 procedure TPB_User.clear_has_SubscriptionPlan;
 begin
-  FHasBits := FHasBits and not 64;
+  FHasBits := FHasBits and not 32;
 end;
 
 procedure TPB_User.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
