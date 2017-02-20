@@ -35,13 +35,23 @@ function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
 function MinutesToString(const AMinutes: UINT32): String;
 function RawByteStringToHex(const AString: RawByteString): String;
+function FindMainWindow(const AProcessId: DWORD; out AMainWindowHandle: HWND): Boolean;
+procedure ForceShowWindow(const AWindowHandle: HWND);
 
 implementation
 
 uses
   System.Rtti, System.TypInfo,
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, System.Generics.Collections, System.RegularExpressionsAPI,
-  Vcl.Dialogs;
+  Vcl.Dialogs, Winapi.Messages;
+
+type
+  PEnumWindowsHandleData = ^TEnumWindowsHandleData;
+  TEnumWindowsHandleData = record
+    ProcessId: DWORD;
+    BestHandle: HWND;
+  end;
+
 
 function ValueToStr(const AProperty: TRttiProperty; const AValue: TValue): String;
 var
@@ -684,6 +694,38 @@ function RawByteStringToHex(const AString: RawByteString): String;
 begin
   SetLength(result, Length(AString) * 2);
   BinToHex(@AString[1], PWideChar(@result[1]), Length(AString));
+end;
+
+function EnumWindowsCallback(handle: HWND; lp: LPARAM): BOOL; stdcall;
+var
+  handle_data: PEnumWindowsHandleData;
+  process_id: ULONG;
+begin
+  handle_data := PEnumWindowsHandleData(lp);
+  GetWindowThreadProcessId(handle, @process_id);
+  if (process_id <> handle_data.ProcessId) or
+     (not ((GetWindow(handle, GW_OWNER) = 0) and (IsWindowVisible(handle)))) then
+    Exit(TRUE);
+  handle_data.BestHandle := handle;
+  Exit(FALSE);
+end;
+
+function FindMainWindow(const AProcessId: DWORD; out AMainWindowHandle: HWND): Boolean;
+var
+  handle_data: TEnumWindowsHandleData;
+begin
+  handle_data.ProcessId := AProcessId;
+  handle_data.BestHandle := 0;
+  EnumWindows(@EnumWindowsCallback, LPARAM(@handle_data));
+  AMainWindowHandle := handle_data.BestHandle;
+  Exit(AMainWindowHandle <> 0);
+end;
+
+procedure ForceShowWindow(const AWindowHandle: HWND);
+begin
+  PostMessage(AWindowHandle, WM_SYSCOMMAND, SC_RESTORE, 0);
+  ShowWindow(AWindowHandle, SW_SHOWNORMAL);
+  SetForegroundWindow(AWindowHandle);
 end;
 
 end.

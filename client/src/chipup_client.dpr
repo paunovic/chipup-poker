@@ -186,26 +186,16 @@ uses
   Poker.Helpers.PB_ClubMember in 'helpers\Poker.Helpers.PB_ClubMember.pas';
 
 
-procedure FocusApp;
 var
-  window_handle: THandle;
-begin
-  window_handle := FindWindow('TfrmChipUpLogin', nil);
-  if window_handle = 0 then
-    window_handle := FindWindow('TfrmChipUpMain', nil);
-  if window_handle <> 0 then
-  begin
-    ShowWindow(window_handle, SW_SHOWNORMAL);
-    SetForegroundWindow(window_handle);
-  end;
-end;
-
+  existing_process_id: DWORD;
+  existing_process_main_window_handle: HWND;
 begin
   TCommandLineParams.ParseParams;
 
-  if not TInstanceController.AcquireInstance(Settings.Hardcoded.INSTANCE_MUTEX_NAME) then
+  if not TInstanceController.AcquireInstance(Settings.Hardcoded.PROJECT_UID, icsSession, existing_process_id) then
   begin
-    FocusApp;
+    if FindMainWindow(existing_process_id, existing_process_main_window_handle) then
+      ForceShowWindow(existing_process_main_window_handle);
     Exit;
   end;
 

@@ -9,11 +9,11 @@ type
   private
     type
       THardcodedSettingsRec = record
+        PROJECT_UID: String;
         VERSION: String;
         PROJECT_CAPTION: String;
         INSTALLER_FILENAME: String;
         REVISION: String;
-        INSTANCE_MUTEX_NAME: String;
         SETTINGS_FILENAME: String;
         SETTINGS_ENCRYPTION_KEY: String;
         DATABASE_FILENAME: String;
@@ -67,12 +67,11 @@ type
   public
     const
       Hardcoded: THardcodedSettingsRec = (
+        PROJECT_UID: '{6F7096BB-9CCC-4F59-BA6E-F29CD98C5A33}';
         VERSION: '0.01a';
         PROJECT_CAPTION: 'ChipUP Poker';
         INSTALLER_FILENAME: 'install_chipuppoker.exe';
         REVISION: {$I revision.inc};
-
-        INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
 
         SETTINGS_FILENAME: 'settings.dat';
         SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
