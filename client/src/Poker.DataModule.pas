@@ -445,23 +445,6 @@ begin
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
-
-    // we got kicked from club we weren't approved yet
-    if dmMain.SelfInfo.PendingClubs.GetAndLock(AClub.MongoId, club) then
-    try
-      found := FALSE;
-      for member in AClub.Members do
-        if member.MongoId = dmMain.SelfInfo.MongoId then
-        begin
-          found := TRUE;
-          Break;
-        end;
-
-      if not found then
-        dmMain.SelfInfo.PendingClubs.Remove(AClub.MongoId);
-    finally
-      dmMain.SelfInfo.PendingClubs.Unlock;
-    end;
   end
   else
   begin

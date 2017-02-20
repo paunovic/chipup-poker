@@ -922,8 +922,6 @@ begin
     rcount := 0;
     dmMain.SelfInfo.Clubs.Lock;
     try
-      for club in dmMain.SelfInfo.PendingClubs.Values do
-        ProcessClubObject(club);
       for club in dmMain.SelfInfo.Clubs.Values do
         ProcessClubObject(club);
     finally
@@ -1351,7 +1349,7 @@ begin
     Exit;
 
   case pbreply.Status of
-    csSuccess: begin
+    csSuccess, csWaitingForApproval: begin
       dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
       RefreshAll;
     end;

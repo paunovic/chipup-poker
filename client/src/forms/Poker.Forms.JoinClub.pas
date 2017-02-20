@@ -121,9 +121,9 @@ begin
     edClubPassword.SelectAll;
   end;
 
-  if dmMain.SelfInfo.PendingClubs.ClubIdExists(edClubID.Value) then
+  if dmMain.SelfInfo.Clubs.ClubIdExists(edClubID.Value) then
   begin
-    error := 'You''ve already sent a request to join this club';
+    error := 'You are already a member of this club';
     edClubID.SelectAll;
     edClubID.SetFocus;
   end;
@@ -171,7 +171,7 @@ begin
     end;
     csWaitingForApproval: begin
       ModalDialogs.ShowInformation('Your request to join the club has been sent to the club owner for approval');
-      dmMain.SelfInfo.PendingClubs.AddClub(pbreply.Club);
+      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
       Close;
     end
   else

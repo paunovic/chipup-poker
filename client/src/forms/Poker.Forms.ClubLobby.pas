@@ -236,7 +236,7 @@ procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
   FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                      TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
+                      TServerMessageCallback.Create([srChangeClubDetailsReply, srJoinClubReply], CSRClubDetailsChange),
                       TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
                       TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                       TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, CSROwnerGiveawayNotOwner),
@@ -247,7 +247,7 @@ begin
                       TServerMessageCallback.Create(seTableStatus, CSETableStatus),
                       TServerMessageCallback.Create(srPlayerLimitOk, CSRPlayerLimitOk),
                       TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk),
-                      TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srReinstatePlayerOk, seClubDeleted, seClubChange, srClubDisbandOk], CSREClubOperation),
+                      TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srJoinClubReply, srReinstatePlayerOk, seClubDeleted, seClubChange, srClubDisbandOk], CSREClubOperation),
                       TServerMessageCallback.Create([seGameDelete, seGameChange, seGameCreate, srCreateGameOk, srDeleteGameOk], CSREGameOperation)
                   ]);
 
@@ -1261,10 +1261,7 @@ begin
     Exit;
 
   case pbreply.Status of
-    csSuccess: ConfigureGUI;
-    csNameExists: ;
-  else
-    SoftException(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]));
+    csSuccess, csWaitingForApproval: ConfigureGUI;
   end;
 end;
 
