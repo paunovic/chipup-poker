@@ -9,9 +9,7 @@ type
   TDatabase = class
   private
     FDatabasePath: RawUTF8;
-
     procedure CreateTables(const AConnection: TSQLDBSQLite3ConnectionProperties);
-
   public
     class procedure Initialize(const ADatabasePath: String);
     class procedure Deinitialize;
@@ -20,10 +18,8 @@ type
     destructor Destroy; override;
 
     function NewConnection: TSQLDBSQLite3ConnectionProperties;
-
     function Execute(const AConnection: TSQLDBSQLite3ConnectionProperties; const AQuery: String): ISQLDBRows;
     procedure ExecuteNoResult(const AConnection: TSQLDBSQLite3ConnectionProperties; const AQuery: String);
-
     procedure InsertAvatar(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream);
     function RetrieveAvatarData(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream): Boolean;
   end;
@@ -82,11 +78,9 @@ end;
 procedure TDatabase.CreateTables(const AConnection: TSQLDBSQLite3ConnectionProperties);
 begin
   ExecuteNoResult(AConnection, 'PRAGMA page_size = 4096');
-
   ExecuteNoResult(AConnection, 'CREATE TABLE IF NOT EXISTS hands (id INTEGER PRIMARY KEY, clubid BLOB, gameid BLOB, timestamp INTEGER, data BLOB)');
   ExecuteNoResult(AConnection, 'CREATE INDEX IF NOT EXISTS gameid_idx ON hands(gameid)');
   ExecuteNoResult(AConnection, 'CREATE INDEX IF NOT EXISTS clubid_idx ON hands(clubid, gameid)');
-
   ExecuteNoResult(AConnection, 'CREATE TABLE IF NOT EXISTS avatars (id BLOB, data BLOB)');
   ExecuteNoResult(AConnection, 'CREATE UNIQUE INDEX IF NOT EXISTS id_idx ON avatars(id)');
 end;
