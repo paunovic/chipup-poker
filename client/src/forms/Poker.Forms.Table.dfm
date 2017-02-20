@@ -717,6 +717,7 @@ object frmTable: TfrmTable
     object acReportBug: TAction
       Category = 'Misc'
       Caption = 'acReportBug'
+      Enabled = False
       OnExecute = acReportBugExecute
     end
   end

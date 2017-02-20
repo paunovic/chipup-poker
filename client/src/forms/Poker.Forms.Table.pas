@@ -279,7 +279,8 @@ begin
     table.Renderer.AddDXButton(acPlayNow, @table.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
     FDXBJoinWaitingList := table.Renderer.AddDXButton(acJoinWaitingList, @table.Renderer.Metrics.JoinWaitingListButtonBounds, TableResources.JoinWaitingListNormal, TableResources.JoinWaitingListPressed, nil);
     table.Renderer.AddDXButton(acLeaveWaitingList, @table.Renderer.Metrics.LeaveWaitingListButtonBounds, TableResources.LeaveWaitingListNormal, TableResources.LeaveWaitingListPressed, nil, FALSE, 0.15);
-//    table.Renderer.AddDXButton(acReportBug, @table.Renderer.Metrics.ReportBugButtonBounds, TableResources.ReportBugNormalImage, TableResources.ReportBugPressedImage, nil);
+    if acReportBug.Enabled then
+      table.Renderer.AddDXButton(acReportBug, @table.Renderer.Metrics.ReportBugButtonBounds, TableResources.ReportBugNormalImage, TableResources.ReportBugPressedImage, nil);
 
     FDXBFold := table.Renderer.AddDXButton(acFold, @table.Renderer.Metrics.ActionButtonsBounds[0],
          TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
