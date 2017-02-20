@@ -134,7 +134,7 @@ function Server(activeUsersIN) {
         if (row) {
           global.log('sending installer %j',row);
           if (config.diffserver) {
-            res.sendfile('installers/'+row.name);
+            res.sendfile(config.installers + '/'+row.name);
           } else {
             res.writeHead(302,{Location:'https://' + config.hostname + '/redirect/install_chipuppoker.exe?name='+row.name});
             res.end();
@@ -155,7 +155,7 @@ function Server(activeUsersIN) {
 				res.end();
 				return;
 			}
-			res.sendfile('installers/'+row.name);
+			res.sendfile(config.installers + '/'+row.name);
 		});
 	}.bind(this));
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
@@ -163,7 +163,7 @@ function Server(activeUsersIN) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
 				global.log('sending debug installer %j',row);
-				res.sendfile('installers/'+row.name);
+				res.sendfile(config.installers + '/ '+ row.name);
 			});
 		}.bind(this));
 	}.bind(this));
@@ -205,7 +205,7 @@ function Server(activeUsersIN) {
 	app.get('/pay',this.pay.bind(this));
 	this.addSync(app);
 	app.use(express.static(project_root + '/files'));
-	app.use('/rawinstallers',express.static('installers'));
+	app.use('/rawinstallers',express.static(config.installers));
 }
 Server.prototype.pay = function (req,res) {
 	console.log(req.query);
@@ -286,7 +286,7 @@ Server.prototype.addMac = function (req,res) {
 		var version = 'FIXME';
 		var revision = req.body.githash;
 		var debug ='release';
-		fs.rename(localFile,'installers/'+name1,function (err) {
+		fs.rename(localFile, config.installers + '/' + name1,function (err) {
 			assert.ifError(err);
 			var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.dmg.size,appcode:'acQtMac'});
 			obj.save(function (err) {
@@ -681,7 +681,7 @@ Server.prototype.installers_func = function (req,res) {
     return function (cb) {
       models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
         if (row) {
-          fs.unlink('installers/'+row.name,function (err) {
+          fs.unlink(config.installers + '/' + row.name,function (err) {
           });
           row.remove(function () {});
         }
@@ -1195,7 +1195,7 @@ Server.prototype.newVersion = function newVersion(req,res) {
   var debug = req.query.debug;
   if (!debug) debug = req.body.debug;
 
-  fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
+  fs.rename(req.files.installer.path, config.installers + '/'+name1,function (err) {
     assert.ifError(err);
     var obj = new models.Installer({name:name1, version:version, revision:revision, debug:debug, size:req.files.installer.size, appcode:'acDelphiWindows' });
     obj.save(function (err) {

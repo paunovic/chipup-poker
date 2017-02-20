@@ -2,7 +2,7 @@ tr
   td
     script="document.write(formatDate(new Date('" + val._id.getTimestamp().toJSON() + "')))"
   td
-    a(href="https://dev-server.chipuppoker.com/rawinstallers/"+val.name)=val.version
+    a(href="/rawinstallers/"+val.name)=val.version
   td(class="revision")=val.revision
   td=(val.size/1024/1024).toFixed(2) +'MB'
   td

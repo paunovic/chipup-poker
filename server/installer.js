@@ -30,7 +30,7 @@ function updateLive(doc,sizes,cb) {
 
 function unpackInstaller(record,cb1) {
   var prefix = config.unpacked + '/'+record._id+'/app/';
-  var unpacker = child_process.spawn('innoextract', ['-l', '-d', config.unpacked + '/'+record._id+'/', '-e', 'installers/'+record.name ], {stdio:'inherit'});
+  var unpacker = child_process.spawn('innoextract', ['-l', '-d', config.unpacked + '/'+record._id+'/', '-e', config.installers + '/'+record.name ], {stdio:'inherit'});
   unpacker.on('close',function (code, err) {
     console.log('result',arguments);
     if (code != 0) {

@@ -14,6 +14,7 @@ let
     upload_dir = "/home/poker/upload";
     log_dir = "/home/poker/logs";
     unpacked = "/home/poker/unpacked";
+    installers = "/home/poker/rawinstallers";
   };
 in {
   imports = [ ./snmpd.nix ];
@@ -66,7 +67,7 @@ in {
       };
       script = ''
         chmod 701 /home/poker
-        mkdir -pv /home/poker/chipuppoker/{server/assets,installers} ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}/objects
+        mkdir -pv /home/poker/chipuppoker/{server/assets,installers} ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}/objects ${poker_config.installers}
         cd /home/poker/chipuppoker
         ${pkgs.poker}/bin/poker-master
       '';
