@@ -1,3 +1,4 @@
 #!/bin/sh
-protoc common.proto backend.proto descriptor.proto extra.proto message.proto -o server/message.desc --delphi_out=client/src/modules/protobufs/objects
+protoc common.proto backend.proto descriptor.proto extra.proto message.proto -o server/message.desc
+protoc message.proto --delphi_out=client/src/modules/protobufs/objects
 node server/rebuild.js
