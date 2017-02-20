@@ -205,7 +205,6 @@ message LoginReply {
 	optional User self = 8;
 	repeated Game games = 9;
 	repeated PlayerClubStatus player_club_statuses = 10;
-	repeated Club pending_clubs = 11;
 }
 
 message ClubMember {
