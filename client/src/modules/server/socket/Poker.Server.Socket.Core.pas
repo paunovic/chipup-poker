@@ -238,7 +238,7 @@ begin
   begin
     if FSocket.SslEnable then
     begin
-      {$IFDEF DEBUG} DebugLn(Format('Starting SSL handshake [cert size: %d]...', [FSSLCert.Size]), ditSocket); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Starting SSL handshake [cert size: %d bytes]...', [FSSLCert.Size]), ditSocket); {$ENDIF}
       FSocket.StartSslHandshake;
     end
     else
