@@ -247,10 +247,9 @@ message User {
 	required bytes _id = 1 [(ObjectId)=true];
 	optional bytes avatar = 2;
 	required string displayname = 3;
-	
-	optional string email = 5;
-	optional bool authed = 6;
-	optional PlayerSubscriptionPlan subscription_plan = 7;
+	optional string email = 4;
+	optional bool authed = 5;
+	optional PlayerSubscriptionPlan subscription_plan = 6;
 }
 
 message SubscriptionPlanChange {
@@ -303,18 +302,18 @@ message Game {
 	optional GameType game_type = 5;
 	optional GameLimit game_limit = 6;
 	optional GameBlinds blinds = 7;
-	optional int32 seats = 9;
-	optional int32 sitting = 10;
-	optional uint32 buyin_min = 11;
-	optional uint32 buyin_max = 12;
-	optional GameState state = 13;
-	optional uint32 closetime = 14;
-	optional uint32 lasthandid = 15;
-	optional bytes tournament = 16 [(ObjectId)=true];
-	optional uint32 small_blind = 17;
-	optional uint32 big_blind = 18;
-	optional bool final_table = 19;
-	optional uint32 max_rake_per_hand = 20;
+	optional int32 seats = 8;
+	optional int32 sitting = 9;
+	optional uint32 buyin_min = 10;
+	optional uint32 buyin_max = 11;
+	optional GameState state = 12;
+	optional uint32 closetime = 13;
+	optional uint32 lasthandid = 14;
+	optional bytes tournament = 15 [(ObjectId)=true];
+	optional uint32 small_blind = 16;
+	optional uint32 big_blind = 17;
+	optional bool final_table = 18;
+	optional uint32 max_rake_per_hand = 19;
 }
 
 message ListClubsReply {
@@ -416,25 +415,25 @@ message TableStatus {
 	required int32 dealer = 4;
 	required int32 current_seat = 5;
 	repeated uint32 bets = 6;
-	required bool locked = 11;
-	optional int32 seq = 12;
-	optional uint32 minimum_bet = 13;
-	optional uint32 maximum_raise = 14;
-	optional uint32 small_blind = 15;
-	optional uint32 big_blind = 16;
-	optional uint32 handid = 17;
-	optional uint64 time = 18;
-	repeated TableEvent events = 19;
-	repeated Pot pots = 20;
-	optional uint32 rake_percent = 21;
-	optional Game.GameType current_game = 22;
-	optional uint32 rotation = 23;
-	optional Game.GameLimit game_limit = 25;
-	optional uint32 minimum_raise = 26;
-	required TableType table_type = 27;
-	repeated TableMessage table_message = 28;
-	optional uint32 queue_position = 29;
-	repeated uint32 reserved_seats = 30;
+	required bool locked = 7;
+	optional int32 seq = 8;
+	optional uint32 minimum_bet = 9;
+	optional uint32 maximum_raise = 10;
+	optional uint32 small_blind = 11;
+	optional uint32 big_blind = 12;
+	optional uint32 handid = 13;
+	optional uint64 time = 14;
+	repeated TableEvent events = 15;
+	repeated Pot pots = 16;
+	optional uint32 rake_percent = 17;
+	optional Game.GameType current_game = 18;
+	optional uint32 rotation = 19;
+	optional Game.GameLimit game_limit = 20;
+	optional uint32 minimum_raise = 21;
+	required TableType table_type = 22;
+	repeated TableMessage table_message = 23;
+	optional uint32 queue_position = 24;
+	repeated uint32 reserved_seats = 25;
 }
 
 message SeatInfo {
@@ -460,8 +459,8 @@ message SeatInfo {
 
 message ChangeClubPlayerFlag {
 	required bytes club_mongo_id = 1 [(ObjectId)=true];
-	required bytes player_mongo_id = 3 [(ObjectId)=true];
-	required bool flag = 2;
+	required bytes player_mongo_id = 2 [(ObjectId)=true];
+	required bool flag = 3;
 }
 
 message RegisterReply {
@@ -545,9 +544,9 @@ message TableEvent {
 	}
 	required TableEventType event = 1;
 	optional int32 seat = 2;
-	repeated Pot pots = 4;
-	repeated uint32 bets = 5;
-	repeated bytes cards = 6;
+	repeated Pot pots = 3;
+	repeated uint32 bets = 4;
+	repeated bytes cards = 5;
 }
 
 message PutChips {
@@ -594,13 +593,13 @@ message TableStatsReply {
 
 message TablePlayerStats {
 	required bytes userid = 1 [(ObjectId)=true];
-	optional int32 balance = 3;
-	repeated uint32 buyins = 4;
-	repeated uint32 cashouts = 5;
-	optional uint32 rakecontrib = 6;
-	optional uint32 secondsplayed = 7;
-	optional uint32 chipsinplay = 8;
-	optional uint32 hands = 9;
+	optional int32 balance = 2;
+	repeated uint32 buyins = 3;
+	repeated uint32 cashouts = 4;
+	optional uint32 rakecontrib = 5;
+	optional uint32 secondsplayed = 6;
+	optional uint32 chipsinplay = 7;
+	optional uint32 hands = 8;
 }
 
 message ClubStatsReply {
@@ -640,8 +639,8 @@ message HandHistoryReply {
 	optional bytes club_id = 1 [(ObjectId)=true];
 	required bytes gameid = 2 [(ObjectId)=true];
 	repeated HandHistory rows = 3;
-	//repeated GameEventHistory events = 4;
 	optional bytes tournament_id = 4 [(ObjectId)=true];
+	//repeated GameEventHistory events = 5;
 }
 
 message HandHistory {
