@@ -401,7 +401,6 @@ var
   query_users: TArray<TMongoId>;
   empty_avatar_id: TBytes;
   member: TPB_ClubMember;
-  found: Boolean;
 begin
   if AMethodId <> Integer(srClubDisbandOk) then
   begin
