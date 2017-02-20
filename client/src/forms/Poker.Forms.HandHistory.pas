@@ -292,7 +292,7 @@ begin
     C1 := 0;
     for hhi in hhis do
     begin
-      hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhis.Game.GameLimit, FALSE),
+      hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, GameTypeToStr(hhi.CurrentGame, hhis.Game.GameLimit, FALSE),
          ChipsToStr(hhis.Game.SmallBlind), ChipsToStr(hhis.Game.BigBlind), hhi.StartTimeStr]);
 
       if C1 >= cbHand.Properties.Items.Count then

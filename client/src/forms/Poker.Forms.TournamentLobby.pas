@@ -241,7 +241,7 @@ begin
   if Tournaments.GetAndLock(FTournamentId, tournament) then
   try
     // tournament info
-    lbvTournamentInfo.Caption := Format('%s, %d-max', [TGameInfo.GameTypeToStr(tournament.Gametype, tournament.Limit, FALSE), tournament.SeatsPerTable]);
+    lbvTournamentInfo.Caption := Format('%s, %d-max', [GameTypeToStr(tournament.Gametype, tournament.Limit, FALSE), tournament.SeatsPerTable]);
 
     // tournament state
     case tournament.State of

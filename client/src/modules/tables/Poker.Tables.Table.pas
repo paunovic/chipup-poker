@@ -182,7 +182,7 @@ begin
 
         if hhis.GetAndLockHand(FHandHistoryHandId, hhi) then
         try
-          result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.GameLimit, FALSE),
+          result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.GameLimit, FALSE),
                      ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
         finally
           hhis.Unlock;

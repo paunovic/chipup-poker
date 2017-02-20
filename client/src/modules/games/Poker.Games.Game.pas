@@ -13,34 +13,50 @@ type
     function GetName: String;
   public
     constructor Create;
-
     procedure Assign(const AProtobufObject: TPB_Game);
-
-    class procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
-    class function GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
-
     function AsString(const AShort: Boolean): String;
-
     property GameName: String read GetName;
     property StateAsStr: String read GetStateStr;
   end;
 
+procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
+function GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
+
+
 implementation
 
-{ TGameInfo }
-
-constructor TGameInfo.Create;
+function GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
 begin
-  inherited Create(TRUE);
+  result := '';
+  case AGameLimit of
+    glNoLimit: if AShort then
+      result := 'NL'
+    else
+      result := 'No Limit';
+    glFixedLimit: if AShort then
+      result := 'FL'
+    else
+      result := 'Fixed Limit';
+    glPotLimit: if AShort then
+      result := 'PL'
+    else
+      result := 'Pot Limit';
+  end;
+
+  case AGameType of
+    gtHoldem: if AShort then
+      result := result + 'H'
+    else
+      result := result + ' Hold''em';
+    gtOmaha: if AShort then
+      result := result + 'O'
+    else
+      result := result + ' Omaha';
+    gtRotationNLHPLO: result := 'Rotation NLH/PLO';
+  end;
 end;
 
-procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
-begin
-  Clear;
-  MergeFrom(AProtobufObject);
-end;
-
-class procedure TGameInfo.BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
+procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
 begin
   case ABlinds of
    gb1x2: begin
@@ -109,40 +125,23 @@ begin
   end;
 end;
 
+
+{ TGameInfo }
+
+constructor TGameInfo.Create;
+begin
+  inherited Create(TRUE);
+end;
+
+procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
+begin
+  Clear;
+  MergeFrom(AProtobufObject);
+end;
+
 function TGameInfo.AsString(const AShort: Boolean): String;
 begin
   result := GameTypeToStr(GameType, GameLimit, AShort);
-end;
-
-class function TGameInfo.GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
-begin
-  result := '';
-  case AGameLimit of
-    glNoLimit: if AShort then
-      result := 'NL'
-    else
-      result := 'No Limit';
-    glFixedLimit: if AShort then
-      result := 'FL'
-    else
-      result := 'Fixed Limit';
-    glPotLimit: if AShort then
-      result := 'PL'
-    else
-      result := 'Pot Limit';
-  end;
-
-  case AGameType of
-    gtHoldem: if AShort then
-      result := result + 'H'
-    else
-      result := result + ' Hold''em';
-    gtOmaha: if AShort then
-      result := result + 'O'
-    else
-      result := result + ' Omaha';
-    gtRotationNLHPLO: result := 'Rotation NLH/PLO';
-  end;
 end;
 
 function TGameInfo.GetName: String;

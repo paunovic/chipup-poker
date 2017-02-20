@@ -223,8 +223,8 @@ begin
   if FParentItems.Game.GameType = gtRotationNLHPLO then
   begin
     case FCurrentGame of
-      gtHoldem: gamename := FParentItems.Game.GameTypeToStr(FCurrentGame, glNoLimit, FALSE);
-      gtOmaha: gamename := FParentItems.Game.GameTypeToStr(FCurrentGame, glPotLimit, FALSE);
+      gtHoldem: gamename := GameTypeToStr(FCurrentGame, glNoLimit, FALSE);
+      gtOmaha: gamename := GameTypeToStr(FCurrentGame, glPotLimit, FALSE);
     end;
   end
   else

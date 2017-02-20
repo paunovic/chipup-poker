@@ -847,7 +847,7 @@ begin
         end;
       end;
 
-      lbvTournamentGameType.Caption := Format('%s, %d-max', [TGameInfo.GameTypeToStr(tournament.GameType, tournament.Limit, FALSE), tournament.SeatsPerTable]);
+      lbvTournamentGameType.Caption := Format('%s, %d-max', [GameTypeToStr(tournament.GameType, tournament.Limit, FALSE), tournament.SeatsPerTable]);
 
       if tournament.RegisteredPlayers = 1 then
         players_text := 'player'

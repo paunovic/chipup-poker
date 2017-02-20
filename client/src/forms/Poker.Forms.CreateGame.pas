@@ -136,7 +136,7 @@ begin
   for blinds := Low(TGameBlinds) to High(TGameBlinds) do
     if blinds <> gbOther then
     begin
-      TGameInfo.BlindsEnumToInts(blinds, sb, bb);
+      BlindsEnumToInts(blinds, sb, bb);
       cbBlinds.Properties.Items.Add(Format('%d/%d', [sb, bb]));
     end;
 end;
@@ -152,7 +152,7 @@ var
   sb, bb: Cardinal;
   err: String;
 begin
-  TGameInfo.BlindsEnumToInts(TGameBlinds(cbBlinds.ItemIndex), sb, bb);
+  BlindsEnumToInts(TGameBlinds(cbBlinds.ItemIndex), sb, bb);
 
   if seBuyinMin.Value < bb * 5 then
   begin
