@@ -136,24 +136,11 @@ var
   found: Boolean;
   tournament: TTournamentInfo;
   club: TClubInfo;
-  pbclub: TPB_Club;
-  clubs: TList<TPB_Club>;
 begin
   Clear;
   MergeFrom(ALoginReply.Self);
 
-  // FIXME: merge these two structs server-side
-  clubs := TList<TPB_Club>.Create;
-  try
-    for pbclub in ALoginReply.Clubs do
-      clubs.Add(pbclub);
-    for pbclub in ALoginReply.PendingClubs do
-      clubs.Add(pbclub);
-    ProcessClubsObject(clubs);
-  finally
-    clubs.Free;
-  end;
-
+  ProcessClubsObject(ALoginReply.Clubs);
   for pbgame in ALoginReply.Games do
   begin
     if FClubs.GetAndLock(pbgame.ClubMongoid, club) then
