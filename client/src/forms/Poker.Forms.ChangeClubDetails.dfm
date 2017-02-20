@@ -112,7 +112,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Properties.OnChange = cbDefaultPlayerLimitPropertiesChange
     TabOrder = 3
     Transparent = True
-    Width = 113
   end
   object seLimit: TcxSpinEdit
     Left = 127

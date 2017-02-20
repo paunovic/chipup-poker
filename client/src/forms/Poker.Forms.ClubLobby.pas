@@ -26,13 +26,6 @@ type
     gbClubSettings: TcxGroupBox;
     btCloseClub: TcxButton;
     gbPlayers: TcxGroupBox;
-    gridPlayersList: TcxGrid;
-    gridPlayersListTable: TcxGridTableView;
-    gridPlayersListId: TcxGridColumn;
-    gridPlayersListName: TcxGridColumn;
-    gridPlayersListLevel: TcxGridLevel;
-    btGiveOwnership: TcxButton;
-    btRemovePlayerFromClub: TcxButton;
     alManageClubs: TActionList;
     acRemovePlayer: TAction;
     acGiveOwnership: TAction;
@@ -41,9 +34,6 @@ type
     acShowCreateGameForm: TAction;
     acCloseTable: TAction;
     btChangeClubDetails: TcxButton;
-    gridPlayersListStatus: TcxGridColumn;
-    Bevel1: TdxBevel;
-    btSuspendUnsuspendApprove: TcxButton;
     gbTables: TcxGroupBox;
     gridGames: TcxGrid;
     gridGamesTable: TcxGridTableView;
@@ -110,24 +100,34 @@ type
     gridTotalStatsTimePlayed: TcxGridColumn;
     gridTotalStatsLevel: TcxGridLevel;
     gridTotalStatsDummy: TcxGridColumn;
-    gridPlayersListLimit: TcxGridColumn;
-    gridPlayersListBalance: TcxGridColumn;
-    btResetBalance: TcxButton;
     acResetBalance: TAction;
-    btSetLimit: TcxButton;
-    acSetLimit: TAction;
+    acSetPlayerLimit: TAction;
     styleCheckedRow: TcxStyle;
     styleSelectedRow: TcxStyle;
-    btResetAllPlayerBalances: TcxButton;
     acResetPlayerBalances: TAction;
     btDeleteSelectedStats: TcxButton;
     acDeleteTableStats: TAction;
-    btMuteUnmutePlayer: TcxButton;
     acMuteUnmutePlayer: TAction;
-    btPromoteToManager: TcxButton;
     acPromoteDemoteUser: TAction;
     gridGamesTableRakeCap: TcxGridColumn;
     acApprovePlayer: TAction;
+    gridPlayersList: TcxGrid;
+    gridPlayersListTable: TcxGridTableView;
+    gridPlayersListId: TcxGridColumn;
+    gridPlayersListName: TcxGridColumn;
+    gridPlayersListBalance: TcxGridColumn;
+    gridPlayersListLimit: TcxGridColumn;
+    gridPlayersListStatus: TcxGridColumn;
+    gridPlayersListLevel: TcxGridLevel;
+    btSetLimit: TcxButton;
+    btResetBalance: TcxButton;
+    btSuspendUnsuspendApprove: TcxButton;
+    btMuteUnmutePlayer: TcxButton;
+    btRemovePlayerFromClub: TcxButton;
+    btResetAllPlayerBalances: TcxButton;
+    btPromoteToManager: TcxButton;
+    btGiveOwnership: TcxButton;
+    Bevel1: TdxBevel;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -154,7 +154,7 @@ type
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
-    procedure acSetLimitExecute(Sender: TObject);
+    procedure acSetPlayerLimitExecute(Sender: TObject);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
@@ -250,18 +250,6 @@ begin
                       TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srJoinClubReply, srReinstatePlayerOk, seClubDeleted, seClubChange, srClubDisbandOk], CSREClubOperation),
                       TServerMessageCallback.Create([seGameDelete, seGameChange, seGameCreate, srCreateGameOk, srDeleteGameOk], CSREGameOperation)
                   ]);
-
-  // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
-  btSuspendUnsuspendApprove.Top := gbPlayers.Height - btGiveOwnership.Height - 13;
-  btRemovePlayerFromClub.Top := btSuspendUnsuspendApprove.Top;
-  btSetLimit.Top := btSuspendUnsuspendApprove.Top;
-  btResetAllPlayerBalances.Top := btSuspendUnsuspendApprove.Top - 5 - btResetAllPlayerBalances.Height;
-  btResetBalance.Top := btResetAllPlayerBalances.Top;
-  btGiveOwnership.Top := btResetAllPlayerBalances.Top;
-  btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
-  btCloseTable.Top := btNewGame.Top;
-  btMuteUnmutePlayer.Top := btSuspendUnsuspendApprove.Top;
-  btPromoteToManager.Top := btGiveOwnership.Top;
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -311,7 +299,6 @@ var
   player: TPlayerInfo;
   owner_name: String;
   is_owner: Boolean;
-  is_manager: Boolean;
   member: TPB_ClubMember;
 begin
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
@@ -327,41 +314,25 @@ begin
     lbsSubheader.Caption := Format('Owner: %s           Members: %d (%d pending)           Club ID: %d',
       [owner_name, club.MemberCount, club.PendingMemberCount, club.Seq]);
 
-    is_manager := FALSE;
-    if club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
-      is_manager := member.Manager;
-
-    if not club.GetMemberInfo(FSelectedPlayerId, member) then
-      member := nil;
-
     is_owner := (club.Owner = dmMain.SelfInfo.MongoId);
-
     if not club.GetMemberInfo(FSelectedPlayerId, member) then
       member := nil;
 
-    gridPlayersListLimit.Visible := is_owner;
-    gridPlayersListBalance.Visible := is_owner;
-    btChangeClubDetails.Visible := is_owner;
-    acShowClubChangeDetailsForm.Enabled := is_owner;
-    acUpdateClubDetails.Enabled := is_owner;
-    btSetLimit.Visible := is_owner;
-    acResetBalance.Visible := is_owner;
-    btGiveOwnership.Visible := is_owner;
     acGiveOwnership.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
     acResetBalance.Enabled := (is_owner) and (Assigned(member));
-    acResetPlayerBalances.Visible := is_owner;
     acResetPlayerBalances.Enabled := is_owner;
-    acRemovePlayer.Enabled := (Assigned(member)) and (is_owner);
-    acSetLimit.Enabled := (is_owner) and (Assigned(member));
-    btRemovePlayerFromClub.Visible := is_owner;
-    btSuspendUnsuspendApprove.Visible := is_owner;
+    acRemovePlayer.Enabled := (is_owner) and (Assigned(member)) and (club.Owner <> FSelectedPlayerId);
+    acSetPlayerLimit.Enabled := (is_owner) and (Assigned(member));
+    acSuspendPlayer.Enabled := (is_owner) and (Assigned(member)) and (member.Status = msActive) and (member.MongoId <> club.Owner);
+    acReinstatePlayer.Enabled := (is_owner) and (Assigned(member)) and (member.Status = msSuspended) and (member.MongoId <> club.Owner);
+    acApprovePlayer.Enabled := (is_owner) and (Assigned(member)) and (member.Status = msPending) and (member.MongoId <> club.Owner);
     acDeleteTableStats.Enabled := is_owner;
-    acDeleteTableStats.Visible := is_owner;
-    acMuteUnmutePlayer.Visible := is_owner;
     acMuteUnmutePlayer.Enabled := (is_owner) and (Assigned(member));
-    acPromoteDemoteUser.Visible := is_owner;
     acPromoteDemoteUser.Enabled := (is_owner) and (Assigned(member)) and (member.MongoId <> dmMain.SelfInfo.MongoId);
-    acApprovePlayer.Enabled := (is_owner) and (Assigned(member)) and (member.Status = msPending);
+    acCloseClub.Enabled := is_owner;
+    acLeaveClub.Enabled := not is_owner;
+    btCloseClub.Visible := acCloseClub.Enabled;
+    btLeaveClub.Visible := acLeaveClub.Enabled;
 
     if Assigned(member) then
     begin
@@ -376,26 +347,15 @@ begin
         acPromoteDemoteUser.Caption := 'Promote to manager';
     end;
 
-    if btSuspendUnsuspendApprove.Visible then
-    begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (member.Status = msActive) and (member.MongoId <> club.Owner);
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Status = msSuspended) and (member.MongoId <> club.Owner);
-      acApprovePlayer.Enabled := (Assigned(member)) and (member.Status = msPending) and (member.MongoId <> club.Owner);
-      if acSuspendPlayer.Enabled then
-        btSuspendUnsuspendApprove.Action := acSuspendPlayer
+    if acReinstatePlayer.Enabled then
+      btSuspendUnsuspendApprove.Action := acReinstatePlayer
+    else
+      if acApprovePlayer.Enabled then
+        btSuspendUnsuspendApprove.Action := acApprovePlayer
       else
-        if acReinstatePlayer.Enabled then
-          btSuspendUnsuspendApprove.Action := acReinstatePlayer
-        else
-          if acApprovePlayer.Enabled then
-            btSuspendUnsuspendApprove.Action := acApprovePlayer;
-    end;
-    btNewGame.Visible := is_owner;
-    acShowCreateGameForm.Enabled := is_owner;
-    btCloseTable.Visible := is_owner;
+        btSuspendUnsuspendApprove.Action := acSuspendPlayer;
+
     acCloseTable.Enabled := (is_owner) and (not FSelectedGameId.IsEmpty);
-    btLeaveClub.Visible := not is_owner;
-    acLeaveClub.Enabled := not is_owner;
     if is_owner then
     begin
       gridPlayersList.Align := alTop;
@@ -409,13 +369,7 @@ begin
       gridGames.Align := alClient;
     end;
 
-    btStats.Visible := is_owner or is_manager;
-    btStats.Enabled := is_owner or is_manager;
-
-    if btStats.Visible then
-      btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2
-    else
-      btPrijatnaPunina.Left := btTables.Left + btTables.Width + 2;
+    btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2;
     btPrijatnaPunina.Width := ClientWidth - btPrijatnaPunina.Left - 8;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
@@ -1118,7 +1072,7 @@ begin
     ServerSocket.ResetPlayerBalances(FClubId);
 end;
 
-procedure TfrmClubLobby.acSetLimitExecute(Sender: TObject);
+procedure TfrmClubLobby.acSetPlayerLimitExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmClubMemberOptions, self, [FClubId.Memory, FSelectedPlayerId.Memory], ModalFormClose));
 end;

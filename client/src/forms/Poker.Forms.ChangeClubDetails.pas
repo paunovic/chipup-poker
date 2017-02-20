@@ -36,6 +36,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
+    FIsOwner: Boolean;
     FCallbacksId: Integer;
     FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
@@ -103,8 +104,10 @@ var
   club: TClubInfo;
 begin
   FClubId := AParams[0];
+  FIsOwner := FALSE;
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
+    FIsOwner := club.Owner = dmMain.SelfInfo.MongoId;
     edClubName.Text := club.Name;
     edInvitationCode.Text := club.Password;
     seRake.Value := club.Rake;
@@ -114,6 +117,7 @@ begin
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
+  acOK.Enabled := FIsOwner;
 end;
 
 procedure TfrmChangeClubDetails.acCancelExecute(Sender: TObject);

@@ -3792,6 +3792,7 @@ object frmChipUpMain: TfrmChipUpMain
           OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 4
+          Visible = False
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3810,6 +3811,7 @@ object frmChipUpMain: TfrmChipUpMain
           OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 5
+          Visible = False
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11

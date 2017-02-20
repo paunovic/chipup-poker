@@ -46,6 +46,7 @@ type
     FCallbacksId: Integer;
     FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
+    FIsOwner: Boolean;
 
     procedure PopulateBlindsCombobox;
     procedure CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
@@ -60,7 +61,8 @@ implementation
 
 uses
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.Validators,
-  Poker.Protobufs.Objects.Game, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Common.ModalDialogs;
+  Poker.Protobufs.Objects.Game, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Common.ModalDialogs,
+  Poker.DataModule;
 
 
 
@@ -111,8 +113,18 @@ begin
 end;
 
 procedure TfrmCreateGame.SetParams(const AParams: array of pointer);
+var
+  club: TClubInfo;
 begin
   FClubId := AParams[0];
+  FIsOwner := FALSE;
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    FIsOwner := club.Owner = dmMain.SelfInfo.MongoId;
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
+  acOK.Enabled := FIsOwner;
 end;
 
 procedure TfrmCreateGame.PopulateBlindsCombobox;
