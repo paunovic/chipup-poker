@@ -3,7 +3,7 @@ unit Poker.Settings;
 interface
 
 uses
-  superobject, System.Classes, Poker.HardcodedSettings, Vcl.Forms;
+  superobject, Poker.HardcodedSettings, Vcl.Forms;
 
 type
   TSettings = class(THardcodedSettings)
@@ -75,7 +75,7 @@ var
 implementation
 
 uses
-  Poker.SoftExceptions, System.SysUtils, Poker.Common.Misc, Poker.Common.Encryption;
+  Poker.SoftExceptions, System.Classes, System.SysUtils, Poker.Common.Misc, Poker.Common.Encryption;
 
 
 class procedure TSettings.Initialize;
