@@ -15,7 +15,6 @@ type
 
     procedure AddGame(const AGame: TPB_Game);
     function SecondsUntilNextLevel: Integer;
-
     function StateToStr: String;
   end;
 

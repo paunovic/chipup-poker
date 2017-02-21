@@ -11,12 +11,12 @@ type
     FWavePlayer: TWavePlayer;
   public
     const
-      SOUND_DEALING        = 'Dealing';
-      SOUND_CHECK          = 'Check';
+      SOUND_DEALING = 'Dealing';
+      SOUND_CHECK = 'Check';
       SOUND_PUTCHIPS_SMALL = 'PutChipsSmall';
-      SOUND_MOVE_CHIPS     = 'MoveChips';
-      SOUND_TIMEBAR        = 'Timebar';
-      SOUND_TIMEBANK       = 'Timebank';
+      SOUND_MOVE_CHIPS = 'MoveChips';
+      SOUND_TIMEBAR = 'Timebar';
+      SOUND_TIMEBANK = 'Timebank';
 
     class procedure Initialize(const AHandle: THandle);
     class procedure Deinitialize;

@@ -57,10 +57,8 @@ type
 
     function GetStringValue(const AIndex: Integer): String;
     procedure SetStringValue(const AIndex: Integer; const AValue: String);
-
     function GetIntegerValue(const AIndex: Integer): Int64;
     procedure SetIntegerValue(const AIndex: Integer; const AValue: Int64);
-
     function GetBooleanValue(const AIndex: Integer): Boolean;
     procedure SetBooleanValue(const AIndex: Integer; const AValue: Boolean);
 
@@ -69,14 +67,12 @@ type
       FSettingsFile: String;
 
   public
-    constructor Create(const ASettingsFile: String);
-
     class procedure Initialize(const ASettingsFile: String);
     class procedure Deinitialize;
 
+    constructor Create(const ASettingsFile: String);
     function Load: Boolean;
     procedure Save;
-
     procedure SaveFormSettings(const AForm: TForm);
     procedure LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
 
@@ -84,9 +80,7 @@ type
 
     property LoginUsername: String index PROPINDEX_LOGIN_USERNAME read GetStringValue write SetStringValue;
     property LoginPassword: String index PROPINDEX_LOGIN_PASSWORD read GetStringValue write SetStringValue;
-
     property ServerIndex: Int64 index PROPINDEX_SERVER_INDEX read GetIntegerValue write SetIntegerValue;
-
     property RememberLogin: Boolean index PROPINDEX_REMEMBER_LOGIN read GetBooleanValue write SetBooleanValue;
     property RememberPassword: Boolean index PROPINDEX_REMEMBER_PASSWORD read GetBooleanValue write SetBooleanValue;
     property DeveloperMode: Boolean index PROPINDEX_DEVELOPER_MODE read GetBooleanValue write SetBooleanValue;

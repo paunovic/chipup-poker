@@ -106,8 +106,9 @@ begin
         FHTTP.RcvdStream.Position := 0;
         FImage.LoadFromStream(FHTTP.RcvdStream);
         Save;
-        {$IFDEF DEBUG} DebugLn(Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc,
-          Format('Full URL: %s', [FHTTP.URL])); {$ENDIF}
+        {$IFDEF DEBUG}
+        DebugLn(Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc, Format('Full URL: %s', [FHTTP.URL]));
+        {$ENDIF}
       end
       else
         SoftException(Format('Avatar is not JPEG stream [%s]', [FIdAsString]));

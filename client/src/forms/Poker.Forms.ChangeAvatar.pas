@@ -163,7 +163,7 @@ begin
   HttpClient.OnRequestDone := HTTPRequestDone;
   HttpClient.PostASync;
 
-  {$IFDEF DEBUG}  DebugLn(Format('Uploading avatar [size: %.2fkb]', [HttpClient.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Uploading avatar [size: %.2fkb]', [HttpClient.SendStream.Size / 1024]), ditNetOut); {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);

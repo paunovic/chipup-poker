@@ -24,7 +24,6 @@ type
   private
     FCodes: TServerCodesSet;
     FCallback: TServerMessageCallbackMethod;
-
   public
     constructor Create(const ACodes: TServerCodesSet; const ACallback: TServerMessageCallbackMethod); overload;
     constructor Create(const ACode: TServerCodes; const ACallback: TServerMessageCallbackMethod); overload;

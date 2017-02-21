@@ -74,7 +74,7 @@ begin
     (FCanvas as TDX9Canvas).SetSamplerToCLAMP;
   end
   else
-    SoftException('Failed to connect to DX device!');
+    SoftException('DirectX: failed to connect to the device!');
 end;
 
 destructor TDXCore.Destroy;
@@ -106,7 +106,7 @@ begin
      FDevice.SwapChains[AIndex].Multisamples := 4;
      FDevice.SwapChains[AIndex].VSync := TRUE;
      AIndex := C1;
-     {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
+     {$IFDEF DEBUG} DebugLn(Format('DirectX: swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
      {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
      Exit(TRUE);
    end;
@@ -122,14 +122,14 @@ begin
   FDevice.SwapChains[AIndex].Multisamples := 0;
   FDevice.SwapChains[AIndex].VSync := FALSE;
   FDevice.SwapChains[AIndex].WindowHandle := FDummyWindow;
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('DirectX: swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
   {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
 end;
 
 procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
 begin
   FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('DirectX: swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
 end;
 
 end.

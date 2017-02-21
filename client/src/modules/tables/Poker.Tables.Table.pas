@@ -343,9 +343,7 @@ begin
     SoftException('Table player transfer: failed to update objects', SerializeObject(ATournamentPlayerTransfer))
   else
   begin
-   {$IFDEF DEBUG}
-    DebugLn('Table player transfer succeeded', ditApplication, SerializeObject(ATournamentPlayerTransfer));
-   {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('Table player transfer: OK', ditApplication, SerializeObject(ATournamentPlayerTransfer)); {$ENDIF}
   end;
 end;
 

@@ -13,7 +13,6 @@ type
     constructor Create;
 
     procedure ClearCaptions;
-
     procedure Sort;
   end;
 

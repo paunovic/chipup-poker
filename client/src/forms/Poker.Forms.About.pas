@@ -40,7 +40,7 @@ var
 begin
   FLayeredForm := TfrmLayered.Create(self, 'AboutBackground');
   Caption := Settings.Hardcoded.PROJECT_CAPTION;
-  lbsCopyright.Caption := Format('Copyright © 2015 %s', [Settings.Hardcoded.PROJECT_CAPTION]);
+  lbsCopyright.Caption := Format('Copyright © 2017 %s', [Settings.Hardcoded.PROJECT_CAPTION]);
 
   url := Settings.Hardcoded.SERVER_LIST[Settings.ServerIndex].URL;
   if Pos('://', url) > 0 then

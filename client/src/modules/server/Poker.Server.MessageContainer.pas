@@ -18,7 +18,6 @@ type
     procedure ProcessSocketReply(const AMethodId: Integer; const AObject: TObject);
     procedure ProcessSocketStateChange(const AOldState, ANewState: TSocketState);
     function GetCallbackSetsNames: String;
-
   public
     class procedure Initialize;
     class procedure Deinitialize;

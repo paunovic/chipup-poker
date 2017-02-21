@@ -3,10 +3,8 @@ unit Poker.Common.WavePlayer;
 interface
 
 uses
-  Winapi.Windows, Winapi.DirectSound, System.Generics.Collections,
-  Poker.Common.WavePlayer.DirectSoundBuffer,
-  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread,
-  Poker.Common.SafeMutex;
+  Winapi.Windows, Winapi.DirectSound, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer,
+  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread, Poker.Common.SafeMutex;
 
 type
   TWavePlayer = class

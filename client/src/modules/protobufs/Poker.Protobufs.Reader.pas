@@ -67,7 +67,7 @@ var
   bsize: Integer;
 begin
   bsize := readInt32;
-  Assert(bsize = 12, Format('Received MongoId length = %d', [bsize]));
+  Assert(bsize = 12, Format('Received MongoId with invalid length [%d]', [bsize]));
   readRawBytes(result.Memory^, bsize);
 end;
 

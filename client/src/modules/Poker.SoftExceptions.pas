@@ -12,9 +12,7 @@ uses
 
 procedure SoftException(const AException: String; const AData: String = '');
 begin
-  {$IFDEF DEBUG}
-  DebugLn(AException, ditException, AData);
-  {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(AException, ditException, AData); {$ENDIF}
 
   if Assigned(ServerSocket) then
     ServerSocket.SoftException(AException, AData);
