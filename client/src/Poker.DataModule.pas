@@ -105,7 +105,17 @@ begin
   end;
 
   TSettings.Initialize;
-  Settings.Load(Database.GetSettingsBlob);
+  try
+    Settings.Load(Database.GetSettingsBlob);
+  except
+    on E: Exception do
+    begin
+      TSettings.Deinitialize;
+      TSettings.Initialize;
+      Database.SaveSettings(Settings.AsBlob);
+    end;
+  end;
+
   TServerSocket.Initialize;
   TAvatarList.Initialize;
   TDXCore.Initialize;
