@@ -734,7 +734,7 @@ object frmTable: TfrmTable
         StyleName = 'Normal text'
         FontName = 'Arial'
         Size = 8
-        Color = clSilver
+        Color = 15987699
         Unicode = True
       end
       item
@@ -755,7 +755,7 @@ object frmTable: TfrmTable
         StyleName = 'Self Text'
         FontName = 'Arial'
         Size = 8
-        Color = 16753478
+        Color = 16765348
         Unicode = True
       end
       item
