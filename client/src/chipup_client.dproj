@@ -58,9 +58,10 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_UnitSearchPath>3rdparty\FastMM;3rdparty\AsphyreSphinx\Source;3rdparty\icsv8;3rdparty\protobufs;3rdparty\superobject;3rdparty\synapse;3rdparty\mormot;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_Define>USE_SSL;$(DCC_Define)</DCC_Define>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=ChipUP Poker;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUP Poker;LegalCopyright=;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUP Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>2057</VerInfo_Locale>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
