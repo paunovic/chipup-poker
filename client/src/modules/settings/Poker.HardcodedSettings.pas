@@ -39,7 +39,7 @@ type
           DIRECTX_MEDIA: String;
         end;
 
-        UPDATE_FILES: array[0..7] of record
+        UPDATE_FILES: array[0..6] of record
           Path: String;
           RequiresRestart: Boolean;
         end;
@@ -120,7 +120,6 @@ type
           (Path: 'chipuppoker.exe'; RequiresRestart: TRUE),
           (Path: 'libeay32.dll'; RequiresRestart: TRUE),
           (Path: 'ssleay32.dll'; RequiresRestart: TRUE),
-          (Path: 'sqlite3.dll'; RequiresRestart: TRUE),
           (Path: 'VclStylesInno.dll'; RequiresRestart: FALSE),
           (Path: 'Carbon.vsf'; RequiresRestart: FALSE),
           (Path: 'assets\dxmedia.cpa'; RequiresRestart: FALSE)
