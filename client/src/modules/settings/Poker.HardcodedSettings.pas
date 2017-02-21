@@ -17,6 +17,7 @@ type
         SETTINGS_FILENAME: String;
         SETTINGS_ENCRYPTION_KEY: String;
         DATABASE_FILENAME: String;
+        DATABASE_PASSWORD: String;
         SERVER_PING_INTERVAL: Byte;
         SERVER_INACTIVITY_PING_INTERVAL: Byte;
         SERVER_PING_TIMEOUT: Byte;
@@ -76,6 +77,7 @@ type
         SETTINGS_FILENAME: 'settings.dat';
         SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
         DATABASE_FILENAME: 'database.sqlite';
+        DATABASE_PASSWORD: 'UhpGVY5Cx0I40QKl';
 
         SERVER_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
         SERVER_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity (no command received or sent)

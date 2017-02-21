@@ -68,6 +68,7 @@ object frmSettings: TfrmSettings
       Align = alClient
       TabOrder = 0
       Properties.ActivePage = tsThemes
+      Properties.CustomButtons.Buttons = <>
       Properties.HideTabs = True
       Properties.ShowFrame = True
       ClientRectBottom = 451

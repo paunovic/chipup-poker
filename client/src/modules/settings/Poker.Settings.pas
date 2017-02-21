@@ -64,19 +64,16 @@ type
 
     var
       FJSON: ISuperObject;
-      FSettingsFile: String;
 
   public
-    class procedure Initialize(const ASettingsFile: String);
+    class procedure Initialize;
     class procedure Deinitialize;
 
-    constructor Create(const ASettingsFile: String);
-    function Load: Boolean;
-    procedure Save;
+    constructor Create;
+    function Load(const ABlob: RawByteString): Boolean;
+    function AsBlob: RawByteString;
     procedure SaveFormSettings(const AForm: TForm);
     procedure LoadFormSettings(const AForm: TForm; const ADefaultX, ADefaultY: Integer);
-
-    property SettingsFile: String read FSettingsFile;
 
     property LoginUsername: String index PROPINDEX_LOGIN_USERNAME read GetStringValue write SetStringValue;
     property LoginPassword: String index PROPINDEX_LOGIN_PASSWORD read GetStringValue write SetStringValue;
@@ -101,36 +98,32 @@ uses
   Poker.SoftExceptions, System.SysUtils, Poker.Common.Misc, Poker.Common.Encryption;
 
 
-class procedure TSettings.Initialize(const ASettingsFile: String);
+class procedure TSettings.Initialize;
 begin
-  Settings := TSettings.Create(ASettingsFile);
-  Settings.Load;
+  Settings := TSettings.Create;
 end;
 
 class procedure TSettings.Deinitialize;
 begin
-  Settings.Save;
   FreeAndNil(Settings);
 end;
 
-constructor TSettings.Create(const ASettingsFile: String);
+constructor TSettings.Create;
 begin
-  FSettingsFile := ASettingsFile;
   FJSON := SO;
 end;
 
-function TSettings.Load: Boolean;
+function TSettings.Load(const ABlob: RawByteString): Boolean;
 var
   mstream: TMemoryStream;
 begin
   result := FALSE;
-  if not FileExists(FSettingsFile) then
+  if ABlob = '' then
     Exit;
 
   mstream := TMemoryStream.Create;
   try
-    mstream.LoadFromFile(FSettingsFile);
-
+    mstream.WriteBuffer(ABlob[1], Length(ABlob));
     if (DecompressStream(mstream)) and
        (AES256EncryptStream(mstream, TSettings.Hardcoded.SETTINGS_ENCRYPTION_KEY, FALSE)) then
     begin
@@ -145,7 +138,7 @@ begin
   end;
 end;
 
-procedure TSettings.Save;
+function TSettings.AsBlob: RawByteString;
 var
   mstream: TMemoryStream;
 begin
@@ -154,7 +147,11 @@ begin
     FJSON.SaveTo(mstream);
     if (AES256EncryptStream(mstream, TSettings.Hardcoded.SETTINGS_ENCRYPTION_KEY, TRUE)) and
        (CompressStream(mstream)) then
-      mstream.SaveToFile(FSettingsFile);
+    begin
+      SetLength(result, mstream.Size);
+      mstream.Position := 0;
+      mstream.ReadBuffer(result[1], mstream.Size)
+    end;
   finally
     mstream.Free;
   end;

@@ -9,7 +9,7 @@ uses
   dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxPC, Vcl.StdCtrls, dximctrl, cxContainer,
   cxEdit, cxGroupBox, Vcl.ImgList, cxListBox, cxLabel, dxGDIPlusClasses, cxImage,
   cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit,
-  cxDropDownEdit, Vcl.ExtCtrls;
+  cxDropDownEdit, Vcl.ExtCtrls, dxBarBuiltInMenu;
 
 type
   TfrmSettings = class(TForm)
@@ -49,7 +49,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Settings, Poker.Common.FormsContainer, Poker.DataModule, Poker.Forms.Table, cxClasses;
+  Poker.Settings, Poker.Common.FormsContainer, Poker.DataModule, Poker.Forms.Table, cxClasses, Poker.Database.Core;
 
 procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
@@ -79,7 +79,7 @@ begin
   if ModalResult = mrOk then
   begin
 //    Settings.CardBackground := cbCardBackground.ItemIndex;
-    Settings.Save;
+    Database.SaveSettings(Settings.AsBlob);
   end;
 end;
 

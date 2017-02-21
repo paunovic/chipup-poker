@@ -275,7 +275,7 @@ uses
   Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished, Poker.Protobufs.Objects.TableMessage,
   Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.TournamentPlayerTransfer, Poker.Forms.Table, Poker.Forms.TournamentFinishDialog,
   Poker.Protobufs.Objects.PlayerClubStatus, Poker.Common.ModalDialogs, Poker.Common.InstanceController,
-  Poker.SoftExceptions, Poker.Helpers.PB_ClubMember;
+  Poker.SoftExceptions, Poker.Helpers.PB_ClubMember, Poker.Database.Core;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -493,7 +493,7 @@ procedure TfrmChipUpMain.acAlwaysRunItTwiceExecute(Sender: TObject);
 begin
   Settings.AlwaysRunItTwice := not Settings.AlwaysRunItTwice;
   acAlwaysRunItTwice.Checked := Settings.AlwaysRunItTwice;
-  Settings.Save;
+  Database.SaveSettings(Settings.AsBlob);
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
@@ -501,14 +501,14 @@ begin
   Settings.Animations := not Settings.Animations;
   acAnimationsEnabled.Checked := Settings.Animations;
   DXTimer.AnimationsEnabled := Settings.Animations;
-  Settings.Save;
+  Database.SaveSettings(Settings.AsBlob);
 end;
 
 procedure TfrmChipUpMain.acConfirmationOnFoldExecute(Sender: TObject);
 begin
   Settings.FoldConfirmation := not Settings.FoldConfirmation;
   acConfirmationOnFold.Checked := Settings.FoldConfirmation;
-  Settings.Save;
+  Database.SaveSettings(Settings.AsBlob);
 end;
 
 procedure TfrmChipUpMain.acDisconnectExecute(Sender: TObject);
@@ -520,7 +520,7 @@ procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
   acFoldChecks.Checked := Settings.FoldChecks;
-  Settings.Save;
+  Database.SaveSettings(Settings.AsBlob);
 end;
 
 procedure TfrmChipUpMain.acHandHistoryExecute(Sender: TObject);
@@ -1393,7 +1393,7 @@ procedure TfrmChipUpMain.acSoundsOnOffExecute(Sender: TObject);
 begin
   Settings.Sounds := not Settings.Sounds;
   acSoundsOnOff.Checked := Settings.Sounds;
-  Settings.Save;
+  Database.SaveSettings(Settings.AsBlob);
 end;
 
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);

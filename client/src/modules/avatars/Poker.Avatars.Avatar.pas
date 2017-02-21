@@ -44,8 +44,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   OverbyteIcsWSocket,
-  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
-  Poker.Settings, Poker.SoftExceptions, Poker.Server.Socket;
+  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, Poker.DataModule, Poker.Settings, Poker.SoftExceptions, Poker.Server.Socket;
 
 { TAvatar }
 
@@ -160,48 +159,39 @@ end;
 
 function TAvatar.Retrieve: Boolean;
 var
-  conn: TSQLDBSQLite3ConnectionProperties;
   mstream: TMemoryStream;
+  data: RawByteString;
 begin
-  conn := Database.NewConnection;
+  result := FALSE;
+  mstream := TMemoryStream.Create;
   try
-    mstream := TMemoryStream.Create;
-    try
-      result := Database.RetrieveAvatarData(conn, FId, mstream);
-      if result then
+    data := Database.RetrieveAvatar(FId);
+    if data <> '' then
+    begin
+      mstream.WriteBuffer(data[1], Length(data));
+      mstream.Position := 0;
+      if IsJPEGStream(mstream) then
       begin
         mstream.Position := 0;
-        if IsJPEGStream(mstream) then
-        begin
-          mstream.Position := 0;
-          FImage.LoadFromStream(mstream);
-          Exit(TRUE);
-        end;
+        FImage.LoadFromStream(mstream);
+        Exit(TRUE);
       end;
-    finally
-      mstream.Free;
     end;
   finally
-    conn.Free;
+    mstream.Free;
   end;
 end;
 
 procedure TAvatar.Save;
 var
-  conn: TSQLDBSQLite3ConnectionProperties;
   mstream: TMemoryStream;
 begin
-  conn := Database.NewConnection;
+  mstream := TMemoryStream.Create;
   try
-    mstream := TMemoryStream.Create;
-    try
-      FImage.SaveToStream(mstream);
-      Database.InsertAvatar(conn, FId, mstream);
-    finally
-      mstream.Free;
-    end;
+    FImage.SaveToStream(mstream);
+    Database.InsertAvatar(FId, mstream);
   finally
-    conn.Free;
+    mstream.Free;
   end;
 end;
 

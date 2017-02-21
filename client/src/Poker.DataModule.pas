@@ -70,6 +70,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  SynSQLite3Static,
   Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket,
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
@@ -92,9 +93,10 @@ begin
 
   LoadFonts;
 
-  TSettings.Initialize(UserDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME, Settings.Hardcoded.DATABASE_PASSWORD);
+  TSettings.Initialize;
+  Settings.Load(Database.GetSettingsBlob);
   TServerSocket.Initialize;
-  TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatarList.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
@@ -140,6 +142,7 @@ begin
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
   TAvatarList.Deinitialize;
+  Database.SaveSettings(Settings.AsBlob);
   TDatabase.Deinitialize;
   TSettings.Deinitialize;
 
