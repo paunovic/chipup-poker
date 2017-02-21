@@ -32,7 +32,6 @@ implementation
 class procedure TDatabase.Initialize(const ADatabasePath: String);
 begin
   sqlite3 := TSQLite3LibraryDynamic.Create('sqlite3.dll');
-
   Database := TDatabase.Create(ADatabasePath);
 end;
 
