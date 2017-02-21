@@ -11,7 +11,8 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply,
   dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels,
   Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, Vcl.ExtCtrls, cxStyles, cxClasses;
+  Poker.Protobufs.Objects.Game, Vcl.ExtCtrls, cxStyles, cxClasses,
+  System.ImageList;
 
 type
   TdmMain = class(TDataModule)

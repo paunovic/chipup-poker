@@ -10,7 +10,7 @@ uses
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView,
   cxClasses, cxGridCustomView, cxGrid, cxCurrencyEdit, Vcl.Menus, Vcl.ActnList,
   Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin, cxContainer, dxGDIPlusClasses, cxImage,
-  cxLabel, Vcl.ExtCtrls, dxBevel, cxNavigator;
+  cxLabel, Vcl.ExtCtrls, dxBevel, cxNavigator, System.Actions;
 
 type
   TfrmTournamentLobby = class(TForm, IFormParams)

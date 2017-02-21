@@ -291,7 +291,7 @@ object frmTable: TfrmTable
   object paTopLeftHeader: TPanel
     Left = 0
     Top = 0
-    Width = 337
+    Width = 367
     Height = 23
     BevelOuter = bvNone
     Color = clBlack
@@ -306,7 +306,7 @@ object frmTable: TfrmTable
       Shape = bsSpacer
     end
     object lbvHandHistory: TcxLabel
-      Left = 79
+      Left = 118
       Top = 0
       Cursor = crHandPoint
       Align = alLeft
@@ -338,7 +338,7 @@ object frmTable: TfrmTable
       Transparent = True
       OnClick = lbvHandHistoryClick
       Height = 23
-      Width = 101
+      Width = 110
       AnchorY = 12
     end
     object lbsTableStats: TcxLabel
@@ -352,7 +352,7 @@ object frmTable: TfrmTable
       Style.Edges = []
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
-      Style.Font.Height = -8
+      Style.Font.Height = -11
       Style.Font.Name = 'Sintony'
       Style.Font.Style = [fsBold]
       Style.Font.Quality = fqAntialiased
@@ -376,11 +376,11 @@ object frmTable: TfrmTable
       Visible = False
       OnClick = lbsTableStatsClick
       Height = 23
-      Width = 73
+      Width = 112
       AnchorY = 12
     end
     object lbvClubBalance: TcxLabel
-      Left = 180
+      Left = 228
       Top = 0
       Align = alClient
       AutoSize = False
@@ -389,7 +389,7 @@ object frmTable: TfrmTable
       Style.Edges = []
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
-      Style.Font.Height = -8
+      Style.Font.Height = -11
       Style.Font.Name = 'Sintony'
       Style.Font.Style = [fsBold]
       Style.Font.Quality = fqAntialiased
@@ -409,8 +409,10 @@ object frmTable: TfrmTable
       Properties.Alignment.Horz = taLeftJustify
       Properties.Alignment.Vert = taVCenter
       Transparent = True
+      ExplicitLeft = 219
+      ExplicitWidth = 119
       Height = 23
-      Width = 157
+      Width = 139
       AnchorY = 12
     end
   end
@@ -942,7 +944,7 @@ object frmTable: TfrmTable
     Left = 216
     Top = 52
     Bitmap = {
-      494C010106000900040030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101060009000C0030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

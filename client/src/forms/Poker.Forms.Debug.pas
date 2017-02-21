@@ -12,7 +12,7 @@ uses
   ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxCheckComboBox, System.Generics.Collections, cxRadioGroup, cxCheckBox,
   Poker.Common.SafeMutex, Poker.Common.CPUUsage, dxScreenTip, dxCustomHint,
-  cxHint, cxClasses;
+  cxHint, cxClasses, System.Actions;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc,
@@ -174,7 +174,7 @@ uses
   JclExprEval, Poker.Tables.Resources,
   {$ENDIF}
   FastMM4, Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds, Poker.DirectX.Timer,
+  Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, Poker.Sounds, Poker.DirectX.Timer,
   RectMarks, Poker.Settings, Vcl.Clipbrd, synacode;
 
 

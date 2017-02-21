@@ -12,7 +12,8 @@ uses
   Asphyre.Images, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
   dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList,
   Vcl.PlatformDefaultStyleActnCtrls, cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit,
-  dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types, cxRadioGroup;
+  dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types, cxRadioGroup,
+  System.ImageList, System.Actions;
 
 type
   TfrmTable = class(TForm)

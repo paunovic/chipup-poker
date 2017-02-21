@@ -6,7 +6,8 @@ uses
   Winapi.Windows, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Vcl.ActnList, cxButtons,
   GR32_Image, GR32, GR32_backends, GR32_Resamplers, cxGraphics, cxLookAndFeels,
-  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls;
+  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls,
+  System.Actions;
 
 const
    PixelCountMax = 32768;
@@ -60,7 +61,7 @@ type
 implementation
 
 uses
-  Poker.Common.FormsContainer, Poker.Common.Misc, Poker.Common.ModalDialogs;
+  Poker.Common.FormsContainer, Poker.Common.Misc, Poker.Common.ModalDialogs, System.Types;
 
 {$R *.dfm}
 
@@ -343,7 +344,7 @@ begin
   else
     rect_inner := FSelectionRect;
     rect_inner.Inflate(-8, -8);
-    if PtInRect(FSelectionRect, Point(X, Y)) then
+    if System.Types.PtInRect(FSelectionRect, System.Types.Point(X, Y)) then
       PaintBox.Cursor := crSizeAll
     else
       PaintBox.Cursor := crCross;
