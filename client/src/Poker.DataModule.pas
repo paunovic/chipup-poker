@@ -93,7 +93,17 @@ begin
 
   LoadFonts;
 
-  TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME, Settings.Hardcoded.DATABASE_PASSWORD);
+  try
+    TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME, Settings.Hardcoded.DATABASE_PASSWORD);
+  except
+    on E: Exception do
+    begin
+      TDatabase.Deinitialize;
+      DeleteFile(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
+      TDatabase.Initialize(UserDataPath + TSettings.Hardcoded.DATABASE_FILENAME, Settings.Hardcoded.DATABASE_PASSWORD);
+    end;
+  end;
+
   TSettings.Initialize;
   Settings.Load(Database.GetSettingsBlob);
   TServerSocket.Initialize;
