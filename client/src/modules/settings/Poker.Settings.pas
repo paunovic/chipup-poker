@@ -9,7 +9,7 @@ type
   TSettings = class(THardcodedSettings)
   private
     const
-      // property indexes
+      // indexes
       PROPINDEX_LOGIN_USERNAME = 1;
       PROPINDEX_LOGIN_PASSWORD = 2;
       PROPINDEX_SERVER_INDEX = 3;
@@ -21,26 +21,14 @@ type
       PROPINDEX_ANIMATIONS = 9;
       PROPINDEX_FOLD_CONFIRMATION = 10;
       PROPINDEX_ALWAYS_RUN_TWICE = 11;
+      PROPINDEX_FORMS_SETTINGS = 12;
 
-      // json field names
-      JSON_LOGIN_USERNAME = 'login_username';
-      JSON_LOGIN_PASSWORD = 'login_password';
-      JSON_SERVER_INDEX = 'server_index';
-      JSON_REMEMBER_LOGIN = 'remember_login';
-      JSON_REMEMBER_PASSWORD = 'remember_password';
-      JSON_DEVELOPER_MODE = 'devmode';
-      JSON_SOUNDS = 'sounds';
-      JSON_FOLD_CHECKS = 'fold_checks';
-      JSON_ANIMATIONS = 'animations';
-      JSON_FOLD_CONFIRMATION = 'fold_confirmation';
-      JSON_ALWAYS_RUN_IT_TWICE = 'always_run_it_twice';
-      JSON_FORMS_SETTINGS = 'forms';
-      JSON_FORM_NAME = 'name';
-      JSON_FORM_MAXIMIZED = 'maximized';
-      JSON_FORM_X = 'x';
-      JSON_FORM_Y = 'y';
-      JSON_FORM_W = 'w';
-      JSON_FORM_H = 'h';
+      JSON_INDEX_FORM_NAME = 1;
+      JSON_INDEX_FORM_MAXIMIZED = 2;
+      JSON_INDEX_FORM_X = 3;
+      JSON_INDEX_FORM_Y = 4;
+      JSON_INDEX_FORM_W = 5;
+      JSON_INDEX_FORM_H = 6;
 
       // default values
       DEFAULT_LOGIN_USERNAME = '';
@@ -110,7 +98,7 @@ end;
 
 constructor TSettings.Create;
 begin
-  FJSON := SO;
+  FJSON := SA([]);
 end;
 
 function TSettings.Load(const ABlob: RawByteString): Boolean;
@@ -162,29 +150,29 @@ var
   C1: Integer;
   forms_settings, formjson: ISuperObject;
 begin
-  if not Assigned(FJSON.O[JSON_FORMS_SETTINGS]) then
-    FJSON.O[JSON_FORMS_SETTINGS] := SA([]);
-  forms_settings := FJSON.O[JSON_FORMS_SETTINGS];
+  if not Assigned(FJSON.AsArray[PROPINDEX_FORMS_SETTINGS]) then
+    FJSON.AsArray[PROPINDEX_FORMS_SETTINGS] := SA([]);
+  forms_settings := FJSON.AsArray[PROPINDEX_FORMS_SETTINGS];
 
   formjson := nil;
   for C1 := forms_settings.AsArray.Length - 1 downto 0 do
-    if forms_settings.AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+    if forms_settings.AsArray.O[C1].AsArray.S[JSON_INDEX_FORM_NAME] = AForm.Name then
     begin
       formjson := forms_settings.AsArray.O[C1];
       forms_settings.AsArray.Delete(C1);
     end;
 
   if not Assigned(formjson) then
-    formjson := SO;
+    formjson := SA([]);
 
-  formjson.S[JSON_FORM_NAME] := AForm.Name;
-  formjson.B[JSON_FORM_MAXIMIZED] := AForm.WindowState = wsMaximized;
+  formjson.AsArray.S[JSON_INDEX_FORM_NAME] := AForm.Name;
+  formjson.AsArray.B[JSON_INDEX_FORM_MAXIMIZED] := AForm.WindowState = wsMaximized;
   if AForm.WindowState <> wsMaximized then
   begin
-    formjson.I[JSON_FORM_X] := AForm.Left;
-    formjson.I[JSON_FORM_Y] := AForm.Top;
-    formjson.I[JSON_FORM_W] := AForm.Width;
-    formjson.I[JSON_FORM_H] := AForm.Height;
+    formjson.AsArray.I[JSON_INDEX_FORM_X] := AForm.Left;
+    formjson.AsArray.I[JSON_INDEX_FORM_Y] := AForm.Top;
+    formjson.AsArray.I[JSON_INDEX_FORM_W] := AForm.Width;
+    formjson.AsArray.I[JSON_INDEX_FORM_H] := AForm.Height;
   end;
 
   forms_settings.AsArray.Add(formjson);
@@ -196,26 +184,26 @@ var
   formjson: ISuperObject;
 begin
   formjson := nil;
-  if Assigned(FJSON.O[JSON_FORMS_SETTINGS]) then
-    for C1 := 0 to FJSON.O[JSON_FORMS_SETTINGS].AsArray.Length - 1 do
-      if FJSON.O[JSON_FORMS_SETTINGS].AsArray.O[C1].S[JSON_FORM_NAME] = AForm.Name then
+  if Assigned(FJSON.AsArray[PROPINDEX_FORMS_SETTINGS]) then
+    for C1 := 0 to FJSON.AsArray[PROPINDEX_FORMS_SETTINGS].AsArray.Length - 1 do
+      if FJSON.AsArray[PROPINDEX_FORMS_SETTINGS].AsArray.O[C1].AsArray.S[JSON_INDEX_FORM_NAME] = AForm.Name then
       begin
-        formjson := FJSON.O[JSON_FORMS_SETTINGS].AsArray.O[C1];
+        formjson := FJSON.AsArray[PROPINDEX_FORMS_SETTINGS].AsArray.O[C1];
         Break;
       end;
 
   if Assigned(formjson) then
   begin
-    if Assigned(formjson.O[JSON_FORM_X]) then
-      AForm.Left := formjson.I[JSON_FORM_X];
-    if Assigned(formjson.O[JSON_FORM_Y]) then
-      AForm.Top := formjson.I[JSON_FORM_Y];
-    if Assigned(formjson.O[JSON_FORM_W]) then
-      AForm.Width := formjson.I[JSON_FORM_W];
-    if Assigned(formjson.O[JSON_FORM_H]) then
-      AForm.Height := formjson.I[JSON_FORM_H];
+    if Assigned(formjson.AsArray.O[JSON_INDEX_FORM_X]) then
+      AForm.Left := formjson.AsArray.I[JSON_INDEX_FORM_X];
+    if Assigned(formjson.AsArray.O[JSON_INDEX_FORM_Y]) then
+      AForm.Top := formjson.AsArray.I[JSON_INDEX_FORM_Y];
+    if Assigned(formjson.AsArray.O[JSON_INDEX_FORM_W]) then
+      AForm.Width := formjson.AsArray.I[JSON_INDEX_FORM_W];
+    if Assigned(formjson.AsArray.O[JSON_INDEX_FORM_H]) then
+      AForm.Height := formjson.AsArray.I[JSON_INDEX_FORM_H];
 
-    if formjson.B[JSON_FORM_MAXIMIZED] then
+    if formjson.AsArray.B[JSON_INDEX_FORM_MAXIMIZED] then
       AForm.WindowState := wsMaximized
     else
       AForm.WindowState := wsNormal;
@@ -244,23 +232,17 @@ end;
 function TSettings.GetStringValue(const AIndex: Integer): String;
 var
   o: ISuperObject;
-  field, default_value: String;
+  default_value: String;
 begin
   case AIndex of
-    PROPINDEX_LOGIN_USERNAME: begin
-      field := JSON_LOGIN_USERNAME;
-      default_value := DEFAULT_LOGIN_USERNAME;
-    end;
-    PROPINDEX_LOGIN_PASSWORD: begin
-      field := JSON_LOGIN_PASSWORD;
-      default_value := DEFAULT_LOGIN_PASSWORD;
-    end;
+    PROPINDEX_LOGIN_USERNAME: default_value := DEFAULT_LOGIN_USERNAME;
+    PROPINDEX_LOGIN_PASSWORD: default_value := DEFAULT_LOGIN_PASSWORD;
   else
     SoftException(Format('TSettings.GetStringValue(%d): index not found', [AIndex]));
     Exit;
   end;
 
-  o := FJSON.O[field];
+  o := FJSON.AsArray[AIndex];
   if not Assigned(o) then
     result := default_value
   else
@@ -270,20 +252,16 @@ end;
 function TSettings.GetIntegerValue(const AIndex: Integer): Int64;
 var
   o: ISuperObject;
-  field: String;
   default_value: Integer;
 begin
   case AIndex of
-    PROPINDEX_SERVER_INDEX: begin
-      field := JSON_SERVER_INDEX;
-      default_value := DEFAULT_SERVER_INDEX;
-    end;
+    PROPINDEX_SERVER_INDEX: default_value := DEFAULT_SERVER_INDEX;
   else
     SoftException(Format('TSettings.GetIntegerValue(%d): index not found', [AIndex]));
     Exit(0);
   end;
 
-  o := FJSON.O[field];
+  o := FJSON.AsArray[AIndex];
   if not Assigned(o) then
     result := default_value
   else
@@ -293,48 +271,23 @@ end;
 function TSettings.GetBooleanValue(const AIndex: Integer): Boolean;
 var
   o: ISuperObject;
-  field: String;
   default_value: Boolean;
 begin
   case AIndex of
-    PROPINDEX_REMEMBER_LOGIN: begin
-      field := JSON_REMEMBER_LOGIN;
-      default_value := DEFAULT_REMEMBER_LOGIN;
-    end;
-    PROPINDEX_REMEMBER_PASSWORD: begin
-      field := JSON_REMEMBER_PASSWORD;
-      default_value := DEFAULT_REMEMBER_PASSWORD;
-    end;
-    PROPINDEX_DEVELOPER_MODE: begin
-      field := JSON_DEVELOPER_MODE;
-      default_value := DEFAULT_DEVELOPER_MODE;
-    end;
-    PROPINDEX_SOUNDS: begin
-      field := JSON_SOUNDS;;
-      default_value := DEFAULT_SOUNDS;
-    end;
-    PROPINDEX_FOLD_CHECKS: begin
-      field := JSON_FOLD_CHECKS;
-      default_value := DEFAULT_FOLD_CHECKS;
-    end;
-    PROPINDEX_ANIMATIONS: begin
-      field := JSON_ANIMATIONS;
-      default_value := DEFAULT_ANIMATIONS;
-    end;
-    PROPINDEX_FOLD_CONFIRMATION: begin
-      field := JSON_FOLD_CONFIRMATION;
-      default_value := DEFAULT_FOLD_CONFIRMATION;
-    end;
-    PROPINDEX_ALWAYS_RUN_TWICE: begin
-      field := JSON_ALWAYS_RUN_IT_TWICE;
-      default_value := DEFAULT_ALWAYS_RUN_IT_TWICE;
-    end;
+    PROPINDEX_REMEMBER_LOGIN: default_value := DEFAULT_REMEMBER_LOGIN;
+    PROPINDEX_REMEMBER_PASSWORD: default_value := DEFAULT_REMEMBER_PASSWORD;
+    PROPINDEX_DEVELOPER_MODE: default_value := DEFAULT_DEVELOPER_MODE;
+    PROPINDEX_SOUNDS: default_value := DEFAULT_SOUNDS;
+    PROPINDEX_FOLD_CHECKS: default_value := DEFAULT_FOLD_CHECKS;
+    PROPINDEX_ANIMATIONS: default_value := DEFAULT_ANIMATIONS;
+    PROPINDEX_FOLD_CONFIRMATION: default_value := DEFAULT_FOLD_CONFIRMATION;
+    PROPINDEX_ALWAYS_RUN_TWICE: default_value := DEFAULT_ALWAYS_RUN_IT_TWICE;
   else
     SoftException(Format('TSettings.GetBooleanValue(%d): index not found', [AIndex]));
     Exit(FALSE);
   end;
 
-  o := FJSON.O[field];
+  o := FJSON.AsArray[AIndex];
   if not Assigned(o) then
     result := default_value
   else
@@ -344,53 +297,28 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TSettings.SetStringValue(const AIndex: Integer; const AValue: String);
-var
-  field_name: String;
 begin
-  case AIndex of
-    PROPINDEX_LOGIN_USERNAME: field_name := JSON_LOGIN_USERNAME;
-    PROPINDEX_LOGIN_PASSWORD: field_name := JSON_LOGIN_PASSWORD;
+  if AIndex in [PROPINDEX_LOGIN_USERNAME, PROPINDEX_LOGIN_PASSWORD] then
+    FJSON.AsArray.S[AIndex] := AValue
   else
     SoftException(Format('TSettings.SetStringValue(%d, %s): index not found', [AIndex, AValue]));
-    Exit;
-  end;
-
-  FJSON.S[field_name] := AValue;
 end;
 
 procedure TSettings.SetIntegerValue(const AIndex: Integer; const AValue: Int64);
-var
-  field_name: String;
 begin
-  case AIndex of
-    PROPINDEX_SERVER_INDEX: field_name := JSON_SERVER_INDEX;
+  if AIndex in [PROPINDEX_SERVER_INDEX] then
+    FJSON.AsArray.I[AIndex] := AValue
   else
     SoftException(Format('TSettings.SetIntegerValue(%d, %d): index not found', [AIndex, AValue]));
-    Exit;
-  end;
-
-  FJSON.I[field_name] := AValue;
 end;
 
 procedure TSettings.SetBooleanValue(const AIndex: Integer; const AValue: Boolean);
-var
-  field_name: String;
 begin
-  case AIndex of
-    PROPINDEX_REMEMBER_LOGIN: field_name := JSON_REMEMBER_LOGIN;
-    PROPINDEX_REMEMBER_PASSWORD: field_name:= JSON_REMEMBER_PASSWORD;
-    PROPINDEX_DEVELOPER_MODE: field_name:= JSON_DEVELOPER_MODE;
-    PROPINDEX_SOUNDS: field_name:= JSON_SOUNDS;
-    PROPINDEX_FOLD_CHECKS: field_name:= JSON_FOLD_CHECKS;
-    PROPINDEX_ANIMATIONS: field_name:= JSON_ANIMATIONS;
-    PROPINDEX_FOLD_CONFIRMATION: field_name:= JSON_FOLD_CONFIRMATION;
-    PROPINDEX_ALWAYS_RUN_TWICE: field_name:= JSON_ALWAYS_RUN_IT_TWICE;
+  if AIndex in [PROPINDEX_REMEMBER_LOGIN, PROPINDEX_REMEMBER_PASSWORD, PROPINDEX_DEVELOPER_MODE, PROPINDEX_SOUNDS,
+                PROPINDEX_FOLD_CHECKS, PROPINDEX_ANIMATIONS, PROPINDEX_FOLD_CONFIRMATION, PROPINDEX_ALWAYS_RUN_TWICE] then
+    FJSON.AsArray.B[AIndex] := AValue
   else
     SoftException(Format('TSettings.SetIntegerValue(%d, %s): index not found', [AIndex, BoolToStr(AValue, TRUE)]));
-    Exit;
-  end;
-
-  FJSON.B[field_name] := AValue;
 end;
 
 end.
