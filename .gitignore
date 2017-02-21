@@ -10,6 +10,7 @@ cpp-protobuf-generator/output
 *.tvsconfig
 *.res
 *.dres
+*.stat
 server/dag/handeval/*
 server/dag/build/*
 server/node_modules/*
