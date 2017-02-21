@@ -1504,11 +1504,14 @@ type
     // - e.g. '/category/name/10?param=1'
     Address: SockString;
     /// fill the members from a supplied URI
-    function From(aURI: SockString): boolean;
+    function From(aURI: SockString; const DefaultPort: SockString=''): boolean;
     /// compute the whole normalized URI
     function URI: SockString;
     /// the server port, as integer value
     function PortInt: integer;
+    /// compute the root resource Address, without any URI-encoded parameter 
+    // - e.g. '/category/name/10'
+    function Root: SockString;
   end;
 
   /// the supported authentication schemes which may be used by HTTP clients
@@ -1950,6 +1953,8 @@ const
   STATUS_CREATED = 201;
   /// HTTP Status Code for "No Content"
   STATUS_NOCONTENT = 204;
+  /// HTTP Status Code for "Not Modified"
+  STATUS_NOTMODIFIED = 304;
   /// HTTP Status Code for "Bad Request"
   STATUS_BADREQUEST = 400;
   /// HTTP Status Code for "Unauthorized"
@@ -2804,7 +2809,7 @@ const
 const
   DEFAULT_PORT: array[boolean] of SockString = ('80','443');
 
-function TURI.From(aURI: SockString): boolean;
+function TURI.From(aURI: SockString; const DefaultPort: SockString): boolean;
 var P,S: PAnsiChar;
 begin
   Https := false;
@@ -2829,7 +2834,9 @@ begin
     while not (S^ in [#0,'/']) do inc(S);
     SetString(Port,P,S-P);
   end else
-    Port := DEFAULT_PORT[Https];
+    if DefaultPort<>'' then
+      Port := DefaultPort else
+      Port := DEFAULT_PORT[Https];
   if S^<>#0 then // ':' or '/'
     inc(S);
   Address := S;
@@ -2851,6 +2858,15 @@ begin
   Val(string(Port),result,err);
   if err<>0 then
     result := 0;
+end;
+
+function TURI.Root: SockString;
+var i: integer;
+begin
+  i := Pos({$ifdef HASCODEPAGE}SockString{$endif}('?'),Address);
+  if i=0 then
+    Root := Address else
+    Root := copy(Address,1,i-1);
 end;
 
 
@@ -7589,7 +7605,7 @@ end;
 { ************ libcurl implementation }
 
 const
-  LIBCURL_DLL = {$IFDEF LINUX} 'libcurl.so' {$ELSE} 'libcurl.dll' {$ENDIF};
+  LIBCURL_DLL = {$IFDEF Darwin} 'libcurl.dylib' {$ELSE}{$IFDEF LINUX} 'libcurl.so' {$ELSE} 'libcurl.dll' {$ENDIF}{$ENDIF};
 
 type
   TCurlOption = (
@@ -7803,7 +7819,11 @@ type
 
 var
   curl: packed record
+    {$ifdef FPC}
+    Module: TLibHandle;
+    {$else}
     Module: THandle;
+    {$endif}
     global_init: function(flags: TCurlGlobalInit): TCurlResult; cdecl;
     global_cleanup: procedure; cdecl;
     version_info: function(age: TCurlVersion): PCurlVersionInfo; cdecl;
@@ -7833,9 +7853,23 @@ begin
   if curl.Module=0 then
   try
     curl.Module := LoadLibrary(LIBCURL_DLL);
+    {$ifdef Darwin}
+    if curl.Module=0 then
+      curl.Module := LoadLibrary('libcurl.3.dylib');
+    if curl.Module=0 then
+      curl.Module := LoadLibrary('libcurl.4.dylib');
+    {$else}
     {$ifdef LINUX}
     if curl.Module=0 then
       curl.Module := LoadLibrary('libcurl.so.3');
+    if curl.Module=0 then
+      curl.Module := LoadLibrary('libcurl.so.4');
+    // for latest Linux Mint and other similar distros
+    if curl.Module=0 then
+      curl.Module := LoadLibrary('libcurl-gnutls.so.3');
+    if curl.Module=0 then
+      curl.Module := LoadLibrary('libcurl-gnutls.so.4');
+    {$endif}
     {$endif}
     if curl.Module=0 then
       raise ECrtSocket.CreateFmt('Unable to find %s'{$ifdef LINUX}

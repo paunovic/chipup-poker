@@ -48,7 +48,7 @@ unit SynSQLite3;
   ***** END LICENSE BLOCK *****
 
 
-       SQLite3 3.16.2 database engine
+       SQLite3 3.17.0 database engine
       ********************************
 
      Brand new SQLite3 library to be used with Delphi
@@ -136,7 +136,7 @@ unit SynSQLite3;
   - moved all static .obj code into new SynSQLite3Static unit
   - allow either static .obj use via SynSQLite3Static or external .dll linking
     using TSQLite3LibraryDynamic to bind all APIs to the global sqlite3 variable
-  - updated SQLite3 engine to latest version 3.16.2
+  - updated SQLite3 engine to latest version 3.17.0
   - fixed: internal result cache is now case-sensitive for its SQL key values
   - raise an ESQLite3Exception if DBOpen method is called twice
   - added TSQLite3ErrorCode enumeration and sqlite3_resultToErrorCode()
@@ -197,6 +197,9 @@ interface
 uses
   {$ifdef MSWINDOWS}
   Windows,
+  {$ifdef FPC}
+  dynlibs,
+  {$endif}
   {$else}
   {$ifdef KYLIX3}
   LibC,
@@ -1288,7 +1291,7 @@ type
     close: function(DB: TSQLite3DB): integer; {$ifndef SQLITE3_FASTCALL}cdecl;{$endif}
 
     /// Return the version of the SQLite database engine, in ascii format
-    // - currently returns '3.16.2', when used with our SynSQLite3Static unit
+    // - currently returns '3.17.0', when used with our SynSQLite3Static unit
     // - if an external SQLite3 library is used, version may vary
     // - you may use the VersionText property (or Version for full details) instead
     libversion: function: PUTF8Char; {$ifndef SQLITE3_FASTCALL}cdecl;{$endif}
@@ -2063,8 +2066,8 @@ type
   // ! sqlite3 := TSQLite3LibraryDynamic.Create;
   TSQLite3LibraryDynamic = class(TSQLite3Library)
   protected
-    {$ifdef BSDNOTDARWIN}
-    fHandle: pointer;
+    {$ifdef FPC}
+    fHandle: TLibHandle;
     {$else}
     fHandle: THandle;
     {$endif}
@@ -3264,8 +3267,6 @@ const
 
 implementation
 
-
-
 { ************ direct access to sqlite3.c / sqlite3.obj consts and functions }
 
 function IsSQLite3File(const FileName: TFileName): boolean;
@@ -3438,7 +3439,7 @@ begin
     ftCurrency:
       sqlite3.result_double(Context,Res.VCurrency);
     ftDate: begin
-      DateTimeToIso8601ExpandedPChar(Res.VDateTime,tmp);
+      DateTimeToIso8601ExpandedPChar(Res.VDateTime,tmp,'T',svoDateWithMS in Res.Options);
       sqlite3.result_text(Context,tmp,-1,SQLITE_TRANSIENT_VIRTUALTABLE);
     end;
     // WARNING! use pointer(integer(-1)) instead of SQLITE_TRANSIENT=pointer(-1)
@@ -3464,6 +3465,7 @@ end;
 procedure SQlite3ValueToSQLVar(Value: TSQLite3Value; var Res: TSQLVar);
 var ValueType: Integer;
 begin
+  Res.Options := [];
   ValueType := sqlite3.value_type(Value);
   case ValueType of
   SQLITE_NULL:

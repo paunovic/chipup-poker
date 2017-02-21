@@ -1734,7 +1734,7 @@ var
 
 /// same as VarIsEmpty(V) or VarIsEmpty(V), but faster
 // - FPC VarIsNull() seems buggy with varByRef variants, and does not allow
-// direct transtyping from a TNullableInteger = type variant variant: use this
+// direct transtyping from a TNullableInteger = type variant variable: use this
 // function to circumvent those limitations
 function NullableIntegerIsEmptyOrNull(const V: TNullableInteger): Boolean;
   {$ifdef HASINLINE}inline;{$endif}
@@ -1780,7 +1780,7 @@ function NullableFloat(const Value: double): TNullableFloat;
 
 /// same as VarIsEmpty(V) or VarIsEmpty(V), but faster
 // - FPC VarIsNull() seems buggy with varByRef variants, and does not allow
-// direct transtyping from a TNullableFloat = type variant variant: use this
+// direct transtyping from a TNullableFloat = type variant variable: use this
 // function to circumvent those limitations
 function NullableFloatIsEmptyOrNull(const V: TNullableFloat): Boolean;
   {$ifdef HASINLINE}inline;{$endif}
@@ -1803,7 +1803,7 @@ function NullableCurrency(const Value: currency): TNullableCurrency;
 
 /// same as VarIsEmpty(V) or VarIsEmpty(V), but faster
 // - FPC VarIsNull() seems buggy with varByRef variants, and does not allow
-// direct transtyping from a TNullableCurrency = type variant variant: use this
+// direct transtyping from a TNullableCurrency = type variant variable: use this
 // function to circumvent those limitations
 function NullableCurrencyIsEmptyOrNull(const V: TNullableCurrency): Boolean;
   {$ifdef HASINLINE}inline;{$endif}
@@ -1826,7 +1826,7 @@ function NullableDateTime(const Value: TDateTime): TNullableDateTime;
 
 /// same as VarIsEmpty(V) or VarIsEmpty(V), but faster
 // - FPC VarIsNull() seems buggy with varByRef variants, and does not allow
-// direct transtyping from a TNullableDateTime = type variant variant: use this
+// direct transtyping from a TNullableDateTime = type variant variable: use this
 // function to circumvent those limitations
 function NullableDateTimeIsEmptyOrNull(const V: TNullableDateTime): Boolean;
   {$ifdef HASINLINE}inline;{$endif}
@@ -1849,7 +1849,7 @@ function NullableTimeLog(const Value: TTimeLog): TNullableTimeLog;
 
 /// same as VarIsEmpty(V) or VarIsEmpty(V), but faster
 // - FPC VarIsNull() seems buggy with varByRef variants, and does not allow
-// direct transtyping from a TNullableTimeLog = type variant variant: use this
+// direct transtyping from a TNullableTimeLog = type variant variable: use this
 // function to circumvent those limitations
 function NullableTimeLogIsEmptyOrNull(const V: TNullableTimeLog): Boolean;
   {$ifdef HASINLINE}inline;{$endif}
@@ -1872,7 +1872,7 @@ function NullableUTF8Text(const Value: RawUTF8): TNullableUTF8Text;
 
 /// same as VarIsEmpty(V) or VarIsEmpty(V), but faster
 // - FPC VarIsNull() seems buggy with varByRef variants, and does not allow
-// direct transtyping from a TNullableUTF8Text = type variant variant: use this
+// direct transtyping from a TNullableUTF8Text = type variant variable: use this
 // function to circumvent those limitations
 function NullableUTF8TextIsEmptyOrNull(const V: TNullableUTF8Text): Boolean;
   {$ifdef HASINLINE}inline;{$endif}
@@ -2552,6 +2552,9 @@ type
     /// specify ordinal storage size and sign
     // - is prefered to MaxValue to identify the number of stored bytes
     OrdType: TOrdType;
+    {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+    Dummy: DWORD; // needed on ARM for correct alignment !!??
+    {$endif}
     { this seemingly extraneous inner record is here for alignment purposes, so
     that its data gets aligned properly (if FPC_REQUIRES_PROPER_ALIGNMENT is set) }
     {$ifdef FPC_ENUMHASINNER}
@@ -2697,6 +2700,9 @@ type
     packed
     {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
     record
+    {$ifdef FPC_NEWRTTI}
+    RecInitInfo: Pointer;
+    {$endif}
     Size: cardinal;
     Count: integer;
     Fields: array[word] of TRecordField;
@@ -3081,11 +3087,23 @@ type
   /// the available methods calling conventions
   // - this is by design only relevant to the x86 model
   // - Win64 has one unique calling convention
-  TCallingConvention = (ccRegister, ccCdecl, ccPascal, ccStdCall, ccSafeCall);
+  TCallingConvention = (
+    ccRegister, ccCdecl, ccPascal, ccStdCall, ccSafeCall
+    {$ifdef FPC},
+    ccCppdecl, ccFar16,
+    ccOldFPCCall, ccInternProc, ccSysCall, ccSoftFloat, ccMWPascal
+    {$endif});
 
   /// the available kind of method parameters
-  TParamFlag = (pfVar, pfConst, pfArray, pfAddress, pfReference, pfOut,
-    {$ifdef FPC}pfConstRef{$else}pfResult{$endif});
+  TParamFlag = (pfVar, pfConst, pfArray, pfAddress, pfReference, pfOut
+    {$ifdef FPC}
+    ,pfConstRef
+    {$ifdef FPC_NEWRTTI}
+    ,pfHidden,pfHigh,pfSelf,pfVmt,pfResult
+    {$endif}
+    {$else}
+    ,pfResult
+    {$endif});
 
   /// a set of kind of method parameters
   TParamFlags = set of TParamFlag;
@@ -4190,6 +4208,9 @@ const
     Name: 'TGUID';
     Size: sizeof(TGUID);
     Count: 0);
+
+/// returns the interface name of a registered GUID, or its hexadecimal value
+function ToText(const aGUID: TGUID): TGUIDShortString; overload;
 
 /// retrieve a Field property RTTI information from a Property Name
 function ClassFieldProp(ClassType: TClass; const PropName: shortstring): PPropInfo;
@@ -5661,7 +5682,7 @@ type
    afInvalidSignature,afRemoteServiceExecutionNotAllowed,
    afUnknownUser,afInvalidPassword,
    afSessionAlreadyStartedForThisUser,afSessionCreationAborted,
-   afSecureConnectionRequired);
+   afSecureConnectionRequired, afJWTRequired);
 
   /// will identify the currently running service on the server side
   // - is the type of the global ServiceContext threadvar
@@ -6590,7 +6611,7 @@ type
   // - INITIALIZETABLE_NOINDEX constant contain all itoNoIndex* items
   TSQLInitializeTableOption = (
     itoNoAutoCreateGroups, itoNoAutoCreateUsers,
-    itoNoCreateMissingField, 
+    itoNoCreateMissingField,
     itoNoIndex4ID, itoNoIndex4UniqueField,
     itoNoIndex4NestedRecord, itoNoIndex4RecordReference,
     itoNoIndex4TID, itoNoIndex4RecordVersion);
@@ -9184,6 +9205,10 @@ type
     SQL: TSQLModelRecordPropertiesSQL;
     /// allow SQL process for one external TSQLRecord in this model
     ExternalDB: TSQLRecordPropertiesMapping;
+    /// will by-pass automated table and field creation for this TSQLRecord
+    // - may be used e.g. when the TSQLRecord is in fact mapped into a View,
+    // and not a table
+    NoCreateMissingTable: boolean;
 
     /// initialize the ORM properties from the TSQLRecord RTTI and the supplied
     // TSQLModel
@@ -9327,6 +9352,9 @@ type
     // inherited, so that could be used for further instance creation:
     // ! fSQLAuthUserClass := Model.AddTableInherited(TSQLAuthUser);
     function AddTableInherited(aTable: TSQLRecordClass): pointer;
+    /// return any class inheriting from the given table in the model
+    // - if the model does not contain such table, supplied aTable is returned
+    function GetTableInherited(aTable: TSQLRecordClass): TSQLRecordClass;
     /// get the index of aTable in Tables[]
     // - returns -1 if the table is not in the model
     function GetTableIndex(aTable: TSQLRecordClass): integer; overload;
@@ -10502,7 +10530,6 @@ type
   // execution statistics used for DB-based asynchronous notifications
   // - as used by TServiceFactoryClient.SendNotifications
   TSQLRecordServiceNotificationsClass = class of TSQLRecordServiceNotifications;
-
 
   TServiceMethodExecute = class;
 
@@ -12018,6 +12045,8 @@ type
     /// GetTickCount64() time stamp corresponding to the last access of
     // this instance
     LastAccess64: Int64;
+    /// the associated client session
+    Session: cardinal;
     /// the implementation instance itself
     Instance: TInterfacedObject;
     /// used to release the implementation instance
@@ -12055,7 +12084,8 @@ type
   protected
     fInstances: TServiceFactoryServerInstanceDynArray;
     fInstance: TDynArray;
-    fInstancesCount: integer;
+    fInstanceCapacity: integer;
+    fInstanceCount: integer;
     fInstanceCurrentID: TID;
     fInstanceTimeOut: cardinal;
     fInstanceLock: TRTLCriticalSection;
@@ -12072,6 +12102,7 @@ type
     fResultAsXMLObject: boolean;
     fResultAsJSONObjectIfAccept: boolean;
     fResultAsXMLObjectNameSpace: RawUTF8;
+    fExcludeServiceLogCustomAnswer: boolean;
     fBackgroundThread: TSynBackgroundThreadMethod;
     fOnMethodExecute: TOnServiceCanExecute;
     fOnExecute: array of TServiceMethodExecuteEvent;
@@ -12081,12 +12112,14 @@ type
     procedure SetTimeoutSecInt(value: cardinal);
     function GetTimeoutSec: cardinal;
     function GetStat(const aMethod: RawUTF8): TSynMonitorInputOutput;
+    // from client CacheFlush/_ping_
+    function RenewSession(aSession: cardinal): integer;
     /// get an implementation Inst.Instance for the given Inst.InstanceID
     // - is called by ExecuteMethod() in sicClientDrive mode
     // - returns true for successfull {"method":"_free_".. call (aMethodIndex=-1)
     // - otherwise, fill Inst.Instance with the matching implementation (or nil)
     function InternalInstanceRetrieve(var Inst: TServiceFactoryServerInstance;
-      aMethodIndex: integer): integer;
+      aMethodIndex,aSession: integer): integer;
     /// call a given method of this service provider
     // - here Ctxt.ServiceMethodIndex should be the index in fInterface.Methods[]
     // (i.e. excluding _free_/_contract_/_signature_ pseudo-methods)
@@ -12346,6 +12379,10 @@ type
     // </content> around the generated XML data
     property ResultAsXMLObjectNameSpace: RawUTF8
       read fResultAsXMLObjectNameSpace write fResultAsXMLObjectNameSpace;
+    /// disable base64-encoded TSQLRecordServiceLog.Output for methods
+    // returning TServiceCustomAnswer record (to reduce storage size)
+    property ExcludeServiceLogCustomAnswer: boolean read fExcludeServiceLogCustomAnswer
+      write fExcludeServiceLogCustomAnswer;
   end;
 
   /// a service provider implemented on the client side
@@ -14889,10 +14926,6 @@ type
     property AccessRights: RawUTF8 index 1600 read fAccessRights write fAccessRights;
   end;
 
-  /// class-reference type (metaclass) of the table containing the available
-  // user access rights for authentication, defined as a group
-  TSQLAuthGroupClass = class of TSQLAuthGroup;
-
   /// table containing the Users registered for authentication
   // - this class should be added to the TSQLModel, together with TSQLAuthGroup,
   // to allow authentication support
@@ -14928,6 +14961,7 @@ type
     /// able to set the PasswordHashHexa field from a plain password content
     // - in fact, PasswordHashHexa := SHA256('salt'+PasswordPlain) in UTF-8
     // - use SetPassword() method if you want to customize the hash salt value
+    // and use the much safer PBKDF2_HMAC_SHA256 algorithm
     property PasswordPlain: RawUTF8 write SetPasswordPlain;
     /// set the PasswordHashHexa field from a plain password content and salt
     // - use this method to specify aHashSalt/aHashRound values, enabling
@@ -14964,11 +14998,6 @@ type
     // application
     property Data: TSQLRawBlob read fData write fData;
   end;
-
-  /// class-reference type (metaclass) of a table containing the Users
-  // registered for authentication
-  // - see also TSQLRestServer.OnAuthenticationUserRetrieve custom event
-  TSQLAuthUserClass = class of TSQLAuthUser;
 
   /// class used to maintain in-memory sessions
   // - this is not a TSQLRecord table so won't be remotely accessible, for
@@ -16055,6 +16084,15 @@ type
     property TimeOut: integer read fTimeOut write fTimeOut;
   end;
 
+  /// class-reference type (metaclass) of a table containing the Users
+  // registered for authentication
+  // - see also TSQLRestServer.OnAuthenticationUserRetrieve custom event
+  TSQLAuthUserClass = class of TSQLAuthUser;
+
+  /// class-reference type (metaclass) of the table containing the available
+  // user access rights for authentication, defined as a group
+  TSQLAuthGroupClass = class of TSQLAuthGroup;
+
   /// class-reference type (metaclass) of a REST server
   TSQLRestServerClass = class of TSQLRestServer;
 
@@ -16084,8 +16122,9 @@ type
   // unless you set rsoComputeFieldsBeforeWriteOnServerSide so that AJAX requests
   // will set the fields on the server side by calling the TSQLRecord
   // ComputeFieldsBeforeWrite virtual method, before writing to the database
-  // - rsoSecureConnectionRequired will ensure Call is flagged as llfSecured -
-  // with the only exception of the Timestamp method-based service
+  // - rsoSecureConnectionRequired will ensure Call is flagged as llfSecured
+  // (i.e. in-process, HTTPS, or encrypted WebSockets) - with the only exception
+  // of the Timestamp method-based service (for monitoring purposes)
   // - by default, cookies will contain only 'Path=/Model.Root', but
   // '; Path=/' may be also added setting rsoCookieIncludeRootPath
   // - you can disable the 'HttpOnly' flag via rsoCookieHttpOnlyFlagDisable
@@ -16118,11 +16157,12 @@ type
     fVirtualTableDirect: boolean;
     fHandleAuthentication: boolean;
     fBypassORMAuthentication: TSQLURIMethods;
-    fAfterCreation: boolean;
-    fOptions: TSQLRestServerOptions;
     /// the TSQLAuthUser and TSQLAuthGroup classes, as defined in model
     fSQLAuthUserClass: TSQLAuthUserClass;
     fSQLAuthGroupClass: TSQLAuthGroupClass;
+    fAfterCreation: boolean;
+    fOptions: TSQLRestServerOptions;
+    fJWTForUnauthenticatedRequest: TJWTAbstract;
     /// how in-memory sessions are handled
     fSessionClass: TAuthSessionClass;
     /// will contain the in-memory representation of some static tables
@@ -16153,6 +16193,7 @@ type
     fPublishedMethod: TSQLRestServerMethods;
     fPublishedMethods: TDynArrayHashed;
     fPublishedMethodTimeStampIndex: integer;
+    fPublishedMethodAuthIndex: integer;
     fPublishedMethodBatchIndex: integer;
     fPublicURI: TSQLRestServerURI;
     fAssociatedServices: TServicesPublishedInterfacesList;
@@ -16958,6 +16999,11 @@ type
     /// how many authentication methods are registered in AuthenticationSchemes
     property AuthenticationSchemesCount: integer
       read GetAuthenticationSchemesCount;
+    /// define if unsecure connections (i.e. not in-process, HTTPS or encrypted
+    // WebSockets) require a JWT for authentication
+    // - once set, this instance will be owned by the TSQLRestServer 
+    property JWTForUnauthenticatedRequest: TJWTAbstract
+      read fJWTForUnauthenticatedRequest write fJWTForUnauthenticatedRequest;
     /// retrieve the TSQLRestStorage instance used to store and manage
     // a specified TSQLRecordClass in memory
     // - has been associated by the StaticDataCreate method
@@ -17052,15 +17098,6 @@ type
     // (should not to be used normaly, because it will add unnecessary overhead)
     property StaticVirtualTableDirect: boolean read fVirtualTableDirect
       write fVirtualTableDirect;
-    /// the class inheriting from TSQLAuthUser, as defined in the model
-    // - during authentication, this class will be used for every TSQLAuthUser
-    // table access
-    // - see also the OnAuthenticationUserRetrieve optional event handler
-    property SQLAuthUserClass: TSQLAuthUserClass read fSQLAuthUserClass;
-    /// the class inheriting from TSQLAuthGroup, as defined in the model
-    // - during authentication, this class will be used for every TSQLAuthGroup
-    // table access
-    property SQLAuthGroupClass: TSQLAuthGroupClass read fSQLAuthGroupClass;
     /// the class inheriting from TSQLRecordTableDeleted, as defined in the model
     // - during authentication, this class will be used for storing a trace of
     // every deletion of table rows containing a TRecordVersion published field
@@ -17070,6 +17107,15 @@ type
     // - since all sessions data remain in memory, ensure they are not taking
     // too much resource (memory or process time)
     property SessionClass: TAuthSessionClass read fSessionClass write fSessionClass;
+    /// the class inheriting from TSQLAuthUser, as defined in the model
+    // - during authentication, this class will be used for every TSQLAuthUser
+    // table access
+    // - see also the OnAuthenticationUserRetrieve optional event handler
+    property SQLAuthUserClass: TSQLAuthUserClass read fSQLAuthUserClass;
+    /// the class inheriting from TSQLAuthGroup, as defined in the model
+    // - during authentication, this class will be used for every TSQLAuthGroup
+    // table access
+    property SQLAuthGroupClass: TSQLAuthGroupClass read fSQLAuthGroupClass;
   published { standard method-based services }
     /// REST service accessible from ModelRoot/Stat URI to gather detailed information
     // - returns the current execution statistics of this server, as a JSON object
@@ -18248,6 +18294,7 @@ type
     fSessionVersion: RawUTF8;
     fSessionData: RawByteString;
     fSessionServerTimeout: integer;
+    fSessionHeartbeatSeconds: integer;
     /// used to make the internal client-side process reintrant
     fSafe: IAutoLocker;
     fRemoteLogClass: TSynLog;
@@ -18278,6 +18325,7 @@ type
     constructor RegisteredClassCreateFrom(aModel: TSQLModel;
       aDefinition: TSynConnectionDefinition); override;
     function GetCurrentSessionUserID: TID; override;
+    procedure SetSessionHeartbeatSeconds(timeout: integer);
     function InternalRemoteLogSend(const aText: RawUTF8): boolean;
     procedure InternalNotificationMethodExecute(var Ctxt: TSQLRestURIParams); virtual;
     procedure SetLastException(E: Exception=nil; ErrorCode: integer=HTTP_BADREQUEST;
@@ -18728,10 +18776,17 @@ type
     property SessionVersion: RawUTF8 read fSessionVersion;
     /// the remote server session tiemout in minutes, as retrieved after
     // a SetUser() success
-    // - will be used to call SessionRenewEvent every half period, so that
-    // the session will be maintained on the server side as long as the
-    // client connection stands 
+    // - will be used to set SessionHeartbeatSeconds default
     property SessionServerTimeout: integer read fSessionServerTimeout;
+    /// frequency of Callback/_ping_ calls to maintain session and services
+    // - will be used to call SessionRenewEvent at the specified period, so that
+    // the session and all sicClientDriven instances will be maintained on the
+    // server side as long as the client connection stands
+    // - equals half SessionServerTimeout or 25 minutes (if lower) by default -
+    // 25 minutes matches the default service timeout of 30 minutes
+    // - you may set 0 to disable this SOA-level heartbeat feature
+    property SessionHeartbeatSeconds: integer read fSessionHeartbeatSeconds
+      write SetSessionHeartbeatSeconds;
   public
     /// the current user as set by SetUser() method
     // - contans nil if no User is currently authenticated
@@ -19305,6 +19360,10 @@ type
       {$ifdef HASINLINE}inline;{$endif}
     procedure SetColumnBlob(var aResult: TSQLVar; aValue: pointer; aValueLength: integer);
       {$ifdef HASINLINE}inline;{$endif}
+    procedure SetColumnDate(var aResult: TSQLVar; const aValue: TDateTime;
+      aWithMS: boolean); {$ifdef HASINLINE}inline;{$endif}
+    procedure SetColumnCurr64(var aResult: TSQLVar; aValue64: PInt64);
+      {$ifdef HASINLINE}inline;{$endif}
   public
     /// create the cursor instance
     // - it will be destroyed when by the DB engine (e.g. via xClose in SQLite3)
@@ -19856,13 +19915,13 @@ var
 implementation
 
 {$ifdef FPC}
-{$ifndef MSWINDOWS}
 uses
+  {$ifndef MSWINDOWS}
   SynFPCLinux,
   BaseUnix,
   Unix,
+  {$endif}
   dynlibs;
-{$endif}
 {$endif}
 
 // ************ some RTTI and SQL mapping routines
@@ -19935,6 +19994,7 @@ type
   end;
   /// no RTTI alignment under Delphi
   AlignToPtr = pointer;
+  AlignTypeData = pointer;
   UnalignToDouble = Double;
 
 const
@@ -20562,6 +20622,7 @@ procedure TSQLPropInfo.GetFieldSQLVar(Instance: TObject; var aValue: TSQLVar;
   var temp: RawByteString);
 begin
   GetValueVar(Instance,true,RawUTF8(temp),nil);
+  aValue.Options := [];
   aValue.VType := fSQLDBFieldType;
   case aValue.VType of
     ftInt64:
@@ -20594,7 +20655,8 @@ begin
     ftDouble:
       SetValueVar(Instance,DoubleToStr(aValue.VDouble),false);
     ftDate:
-      SetValueVar(Instance,DateTimeToIso8601Text(aValue.VDateTime),true);
+      SetValueVar(Instance,DateTimeToIso8601Text(
+        aValue.VDateTime,'T',svoDateWithMS in aValue.Options),true);
     ftBlob:
       SetValueVar(Instance,TSQLRawBlobToBlob(aValue.VBlob,aValue.VBlobLen),true);
     ftUTF8:
@@ -21013,6 +21075,7 @@ end;
 procedure TSQLPropInfoRTTIInt32.GetFieldSQLVar(Instance: TObject; var aValue: TSQLVar;
   var temp: RawByteString);
 begin
+  aValue.Options := [];
   aValue.VType := ftInt64;
   aValue.VInt64 := fPropInfo.GetOrdProp(Instance);
 end;
@@ -21238,6 +21301,7 @@ end;
 procedure TSQLPropInfoRTTIInt64.GetFieldSQLVar(Instance: TObject; var aValue: TSQLVar;
   var temp: RawByteString);
 begin
+  aValue.Options := [];
   aValue.VType := ftInt64;
   aValue.VInt64 := fPropInfo.GetInt64Prop(Instance);
 end;
@@ -21349,6 +21413,7 @@ end;
 procedure TSQLPropInfoRTTIDouble.GetFieldSQLVar(Instance: TObject; var aValue: TSQLVar;
   var temp: RawByteString);
 begin
+  aValue.Options := [];
   aValue.VType := ftDouble;
   aValue.VDouble := fPropInfo.GetDoubleProp(Instance);
 end;
@@ -21407,6 +21472,7 @@ end;
 procedure TSQLPropInfoRTTICurrency.GetFieldSQLVar(Instance: TObject; var aValue: TSQLVar;
   var temp: RawByteString);
 begin
+  aValue.Options := [];
   aValue.VType := ftCurrency;
   aValue.VCurrency := fPropInfo.GetCurrencyProp(Instance);
 end;
@@ -21499,6 +21565,9 @@ end;
 procedure TSQLPropInfoRTTIDateTime.GetFieldSQLVar(Instance: TObject; var aValue: TSQLVar;
   var temp: RawByteString);
 begin
+  if fSQLFieldType=sftDateTimeMS then
+    aValue.Options := [svoDateWithMS] else
+    aValue.Options := [];
   aValue.VType := ftDate;
   aValue.VDouble := fPropInfo.GetDoubleProp(Instance);
 end;
@@ -21805,6 +21874,7 @@ procedure TSQLPropInfoRTTIAnsi.GetFieldSQLVar(Instance: TObject; var aValue: TSQ
 begin
   fPropInfo.GetLongStrProp(Instance,temp);
   temp := fEngine.AnsiToUTF8(temp);
+  aValue.Options := [];
   aValue.VType := ftUTF8;
   aValue.VText := pointer(temp);
 end;
@@ -21876,6 +21946,7 @@ procedure TSQLPropInfoRTTIRawUTF8.GetFieldSQLVar(Instance: TObject; var aValue: 
   var temp: RawByteString);
 begin
   fPropInfo.GetLongStrProp(Instance,temp);
+  aValue.Options := [];
   aValue.VType := ftUTF8;
   aValue.VText := Pointer(temp);
 end;
@@ -22085,6 +22156,7 @@ procedure TSQLPropInfoRTTIRawBlob.GetFieldSQLVar(Instance: TObject; var aValue: 
   var temp: RawByteString);
 begin
   fPropInfo.GetLongStrProp(Instance,temp);
+  aValue.Options := [];
   if temp='' then
     aValue.VType := ftNull else begin
     aValue.VType := ftBlob;
@@ -22292,6 +22364,7 @@ procedure TSQLPropInfoRTTIUnicode.GetFieldSQLVar(Instance: TObject; var aValue: 
   var temp: RawByteString);
 begin
   temp := UnicodeStringToUtf8(fPropInfo.GetUnicodeStrProp(Instance));
+  aValue.Options := [];
   aValue.VType := ftUTF8;
   aValue.VText := Pointer(temp);
 end;
@@ -22505,6 +22578,7 @@ procedure TSQLPropInfoRTTIDynArray.GetFieldSQLVar(Instance: TObject;
   var aValue: TSQLVar; var temp: RawByteString);
 begin
   Serialize(Instance,temp,false);
+  aValue.Options := [];
   if fObjArray<>nil then begin
     aValue.VType := ftUTF8; // JSON
     aValue.VText := pointer(temp);
@@ -23004,6 +23078,7 @@ procedure TSQLPropInfoRecordRTTI.GetFieldSQLVar(Instance: TObject; var aValue: T
   var temp: RawByteString);
 begin
   temp := RecordSave(GetFieldAddr(Instance)^,fTypeInfo);
+  aValue.Options := [];
   aValue.VType := ftBlob;
   aValue.VBlob := pointer(temp);
   aValue.VBlobLen := length(temp);
@@ -23135,6 +23210,7 @@ procedure TSQLPropInfoRecordFixedSize.GetFieldSQLVar(Instance: TObject; var aVal
   var temp: RawByteString);
 begin
   SetString(temp,PAnsiChar(GetFieldAddr(Instance)),fRecordSize);
+  aValue.Options := [];
   aValue.VType := ftBlob;
   aValue.VBlob := pointer(temp);
   aValue.VBlobLen := length(temp);
@@ -27866,6 +27942,13 @@ procedure TPropInfo.SetLongStrValue(Instance: TObject; const Value: RawUTF8);
     if cp=CP_SQLRAWBLOB then
       tmp := BlobToTSQLRawBlob(Value) else
       tmp := TSynAnsiConvert.Engine(cp).UTF8ToAnsi(Value);
+    {$ifdef FPC}
+    // an FPC quirck ... and Alf work-around ... ;-)
+    if cp=CP_UTF16 then begin
+      Setlength(tmp,length(tmp)+1);
+      tmp[length(tmp)]:=#0;
+    end;
+    {$endif}
     SetLongStrProp(Instance,tmp);
   end;
   {$ifdef HASVARUSTRING}
@@ -29050,22 +29133,24 @@ type
 
 
   TMethodKind = (mkProcedure, mkFunction, mkConstructor, mkDestructor,
-    mkClassProcedure, mkClassFunction, { Obsolete } mkSafeProcedure, mkSafeFunction);
+    mkClassProcedure, mkClassFunction, mkClassConstructor, mkClassDestructor,
+    mkOperatorOverload{$ifndef FPC},{ Obsolete } mkSafeProcedure, mkSafeFunction{$endif});
 
   TIntfMethodEntryTail =
     {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}packed{$endif} record
-    {$ifdef FPC}
-    Version: Byte; // alwyas 3 at the moment
+    {$ifdef FPC_NEWRTTI}
+    ResultType: PPTypeInfo;
+    CC: TCallingConvention;
+    Kind: TMethodKind;
+    ParamCount: Word;
+    StackSize: SizeInt;
+    Name: ShortString;
     {$else}
     Kind: TMethodKind;
-    {$endif}
     CC: TCallingConvention;
-    {$ifdef FPC}
-    ResultType: PTypeInfo;
-    StackSize: Word;
-    {$endif}
     ParamCount: Byte;
     {Params: array[0..ParamCount - 1] of TVmtMethodParam;}
+    {$endif}
   end;
 
 { TTypeInfo }
@@ -29073,7 +29158,7 @@ type
 {$ifdef HASINLINE}
 function TTypeInfo.ClassType: PClassType;
 begin
-  result := AlignToPtr(@Name[ord(Name[0])+1]);
+  result := AlignTypeData(@Name[ord(Name[0])+1]);
 end;
 {$else}
 function TTypeInfo.ClassType: PClassType;
@@ -29093,7 +29178,7 @@ end;
 function TTypeInfo.RecordType: PRecordType;
 {$ifdef HASINLINE}
 begin
-  result := AlignToPtr(@Name[ord(Name[0])+1]);
+  result := AlignTypeData(@Name[ord(Name[0])+1]);
 {$else}
 asm // very fast code
         movzx   edx, byte ptr[eax].TTypeInfo.Name
@@ -29110,7 +29195,7 @@ function TTypeInfo.ClassSQLFieldType: TSQLFieldType;
 var CT: PClassType;
     C,C2: TClass;
 begin
-  CT := AlignToPtr(@Name[ord(Name[0])+1]); // inlined ClassType
+  CT := AlignTypeData(@Name[ord(Name[0])+1]); // inlined ClassType
   C := CT^.ClassType;
   C2 := C;
   while true do // unrolled several InheritsFrom() calls
@@ -29120,7 +29205,7 @@ begin
        (C<>TObjectList) {$ifndef LVCL}and (C<>TCollection){$endif} then
       if CT^.ParentInfo<>nil then begin
         with Deref(CT^.ParentInfo)^ do
-          CT := AlignToPtr(@Name[ord(Name[0])+1]); // get parent ClassType
+          CT := AlignTypeData(@Name[ord(Name[0])+1]); // get parent ClassType
         C := CT^.ClassType;
         if C<>TObject then
           continue else
@@ -29311,7 +29396,7 @@ end;
 
 function TTypeInfo.FloatType: TFloatType;
 begin
-  {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+  {$ifdef FPC}
   result := PFloatType(GetFPCTypeData(@self))^;
   {$else}
   result := TFloatType(PByte(@Name[ord(Name[0])+1])^);
@@ -29320,7 +29405,7 @@ end;
 
 function TTypeInfo.OrdType: TOrdType;
 begin
-  {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+  {$ifdef FPC}
   result := POrdType(GetFPCTypeData(@self))^;
   {$else}
   result := TOrdType(PByte(@Name[ord(Name[0])+1])^);
@@ -29354,17 +29439,21 @@ asm     // very fast code
 end;
 
 function TTypeInfo.SetEnumType: PEnumType;
-{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+{$ifdef FPC}
 var p: pointer;
+    aTest: TYPINFO.PTypeInfo;
 begin
   if (@self=nil) or (Kind<>tkSet) then
     result := nil else begin
     p := GetFPCTypeData(@self);
-    inc(PtrInt(p),sizeof(TOrdType));
-    p := PPointer(AlignToPtr(p))^; // p = info^.SetBaseType
-    if p=nil then
+    {$ifdef FPC_NEWRTTI}
+    aTest := TYPINFO.PTypeData(p)^.CompTypeRef^;
+    {$else}
+    aTest := TYPINFO.PTypeData(p)^.CompType;
+    {$endif}
+    if aTest=nil then
       result := nil else
-      result := DeRef(p)^.EnumBaseType;
+      result := PTypeInfo(aTest)^.EnumBaseType;
   end;
 {$else}
 begin
@@ -29395,7 +29484,7 @@ begin
   if @self=TypeInfo(TSQLRawBlob) then
     result := CP_SQLRAWBLOB else
     if Kind in [{$ifdef FPC}tkAString,{$endif} tkLString] then
-      {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+      {$ifdef FPC}
       result := PWord(GetFPCTypeData(@self))^ else
       {$else}
       result := PWord(@Name[ord(Name[0])+1])^ else // from RTTI
@@ -29418,10 +29507,10 @@ begin
 end;
 
 function TTypeInfo.InterfaceGUID: PGUID;
-{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT} var td: PTypeData; {$endif}
+{$ifdef FPC} var td: PTypeData; {$endif}
 begin
   if (@self=nil) or (Kind<>tkInterface) then result := nil else
-{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT} begin
+{$ifdef FPC} begin
     td := GetFPCTypeData(@self);
     result := @td^.GUID;
   end; {$else}
@@ -29430,11 +29519,11 @@ begin
 end;
 
 function TTypeInfo.InterfaceUnitName: PShortString;
-{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT} var td: PTypeData; {$endif}
+{$ifdef FPC} var td: PTypeData; {$endif}
 begin
   if (@self=nil) or (Kind<>tkInterface) then
     result := @NULL_SHORTSTRING else
-{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT} begin
+{$ifdef FPC} begin
     td := GetFPCTypeData(@self);
     result := @td^.IntfUnit;
   end; {$else}
@@ -29446,7 +29535,7 @@ function TTypeInfo.InterfaceAncestor: PTypeInfo;
 begin
   if (@self=nil) or (Kind<>tkInterface) then
     result := nil else
-    {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+    {$ifdef FPC}
     with PInterfaceTypeData(GetFPCTypeData(@self))^ do
     {$else}
     with PInterfaceTypeData(@Name[ord(Name[0])+1])^ do
@@ -29465,7 +29554,7 @@ begin
   if (@self=nil) or (Kind<>tkInterface) then
     exit;
   n := 0;
-  {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+  {$ifdef FPC}
   typ := PInterfaceTypeData(GetFPCTypeData(@self));
   {$else}
   typ := @Name[ord(Name[0])+1];
@@ -29476,7 +29565,7 @@ begin
     nfo := Deref(typ^.IntfParent);
     if nfo=TypeInfo(IInterface) then
       exit;
-    {$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+    {$ifdef FPC}
     typ := PInterfaceTypeData(GetFPCTypeData(pointer(nfo)));
     {$else}
     typ := @nfo^.Name[ord(nfo^.Name[0])+1];
@@ -32473,6 +32562,15 @@ begin
     if not AddTable(aTable,@ndx) then
       raise EModelException.CreateUTF8('%.AddTableInherited(%)',[self,aTable]);
   result := Tables[ndx];
+end;
+
+function TSQLModel.GetTableInherited(aTable: TSQLRecordClass): TSQLRecordClass;
+var ndx: integer;
+begin
+  ndx := GetTableIndexInheritsFrom(aTable);
+  if ndx<0 then
+    result := aTable else
+    result := Tables[ndx];
 end;
 
 constructor TSQLModel.Create(CloneFrom: TSQLModel);
@@ -36326,8 +36424,17 @@ var resp: RawUTF8;
      status: integer;
 begin
   status := CallBack(mPOST,'CacheFlush/_ping_','',resp);
-  InternalLog('SessionRenewEvent(%) received % from % % (timeout=% min)',
-    [Model.Root,status,SessionServer,SessionVersion,fSessionServerTimeout],sllUserAuth);
+  InternalLog('SessionRenewEvent(%) received status=% count=% from % % (timeout=% min)',
+    [Model.Root,status,JSONDecode(resp,'count'),
+     SessionServer,SessionVersion,fSessionServerTimeout],sllUserAuth);
+end;
+
+procedure TSQLRestClientURI.SetSessionHeartbeatSeconds(timeout: integer);
+begin
+  if (timeout<0) or (timeout=fSessionHeartbeatSeconds) then
+    exit;
+  fSessionHeartbeatSeconds := timeout;
+  TimerEnable(SessionRenewEvent,timeout);
 end;
 
 function TSQLRestClientURI.SessionCreate(aAuth: TSQLRestServerAuthenticationClass;
@@ -36346,9 +36453,9 @@ begin
   aUser := nil; // now owned by this instance
   if fSessionServerTimeout>0 then begin // call _ping_ every half timeout period
     period := fSessionServerTimeout*(60 div 2);
-    if period>3600 then
-      period := 3600; // REST heartbeat at least every hour
-    TimerEnable(SessionRenewEvent,period);
+    if period>25*60 then
+      period := 25*60; // default REST heartbeat at least every 25 minutes
+    SetSessionHeartbeatSeconds(period);
   end;
   result := true;
 end;
@@ -37440,9 +37547,9 @@ begin
   fStatLevels := SERVERDEFAULTMONITORLEVELS;
   fVirtualTableDirect := true; // faster direct Static call by default
   fSessions := TObjectListLocked.Create; // needed by AuthenticationRegister() below
-  fModel := aModel;
   fSQLAuthUserClass := TSQLAuthUser;
   fSQLAuthGroupClass := TSQLAuthGroup;
+  fModel := aModel;
   fSQLRecordVersionDeleteTable := TSQLRecordTableDeleted;
   for t := 0 to high(Model.Tables) do
   if fModel.Tables[t].RecordProps.RecordVersionField<>nil then begin
@@ -37473,7 +37580,7 @@ begin
   fPublishedMethods.InitSpecific(TypeInfo(TSQLRestServerMethods),
     fPublishedMethod,djRawUTF8,nil,true);
   ServiceMethodRegisterPublishedMethods('',self);
-  ServiceMethodByPassAuthentication('Auth');
+  fPublishedMethodAuthIndex := ServiceMethodByPassAuthentication('Auth');
   fPublishedMethodTimeStampIndex := ServiceMethodByPassAuthentication('TimeStamp');
   tmp := 'Batch';
   fPublishedMethodBatchIndex := fPublishedMethods.FindHashed(tmp);
@@ -37558,6 +37665,7 @@ begin
   FreeAndNil(fAssociatedServices);
   ObjArrayClear(fSessionAuthentication);
   inherited Destroy; // calls fServices.Free which will update fStats
+  fJWTForUnauthenticatedRequest.Free;
   FreeAndNil(fStats);
 end;
 
@@ -40028,7 +40136,7 @@ begin
     Call.OutStatus := HTTP_SUCCESS;
     if Handle304NotModified then begin
       clientHash := FindIniNameValue(pointer(Call.InHead),'IF-NONE-MATCH: ');
-      serverHash := '"'+DateTimeToIso8601(FileTime,false)+'"';
+      serverHash := '"'+DateTimeToIso8601(FileTime,false,'T',true)+'"';
       Call.OutHead := Call.OutHead+#13#10'ETag: '+serverHash;
       if clientHash=serverHash then begin
         Call.OutStatus := HTTP_NOTMODIFIED;
@@ -40453,6 +40561,13 @@ begin
         if (rsoRedirectForbiddenToAuth in Options) and (Ctxt.ClientKind=ckAjax) then
           Ctxt.Redirect(Model.Root+'/auth') else
           Ctxt.AuthenticationFailed(afRemoteServiceExecutionNotAllowed) else
+      if (Ctxt.Session=CONST_AUTHENTICATION_NOT_USED) and
+         (fJWTForUnauthenticatedRequest<>nil) and
+         (Ctxt.MethodIndex<>fPublishedMethodTimeStampIndex) and
+         (not(llfSecured in Call.LowLevelFlags) or
+             (llfHttps in Call.LowLevelFlags)) and // HTTPS does not authenticate
+          (fJWTForUnauthenticatedRequest.Verify(Ctxt.AuthenticationBearerToken)<>jwtValid) then
+        Ctxt.AuthenticationFailed(afJWTRequired) else
       // 3. call appropriate ORM / SOA commands in fAcquireExecution[] context
       try
         if Ctxt.MethodIndex>=0 then
@@ -40834,6 +40949,7 @@ begin
 end;
 
 procedure TSQLRestServer.CacheFlush(Ctxt: TSQLRestServerURIContext);
+var i,count: integer;
 begin
   case Ctxt.Method of
   mGET: begin
@@ -40849,9 +40965,14 @@ begin
       // as called from TSQLHttpClientWebsockets.FakeCallbackUnregister
       (Services as TServiceContainerServer).FakeCallbackRelease(Ctxt) else
     if Ctxt.URIBlobFieldName='_ping_' then begin
-      InternalLog('Renew % authenticated session % from %',
-        [Model.Root,Ctxt.Session,Ctxt.SessionRemoteIP],sllUserAuth);
-      Ctxt.Success;
+      count := 0;
+      if Ctxt.Session>CONST_AUTHENTICATION_NOT_USED then
+        for i := 0 to Services.Count-1 do
+          inc(count,TServiceFactoryServer(Services.fList.Objects[i]).
+            RenewSession(Ctxt.Session));
+      InternalLog('Renew % authenticated session % from %: count=%',
+        [Model.Root,Ctxt.Session,Ctxt.SessionRemoteIP,count],sllUserAuth);
+      Ctxt.Returns(['count',count]);
     end;
   end;
 end;
@@ -40882,13 +41003,26 @@ begin
   Ctxt.Call.OutBody := '["OK"]';  // to save bandwith if no adding
 end;
 
+var
+  ServerNonceHmac: THMAC_SHA256;
+
 function ServerNonce(Previous: boolean): RawUTF8;
 var Ticks: cardinal;
+    rnd: THash128;
+    hmac: THMAC_SHA256;
+    res: THash256;
 begin
-  Ticks := GetTickCount64 div (1000*60*5); // valid for 5*60*1000 ms = 5 minutes
+  Ticks := UnixTimeUTC div (60*5); // 5 minutes resolution
   if Previous then
     dec(Ticks);
-  result := SHA256(@Ticks,sizeof(Ticks)); // naive but sufficient nonce
+  while PInteger(@ServerNonceHmac)^=0 do begin
+    TAESPRNG.Main.Fill(rnd); // ensure unpredictable nonce
+    ServerNonceHmac.Init(@rnd,sizeof(rnd));
+  end;
+  hmac := ServerNonceHmac;
+  hmac.Update(@Ticks,sizeof(Ticks));
+  hmac.Done(res,true);
+  result := SHA256DigestToString(res);
 end;
 
 procedure TSQLRestServer.SessionCreate(var User: TSQLAuthUser;
@@ -40980,8 +41114,8 @@ procedure TSQLRestServer.SessionDelete(aSessionIndex: integer;
 begin
   if (self<>nil) and (cardinal(aSessionIndex)<cardinal(fSessions.Count)) then
   with TAuthSession(fSessions.List[aSessionIndex]) do begin
-    if Services is TServiceContainerServer then
-      TServiceContainerServer(Services).OnCloseSession(IDCardinal);
+    if Services<>nil then
+      (Services as TServiceContainerServer).OnCloseSession(IDCardinal);
     if Ctxt=nil then
       InternalLog('Deleted session %:%/%',
         [User.LogonName,IDCardinal,fSessions.Count],sllUserAuth) else
@@ -41209,7 +41343,7 @@ begin
     for i := 0 to Services.Count-1 do
       with TServiceFactoryServer(Services.fList.Objects[i]) do
       if InstanceCreation=sicPerThread then
-        InternalInstanceRetrieve(Inst,SERVICE_METHODINDEX_FREEINSTANCE);
+        InternalInstanceRetrieve(Inst,SERVICE_METHODINDEX_FREEINSTANCE,0);
   end;
   with PServiceRunningContext(@ServiceContext)^ do // P..(@..)^ for ONE GetTls()
     if RunningThread<>nil then  // e.g. if length(TSQLHttpServer.fDBServers)>1
@@ -42246,12 +42380,16 @@ end;
 
 constructor TSQLRestClientURIDll.Create(aModel: TSQLModel; const DllName: TFileName);
 var aRequest: TURIMapRequest;
-    aDLL: cardinal;
+    {$ifdef FPC}
+    aDLL: TLibHandle;
+    {$else}
+    aDLL: THandle;
+    {$endif}
 begin
   {$ifdef KYLIX3}
   aDLL := LoadLibrary(pointer(DllName));
   {$else}
-  {$ifndef MSWINDOWS}
+  {$ifdef FPC}
   aDLL := LoadLibrary(DllName);
   {$else}
   aDLL := LoadLibrary(pointer(DllName));
@@ -44728,6 +44866,7 @@ end;
 procedure TSQLRestStorageInMemory.UpdateFile;
 var F: TFileStream;
     Timer: TPrecisionTimer;
+    ErrorMsg: string;
 begin
   if (self=nil) or not Modified or (FileName='') then
     exit;
@@ -44736,7 +44875,28 @@ begin
   try
     if fValue.Count=0 then
       DeleteFile(FileName) else begin
-      F := TFileStream.Create(FileName,fmCreate);
+      try
+        if FileExists(FileName) then begin
+          {$ifdef Linux}
+          // on Linux, we have to do something special unfortunately ...
+          ErrorMsg := 'Deleting and again creating existing file';
+          DeleteFile(FileName);
+          F := TFileStream.Create(FileName,fmCreate);
+          {$else}
+          ErrorMsg := 'Open existing file';
+          F := TFileStream.Create(FileName,fmOpenWrite);
+          F.Seek(0,soFromBeginning);
+          {$endif}
+        end else
+        begin
+          ErrorMsg := 'Create new file';
+          F := TFileStream.Create(FileName,fmCreate);
+        end;
+      except
+        on E: Exception do
+          raise EORMException.CreateUTF8('% error. Failure in %.UpdateFile(%) due to %',
+           [ErrorMsg,self,FileName,E]);
+      end;
       try
         if BinaryFile then
           SaveToBinary(F) else
@@ -49838,7 +49998,7 @@ begin
     info := PPointer(PPtrInt(Instance)^+vmtTypeInfo)^;
     if info<>nil then begin // avoid GPF if not RTTI for this class
       with info^ do
-        AddShort(PClassType(AlignToPtr(@Name[ord(Name[0])+1]))^.UnitName);
+        AddShort(PClassType(AlignTypeData(@Name[ord(Name[0])+1]))^.UnitName);
       Add('.');
     end;
   end;
@@ -50019,18 +50179,21 @@ end;
 
 procedure TSQLVirtualTableCursor.SetColumn(var aResult: TSQLVar; aValue: Int64);
 begin
+  aResult.Options := [];
   aResult.VType := ftInt64;
   aResult.VInt64 := aValue;
 end;
 
 procedure TSQLVirtualTableCursor.SetColumn(var aResult: TSQLVar; const aValue: double);
 begin
+  aResult.Options := [];
   aResult.VType := ftDouble;
   aResult.VDouble := aValue;
 end;
 
 procedure TSQLVirtualTableCursor.SetColumn(var aResult: TSQLVar; const aValue: RawUTF8);
 begin
+  aResult.Options := [];
   aResult.VType := ftUTF8;
   fColumnTemp := aValue; // temporary copy available until next Column() call
   aResult.VText := pointer(fColumnTemp);
@@ -50039,6 +50202,7 @@ end;
 procedure TSQLVirtualTableCursor.SetColumn(var aResult: TSQLVar;
   aValue: PUTF8Char; aValueLength: integer);
 begin
+  aResult.Options := [];
   aResult.VType := ftUTF8;
   SetString(fColumnTemp,PAnsiChar(aValue),aValueLength); // temporary copy
   aResult.VText := pointer(fColumnTemp);
@@ -50047,10 +50211,28 @@ end;
 procedure TSQLVirtualTableCursor.SetColumnBlob(var aResult: TSQLVar;
   aValue: pointer; aValueLength: integer);
 begin
+  aResult.Options := [];
   aResult.VType := ftBlob;
   SetString(fColumnTemp,PAnsiChar(aValue),aValueLength); // temporary copy
   aResult.VBlob := pointer(fColumnTemp);
   aResult.VBlobLen := aValueLength;
+end;
+
+procedure TSQLVirtualTableCursor.SetColumnDate(var aResult: TSQLVar; const aValue: TDateTime;
+  aWithMS: boolean);
+begin
+  if aWithMS then
+    aResult.Options := [svoDateWithMS] else
+    aResult.Options := [];
+  aResult.VType := ftDate;
+  aResult.VDateTime := aValue;
+end;
+
+procedure TSQLVirtualTableCursor.SetColumnCurr64(var aResult: TSQLVar; aValue64: PInt64);
+begin
+  aResult.Options := [];
+  aResult.VType := ftCurrency;
+  PInt64(@aResult.VCurrency)^ := aValue64^; 
 end;
 
 
@@ -50333,7 +50515,7 @@ begin
     exit;
   case aColumn of
    -1: SetColumn(aResult,fCurrent+1); // ID = row index + 1
-    0: SetColumn(aResult,LogFile.EventDateTime(fCurrent));
+    0: SetColumnDate(aResult,LogFile.EventDateTime(fCurrent),true);
     1: SetColumn(aResult,ord(LogFile.EventLevel[fCurrent]));
     2: SetColumn(aResult,LogFile.LinePointers[fCurrent],LogFile.LineSize(fCurrent));
     else exit;
@@ -50835,7 +51017,7 @@ begin
     exit;
   try
     Sender.SessionClose;  // ensure Sender.SessionUser=nil
-    U := TSQLAuthUser.Create;
+    U := TSQLAuthUser(Sender.Model.GetTableInherited(TSQLAuthUser).Create);
     try
       U.LogonName := trim(aUserName);
       U.DisplayName := U.LogonName;
@@ -51091,7 +51273,7 @@ begin
   try // inherited ClientSetUser() won't fit with Auth() method below
     ClientSetUserHttpOnly(Sender,aUserName,aPassword);
     Sender.fSessionAuthentication := self; // to enable ClientSessionSign()
-    U := TSQLAuthUser.Create;
+    U := TSQLAuthUser(Sender.Model.GetTableInherited(TSQLAuthUser).Create);
     try
       U.LogonName := trim(aUserName);
       res := ClientGetSessionKey(Sender,U,[]);
@@ -52582,6 +52764,15 @@ begin
   result := nil;
 end;
 
+function ToText(const aGUID: TGUID): TGUIDShortString;
+var fact: TInterfaceFactory;
+begin
+  fact := TInterfaceFactory.Get(aGUID);
+  if fact=nil then
+    GUIDToShort(aGUID,result) else
+    result := fact.fInterfaceTypeInfo^.Name;
+end;
+
 class procedure TInterfaceFactory.AddToObjArray(var Obj: TInterfaceFactoryObjArray;
   const aGUIDs: array of TGUID);
 var i: integer;
@@ -52647,7 +52838,11 @@ var m,a,reg: integer;
     fpreg: integer;
     {$endif}
     {$endif}
-label error;
+  procedure RaiseError(const Args: array of const);
+  begin
+    raise EInterfaceFactoryException.CreateUTF8(
+     '%.Create: %.% "%" parameter has unexpected type %%',Args);
+  end;
 begin
   if aInterface=nil then
     raise EInterfaceFactoryException.CreateUTF8('%.Create(nil)',[self]);
@@ -52719,19 +52914,17 @@ begin
         tkInteger: ErrorMsg := ' - use integer/cardinal instead';
         tkFloat:   ErrorMsg := ' - use double/currency instead';
         end;
-error:  raise EInterfaceFactoryException.CreateUTF8(
-          '%.Create: %.% "%" parameter has unexpected type %%',
-          [self,aInterface^.Name,URI,ParamName^,ArgTypeInfo^.Name,ErrorMsg]);
+        RaiseError([self,aInterface^.Name,URI,ParamName^,ArgTypeInfo^.Name,ErrorMsg]);
       end;
       smvObject:
         if ValueDirection=smdResult then begin
           ErrorMsg := ' - class not allowed as function result: use a var/out parameter';
-          goto error;
+          RaiseError([self,aInterface^.Name,URI,ParamName^,ArgTypeInfo^.Name,ErrorMsg]);
         end;
       smvInterface:
         if ValueDirection in [smdVar,smdOut,smdResult] then begin
           ErrorMsg := ' - interface not allowed as output: use a const parameter';
-          goto error;
+          RaiseError([self,aInterface^.Name,URI,ParamName^,ArgTypeInfo^.Name,ErrorMsg]);
         end;
       end;
       if ValueDirection=smdResult then
@@ -53355,7 +53548,11 @@ begin
           PByte(P)^ := $e8; inc(PByte(P));         // call FakeCall
           P^ := PtrUInt(@TInterfacedObjectFake.FakeCall)-PtrUInt(P)-4; inc(P);
           P^ := $c25dec89; inc(P);                 // mov esp,ebp; pop ebp
+          {$ifdef Darwin}
+          P^ := $900000;  // ret; nop
+          {$else}
           P^ := fMethods[i].ArgsSizeInStack or $900000;  // ret {StackSize}; nop
+          {$endif}
           inc(PByte(P),3);
           {$endif CPUX86}
         end;
@@ -53373,26 +53570,35 @@ end;
 { TInterfaceFactoryRTTI }
 
 procedure TInterfaceFactoryRTTI.AddMethodsFromTypeInfo(aInterface: PTypeInfo);
+const
+  {$if defined(CPUI386) or defined(CPUI8086) or defined(CPUX86_64) or defined(CPUM68K)}
+  DEFCC = ccRegister;
+  {$else}
+  DEFCC = ccStdCall;
+  {$ifend}
 var P: Pointer;
-    PB: PByte absolute P;
-    PI: PInterfaceTypeData absolute P;
     {$ifdef FPC}
-    PIR: PRawInterfaceTypeData absolute P;
-    {$endif}
-    PW: PWord absolute P;
+    PI: TYPINFO.PInterfaceData;
+    VMP: PVmtMethodParam;
+    methtable: PIntfMethodTable;
+    PME: PIntfMethodEntry;
+    PW: PWord;
+    aResultType: PTypeInfo;
+    methodindex,argsindex: word;
+    {$else}
+    PI: PInterfaceTypeData absolute P;
+    PB: PByte absolute P;
     PS: PShortString absolute P;
     PME: ^TIntfMethodEntryTail absolute P;
     PF: ^TParamFlags absolute P;
     PP: ^PPTypeInfo absolute P;
-    Ancestor: PTypeInfo;
-    {$ifdef FPC}
-    propCount: integer;
-    aResultType: PTypeInfo;
-    {$else}
-    Kind: TMethodKind;
+    PW: PWord absolute P;
     {$endif}
+    Ancestor: PTypeInfo;
+    Kind: TMethodKind;
     f: TParamFlags;
-    m,a: integer;
+    m: integer;
+    paramcounter: word;
     n: cardinal;
     aURI: RawUTF8;
 
@@ -53406,59 +53612,73 @@ var P: Pointer;
 begin
   // handle interface inheritance via recursive calls
   P := aInterface^.ClassType;
+  {$ifdef FPC}
+  PI := TYPINFO.PInterfaceData(GetFPCTypeData(pointer(aInterface)));
+  if PI^.Parent<>nil then
+    Ancestor := Deref(MORMOT.PPTypeInfo(PI^.Parent)) else
+  {$else}
   if PI^.IntfParent<>nil then
     Ancestor := Deref(PI^.IntfParent) else
+  {$endif}
     Ancestor := nil;
   if Ancestor<>nil then begin
     AddMethodsFromTypeInfo(Ancestor);
     inc(fAddMethodsLevel);
   end;
-  // retrieve methods for this interface level
   {$ifdef FPC}
-  if PI^.IntfUnit='System' then
+  if PI^.UnitName='System' then
     exit;
-  if aInterface^.Kind=tkInterface then
-    P := AlignToPtr(@PI^.IntfUnit[ord(PI^.IntfUnit[0])+1]) else
-    P := AlignToPtr(@PIR^.IIDStr[ord(PIR^.IIDStr[0])+1]);
-  propCount := PSmallInt(P)^; // FPC add property information -> ignore now
-  inc(P,sizeOf(SmallInt));
-  P := AlignToPtr(P);
-  for a := 0 to propCount-1 do
-    P := AlignToPtr(@PPropInfo(P)^.Name[ord(PPropInfo(P)^.Name[0])+1]);
+  // retrieve methods for this interface level
+  methtable := PI^.MethodTable;
+  n:= methtable^.Count;
+  PW := @methtable^.RttiCount;
   {$else}
   P := AlignToPtr(@PI^.IntfUnit[ord(PI^.IntfUnit[0])+1]);
-  {$endif}
   n := PW^; inc(PW);
+  {$endif}
   if (PW^=$ffff) or (n=0) then
     exit; // no RTTI or no method at this level of interface
+  {$ifdef FPC}
+  methodindex:=0;
+  {$else}
   inc(PW);
   p := aligntoptr(p);
+  {$endif}
   for m := fMethodsCount to fMethodsCount+n-1 do begin
     // retrieve method name, and add to the methods list (with hashing)
+    {$ifdef FPC_NEWRTTI}
+    PME := methtable^.Method[methodindex];
+    Inc(methodindex);
+    aURI := PME^.Name;
+    {$else}
     SetString(aURI,PAnsiChar(@PS^[1]),ord(PS^[0]));
+    {$endif}
     with PServiceMethod(fMethod.AddUniqueName(aURI,
       '%.% method: duplicated name for %',[fInterfaceTypeInfo^.Name,aURI,self]))^ do begin
       HierarchyLevel := fAddMethodsLevel;
-      {$ifdef FPC} // FPC has its own RTTI layout only since late 3.x
-      inc(PB,ord(PS^[0])+1);
-      inc(PB); // skip Version field (always 3)
-      {$ifdef CPUINTEL}
-      if PCallingConvention(P)^<>ccRegister then
+      {$ifdef FPC}
+      aResultType := Deref(MORMOT.PPTypeInfo(PME^.ResultType));
+      Kind := MORMOT.TMethodKind(PME^.Kind);
+      if TCallingConvention(PME^.CC)<>DEFCC then
+        RaiseError('method uses wrong calling convention',[]);
+      {$else}
+      PS := AlignToPtr(@PS^[ord(PS^[0])+1]); // skip method name in Delphi
+      Kind := PME^.Kind;
+      if PME^.CC<>ccRegister then
          RaiseError('method shall use register calling convention',[]);
-      {$endif CPUINTEL}
-      inc(PB,sizeOf(TCallingConvention));
-      P := AlignToPtr(P);// new Alignment
-      aResultType := DeRef(PP^);
-      inc(PP);
-      inc(PW); // skip StackSize
-      n := PB^;
-      inc(PB);
-      P := AlignToPtr(P);// new Alignment
-      if aResultType<>nil then  // we have a function
+      {$endif}
+      // retrieve method call arguments from RTTI
+      n := PME^.ParamCount;
+      {$ifndef FPC}
+       // skip ParamCount in Delphi
+      inc(PME);
+      {$endif}
+      if Kind=mkFunction then
         SetLength(Args,n+1) else
         SetLength(Args,n);
       if length(Args)>MAX_METHOD_ARGS then
          RaiseError('method has too many parameters: %>%',[Length(Args),MAX_METHOD_ARGS]);
+      {$ifdef FPC}
       if aResultType<>nil then
       with Args[n] do begin
         ParamName := @CONST_PSEUDO_RESULT_NAME;
@@ -53468,19 +53688,25 @@ begin
           ArgTypeName := @CONST_INTEGER_NAME else
           ArgTypeName := @ArgTypeInfo^.Name;
       end;
-      for a := 0 to n-1 do
-      with Args[a],PVmtMethodParam(P)^ do begin
-        f := mORMot.TParamFlags(Flags);
+      argsindex:=0;
+      {$endif}
+      paramcounter:=0;
+      while paramcounter < n do
+      {$ifdef FPC} // FPC has its own RTTI layout
+      begin
+        VMP:=PME^.Param[paramcounter];
+        f := mORMot.TParamFlags(VMP^.Flags);
+        with Args[argsindex] do begin
         if pfVar in f then
           ValueDirection := smdVar else
         if pfOut in f then
           ValueDirection := smdOut;
-        ArgsNotResultLast := a;
+          ArgsNotResultLast := argsindex;
         if ValueDirection<>smdConst then
-          ArgsOutNotResultLast := a;
-          ArgTypeInfo := mORMot.PTypeInfo(Deref(mORMot.PPTypeInfo(ParamType)));
+            ArgsOutNotResultLast := argsindex;
+        ArgTypeInfo := mORMot.PTypeInfo(Deref(mORMot.PPTypeInfo(VMP^.ParamType)));
         ArgTypeName := @ArgTypeInfo^.Name;
-        if a>0 then
+        if paramcounter>0 then
         case TypeInfoToMethodValueType(ArgTypeInfo) of
         smvRecord,smvDynArray:
           if f*[pfConst,pfVar,pfOut{$IFDEF FPC_HAS_CONSTREF},pfConstRef{$endif}]=[] then
@@ -53491,42 +53717,42 @@ begin
              RaiseError('%: % parameter should be declared as const',
                [ParamName^,ArgTypeName^]);
         end;
-        if Name='$self' then
-          ParamName := @CONST_PSEUDO_SELF_NAME else
-          ParamName := @Name;
-        P := AlignToPtr(@Name[ord(Name[0])+1]);
+        if pfSelf in f then
+            ParamName := @CONST_PSEUDO_SELF_NAME else
+          if pfResult in f then begin
+            if (paramcounter <> n-1) or (High(Args) <> paramcounter+1) then begin
+              // at least on ARM, function (result) is on paramcounter different position than on x86
+              // so, cleanup and re-use array for next param entry
+              FillcharFast(Args[argsindex],SizeOf(TServiceMethodArgument),0);
+              // needed for re-use due to following Inc(argsindex) ... see below
+              Dec(argsindex);
+            end;
+            Args[n-1]:=Args[n];
+            SetLength(Args,n);
+          end else
+            ParamName := @VMP^.Name;
+        end;
+        Inc(paramcounter);
+        Inc(argsindex);
       end;
       {$else FPC} // Delphi code
-      PS := AlignToPtr(@PS^[ord(PS^[0])+1]);
-      Kind := PME^.Kind;
-      if PME^.CC<>ccRegister then
-        RaiseError('method shall use register calling convention',[]);
-      // retrieve method call arguments from RTTI
-      n := PME^.ParamCount;
-      inc(PME);
-      if Kind=mkFunction then
-        SetLength(Args,n+1) else
-        SetLength(Args,n);
-      if length(Args)>MAX_METHOD_ARGS then
-        RaiseError('method has too many parameters: %>%',[Length(Args),MAX_METHOD_ARGS]);
-      for a := 0 to n-1 do
-      with Args[a] do begin
+      with Args[paramcounter] do begin
         f := PF^;
         inc(PF);
         if pfVar in f then
           ValueDirection := smdVar else
         if pfOut in f then
           ValueDirection := smdOut;
-        ArgsNotResultLast := a;
+        ArgsNotResultLast := paramcounter;
         if ValueDirection<>smdConst then
-          ArgsOutNotResultLast := a;
+          ArgsOutNotResultLast := paramcounter;
         ParamName := PS;
         PS := AlignToPtr(@PS^[ord(PS^[0])+1]);
         SetFromRTTI(PB);
         {$ifdef ISDELPHIXE}
         inc(PB,PW^); // skip custom attributes
         {$endif}
-        if a>0 then
+        if paramcounter>0 then
         case TypeInfoToMethodValueType(ArgTypeInfo) of
         smvRecord,smvDynArray:
           if f*[pfConst,pfVar,pfOut]=[] then
@@ -53537,6 +53763,7 @@ begin
             RaiseError('%: % parameter should be declared as const',
               [ParamName^,ArgTypeName^]);
         end;
+        Inc(paramcounter);
       end;
       // add a pseudo argument after all arguments for functions
       if Kind=mkFunction then
@@ -55686,14 +55913,34 @@ begin
 end;
 
 procedure TServiceContainerServer.OnCloseSession(aSessionID: cardinal);
-var i: Integer;
-    Inst: TServiceFactoryServerInstance;
+var i,j: Integer;
+    P: ^TServiceFactoryServerInstance;
+    fact: TServiceFactoryServer;
+    inst: TServiceFactoryServerInstance;
 begin
-  Inst.InstanceID := aSessionID;
-  for i := 0 to Count-1 do
-    with TServiceFactoryServer(Index(i)) do
-    if InstanceCreation=sicPerSession then
-      InternalInstanceRetrieve(Inst,SERVICE_METHODINDEX_FREEINSTANCE);
+  for i := 0 to Count-1 do begin
+    fact := TServiceFactoryServer(fList.Objects[i]);
+    if fact.fInstanceCount>0 then
+    case fact.InstanceCreation of
+    sicPerSession: begin
+      inst.InstanceID := aSessionID;
+      fact.InternalInstanceRetrieve(inst,SERVICE_METHODINDEX_FREEINSTANCE,aSessionID);
+    end;
+    sicClientDriven: begin // release ASAP if was not notified by client
+      EnterCriticalSection(fact.fInstanceLock);
+      try
+        P := pointer(fact.fInstances);
+        for j := 1 to fact.fInstanceCapacity do begin
+          if P^.Session=aSessionID then
+            P^.SafeFreeInstance(fact);
+          inc(P);
+        end;
+      finally
+        LeaveCriticalSection(fact.fInstanceLock);
+      end;
+    end;
+    end;
+  end;
 end;
 
 constructor TServiceContainerServer.Create(aRest: TSQLRest);
@@ -56289,8 +56536,7 @@ constructor TServiceFactoryServer.Create(aRestServer: TSQLRestServer;
   aTimeOutSec: cardinal; aSharedInstance: TInterfacedObject);
 begin
   // extract RTTI from the interface
-  if aInstanceCreation<>sicPerThread then
-    InitializeCriticalSection(fInstanceLock);
+  InitializeCriticalSection(fInstanceLock);
   inherited Create(aRestServer,aInterface,aInstanceCreation,aContractExpected);
   if fRest.MethodAddress(ShortString(InterfaceURI))<>nil then
     raise EServiceException.CreateUTF8('%.Create: I% already exposed as % published method',
@@ -56345,7 +56591,7 @@ begin
       fInstanceCreation := sicSingle else begin
       // only instances list is protected, since client calls shall be pipelined
       fInstance.InitSpecific(TypeInfo(TServiceFactoryServerInstanceDynArray),
-        fInstances,djCardinal,@fInstancesCount); // sort by InstanceID: cardinal
+        fInstances,djCardinal,@fInstanceCapacity); // sort by InstanceID: cardinal
       fInstanceTimeOut := aTimeOutSec*1000;
     end;
   end;
@@ -56377,6 +56623,9 @@ end;
 destructor TServiceFactoryServer.Destroy;
 var i: integer;
 begin
+  if fInstanceCount>0 then
+    Rest.InternalLog('%.Destroy for I% %: fInstanceCount=%',[ClassType,fInterfaceURI,
+      ToText(InstanceCreation)^,fInstanceCount],sllDebug);
   try
     for i := 0 to High(fLogRestBatch) do begin
       with fLogRestBatch[i] do begin
@@ -56390,11 +56639,10 @@ begin
       end;
       FreeAndNil(fLogRestBatch[i]);
     end;
-    if InstanceCreation<>sicPerThread then
-      EnterCriticalSection(fInstanceLock);
+    EnterCriticalSection(fInstanceLock);
     try // release any internal instance (should have been done by client)
       try
-        for i := 0 to fInstancesCount-1 do
+        for i := 0 to fInstanceCapacity-1 do
           if fInstances[i].Instance<>nil then
             fInstances[i].SafeFreeInstance(self);
       finally
@@ -56406,13 +56654,11 @@ begin
       ; // better ignore any error in business logic code
     end;
   finally
-    if InstanceCreation<>sicPerThread then
-      LeaveCriticalSection(fInstanceLock);
+    LeaveCriticalSection(fInstanceLock);
   end;
-  if InstanceCreation<>sicPerThread then
-    DeleteCriticalSection(fInstanceLock);
+  DeleteCriticalSection(fInstanceLock);
   ObjArrayClear(fStats);
-  inherited;
+  inherited Destroy;
 end;
 
 function TServiceFactoryServer.Get(out Obj): Boolean;
@@ -56430,7 +56676,7 @@ begin
   sicPerThread: begin
     Inst.Instance := nil;
     Inst.InstanceID := PtrUInt(GetCurrentThreadId);
-    if (InternalInstanceRetrieve(Inst,0)=0) and (Inst.Instance<>nil) then
+    if (InternalInstanceRetrieve(Inst,0,0)=0) and (Inst.Instance<>nil) then
       result := GetInterfaceFromEntry(Inst.Instance,fImplementationClassInterfaceEntry,Obj);
   end;
   else begin // no user/group/session on pure server-side -> always sicSingle
@@ -56452,10 +56698,39 @@ begin
     result := Contract; // just return the current value
 end;
 
+function TServiceFactoryServer.RenewSession(aSession: cardinal): integer;
+var tix: Int64;
+    i: integer;
+    P: ^TServiceFactoryServerInstance;
+begin
+  result := 0;
+  if (self=nil) or (fInstanceCount=0) or (aSession<=CONST_AUTHENTICATION_NOT_USED) or
+     not(fInstanceCreation in [sicClientDriven,sicPerSession]) then
+    exit;
+  tix := GetTickCount64;
+  EnterCriticalSection(fInstanceLock);
+  try
+    P := pointer(fInstances);
+    for i := 1 to fInstanceCapacity do begin
+      if P^.Session=aSession then begin
+        P^.LastAccess64 := tix;
+        inc(result);
+      end;
+      inc(P);
+    end;
+  finally
+    LeaveCriticalSection(fInstanceLock);
+  end;
+end;
+
 procedure TServiceFactoryServerInstance.SafeFreeInstance(Factory: TServiceFactoryServer);
 var Obj: TInterfacedObject;
 begin
+  if Instance=nil then
+    exit; // nothing to release
+  dec(Factory.fInstanceCount);
   InstanceID := 0;
+  Session := 0;
   Obj := Instance;
   Instance := nil;
   try
@@ -56476,45 +56751,49 @@ begin
 end;
 
 function TServiceFactoryServer.InternalInstanceRetrieve(
-  var Inst: TServiceFactoryServerInstance; aMethodIndex: integer): integer;
+  var Inst: TServiceFactoryServerInstance; aMethodIndex,aSession: integer): integer;
   procedure AddNew;
   var i: integer;
       P: ^TServiceFactoryServerInstance;
   begin
+    Inst.Session := aSession;
     Inst.Instance := CreateInstance(true);
     if Inst.Instance=nil then
       exit;
-    fRest.InternalLog('%.InternalInstanceRetrieve: Adding %(%) instance (id=%)',
-      [ClassType,fInterfaceURI,pointer(Inst.Instance),Inst.InstanceID],sllDebug);
+    inc(fInstanceCount);
+    fRest.InternalLog('%.InternalInstanceRetrieve: Adding %(%) instance (id=%) count=%',
+      [ClassType,fInterfaceURI,pointer(Inst.Instance),Inst.InstanceID,fInstanceCount],sllDebug);
     P := pointer(fInstances);
-    for i := 1 to fInstancesCount do
+    for i := 1 to fInstanceCapacity do
       if P^.InstanceID=0 then begin
         P^ := Inst; // found an empty entry -> re-use it
         exit;
       end else
-      inc(P);
+        inc(P);
     fInstance.Add(Inst); // append a new entry
   end;
 var i: integer;
+    P: ^TServiceFactoryServerInstance;
 begin
   result := 0;
-  if InstanceCreation<>sicPerThread then
-    EnterCriticalSection(fInstanceLock);
+  EnterCriticalSection(fInstanceLock);
   try
     Inst.LastAccess64 := GetTickCount64;
     // first release any deprecated instances
-    if fInstanceTimeout<>0 then
-    for i := fInstancesCount-1 downto 0 do
-      with fInstances[i] do
-      if InstanceID<>0 then
-      if Inst.LastAccess64>LastAccess64+fInstanceTimeout then begin
-        // deprecated -> mark this entry as empty
-        fRest.InternalLog('%.InternalInstanceRetrieve: Delete %(%) instance '+
-          '(id=%) after % minutes timeout (max % minutes)',[ClassType,fInterfaceURI,
-           pointer(Inst.Instance),InstanceID,(Inst.LastAccess64-LastAccess64)div 60000,
-           fInstanceTimeOut div 60000],sllInfo);
-        SafeFreeInstance(self);
+    if (fInstanceTimeout<>0) and (fInstanceCount>0) then begin
+      P := pointer(fInstances);
+      for i := 1 to fInstanceCapacity do begin
+        if (P^.InstanceID<>0) and
+           (Inst.LastAccess64>P^.LastAccess64+fInstanceTimeOut) then begin
+          fRest.InternalLog('%.InternalInstanceRetrieve: Delete %(%) instance '+
+            '(id=%) after % minutes timeout (max % minutes)',[ClassType,fInterfaceURI,
+             pointer(Inst.Instance),P^.InstanceID,(Inst.LastAccess64-P^.LastAccess64)div 60000,
+             fInstanceTimeOut div 60000],sllInfo);
+          P^.SafeFreeInstance(self);
+        end;
+        inc(P);
       end;
+    end;
     if Inst.InstanceID=0 then begin
       // initialize a new sicClientDriven instance
       if (cardinal(aMethodIndex)>=fInterface.fMethodsCount) or
@@ -56525,27 +56804,29 @@ begin
       AddNew;
     end else begin
       // search the instance corresponding to Inst.InstanceID
-      for i := 0 to fInstancesCount-1 do
-        with fInstances[i] do
-        if InstanceID=Inst.InstanceID then begin
-          if aMethodIndex=SERVICE_METHODINDEX_FREEINSTANCE then begin
-            // aMethodIndex=-1 for {"method":"_free_", "params":[], "id":1234}
-            SafeFreeInstance(self);
-            result := SERVICE_METHODINDEX_FREEINSTANCE; // notify caller 
+      if fInstanceCount>0 then begin
+        P := pointer(fInstances);
+        for i := 1 to fInstanceCapacity do
+          if P^.InstanceID=Inst.InstanceID then begin
+            if aMethodIndex=SERVICE_METHODINDEX_FREEINSTANCE then begin
+              // aMethodIndex=-1 for {"method":"_free_", "params":[], "id":1234}
+              P^.SafeFreeInstance(self);
+              result := SERVICE_METHODINDEX_FREEINSTANCE; // notify caller
+              exit;
+            end;
+            P^.LastAccess64 := Inst.LastAccess64;
+            Inst.Instance := P^.Instance;
             exit;
-          end;
-          LastAccess64 := Inst.LastAccess64;
-          Inst.Instance := Instance;
-          exit;
-        end;
+          end else
+            inc(P);
+      end;
       // add any new session/user/group/thread instance if necessary
       if (InstanceCreation<>sicClientDriven) and
          (cardinal(aMethodIndex)<fInterface.fMethodsCount) then
         AddNew;
     end;
   finally
-    if InstanceCreation<>sicPerThread then
-      LeaveCriticalSection(fInstanceLock);
+    LeaveCriticalSection(fInstanceLock);
   end;
 end;
 
@@ -56605,7 +56886,7 @@ begin
       W.AddString(InterfaceDotMethodName);
       W.AddShort('",Input:{'); // as TSQLPropInfoRTTIVariant.GetJSONValues
       if optNoLogInput in Sender.fOptions then
-        W.AddShort('optNoLogInput:true') else
+        W.AddShort('optNoLog:true') else
         for a := ArgsInFirst to ArgsInLast do
         with Args[a] do
         if (ValueDirection<>smdOut) and (ValueType<>smvInterface) then begin
@@ -56617,8 +56898,12 @@ begin
     end;
     smsAfter: begin
       W.AddShort('},Output:{');
+      if fExcludeServiceLogCustomAnswer and ArgsResultIsServiceCustomAnswer then begin
+        W.AddShort('customanswerlen:');
+        W.Add(length(PServiceCustomAnswer(Sender.Values[ArgsResultIndex])^.Content));
+      end else
       if optNoLogOutput in Sender.fOptions then
-        W.AddShort('optNoLogOutput:true') else
+        W.AddShort('optNoLog:true') else
         for a := ArgsOutFirst to ArgsOutLast do
         with Args[a] do
         if ValueDirection in [smdVar,smdOut,smdResult] then begin
@@ -56724,7 +57009,7 @@ begin
             exit;
           end;
       end;
-      if InternalInstanceRetrieve(Inst,Ctxt.ServiceMethodIndex)=SERVICE_METHODINDEX_FREEINSTANCE then begin
+      if InternalInstanceRetrieve(Inst,Ctxt.ServiceMethodIndex,Ctxt.Session)=SERVICE_METHODINDEX_FREEINSTANCE then begin
         Ctxt.Success; // {"method":"_free_", "params":[], "id":1234}
         exit;
       end;
@@ -57685,11 +57970,13 @@ end;
 procedure TRawUTF8ObjectCacheList.Log(const TextFmt: RawUTF8; const TextArgs: array of const;
   Level: TSynLogInfo);
 begin
+  {$ifdef WITHLOG}
   if (self=nil) or (fLog=nil) then
     exit;
   if Level=sllNone then
     Level := fLogEvent;
   fLog.SynLog.Log(Level, TextFmt, TextArgs, self);
+  {$endif}
 end;
 
 function TRawUTF8ObjectCacheList.NewObjectCache(const Key: RawUTF8): TRawUTF8ObjectCache;

@@ -82,6 +82,7 @@ type
     property DBFrame: TDBFrameDynArray read fDBFrame;
     property ChatPage: TSynPage read fChatPage;
     property ChatFrame: TLogFrame read fChatFrame;
+    property Admin: IAdministratedDaemon read fAdmin;
   end;
 
   TAdminForm = class(TSynForm)
@@ -345,8 +346,8 @@ begin
   fPages[n] := result;
 end;
 
-function TAdminControl.AddDBFrame(const aCaption, aDatabaseName: RawUTF8; aClass:
-  TDBFrameClass): TDBFrame;
+function TAdminControl.AddDBFrame(const aCaption, aDatabaseName: RawUTF8;
+  aClass: TDBFrameClass): TDBFrame;
 var
   page: TSynPage;
   n: integer;
@@ -430,7 +431,7 @@ procedure TAdminControl.SaveOrExport(Fmt: TAdminSaveOrExport;
 var
   grid: TSQLTable;
   row: integer;
-  table: RawUTF8;
+  name, table: RawUTF8;
 begin
   if DB = nil then
     DB := CurrentDBFrame;
@@ -440,12 +441,14 @@ begin
   if (grid = nil) or (grid.RowCount = 0) then
     exit;
   if Fmt = expSaveGrid then begin
+    if PropNameValid(pointer(db.GridLastTableName)) then
+      name := db.GridLastTableName;
     fDlgSave.FileName := SysUtils.Trim(Format('%s %s %s',
-      [ContextName, db.GridLastTableName, NowToString(false)]));
+      [ContextName, name, NowToString(false)]));
     if not fDlgSave.Execute then
       exit;
     case fDlgSave.FilterIndex of
-      1:                  
+      1:
         JSONBufferReformat(pointer(grid.GetJSONValues(true)), table);
       2:
         table := grid.GetJSONValues(true);
