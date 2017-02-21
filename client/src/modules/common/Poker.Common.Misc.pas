@@ -131,6 +131,7 @@ begin
        (method.Invoke(AObject, []).AsBoolean) then
       result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
   end;
+  result := TrimRight(result);
 end;
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
