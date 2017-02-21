@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ChangeEMailParams = class(TProtobufBaseObject)
   private
     const
@@ -34,6 +35,7 @@ type
     // required string NewMail = 1;
     function has_NewMail: Boolean;
     procedure clear_NewMail;
+  published
     property NewMail: String read FNewMail write SetNewMail;
   end;
 

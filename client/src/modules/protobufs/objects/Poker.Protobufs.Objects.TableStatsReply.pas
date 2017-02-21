@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TablePlayerStats;
 
 type
+  {$RTTI INHERIT}
   TPB_TableStatsReply = class(TProtobufBaseObject)
   private
     const
@@ -53,21 +54,22 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TMongoId read FClubid write SetClubid;
 
     // required bytes Gameid = 2;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TMongoId read FGameid write SetGameid;
 
     // repeated TablePlayerStats Playerstats = 3;
     function has_Playerstats: Boolean;
     procedure clear_Playerstats;
-    property Playerstats: TList<TPB_TablePlayerStats> read FPlayerstats;
 
     // optional uint32 Hands = 4;
     function has_Hands: Boolean;
     procedure clear_Hands;
+  published
+    property Clubid: TMongoId read FClubid write SetClubid;
+    property Gameid: TMongoId read FGameid write SetGameid;
+    property Playerstats: TList<TPB_TablePlayerStats> read FPlayerstats;
     property Hands: UInt32 read FHands write SetHands;
   end;
 

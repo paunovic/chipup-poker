@@ -558,9 +558,11 @@ class BaseGenerator : public CodeGenerator {
       }
       delete[] types;
     }
-			printer.Print(";\n"
-				"\n"
-				"type\n");
+    printer.Print(";\n"
+        "\n"
+        "type\n"
+        "  {$$RTTI INHERIT}\n"
+        );
 
     for (int j=0; j < message->enum_type_count(); j++) {
 				const EnumDescriptor *enum_type = message->enum_type(j);
@@ -639,26 +641,34 @@ class BaseGenerator : public CodeGenerator {
       const FieldDescriptor *field = message->field(j);
       TypeInfo instance = typeinfo[field->type()]->getInstance(field);
 
-				vars["pname"] = instance.PrivateFieldName();
-				vars["name"] = instance.PropertyName();
-				snprintf(hack,10,"%d",field->number());
-				vars["number"] = hack;
-				vars["type"] = instance.getDelphiName();
-				vars["label"] = instance.getLabelString();
-				vars["typename"] = instance.getTypeName();
+      vars["name"] = instance.PropertyName();
+      snprintf(hack,10,"%d",field->number());
+      vars["number"] = hack;
+      vars["label"] = instance.getLabelString();
+      vars["typename"] = instance.getTypeName();
 
-				printer.Print(vars,
-					"    // $label$ $typename$ $name$ = $number$;\n"
-					"    function has_$name$: Boolean;\n"
-					"    procedure clear_$name$;\n");
+      printer.Print(vars,
+          "    // $label$ $typename$ $name$ = $number$;\n"
+          "    function has_$name$: Boolean;\n"
+          "    procedure clear_$name$;\n");
+
+      if (j<message->field_count() - 1)
+        printer.Print("\n");
+    }
+    printer.Print("  published\n");
+    for (int j=0; j<message->field_count(); j++) {
+      const FieldDescriptor *field = message->field(j);
+      TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+
+      vars["pname"] = instance.PrivateFieldName();
+      vars["name"] = instance.PropertyName();
+      vars["type"] = instance.getDelphiName();
 
       if (field->label() == FieldDescriptor::LABEL_REPEATED) {
         printer.Print(vars,"    property $name$: $type$ read $pname$;\n");
       } else {
         printer.Print(vars,"    property $name$: $type$ read $pname$ write Set$name$;\n");
       }
-      if (j<message->field_count() - 1)
-        printer.Print("\n");
     }
     printer.Print(
         "  end;\n\n"

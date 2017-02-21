@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TMemberStatus = (msActive = 0, msSuspended, msPending);
 
   TPB_ClubMember = class(TProtobufBaseObject)
@@ -66,36 +67,37 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional MemberStatus Status = 2;
     function has_Status: Boolean;
     procedure clear_Status;
-    property Status: TMemberStatus read FStatus write SetStatus;
 
     // optional uint32 BalanceLimit = 3;
     function has_BalanceLimit: Boolean;
     procedure clear_BalanceLimit;
-    property BalanceLimit: UInt32 read FBalanceLimit write SetBalanceLimit;
 
     // optional int32 ClubBalance = 4;
     function has_ClubBalance: Boolean;
     procedure clear_ClubBalance;
-    property ClubBalance: Integer read FClubBalance write SetClubBalance;
 
     // optional bool UnlimitedLimit = 5;
     function has_UnlimitedLimit: Boolean;
     procedure clear_UnlimitedLimit;
-    property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
 
     // optional bool Muted = 6;
     function has_Muted: Boolean;
     procedure clear_Muted;
-    property Muted: Boolean read FMuted write SetMuted;
 
     // optional bool Manager = 7;
     function has_Manager: Boolean;
     procedure clear_Manager;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Status: TMemberStatus read FStatus write SetStatus;
+    property BalanceLimit: UInt32 read FBalanceLimit write SetBalanceLimit;
+    property ClubBalance: Integer read FClubBalance write SetClubBalance;
+    property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
+    property Muted: Boolean read FMuted write SetMuted;
     property Manager: Boolean read FManager write SetManager;
   end;
 

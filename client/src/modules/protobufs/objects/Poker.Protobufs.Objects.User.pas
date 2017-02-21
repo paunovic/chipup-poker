@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPlayerSubscriptionPlan = (pspBasic = 0, pspNormal, pspSuper);
 
   TPB_User = class(TProtobufBaseObject)
@@ -61,31 +62,32 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional bytes Avatar = 2;
     function has_Avatar: Boolean;
     procedure clear_Avatar;
-    property Avatar: TBytes read FAvatar write SetAvatar;
 
     // required string Displayname = 3;
     function has_Displayname: Boolean;
     procedure clear_Displayname;
-    property Displayname: String read FDisplayname write SetDisplayname;
 
     // optional string Email = 4;
     function has_Email: Boolean;
     procedure clear_Email;
-    property Email: String read FEmail write SetEmail;
 
     // optional bool Authed = 5;
     function has_Authed: Boolean;
     procedure clear_Authed;
-    property Authed: Boolean read FAuthed write SetAuthed;
 
     // optional PlayerSubscriptionPlan SubscriptionPlan = 6;
     function has_SubscriptionPlan: Boolean;
     procedure clear_SubscriptionPlan;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Avatar: TBytes read FAvatar write SetAvatar;
+    property Displayname: String read FDisplayname write SetDisplayname;
+    property Email: String read FEmail write SetEmail;
+    property Authed: Boolean read FAuthed write SetAuthed;
     property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
   end;
 

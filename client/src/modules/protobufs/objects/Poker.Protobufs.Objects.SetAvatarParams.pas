@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_SetAvatarParams = class(TProtobufBaseObject)
   private
     const
@@ -34,6 +35,7 @@ type
     // required bytes AvatarId = 1;
     function has_AvatarId: Boolean;
     procedure clear_AvatarId;
+  published
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
   end;
 

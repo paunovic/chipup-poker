@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentTableStart = class(TProtobufBaseObject)
   private
     const
@@ -40,11 +41,12 @@ type
     // required Game Game = 1;
     function has_Game: Boolean;
     procedure clear_Game;
-    property Game: TPB_Game read FGame write SetGame;
 
     // required TableStatus TableStatus = 2;
     function has_TableStatus: Boolean;
     procedure clear_TableStatus;
+  published
+    property Game: TPB_Game read FGame write SetGame;
     property TableStatus: TPB_TableStatus read FTableStatus write SetTableStatus;
   end;
 

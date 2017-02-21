@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TournamentInfo;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentList = class(TProtobufBaseObject)
   private
     const
@@ -38,6 +39,7 @@ type
     // repeated TournamentInfo Items = 1;
     function has_Items: Boolean;
     procedure clear_Items;
+  published
     property Items: TList<TPB_TournamentInfo> read FItems;
   end;
 

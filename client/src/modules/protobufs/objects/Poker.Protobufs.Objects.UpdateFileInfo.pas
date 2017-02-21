@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TUpdateFileType = (ufFull = 0, ufDiff, ufRemove);
 
   TPB_UpdateFileInfo = class(TProtobufBaseObject)
@@ -56,26 +57,27 @@ type
     // required string Path = 1;
     function has_Path: Boolean;
     procedure clear_Path;
-    property Path: String read FPath write SetPath;
 
     // optional bytes Hash = 2;
     function has_Hash: Boolean;
     procedure clear_Hash;
-    property Hash: TBytes read FHash write SetHash;
 
     // optional string Url = 3;
     function has_Url: Boolean;
     procedure clear_Url;
-    property Url: String read FUrl write SetUrl;
 
     // optional UpdateFileType FileType = 4;
     function has_FileType: Boolean;
     procedure clear_FileType;
-    property FileType: TUpdateFileType read FFileType write SetFileType;
 
     // optional uint32 FileSize = 5;
     function has_FileSize: Boolean;
     procedure clear_FileSize;
+  published
+    property Path: String read FPath write SetPath;
+    property Hash: TBytes read FHash write SetHash;
+    property Url: String read FUrl write SetUrl;
+    property FileType: TUpdateFileType read FFileType write SetFileType;
     property FileSize: UInt32 read FFileSize write SetFileSize;
   end;
 

@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentPlayerTransfer = class(TProtobufBaseObject)
   private
     const
@@ -54,26 +55,27 @@ type
     // required bytes GameSource = 1;
     function has_GameSource: Boolean;
     procedure clear_GameSource;
-    property GameSource: TMongoId read FGameSource write SetGameSource;
 
     // required bytes GameDestination = 2;
     function has_GameDestination: Boolean;
     procedure clear_GameDestination;
-    property GameDestination: TMongoId read FGameDestination write SetGameDestination;
 
     // required bytes UserId = 3;
     function has_UserId: Boolean;
     procedure clear_UserId;
-    property UserId: TMongoId read FUserId write SetUserId;
 
     // required uint32 SeatSource = 4;
     function has_SeatSource: Boolean;
     procedure clear_SeatSource;
-    property SeatSource: UInt32 read FSeatSource write SetSeatSource;
 
     // required uint32 SeatDestination = 5;
     function has_SeatDestination: Boolean;
     procedure clear_SeatDestination;
+  published
+    property GameSource: TMongoId read FGameSource write SetGameSource;
+    property GameDestination: TMongoId read FGameDestination write SetGameDestination;
+    property UserId: TMongoId read FUserId write SetUserId;
+    property SeatSource: UInt32 read FSeatSource write SetSeatSource;
     property SeatDestination: UInt32 read FSeatDestination write SetSeatDestination;
   end;
 

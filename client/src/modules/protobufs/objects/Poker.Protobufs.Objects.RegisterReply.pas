@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TRegisterStatus = (regSuccess = 0, regDuplicateEmail, regDupUsername, regInvalidEmail, regInvalidName);
 
   TPB_RegisterReply = class(TProtobufBaseObject)
@@ -36,6 +37,7 @@ type
     // required RegisterStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
+  published
     property Status: TRegisterStatus read FStatus write SetStatus;
   end;
 

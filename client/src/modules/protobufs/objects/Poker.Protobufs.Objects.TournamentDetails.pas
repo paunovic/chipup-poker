@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentDetails = class(TProtobufBaseObject)
   private
     const
@@ -34,6 +35,7 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
+  published
     property MongoId: TMongoId read FId write SetMongoId;
   end;
 

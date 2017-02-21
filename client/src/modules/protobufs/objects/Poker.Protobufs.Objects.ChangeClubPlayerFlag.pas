@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ChangeClubPlayerFlag = class(TProtobufBaseObject)
   private
     const
@@ -44,16 +45,17 @@ type
     // required bytes ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
     procedure clear_ClubMongoId;
-    property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
 
     // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
-    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
 
     // required bool Flag = 3;
     function has_Flag: Boolean;
     procedure clear_Flag;
+  published
+    property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
+    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
     property Flag: Boolean read FFlag write SetFlag;
   end;
 

@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
+  {$RTTI INHERIT}
   TPB_HandHistoryMove = class(TProtobufBaseObject)
   private
     const
@@ -58,26 +59,27 @@ type
     // repeated TableEventType Code = 1;
     function has_Code: Boolean;
     procedure clear_Code;
-    property Code: TList<TTableEventType> read FCode;
 
     // optional uint32 Bet = 2;
     function has_Bet: Boolean;
     procedure clear_Bet;
-    property Bet: UInt32 read FBet write SetBet;
 
     // optional int32 Seat = 3;
     function has_Seat: Boolean;
     procedure clear_Seat;
-    property Seat: Integer read FSeat write SetSeat;
 
     // repeated Pot WinnerPotData = 4;
     function has_WinnerPotData: Boolean;
     procedure clear_WinnerPotData;
-    property WinnerPotData: TList<TPB_Pot> read FWinnerPotData;
 
     // repeated Pot Pots = 5;
     function has_Pots: Boolean;
     procedure clear_Pots;
+  published
+    property Code: TList<TTableEventType> read FCode;
+    property Bet: UInt32 read FBet write SetBet;
+    property Seat: Integer read FSeat write SetSeat;
+    property WinnerPotData: TList<TPB_Pot> read FWinnerPotData;
     property Pots: TList<TPB_Pot> read FPots;
   end;
 

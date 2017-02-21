@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.HandHistory;
 
 type
+  {$RTTI INHERIT}
   TPB_HandHistoryReply = class(TProtobufBaseObject)
   private
     const
@@ -53,21 +54,22 @@ type
     // optional bytes ClubId = 1;
     function has_ClubId: Boolean;
     procedure clear_ClubId;
-    property ClubId: TMongoId read FClubId write SetClubId;
 
     // required bytes Gameid = 2;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TMongoId read FGameid write SetGameid;
 
     // repeated HandHistory Rows = 3;
     function has_Rows: Boolean;
     procedure clear_Rows;
-    property Rows: TList<TPB_HandHistory> read FRows;
 
     // optional bytes TournamentId = 4;
     function has_TournamentId: Boolean;
     procedure clear_TournamentId;
+  published
+    property ClubId: TMongoId read FClubId write SetClubId;
+    property Gameid: TMongoId read FGameid write SetGameid;
+    property Rows: TList<TPB_HandHistory> read FRows;
     property TournamentId: TMongoId read FTournamentId write SetTournamentId;
   end;
 

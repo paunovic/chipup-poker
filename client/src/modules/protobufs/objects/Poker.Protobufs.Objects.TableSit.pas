@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TableSit = class(TProtobufBaseObject)
   private
     const
@@ -44,16 +45,17 @@ type
     // required bytes GameId = 1;
     function has_GameId: Boolean;
     procedure clear_GameId;
-    property GameId: TMongoId read FGameId write SetGameId;
 
     // optional int32 SeatIndex = 2;
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
-    property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
 
     // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
+  published
+    property GameId: TMongoId read FGameId write SetGameId;
+    property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
     property Chips: UInt32 read FChips write SetChips;
   end;
 

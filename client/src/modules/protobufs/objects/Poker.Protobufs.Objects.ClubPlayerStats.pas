@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ClubPlayerStats = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required bytes Userid = 1;
     function has_Userid: Boolean;
     procedure clear_Userid;
-    property Userid: TMongoId read FUserid write SetUserid;
 
     // required int32 ClubBalance = 2;
     function has_ClubBalance: Boolean;
     procedure clear_ClubBalance;
+  published
+    property Userid: TMongoId read FUserid write SetUserid;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
   end;
 

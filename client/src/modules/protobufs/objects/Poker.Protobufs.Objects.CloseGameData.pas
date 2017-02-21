@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TCloseGameTime = (cgtCurrentHand = 0, cgtFiveMinutes, cgtFifteenMinutes);
 
   TPB_CloseGameData = class(TProtobufBaseObject)
@@ -41,11 +42,12 @@ type
     // required bytes Gameid = 1;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TMongoId read FGameid write SetGameid;
 
     // required CloseGameTime Timestamp = 2;
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
+  published
+    property Gameid: TMongoId read FGameid write SetGameid;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
   end;
 

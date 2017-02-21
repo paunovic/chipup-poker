@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.User;
 
 type
+  {$RTTI INHERIT}
   TPB_GetUserParams = class(TProtobufBaseObject)
   private
     const
@@ -43,11 +44,12 @@ type
     // repeated bytes UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
     procedure clear_UserMongoIds;
-    property UserMongoIds: TList<TMongoId> read FUserMongoIds;
 
     // repeated User Users = 2;
     function has_Users: Boolean;
     procedure clear_Users;
+  published
+    property UserMongoIds: TList<TMongoId> read FUserMongoIds;
     property Users: TList<TPB_User> read FUsers;
   end;
 

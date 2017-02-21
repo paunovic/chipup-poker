@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.ClubMember;
 
 type
+  {$RTTI INHERIT}
   TPB_Club = class(TProtobufBaseObject)
   private
     const
@@ -93,61 +94,62 @@ type
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // repeated ClubMember Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
-    property Members: TList<TPB_ClubMember> read FMembers;
 
     // optional string Name = 3;
     function has_Name: Boolean;
     procedure clear_Name;
-    property Name: String read FName write SetName;
 
     // optional bytes Owner = 4;
     function has_Owner: Boolean;
     procedure clear_Owner;
-    property Owner: TMongoId read FOwner write SetOwner;
 
     // optional string Password = 5;
     function has_Password: Boolean;
     procedure clear_Password;
-    property Password: String read FPassword write SetPassword;
 
     // optional bool IsPrivate = 6;
     function has_IsPrivate: Boolean;
     procedure clear_IsPrivate;
-    property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
 
     // optional int32 Seq = 7;
     function has_Seq: Boolean;
     procedure clear_Seq;
-    property Seq: Integer read FSeq write SetSeq;
 
     // optional bool PasswordExists = 8;
     function has_PasswordExists: Boolean;
     procedure clear_PasswordExists;
-    property PasswordExists: Boolean read FPasswordExists write SetPasswordExists;
 
     // optional uint32 Rake = 9;
     function has_Rake: Boolean;
     procedure clear_Rake;
-    property Rake: UInt32 read FRake write SetRake;
 
     // optional uint32 DefaultBalanceLimit = 10;
     function has_DefaultBalanceLimit: Boolean;
     procedure clear_DefaultBalanceLimit;
-    property DefaultBalanceLimit: UInt32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
 
     // optional bool UnlimitedDefaultBalance = 11;
     function has_UnlimitedDefaultBalance: Boolean;
     procedure clear_UnlimitedDefaultBalance;
-    property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
 
     // optional uint32 BuyinReset = 12;
     function has_BuyinReset: Boolean;
     procedure clear_BuyinReset;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Members: TList<TPB_ClubMember> read FMembers;
+    property Name: String read FName write SetName;
+    property Owner: TMongoId read FOwner write SetOwner;
+    property Password: String read FPassword write SetPassword;
+    property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
+    property Seq: Integer read FSeq write SetSeq;
+    property PasswordExists: Boolean read FPasswordExists write SetPasswordExists;
+    property Rake: UInt32 read FRake write SetRake;
+    property DefaultBalanceLimit: UInt32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
+    property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
     property BuyinReset: UInt32 read FBuyinReset write SetBuyinReset;
   end;
 

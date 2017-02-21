@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TSetAvatarStatus = (saSuccess = 0, saNotFound);
 
   TPB_SetAvatarReply = class(TProtobufBaseObject)
@@ -36,6 +37,7 @@ type
     // required SetAvatarStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
+  published
     property Status: TSetAvatarStatus read FStatus write SetStatus;
   end;
 

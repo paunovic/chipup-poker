@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.User;
 
 type
+  {$RTTI INHERIT}
   TPB_UserChangeParams = class(TProtobufBaseObject)
   private
     const
@@ -38,6 +39,7 @@ type
     // repeated User Users = 1;
     function has_Users: Boolean;
     procedure clear_Users;
+  published
     property Users: TList<TPB_User> read FUsers;
   end;
 

@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPlayerStatus = (psOutOfPlay = 0, psOutOfHand, psInHand, psFolded, psAllIn);
 
   TPB_SeatInfo = class(TProtobufBaseObject)
@@ -86,56 +87,57 @@ type
     // required int32 SeatIndex = 1;
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
-    property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
 
     // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
-    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
 
     // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
-    property Chips: UInt32 read FChips write SetChips;
 
     // optional int32 CardCount = 4;
     function has_CardCount: Boolean;
     procedure clear_CardCount;
-    property CardCount: Integer read FCardCount write SetCardCount;
 
     // optional bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
-    property Cards: TBytes read FCards write SetCards;
 
     // required PlayerStatus Status = 6;
     function has_Status: Boolean;
     procedure clear_Status;
-    property Status: TPlayerStatus read FStatus write SetStatus;
 
     // required uint32 Timebank = 7;
     function has_Timebank: Boolean;
     procedure clear_Timebank;
-    property Timebank: UInt32 read FTimebank write SetTimebank;
 
     // required bool CardsVisible = 8;
     function has_CardsVisible: Boolean;
     procedure clear_CardsVisible;
-    property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
 
     // required bool Disconnected = 9;
     function has_Disconnected: Boolean;
     procedure clear_Disconnected;
-    property Disconnected: Boolean read FDisconnected write SetDisconnected;
 
     // optional bool CanShow = 10;
     function has_CanShow: Boolean;
     procedure clear_CanShow;
-    property CanShow: Boolean read FCanShow write SetCanShow;
 
     // optional bool Autoplay = 11;
     function has_Autoplay: Boolean;
     procedure clear_Autoplay;
+  published
+    property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
+    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
+    property Chips: UInt32 read FChips write SetChips;
+    property CardCount: Integer read FCardCount write SetCardCount;
+    property Cards: TBytes read FCards write SetCards;
+    property Status: TPlayerStatus read FStatus write SetStatus;
+    property Timebank: UInt32 read FTimebank write SetTimebank;
+    property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
+    property Disconnected: Boolean read FDisconnected write SetDisconnected;
+    property CanShow: Boolean read FCanShow write SetCanShow;
     property Autoplay: Boolean read FAutoplay write SetAutoplay;
   end;
 

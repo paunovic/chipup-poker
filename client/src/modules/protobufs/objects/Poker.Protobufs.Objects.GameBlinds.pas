@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_GameBlinds = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required uint32 Sb = 1;
     function has_Sb: Boolean;
     procedure clear_Sb;
-    property Sb: UInt32 read FSb write SetSb;
 
     // required uint32 Bb = 2;
     function has_Bb: Boolean;
     procedure clear_Bb;
+  published
+    property Sb: UInt32 read FSb write SetSb;
     property Bb: UInt32 read FBb write SetBb;
   end;
 

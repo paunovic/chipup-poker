@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_PlayerLimitParams = class(TProtobufBaseObject)
   private
     const
@@ -49,21 +50,22 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TMongoId read FClubid write SetClubid;
 
     // optional bytes Userid = 2;
     function has_Userid: Boolean;
     procedure clear_Userid;
-    property Userid: TMongoId read FUserid write SetUserid;
 
     // optional uint32 Limit = 3;
     function has_Limit: Boolean;
     procedure clear_Limit;
-    property Limit: UInt32 read FLimit write SetLimit;
 
     // optional bool Unlimited = 4;
     function has_Unlimited: Boolean;
     procedure clear_Unlimited;
+  published
+    property Clubid: TMongoId read FClubid write SetClubid;
+    property Userid: TMongoId read FUserid write SetUserid;
+    property Limit: UInt32 read FLimit write SetLimit;
     property Unlimited: Boolean read FUnlimited write SetUnlimited;
   end;
 

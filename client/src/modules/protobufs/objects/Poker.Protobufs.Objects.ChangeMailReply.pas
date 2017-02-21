@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TChangeMailStatus = (cmSuccess = 0, cmDuplicateMail, cmInvalidEmail);
 
   TPB_ChangeMailReply = class(TProtobufBaseObject)
@@ -36,6 +37,7 @@ type
     // required ChangeMailStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
+  published
     property Status: TChangeMailStatus read FStatus write SetStatus;
   end;
 

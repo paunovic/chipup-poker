@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_PingParams = class(TProtobufBaseObject)
   private
     const
@@ -34,6 +35,7 @@ type
     // required uint32 Uptime = 1;
     function has_Uptime: Boolean;
     procedure clear_Uptime;
+  published
     property Uptime: UInt32 read FUptime write SetUptime;
   end;
 

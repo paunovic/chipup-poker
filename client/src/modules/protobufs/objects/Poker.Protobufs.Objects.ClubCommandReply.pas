@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
 
 type
+  {$RTTI INHERIT}
   TClubStatus = (csSuccess = 0, csInvalidName, csInvalidPassword, csNameExists, csInvalidClubId, csAlreadyMember, csInvalidPlayerId, csWaitingForApproval);
 
   TPB_ClubCommandReply = class(TProtobufBaseObject)
@@ -50,16 +51,17 @@ type
     // required ClubStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
-    property Status: TClubStatus read FStatus write SetStatus;
 
     // optional Club Club = 2;
     function has_Club: Boolean;
     procedure clear_Club;
-    property Club: TPB_Club read FClub write SetClub;
 
     // repeated Game Games = 3;
     function has_Games: Boolean;
     procedure clear_Games;
+  published
+    property Status: TClubStatus read FStatus write SetStatus;
+    property Club: TPB_Club read FClub write SetClub;
     property Games: TList<TPB_Game> read FGames;
   end;
 

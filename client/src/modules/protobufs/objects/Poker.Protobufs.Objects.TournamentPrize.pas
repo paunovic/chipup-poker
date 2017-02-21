@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentPrize = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required int32 Place = 1;
     function has_Place: Boolean;
     procedure clear_Place;
-    property Place: Integer read FPlace write SetPlace;
 
     // required string Name = 2;
     function has_Name: Boolean;
     procedure clear_Name;
+  published
+    property Place: Integer read FPlace write SetPlace;
     property Name: String read FName write SetName;
   end;
 

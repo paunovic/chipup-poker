@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.SeatInfo;
 
 type
+  {$RTTI INHERIT}
   TPB_PlayerHandHistory = class(TProtobufBaseObject)
   private
     const
@@ -65,36 +66,37 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // required int32 Seat = 2;
     function has_Seat: Boolean;
     procedure clear_Seat;
-    property Seat: Integer read FSeat write SetSeat;
 
     // optional bytes Cards = 3;
     function has_Cards: Boolean;
     procedure clear_Cards;
-    property Cards: TBytes read FCards write SetCards;
 
     // required uint32 Chips = 4;
     function has_Chips: Boolean;
     procedure clear_Chips;
-    property Chips: UInt32 read FChips write SetChips;
 
     // required string Nick = 5;
     function has_Nick: Boolean;
     procedure clear_Nick;
-    property Nick: String read FNick write SetNick;
 
     // optional bool Muck = 6;
     function has_Muck: Boolean;
     procedure clear_Muck;
-    property Muck: Boolean read FMuck write SetMuck;
 
     // required PlayerStatus Status = 7;
     function has_Status: Boolean;
     procedure clear_Status;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Seat: Integer read FSeat write SetSeat;
+    property Cards: TBytes read FCards write SetCards;
+    property Chips: UInt32 read FChips write SetChips;
+    property Nick: String read FNick write SetNick;
+    property Muck: Boolean read FMuck write SetMuck;
     property Status: TPlayerStatus read FStatus write SetStatus;
   end;
 

@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_PlayerClubStatus = class(TProtobufBaseObject)
   private
     const
@@ -49,21 +50,22 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TMongoId read FClubid write SetClubid;
 
     // optional bytes Tableid = 2;
     function has_Tableid: Boolean;
     procedure clear_Tableid;
-    property Tableid: TMongoId read FTableid write SetTableid;
 
     // optional uint32 BuyinMin = 3;
     function has_BuyinMin: Boolean;
     procedure clear_BuyinMin;
-    property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
 
     // optional uint32 BuyinMax = 4;
     function has_BuyinMax: Boolean;
     procedure clear_BuyinMax;
+  published
+    property Clubid: TMongoId read FClubid write SetClubid;
+    property Tableid: TMongoId read FTableid write SetTableid;
+    property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
     property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
   end;
 

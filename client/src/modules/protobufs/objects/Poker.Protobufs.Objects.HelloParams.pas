@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
+  {$RTTI INHERIT}
   TAppCode = (acDelphiWindows = 0, acQtLinux32, acQtLinuxArm, acQtMac, acQtWindows32);
 
   TPB_HelloParams = class(TProtobufBaseObject)
@@ -50,16 +51,17 @@ type
     // required bool Debug = 1;
     function has_Debug: Boolean;
     procedure clear_Debug;
-    property Debug: Boolean read FDebug write SetDebug;
 
     // repeated UpdateFileInfo Files = 2;
     function has_Files: Boolean;
     procedure clear_Files;
-    property Files: TList<TPB_UpdateFileInfo> read FFiles;
 
     // optional AppCode Appcode = 3;
     function has_Appcode: Boolean;
     procedure clear_Appcode;
+  published
+    property Debug: Boolean read FDebug write SetDebug;
+    property Files: TList<TPB_UpdateFileInfo> read FFiles;
     property Appcode: TAppCode read FAppcode write SetAppcode;
   end;
 

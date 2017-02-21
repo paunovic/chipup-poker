@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TableStatsReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.ClubStatsReply;
 
 type
+  {$RTTI INHERIT}
   TPB_TableStatsReplies = class(TProtobufBaseObject)
   private
     const
@@ -48,16 +49,17 @@ type
     // repeated TableStatsReply Reply = 1;
     function has_Reply: Boolean;
     procedure clear_Reply;
-    property Reply: TList<TPB_TableStatsReply> read FReply;
 
     // repeated User Players = 2;
     function has_Players: Boolean;
     procedure clear_Players;
-    property Players: TList<TPB_User> read FPlayers;
 
     // repeated ClubStatsReply ClubStats = 3;
     function has_ClubStats: Boolean;
     procedure clear_ClubStats;
+  published
+    property Reply: TList<TPB_TableStatsReply> read FReply;
+    property Players: TList<TPB_User> read FPlayers;
     property ClubStats: TList<TPB_ClubStatsReply> read FClubStats;
   end;
 

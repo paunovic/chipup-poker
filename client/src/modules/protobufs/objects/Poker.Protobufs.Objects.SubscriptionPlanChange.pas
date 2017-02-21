@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.User;
 
 type
+  {$RTTI INHERIT}
   TPB_SubscriptionPlanChange = class(TProtobufBaseObject)
   private
     const
@@ -45,16 +46,17 @@ type
     // required PlayerSubscriptionPlan SubscriptionPlan = 1;
     function has_SubscriptionPlan: Boolean;
     procedure clear_SubscriptionPlan;
-    property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
 
     // optional string Url = 2;
     function has_Url: Boolean;
     procedure clear_Url;
-    property Url: String read FUrl write SetUrl;
 
     // optional string StripeToken = 3;
     function has_StripeToken: Boolean;
     procedure clear_StripeToken;
+  published
+    property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
+    property Url: String read FUrl write SetUrl;
     property StripeToken: String read FStripeToken write SetStripeToken;
   end;
 

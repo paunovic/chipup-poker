@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ValidCharsRegex = class(TProtobufBaseObject)
   private
     const
@@ -59,31 +60,32 @@ type
     // required string Email = 1;
     function has_Email: Boolean;
     procedure clear_Email;
-    property Email: String read FEmail write SetEmail;
 
     // required string Username = 2;
     function has_Username: Boolean;
     procedure clear_Username;
-    property Username: String read FUsername write SetUsername;
 
     // required string Password = 3;
     function has_Password: Boolean;
     procedure clear_Password;
-    property Password: String read FPassword write SetPassword;
 
     // required string Clubname = 4;
     function has_Clubname: Boolean;
     procedure clear_Clubname;
-    property Clubname: String read FClubname write SetClubname;
 
     // required string Clubpassword = 5;
     function has_Clubpassword: Boolean;
     procedure clear_Clubpassword;
-    property Clubpassword: String read FClubpassword write SetClubpassword;
 
     // required string Gamename = 6;
     function has_Gamename: Boolean;
     procedure clear_Gamename;
+  published
+    property Email: String read FEmail write SetEmail;
+    property Username: String read FUsername write SetUsername;
+    property Password: String read FPassword write SetPassword;
+    property Clubname: String read FClubname write SetClubname;
+    property Clubpassword: String read FClubpassword write SetClubpassword;
     property Gamename: String read FGamename write SetGamename;
   end;
 

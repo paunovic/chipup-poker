@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TContactReason = (cmQuestions = 0, cmSuggestions, cmBugReport, cmOther);
 
   TPB_ContactMessage = class(TProtobufBaseObject)
@@ -41,11 +42,12 @@ type
     // required ContactReason Reason = 1;
     function has_Reason: Boolean;
     procedure clear_Reason;
-    property Reason: TContactReason read FReason write SetReason;
 
     // required string Message = 2;
     function has_Message: Boolean;
     procedure clear_Message;
+  published
+    property Reason: TContactReason read FReason write SetReason;
     property Message: String read FMessage write SetMessage;
   end;
 

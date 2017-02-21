@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableMessage;
 
 type
+  {$RTTI INHERIT}
   TTableState = (tsIdle = 0, tsPreFlop, tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2);
   TTableType = (ttLive = 0, ttTournament, ttHandReplay);
 
@@ -161,126 +162,127 @@ type
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
-    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
 
     // repeated SeatInfo Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
-    property Seats: TList<TPB_SeatInfo> read FSeats;
 
     // required TableState State = 3;
     function has_State: Boolean;
     procedure clear_State;
-    property State: TTableState read FState write SetState;
 
     // required int32 Dealer = 4;
     function has_Dealer: Boolean;
     procedure clear_Dealer;
-    property Dealer: Integer read FDealer write SetDealer;
 
     // required int32 CurrentSeat = 5;
     function has_CurrentSeat: Boolean;
     procedure clear_CurrentSeat;
-    property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
 
     // repeated uint32 Bets = 6;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TList<UInt32> read FBets;
 
     // required bool Locked = 7;
     function has_Locked: Boolean;
     procedure clear_Locked;
-    property Locked: Boolean read FLocked write SetLocked;
 
     // optional int32 Seq = 8;
     function has_Seq: Boolean;
     procedure clear_Seq;
-    property Seq: Integer read FSeq write SetSeq;
 
     // optional uint32 MinimumBet = 9;
     function has_MinimumBet: Boolean;
     procedure clear_MinimumBet;
-    property MinimumBet: UInt32 read FMinimumBet write SetMinimumBet;
 
     // optional uint32 MaximumRaise = 10;
     function has_MaximumRaise: Boolean;
     procedure clear_MaximumRaise;
-    property MaximumRaise: UInt32 read FMaximumRaise write SetMaximumRaise;
 
     // optional uint32 SmallBlind = 11;
     function has_SmallBlind: Boolean;
     procedure clear_SmallBlind;
-    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
 
     // optional uint32 BigBlind = 12;
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
-    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
 
     // optional uint32 Handid = 13;
     function has_Handid: Boolean;
     procedure clear_Handid;
-    property Handid: UInt32 read FHandid write SetHandid;
 
     // optional uint64 Time = 14;
     function has_Time: Boolean;
     procedure clear_Time;
-    property Time: UInt64 read FTime write SetTime;
 
     // repeated TableEvent Events = 15;
     function has_Events: Boolean;
     procedure clear_Events;
-    property Events: TList<TPB_TableEvent> read FEvents;
 
     // repeated Pot Pots = 16;
     function has_Pots: Boolean;
     procedure clear_Pots;
-    property Pots: TList<TPB_Pot> read FPots;
 
     // optional uint32 RakePercent = 17;
     function has_RakePercent: Boolean;
     procedure clear_RakePercent;
-    property RakePercent: UInt32 read FRakePercent write SetRakePercent;
 
     // optional GameType CurrentGame = 18;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
-    property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
 
     // optional uint32 Rotation = 19;
     function has_Rotation: Boolean;
     procedure clear_Rotation;
-    property Rotation: UInt32 read FRotation write SetRotation;
 
     // optional GameLimit GameLimit = 20;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
-    property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
 
     // optional uint32 MinimumRaise = 21;
     function has_MinimumRaise: Boolean;
     procedure clear_MinimumRaise;
-    property MinimumRaise: UInt32 read FMinimumRaise write SetMinimumRaise;
 
     // required TableType TableType = 22;
     function has_TableType: Boolean;
     procedure clear_TableType;
-    property TableType: TTableType read FTableType write SetTableType;
 
     // repeated TableMessage TableMessage = 23;
     function has_TableMessage: Boolean;
     procedure clear_TableMessage;
-    property TableMessage: TList<TPB_TableMessage> read FTableMessage;
 
     // optional uint32 QueuePosition = 24;
     function has_QueuePosition: Boolean;
     procedure clear_QueuePosition;
-    property QueuePosition: UInt32 read FQueuePosition write SetQueuePosition;
 
     // repeated uint32 ReservedSeats = 25;
     function has_ReservedSeats: Boolean;
     procedure clear_ReservedSeats;
+  published
+    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
+    property Seats: TList<TPB_SeatInfo> read FSeats;
+    property State: TTableState read FState write SetState;
+    property Dealer: Integer read FDealer write SetDealer;
+    property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
+    property Bets: TList<UInt32> read FBets;
+    property Locked: Boolean read FLocked write SetLocked;
+    property Seq: Integer read FSeq write SetSeq;
+    property MinimumBet: UInt32 read FMinimumBet write SetMinimumBet;
+    property MaximumRaise: UInt32 read FMaximumRaise write SetMaximumRaise;
+    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
+    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
+    property Handid: UInt32 read FHandid write SetHandid;
+    property Time: UInt64 read FTime write SetTime;
+    property Events: TList<TPB_TableEvent> read FEvents;
+    property Pots: TList<TPB_Pot> read FPots;
+    property RakePercent: UInt32 read FRakePercent write SetRakePercent;
+    property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
+    property Rotation: UInt32 read FRotation write SetRotation;
+    property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
+    property MinimumRaise: UInt32 read FMinimumRaise write SetMinimumRaise;
+    property TableType: TTableType read FTableType write SetTableType;
+    property TableMessage: TList<TPB_TableMessage> read FTableMessage;
+    property QueuePosition: UInt32 read FQueuePosition write SetQueuePosition;
     property ReservedSeats: TList<UInt32> read FReservedSeats;
   end;
 

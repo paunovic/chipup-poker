@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_LoginParams = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required string Username = 1;
     function has_Username: Boolean;
     procedure clear_Username;
-    property Username: String read FUsername write SetUsername;
 
     // required string Password = 2;
     function has_Password: Boolean;
     procedure clear_Password;
+  published
+    property Username: String read FUsername write SetUsername;
     property Password: String read FPassword write SetPassword;
   end;
 

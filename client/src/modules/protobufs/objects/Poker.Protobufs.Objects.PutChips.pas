@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TableStatus;
 
 type
+  {$RTTI INHERIT}
   TPB_PutChips = class(TProtobufBaseObject)
   private
     const
@@ -45,16 +46,17 @@ type
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
-    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
 
     // required uint32 ChipAmount = 2;
     function has_ChipAmount: Boolean;
     procedure clear_ChipAmount;
-    property ChipAmount: UInt32 read FChipAmount write SetChipAmount;
 
     // required TableState CurrentState = 3;
     function has_CurrentState: Boolean;
     procedure clear_CurrentState;
+  published
+    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
+    property ChipAmount: UInt32 read FChipAmount write SetChipAmount;
     property CurrentState: TTableState read FCurrentState write SetCurrentState;
   end;
 

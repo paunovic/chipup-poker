@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TTableMessageType = (tmtClosing = 0, tmtTournamentBreak, tmtTournamentStart);
 
   TPB_TableMessage = class(TProtobufBaseObject)
@@ -41,11 +42,12 @@ type
     // required TableMessageType Message = 1;
     function has_Message: Boolean;
     procedure clear_Message;
-    property Message: TTableMessageType read FMessage write SetMessage;
 
     // optional uint64 EndTime = 2;
     function has_EndTime: Boolean;
     procedure clear_EndTime;
+  published
+    property Message: TTableMessageType read FMessage write SetMessage;
     property EndTime: UInt64 read FEndTime write SetEndTime;
   end;
 

@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage;
 
 type
+  {$RTTI INHERIT}
   TEventType = (ceUserMessage = 0, ceServerMessage);
 
   TPB_ChatEvent = class(TProtobufBaseObject)
@@ -47,16 +48,17 @@ type
     // required EventType Event = 1;
     function has_Event: Boolean;
     procedure clear_Event;
-    property Event: TEventType read FEvent write SetEvent;
 
     // required ChatMessage Msg = 2;
     function has_Msg: Boolean;
     procedure clear_Msg;
-    property Msg: TPB_ChatMessage read FMsg write SetMsg;
 
     // optional bytes TableId = 3;
     function has_TableId: Boolean;
     procedure clear_TableId;
+  published
+    property Event: TEventType read FEvent write SetEvent;
+    property Msg: TPB_ChatMessage read FMsg write SetMsg;
     property TableId: TMongoId read FTableId write SetTableId;
   end;
 

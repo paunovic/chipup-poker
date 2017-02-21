@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TTournamentCommandEnum = (tceRegisterOk = 0, tceAlreadyRegistered, tceRegisterLimitReached, tceRegisterFailed, tceUnregisterOk, tceNotOpen);
 
   TPB_TournamentCommandParams = class(TProtobufBaseObject)
@@ -41,11 +42,12 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional TournamentCommandEnum ReplyStatus = 2;
     function has_ReplyStatus: Boolean;
     procedure clear_ReplyStatus;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
     property ReplyStatus: TTournamentCommandEnum read FReplyStatus write SetReplyStatus;
   end;
 

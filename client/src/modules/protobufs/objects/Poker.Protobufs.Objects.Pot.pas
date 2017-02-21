@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.WinnerData;
 
 type
+  {$RTTI INHERIT}
   TPB_Pot = class(TProtobufBaseObject)
   private
     const
@@ -53,21 +54,22 @@ type
     // required uint32 Value = 1;
     function has_Value: Boolean;
     procedure clear_Value;
-    property Value: UInt32 read FValue write SetValue;
 
     // repeated int32 Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
-    property Members: TList<Integer> read FMembers;
 
     // repeated WinnerData WinnerData = 3;
     function has_WinnerData: Boolean;
     procedure clear_WinnerData;
-    property WinnerData: TList<TPB_WinnerData> read FWinnerData;
 
     // optional uint32 Rake = 4;
     function has_Rake: Boolean;
     procedure clear_Rake;
+  published
+    property Value: UInt32 read FValue write SetValue;
+    property Members: TList<Integer> read FMembers;
+    property WinnerData: TList<TPB_WinnerData> read FWinnerData;
     property Rake: UInt32 read FRake write SetRake;
   end;
 

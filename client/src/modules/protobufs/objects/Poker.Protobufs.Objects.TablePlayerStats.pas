@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TablePlayerStats = class(TProtobufBaseObject)
   private
     const
@@ -72,41 +73,42 @@ type
     // required bytes Userid = 1;
     function has_Userid: Boolean;
     procedure clear_Userid;
-    property Userid: TMongoId read FUserid write SetUserid;
 
     // optional int32 Balance = 2;
     function has_Balance: Boolean;
     procedure clear_Balance;
-    property Balance: Integer read FBalance write SetBalance;
 
     // repeated uint32 Buyins = 3;
     function has_Buyins: Boolean;
     procedure clear_Buyins;
-    property Buyins: TList<UInt32> read FBuyins;
 
     // repeated uint32 Cashouts = 4;
     function has_Cashouts: Boolean;
     procedure clear_Cashouts;
-    property Cashouts: TList<UInt32> read FCashouts;
 
     // optional uint32 Rakecontrib = 5;
     function has_Rakecontrib: Boolean;
     procedure clear_Rakecontrib;
-    property Rakecontrib: UInt32 read FRakecontrib write SetRakecontrib;
 
     // optional uint32 Secondsplayed = 6;
     function has_Secondsplayed: Boolean;
     procedure clear_Secondsplayed;
-    property Secondsplayed: UInt32 read FSecondsplayed write SetSecondsplayed;
 
     // optional uint32 Chipsinplay = 7;
     function has_Chipsinplay: Boolean;
     procedure clear_Chipsinplay;
-    property Chipsinplay: UInt32 read FChipsinplay write SetChipsinplay;
 
     // optional uint32 Hands = 8;
     function has_Hands: Boolean;
     procedure clear_Hands;
+  published
+    property Userid: TMongoId read FUserid write SetUserid;
+    property Balance: Integer read FBalance write SetBalance;
+    property Buyins: TList<UInt32> read FBuyins;
+    property Cashouts: TList<UInt32> read FCashouts;
+    property Rakecontrib: UInt32 read FRakecontrib write SetRakecontrib;
+    property Secondsplayed: UInt32 read FSecondsplayed write SetSecondsplayed;
+    property Chipsinplay: UInt32 read FChipsinplay write SetChipsinplay;
     property Hands: UInt32 read FHands write SetHands;
   end;
 

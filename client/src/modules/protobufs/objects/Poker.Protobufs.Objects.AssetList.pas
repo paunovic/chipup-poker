@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
+  {$RTTI INHERIT}
   TPB_AssetList = class(TProtobufBaseObject)
   private
     const
@@ -38,6 +39,7 @@ type
     // repeated UpdateFileInfo Assets = 1;
     function has_Assets: Boolean;
     procedure clear_Assets;
+  published
     property Assets: TList<TPB_UpdateFileInfo> read FAssets;
   end;
 

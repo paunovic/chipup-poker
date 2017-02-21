@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_SoftException = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required string Exception = 1;
     function has_Exception: Boolean;
     procedure clear_Exception;
-    property Exception: String read FException write SetException;
 
     // optional string Data = 2;
     function has_Data: Boolean;
     procedure clear_Data;
+  published
+    property Exception: String read FException write SetException;
     property Data: String read FData write SetData;
   end;
 

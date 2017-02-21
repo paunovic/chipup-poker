@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentMember = class(TProtobufBaseObject)
   private
     const
@@ -59,31 +60,32 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // required string Displayname = 2;
     function has_Displayname: Boolean;
     procedure clear_Displayname;
-    property Displayname: String read FDisplayname write SetDisplayname;
 
     // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
-    property Chips: UInt32 read FChips write SetChips;
 
     // optional bytes Gameid = 4;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TMongoId read FGameid write SetGameid;
 
     // optional int32 Position = 5;
     function has_Position: Boolean;
     procedure clear_Position;
-    property Position: Integer read FPosition write SetPosition;
 
     // optional uint32 SeatIndex = 6;
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Displayname: String read FDisplayname write SetDisplayname;
+    property Chips: UInt32 read FChips write SetChips;
+    property Gameid: TMongoId read FGameid write SetGameid;
+    property Position: Integer read FPosition write SetPosition;
     property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
   end;
 

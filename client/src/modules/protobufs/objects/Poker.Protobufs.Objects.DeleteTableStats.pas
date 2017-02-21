@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_DeleteTableStats = class(TProtobufBaseObject)
   private
     const
@@ -42,11 +43,12 @@ type
     // required bytes ClubId = 1;
     function has_ClubId: Boolean;
     procedure clear_ClubId;
-    property ClubId: TMongoId read FClubId write SetClubId;
 
     // repeated bytes TableId = 2;
     function has_TableId: Boolean;
     procedure clear_TableId;
+  published
+    property ClubId: TMongoId read FClubId write SetClubId;
     property TableId: TList<TMongoId> read FTableId;
   end;
 

@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.HandHistoryMove, Poker.Protobufs.Objects.Game;
 
 type
+  {$RTTI INHERIT}
   TPB_HandHistory = class(TProtobufBaseObject)
   private
     const
@@ -93,61 +94,62 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // required uint32 Seq = 2;
     function has_Seq: Boolean;
     procedure clear_Seq;
-    property Seq: UInt32 read FSeq write SetSeq;
 
     // required uint32 Totalrake = 3;
     function has_Totalrake: Boolean;
     procedure clear_Totalrake;
-    property Totalrake: UInt32 read FTotalrake write SetTotalrake;
 
     // repeated PlayerHandHistory Players = 4;
     function has_Players: Boolean;
     procedure clear_Players;
-    property Players: TList<TPB_PlayerHandHistory> read FPlayers;
 
     // repeated bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
-    property Cards: TList<TBytes> read FCards;
 
     // required uint32 Endtime = 6;
     function has_Endtime: Boolean;
     procedure clear_Endtime;
-    property Endtime: UInt32 read FEndtime write SetEndtime;
 
     // repeated int32 BalanceChanges = 7;
     function has_BalanceChanges: Boolean;
     procedure clear_BalanceChanges;
-    property BalanceChanges: TList<Integer> read FBalanceChanges;
 
     // repeated HandHistoryMove Moves = 8;
     function has_Moves: Boolean;
     procedure clear_Moves;
-    property Moves: TList<TPB_HandHistoryMove> read FMoves;
 
     // required uint32 Dealer = 9;
     function has_Dealer: Boolean;
     procedure clear_Dealer;
-    property Dealer: UInt32 read FDealer write SetDealer;
 
     // optional Game Game = 10;
     function has_Game: Boolean;
     procedure clear_Game;
-    property Game: TPB_Game read FGame write SetGame;
 
     // optional GameType CurrentGame = 11;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
-    property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
 
     // required int32 Rake = 12;
     function has_Rake: Boolean;
     procedure clear_Rake;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Seq: UInt32 read FSeq write SetSeq;
+    property Totalrake: UInt32 read FTotalrake write SetTotalrake;
+    property Players: TList<TPB_PlayerHandHistory> read FPlayers;
+    property Cards: TList<TBytes> read FCards;
+    property Endtime: UInt32 read FEndtime write SetEndtime;
+    property BalanceChanges: TList<Integer> read FBalanceChanges;
+    property Moves: TList<TPB_HandHistoryMove> read FMoves;
+    property Dealer: UInt32 read FDealer write SetDealer;
+    property Game: TPB_Game read FGame write SetGame;
+    property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
     property Rake: Integer read FRake write SetRake;
   end;
 

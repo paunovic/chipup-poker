@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ChatMessage = class(TProtobufBaseObject)
   private
     const
@@ -49,21 +50,22 @@ type
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional string Username = 2;
     function has_Username: Boolean;
     procedure clear_Username;
-    property Username: String read FUsername write SetUsername;
 
     // required string Msg = 3;
     function has_Msg: Boolean;
     procedure clear_Msg;
-    property Msg: String read FMsg write SetMsg;
 
     // optional uint32 Timestamp = 4;
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Username: String read FUsername write SetUsername;
+    property Msg: String read FMsg write SetMsg;
     property Timestamp: UInt32 read FTimestamp write SetTimestamp;
   end;
 

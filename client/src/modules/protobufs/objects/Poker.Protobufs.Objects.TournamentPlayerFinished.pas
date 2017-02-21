@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TournamentPrize;
 
 type
+  {$RTTI INHERIT}
   TPB_TournamentPlayerFinished = class(TProtobufBaseObject)
   private
     const
@@ -55,26 +56,27 @@ type
     // required bytes TournamentId = 1;
     function has_TournamentId: Boolean;
     procedure clear_TournamentId;
-    property TournamentId: TMongoId read FTournamentId write SetTournamentId;
 
     // required bytes PlayerId = 2;
     function has_PlayerId: Boolean;
     procedure clear_PlayerId;
-    property PlayerId: TMongoId read FPlayerId write SetPlayerId;
 
     // required int32 Place = 3;
     function has_Place: Boolean;
     procedure clear_Place;
-    property Place: Integer read FPlace write SetPlace;
 
     // optional TournamentPrize Prize = 4;
     function has_Prize: Boolean;
     procedure clear_Prize;
-    property Prize: TPB_TournamentPrize read FPrize write SetPrize;
 
     // required bytes TableId = 5;
     function has_TableId: Boolean;
     procedure clear_TableId;
+  published
+    property TournamentId: TMongoId read FTournamentId write SetTournamentId;
+    property PlayerId: TMongoId read FPlayerId write SetPlayerId;
+    property Place: Integer read FPlace write SetPlace;
+    property Prize: TPB_TournamentPrize read FPrize write SetPrize;
     property TableId: TMongoId read FTableId write SetTableId;
   end;
 

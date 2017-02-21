@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_KickPlayerParams = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required bytes ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
     procedure clear_ClubMongoId;
-    property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
 
     // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
+  published
+    property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
     property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
   end;
 

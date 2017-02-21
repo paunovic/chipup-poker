@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ForgotPasswordParams = class(TProtobufBaseObject)
   private
     const
@@ -34,6 +35,7 @@ type
     // required string Email = 1;
     function has_Email: Boolean;
     procedure clear_Email;
+  published
     property Email: String read FEmail write SetEmail;
   end;
 

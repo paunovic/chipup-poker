@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.PlayerClubStatus;
 
 type
+  {$RTTI INHERIT}
   TLoginStatus = (lrSuccess = 0, lrInvalid);
 
   TPB_LoginReply = class(TProtobufBaseObject)
@@ -80,46 +81,47 @@ type
     // required LoginStatus LoginStatus = 1;
     function has_LoginStatus: Boolean;
     procedure clear_LoginStatus;
-    property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
 
     // repeated TableStatus ReconnectTables = 2;
     function has_ReconnectTables: Boolean;
     procedure clear_ReconnectTables;
-    property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
     // repeated TournamentInfo TournamentInfos = 3;
     function has_TournamentInfos: Boolean;
     procedure clear_TournamentInfos;
-    property TournamentInfos: TList<TPB_TournamentInfo> read FTournamentInfos;
 
     // repeated bytes RegisteredTournaments = 4;
     function has_RegisteredTournaments: Boolean;
     procedure clear_RegisteredTournaments;
-    property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
 
     // repeated Club Clubs = 5;
     function has_Clubs: Boolean;
     procedure clear_Clubs;
-    property Clubs: TList<TPB_Club> read FClubs;
 
     // repeated User Users = 6;
     function has_Users: Boolean;
     procedure clear_Users;
-    property Users: TList<TPB_User> read FUsers;
 
     // optional User Self = 7;
     function has_Self: Boolean;
     procedure clear_Self;
-    property Self: TPB_User read FSelf write SetSelf;
 
     // repeated Game Games = 8;
     function has_Games: Boolean;
     procedure clear_Games;
-    property Games: TList<TPB_Game> read FGames;
 
     // repeated PlayerClubStatus PlayerClubStatuses = 9;
     function has_PlayerClubStatuses: Boolean;
     procedure clear_PlayerClubStatuses;
+  published
+    property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
+    property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
+    property TournamentInfos: TList<TPB_TournamentInfo> read FTournamentInfos;
+    property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
+    property Clubs: TList<TPB_Club> read FClubs;
+    property Users: TList<TPB_User> read FUsers;
+    property Self: TPB_User read FSelf write SetSelf;
+    property Games: TList<TPB_Game> read FGames;
     property PlayerClubStatuses: TList<TPB_PlayerClubStatus> read FPlayerClubStatuses;
   end;
 

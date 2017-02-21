@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_BuyinError = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required bytes GameId = 1;
     function has_GameId: Boolean;
     procedure clear_GameId;
-    property GameId: TMongoId read FGameId write SetGameId;
 
     // required uint32 LastCashout = 2;
     function has_LastCashout: Boolean;
     procedure clear_LastCashout;
+  published
+    property GameId: TMongoId read FGameId write SetGameId;
     property LastCashout: UInt32 read FLastCashout write SetLastCashout;
   end;
 

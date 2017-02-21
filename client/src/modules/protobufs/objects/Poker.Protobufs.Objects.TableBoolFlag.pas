@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_TableBoolFlag = class(TProtobufBaseObject)
   private
     const
@@ -39,11 +40,12 @@ type
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
-    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
 
     // required bool Flag = 2;
     function has_Flag: Boolean;
     procedure clear_Flag;
+  published
+    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
     property Flag: Boolean read FFlag write SetFlag;
   end;
 

@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.TableStatus;
 
 type
+  {$RTTI INHERIT}
   TPB_ReservedSeatFree = class(TProtobufBaseObject)
   private
     const
@@ -40,11 +41,12 @@ type
     // required TableStatus Ts = 1;
     function has_Ts: Boolean;
     procedure clear_Ts;
-    property Ts: TPB_TableStatus read FTs write SetTs;
 
     // required uint32 SeatIndex = 2;
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
+  published
+    property Ts: TPB_TableStatus read FTs write SetTs;
     property SeatIndex: UInt32 read FSeatIndex write SetSeatIndex;
   end;
 

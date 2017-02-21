@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.StringSizes, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.ValidCharsRegex;
 
 type
+  {$RTTI INHERIT}
   TPB_HelloReply = class(TProtobufBaseObject)
   private
     const
@@ -73,41 +74,42 @@ type
     // required StringSizes StringSizes = 1;
     function has_StringSizes: Boolean;
     procedure clear_StringSizes;
-    property StringSizes: TPB_StringSizes read FStringSizes write SetStringSizes;
 
     // required int32 ChangeExpireTime = 2;
     function has_ChangeExpireTime: Boolean;
     procedure clear_ChangeExpireTime;
-    property ChangeExpireTime: Integer read FChangeExpireTime write SetChangeExpireTime;
 
     // required int32 ForgotExpireTime = 3;
     function has_ForgotExpireTime: Boolean;
     procedure clear_ForgotExpireTime;
-    property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
 
     // required int32 MaxPlayTime = 4;
     function has_MaxPlayTime: Boolean;
     procedure clear_MaxPlayTime;
-    property MaxPlayTime: Integer read FMaxPlayTime write SetMaxPlayTime;
 
     // required int32 MaxTimebank = 5;
     function has_MaxTimebank: Boolean;
     procedure clear_MaxTimebank;
-    property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
 
     // required StringSizes MinSizes = 6;
     function has_MinSizes: Boolean;
     procedure clear_MinSizes;
-    property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
 
     // repeated UpdateFileInfo UpdateFiles = 7;
     function has_UpdateFiles: Boolean;
     procedure clear_UpdateFiles;
-    property UpdateFiles: TList<TPB_UpdateFileInfo> read FUpdateFiles;
 
     // required ValidCharsRegex ValidCharsRegex = 8;
     function has_ValidCharsRegex: Boolean;
     procedure clear_ValidCharsRegex;
+  published
+    property StringSizes: TPB_StringSizes read FStringSizes write SetStringSizes;
+    property ChangeExpireTime: Integer read FChangeExpireTime write SetChangeExpireTime;
+    property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
+    property MaxPlayTime: Integer read FMaxPlayTime write SetMaxPlayTime;
+    property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
+    property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
+    property UpdateFiles: TList<TPB_UpdateFileInfo> read FUpdateFiles;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
   end;
 

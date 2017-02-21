@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TGameLimit = (glNoLimit = 0, glPotLimit, glFixedLimit);
   TGameType = (gtHoldem = 0, gtOmaha, gtRotationNLHPLO);
   TGameState = (gsActive = 0, gsClosing, gsClosed, gsEmpty);
@@ -129,96 +130,97 @@ type
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional bytes CreatorMongoId = 2;
     function has_CreatorMongoId: Boolean;
     procedure clear_CreatorMongoId;
-    property CreatorMongoId: TMongoId read FCreatorMongoId write SetCreatorMongoId;
 
     // optional string Gamename = 3;
     function has_Gamename: Boolean;
     procedure clear_Gamename;
-    property Gamename: String read FGamename write SetGamename;
 
     // optional bytes ClubMongoid = 4;
     function has_ClubMongoid: Boolean;
     procedure clear_ClubMongoid;
-    property ClubMongoid: TMongoId read FClubMongoid write SetClubMongoid;
 
     // optional GameType GameType = 5;
     function has_GameType: Boolean;
     procedure clear_GameType;
-    property GameType: TGameType read FGameType write SetGameType;
 
     // optional GameLimit GameLimit = 6;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
-    property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
 
     // optional GameBlinds Blinds = 7;
     function has_Blinds: Boolean;
     procedure clear_Blinds;
-    property Blinds: TGameBlinds read FBlinds write SetBlinds;
 
     // optional int32 Seats = 8;
     function has_Seats: Boolean;
     procedure clear_Seats;
-    property Seats: Integer read FSeats write SetSeats;
 
     // optional int32 Sitting = 9;
     function has_Sitting: Boolean;
     procedure clear_Sitting;
-    property Sitting: Integer read FSitting write SetSitting;
 
     // optional uint32 BuyinMin = 10;
     function has_BuyinMin: Boolean;
     procedure clear_BuyinMin;
-    property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
 
     // optional uint32 BuyinMax = 11;
     function has_BuyinMax: Boolean;
     procedure clear_BuyinMax;
-    property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
 
     // optional GameState State = 12;
     function has_State: Boolean;
     procedure clear_State;
-    property State: TGameState read FState write SetState;
 
     // optional uint32 Closetime = 13;
     function has_Closetime: Boolean;
     procedure clear_Closetime;
-    property Closetime: UInt32 read FClosetime write SetClosetime;
 
     // optional uint32 Lasthandid = 14;
     function has_Lasthandid: Boolean;
     procedure clear_Lasthandid;
-    property Lasthandid: UInt32 read FLasthandid write SetLasthandid;
 
     // optional bytes Tournament = 15;
     function has_Tournament: Boolean;
     procedure clear_Tournament;
-    property Tournament: TMongoId read FTournament write SetTournament;
 
     // optional uint32 SmallBlind = 16;
     function has_SmallBlind: Boolean;
     procedure clear_SmallBlind;
-    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
 
     // optional uint32 BigBlind = 17;
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
-    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
 
     // optional bool FinalTable = 18;
     function has_FinalTable: Boolean;
     procedure clear_FinalTable;
-    property FinalTable: Boolean read FFinalTable write SetFinalTable;
 
     // optional uint32 MaxRakePerHand = 19;
     function has_MaxRakePerHand: Boolean;
     procedure clear_MaxRakePerHand;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property CreatorMongoId: TMongoId read FCreatorMongoId write SetCreatorMongoId;
+    property Gamename: String read FGamename write SetGamename;
+    property ClubMongoid: TMongoId read FClubMongoid write SetClubMongoid;
+    property GameType: TGameType read FGameType write SetGameType;
+    property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
+    property Blinds: TGameBlinds read FBlinds write SetBlinds;
+    property Seats: Integer read FSeats write SetSeats;
+    property Sitting: Integer read FSitting write SetSitting;
+    property BuyinMin: UInt32 read FBuyinMin write SetBuyinMin;
+    property BuyinMax: UInt32 read FBuyinMax write SetBuyinMax;
+    property State: TGameState read FState write SetState;
+    property Closetime: UInt32 read FClosetime write SetClosetime;
+    property Lasthandid: UInt32 read FLasthandid write SetLasthandid;
+    property Tournament: TMongoId read FTournament write SetTournament;
+    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
+    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
+    property FinalTable: Boolean read FFinalTable write SetFinalTable;
     property MaxRakePerHand: UInt32 read FMaxRakePerHand write SetMaxRakePerHand;
   end;
 

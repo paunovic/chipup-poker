@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TCardRankings = (crRoyalFlush = 0, crStraightFlush, cr4OfKind, crFullHouse, crFlush, crStraight, crThreeOfKind, crTwoPair, crOnePair, crHighCard);
 
   TPB_WinnerData = class(TProtobufBaseObject)
@@ -41,11 +42,12 @@ type
     // required int32 Seat = 3;
     function has_Seat: Boolean;
     procedure clear_Seat;
-    property Seat: Integer read FSeat write SetSeat;
 
     // required string Msg = 4;
     function has_Msg: Boolean;
     procedure clear_Msg;
+  published
+    property Seat: Integer read FSeat write SetSeat;
     property Msg: String read FMsg write SetMsg;
   end;
 

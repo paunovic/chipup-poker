@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember, Poker.Protobufs.Objects.GameBlinds, Poker.Protobufs.Objects.TournamentPrize;
 
 type
+  {$RTTI INHERIT}
   TTournamentState = (tnsOpen = 0, tnsInProgress, tnsCancelled, tnsOnBreak, tnsStarting, tnsFinished);
 
   TPB_TournamentInfo = class(TProtobufBaseObject)
@@ -130,96 +131,97 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TMongoId read FId write SetMongoId;
 
     // required string Name = 2;
     function has_Name: Boolean;
     procedure clear_Name;
-    property Name: String read FName write SetName;
 
     // required string Description = 3;
     function has_Description: Boolean;
     procedure clear_Description;
-    property Description: String read FDescription write SetDescription;
 
     // required GameType Gametype = 4;
     function has_Gametype: Boolean;
     procedure clear_Gametype;
-    property Gametype: TGameType read FGametype write SetGametype;
 
     // required GameLimit Limit = 5;
     function has_Limit: Boolean;
     procedure clear_Limit;
-    property Limit: TGameLimit read FLimit write SetLimit;
 
     // required uint32 SeatsPerTable = 6;
     function has_SeatsPerTable: Boolean;
     procedure clear_SeatsPerTable;
-    property SeatsPerTable: UInt32 read FSeatsPerTable write SetSeatsPerTable;
 
     // required uint32 Minplayers = 7;
     function has_Minplayers: Boolean;
     procedure clear_Minplayers;
-    property Minplayers: UInt32 read FMinplayers write SetMinplayers;
 
     // required uint32 Maxplayers = 8;
     function has_Maxplayers: Boolean;
     procedure clear_Maxplayers;
-    property Maxplayers: UInt32 read FMaxplayers write SetMaxplayers;
 
     // required uint32 Startingchips = 9;
     function has_Startingchips: Boolean;
     procedure clear_Startingchips;
-    property Startingchips: UInt32 read FStartingchips write SetStartingchips;
 
     // required uint32 Timeperlevel = 10;
     function has_Timeperlevel: Boolean;
     procedure clear_Timeperlevel;
-    property Timeperlevel: UInt32 read FTimeperlevel write SetTimeperlevel;
 
     // required uint32 RegisteredPlayers = 11;
     function has_RegisteredPlayers: Boolean;
     procedure clear_RegisteredPlayers;
-    property RegisteredPlayers: UInt32 read FRegisteredPlayers write SetRegisteredPlayers;
 
     // required uint32 StartTime = 12;
     function has_StartTime: Boolean;
     procedure clear_StartTime;
-    property StartTime: UInt32 read FStartTime write SetStartTime;
 
     // repeated TournamentMember Players = 13;
     function has_Players: Boolean;
     procedure clear_Players;
-    property Players: TList<TPB_TournamentMember> read FPlayers;
 
     // required TournamentState State = 14;
     function has_State: Boolean;
     procedure clear_State;
-    property State: TTournamentState read FState write SetState;
 
     // repeated Game Games = 15;
     function has_Games: Boolean;
     procedure clear_Games;
-    property Games: TList<TPB_Game> read FGames;
 
     // repeated GameBlinds BlindStructure = 16;
     function has_BlindStructure: Boolean;
     procedure clear_BlindStructure;
-    property BlindStructure: TList<TPB_GameBlinds> read FBlindStructure;
 
     // optional uint32 CurrentBlindLevel = 17;
     function has_CurrentBlindLevel: Boolean;
     procedure clear_CurrentBlindLevel;
-    property CurrentBlindLevel: UInt32 read FCurrentBlindLevel write SetCurrentBlindLevel;
 
     // optional uint64 CurrentBlindLevelEndTime = 18;
     function has_CurrentBlindLevelEndTime: Boolean;
     procedure clear_CurrentBlindLevelEndTime;
-    property CurrentBlindLevelEndTime: UInt64 read FCurrentBlindLevelEndTime write SetCurrentBlindLevelEndTime;
 
     // repeated TournamentPrize Prizes = 19;
     function has_Prizes: Boolean;
     procedure clear_Prizes;
+  published
+    property MongoId: TMongoId read FId write SetMongoId;
+    property Name: String read FName write SetName;
+    property Description: String read FDescription write SetDescription;
+    property Gametype: TGameType read FGametype write SetGametype;
+    property Limit: TGameLimit read FLimit write SetLimit;
+    property SeatsPerTable: UInt32 read FSeatsPerTable write SetSeatsPerTable;
+    property Minplayers: UInt32 read FMinplayers write SetMinplayers;
+    property Maxplayers: UInt32 read FMaxplayers write SetMaxplayers;
+    property Startingchips: UInt32 read FStartingchips write SetStartingchips;
+    property Timeperlevel: UInt32 read FTimeperlevel write SetTimeperlevel;
+    property RegisteredPlayers: UInt32 read FRegisteredPlayers write SetRegisteredPlayers;
+    property StartTime: UInt32 read FStartTime write SetStartTime;
+    property Players: TList<TPB_TournamentMember> read FPlayers;
+    property State: TTournamentState read FState write SetState;
+    property Games: TList<TPB_Game> read FGames;
+    property BlindStructure: TList<TPB_GameBlinds> read FBlindStructure;
+    property CurrentBlindLevel: UInt32 read FCurrentBlindLevel write SetCurrentBlindLevel;
+    property CurrentBlindLevelEndTime: UInt64 read FCurrentBlindLevelEndTime write SetCurrentBlindLevelEndTime;
     property Prizes: TList<TPB_TournamentPrize> read FPrizes;
   end;
 

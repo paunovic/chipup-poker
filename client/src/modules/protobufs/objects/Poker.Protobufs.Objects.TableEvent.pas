@@ -12,6 +12,7 @@ uses
   Poker.Protobufs.Objects.Pot;
 
 type
+  {$RTTI INHERIT}
   TTableEventType = (teFold = 0, teSit, teStandUp, teWinning, teDealing, teCheck, teCall, teRaise, teAllIn, teFlop, teTurn, teRiver, tePostRiver, tePreWin, teExistingCards, teDisconnect, teSB, teBB, teForced);
 
   TPB_TableEvent = class(TProtobufBaseObject)
@@ -60,26 +61,27 @@ type
     // required TableEventType Event = 1;
     function has_Event: Boolean;
     procedure clear_Event;
-    property Event: TTableEventType read FEvent write SetEvent;
 
     // optional int32 Seat = 2;
     function has_Seat: Boolean;
     procedure clear_Seat;
-    property Seat: Integer read FSeat write SetSeat;
 
     // repeated Pot Pots = 3;
     function has_Pots: Boolean;
     procedure clear_Pots;
-    property Pots: TList<TPB_Pot> read FPots;
 
     // repeated uint32 Bets = 4;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TList<UInt32> read FBets;
 
     // repeated bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
+  published
+    property Event: TTableEventType read FEvent write SetEvent;
+    property Seat: Integer read FSeat write SetSeat;
+    property Pots: TList<TPB_Pot> read FPots;
+    property Bets: TList<UInt32> read FBets;
     property Cards: TList<TBytes> read FCards;
   end;
 

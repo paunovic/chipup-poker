@@ -11,6 +11,7 @@ uses
   pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  {$RTTI INHERIT}
   TPB_ChangePasswordParams = class(TProtobufBaseObject)
   private
     const
@@ -34,6 +35,7 @@ type
     // required string NewPassword = 1;
     function has_NewPassword: Boolean;
     procedure clear_NewPassword;
+  published
     property NewPassword: String read FNewPassword write SetNewPassword;
   end;
 
