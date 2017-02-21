@@ -41,40 +41,31 @@ type
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
     procedure SocketConnectThreadTerminate(Sender: TObject);
-
     procedure WndProc(var AMessage: TMessage);
-
     procedure FreeReceiveBuffer;
     function ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
-
     procedure ResetPingTimeoutTimer;
     procedure ResetPingTimer;
     procedure ResetInactivityPingTimer;
     procedure KillPingTimers;
     procedure KillPingTimeoutTimer;
-
     {$IFDEF DEBUG}
     procedure DebugRpcMessage(const ADebugType: TDebugInfoType;
       const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject;
       const AStreamSize: Int64 = 0; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
     {$ENDIF}
-
   public
     constructor Create;
     destructor Destroy; override;
 
-    procedure Connect(const AServer: String; const APort: Integer;
-     const ASSLEnable: Boolean; const ASSLCert: String;
-     const AConnectSynchronously: Boolean = FALSE);
+    procedure Connect(const AServer: String; const APort: Integer; const ASSLEnable: Boolean; const ASSLCert: String; const AConnectSynchronously: Boolean = FALSE);
     procedure Disconnect;
     function IsConnected: Boolean;
-
     procedure SendProtobuf(const AServerCode: TServerCodes; const AProtobuf: TProtobufBaseObject);
     procedure SendRawProtobuf(const AServerCode: TServerCodes; const AProtobuf; const ASize: Integer);
     procedure SendRaw(const ABuffer: pointer; const ASize: Integer);
     procedure AppendToReceiveBuffer(const APointer: pointer; const ASize: Integer);
     procedure ParseReceiveBuffer;
-
     procedure Ping;
 
     property Socket: TSslWSocket read FSocket;
@@ -338,8 +329,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TServerSocketCore.AppendToReceiveBuffer(const APointer: pointer;
-  const ASize: Integer);
+procedure TServerSocketCore.AppendToReceiveBuffer(const APointer: pointer; const ASize: Integer);
 begin
   Inc(FReceiveBufferSize, ASize);
   {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
