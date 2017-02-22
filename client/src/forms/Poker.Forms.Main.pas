@@ -1471,7 +1471,7 @@ begin
     if (proto.has_Prize) and
        (proto.Prize.Name <> '') then
       msg := msg + #10 + Format('You have won the following prize: %s!', [proto.Prize.Name]) + #10 +
-         'We will contact you soon on your E-Mail address about more details for claiming your prize.';
+         'We will contact you soon to your E-Mail address about more details for claiming your prize.';
   finally
     Tournaments.Unlock;
   end;
