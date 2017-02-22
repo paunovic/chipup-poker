@@ -45,7 +45,7 @@ object frmTable: TfrmTable
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -9
+    Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.TextColor = clGray
@@ -69,7 +69,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbFoldToAnyBetPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -77,8 +77,8 @@ object frmTable: TfrmTable
     TabOrder = 1
     Transparent = True
     Visible = False
-    Height = 15
-    Width = 104
+    Height = 19
+    Width = 121
   end
   object cbSitOutNextHand: TcxCheckBox
     Left = 223
@@ -90,7 +90,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbSitOutNextHandPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -98,8 +98,8 @@ object frmTable: TfrmTable
     TabOrder = 2
     Transparent = True
     Visible = False
-    Height = 15
-    Width = 104
+    Height = 19
+    Width = 121
   end
   object cbSitOutNextBB: TcxCheckBox
     Left = 223
@@ -111,7 +111,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbSitOutNextBBPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -119,8 +119,8 @@ object frmTable: TfrmTable
     TabOrder = 3
     Transparent = True
     Visible = False
-    Height = 15
-    Width = 104
+    Height = 19
+    Width = 121
   end
   object seRaiseAmount: TcxSpinEdit
     Left = 404
@@ -165,7 +165,7 @@ object frmTable: TfrmTable
     Style = RVStyle
   end
   object lbvHandStrength: TcxLabel
-    Left = 632
+    Left = 613
     Top = 370
     Anchors = [akRight, akBottom]
     Caption = 'Hand Strength'
@@ -173,7 +173,7 @@ object frmTable: TfrmTable
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -9
+    Style.Font.Height = -12
     Style.Font.Name = 'Sintony'
     Style.Font.Style = []
     Style.Font.Quality = fqAntialiased
@@ -409,8 +409,6 @@ object frmTable: TfrmTable
       Properties.Alignment.Horz = taLeftJustify
       Properties.Alignment.Vert = taVCenter
       Transparent = True
-      ExplicitLeft = 219
-      ExplicitWidth = 119
       Height = 23
       Width = 139
       AnchorY = 12
@@ -478,7 +476,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbAutoCheckPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -496,7 +494,7 @@ object frmTable: TfrmTable
     Properties.ImmediatePost = True
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -514,7 +512,7 @@ object frmTable: TfrmTable
     Properties.ImmediatePost = True
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -532,7 +530,7 @@ object frmTable: TfrmTable
     Properties.ImmediatePost = True
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -551,7 +549,7 @@ object frmTable: TfrmTable
     Properties.OnChange = cbSplitTableCardsPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = 13
+    Style.Font.Height = 15
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
@@ -559,19 +557,19 @@ object frmTable: TfrmTable
     TabOrder = 18
     Transparent = True
     Visible = False
-    Height = 15
-    Width = 104
+    Height = 19
+    Width = 121
   end
   object lbvWaitingListPosition: TcxLabel
-    Left = 404
+    Left = 352
     Top = 442
     Anchors = [akRight, akBottom]
-    Caption = 'Position in waiting list: 1'
+    Caption = 'Position in the waiting list: 1'
     ParentFont = False
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -9
+    Style.Font.Height = -12
     Style.Font.Name = 'Sintony'
     Style.Font.Style = []
     Style.Font.Quality = fqClearType
@@ -728,42 +726,42 @@ object frmTable: TfrmTable
       item
         StyleName = 'User'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = 14803425
         Unicode = True
       end
       item
         StyleName = 'Normal text'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = 15987699
         Unicode = True
       end
       item
         StyleName = 'Dealer'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = clLime
         Unicode = True
       end
       item
         StyleName = 'Dealer Text'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = 11075496
         Unicode = True
       end
       item
         StyleName = 'Self Text'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = 16765348
         Unicode = True
       end
       item
         StyleName = 'System'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Style = [fsBold]
         Color = 4227327
         Unicode = True
@@ -771,14 +769,14 @@ object frmTable: TfrmTable
       item
         StyleName = 'System Text'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = 4227327
         Unicode = True
       end
       item
         StyleName = 'Observer Text'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = clGray
         Unicode = True
       end>
@@ -944,7 +942,7 @@ object frmTable: TfrmTable
     Left = 216
     Top = 52
     Bitmap = {
-      494C0101060009000C0030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000900100030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
