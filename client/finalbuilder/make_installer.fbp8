@@ -1,0 +1,367 @@
+﻿project
+begin
+  projectid = {23E616B9-58E3-4BC4-9228-057A44F8B5BD}
+  target
+  begin
+    name = Default
+    targetid = {C43FEF7F-007D-44B2-939D-4CD11EC42686}
+    rootaction
+    begin
+      action.group
+      begin
+        description = Prepare
+        id = {45FBE294-8A50-4168-902A-B64662143E16}
+        action.script.run
+        begin
+          description = "git rev-parse HEAD > revision.inc"
+          id = {AB6385CE-C23F-4846-84C1-4ECFE9FB526C}
+          action.script
+          begin
+            name = OnExecute
+            script >
+            beginscript
+              $rev = git rev-parse HEAD
+              write-output "'$($rev)'" > ../src/revision.inc
+            endscript
+            scriptlanguage = Powershell
+          end
+        end
+      end
+      action.group
+      begin
+        description = "Compile Project"
+        id = {77972750-D93E-4DB6-B6B9-C15442C1A1D2}
+        action.ifthen
+        begin
+          expandactionlogtitle = false
+          id = {5B9ABC9C-8B7F-47EF-A6AA-D252CBE811E5}
+          lhsstoragestring = "%DEBUG%" +
+                             ""
+          operatorsstoragestring = "=" +
+                                   ""
+          resultinlogtitle = true
+          rhsstoragestring = "0" +
+                             ""
+          shortcircuitevaluation = true
+          termjoiner = jwOr
+          action.delphi.build
+          begin
+            allowimplicitimport = true
+            alwaysuseconditionalsfromdof = true
+            autoincbuild = false
+            autoupdatefileversion = true
+            autoupdateproductversion = false
+            buildall = true
+            buildversion = 0
+            codepage = 1252
+            compileprojectresources = true
+            compileridl = true
+            configname = Release
+            debugversionnumbers = false
+            delphiversion = DelphiXE8
+            description = "Build Client [Release, x86] [ %PROJECT_DIR%\\client\\src\\chipup_client.dpr ]"
+            eurekalogverboselogging = false
+            frameworktype = VCL
+            hintsaserror = false
+            iconfile = %PROJECT_DIR%\\client\\src\\resources\\Icon.ico
+            id = {6102B373-1720-4686-9552-7F5D451FD66B}
+            includecompiledate = false
+            includemanifest = false
+            includeverinfo = true
+            isdebug = false
+            isdll = false
+            isprerelease = false
+            isprivate = false
+            isspecial = false
+            keepcfg = false
+            linkproductversiontofileversion = true
+            locale = 1033
+            majorversion = 1
+            minorversion = 0
+            platform = Win32
+            projectfile = %PROJECT_DIR%\\client\\src\\chipup_client.dpr
+            regenerateresource = true
+            releaseversion = 0
+            resourcecompilertype = rcBorland
+            startingdir = %PROJECT_DIR%\\client\\src
+            updatedoffile = false
+            updatepackagesource = false
+            updateversioninfokeys = false
+            useeurekalogcompiler = false
+            useprojectsettings = [usPackages,usCompiler,usLinker,usDirectories,usVersionInfo]
+            usepropertyset = false
+            useversionfromdof = false
+            versioninfokeys = "CompanyName=ChipUP Poker" +
+                              "FileDescription=" +
+                              "FileVersion=1.0.0.0" +
+                              "InternalName=ChipUP Poker" +
+                              "LegalCopyright=" +
+                              "LegalTrademarks=" +
+                              "OriginalFilename=chipuppoker.exe" +
+                              "ProductName=ChipUP Poker" +
+                              "ProductVersion=1.0.0.0" +
+                              "Comments=" +
+                              ""
+            warningsaserror = false
+            workaroundd5bug = false
+            delphi.compileroptions
+            begin
+              alwaysuseconditionalsfromdof = true
+              alwaysusedelphilibrarypath = true
+              alwaysusedofsearchpath = true
+              assertions = true
+              assignableconst = false
+              booleval = false
+              conditionals = USE_SSL;RELEASE
+              consoleapp = false
+              debuginfo = true
+              definitionsonly = false
+              emitruntimetypeinformation = false
+              exportallsymbols = false
+              extendedsyntax = true
+              externaltd32 = false
+              frameworktype = VCL
+              generatedocumentation = false
+              generatehpp = false
+              hugestrings = true
+              imagebase = 4194304
+              includenamespaces = false
+              includeremotesymbols = false
+              includetd32 = false
+              inlining = inOn
+              iochecking = true
+              librarypath = "$(BDSLIB)\\$(Platform)\\release;$(BDSUSERDIR)\\Imports;$(BDS)\\Imports;$(BDSCOMMONDIR)\\Dcp;$(BDS)\\include;C:\\Users\\marko\\XE8Components\\DevExpress\\Library\\RAD Studio XE8;C:\\Users\\marko\\XE8Components\\DevExpress\\Library\\Sources;C:\\Users\\marko\\XE8Components\\graphics32\\Source;C:\\Users\\marko\\XE8Components\\RichView\\1-TrichView;C:\\Users\\marko\\XE8Components\\OverbyteICS\\Source;C:\\Users\\marko\\XE8Components\\OverbyteICS\\Source\\Extras;C:\\Users\\marko\\XE8Components\\OverbyteICS\\Source\\Include;C:\\Program Files (x86)\\Steema Software\\Steema TeeChart Pro VCL 2015.15\\Delphi22\\Delphi22.win32\\Lib"
+              linkeroutput = 0
+              localsymbols = true
+              mapfile = 3
+              maxstacksize = 1048576
+              minstacksize = 16384
+              namespaceprefixes = System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;
+              openstrings = true
+              optimisation = true
+              outputdir = ..\\bin\\$(Platform)\\$(Config)
+              overflowchecking = false
+              packages = dxtilecontrolrs16;cxlibraryrs16;tmscloudpkgdxe2;dxskinsevenrs16;tp_lockbox3;dxpsprvwadvrs16;dxskinsummer2008rs16;dxpscorers16;cxpivotgridolaprs16;dxpscxgridlnkrs16;dxpscxtllnkrs16;cxpagecontrolrs16;dxskinvs2010rs16;vclimg;dxskindevexpressstylers16;dxskinwhiteprintrs16;fmi;dxcomnrs16;vcldb;dxskinblackrs16;dxadoservermoders16;dxbarextdbitemsrs16;dxskinxmas2008bluers16;dxskinoffice2007bluers16;cloudservice;dxskinoffice2007greenrs16;fmxteeui;cxdatars16;cxbaredititemrs16;dxdockingrs16;cxpagecontroldxbarpopupmenurs16;tmsexdxe2;dxpsdbteechartrs16;dxpslnksrs16;dxbarextitemsrs16;jcldevelopertools;dxpsteechartrs16;dxpsdxlclnkrs16;cxverticalgridrs16;dxskinsharprs16;dxskinoffice2007blackrs16;dxorgcrs16;dxskinblueprintrs16;dxpscxextcommonrs16;vcldbx;dxnavbarrs16;overbyteicsdxe2run;dbxodbcdriver;dxdbtrrs16;dxskinfoggyrs16;maddisasm_;dxpscxsslnkrs16;dxskindarksiders16;intrawebdb_120_160;dxskinscxpcpainterrs16;dxpsdxdbtvlnkrs16;fmxtee;vclactnband;dxpscxschedulerlnkrs16;dxservermoders16;bindcompvcl;jcl;vclie;madexcept_;dxskinsilverrs16;dsnapcon;dcldxskinscorers16;cooltrayicon_d140;dxskinlilianrs16;vclx;dxskinvalentiners16;dxflowchartrs16;dxgdiplusrs16;dxskinsharpplusrs16;dxdborrs16;dxpscxvgridlnkrs16;dxlayoutcontrolrs16;dxpscxpivotgridlnkrs16;dxcorers16;cxexportrs16;zcomponent;dxbarrs16;dxskinsdxnavbarpainterrs16;cxspreadsheetrs16;cxtreelistdxbarpopupmenurs16;teedb;flexcelxe2;dxdbxservermoders16;dxskincoffeers16;rave100vcl;vclib;inetdbbde;dxribbonrs16;dbxsybaseasedriver;cxtreelistrs16;dxskinoffice2007silverrs16;dxskinsdxribbonpainterrs16;vcldsnap;dxskinbluers16;dbxdb2driver;intraweb_120_160;dwslibruntime;vclribbon;dxskindarkroomrs16;dxskinscxschedulerpainterrs16;vcl;dxskindevexpressdarkstylers16;dbxmssqldriver;tmsdxe2;cxschedulergridrs16;webdsnap;dxtrmdrs16;dxskinsdxdlpainterrs16;dxskintheasphaltworldrs16;dxskinoffice2010blackrs16;dxskinmoneytwinsrs16;dxskinpumpkinrs16;adortl;madbasic_;dxskinhighcontrastrs16;dxskinimaginaryrs16;shellchangenotify;zdbc;dxpsdxdboclnkrs16;dxskinlondonliquidskyrs16;dxskinsdxbarpainterrs16;zplain;tee;jclcontainers;dxskinglassoceansrs16;dxskinliquidskyrs16;dxskinscorers16;svnui;cxpivotgridchartrs16;dxpscxcommonrs16;dxmdsrs16;dxspellcheckerrs16;dxpsprvwribbonrs16;cxgridrs16;cxeditorsrs16;teeui;cxpivotgridrs16;dxskinsevenclassicrs16;cxschedulerrs16;tmsxlsdxe2;vcltouch;dxskinoffice2010silverrs16;zcore;websnap;dxskinoffice2007pinkrs16;vclsmp;dxskinspringtimers16;dxtabbedmdirs16;datasnapconnectors;dxskinstardustrs16;dxpsdxoclnkrs16;dxskinoffice2010bluers16;dxpsdxfclnkrs16;dxthemers16;jclvcl;dxpscxpcprodrs16;zparsesql;tmswizdxe2;svn;dxskincaramelrs16;bdertl;dxskinmcskinrs16;dxbardbnavrs16
+              rangechecking = false
+              recordfieldalign = fa8
+              referenceinfo = false
+              safedivide = false
+              searchpath = 3rdparty\\FastMM;3rdparty\\AsphyreSphinx\\Source;3rdparty\\icsv8;3rdparty\\protobufs;3rdparty\\superobject;3rdparty\\synapse;3rdparty\\mormot
+              showhints = true
+              showwarnings = true
+              stackframes = false
+              stringchecks = true
+              typedpointers = false
+              unitaliases = WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE
+              unitoutputdir = ..\\bin\\$(Platform)\\$(Config)\\dcu
+              usedebugdcu = false
+              usepackages = false
+              varstringchecks = true
+            end
+          end
+        end
+        action.else
+        begin
+          id = {3C971585-2308-47CF-AB19-345B1D718C78}
+          action.delphi.build
+          begin
+            allowimplicitimport = true
+            alwaysuseconditionalsfromdof = true
+            autoincbuild = false
+            autoupdatefileversion = true
+            autoupdateproductversion = false
+            buildall = true
+            buildversion = 0
+            codepage = 1252
+            compileprojectresources = true
+            compileridl = true
+            configname = Release
+            debugversionnumbers = false
+            delphiversion = DelphiXE8
+            description = "Build Client [Debug, x86] [ %PROJECT_DIR%\\client\\src\\chipup_client.dpr ]"
+            eurekalogverboselogging = false
+            extracommandline = -DDEBUG
+            frameworktype = VCL
+            hintsaserror = false
+            iconfile = %PROJECT_DIR%\\client\\src\\resources\\Icon.ico
+            id = {71DBAFB3-02D1-402A-BA5A-9BD01E2E9142}
+            includecompiledate = false
+            includemanifest = false
+            includeverinfo = false
+            isdebug = false
+            isdll = false
+            isprerelease = false
+            isprivate = false
+            isspecial = false
+            keepcfg = false
+            linkproductversiontofileversion = true
+            locale = 2057
+            majorversion = 1
+            minorversion = 0
+            platform = Win32
+            projectfile = %PROJECT_DIR%\\client\\src\\chipup_client.dpr
+            regenerateresource = true
+            releaseversion = 0
+            resourcecompilertype = rcBorland
+            startingdir = %PROJECT_DIR%\\client\\src
+            updatedoffile = false
+            updatepackagesource = false
+            updateversioninfokeys = false
+            useeurekalogcompiler = false
+            useprojectsettings = [usPackages,usCompiler,usLinker,usDirectories,usVersionInfo]
+            usepropertyset = false
+            useversionfromdof = false
+            versioninfokeys = "CompanyName=" +
+                              "FileDescription=" +
+                              "FileVersion=1.0.0.0" +
+                              "InternalName=" +
+                              "LegalCopyright=" +
+                              "LegalTrademarks=" +
+                              "OriginalFilename=" +
+                              "ProductName=" +
+                              "ProductVersion=1.0.0.0" +
+                              "Comments=" +
+                              ""
+            warningsaserror = false
+            workaroundd5bug = false
+            delphi.compileroptions
+            begin
+              alwaysuseconditionalsfromdof = true
+              alwaysusedelphilibrarypath = true
+              alwaysusedofsearchpath = true
+              assertions = true
+              assignableconst = false
+              booleval = false
+              compilerwarnings = "-w-UNSAFE_TYPE=0" +
+                                 "-w-UNSAFE_CODE=0" +
+                                 "-w-UNSAFE_CAST=0" +
+                                 ""
+              conditionals = RELEASE;madExcept
+              consoleapp = false
+              debuginfo = true
+              definitionsonly = false
+              emitruntimetypeinformation = false
+              exportallsymbols = false
+              extendedsyntax = true
+              externaltd32 = false
+              frameworktype = VCL
+              generatedocumentation = false
+              generatehpp = false
+              hugestrings = true
+              imagebase = 4194304
+              includenamespaces = false
+              includeremotesymbols = false
+              includetd32 = false
+              inlining = inOn
+              iochecking = true
+              librarypath = "$(BDSLIB)\\$(Platform)\\release;$(BDSUSERDIR)\\Imports;$(BDS)\\Imports;$(BDSCOMMONDIR)\\Dcp;$(BDS)\\include;C:\\Users\\marko\\XE8Components\\DevExpress\\Library\\RAD Studio XE8;C:\\Users\\marko\\XE8Components\\DevExpress\\Library\\Sources;C:\\Users\\marko\\XE8Components\\graphics32\\Source;C:\\Users\\marko\\XE8Components\\RichView\\1-TrichView;C:\\Users\\marko\\XE8Components\\OverbyteICS\\Source;C:\\Users\\marko\\XE8Components\\OverbyteICS\\Source\\Extras;C:\\Users\\marko\\XE8Components\\OverbyteICS\\Source\\Include;C:\\Program Files (x86)\\Steema Software\\Steema TeeChart Pro VCL 2015.15\\Delphi22\\Delphi22.win32\\Lib"
+              linkeroutput = 0
+              localsymbols = true
+              mapfile = 3
+              maxstacksize = 1048576
+              minstacksize = 16384
+              namespaceprefixes = System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Data.Win;Web.Win;Soap.Win;Bde;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;
+              openstrings = true
+              optimisation = true
+              outputdir = ..\\bin\\$(Platform)\\$(Config)
+              overflowchecking = false
+              packages = dxtilecontrolrs16;cxlibraryrs16;tmscloudpkgdxe2;dxskinsevenrs16;tp_lockbox3;dxpsprvwadvrs16;dxskinsummer2008rs16;dxpscorers16;cxpivotgridolaprs16;dxpscxgridlnkrs16;dxpscxtllnkrs16;cxpagecontrolrs16;dxskinvs2010rs16;vclimg;dxskindevexpressstylers16;dxskinwhiteprintrs16;fmi;dxcomnrs16;vcldb;dxskinblackrs16;dxadoservermoders16;dxbarextdbitemsrs16;dxskinxmas2008bluers16;dxskinoffice2007bluers16;cloudservice;dxskinoffice2007greenrs16;fmxteeui;cxdatars16;cxbaredititemrs16;dxdockingrs16;cxpagecontroldxbarpopupmenurs16;tmsexdxe2;dxpsdbteechartrs16;dxpslnksrs16;dxbarextitemsrs16;jcldevelopertools;dxpsteechartrs16;dxpsdxlclnkrs16;cxverticalgridrs16;dxskinsharprs16;dxskinoffice2007blackrs16;dxorgcrs16;dxskinblueprintrs16;dxpscxextcommonrs16;vcldbx;dxnavbarrs16;overbyteicsdxe2run;dbxodbcdriver;dxdbtrrs16;dxskinfoggyrs16;maddisasm_;dxpscxsslnkrs16;dxskindarksiders16;intrawebdb_120_160;dxskinscxpcpainterrs16;dxpsdxdbtvlnkrs16;fmxtee;vclactnband;dxpscxschedulerlnkrs16;dxservermoders16;bindcompvcl;jcl;vclie;madexcept_;dxskinsilverrs16;dsnapcon;dcldxskinscorers16;cooltrayicon_d140;dxskinlilianrs16;vclx;dxskinvalentiners16;dxflowchartrs16;dxgdiplusrs16;dxskinsharpplusrs16;dxdborrs16;dxpscxvgridlnkrs16;dxlayoutcontrolrs16;dxpscxpivotgridlnkrs16;dxcorers16;cxexportrs16;zcomponent;dxbarrs16;dxskinsdxnavbarpainterrs16;cxspreadsheetrs16;cxtreelistdxbarpopupmenurs16;teedb;flexcelxe2;dxdbxservermoders16;dxskincoffeers16;rave100vcl;vclib;inetdbbde;dxribbonrs16;dbxsybaseasedriver;cxtreelistrs16;dxskinoffice2007silverrs16;dxskinsdxribbonpainterrs16;vcldsnap;dxskinbluers16;dbxdb2driver;intraweb_120_160;dwslibruntime;vclribbon;dxskindarkroomrs16;dxskinscxschedulerpainterrs16;vcl;dxskindevexpressdarkstylers16;dbxmssqldriver;tmsdxe2;cxschedulergridrs16;webdsnap;dxtrmdrs16;dxskinsdxdlpainterrs16;dxskintheasphaltworldrs16;dxskinoffice2010blackrs16;dxskinmoneytwinsrs16;dxskinpumpkinrs16;adortl;madbasic_;dxskinhighcontrastrs16;dxskinimaginaryrs16;shellchangenotify;zdbc;dxpsdxdboclnkrs16;dxskinlondonliquidskyrs16;dxskinsdxbarpainterrs16;zplain;tee;jclcontainers;dxskinglassoceansrs16;dxskinliquidskyrs16;dxskinscorers16;svnui;cxpivotgridchartrs16;dxpscxcommonrs16;dxmdsrs16;dxspellcheckerrs16;dxpsprvwribbonrs16;cxgridrs16;cxeditorsrs16;teeui;cxpivotgridrs16;dxskinsevenclassicrs16;cxschedulerrs16;tmsxlsdxe2;vcltouch;dxskinoffice2010silverrs16;zcore;websnap;dxskinoffice2007pinkrs16;vclsmp;dxskinspringtimers16;dxtabbedmdirs16;datasnapconnectors;dxskinstardustrs16;dxpsdxoclnkrs16;dxskinoffice2010bluers16;dxpsdxfclnkrs16;dxthemers16;jclvcl;dxpscxpcprodrs16;zparsesql;tmswizdxe2;svn;dxskincaramelrs16;bdertl;dxskinmcskinrs16;dxbardbnavrs16
+              rangechecking = false
+              recordfieldalign = fa8
+              referenceinfo = false
+              safedivide = false
+              showhints = true
+              showwarnings = true
+              stackframes = false
+              stringchecks = true
+              typedpointers = false
+              unitaliases = WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE
+              unitoutputdir = ..\\bin\\$(Platform)\\$(Config)\\dcu
+              usedebugdcu = false
+              usepackages = false
+              varstringchecks = true
+            end
+          end
+        end
+      end
+      action.group
+      begin
+        description = Postprocess
+        id = {46F0CBBD-D36A-452A-9C31-DD3BCF4E9929}
+        action.files.copy
+        begin
+          clearattributes = false
+          failifexists = false
+          failifzerofiles = true
+          filespec = %PROJECT_DIR%\\client\\bin\\Win32\\Release\\chipup_client.exe
+          force = true
+          id = {FCC49070-5074-4F3F-A442-9C2ED4848EC9}
+          logfilesaffected = true
+          overwrite = true
+          overwritereadonly = true
+          recurse = false
+          target = %PROJECT_DIR%\\client\\installer\\files\\chipuppoker.exe
+          targetisdir = false
+        end
+        action.process.execute
+        begin
+          captureoutput = true
+          enablelivecapture = true
+          enablereturncodecheck = true
+          enabletimeout = false
+          expandimpersonationtoken = false
+          hidewindow = true
+          id = {A3FC074A-DFE0-487C-AD90-9CD9D9DDCC6F}
+          impersonateusenetcredonly = false
+          impersonateuser = false
+          logoutput = true
+          logprocessparameters = true
+          params = "/B \"%PROJECT_DIR%\\client\\installer\\files\\chipuppoker.exe\""
+          programname = %PROJECT_DIR%\\client\\finalbuilder\\tools\\StripReloc.exe
+          redirectstderr = true
+          returncodecomparator = rcEqualTo
+          returncodetocheck = 0
+          terminateontimeout = false
+          timeoutlength = 1
+          useerrordialogmonitor = false
+          waitforcompletion = true
+        end
+      end
+      action.group
+      begin
+        description = "Create Installer"
+        id = {CB839B39-F069-47C0-A2BF-EFA6FE88DA71}
+        action.innosetup.execute
+        begin
+          id = {8AF45970-D345-4057-8716-A2F846851F62}
+          innoversion = Inno5
+          scriptfile = %PROJECT_DIR%\\client\\installer\\installer.iss
+          showprogress = true
+          unicode = true
+          usecommandline = false
+          usepreprocessor = false
+        end
+      end
+    end
+  end
+  variable
+  begin
+    defaultvalue = 0
+    name = DEBUG
+    variablescope = vtProject
+    variabletype = btInteger
+  end
+  variable
+  begin
+    defaultvalue = ..\\..
+    name = PROJECT_DIR
+    variablescope = vtProject
+    variabletype = btString
+  end
+  variable
+  begin
+    name = PROJECT_EXECUTABLE
+    variablescope = vtProject
+    variabletype = btString
+  end
+end
