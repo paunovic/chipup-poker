@@ -163,7 +163,7 @@ function Server(activeUsersIN) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
 				global.log('sending debug installer %j',row);
-				res.sendfile(config.installers + '/ '+ row.name);
+				res.sendfile(config.installers + '/'+ row.name);
 			});
 		}.bind(this));
 	}.bind(this));
@@ -754,12 +754,6 @@ Server.prototype.installers_func = function (req,res) {
 		if (req.body.activate_live_debug) {
 			jobs.push(makeActivator.call(this,req.body.activate_live_debug,'live'));
 		}
-		if (req.body.activate_dev_release) {
-			jobs.push(makeActivator.call(this,req.body.activate_dev_release,'dev'));
-		}
-		if (req.body.activate_dev_debug) {
-			jobs.push(makeActivator.call(this,req.body.activate_dev_debug,'dev'));
-		}
 	}
 	for (var key in req.body) {
 		var res2 = /^delete_(.*)$/.exec(key);
@@ -798,20 +792,13 @@ Server.prototype.installers_func = function (req,res) {
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
 		models.Installer.find().sort({_id:1}).exec(function(err,data) {
-			models.Config.find({_id:{$in:['live_installerid','live_debuginstallerid','dev_debuginstallerid','dev_installerid']}},function (err,configs) {
+			models.Config.find({_id:{$in:['live_installerid','live_debuginstallerid']}},function (err,configs) {
 				console.log('configs',configs);
 				var live_pubver,live_debugver;
-				var dev_pubver,dev_debugver;
 				for (var x=0; x<configs.length; x++) {
                                         if (!configs[x].value) continue;
 					var y = configs[x].value.toString();
 					switch (configs[x]._id) {
-					case 'dev_installerid':
-						dev_pubver = y;
-						break;
-					case 'dev_debuginstallerid':
-						dev_debugver = y;
-						break;
 					case 'live_installerid':
 						live_pubver = y;
 						break;
@@ -819,12 +806,7 @@ Server.prototype.installers_func = function (req,res) {
 						live_debugver = y;
 					}
 				}
-				var activeRelease;
 				for (var x=0; x<data.length; x++) {
-					if (data[x]._id.toString() == dev_pubver) {
-						console.log('debuga',data[x]);
-						activeRelease = data[x];
-					}
 					for (var y=0; y<user_stats.length; y++) {
 						if (myutils.compareObjectID(data[x]._id,user_stats[y]._id)) {
 							data[x].used_by = user_stats[y].hits;
@@ -834,8 +816,8 @@ Server.prototype.installers_func = function (req,res) {
 				}
 				res.render('installers',{installers:data,start:start,
 					live_pubver:live_pubver, live_debugver:live_debugver,
-					dev_pubver:dev_pubver, dev_debugver:dev_debugver,appcode:appcode,
-					activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
+					appcode:appcode,
+					showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 			}.bind(this));
 		}.bind(this));
 	}
@@ -1104,28 +1086,28 @@ Server.prototype.errorUpload = function (req,res) {
 	});
 }*/
 Server.prototype.getAvatar = function (req,res) {
-	var id = req.query.id;
-	global.log('getting avatar %j %d %s',req.query,id.length,id);
-	if (id == 'default') {
-		fs.readFile('server/resources/default_avatar.jpg',function (err,data) {
-			if (err) throw err;
-			res.send(data);
-		});
-		return;
-	}
-	var raw = new Buffer(id,'hex');
-	var base64 = raw.toString('base64');
-	console.log('base64 avatar',base64);
-	models.Avatars.findOne({_id:base64},function (err,row) {
-		if (!row) {
-			res.send(404);
-			return;
-		}
-		var filename = req.query.id+"."+row.ext;
-		console.log(filename);
-		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
-		res.send(row.image);
-	});
+  var id = req.query.id;
+  global.log('getting avatar %j %d %s',req.query,id.length,id);
+  if (id == 'default') {
+    fs.readFile(project_root + '/resources/default_avatar.jpg',function (err,data) {
+      if (err) throw err;
+      res.send(data);
+    });
+    return;
+  }
+  var raw = new Buffer(id,'hex');
+  var base64 = raw.toString('base64');
+  console.log('base64 avatar',base64);
+  models.Avatars.findOne({_id:base64},function (err,row) {
+    if (!row) {
+      res.send(404);
+      return;
+    }
+    var filename = req.query.id+"."+row.ext;
+    console.log(filename);
+    res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
+    res.send(row.image);
+  });
 }
 
 Server.prototype.uploadAvatar = function (req,res) {
