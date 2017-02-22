@@ -129,9 +129,12 @@ begin
     method := t.GetMethod(Format('has_%s', [p.Name]));
     if (Assigned(method)) and
        (method.Invoke(AObject, []).AsBoolean) then
-      result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
+    begin
+      if result <> '' then
+        result := result + '; ';
+      result := result + Format('%s: %s', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
+    end;
   end;
-  result := TrimRight(result);
 end;
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
