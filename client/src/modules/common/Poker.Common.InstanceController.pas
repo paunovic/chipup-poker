@@ -7,7 +7,6 @@ type
   private
     class var
       FMutexHandle: THandle;
-
   public
     class function AcquireInstance(const AMutexName: String): Boolean;
     class procedure ReleaseInstance;
