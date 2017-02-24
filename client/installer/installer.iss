@@ -57,9 +57,9 @@ Type: files; Name: "{app}\assets\*.cpa"
 Type: dirifempty; Name: "{app}\assets"
 
 [Messages]
-WizardSelectTasks=Select Tasks
-SelectTasksDesc=Which tasks should be performed?
-SelectTasksLabel2=Select the tasks you would like Setup to perform while installing [name], then click Install.
+WizardSelectTasks=
+SelectTasksDesc=Please choose from the options below, then click Install.
+SelectTasksLabel2=
 
 [Code]
 procedure LoadVCLStyleS(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall setuponly';
