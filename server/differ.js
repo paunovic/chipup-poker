@@ -46,7 +46,7 @@ function makeDiff(sourcehash,desthash,path) {
 		req.end();
 		return;
 	}
-	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
+	fs.stat(config.unpacked + "/objects/"+sourcehash,function (err,localCopy) {
 		console.log('localCopy %s %s:%j',sourcehash,path,localCopy);
 		if (localCopy) {
 			console.log('getting lock');
@@ -61,10 +61,10 @@ function makeDiff(sourcehash,desthash,path) {
 					}
 					console.log('making diff for %s',path);
 					if (IO) IO.sockets.emit('makeDiff',{sourcehash:sourcehash,desthash:desthash,path:path});
-					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
-					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
+					var outfile = sourcehash+'-'+desthash+'.diff';
+					bsdiff(config.unpacked + "/objects/"+sourcehash, config.unpacked + "/objects/"+desthash, config.diffs + '/' + outfile,function (err,stats) {
 						assert.ifError(err);
-						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'https://'+config.staticserver+'/'+outfile };
+						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'https://'+config.staticserver+'/diffs/'+outfile };
 						var obj = new models.Diff(doc);
 						if (IO) IO.sockets.emit('makeDiff',{sourcehash:sourcehash,desthash:desthash,path:path,size:stats.size});
 						obj.save(function () {

@@ -15,6 +15,7 @@ let
     log_dir = "/home/poker/logs";
     unpacked = "/home/poker/unpacked";
     installers = "/home/poker/rawinstallers";
+    diffs = "/home/poker/diffs";
   };
 in {
   imports = [ ./snmpd.nix ];
@@ -60,14 +61,14 @@ in {
     systemd.services.poker = {
       description = "main poker process";
       wantedBy = [ "multi-user.target" ];
-      path = with pkgs; [ poker innoextract ];
+      path = with pkgs; [ poker innoextract bsdiff ];
       enable = true;
       environment = {
         CONFIG_FILE = pkgs.writeText "poker.json" (builtins.toJSON poker_config);
       };
       script = ''
         chmod 701 /home/poker
-        mkdir -pv /home/poker/chipuppoker/{server/assets,installers} ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}/objects ${poker_config.installers}
+        mkdir -pv /home/poker/chipuppoker/{server/assets,installers} ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}/objects ${poker_config.installers} ${poker_config.diffs}
         cd /home/poker/chipuppoker
         ${pkgs.poker}/bin/poker-master
       '';
