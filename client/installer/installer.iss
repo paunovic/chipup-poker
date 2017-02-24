@@ -27,7 +27,7 @@ DisableReadyPage=yes
 AppMutex={#ApplicationInstanceMutex}
 WizardImageFile=installer_images\installer-1.bmp
 WizardSmallImageFile=installer_images\installer-2.bmp
-PrivilegesRequired=none
+PrivilegesRequired=lowest
 
 [Files]
 Source: "skins\VclStylesInno.dll"; DestDir: "{app}"; Flags: uninsneveruninstall ignoreversion
