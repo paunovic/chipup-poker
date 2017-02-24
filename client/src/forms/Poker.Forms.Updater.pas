@@ -298,7 +298,7 @@ begin
     if result = 0 then
       Exit;
 
-    batch.Add(Format('START "%s"', [ParamStr(0)]));
+    batch.Add(Format('START "" "%s"', [ParamStr(0)]));
     batch.Add(Format('RMDIR /S /Q "%s"', [FUpdateDir]));
     ABatchFile := FUpdateDir + 'updater.bat';
 
