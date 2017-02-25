@@ -235,6 +235,10 @@ type
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
     procedure DoLogout;
+
+    {$IFDEF ENABLE_EXCEPTION_LOGGING}
+    procedure HandleAppException(_Sender: TObject; _e: Exception);
+    {$ENDIF}
   protected
     procedure DoCreate; override;
     procedure WMQueryEndSession(var AMessage: TWMQueryEndSession); message WM_QUERYENDSESSION;
@@ -255,6 +259,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  {$IFDEF ENABLE_EXCEPTION_LOGGING} JclDebug, {$ENDIF}
   Poker.Sounds, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc,
   Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
@@ -282,6 +287,11 @@ end;
 
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
 begin
+  {$IFDEF ENABLE_EXCEPTION_LOGGING}
+  ApplicationEvents.OnException := HandleAppException;
+  {$IFDEF DEBUG} DebugLn('Exception logging enabled', ditApplication); {$ENDIF}
+  {$ENDIF}
+
   FRegisteredTournamentsMap := TDictionary<Integer, TMongoId>.Create;
 
   FCallbacksId := MessageContainer.AddCallbacks(self.Name, [
@@ -1905,5 +1915,35 @@ begin
     Tables.Unlock;
   end;
 end;
+
+{$IFDEF ENABLE_EXCEPTION_LOGGING}
+procedure TfrmChipUpMain.HandleAppException(_Sender: TObject; _e: Exception);
+const
+  FILENAME = 'C:\ChipUP Poker error log.txt';
+var
+  sl: TStringList;
+begin
+  sl := TStringList.Create;
+  try
+    JclLastExceptStackListToStrings(sl, TRUE, TRUE, TRUE, FALSE);
+    sl.SaveToFile(FILENAME);
+    SoftException('AppException', sl.Text);
+  finally
+    sl.Free;
+  end;
+end;
+{$ENDIF}
+
+
+{$IFDEF ENABLE_EXCEPTION_LOGGING}
+initialization
+  Include(JclStackTrackingOptions, stRawMode);
+  Include(JclStackTrackingOptions, stStaticModuleList);
+  JclStartExceptionTracking;
+
+finalization
+  JclStopExceptionTracking;
+{$ENDIF}
+
 
 end.
