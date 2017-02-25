@@ -454,7 +454,7 @@ begin
       if FormsContainer.Find(TfrmChipUpLogin, form) then
         Exit;
 
-      // check if reconnect form already exists, if it does, don't recreate it!
+      // create the reconnect form if it doesn't exist
       if not FormsContainer.Contains(TfrmReconnect) then
       begin
         // save form states and disable them
@@ -467,7 +467,7 @@ begin
         // disable main form (its not in forms container)
         EnableWindow(Handle, FALSE);
 
-        // open reconection form
+        // create reconection form
         frmReconnect := FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect;
         frmReconnect.SetCloseCallback(ModalFormClose);
       end;
