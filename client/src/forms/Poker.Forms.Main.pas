@@ -363,9 +363,7 @@ end;
 
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := (not dmMain.IsLoggedIn) or
-              (FShuttingDown) or
-              (ConfirmToCloseTablesAppClose);
+  CanClose := (not dmMain.IsLoggedIn) or (FShuttingDown) or (ConfirmToCloseTablesAppClose);
 
   if CanClose then
   begin
