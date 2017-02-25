@@ -200,6 +200,8 @@ begin
 end;
 
 begin
+  {$IFDEF DEBGU} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
+
   TCommandLineParams.ParseParams;
 
   if not TInstanceController.AcquireInstance(Settings.Hardcoded.PROJECT_INSTANCE_MUTEX) then
