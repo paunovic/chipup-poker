@@ -1,7 +1,7 @@
 object frmDebug: TfrmDebug
   Left = 0
   Top = 0
-  ClientHeight = 380
+  ClientHeight = 414
   ClientWidth = 621
   Color = clWindow
   Ctl3D = False
@@ -23,13 +23,14 @@ object frmDebug: TfrmDebug
     Left = 0
     Top = 18
     Width = 621
-    Height = 255
+    Height = 289
     Align = alClient
     TabOrder = 4
     Visible = False
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
+    ExplicitHeight = 255
   end
   object meSeatPos: TcxMemo
     Left = 0
@@ -64,14 +65,15 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    Height = 255
+    ExplicitHeight = 255
+    Height = 289
     Width = 621
   end
   object rvLog: TRichView
     Left = 0
     Top = 18
     Width = 621
-    Height = 255
+    Height = 289
     Align = alClient
     PopupMenu = pmLog
     TabOrder = 1
@@ -80,10 +82,11 @@ object frmDebug: TfrmDebug
     Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoAutoCopyUnicodeText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoFastFormatting]
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
+    ExplicitHeight = 255
   end
   object paInfo: TPanel
     Left = 0
-    Top = 292
+    Top = 326
     Width = 621
     Height = 88
     Align = alBottom
@@ -94,6 +97,7 @@ object frmDebug: TfrmDebug
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 2
+    ExplicitTop = 292
     DesignSize = (
       621
       88)
@@ -894,13 +898,14 @@ object frmDebug: TfrmDebug
   end
   object paSocketIO: TPanel
     Left = 0
-    Top = 273
+    Top = 307
     Width = 621
     Height = 19
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 5
     Visible = False
+    ExplicitTop = 273
     object btSocketIOSend: TcxButton
       Left = 507
       Top = 0

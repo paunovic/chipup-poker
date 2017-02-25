@@ -89,7 +89,8 @@ begin
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
-  DebugLn(Format('Revision: %s', [Settings.Hardcoded.REVISION]), ditApplication);
+  DebugLn(Format('Version: %s; Revision: %s', [Settings.Hardcoded.VERSION, Settings.Hardcoded.REVISION]), ditApplication);
+  {$IFDEF ENABLE_EXCEPTION_LOGGING} DebugLn('Exception logging enabled', ditApplication); {$ENDIF}
   {$ENDIF}
 
   LoadFonts;
@@ -488,6 +489,7 @@ begin
     Tables.Unlock;
   end;
 end;
+
 
 end.
 
