@@ -185,6 +185,7 @@ uses
   Poker.Protobufs.Objects.ReservedSeatFree in 'modules\protobufs\objects\Poker.Protobufs.Objects.ReservedSeatFree.pas',
   Poker.Helpers.PB_ClubMember in 'helpers\Poker.Helpers.PB_ClubMember.pas';
 
+
 procedure FocusApp;
 var
   window_handle: THandle;
