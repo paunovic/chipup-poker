@@ -880,34 +880,8 @@ procedure TfrmChipUpMain.UpdateClublist;
 var
   rcount: Integer;
   dc: TcxDataController;
-
-  procedure ProcessClubObject(const AClub: TClubInfo);
-  var
-    status: String;
-    member: TPB_ClubMember;
-  begin
-    if AClub.IsPrivate then
-    begin
-      Inc(rcount);
-      if rcount > dc.RecordCount then
-        dc.SetRecordCount(rcount);
-
-      dc.SetValue(rcount - 1, gridHomeClubsMongoId.Index, AClub.MongoId.ToVariant);
-      dc.SetValue(rcount - 1, gridHomeClubsId.Index, AClub.Seq);
-      dc.SetValue(rcount - 1, gridHomeClubsName.Index, AClub.Name);
-
-      if dmMain.SelfInfo.MongoId = AClub.Owner then
-        status := 'Owner'
-      else
-        if AClub.GetMemberInfo(dmMain.SelfInfo.Mongoid, member) then
-          status := member.StatusAsString
-        else
-          status := 'Unknown';
-      dc.SetValue(rcount - 1, gridHomeClubsStatus.Index, status);
-    end;
-  end;
-
-var
+  status: String;
+  member: TPB_ClubMember;
   club: TClubInfo;
 begin
   dc := gridPrivateClubsTable.DataController;
@@ -917,7 +891,25 @@ begin
     dmMain.SelfInfo.Clubs.Lock;
     try
       for club in dmMain.SelfInfo.Clubs.Values do
-        ProcessClubObject(club);
+        if club.IsPrivate then
+        begin
+          Inc(rcount);
+          if rcount > dc.RecordCount then
+            dc.SetRecordCount(rcount);
+
+          dc.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId.ToVariant);
+          dc.SetValue(rcount - 1, gridHomeClubsId.Index, club.Seq);
+          dc.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
+
+          if dmMain.SelfInfo.MongoId = club.Owner then
+            status := 'Owner'
+          else
+            if club.GetMemberInfo(dmMain.SelfInfo.Mongoid, member) then
+              status := member.StatusAsString
+            else
+              status := 'Unknown';
+          dc.SetValue(rcount - 1, gridHomeClubsStatus.Index, status);
+        end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
