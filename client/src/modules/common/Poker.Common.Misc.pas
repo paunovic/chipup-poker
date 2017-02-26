@@ -37,6 +37,9 @@ function MinutesToString(const AMinutes: UINT32): String;
 function RawByteStringToHex(const AString: RawByteString): String;
 function FindMainWindow(const AProcessId: DWORD; out AMainWindowHandle: HWND): Boolean;
 procedure ForceShowWindow(const AWindowHandle: HWND);
+function ReverseDWORD(const AValue: DWORD): DWORD;
+function BytesToHex(const ABytes: TBytes): String;
+function UnixToDateTime(const AUnixTimestamp: UINT32): TDateTime;
 
 implementation
 
@@ -730,6 +733,23 @@ begin
   PostMessage(AWindowHandle, WM_SYSCOMMAND, SC_RESTORE, 0);
   ShowWindow(AWindowHandle, SW_SHOWNORMAL);
   SetForegroundWindow(AWindowHandle);
+end;
+
+function ReverseDWORD(const AValue: Cardinal): Cardinal;
+asm
+  bswap eax
+end;
+
+function BytesToHex(const ABytes: TBytes): String;
+begin
+  SetLength(result, 2 * Length(ABytes));
+  BinToHex(@ABytes[0], PChar(@result[1]), Length(ABytes));
+  result := LowerCase(result);
+end;
+
+function UnixToDateTime(const AUnixTimestamp: UINT32): TDateTime;
+begin
+  result := (AUnixTimestamp / 86400) + 25569;
 end;
 
 end.
