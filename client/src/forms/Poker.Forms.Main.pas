@@ -1128,9 +1128,7 @@ begin
   UpdateGamelist;
 end;
 
-procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(
-  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+procedure TfrmChipUpMain.gridTournamentsNameStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
 begin
@@ -1141,9 +1139,7 @@ begin
     AStyle := styleTournamentName;
 end;
 
-procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(
-  Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 var
   mongoid: TMongoId;
   tournament: TTournamentInfo;
@@ -1466,7 +1462,7 @@ begin
     if (proto.has_Prize) and
        (proto.Prize.Name <> '') then
       msg := msg + #10 + Format('You have won the following prize: %s!', [proto.Prize.Name]) + #10 +
-         'We will contact you soon to your E-Mail address about more details for claiming your prize.';
+         'We will contact you soon on your E-Mail address with more details about claiming your prize.';
   finally
     Tournaments.Unlock;
   end;
