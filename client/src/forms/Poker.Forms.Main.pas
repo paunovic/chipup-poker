@@ -59,8 +59,6 @@ type
     gridGamesPlayers: TcxGridColumn;
     gridGamesStatus: TcxGridColumn;
     gridGamesLevel: TcxGridLevel;
-    btOpenClubLobby: TcxButton;
-    btOpenTable: TcxButton;
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
     btTournamentsHeader: TcxButton;
@@ -339,7 +337,6 @@ begin
 
   btJoinClub.Font.Assign(btHomeGames.Font);
   btTournaments.Font.Assign(btHomeGames.Font);
-  btOpenClubLobby.Font.Assign(btHomeGames.Font);
   btCreateClub.Font.Assign(btHomeGames.Font);
   btJoinClub.Font.Assign(btHomeGames.Font);
 
@@ -438,10 +435,8 @@ begin
   gridPrivateClubs.Visible := not AShow;
   gridPublicClubs.Visible := not AShow;
   btPrivateClubs.Visible := not AShow;
-  btOpenTable.Visible := not AShow;
   btPublicClubs.Visible := not AShow;
   gridGames.Visible := not AShow;
-  btOpenClubLobby.Visible := not AShow;
 
   btTournamentsHeader.Visible := AShow;
   gridTournaments.Visible := AShow;

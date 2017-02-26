@@ -3781,44 +3781,6 @@ object frmChipUpMain: TfrmChipUpMain
             GridView = gridGamesTable
           end
         end
-        object btOpenClubLobby: TcxButton
-          Left = 10
-          Top = 278
-          Width = 143
-          Height = 35
-          Action = acOpenClubLobby
-          Anchors = [akLeft, akBottom]
-          LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-          OptionsImage.Margin = 15
-          SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 4
-          Visible = False
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Sintony'
-          Font.Style = [fsBold]
-          ParentFont = False
-        end
-        object btOpenTable: TcxButton
-          Left = 10
-          Top = 316
-          Width = 143
-          Height = 35
-          Action = acShowGameTableForm
-          Anchors = [akLeft, akBottom]
-          LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-          OptionsImage.Margin = 15
-          SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 5
-          Visible = False
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Sintony'
-          Font.Style = [fsBold]
-          ParentFont = False
-        end
         object btCreateClub: TcxButton
           Left = 10
           Top = 354
@@ -3829,7 +3791,7 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 6
+          TabOrder = 4
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3847,7 +3809,7 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 7
+          TabOrder = 5
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3861,7 +3823,7 @@ object frmChipUpMain: TfrmChipUpMain
           Width = 336
           Height = 228
           Anchors = [akTop, akRight, akBottom]
-          TabOrder = 8
+          TabOrder = 6
           OnEnter = gridPrivateClubsEnter
           object gridPrivateClubsTable: TcxGridTableView
             Navigator.Buttons.CustomButtons = <>
