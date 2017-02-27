@@ -30,7 +30,6 @@ object frmDebug: TfrmDebug
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
-    ExplicitHeight = 255
   end
   object meSeatPos: TcxMemo
     Left = 0
@@ -65,7 +64,6 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    ExplicitHeight = 255
     Height = 289
     Width = 621
   end
@@ -82,7 +80,6 @@ object frmDebug: TfrmDebug
     Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoAutoCopyUnicodeText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoFastFormatting]
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
-    ExplicitHeight = 255
   end
   object paInfo: TPanel
     Left = 0
@@ -97,7 +94,6 @@ object frmDebug: TfrmDebug
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 2
-    ExplicitTop = 292
     DesignSize = (
       621
       88)
@@ -905,7 +901,6 @@ object frmDebug: TfrmDebug
     BevelOuter = bvNone
     TabOrder = 5
     Visible = False
-    ExplicitTop = 273
     object btSocketIOSend: TcxButton
       Left = 507
       Top = 0

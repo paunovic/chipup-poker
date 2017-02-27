@@ -201,6 +201,7 @@ end;
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = ''; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
 var
+  debug_dir: String;
   time_str: String;
   type_str: String;
   output: String;
@@ -233,12 +234,14 @@ begin
   if ConsoleAttached then
     WriteLn(output);
 
-  // do NOT use SelfPath variable here, because this function can be called before SelfPath is initialized!
+  // do NOT use SelfPath variable here, because this function can be called before SelfPath is initialized
+  debug_dir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + IncludeTrailingPathDelimiter('debug');
+
   if DebugFilePath = '' then
-    DebugFilePath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
+    DebugFilePath := debug_dir + Format('%s - %s.txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), Settings.Hardcoded.REVISION]);
 
   if MemoryUsageFilePath = '' then
-    MemoryUsageFilePath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'debug\MemoryManagerState.txt';
+    MemoryUsageFilePath := debug_dir + 'MemoryManagerState.txt';
 
   ForceDirectories(ExtractFilePath(DebugFilePath));
   if not FileExists(DebugFilePath) then
