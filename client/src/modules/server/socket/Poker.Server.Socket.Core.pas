@@ -4,10 +4,8 @@ interface
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections,
-  OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread, Poker.Common.SSLCert,
-  Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Protobufs.Objects.Base, Winapi.Messages;
+  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread,
+  Poker.Common.SSLCert, Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Base, Winapi.Messages;
 
 type
   TServerSocketCore = class
@@ -50,9 +48,7 @@ type
     procedure KillPingTimers;
     procedure KillPingTimeoutTimer;
     {$IFDEF DEBUG}
-    procedure DebugRpcMessage(const ADebugType: TDebugInfoType;
-      const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject;
-      const AStreamSize: Int64 = 0; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
+    procedure DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0; const ABuffer: pointer = nil; const ABufferSize: Integer = 0);
     {$ENDIF}
   public
     constructor Create;
@@ -330,12 +326,15 @@ end;
 {$ENDIF}
 
 procedure TServerSocketCore.AppendToReceiveBuffer(const APointer: pointer; const ASize: Integer);
+var
+  new_size: Integer;
 begin
-  Inc(FReceiveBufferSize, ASize);
-  {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
+  new_size := FReceiveBufferSize + ASize;
+  ReallocMem(FReceiveBuffer, new_size);
+  Move(APointer^, FReceiveBuffer[new_size - ASize], ASize);
+  FReceiveBufferSize := new_size;
   Inc(FBytesDownloaded, ASize);
-  ReallocMem(FReceiveBuffer, FReceiveBufferSize);
-  Move(APointer^, FReceiveBuffer[FReceiveBufferSize - ASize], ASize);
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSocket]); {$ENDIF}
 end;
 
 procedure TServerSocketCore.ParseReceiveBuffer;
@@ -590,8 +589,7 @@ begin
     Integer(sePlayerClubStatus): ADataObject := TPB_PlayerClubStatus.Create(ADataPointer, ARpcMessage.DataSize);
     Integer(seReservedSeatFree): ADataObject := TPB_ReservedSeatFree.Create(ADataPointer, ARpcMessage.DataSize);
   else
-    SoftException(Format('Unhandled code received: %s',
-      [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
+    SoftException(Format('Unhandled code received: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]));
     Exit(FALSE);
   end;
 
@@ -600,8 +598,7 @@ begin
   begin
     SetLength(hexdump, ARpcMessage.DataSize * 2);
     BinToHex(ADataPointer, PWideChar(@hexdump[1]), ARpcMessage.DataSize);
-    SoftException(Format('Data object not initialized for code: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]),
-       hexdump);
+    SoftException(Format('Data object not initialized for code: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), hexdump);
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;
@@ -654,8 +651,7 @@ begin
       if ASize > 0 then
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, nil, mstream.Size,
-        mstream.Memory, mstream.Size); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, nil, mstream.Size, mstream.Memory, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -684,8 +680,7 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, AProtobuf, mstream.Size,
-        mstream.Memory, mstream.Size); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, AProtobuf, mstream.Size, mstream.Memory, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
