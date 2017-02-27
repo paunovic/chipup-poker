@@ -30,13 +30,20 @@ type
           Address: String;
           Port: Word;
           URL: String;
-          SSLEnable: Boolean;
+          SSLEnabled: Boolean;
           SSLCertificate: String;
         end;
 
         ASSETS: record
           DIRECTORY: String;
           DIRECTX_MEDIA: String;
+        end;
+
+        RESOURCES: record
+          ABOUT_BACKGROUND: String;
+          RETRIEVING_AVATAR: String;
+          CASHIER_NORMAL: String;
+          CASHIER_PRESSED: String;
         end;
 
         UPDATE_FILES: array[0..6] of record
@@ -95,7 +102,7 @@ type
            Address: 'server.chipuppoker.com';
            Port: 12346;
            URL: 'https://www.chipuppoker.com';
-           SSLEnable: TRUE;
+           SSLEnabled: TRUE;
            SSLCertificate: 'OfficialServerCertificate'
           ),
 
@@ -103,7 +110,7 @@ type
            Address: 'dev-server.chipuppoker.com';
            Port: 12346;
            URL: 'https://dev-server.chipuppoker.com';
-           SSLEnable: TRUE;
+           SSLEnabled: TRUE;
            SSLCertificate: 'DevServerCertificate'
           )
         );
@@ -112,6 +119,14 @@ type
         ASSETS: (
           DIRECTORY: 'assets\';
           DIRECTX_MEDIA: 'dxmedia.cpa';
+        );
+
+        // resource names
+        RESOURCES: (
+          ABOUT_BACKGROUND: 'AboutBackground';
+          RETRIEVING_AVATAR: 'RetrievingAvatar';
+          CASHIER_NORMAL: 'CashierNormal';
+          CASHIER_PRESSED: 'CashierPressed';
         );
 
         // check these files for update

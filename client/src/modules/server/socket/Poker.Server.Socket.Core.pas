@@ -54,7 +54,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Connect(const AServer: String; const APort: Integer; const ASSLEnable: Boolean; const ASSLCert: String; const AConnectSynchronously: Boolean = FALSE);
+    procedure Connect(const AServer: String; const APort: Integer; const ASSLEnabled: Boolean; const ASSLCert: String; const AConnectSynchronously: Boolean = FALSE);
     procedure Disconnect;
     function IsConnected: Boolean;
     procedure SendProtobuf(const AServerCode: TServerCodes; const AProtobuf: TProtobufBaseObject);
@@ -136,9 +136,7 @@ begin
   inherited;
 end;
 
-procedure TServerSocketCore.Connect(const AServer: String; const APort: Integer;
-     const ASSLEnable: Boolean; const ASSLCert: String;
-     const AConnectSynchronously: Boolean = FALSE);
+procedure TServerSocketCore.Connect(const AServer: String; const APort: Integer; const ASSLEnabled: Boolean; const ASSLCert: String; const AConnectSynchronously: Boolean = FALSE);
 begin
   if (FSocket.State <> wsClosed) or
      (Assigned(FSocketConnectThread)) then
@@ -151,7 +149,7 @@ begin
 
   FSocket.Addr := AServer;
   FSocket.Port := IntToStr(APort);
-  FSocket.SslEnable := ASSLEnable;
+  FSocket.SslEnable := ASSLEnabled;
 
   if FSocket.SslEnable then
   begin

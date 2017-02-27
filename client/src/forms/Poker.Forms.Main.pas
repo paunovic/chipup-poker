@@ -170,18 +170,13 @@ type
     procedure gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure FormShow(Sender: TObject);
   private
-    const
-      RESOURCE_CASHIER_NORMAL = 'CashierNormal';
-      RESOURCE_CASHIER_PRESSED = 'CashierPressed';
-
-    var
-      FSelectedClub: TMongoId;
-      FSelectedGame: TMongoId;
-      FSelectedTournament: TMongoId;
-      FCallbacksId: Integer;
-      FShuttingDown: Boolean;
-      FActionMainMenuBarFont: TFont;
-      FRegisteredTournamentsMap: TDictionary<Integer, TMongoId>;
+    FSelectedClub: TMongoId;
+    FSelectedGame: TMongoId;
+    FSelectedTournament: TMongoId;
+    FCallbacksId: Integer;
+    FShuttingDown: Boolean;
+    FActionMainMenuBarFont: TFont;
+    FRegisteredTournamentsMap: TDictionary<Integer, TMongoId>;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -323,7 +318,7 @@ begin
 
   acShowAboutForm.Caption := Format('About %s...', [Settings.Hardcoded.PROJECT_CAPTION]);
 
-  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
+  LoadImageFromResource(imgCashier, Settings.Hardcoded.RESOURCES.CASHIER_NORMAL);
 
   ActionManager.Style := ActionMainMenuBarStyle;
   ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
@@ -399,7 +394,7 @@ end;
 
 procedure TfrmChipUpMain.FormShow(Sender: TObject);
 begin
-  LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
+  LoadImageFromResource(imgCashier, Settings.Hardcoded.RESOURCES.CASHIER_NORMAL);
 end;
 
 procedure TfrmChipUpMain.FlushData;
@@ -1224,7 +1219,7 @@ begin
   if Button = mbLeft then
   begin
     if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
-      LoadImageFromResource(imgCashier, RESOURCE_CASHIER_PRESSED);
+      LoadImageFromResource(imgCashier, Settings.Hardcoded.RESOURCES.CASHIER_PRESSED);
   end;
 end;
 
@@ -1234,7 +1229,7 @@ begin
   begin
     if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       acOpenCashier.Execute;
-    LoadImageFromResource(imgCashier, RESOURCE_CASHIER_NORMAL);
+    LoadImageFromResource(imgCashier, Settings.Hardcoded.RESOURCES.CASHIER_NORMAL);
   end;
 end;
 

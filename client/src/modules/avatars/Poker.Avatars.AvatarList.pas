@@ -50,7 +50,7 @@ end;
 constructor TAvatarList.Create;
 begin
   FRetrievingImage := TJPEGImage.Create;
-  LoadJPGFromResource(FRetrievingImage, 'RetrievingAvatar');
+  LoadJPGFromResource(FRetrievingImage, Settings.Hardcoded.RESOURCES.RETRIEVING_AVATAR);
 
   inherited Create([doOwnsValues]);
 end;

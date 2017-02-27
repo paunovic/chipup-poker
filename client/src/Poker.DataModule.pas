@@ -210,7 +210,7 @@ begin
 
   ServerSocket.Connect(Settings.Hardcoded.SERVER_LIST[server_index].Address,
     Settings.Hardcoded.SERVER_LIST[server_index].Port,
-    Settings.Hardcoded.SERVER_LIST[server_index].SSLEnable,
+    Settings.Hardcoded.SERVER_LIST[server_index].SSLEnabled,
     Settings.Hardcoded.SERVER_LIST[server_index].SSLCertificate);
 end;
 

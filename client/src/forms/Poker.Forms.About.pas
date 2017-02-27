@@ -38,7 +38,7 @@ procedure TfrmAbout.FormCreate(Sender: TObject);
 var
   url: String;
 begin
-  FLayeredForm := TfrmLayered.Create(self, 'AboutBackground');
+  FLayeredForm := TfrmLayered.Create(self, Settings.Hardcoded.RESOURCES.ABOUT_BACKGROUND);
   Caption := Settings.Hardcoded.PROJECT_CAPTION;
   lbsCopyright.Caption := Format('Copyright © 2017 %s', [Settings.Hardcoded.PROJECT_CAPTION]);
 
