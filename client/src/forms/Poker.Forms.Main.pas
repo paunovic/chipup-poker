@@ -313,8 +313,7 @@ begin
                       TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk, srTournamentOpenTable], CSRTableStatus)
                   ], TRUE);
 
-  Settings.LoadFormSettings(self,
-    Screen.Width div 2 - Width div 2, Screen.Height div 2 - Height div 2);
+  Settings.LoadFormSettings(self, Screen.Width div 2 - Width div 2, Screen.Height div 2 - Height div 2);
 
   acShowAboutForm.Caption := Format('About %s...', [Settings.Hardcoded.PROJECT_CAPTION]);
 
