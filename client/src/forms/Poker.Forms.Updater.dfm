@@ -199,8 +199,8 @@ object frmUpdater: TfrmUpdater
     Left = 338
     Top = 4
     Anchors = [akTop, akRight]
+    Properties.FitMode = ifmNormal
     Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
     Style.BorderStyle = ebsNone
@@ -221,8 +221,8 @@ object frmUpdater: TfrmUpdater
     Left = 317
     Top = 4
     Anchors = [akTop, akRight]
+    Properties.FitMode = ifmNormal
     Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
     Style.BorderStyle = ebsNone

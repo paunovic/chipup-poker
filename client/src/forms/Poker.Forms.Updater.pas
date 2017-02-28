@@ -7,8 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel, cxProgressBar, cxImage,
   OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses,
-  Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger,
-  Poker.Common.SSLCert;
+  Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger;
 
 type
   TfrmUpdater = class(TForm, IModalForm)
@@ -38,7 +37,6 @@ type
     FCurrentDownloadedSize: UINT32;
     FFullInstaller: Boolean;
     FRequiresReboot: Boolean;
-    FSSLCert: TSSLCert;
 
     function PatchNonRebootFiles: Integer;
     function ProcessNextFile: Boolean;
@@ -87,11 +85,7 @@ begin
   for ufi in dmMain.UpdateFiles do
     Inc(FTotalSize, ufi.FileSize);
 
-  FSSLCert := TSSLCert.Create(nil);
-  FSSLCert.LoadFromResource('SubClass1ServerCertificate');
-
   SslContext.InitContext;
-  SslContext.TrustCert(FSSLCert);
 
   HttpClient.CtrlSocket.StartSslHandshake;
 end;
@@ -103,8 +97,6 @@ begin
   obj := HttpClient.RcvdStream;
   HttpClient.RcvdStream := nil;
   (obj as TMemoryStream).Free;
-
-  FSSLCert.Free;
 
   FormsContainer.Remove(self);
 
