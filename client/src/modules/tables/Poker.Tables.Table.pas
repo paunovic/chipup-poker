@@ -837,7 +837,7 @@ begin
                   FStatus.ActionCall := TRUE;
 
                   // if we can call, there is a possibility that we can raise too - we check if we can raise here
-                  if (seat.Chips > FStatus.MinimumBet) and
+                  if {(seat.Chips > FStatus.MinimumBet) and} // fixme
                      (FStatus.MinimumBet < FStatus.MinimumRaise) then
                     FStatus.ActionRaise := TRUE;
                 end
