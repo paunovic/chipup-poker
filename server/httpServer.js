@@ -855,21 +855,23 @@ Server.prototype.isSecureAuthed = function (req,res,next) {
 		res.end('you must first login');
 	}
 }
+
 Server.prototype.getDisk = function (req,res) {
-	var start = Date.now();
-	mongoose.connection.db.stats(function (err,stats) {
-		mongoose.connection.db.collectionNames(function (err,names) {
-			var out = [];
-			var input = [];
-			for (var x=0; x<names.length; x++) {
-				input.push(names[x].name);
-			}
-			input.sort();
-			async.eachLimit(input,1,function (item,cb) {
-				mongoose.connection.db.collection(item.split('.')[1]).stats(function (err,stats) {
-					if (!stats) {
-						console.log('name:%s stats:',item,stats);
-						cb();
+  var start = Date.now();
+  mongoose.connection.db.stats(function (err,stats) {
+    mongoose.connection.db.collectionNames(function (err,names) {
+      var out = [];
+      var input = [];
+      for (var x=0; x<names.length; x++) {
+        input.push(names[x].name);
+      }
+      input.sort();
+      console.log("collections:",input);
+      async.eachLimit(input,1,function (item,cb) {
+        mongoose.connection.db.collection(item).stats(function (err,stats) {
+          if (!stats) {
+            console.log('name:%s stats:',item,stats);
+            cb();
 						return;
 					}
 					out.push(stats);
