@@ -445,7 +445,9 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
           //console.log('need to patch %s',clientFile.path);
           models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
             assert.ifError(err);
-            if (diffRow && (params.appcode == 'acDelphiWindows')) {
+            var neverDiff = false;
+            if (clientFile.path == "bspatch.exe") neverDiff = true;
+            if (!neverDiff && diffRow && (params.appcode == 'acDelphiWindows')) {
               var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
               toUpdate.push(UFI);
               cb();
@@ -461,7 +463,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
                 }
                 cb();
               });
-              if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path);
+              if (clientFile.hash && !neverDiff) differ.makeDiff(clientFile.hash,targetFile,clientFile.path);
             }
           }.bind(this));
         } else {

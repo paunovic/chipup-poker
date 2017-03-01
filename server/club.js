@@ -367,60 +367,62 @@ function containsObjectID(list,id) {
 	}
 	return false;
 }
+
 Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self,connection) {
-	var c = JSON.parse(JSON.stringify(input));
-	assert(stats);
-	if (stats.length > 1) assert(self);
-	var memberList = [input.owner];
-	if (input.members) memberList = memberList.concat(input.members);
-	if (input.pendingApproval) memberList = memberList.concat(input.pendingApproval);
-	var out = [];
-	for (var y=0; y<memberList.length; y++) {
-		if (userlist && (userlist.indexOf(memberList[y]) == -1)) userlist.push(memberList[y]);
-		var suspended = false;
-		if (input.suspended) {
-			if (containsObjectID(input.suspended,memberList[y])) suspended = true;
-		}
-		var pending = false;
-		if (input.pendingApproval) {
-			if (containsObjectID(input.pendingApproval,memberList[y])) pending = true;
-		}
-		var muted = false;
-		if (input.muted) {
-			if (containsObjectID(input.muted,memberList[y])) muted = true;
-		}
-		var manager = false;
-		if (input.manager) {
-			if (containsObjectID(input.manager,memberList[y])) manager = true;
-		}
-		var obj = {_id:new Buffer(memberList[y].toString(),'hex'), balance_limit:0, club_balance: 0, muted:muted, manager:manager };
-		if (pending) obj.status = 'msPending';
-		else if (suspended) obj.status = 'msSuspended';
-		else obj.status = 'msActive';
-		assert.equal(obj._id.length,12);
-		for (var a=0; a<stats.length; a++) {
-			if (compareObjectID(stats[a].clubid,input._id)) {
-				if (stats[a].userid == null) {
-					console.log('wtf1',stats[a]);
-					continue;
-				}
-				if (compareObjectID(stats[a].userid,memberList[y])) {
-					console.log('balance stats %s %d %d %d',stats[a].userid,stats[a].balance,self.balance[memberList[y]],stats[a].balance_limit);
-					obj.club_balance = stats[a].balance;
-					if (self.balance[memberList[y]]) obj.club_balance += self.balance[memberList[y]];
-					obj.balance_limit = stats[a].balance_limit;
-					obj.unlimited_limit = stats[a].unlimited_limit;
-				}
-			}
-		}
-		out.push(obj);
-	}
-	c.members = out;
-	delete c.suspended;
-	c._id = input._id.toProtobuf();
-	c.owner = input.owner.toProtobuf();
-	return c;
+  var c = JSON.parse(JSON.stringify(input));
+  assert(stats);
+  if (stats.length > 1) assert(self);
+  var memberList = [input.owner];
+  if (input.members) memberList = memberList.concat(input.members);
+  if (input.pendingApproval) memberList = memberList.concat(input.pendingApproval);
+  var out = [];
+  for (var y=0; y<memberList.length; y++) {
+    if (userlist && (userlist.indexOf(memberList[y]) == -1)) userlist.push(memberList[y]);
+    var suspended = false;
+    if (input.suspended) {
+      if (containsObjectID(input.suspended,memberList[y])) suspended = true;
+    }
+    var pending = false;
+    if (input.pendingApproval) {
+      if (containsObjectID(input.pendingApproval,memberList[y])) pending = true;
+    }
+    var muted = false;
+    if (input.muted) {
+      if (containsObjectID(input.muted,memberList[y])) muted = true;
+    }
+    var manager = false;
+    if (input.manager) {
+      if (containsObjectID(input.manager,memberList[y])) manager = true;
+    }
+    var obj = {_id:new Buffer(memberList[y].toString(),'hex'), balance_limit:0, club_balance: 0, muted:muted, manager:manager };
+    if (pending) obj.status = 'msPending';
+    else if (suspended) obj.status = 'msSuspended';
+    else obj.status = 'msActive';
+    assert.equal(obj._id.length,12);
+    for (var a=0; a<stats.length; a++) {
+      if (compareObjectID(stats[a].clubid,input._id)) {
+        if (stats[a].userid == null) {
+          console.log('wtf1',stats[a]);
+          continue;
+        }
+        if (compareObjectID(stats[a].userid,memberList[y])) {
+          console.log('balance stats userid:%s stats.balance:%d self.balance:%d balance_limit:%d',stats[a].userid,stats[a].balance,self.balance[memberList[y]],stats[a].balance_limit);
+          obj.club_balance = stats[a].balance;
+          if (self.balance[memberList[y]]) obj.club_balance += self.balance[memberList[y]];
+          obj.balance_limit = stats[a].balance_limit;
+          obj.unlimited_limit = stats[a].unlimited_limit;
+        }
+      }
+    }
+    out.push(obj);
+  }
+  c.members = out;
+  delete c.suspended;
+  c._id = input._id.toProtobuf();
+  c.owner = input.owner.toProtobuf();
+  return c;
 }
+
 Club.prototype.log = function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	if (format.indexOf('%') != -1) {

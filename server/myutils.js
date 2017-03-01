@@ -52,30 +52,32 @@ function containsObjectID(list,id) {
 	return false;
 }
 var throttled_funcs = {};
+
 function throttle(key,interval,func) {
-	if (global.ignoreThrottle) return;
-	//console.log(throttled_funcs);
-	if (!throttled_funcs[key]) {
-		throttled_funcs[key] = { lastrun: Date.now() };
-		func();
-		return;
-	}
-	if ((Date.now() - throttled_funcs[key].lastrun) > (interval * 1000)) {
-		if (throttled_funcs[key].timer) clearTimeout(throttled_funcs[key].timer);
-		throttled_funcs[key].timer = null;
-		throttled_funcs[key].lastrun = Date.now();
-		func();
-		return;
-	}
-	if (throttled_funcs[key].timer) clearTimeout(throttled_funcs[key].timer);
-	var tracer = new Error();
-	throttled_funcs[key].timer = setTimeout(function () {
-		console.log('time up',tracer.stack);
-		throttled_funcs[key].timer = null;
-		throttled_funcs[key].lastrun = Date.now();
-		func();
-	},(interval * 1000) - (Date.now() - throttled_funcs[key].lastrun));
+  if (global.ignoreThrottle) return;
+  //console.log(throttled_funcs);
+  if (!throttled_funcs[key]) {
+    throttled_funcs[key] = { lastrun: Date.now() };
+    func();
+    return;
+  }
+  if ((Date.now() - throttled_funcs[key].lastrun) > (interval * 1000)) {
+    if (throttled_funcs[key].timer) clearTimeout(throttled_funcs[key].timer);
+    throttled_funcs[key].timer = null;
+    throttled_funcs[key].lastrun = Date.now();
+    func();
+    return;
+  }
+  if (throttled_funcs[key].timer) clearTimeout(throttled_funcs[key].timer);
+  var tracer = new Error();
+  throttled_funcs[key].timer = setTimeout(function () {
+    //console.log('time up',tracer.stack);
+    throttled_funcs[key].timer = null;
+    throttled_funcs[key].lastrun = Date.now();
+    func();
+  },(interval * 1000) - (Date.now() - throttled_funcs[key].lastrun));
 }
+
 function shuffle(o) {
 	for (var j,x,i=o.length; i; j=Math.floor(Math.random()*i),x=o[--i],o[i]=o[j], o[j]=x);
 	return o;

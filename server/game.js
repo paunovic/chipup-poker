@@ -236,40 +236,42 @@ Game.prototype.close = function(conn,cb) {
 		}
 	}.bind(this));
 };
+
 Game.prototype.getLimit = function (seat) {
-	var x;
-	//this.log('getLimit type %s %j',this.game_limit,this.bets);
+  var x;
+  //this.log('getLimit type %s %j',this.game_limit,this.bets);
 
-	var canplay = 0;
-	for (x=0; x<this.members.length; x++) {
-		if (!this.members[x]) continue;
-		if (this.members[x].status == 'psInHand') {
-			canplay++;
-		}
-	}
+  var canplay = 0;
+  for (x=0; x<this.members.length; x++) {
+    if (!this.members[x]) continue;
+    if (this.members[x].status == 'psInHand') {
+      canplay++;
+    }
+  }
 
-	if (canplay == 1) return this.minBet;
+  if (canplay == 1) return this.minBet;
 
-	if (typeof this.bets[seat] != 'number') this.bets[seat] = 0;
-	var oldbet = this.bets[seat];
-	if (this.game_limit == 'glNoLimit') {
-		return oldbet + this.members[seat].chips;
-	}
+  if (typeof this.bets[seat] != 'number') this.bets[seat] = 0;
+  var oldbet = this.bets[seat];
+  if (this.game_limit == 'glNoLimit') {
+    return oldbet + this.members[seat].chips;
+  }
 
-	var pot = 0;
-	for (x=0; x<this.pots.length; x++) {
-		pot += this.pots[x].value - this.pots[x].rake;
-	}
-	for (var x=0; x<this.bets.length; x++) {
-		if (typeof this.bets[x] != 'number') this.bets[x] = 0;
-		pot += this.bets[x];
-	}
-	var pottotal = pot + (this.minBet - oldbet);
-	var maxbet = pottotal + this.minBet;
-	this.log('pot:%d pottotal:%d maxbet:%d oldbet:%d',pot,pottotal,maxbet,oldbet);
-	if (maxbet > this.members[seat].chips) return oldbet + this.members[seat].chips;
-	return maxbet;
+  var pot = 0;
+  for (x=0; x<this.pots.length; x++) {
+    pot += this.pots[x].value - this.pots[x].rake;
+  }
+  for (var x=0; x<this.bets.length; x++) {
+    if (typeof this.bets[x] != 'number') this.bets[x] = 0;
+    pot += this.bets[x];
+  }
+  var pottotal = pot + (this.minBet - oldbet);
+  var maxbet = pottotal + this.minBet;
+  this.log('pot:%d pottotal:%d maxbet:%d oldbet:%d',pot,pottotal,maxbet,oldbet);
+  if (maxbet > this.members[seat].chips) return oldbet + this.members[seat].chips;
+  return maxbet;
 };
+
 Game.prototype.log = function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	if (format.indexOf('%') != -1) {
@@ -2549,29 +2551,30 @@ Game.prototype.doDelete = function () {
 		}
 	}
 }
+
 Game.prototype.startTimer = function startTimer(seat,offset) {
-	assert.equal(typeof offset,'number');
-	this.stopTimer(seat);
-	this.log('starting timer for seat %d in state %s',seat,this.state);
-	//this.log('public: %j',this.members[seat]);
-	//this.log('private: %s',util.inspect(this.seats[seat]));
-	assert(this.members[seat]);
-	this.timer = { time: (sharedconfig.max_play_time*1000) + Date.now() + offset, seat:seat };
-	var priv = this.seats[seat];
-	if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
-	this.timer.timerid = setTimeout(function () {
-		this.log('DING!');
-		this.Lock.writeLock(function (release) {
-			assert.equal(this.timer.seat,seat);
-			this.stopTimer(seat);
-			this.log('minbet:%d seatbet:%d',this.minBet,this.bets[seat]);
-			if (this.minBet == this.bets[seat]) {
-				if (this.current_seat != seat) {
-					this.log('WARNING, timebank tried to force somebody to play when he isnt on the move!');
-					release();
-					return;
-				}
-				this.log('checking');
+  assert.equal(typeof offset,'number');
+  this.stopTimer(seat);
+  this.log('starting timer for seat %d in state %s',seat,this.state);
+  //this.log('public: %j',this.members[seat]);
+  //this.log('private: %s',util.inspect(this.seats[seat]));
+  assert(this.members[seat]);
+  this.timer = { time: (sharedconfig.max_play_time*1000) + Date.now() + offset, seat:seat };
+  var priv = this.seats[seat];
+  if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
+  this.timer.timerid = setTimeout(function () {
+    this.log('DING!');
+    this.Lock.writeLock(function (release) {
+      assert.equal(this.timer.seat,seat);
+      this.stopTimer(seat);
+      this.log('minbet:%d seatbet:%d',this.minBet,this.bets[seat]);
+      if (this.minBet == this.bets[seat]) {
+        if (this.current_seat != seat) {
+          this.log('WARNING, timebank tried to force somebody to play when he isnt on the move!');
+          release();
+          return;
+        }
+        this.log('checking');
 				// FIXME, this will fail hard if that is not the current player, something didnt reset the timer right
 				this.putChips(this.seats[seat].conn,this.minBet,function (events,offset) {
 					this.log('checked %j',events);
