@@ -2738,8 +2738,8 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 624
-          Height = 377
-          Align = alTop
+          Height = 414
+          Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone

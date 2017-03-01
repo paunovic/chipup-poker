@@ -12,7 +12,7 @@ uses
   ChipUpPokerDarkSkin, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage,
   cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
   Vcl.StdCtrls, dxGDIPlusClasses, Poker.Types, cxCurrencyEdit,
-  dxBarBuiltInMenu, cxNavigator;
+  dxBarBuiltInMenu, cxNavigator, System.Actions;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -347,16 +347,11 @@ begin
     acCloseTable.Enabled := (is_owner) and (not FSelectedGameId.IsEmpty);
     if is_owner then
     begin
-      gridPlayersList.Align := alTop;
       gridGames.Align := alTop;
-      gridPlayersList.Height := btSuspendUnsuspendApprove.Top - 5;
       gridGames.Height := btNewGame.Top - 5;
     end
     else
-    begin
-      gridPlayersList.Align := alClient;
       gridGames.Align := alClient;
-    end;
 
     btPrijatnaPunina.Left := btStats.Left + btStats.Width + 2;
     btPrijatnaPunina.Width := ClientWidth - btPrijatnaPunina.Left - 8;
@@ -649,7 +644,10 @@ var
       if AMember.UnlimitedLimit then
         status := 'Unlimited'
       else
-        status := '-' + ChipsToStr(AMember.BalanceLimit);
+        if AMember.BalanceLimit = 0 then
+          status := '0'
+        else
+          status := '-' + ChipsToStr(AMember.BalanceLimit);
 
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
