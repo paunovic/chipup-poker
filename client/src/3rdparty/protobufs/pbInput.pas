@@ -37,8 +37,8 @@ type
     FLastTag: integer;
     FOwnObject: boolean;
   protected
-    FBuffer: PAnsiChar;
     FPos: integer;
+    FBuffer: PAnsiChar;
   public
     constructor Create; overload;
     constructor Create(buf: PAnsiChar; len: integer; aOwnsObjects: Boolean=false); overload;
@@ -76,12 +76,12 @@ type
     // Read a boolean field value
     function readBoolean: boolean;
     // Read a AnsiString field value
-    function readString: AnsiString;
-    function readUtf8String: String;
+    function readString: AnsiString; overload;
+    function readUtf8String: String; overload;
     // Read nested message
     procedure readMessage(builder: IBuilder; extensionRegistry: IExtensionRegistry);
     // Read a uint32 field value
-    function readUInt32: integer;
+    function readUInt32: UINT32;
     // Read a enum field value
     function readEnum: integer;
     // Read an sfixed32 field value
@@ -243,7 +243,7 @@ function TProtoBufInput.readString: AnsiString;
 var size: integer;
 begin
   size := readRawVarint32;
-  Assert(size > 0, ProtoBufException + 'readString (size <= 0)');
+  Assert(size >= 0, ProtoBufException + 'readString (size < 0)');
   SetString(result, FBuffer + FPos, size);
   Inc(FPos, size);
 end;
@@ -264,7 +264,7 @@ begin
   dec(FRecursionDepth);
 end;
 
-function TProtoBufInput.readUInt32: integer;
+function TProtoBufInput.readUInt32: UINT32;
 begin
   result := readRawVarint32;
 end;
@@ -296,18 +296,10 @@ end;
 
 function TProtoBufInput.readRawVarint32: integer;
 var
-  tmp: shortint;
-  shift: integer;
+  tmp: int64;
 begin
-  shift := -7;
-  result := 0;
-  repeat
-    Inc(shift, 7);
-    // for negative numbers number value may be to 10 byte
-    Assert(shift < 64, ProtoBufException + 'malformed Varint');
-    tmp := readRawByte;
-    result := result or ((tmp and $7f) shl shift);
-  until tmp >= 0;
+  tmp := readRawVarint64;
+  result := tmp;
 end;
 
 function TProtoBufInput.readRawVarint64: int64;
@@ -355,7 +347,7 @@ end;
 procedure TProtoBufInput.skipRawBytes(size: integer);
 begin
   Assert(size >= 0, ProtoBufException + 'negative Size');
-  Assert((FPos + size) < FLen, ProtoBufException + 'truncated Message');
+  Assert((FPos + size) <= FLen, ProtoBufException + 'truncated Message');
   Inc(FPos, size);
 end;
 
