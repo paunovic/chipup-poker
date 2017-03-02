@@ -1,10 +1,17 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   keys = import ./keys.nix;
 in {
   imports = [ ./core.nix ./poker.nix ];
   services = {
+    hydra = {
+      enable = true;
+      hydraURL = "https://hydra.chipuppoker.com";
+      notificationSender = "clever@chipuppoker.com";
+      port = 3001;
+      listenHost = "localhost";
+    };
     fail2ban = {
       enable = true;
     };
@@ -33,6 +40,18 @@ in {
       virtualHosts = {
         "chipuppoker.com" = {
           serverAliases = [ "www.chipuppoker.com" ];
+        };
+        "hydra.chipuppoker.com" = {
+          enableACME = true;
+          forceSSL = true;
+          basicAuth.buildbot = "keD1Wu2f";
+          locations."/".extraConfig = ''
+            proxy_pass http://localhost:3001;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header  X-Real-IP         $remote_addr;
+            proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+          '';
         };
         "server.chipuppoker.com" = {
           enableACME = true;
@@ -129,6 +148,9 @@ in {
     };
     extraGroups.sslkeys.gid = 500;
   };
+  nix.buildMachines = [
+    { hostName = "dev-server.chipuppoker.com"; maxJobs = 1; speedFactor = 1; sshKey = "/var/lib/hydra/queue-runner/.ssh/id_rsa"; sshUser = "builder"; system = "x86_64-linux"; }
+  ];
   networking.firewall = {
     allowedTCPPorts = [ 25 12346 9989 53 ];
     allowedUDPPorts = [ 33445 53 ]; # toxvpn, dns
