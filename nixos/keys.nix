@@ -1,5 +1,6 @@
 {
   clever = {
     desktop = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC34wZQFEOGkA5b0Z6maE3aKy/ix1MiK1D0Qmg4E9skAA57yKtWYzjA23r5OCF4Nhlj1CuYd6P1sEI/fMnxf+KkqqgW3ZoZ0+pQu4Bd8Ymi3OkkQX9kiq2coD3AFI6JytC6uBi6FaZQT5fG59DbXhxO5YpZlym8ps1obyCBX0hyKntD18RgHNaNM+jkQOhQ5OoxKsBEobxQOEdjIowl2QeEHb99n45sFr53NFqk3UCz0Y7ZMf1hSFQPuuEC/wExzBBJ1Wl7E1LlNA4p9O3qJUSadGZS4e5nSLqMnbQWv2icQS/7J8IwY0M8r1MsL8mdnlXHUofPlG1r4mtovQ2myzOx clever@nixos";
+    hydra = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvT+1PczdcWhYiNptMyitxTUfaJsb3o3mSb+0AzG998dMQmGnNfjY1jIqwsMmtQk4N7+OM6Up1/khyexrWAhNj0FLpQYuVm1BpSaxbT9uqZ8Jt8eaPkzAS1gxIJR+4nKGmrCv/1mbyunFb2MKuLlwdVwbzqhIYqDRYctDVrPvzUq9HYSEjGA17fzKjrTh/B/JBRzhyE2UZb3+5Zd7vJxV8Sr4+23+JVDmwP1BOF0X8++v9q/9B5hWo3XQigGmbUTnJkEtM2/7EICfsRdqcSylUyZqdMbONNaocRzhJOgUcYf1noTaFNaocbEvcSMUfoE/r7YqLdQjWr0dQiltYk7Gl hydra-queue-runner@chipuppoker.com";
   };
 }
