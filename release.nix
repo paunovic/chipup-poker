@@ -1,5 +1,5 @@
 with import ./default.nix;
 {
- inherit generator;
+ inherit generator tests;
  server = server.package;
 }
