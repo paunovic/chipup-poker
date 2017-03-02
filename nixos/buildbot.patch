@@ -1,0 +1,15 @@
+diff -r -u buildbot-0.9.0rc2/buildbot/scripts/logwatcher.py buildbot-0.9.0rc2/buildbot/scripts/logwatcher.py
+--- buildbot-0.9.0rc2/buildbot/scripts/logwatcher.py	2016-06-23 16:36:25.000000000 +0000
++++ buildbot-0.9.0rc2/buildbot/scripts/logwatcher.py	2017-01-26 20:51:44.290410821 +0000
+@@ -73,10 +73,7 @@
+         # been seen within 10 seconds, and with ReconfigError if the error
+         # line was seen. If the logfile could not be opened, it errbacks with
+         # an IOError.
+-        if platform.system().lower() == 'sunos' and os.path.exists('/usr/xpg4/bin/tail'):
+-            tailBin = "/usr/xpg4/bin/tail"
+-        else:
+-            tailBin = "/usr/bin/tail"
++        tailBin = "/run/current-system/sw/bin/tail"
+         self.p = reactor.spawnProcess(self.pp, tailBin,
+                                       ("tail", "-f", "-n", "0", self.logfile),
+                                       env=os.environ,
