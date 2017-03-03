@@ -1,12 +1,15 @@
 #include <stdint.h>
-#include <string>
-#include <openssl/ssl.h>
 #include <stddef.h>
 #include <iostream>
 #include <unistd.h>
+#include <lua.hpp>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#include "message.pb.h"
 #include "locking.h"
+#include "funcs.h"
+#include "test-driver.h"
 
 // https://wiki.openssl.org/index.php/SSL/TLS_Client
 
@@ -14,8 +17,11 @@ using namespace std;
 using namespace Poker;
 
 void *read_loop(void*data);
+
+Context *gContext = NULL;
+
 void hex_dump(string data) {
-  for (int i=0; i < data.length(); i++) {
+  for (unsigned int i=0; i < data.length(); i++) {
     uint8_t c = data[i];
     printf("%02x ", c);
   }
@@ -82,133 +88,123 @@ public:
   SSL_CTX *ctx;
 };
 
-class Client {
-public:
-  Client(string hostname, uint16_t port) : hostname(hostname), port(port), state(Inactive) {
-    socket = NULL;
-    out = NULL;
-    ssl = NULL;
+Client::Client(string hostname, uint16_t port) : hostname(hostname), port(port), state(Inactive) {
+  socket = NULL;
+  out = NULL;
+  ssl = NULL;
+}
+
+Client::~Client() {
+  if (out) BIO_free(out);
+  if (socket) BIO_free_all(socket);
+}
+
+bool Client::connect(Context *context) {
+  int result;
+
+  cout << "connecting\n";
+  if (state != Inactive) return false;
+
+  socket = BIO_new_ssl_connect(context->ctx);
+  if (!socket) return false;
+
+  char buffer[64];
+  snprintf(buffer, 64, "%s:%d", hostname.c_str(), port);
+
+  result = BIO_set_conn_hostname(socket, buffer);
+  if (result != 1) return false;
+
+  BIO_get_ssl(socket, &ssl);
+  if (!ssl) return false;
+
+  result = SSL_set_tlsext_host_name(ssl, hostname.c_str());
+  if (result != 1) return false;
+
+  out = BIO_new_fp(stdout, BIO_NOCLOSE);
+  if (!out) return false;
+
+  result = BIO_do_connect(socket);
+  if (result != 1) return false;
+
+  result = BIO_do_handshake(socket);
+  if (result != 1) return false;
+
+  {
+    X509* cert = SSL_get_peer_certificate(ssl);
+
+    X509_NAME* iname = X509_get_issuer_name(cert);
+    print_cn_name("Issuer (cn)", iname);
+
+    X509_NAME* sname = X509_get_subject_name(cert);
+    print_cn_name("Subject (cn)", sname);
+
+    if(cert) { X509_free(cert); } /* Free immediately */
+    if (!cert) return false;
   }
-  ~Client() {
-    if (out) BIO_free(out);
-    if (socket) BIO_free_all(socket);
+
+  result = SSL_get_verify_result(ssl);
+  if (result != X509_V_OK) {
+    cout << "verify failed\n";
+    return false;
   }
-  virtual void onConnect() = 0;
-  bool connect(Context *context) __attribute__ ((warn_unused_result)) {
-    int result;
 
-    cout << "connecting\n";
-    if (state != Inactive) return false;
+  state = Connected;
+  onConnect();
 
-    socket = BIO_new_ssl_connect(context->ctx);
-    if (!socket) return false;
+  return true;
+}
 
-    char buffer[64];
-    snprintf(buffer, 64, "%s:%d", hostname.c_str(), port);
+void Client::disconnect() {
+  SSL_shutdown(ssl);
+}
 
-    result = BIO_set_conn_hostname(socket, buffer);
-    if (result != 1) return false;
-
-    BIO_get_ssl(socket, &ssl);
-    if (!ssl) return false;
-
-    result = SSL_set_tlsext_host_name(ssl, hostname.c_str());
-    if (result != 1) return false;
-
-    out = BIO_new_fp(stdout, BIO_NOCLOSE);
-    if (!out) return false;
-
-    result = BIO_do_connect(socket);
-    if (result != 1) return false;
-
-    result = BIO_do_handshake(socket);
-    if (result != 1) return false;
-
-    {
-      X509* cert = SSL_get_peer_certificate(ssl);
-
-      X509_NAME* iname = X509_get_issuer_name(cert);
-      print_cn_name("Issuer (cn)", iname);
-
-      X509_NAME* sname = X509_get_subject_name(cert);
-      print_cn_name("Subject (cn)", sname);
-
-      if(cert) { X509_free(cert); } /* Free immediately */
-      if (!cert) return false;
-    }
-
-    result = SSL_get_verify_result(ssl);
-    if (result != X509_V_OK) {
-      cout << "verify failed\n";
-      return false;
-    }
-
-    state = Connected;
-    onConnect();
-
-    return true;
+bool Client::write(const char *data, int len) {
+  for (int i=0; i<len; i++) {
+    //printf("%02x ", data[i]);
   }
-  void disconnect() {
-    SSL_shutdown(ssl);
-  }
-  bool write(const char *data, int len) {
-    for (int i=0; i<len; i++) {
-      //printf("%02x ", data[i]);
-    }
-    //printf("\n");
-    BIO_write(socket, data, len);
-    return true;
-  };
+  //printf("\n");
+  BIO_write(socket, data, len);
+  return true;
+}
 
-  enum State {
-    Inactive, Connecting, Connected, Disconnecting
-  };
-protected:
-  BIO *socket;
-private:
-  string hostname;
-  uint16_t port;
-  State state;
-  BIO *out;
-  SSL* ssl;
-};
+PokerClient::PokerClient(string hostname, uint16_t port) : Client(hostname, port) {
+}
 
-class PokerClient : public Client {
-public:
-  PokerClient(string hostname, uint16_t port) : Client(hostname, port) {
-  }
-  ~PokerClient() {
-    disconnect();
-    keep_looping = false;
-    void *retval;
-    pthread_join(looper, &retval);
-  }
-  void sendHello() {
+PokerClient::~PokerClient() {
+  disconnect();
+  keep_looping = false;
+  void *retval;
+  pthread_join(looper, &retval);
+}
+
+void PokerClient::sendHello() {
     HelloParams out;
     out.set_debug(false);
     out.set_appcode(HelloParams::acDelphiWindows);
     sendMessage(scHello, out);
   }
-  void sendRegister(string username, string password, string email) {
+  void PokerClient::sendRegister(string username, string password, string email) {
     RegisterParams out;
     out.set_displayname(username);
     out.set_password(password);
     out.set_email(email);
     sendMessage(scRegister, out);
   }
-  void login(string username, string password) {
+  void PokerClient::login(string username, string password) {
     LoginParams out;
     out.set_username(username);
     out.set_password(password);
     sendMessage(scLogin, out);
   }
-  virtual void onConnect() {
-    pthread_attr_t attr;
 
-    pthread_attr_init(&attr);
-    pthread_create(&looper, &attr, &read_loop, this);
-  }
-  void *loop() {
+void PokerClient::onConnect() {
+  pthread_attr_t attr;
+  
+  pthread_attr_init(&attr);
+  pthread_create(&looper, &attr, &read_loop, this);
+}
+
+  void *PokerClient::loop() {
     uint8_t header_size[2];
     uint16_t real_header_size;
     int r;
@@ -239,13 +235,12 @@ public:
     cout << "event loop quiting\n";
     return 0;
   }
-  void handlePacket(int event_code, string payload_str) {
+  void PokerClient::handlePacket(int event_code, string payload_str) {
     printf("got event %d of size %lud\n", event_code, payload_str.size());
   }
-  void sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg) {
-    string payload;
-    int i, n;
-    string prefix;
+  void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg) {
+    string payload, prefix;
+    unsigned int i, n;
     RpcMessage header;
 
     msg.SerializeToString(&payload);
@@ -277,25 +272,102 @@ public:
     write(buffer, packet_size);
     printf("sent event %d of size %ud\n", code, packet_size);
   }
-private:
-    pthread_t looper;
-    volatile bool keep_looping;
-};
 
 void *read_loop(void *data) {
   PokerClient *client = static_cast<PokerClient*>(data);
   return client->loop();
 }
 
+static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {
+  (void)ud;
+  (void)osize;
+
+  if (nsize == 0) {
+    free(ptr);
+    return NULL;
+  } else {
+    return realloc(ptr, nsize);
+  }
+}
+
+class Reader {
+public:
+  Reader(string path) {
+    fd = open(path.c_str(), O_RDONLY);
+    assert(fd != -1);
+  }
+  ~Reader() {
+    close(fd);
+  }
+  const char *readChunk(lua_State *state, size_t *size) {
+    buffer.resize(1024);
+    *size = read(fd, &buffer[0], 1024);
+    buffer.resize(*size);
+    cout << "read chunk\n" << buffer << "(" << *size << ") bytes\n";
+    if (*size == 0) return NULL;
+    return buffer.data();
+  }
+private:
+  string buffer;
+  int fd;
+};
+
+static const char *reader(lua_State *state, void *data, size_t *size) {
+  Reader *r = static_cast<Reader*>(data);
+  return r->readChunk(state, size);
+}
+
+class LuaTester {
+public:
+  LuaTester() {
+    L = lua_newstate(l_alloc, NULL);
+    luaL_openlibs(L);
+
+    cout << "top == " << lua_gettop(L) << "\n";
+    lua_register(L, "makeClient", makeClient);
+    cout << "top == " << lua_gettop(L) << "\n";
+  }
+
+  void runTest(string path, string hostname, uint16_t port) {
+    int result;
+    Reader r(path);
+
+    cout << "top == " << lua_gettop(L) << "\n";
+
+    result = lua_load(L, reader, &r, path.c_str(), NULL);
+    if (result != LUA_OK) {
+      cout << "load error:" << lua_tostring(L, -1) << "\n";
+      abort();
+    }
+    lua_pushstring(L, hostname.c_str());
+    lua_pushinteger(L, port);
+    result = lua_pcall(L, 2, 1, 0);
+    if (result != LUA_OK) {
+      cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
+      abort();
+    }
+    cout << "retval:" << lua_toboolean(L, -1) << "\n";
+    lua_remove(L, -1);
+    
+    cout << "top == " << lua_gettop(L) << "\n";
+  }
+  ~LuaTester() {
+    lua_close(L);
+  }
+  lua_State *L;
+};
+
 int main(int argc, char **argv) {
   thread_setup();
   SSL_library_init();
-  Context context;
   string hostname = "dev-server.chipuppoker.com";
   uint16_t port  = 12346;
   int c;
+  string codepath;
+  Context context;
+  set_context(&context);
 
-  while ((c = getopt(argc, argv, "h:p:")) != -1) {
+  while ((c = getopt(argc, argv, "h:p:c:")) != -1) {
     switch (c) {
     case 'h':
       hostname = optarg;
@@ -303,13 +375,16 @@ int main(int argc, char **argv) {
     case 'p':
       port = strtol(optarg, 0, 10);
       break;
+    case 'c':
+      codepath = optarg;
+      break;
     }
   }
 
-  PokerClient client(hostname, port);
-  if (!client.connect(&context)) return -1;
-  client.sendHello();
-  sleep(10);
+  LuaTester t;
+  t.runTest(codepath, hostname, port);
+
+  set_context(NULL);
   cout << "done\n";
   thread_cleanup();
   return 0;

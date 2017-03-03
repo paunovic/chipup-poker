@@ -35,6 +35,6 @@ void thread_cleanup() {
   for (i=0; i<CRYPTO_num_locks(); i++) {
     pthread_mutex_destroy(&mutex_buf[i]);
   }
-  delete mutex_buf;
+  delete [] mutex_buf;
   mutex_buf = NULL;
 }
