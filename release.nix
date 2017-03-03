@@ -1,5 +1,5 @@
 with import ./default.nix;
 {
- inherit generator tests;
+ inherit generator tests test-driver;
  server = server.package;
 }

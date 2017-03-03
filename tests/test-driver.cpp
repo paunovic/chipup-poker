@@ -14,6 +14,13 @@ using namespace std;
 using namespace Poker;
 
 void *read_loop(void*data);
+void hex_dump(string data) {
+  for (int i=0; i < data.length(); i++) {
+    uint8_t c = data[i];
+    printf("%02x ", c);
+  }
+  printf("\n");
+}
 
 void print_cn_name(const char* label, X509_NAME* const name) {
   int idx = -1, success = 0;
@@ -182,6 +189,19 @@ public:
     out.set_appcode(HelloParams::acDelphiWindows);
     sendMessage(scHello, out);
   }
+  void sendRegister(string username, string password, string email) {
+    RegisterParams out;
+    out.set_displayname(username);
+    out.set_password(password);
+    out.set_email(email);
+    sendMessage(scRegister, out);
+  }
+  void login(string username, string password) {
+    LoginParams out;
+    out.set_username(username);
+    out.set_password(password);
+    sendMessage(scLogin, out);
+  }
   virtual void onConnect() {
     pthread_attr_t attr;
 
@@ -192,16 +212,17 @@ public:
     uint8_t header_size[2];
     uint16_t real_header_size;
     int r;
+    string header_str, payload;
+
     keep_looping = true;
     while (keep_looping) {
       r = BIO_read(socket, header_size, 2);
       if (r != 2) break;
       real_header_size = header_size[0] | (header_size[1] << 8);
 
-      char raw_header[real_header_size];
-      r = BIO_read(socket, raw_header, real_header_size);
+      header_str.resize(real_header_size);
+      r = BIO_read(socket, &header_str[0], real_header_size);
       if (r != real_header_size) break;
-      string header_str(raw_header, real_header_size);
 
       RpcMessage header;
       header.ParseFromString(header_str);
@@ -209,12 +230,11 @@ public:
       int event_code = header.methodid();
       int payload_size = header.datasize();
 
-      char raw_payload[payload_size];
-      r = BIO_read(socket, raw_payload, payload_size);
+      payload.resize(payload_size);
+      r = BIO_read(socket, &payload[0], payload_size);
       if (r != payload_size) break;
-      string payload_str(raw_payload, payload_size);
 
-      handlePacket(event_code, payload_str);
+      handlePacket(event_code, payload);
     }
     cout << "event loop quiting\n";
     return 0;
@@ -255,7 +275,7 @@ public:
       buffer[n++] = payload_raw[i];
     }
     write(buffer, packet_size);
-    printf("sent event %d of size %lud\n", code, packet_size);
+    printf("sent event %d of size %ud\n", code, packet_size);
   }
 private:
     pthread_t looper;
@@ -271,7 +291,22 @@ int main(int argc, char **argv) {
   thread_setup();
   SSL_library_init();
   Context context;
-  PokerClient client("dev-server.chipuppoker.com", 12346);
+  string hostname = "dev-server.chipuppoker.com";
+  uint16_t port  = 12346;
+  int c;
+
+  while ((c = getopt(argc, argv, "h:p:")) != -1) {
+    switch (c) {
+    case 'h':
+      hostname = optarg;
+      break;
+    case 'p':
+      port = strtol(optarg, 0, 10);
+      break;
+    }
+  }
+
+  PokerClient client(hostname, port);
   if (!client.connect(&context)) return -1;
   client.sendHello();
   sleep(10);
