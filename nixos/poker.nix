@@ -17,11 +17,22 @@ let
     installers = "/home/poker/rawinstallers";
     diffs = "/home/poker/diffs";
   };
+  genkeyscript = ''
+    if [ ! -f ${poker_config.certpath} ]; then
+      ${pkgs.openssl}/bin/openssl req -x509 -newkey rsa:2048 -keyout ${poker_config.keypath} -out ${poker_config.certpath} -days 3650 -nodes -subj "/CN=localhost"
+    fi
+  '';
 in {
   imports = [ ./snmpd.nix ];
   options = {
     services.poker = {
       enable = mkEnableOption "enable poker service";
+      autoSelfSigned = mkOption {
+        default = false;
+        example = true;
+        type = types.bool;
+        description = "autogenerate self-signed keys if they are missing";
+      };
     };
   };
   config = mkIf config.services.poker.enable {
@@ -70,6 +81,7 @@ in {
         chmod 701 /home/poker
         mkdir -pv /home/poker/chipuppoker/{server/assets,installers} ${poker_config.upload_dir} ${poker_config.log_dir} ${poker_config.unpacked}/objects ${poker_config.installers} ${poker_config.diffs}
         cd /home/poker/chipuppoker
+        ${if config.services.poker.autoSelfSigned then genkeyscript else ""}
         ${pkgs.poker}/bin/poker-master
       '';
       serviceConfig = {

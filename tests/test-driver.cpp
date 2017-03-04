@@ -62,7 +62,7 @@ void print_cn_name(const char* label, X509_NAME* const name) {
 
 class Context {
 public:
-  Context() {
+  Context(string certpath) {
     int result;
     const SSL_METHOD* method = SSLv23_method();
     if (!method) abort();
@@ -77,7 +77,7 @@ public:
     const long flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION;
     SSL_CTX_set_options(ctx, flags);
 
-    result = SSL_CTX_load_verify_locations(ctx, "../qt-client/client/resources/DevServerCertificate.pem", NULL);
+    result = SSL_CTX_load_verify_locations(ctx, certpath.c_str(), NULL);
     if (result != 1) abort();
     
     const char* const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4";
@@ -158,14 +158,14 @@ void PokerClient::onConnect() {
 void PokerClient::handlePacket(int event_code, string payload) {
   printf("got event %d of size %lud\n", event_code, payload.size());
   switch (event_code) {
-  case srHello:
+  case srHello: // 1
   {
     HelloReply msg;
     msg.ParseFromString(payload);
     tester->event("srHello");
     break;
   }
-  case srLoginReply:
+  case srLoginReply: // 2
   {
     LoginReply msg;
     msg.ParseFromString(payload);
@@ -174,6 +174,18 @@ void PokerClient::handlePacket(int event_code, string payload) {
       tester->event("srLoginReply");
     } else {
       tester->event("srLoginReply-"); // TODO improve the ability set attributes
+    }
+    break;
+  }
+  case srRegisterReply:
+  {
+    RegisterReply msg;
+    msg.ParseFromString(payload);
+    cout << msg.DebugString() << "\n";
+    if (msg.status() == RegisterReply::regSuccess) {
+      tester->event("srRegisterReply");
+    } else {
+      tester->event("srRegisterReply-");
     }
     break;
   }
@@ -189,8 +201,6 @@ void PokerClient::handlePacket(int event_code, string payload) {
 
     header.set_methodid(code);
     header.set_datasize(payload_size);
-
-    cout << header.DebugString() << "\n";
 
     header.SerializeToString(&prefix);
 
@@ -316,22 +326,20 @@ bool Client::connect(Context *context) {
   return true;
 }
 
-
 int main(int argc, char **argv) {
   thread_setup();
   evthread_use_pthreads();
   SSL_library_init();
   string hostname = "dev-server.chipuppoker.com";
+  string certpath = "../qt-client/client/resources/DevServerCertificate.pem";
   uint16_t port  = 12346;
   int c;
   string codepath;
-  Context context;
-  set_context(&context);
   struct event_base *base = event_base_new();
   assert(base);
   printf("Using Libevent with backend method %s.\n", event_base_get_method(base));
 
-  while ((c = getopt(argc, argv, "h:p:c:")) != -1) {
+  while ((c = getopt(argc, argv, "h:p:c:e:")) != -1) {
     switch (c) {
     case 'h':
       hostname = optarg;
@@ -342,8 +350,14 @@ int main(int argc, char **argv) {
     case 'c':
       codepath = optarg;
       break;
+    case 'e':
+      certpath = optarg;
+      break;
     }
   }
+  
+  Context context(certpath);
+  set_context(&context);
 
   bool success;
   {

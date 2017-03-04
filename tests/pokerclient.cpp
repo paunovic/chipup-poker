@@ -14,7 +14,7 @@ void PokerClient::onRead(struct bufferevent *bev) {
   char header_size[2];
   uint16_t real_header_size;
 
-  cout << __func__ << evbuffer_get_length(input) << "\n";
+  cout << __func__ << " " << evbuffer_get_length(input) << "\n";
   if (evbuffer_get_length(input) < 2) return;
   ssize_t s = evbuffer_copyout(input, header_size, 2);
   assert(s == 2);

@@ -1,8 +1,16 @@
 { stdenv, protobuf, libressl, lua, libevent }:
 
-stdenv.mkDerivation {
+let
+  lib = stdenv.lib;
+  filter = name: type: let baseName = baseNameOf (toString name); in (
+    lib.hasSuffix ".cpp" baseName ||
+    lib.hasSuffix ".cc" baseName ||
+    lib.hasSuffix ".h" baseName ||
+    baseName == "Makefile"
+  );
+in stdenv.mkDerivation {
   name = "test-driver";
   buildInputs = [ protobuf libressl lua libevent ];
-  src = ./.;
+  src = builtins.filterSource filter ./.;
   enableParallelBuilding = true;
 }

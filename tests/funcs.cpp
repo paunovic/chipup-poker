@@ -50,6 +50,15 @@ static int client_login(lua_State *L) {
   return 0;
 }
 
+static int client_register(lua_State *L) {
+  PokerClient *client = static_cast<PokerClient*>(lua_touserdata(L, lua_upvalueindex(1)));
+  string user = luaL_checkstring(L, 2);
+  string pass = luaL_checkstring(L, 3);
+  string email = luaL_checkstring(L, 4);
+  client->sendRegister(user, pass, email);
+  return 0;
+}
+
 int makeClient(lua_State *L) {
   cout << __func__ << " top == " << lua_gettop(L) << "\n";
   assert(lua_isstring(L, 1));
@@ -81,6 +90,7 @@ int makeClient(lua_State *L) {
     { "disconnect", client_disconnect },
     { "sendHello", client_sendHello },
     { "login", client_login },
+    { "register", client_register },
     { NULL, NULL}
   };
 
@@ -105,7 +115,6 @@ int client_connect(lua_State *L) {
 
 int client_sendHello(lua_State *L) {
   PokerClient *client = static_cast<PokerClient*>(lua_touserdata(L, lua_upvalueindex(1)));
-  dump_stack(L, __func__);
   client->sendHello();
   return 0;
 }

@@ -17,7 +17,10 @@ end
 handlers = {}
 handlers["srHello"] = function ()
   print("got hello reply")
-  client1:login("test1","password")
+  client1:register("username", "password", "email@example.com")
+end
+handlers["srRegisterReply"] = function ()
+  client1:login("username","password")
 end
 handlers["srLoginReply"] = function ()
   set_success(true);
