@@ -65,32 +65,28 @@ int makeClient(lua_State *L) {
   int table = lua_gettop(L);
   printf("tbl %d\n", table);
 
-  lua_createtable(L, 0, 0);
+  lua_createtable(L, 0, 0); // metatable
+
+  luaL_Reg metatable[] = {
+    { "__gc", delete_client },
+    { NULL, NULL }
+  };
   lua_pushlightuserdata(L, client);
-  lua_pushcclosure(L, delete_client, 1);
-  lua_setfield(L, -2, "__gc");
+  luaL_setfuncs(L, metatable, 1);
+
   lua_setmetatable(L, table);
 
-  lua_pushlightuserdata(L, client);
-  lua_pushcclosure(L, client_connect, 1);
-  lua_setfield(L, table, "connect");
+  luaL_Reg funcs[] = {
+    { "connect", client_connect },
+    { "disconnect", client_disconnect },
+    { "sendHello", client_sendHello },
+    { "login", client_login },
+    { NULL, NULL}
+  };
 
   lua_pushlightuserdata(L, client);
-  lua_pushcclosure(L, client_disconnect, 1);
-  lua_setfield(L, table, "disconnect");
+  luaL_setfuncs(L, funcs, 1);
   
-  lua_pushlightuserdata(L, client);
-  lua_pushcclosure(L, client_sendHello, 1);
-  lua_setfield(L, table, "sendHello");
-
-  lua_pushlightuserdata(L, client);
-
-  lua_pushvalue(L, -1);
-  lua_pushcclosure(L, client_login, 1);
-  lua_setfield(L, table, "login");
-
-  lua_remove(L, -1);
-
   cout << __func__ << " top == " << lua_gettop(L) << "\n";
   return 1;
 }

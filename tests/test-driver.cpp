@@ -169,7 +169,7 @@ void PokerClient::handlePacket(int event_code, string payload) {
   {
     LoginReply msg;
     msg.ParseFromString(payload);
-    cout << msg.DebugString() << "\n";
+    //cout << msg.DebugString() << "\n";
     if (msg.login_status() == LoginReply::lrSuccess) {
       tester->event("srLoginReply");
     } else {
@@ -186,8 +186,6 @@ void PokerClient::handlePacket(int event_code, string payload) {
 
     msg.SerializeToString(&payload);
     uint16_t payload_size = payload.length();
-    cout << "payload size " << payload_size << "\n";
-    cout << msg.DebugString() << "\n";
 
     header.set_methodid(code);
     header.set_datasize(payload_size);
