@@ -598,71 +598,78 @@ ClientSocket.prototype.handle = function (code,args) {
       var newuser = new models.UserModel();
       newuser.email = params.email;
       newuser.displayname = params.displayName;
-			newuser.authed = false;
-			newuser.chips = 0;
-			newuser.authcode = uuid.v4();
-			newuser.subscription_plan = 'pspBasic';
-			if (!regexLimits.email.exec(newuser.email)) {
-				console.log('email invalid',newuser.email);
-				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
-				return;
-			}
-			if ((newuser.email.length > global.sharedconfig.stringSizes.email) || (newuser.email.length < global.sharedconfig.minSizes.email)) {
-				this.log('email out of bounds');
-				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
-				return;
-			}
-			if (!regexLimits.username.exec(newuser.displayname)) {
-				this.log('display name out of bounds');
-				this.send(codes.srRegisterReply,{status:'regInvalidName'},'Poker.RegisterReply');
-				return;
-			}
-			if (!regexLimits.password.exec(params.password)) {
-				this.reply(0,"password too long");
-				return;
-			}
+      if (config.autoConfirm) {
+        newuser.authed = true;
+      } else {
+        newuser.authed = false;
+        newuser.authcode = uuid.v4();
+      }
+      newuser.chips = 0;
+      newuser.subscription_plan = 'pspBasic';
+      if (!regexLimits.email.exec(newuser.email)) {
+        console.log('email invalid',newuser.email);
+        this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
+        return;
+      }
+      if ((newuser.email.length > global.sharedconfig.stringSizes.email) || (newuser.email.length < global.sharedconfig.minSizes.email)) {
+        this.log('email out of bounds');
+        this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
+        return;
+      }
+      if (!regexLimits.username.exec(newuser.displayname)) {
+        this.log('display name out of bounds');
+        this.send(codes.srRegisterReply,{status:'regInvalidName'},'Poker.RegisterReply');
+        return;
+      }
+      if (!regexLimits.password.exec(params.password)) {
+        this.reply(0,"password too long");
+        return;
+      }
       deck.getRandom(200,function (salt) {
         var hasher = crypto.createHash('sha256');
-				hasher.update(salt);
-				hasher.update(params.password);
-				var hash = hasher.digest();
-				newuser.password = hash;
-				newuser.salt = salt;
+        hasher.update(salt);
+        hasher.update(params.password);
+        var hash = hasher.digest();
+        newuser.password = hash;
+        newuser.salt = salt;
         models.UserModel.findOne({email:{$regex:new RegExp('^'+params.email+'$','i')}},function (err,row) {
           if (row) {
-						this.log('found it',row);
-						this.log('error, dup!');
-						this.send(codes.srRegisterReply,{status:'regDuplicateEmail'},'Poker.RegisterReply');
-					} else {
-						models.UserModel.findOne({displayname:{$regex:new RegExp('^'+params.displayName+'$','i')}},function (err,row) {
-							if (row) {
-								this.send(codes.srRegisterReply,{status:'regDupUsername'},'Poker.RegisterReply');
-							} else {
-								newuser.save(function (err) {
-									if (err) {
-										console.log('error 1',err);
-										process.exit(1);
-									}
-									sendAuthEmail(newuser._id,newuser.authcode,newuser.email,newuser.displayname, function fail1() {
-										this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
-										newuser.remove(function (err,res) {
-											this.log('delete done',err,res,newuser);
-										}.bind(this));
-									}.bind(this),function fail1() {
-										this.reply(0,"internal error");
-									}.bind(this),
-                                                                                function success() {
-										token.stop();
-										this.send(codes.srRegisterReply,{status:'regSuccess'},'Poker.RegisterReply');
-									}.bind(this)
-                                                                        );
-								}.bind(this));
-							}
-						}.bind(this));
-					}
-				}.bind(this));
-			}.bind(this));
-			break;
+            this.log('found it',row);
+            this.log('error, dup!');
+            this.send(codes.srRegisterReply,{status:'regDuplicateEmail'},'Poker.RegisterReply');
+          } else {
+            models.UserModel.findOne({displayname:{$regex:new RegExp('^'+params.displayName+'$','i')}},function (err,row) {
+              if (row) {
+                this.send(codes.srRegisterReply,{status:'regDupUsername'},'Poker.RegisterReply');
+              } else {
+                newuser.save(function (err) {
+                  if (err) {
+                    console.log('error 1',err);
+                    process.exit(1);
+                  }
+                  function register_success() {
+                    token.stop();
+                    this.send(codes.srRegisterReply,{status:'regSuccess'},'Poker.RegisterReply');
+                  }
+                  if (config.autoConfirm) {
+                    register_success.call(this);
+                    return;
+                  }
+                  sendAuthEmail(newuser._id,newuser.authcode,newuser.email,newuser.displayname, function fail1() {
+                    this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
+                    newuser.remove(function (err,res) {
+                      this.log('delete done',err,res,newuser);
+                    }.bind(this));
+                  }.bind(this),function fail1() {
+                    this.reply(0,"internal error");
+                  }.bind(this),register_success.bind(this));
+                }.bind(this));
+              }
+            }.bind(this));
+          }
+        }.bind(this));
+      }.bind(this));
+      break;
 		case codes.scForgotPassword:
 			if (args.length > 1024) return this.error('forgot cmd too long');
 			try {

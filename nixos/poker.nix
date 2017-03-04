@@ -4,6 +4,7 @@ with lib;
 
 let
   keys = import ./keys.nix;
+  cfg = config.services.poker;
   poker_config = {
     keypath = "/home/poker/chipuppoker/key.pem";
     certpath = "/home/poker/chipuppoker/cert.pem";
@@ -16,12 +17,14 @@ let
     unpacked = "/home/poker/unpacked";
     installers = "/home/poker/rawinstallers";
     diffs = "/home/poker/diffs";
+    autoConfirm = cfg.autoConfirm;
   };
   genkeyscript = ''
     if [ ! -f ${poker_config.certpath} ]; then
       ${pkgs.openssl}/bin/openssl req -x509 -newkey rsa:2048 -keyout ${poker_config.keypath} -out ${poker_config.certpath} -days 3650 -nodes -subj "/CN=localhost"
     fi
   '';
+  mkBool = description: default: mkOption { inherit default description; example = !default; };
 in {
   imports = [ ./snmpd.nix ];
   options = {
@@ -33,6 +36,7 @@ in {
         type = types.bool;
         description = "autogenerate self-signed keys if they are missing";
       };
+      autoConfirm = mkBool "auto-confirm all accounts" false;
     };
   };
   config = mkIf config.services.poker.enable {

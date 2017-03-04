@@ -2609,6 +2609,7 @@ Game.prototype.stopTimer = function stopTimer(seat) {
 }
 Game.handleDisconnect = function handleDisconnect(conn,reason,cb1) {
 	// ran for ANY disconnection event
+  if (conn.userid == undefined) return;
 	conn.log('handling disconnect:%s',reason);
 	var jobs = [];
 	for (var key in activeGames) {
