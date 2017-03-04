@@ -226,33 +226,6 @@ static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {
   }
 }
 
-class Reader {
-public:
-  Reader(string path) {
-    fd = open(path.c_str(), O_RDONLY);
-    assert(fd != -1);
-  }
-  ~Reader() {
-    close(fd);
-  }
-  const char *readChunk(lua_State *state, size_t *size) {
-    buffer.resize(1024);
-    *size = read(fd, &buffer[0], 1024);
-    buffer.resize(*size);
-    //cout << "read chunk\n" << buffer << "(" << *size << ") bytes\n";
-    if (*size == 0) return NULL;
-    return buffer.data();
-  }
-private:
-  string buffer;
-  int fd;
-};
-
-static const char *reader(lua_State *state, void *data, size_t *size) {
-  Reader *r = static_cast<Reader*>(data);
-  return r->readChunk(state, size);
-}
-
 LuaTester::LuaTester(struct event_base *base) : base(base) {
   L = lua_newstate(l_alloc, NULL);
   success = false;
@@ -289,11 +262,10 @@ void LuaTester::set_success(bool success) {
 
 void LuaTester::runTest(string path, string hostname, uint16_t port) {
   int result;
-  Reader r(path);
 
   cout << "top == " << lua_gettop(L) << "\n";
 
-  result = lua_load(L, reader, &r, path.c_str(), NULL);
+  result = luaL_loadfilex(L, path.c_str(), NULL);
   if (result != LUA_OK) {
     cout << "load error:" << lua_tostring(L, -1) << "\n";
     abort();
