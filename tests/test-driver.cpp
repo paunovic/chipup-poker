@@ -177,7 +177,7 @@ void PokerClient::handlePacket(int event_code, string payload) {
     }
     break;
   }
-  case srRegisterReply:
+  case srRegisterReply: // 3
   {
     RegisterReply msg;
     msg.ParseFromString(payload);
@@ -186,6 +186,18 @@ void PokerClient::handlePacket(int event_code, string payload) {
       tester->event("srRegisterReply");
     } else {
       tester->event("srRegisterReply-");
+    }
+    break;
+  }
+  case srCreateClubReply: // 4
+  {
+    ClubCommandReply msg;
+    msg.ParseFromString(payload);
+    cout << msg.DebugString() << "\n";
+    if (msg.status() == ClubCommandReply::csSuccess) {
+      tester->event("srCreateClubReply");
+    } else {
+      tester->event("srCreateClubReply-");
     }
     break;
   }

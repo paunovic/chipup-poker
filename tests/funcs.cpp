@@ -7,8 +7,10 @@
 
 #include "funcs.h"
 #include "test-driver.h"
+#include "message.pb.h"
 
 using namespace std;
+using namespace Poker;
 
 static int client_connect(lua_State *L);
 static int client_disconnect(lua_State *L);
@@ -59,6 +61,24 @@ static int client_register(lua_State *L) {
   return 0;
 }
 
+static int client_scCreateClub(lua_State *L) {
+  PokerClient *client = static_cast<PokerClient*>(lua_touserdata(L, lua_upvalueindex(1)));
+  luaL_checktype(L, 2, LUA_TBOOLEAN);
+  bool priv = lua_toboolean(L, 2);
+  string name = luaL_checkstring(L, 3);
+  string pass = luaL_checkstring(L, 4);
+  int buyin_reset = luaL_checkint(L, 5);
+  
+  Club msg;
+  msg.set_is_private(priv);
+  msg.set_name(name);
+  msg.set_password(pass);
+  msg.set_rake(1);
+  msg.set_buyin_reset(buyin_reset);
+  client->sendMessage(scCreateClub, msg);
+  return 0;
+}
+
 int makeClient(lua_State *L) {
   cout << __func__ << " top == " << lua_gettop(L) << "\n";
   assert(lua_isstring(L, 1));
@@ -91,6 +111,7 @@ int makeClient(lua_State *L) {
     { "sendHello", client_sendHello },
     { "login", client_login },
     { "register", client_register },
+    { "scCreateClub", client_scCreateClub },
     { NULL, NULL}
   };
 

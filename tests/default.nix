@@ -43,4 +43,5 @@ in {
     '';
   };
   register_login = makeLuaTest ./register_login.lua;
+  makeClub = makeLuaTest ./makeClub.lua;
 }
