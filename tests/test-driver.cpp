@@ -214,20 +214,8 @@ void PokerClient::handlePacket(int event_code, string payload) {
     printf("sent event %d of size %ud\n", code, packet_size);
   }
 
-static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {
-  (void)ud;
-  (void)osize;
-
-  if (nsize == 0) {
-    free(ptr);
-    return NULL;
-  } else {
-    return realloc(ptr, nsize);
-  }
-}
-
 LuaTester::LuaTester(struct event_base *base) : base(base) {
-  L = lua_newstate(l_alloc, NULL);
+  L = luaL_newstate();
   success = false;
   luaL_openlibs(L);
 
