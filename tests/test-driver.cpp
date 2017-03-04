@@ -7,6 +7,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <event2/thread.h>
+#include <event2/event.h>
+#include <event2/bufferevent_ssl.h>
+
 #include "locking.h"
 #include "funcs.h"
 #include "test-driver.h"
@@ -88,70 +92,23 @@ public:
   SSL_CTX *ctx;
 };
 
-Client::Client(string hostname, uint16_t port) : hostname(hostname), port(port), state(Inactive) {
-  socket = NULL;
-  out = NULL;
+Client::Client(LuaTester *tester, string hostname, uint16_t port) : tester(tester), hostname(hostname), port(port), state(Inactive) {
   ssl = NULL;
 }
 
 Client::~Client() {
-  if (out) BIO_free(out);
-  if (socket) BIO_free_all(socket);
+  if (bev) bufferevent_free(bev);
+  if (ssl) SSL_free(ssl);
 }
 
-bool Client::connect(Context *context) {
-  int result;
+void client_readcb(struct bufferevent *bev, void *ctx) {
+  cout << __func__ << "\n";
+  Client *client = static_cast<Client*>(ctx);
+  client->onRead(bev);;
+}
 
-  cout << "connecting\n";
-  if (state != Inactive) return false;
-
-  socket = BIO_new_ssl_connect(context->ctx);
-  if (!socket) return false;
-
-  char buffer[64];
-  snprintf(buffer, 64, "%s:%d", hostname.c_str(), port);
-
-  result = BIO_set_conn_hostname(socket, buffer);
-  if (result != 1) return false;
-
-  BIO_get_ssl(socket, &ssl);
-  if (!ssl) return false;
-
-  result = SSL_set_tlsext_host_name(ssl, hostname.c_str());
-  if (result != 1) return false;
-
-  out = BIO_new_fp(stdout, BIO_NOCLOSE);
-  if (!out) return false;
-
-  result = BIO_do_connect(socket);
-  if (result != 1) return false;
-
-  result = BIO_do_handshake(socket);
-  if (result != 1) return false;
-
-  {
-    X509* cert = SSL_get_peer_certificate(ssl);
-
-    X509_NAME* iname = X509_get_issuer_name(cert);
-    print_cn_name("Issuer (cn)", iname);
-
-    X509_NAME* sname = X509_get_subject_name(cert);
-    print_cn_name("Subject (cn)", sname);
-
-    if(cert) { X509_free(cert); } /* Free immediately */
-    if (!cert) return false;
-  }
-
-  result = SSL_get_verify_result(ssl);
-  if (result != X509_V_OK) {
-    cout << "verify failed\n";
-    return false;
-  }
-
-  state = Connected;
-  onConnect();
-
-  return true;
+void client_eventcb(struct bufferevent *bev, short events, void *ctx) {
+  cout << __func__ << "\n";
 }
 
 void Client::disconnect() {
@@ -163,18 +120,16 @@ bool Client::write(const char *data, int len) {
     //printf("%02x ", data[i]);
   }
   //printf("\n");
-  BIO_write(socket, data, len);
+  int result = bufferevent_write(bev, data, len);
+  assert(result == 0);
   return true;
 }
 
-PokerClient::PokerClient(string hostname, uint16_t port) : Client(hostname, port) {
+PokerClient::PokerClient(LuaTester *tester, string hostname, uint16_t port) : Client(tester, hostname, port) {
 }
 
 PokerClient::~PokerClient() {
   disconnect();
-  keep_looping = false;
-  void *retval;
-  pthread_join(looper, &retval);
 }
 
 void PokerClient::sendHello() {
@@ -198,46 +153,32 @@ void PokerClient::sendHello() {
   }
 
 void PokerClient::onConnect() {
-  pthread_attr_t attr;
-  
-  pthread_attr_init(&attr);
-  pthread_create(&looper, &attr, &read_loop, this);
 }
 
-  void *PokerClient::loop() {
-    uint8_t header_size[2];
-    uint16_t real_header_size;
-    int r;
-    string header_str, payload;
-
-    keep_looping = true;
-    while (keep_looping) {
-      r = BIO_read(socket, header_size, 2);
-      if (r != 2) break;
-      real_header_size = header_size[0] | (header_size[1] << 8);
-
-      header_str.resize(real_header_size);
-      r = BIO_read(socket, &header_str[0], real_header_size);
-      if (r != real_header_size) break;
-
-      RpcMessage header;
-      header.ParseFromString(header_str);
-
-      int event_code = header.methodid();
-      int payload_size = header.datasize();
-
-      payload.resize(payload_size);
-      r = BIO_read(socket, &payload[0], payload_size);
-      if (r != payload_size) break;
-
-      handlePacket(event_code, payload);
+void PokerClient::handlePacket(int event_code, string payload) {
+  printf("got event %d of size %lud\n", event_code, payload.size());
+  switch (event_code) {
+  case srHello:
+  {
+    HelloReply msg;
+    msg.ParseFromString(payload);
+    tester->event("srHello");
+    break;
+  }
+  case srLoginReply:
+  {
+    LoginReply msg;
+    msg.ParseFromString(payload);
+    cout << msg.DebugString() << "\n";
+    if (msg.login_status() == LoginReply::lrSuccess) {
+      tester->event("srLoginReply");
+    } else {
+      tester->event("srLoginReply-"); // TODO improve the ability set attributes
     }
-    cout << "event loop quiting\n";
-    return 0;
+    break;
   }
-  void PokerClient::handlePacket(int event_code, string payload_str) {
-    printf("got event %d of size %lud\n", event_code, payload_str.size());
   }
+}
   void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg) {
     string payload, prefix;
     unsigned int i, n;
@@ -273,11 +214,6 @@ void PokerClient::onConnect() {
     printf("sent event %d of size %ud\n", code, packet_size);
   }
 
-void *read_loop(void *data) {
-  PokerClient *client = static_cast<PokerClient*>(data);
-  return client->loop();
-}
-
 static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {
   (void)ud;
   (void)osize;
@@ -303,7 +239,7 @@ public:
     buffer.resize(1024);
     *size = read(fd, &buffer[0], 1024);
     buffer.resize(*size);
-    cout << "read chunk\n" << buffer << "(" << *size << ") bytes\n";
+    //cout << "read chunk\n" << buffer << "(" << *size << ") bytes\n";
     if (*size == 0) return NULL;
     return buffer.data();
   }
@@ -317,48 +253,115 @@ static const char *reader(lua_State *state, void *data, size_t *size) {
   return r->readChunk(state, size);
 }
 
-class LuaTester {
-public:
-  LuaTester() {
-    L = lua_newstate(l_alloc, NULL);
-    luaL_openlibs(L);
+LuaTester::LuaTester(struct event_base *base) : base(base) {
+  L = lua_newstate(l_alloc, NULL);
+  success = false;
+  luaL_openlibs(L);
 
-    cout << "top == " << lua_gettop(L) << "\n";
-    lua_register(L, "makeClient", makeClient);
-    cout << "top == " << lua_gettop(L) << "\n";
+  cout << "top == " << lua_gettop(L) << "\n";
+  lua_pushlightuserdata(L, this);
+  lua_pushcclosure(L, makeClient, 1);
+  lua_setglobal(L, "makeClient");
+
+  lua_pushlightuserdata(L, this);
+  lua_pushcclosure(L, ::set_success, 1);
+  lua_setglobal(L, "set_success");
+  
+  lua_createtable(L, 0, 0);
+  lua_pushinteger(L, 0);
+  lua_setfield(L, -2, "counter");
+  lua_setfield(L, LUA_REGISTRYINDEX, "test-timers");
+  
+  lua_pushlightuserdata(L, base);
+  lua_pushcclosure(L, setTimeout, 1);
+  lua_setglobal(L, "setTimeout");
+  
+  cout << "top == " << lua_gettop(L) << "\n";
+}
+
+LuaTester::~LuaTester() {
+  lua_close(L);
+}
+
+void LuaTester::set_success(bool success) {
+  this->success = success;
+}
+
+void LuaTester::runTest(string path, string hostname, uint16_t port) {
+  int result;
+  Reader r(path);
+
+  cout << "top == " << lua_gettop(L) << "\n";
+
+  result = lua_load(L, reader, &r, path.c_str(), NULL);
+  if (result != LUA_OK) {
+    cout << "load error:" << lua_tostring(L, -1) << "\n";
+    abort();
+  }
+  lua_pushstring(L, hostname.c_str());
+  lua_pushinteger(L, port);
+
+  result = lua_pcall(L, 2, 1, 0);
+  if (result != LUA_OK) {
+    cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
+    abort();
+  }
+  bool retval = lua_toboolean(L, -1);
+  lua_remove(L, -1);
+  cout << "retval:" << retval << "\n";
+
+  if (!retval) {
+    cerr << "test init failed\n";
+    abort();
   }
 
-  void runTest(string path, string hostname, uint16_t port) {
-    int result;
-    Reader r(path);
-
-    cout << "top == " << lua_gettop(L) << "\n";
-
-    result = lua_load(L, reader, &r, path.c_str(), NULL);
-    if (result != LUA_OK) {
-      cout << "load error:" << lua_tostring(L, -1) << "\n";
-      abort();
-    }
-    lua_pushstring(L, hostname.c_str());
-    lua_pushinteger(L, port);
-    result = lua_pcall(L, 2, 1, 0);
-    if (result != LUA_OK) {
-      cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
-      abort();
-    }
-    cout << "retval:" << lua_toboolean(L, -1) << "\n";
-    lua_remove(L, -1);
+  result = event_base_loop(base, 0);
+  cout << "ev result:" << result << "\n";
     
-    cout << "top == " << lua_gettop(L) << "\n";
+  cout << "top == " << lua_gettop(L) << "\n";
+}
+
+void LuaTester::event(string code) {
+  lua_getglobal(L, "onEvent");
+  if (lua_type(L, -1) == LUA_TNIL) {
+    lua_remove(L, -1);
+    return;
   }
-  ~LuaTester() {
-    lua_close(L);
+  lua_pushstring(L, code.c_str());
+  int result = lua_pcall(L, 1, 0, 0);
+  if (result != LUA_OK) {
+    cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
+    lua_remove(L, -1);
   }
-  lua_State *L;
-};
+}
+
+bool Client::connect(Context *context) {
+  struct addrinfo *out;
+  int res;
+  res = getaddrinfo(hostname.c_str(), NULL, NULL, &out);
+  assert(res == 0);
+  int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+  assert(fd != -1);
+  struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in*>(out->ai_addr);
+  addr->sin_port = htons(port);
+  res = ::connect(fd, out->ai_addr, out->ai_addrlen);
+  assert(res == 0);
+  
+  freeaddrinfo(out);
+  out = NULL;
+
+  ssl = SSL_new(context->ctx);
+
+  bev = bufferevent_openssl_socket_new(tester->base, fd, ssl, BUFFEREVENT_SSL_CONNECTING, 0);
+  bufferevent_enable(bev, EV_READ);
+  bufferevent_setcb(bev, client_readcb, NULL, client_eventcb, this);
+  return true;
+}
+
 
 int main(int argc, char **argv) {
   thread_setup();
+  evthread_use_pthreads();
   SSL_library_init();
   string hostname = "dev-server.chipuppoker.com";
   uint16_t port  = 12346;
@@ -366,6 +369,9 @@ int main(int argc, char **argv) {
   string codepath;
   Context context;
   set_context(&context);
+  struct event_base *base = event_base_new();
+  assert(base);
+  printf("Using Libevent with backend method %s.\n", event_base_get_method(base));
 
   while ((c = getopt(argc, argv, "h:p:c:")) != -1) {
     switch (c) {
@@ -381,11 +387,21 @@ int main(int argc, char **argv) {
     }
   }
 
-  LuaTester t;
-  t.runTest(codepath, hostname, port);
+  bool success;
+  {
+    LuaTester t(base);
+    t.runTest(codepath, hostname, port);
+    success = t.success;
+  }
 
   set_context(NULL);
   cout << "done\n";
   thread_cleanup();
+  event_base_free(base);
+  // needs 2.1 libevent_global_shutdown();
+  if (!success) {
+    cout << "test failed\n";
+    return -1;
+  }
   return 0;
 }
