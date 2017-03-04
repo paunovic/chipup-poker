@@ -587,17 +587,17 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 			}.bind(this));
 			break;
-		case codes.scRegister:
-			try {
-				params = pb.Parse(args,'Poker.RegisterParams');
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			console.log('register params',params);
-			var newuser = new models.UserModel();
-			newuser.email = params.email;
-			newuser.displayname = params.displayName;
+    case codes.scRegister:
+      try {
+        params = pb.Parse(args,'Poker.RegisterParams');
+      } catch (e) {
+        this.error(e);
+        return;
+      }
+      console.log('register params',params);
+      var newuser = new models.UserModel();
+      newuser.email = params.email;
+      newuser.displayname = params.displayName;
 			newuser.authed = false;
 			newuser.chips = 0;
 			newuser.authcode = uuid.v4();
@@ -621,15 +621,15 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(0,"password too long");
 				return;
 			}
-			deck.getRandom(200,function (salt) {
-				var hasher = crypto.createHash('sha256');
+      deck.getRandom(200,function (salt) {
+        var hasher = crypto.createHash('sha256');
 				hasher.update(salt);
 				hasher.update(params.password);
 				var hash = hasher.digest();
 				newuser.password = hash;
 				newuser.salt = salt;
-				models.UserModel.findOne({email:{$regex:new RegExp('^'+params.email+'$','i')}},function (err,row) {
-					if (row) {
+        models.UserModel.findOne({email:{$regex:new RegExp('^'+params.email+'$','i')}},function (err,row) {
+          if (row) {
 						this.log('found it',row);
 						this.log('error, dup!');
 						this.send(codes.srRegisterReply,{status:'regDuplicateEmail'},'Poker.RegisterReply');
@@ -650,10 +650,12 @@ ClientSocket.prototype.handle = function (code,args) {
 										}.bind(this));
 									}.bind(this),function fail1() {
 										this.reply(0,"internal error");
-									}.bind(this),function success() {
+									}.bind(this),
+                                                                                function success() {
 										token.stop();
 										this.send(codes.srRegisterReply,{status:'regSuccess'},'Poker.RegisterReply');
-									}.bind(this));
+									}.bind(this)
+                                                                        );
 								}.bind(this));
 							}
 						}.bind(this));
