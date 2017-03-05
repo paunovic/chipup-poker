@@ -1135,27 +1135,28 @@ handlers[codes.scSubscriptionPlanChange] = function (args,token) {
 		this.send(codes.srSubscriptionPlanChange,params,'Poker.SubscriptionPlanChange');
 	}.bind(this));
 };
-function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
-	var test = new SmtpConnection();
-	var link = 'https://'+config.hostname+'/confirm?code='+authcode;
-	var body = emailRegister({authlink:link,email:email});
-	console.log(body);
-	test.sendMail(email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+displayname+'<'+email+'>\r\nSubject: E-Mail Verification\r\nContent-Type: text/html\r\n\r\n'+body,function cb(err,ret) {
-		console.log('cb',err,ret);
-		if (err) {
-			if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
-				global.log('invalid email server');
 
-				fail1();
-				return;
-			}
-			global.log('internal error sending email');
-			fail2();
-			return;
-		}
-		sucess();
-	}.bind(this));
+function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
+  var test = new SmtpConnection();
+  var link = 'https://'+config.hostname+'/confirm?code='+authcode;
+  var body = emailRegister({authlink:link,email:email});
+  test.sendMail(email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+displayname+'<'+email+'>\r\nSubject: E-Mail Verification\r\nContent-Type: text/html\r\n\r\n'+body,function cb(err,ret) {
+    console.log('cb',err,ret);
+    if (err) {
+      if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
+        global.log('invalid email server');
+
+        fail1();
+        return;
+      }
+      global.log('internal error sending email');
+      fail2();
+      return;
+    }
+    sucess();
+  }.bind(this));
 }
+
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts,token) {
 	switch (ev.event) {
 	case 'ceUserMessage':
