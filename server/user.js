@@ -594,7 +594,6 @@ ClientSocket.prototype.handle = function (code,args) {
         this.error(e);
         return;
       }
-      console.log('register params',params);
       var newuser = new models.UserModel();
       newuser.email = params.email;
       newuser.displayname = params.displayName;
