@@ -870,13 +870,13 @@ ClientSocket.prototype.getStatusPacket = function (status,maincb) {
         Club.getClubById(item._id,function (err,club) {
           // TODO, dont show userlist if you are pending
           var obj = Club.makeClubProtobuf(item,userlist,balances,club);
-          if (myutils.containsObjectID(club.obj.members,this.userid)) {
-            clubsOut.push(obj);
+          clubsOut.push(obj);
+          /*if (myutils.containsObjectID(club.obj.members,this.userid)) {
           } else if (myutils.containsObjectID(item.pendingApproval,this.userid)) {
             clubsOut.push(obj);
           } else if (club.isOwner(this.userid)) {
             clubsOut.push(obj);
-          }
+          }*/
           cb();
         }.bind(this));
       }.bind(this),function finished() {
