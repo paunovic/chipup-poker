@@ -8,7 +8,8 @@ uses
   Poker.Interfaces.FormParams, Poker.Tables.Table, Poker.Tables.Status,
   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game, Winapi.Messages;
+  Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game, Winapi.Messages,
+  System.Actions;
 
 type
   TfrmTableSit = class(TForm, IFormParams, IModalForm)
@@ -457,13 +458,17 @@ end;
 procedure TfrmTableSit.CSEPlayerClubStatus(const AMethodId: Integer; const AObject: TObject);
 var
   proto: TPB_PlayerClubStatus;
+  focus_buyin_field: Boolean;
 begin
   if not TTypes.TryCast<TPB_PlayerClubStatus>(AObject, proto) then
     Exit;
 
+  focus_buyin_field := not FPlayerStatusReceived;
   FPlayerStatusReceived := TRUE;
   ConfigureGUI;
   seBuyin.Properties.OnChange(nil);
+  if focus_buyin_field then
+    seBuyin.SetFocus;
 end;
 
 procedure TfrmTableSit.CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);

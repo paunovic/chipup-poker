@@ -20,6 +20,9 @@ object frmClubLobby: TfrmClubLobby
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
+  DesignSize = (
+    894
+    612)
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
@@ -2428,7 +2431,7 @@ object frmClubLobby: TfrmClubLobby
     StyleDisabled.LookAndFeel.SkinName = ''
     StyleFocused.LookAndFeel.SkinName = ''
     StyleHot.LookAndFeel.SkinName = ''
-    TabOrder = 5
+    TabOrder = 3
     Transparent = True
   end
   object lbsHeader: TcxLabel
@@ -2481,45 +2484,6 @@ object frmClubLobby: TfrmClubLobby
     AnchorX = 447
     AnchorY = 124
   end
-  object btClubHome: TcxButton
-    Left = 8
-    Top = 138
-    Width = 124
-    Height = 31
-    Caption = 'CLUB HOME'
-    Colors.PressedText = 15461355
-    LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
-    SpeedButtonOptions.GroupIndex = 1
-    SpeedButtonOptions.CanBeFocused = False
-    SpeedButtonOptions.Down = True
-    TabOrder = 0
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Sintony'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = btClubHomeClick
-  end
-  object btTables: TcxButton
-    Left = 134
-    Top = 138
-    Width = 124
-    Height = 31
-    Caption = 'TABLES'
-    Colors.PressedText = 15461355
-    LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
-    SpeedButtonOptions.GroupIndex = 1
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 1
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Sintony'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = btTablesClick
-  end
   object pcTabs: TcxPageControl
     Left = 0
     Top = 170
@@ -2527,7 +2491,7 @@ object frmClubLobby: TfrmClubLobby
     Height = 442
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
-    TabOrder = 2
+    TabOrder = 0
     Properties.ActivePage = tsClubHome
     Properties.CustomButtons.Buttons = <>
     Properties.HideTabs = True
@@ -2547,16 +2511,17 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Club Settings'
         TabOrder = 0
         DesignSize = (
-          250
+          249
           435)
         Height = 435
-        Width = 250
+        Width = 249
         object Bevel1: TdxBevel
           Left = 13
           Top = 197
-          Width = 225
+          Width = 224
           Height = 1
           Anchors = [akLeft, akTop, akRight]
+          ExplicitWidth = 225
         end
         object btCloseClub: TcxButton
           Left = 10
@@ -3321,40 +3286,124 @@ object frmClubLobby: TfrmClubLobby
       end
     end
   end
-  object btPrijatnaPunina: TcxButton
-    Left = 386
-    Top = 138
-    Width = 500
-    Height = 31
-    Enabled = False
-    LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 6
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object btStats: TcxButton
-    Left = 260
-    Top = 138
-    Width = 124
-    Height = 31
-    Caption = 'STATISTICS'
-    Colors.PressedText = 15461355
-    LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
-    SpeedButtonOptions.GroupIndex = 1
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 7
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Sintony'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = btStatsClick
+  object paHeader: TPanel
+    Left = 8
+    Top = 136
+    Width = 878
+    Height = 33
+    Anchors = [akLeft, akTop, akRight]
+    BevelOuter = bvNone
+    TabOrder = 4
+    object dxBevel1: TdxBevel
+      Left = 124
+      Top = 0
+      Width = 2
+      Height = 33
+      Align = alLeft
+      Shape = dxbsNone
+      ExplicitLeft = 125
+    end
+    object dxBevel2: TdxBevel
+      Left = 250
+      Top = 0
+      Width = 2
+      Height = 33
+      Align = alLeft
+      Shape = dxbsNone
+      ExplicitLeft = 252
+    end
+    object dxBevel3: TdxBevel
+      Left = 376
+      Top = 0
+      Width = 2
+      Height = 33
+      Align = alLeft
+      Shape = dxbsNone
+      ExplicitLeft = 379
+    end
+    object btPrijatnaPunina: TcxButton
+      Left = 378
+      Top = 0
+      Width = 500
+      Height = 33
+      Align = alClient
+      Enabled = False
+      LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 0
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ExplicitLeft = 377
+      ExplicitTop = 10
+      ExplicitHeight = 31
+    end
+    object btStats: TcxButton
+      Left = 252
+      Top = 0
+      Width = 124
+      Height = 33
+      Align = alLeft
+      Caption = 'STATISTICS'
+      Colors.PressedText = 15461355
+      LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
+      SpeedButtonOptions.GroupIndex = 1
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 1
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = [fsBold]
+      ParentFont = False
+      OnClick = btStatsClick
+      ExplicitLeft = 254
+    end
+    object btTables: TcxButton
+      Left = 126
+      Top = 0
+      Width = 124
+      Height = 33
+      Align = alLeft
+      Caption = 'TABLES'
+      Colors.PressedText = 15461355
+      LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
+      SpeedButtonOptions.GroupIndex = 1
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 2
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = [fsBold]
+      ParentFont = False
+      OnClick = btTablesClick
+      ExplicitLeft = 127
+    end
+    object btClubHome: TcxButton
+      Left = 0
+      Top = 0
+      Width = 124
+      Height = 33
+      Align = alLeft
+      Caption = 'CLUB HOME'
+      Colors.PressedText = 15461355
+      LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_ClubLobbyTabs'
+      SpeedButtonOptions.GroupIndex = 1
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.Down = True
+      TabOrder = 3
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = [fsBold]
+      ParentFont = False
+      OnClick = btClubHomeClick
+    end
   end
   object alManageClubs: TActionList
     Left = 292
