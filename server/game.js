@@ -446,72 +446,75 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 		}
 	}.bind(this));
 };
-Game.prototype.handOver = function (cb,handid,reason,userid) {
-	this.log('handOver start');
-	if (this.club) this.club.handOver(this,cb,handid,reason,userid);
-	else if (this.tourn) {
-		if (reason == 'updateCashOut') cb();
-		else {
-			this.tourn.handOver(this,function () {
-				this.log('handOver end');
-				cb();
-			}.bind(this));
-		}
-	} else cb();
-	if (handid) {
-		var gameRow = this.obj; // FIXME
-		models.HandHistory.findOne({seq:handid}).lean(true).exec(function (err,historyRow) {
-			assert.ifError(err);
-			var savedCards = [];
-			var keyid = 0;
-			async.each(historyRow.players,function (player,cb) {
-				if (!player) return cb();
-				models.UserModel.findOne({_id:player._id},function (err,playerRow) {
-					assert.ifError(err);
-					assert(playerRow);
-					player.keyid = keyid++;
-					player.nick = playerRow.displayname;
-						if (player.cards) {
-						savedCards[player.keyid] = new Buffer(player.cards);
-					}
-					player.origid = player._id;
 
-					if (!player.muck && player.cards) player.cards = new Buffer(player.cards);
-					else delete player.cards;
-					cb();
-				});
-			},function () {
-				// MARK
-				for (var x=0; x<historyRow.cards.length; x++) {
-					if (!historyRow.cards[x].cards) continue;
-					historyRow.cards[x] = new Buffer(historyRow.cards[x].cards);
-				}
-				var obj = {gameid:this.id, rows:[historyRow] };
-				if (this.tournament) obj.tournament_id = this.obj.tournament;
-				if (this.obj.clubid) obj.club_id = this.obj.clubid;
-				for (var x in this.users) {
-					for (var y=0; y<obj.rows[0].players.length; y++) {
-						if (obj.rows[0].players[y]) {
-							var key2 = obj.rows[0].players[y].keyid;
-							if (obj.rows[0].players[y].rehide) {
-								delete obj.rows[0].players[y].cards;
-								obj.rows[0].players[y].rehide = false;
-							}
-							if (obj.rows[0].players[y].cards) continue;
-							if (savedCards[key2]) {
-								if (myutils.compareObjectID(obj.rows[0].players[y].origid,x)) {
-									obj.rows[0].players[y].cards = savedCards[key2];
-									obj.rows[0].players[y].rehide = true;
-								}
-							}
-						}
-					}
-					this.users[x].send(codes.srHandHistoryMsg,obj,'Poker.HandHistoryReply');
-				}
-			}.bind(this));
-		}.bind(this));
-	}
+Game.prototype.handOver = function (cb,handid,reason,userid) {
+  this.log('handOver start');
+  if (this.club) this.club.handOver(this,cb,handid,reason,userid);
+  else if (this.tourn) {
+    if (reason == 'updateCashOut') cb();
+    else {
+      this.tourn.handOver(this,function () {
+        this.log('handOver end');
+        cb();
+      }.bind(this));
+    }
+  } else cb();
+  if (handid) {
+    var gameRow = this.obj; // FIXME
+    models.HandHistory.findOne({seq:handid}).lean(true).exec(function (err,historyRow) {
+      assert.ifError(err);
+      var savedCards = [];
+      var keyid = 0;
+      async.each(historyRow.players,function (player,cb) {
+        if (!player) return cb();
+        models.UserModel.findOne({_id:player._id},function (err,playerRow) {
+          assert.ifError(err);
+          assert(playerRow);
+          player.keyid = keyid++;
+          player.nick = playerRow.displayname;
+          if (player.cards) {
+            savedCards[player.keyid] = new Buffer(player.cards);
+          }
+          player.origid = player._id;
+
+          if (!player.muck && player.cards) player.cards = new Buffer(player.cards);
+          else delete player.cards;
+          cb();
+        });
+      },function () {
+        // MARK
+        for (var x=0; x<historyRow.cards.length; x++) {
+          if (!historyRow.cards[x]) continue;
+          if (!historyRow.cards[x].cards) continue;
+          historyRow.cards[x] = new Buffer(historyRow.cards[x].cards);
+        }
+        var obj = {gameid:this.id, rows:[historyRow] };
+        if (this.tournament) obj.tournament_id = this.obj.tournament;
+        if (this.obj.clubid) obj.club_id = this.obj.clubid;
+        for (var x in this.users) {
+          for (var y=0; y<obj.rows[0].players.length; y++) {
+            if (obj.rows[0].players[y]) {
+              var key2 = obj.rows[0].players[y].keyid;
+              if (obj.rows[0].players[y].rehide) {
+                delete obj.rows[0].players[y].cards;
+                obj.rows[0].players[y].rehide = false;
+              }
+              if (obj.rows[0].players[y].cards) continue;
+              if (savedCards[key2]) {
+                if (myutils.compareObjectID(obj.rows[0].players[y].origid,x)) {
+                  obj.rows[0].players[y].cards = savedCards[key2];
+                  obj.rows[0].players[y].rehide = true;
+                }
+              }
+            }
+          }
+          this.users[x].send(codes.srHandHistoryMsg,obj,'Poker.HandHistoryReply');
+        }
+      }.bind(this));
+    }.bind(this));
+  }
 }
+
 Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 	if (!this.members[seatIdx].sitTime) {
 		if (cb) cb();
