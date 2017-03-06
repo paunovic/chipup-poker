@@ -18,8 +18,6 @@ type
   TfrmClubLobby = class(TForm, IFormParams)
     lbsHeader: TcxLabel;
     lbsSubheader: TcxLabel;
-    btClubHome: TcxButton;
-    btTables: TcxButton;
     pcTabs: TcxPageControl;
     tsClubHome: TcxTabSheet;
     tsTables: TcxTabSheet;
@@ -50,11 +48,9 @@ type
     btLeaveClub: TcxButton;
     acLeaveClub: TAction;
     imgHeader: TcxImage;
-    btPrijatnaPunina: TcxButton;
     gridGamesBuyinLimits: TcxGridColumn;
     acUpdateClubDetails: TAction;
     gridGamesTableStatus: TcxGridColumn;
-    btStats: TcxButton;
     tsStats: TcxTabSheet;
     gridTables: TcxGrid;
     gridTablesTable: TcxGridTableView;
@@ -128,6 +124,14 @@ type
     btPromoteToManager: TcxButton;
     btGiveOwnership: TcxButton;
     Bevel1: TdxBevel;
+    paHeader: TPanel;
+    btPrijatnaPunina: TcxButton;
+    btStats: TcxButton;
+    btTables: TcxButton;
+    btClubHome: TcxButton;
+    dxBevel1: TdxBevel;
+    dxBevel2: TdxBevel;
+    dxBevel3: TdxBevel;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -322,6 +326,15 @@ begin
     acLeaveClub.Enabled := not is_owner;
     btCloseClub.Visible := acCloseClub.Enabled;
     btLeaveClub.Visible := acLeaveClub.Enabled;
+    btChangeClubDetails.Visible := (is_owner) or (not club.IsPrivate);
+    btStats.Visible := (is_owner) or (not club.IsPrivate);
+    dxBevel2.Visible := btStats.Visible;
+
+    if btChangeClubDetails.Visible then
+      Bevel1.Top := btChangeClubDetails.Top + btChangeClubDetails.Height + 8
+    else
+      Bevel1.Top := btGiveOwnership.Top + btGiveOwnership.Height + 8;
+    btLeaveClub.Top := Bevel1.Top + 7;
 
     if Assigned(member) then
     begin
