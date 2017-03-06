@@ -11,7 +11,6 @@ function ding()
   print("ding from lua");
 end
 function abort()
-  print("timeout, failing")
   client1:disconnect()
 end
 handlers = {}
@@ -22,12 +21,14 @@ end
 handlers["srRegisterReply"] = function ()
   client1:login("username","password")
 end
-handlers["srLoginReply"] = function ()
-  set_success(true);
+handlers["srLoginReply"] = function (msg)
+  if msg["login_status"] == "lrSuccess" then
+    set_success(true);
+  end
 end
-function onEvent(code)
+function onEvent(code, msg)
   print("event handler:"..code)
-  handlers[code]()
+  handlers[code](msg)
 end
 
 setTimeout(ding, 0, 1);

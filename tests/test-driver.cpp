@@ -78,12 +78,11 @@ public:
     SSL_CTX_set_options(ctx, flags);
 
     result = SSL_CTX_load_verify_locations(ctx, certpath.c_str(), NULL);
-    if (result != 1) abort();
+    assert(result == 1);
     
     const char* const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4";
     result = SSL_CTX_set_cipher_list(ctx, PREFERRED_CIPHERS);
-    if (result != 1) abort();
-
+    assert(result == 1);
   }
   ~Context() {
     if (ctx) SSL_CTX_free(ctx);
@@ -92,8 +91,9 @@ public:
   SSL_CTX *ctx;
 };
 
-Client::Client(LuaTester *tester, string hostname, uint16_t port) : tester(tester), hostname(hostname), port(port), state(Inactive) {
+Client::Client(LuaTester *tester, string hostname, uint16_t port) : tester(tester), hostname(hostname), port(port) {
   ssl = NULL;
+  bev = NULL;
 }
 
 Client::~Client() {
@@ -102,7 +102,6 @@ Client::~Client() {
 }
 
 void client_readcb(struct bufferevent *bev, void *ctx) {
-  cout << __func__ << "\n";
   Client *client = static_cast<Client*>(ctx);
   client->onRead(bev);;
 }
@@ -112,7 +111,7 @@ void client_eventcb(struct bufferevent *bev, short events, void *ctx) {
 }
 
 void Client::disconnect() {
-  SSL_shutdown(ssl);
+  if (ssl) SSL_shutdown(ssl);
 }
 
 bool Client::write(const char *data, int len) {
@@ -125,7 +124,7 @@ bool Client::write(const char *data, int len) {
   return true;
 }
 
-PokerClient::PokerClient(LuaTester *tester, string hostname, uint16_t port) : Client(tester, hostname, port) {
+PokerClient::PokerClient(LuaTester *tester, string hostname, uint16_t port, int id) : Client(tester, hostname, port), id(id) {
 }
 
 PokerClient::~PokerClient() {
@@ -133,106 +132,175 @@ PokerClient::~PokerClient() {
 }
 
 void PokerClient::sendHello() {
-    HelloParams out;
-    out.set_debug(false);
-    out.set_appcode(HelloParams::acDelphiWindows);
-    sendMessage(scHello, out);
-  }
-  void PokerClient::sendRegister(string username, string password, string email) {
-    RegisterParams out;
-    out.set_displayname(username);
-    out.set_password(password);
-    out.set_email(email);
-    sendMessage(scRegister, out);
-  }
-  void PokerClient::login(string username, string password) {
-    LoginParams out;
-    out.set_username(username);
-    out.set_password(password);
-    sendMessage(scLogin, out);
-  }
+  HelloParams out;
+  out.set_debug(false);
+  out.set_appcode(HelloParams::acDelphiWindows);
+  sendMessage(scHello, out);
+}
+
+void PokerClient::sendRegister(string username, string password, string email) {
+  RegisterParams out;
+  out.set_displayname(username);
+  out.set_password(password);
+  out.set_email(email);
+  sendMessage(scRegister, out);
+}
+
+void PokerClient::login(string username, string password) {
+  LoginParams out;
+  out.set_username(username);
+  out.set_password(password);
+  sendMessage(scLogin, out);
+}
 
 void PokerClient::onConnect() {
 }
 
+struct EventInfo {
+  google::protobuf::Message *m;
+  string name;
+  const ::google::protobuf::Descriptor *descriptor;
+};
+
+struct EventInfo events[200];
+
+void init_events() {
+  for (int i=0; i<200; i++) events[i].m = NULL;
+
+#define x(CODE, CLASS) events[CODE] = { new CLASS(), #CODE, CLASS::descriptor() }
+
+  x(srHello, HelloReply);
+  x(srLoginReply, LoginReply);
+  x(srRegisterReply, RegisterReply);
+  x(srCreateClubReply, ClubCommandReply); // 4
+  x(seTableStatus, TableStatus); // 58
+
+  x(scHello, HelloParams);
+  x(scLogin, LoginParams);
+  x(scRegister, RegisterParams); // 73
+  x(scCreateClub, Club); // 76
+  x(scJoinClub, Club); // 77
+  x(scTableJoin, Game); // 89
+#undef x
+}
+
 void PokerClient::handlePacket(int event_code, string payload) {
   printf("got event %d of size %lud\n", event_code, payload.size());
-  switch (event_code) {
-  case srHello: // 1
-  {
-    HelloReply msg;
-    msg.ParseFromString(payload);
-    tester->event("srHello");
-    break;
-  }
-  case srLoginReply: // 2
-  {
-    LoginReply msg;
-    msg.ParseFromString(payload);
-    //cout << msg.DebugString() << "\n";
-    if (msg.login_status() == LoginReply::lrSuccess) {
-      tester->event("srLoginReply");
-    } else {
-      tester->event("srLoginReply-"); // TODO improve the ability set attributes
-    }
-    break;
-  }
-  case srRegisterReply: // 3
-  {
-    RegisterReply msg;
-    msg.ParseFromString(payload);
-    cout << msg.DebugString() << "\n";
-    if (msg.status() == RegisterReply::regSuccess) {
-      tester->event("srRegisterReply");
-    } else {
-      tester->event("srRegisterReply-");
-    }
-    break;
-  }
-  case srCreateClubReply: // 4
-  {
-    ClubCommandReply msg;
-    msg.ParseFromString(payload);
-    cout << msg.DebugString() << "\n";
-    if (msg.status() == ClubCommandReply::csSuccess) {
-      tester->event("srCreateClubReply");
-    } else {
-      tester->event("srCreateClubReply-");
-    }
-    break;
-  }
+  google::protobuf::Message *m = NULL;
+  if (events[event_code].m) {
+    m = events[event_code].m->New();
+    m->ParseFromString(payload);
+    tester->event(events[event_code].name, *m, id);
+    delete m;
+  } else {
+    cout << "unhandled event code " << event_code << "\n";
   }
 }
-  void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg) {
-    string payload, prefix;
-    unsigned int i, n;
-    RpcMessage header;
 
-    msg.SerializeToString(&payload);
-    uint16_t payload_size = payload.length();
-
-    header.set_methodid(code);
-    header.set_datasize(payload_size);
-
-    header.SerializeToString(&prefix);
-
-    int packet_size = 2 + prefix.length() + payload_size;
-    char buffer[packet_size];
-    n=0;
-    buffer[n++] = prefix.length() & 0xff;
-    buffer[n++] = prefix.length() >> 8;
-
-    const char *prefix_raw = prefix.data();
-    for (i=0; i<prefix.length(); i++) {
-      buffer[n++] = prefix_raw[i];
-    }
-    const char *payload_raw = payload.data();
-    for (i=0; i<payload_size; i++) {
-      buffer[n++] = payload_raw[i];
-    }
-    write(buffer, packet_size);
-    printf("sent event %d of size %ud\n", code, packet_size);
+void PokerClient::sendMessage(lua_State *L, string code_str, int index) {
+  using namespace google::protobuf;
+  const ::google::protobuf::EnumDescriptor* ed = ServerCodes_descriptor();
+  Poker::ServerCodes code;
+  auto evd = ed->FindValueByName(code_str);
+  if (!evd) {
+    luaL_error(L, "invalid server code");
+    return;
   }
+  code = (Poker::ServerCodes) evd->number();
+
+  auto eventInfo = events[code];
+  if (!eventInfo.m) {
+    luaL_error(L, "class for code %s not configured", code_str.c_str());
+    return;
+  }
+
+  google::protobuf::Message *out = eventInfo.m->New();;
+  auto descriptor = eventInfo.descriptor;
+  auto r = out->GetReflection();
+  evd = NULL;
+  lua_pushnil(L);
+  while (lua_next(L, index) != 0) {
+    luaL_checkstring(L, -2);
+    string field_name = lua_tostring(L, -2);
+    auto f = descriptor->FindFieldByName(field_name);
+    if (!f) {
+      delete out;
+      luaL_error(L, "field %s not in protobuf", field_name.c_str());
+      return;
+    }
+    switch (f->type()) {
+    case FieldDescriptor::TYPE_BOOL:
+      luaL_checktype(L, -1, LUA_TBOOLEAN);
+      r->SetBool(out, f, lua_toboolean(L, -1));
+      break;
+    case FieldDescriptor::TYPE_STRING:
+      luaL_checkstring(L, -1);
+      r->SetString(out, f, lua_tostring(L, -1));
+      break;
+    case FieldDescriptor::TYPE_BYTES:
+      luaL_checkstring(L, -1);
+      r->SetString(out, f, lua_tostring(L, -1));
+      break;
+    case FieldDescriptor::TYPE_UINT32:
+      luaL_checkint(L, -1);
+      r->SetUInt32(out, f, lua_tointeger(L, -1));
+      break;
+    case FieldDescriptor::TYPE_ENUM:
+      evd = f->enum_type()->FindValueByName(lua_tostring(L, -1));
+      if (!evd) {
+        luaL_error(L, "invalid enum value %s", lua_tostring(L, -1));
+        return;
+      }
+      r->SetEnum(out, f, evd);
+      break;
+    default:
+      delete out;
+      luaL_error(L, "type %d not supported", f->type());
+      return;
+    }
+
+    lua_pop(L, 1);
+  }
+  if (!out->IsInitialized()) {
+    string errmsg = out->InitializationErrorString();
+    delete out;
+    luaL_error(L, "required fields not set: %s", errmsg.c_str());
+    return;
+  }
+  sendMessage(code, *out);
+  delete out;
+}
+
+void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg) {
+  string payload, prefix;
+  unsigned int i, n;
+  RpcMessage header;
+
+  msg.SerializeToString(&payload);
+  uint16_t payload_size = payload.length();
+
+  header.set_methodid(code);
+  header.set_datasize(payload_size);
+
+  header.SerializeToString(&prefix);
+
+  int packet_size = 2 + prefix.length() + payload_size;
+  char buffer[packet_size];
+  n=0;
+  buffer[n++] = prefix.length() & 0xff;
+  buffer[n++] = prefix.length() >> 8;
+
+  const char *prefix_raw = prefix.data();
+  for (i=0; i<prefix.length(); i++) {
+    buffer[n++] = prefix_raw[i];
+  }
+  const char *payload_raw = payload.data();
+  for (i=0; i<payload_size; i++) {
+    buffer[n++] = payload_raw[i];
+  }
+  write(buffer, packet_size);
+  printf("sent event %d of size %ud\n", code, packet_size);
+}
 
 LuaTester::LuaTester(struct event_base *base) : base(base) {
   L = luaL_newstate();
@@ -257,6 +325,8 @@ LuaTester::LuaTester(struct event_base *base) : base(base) {
   lua_pushcclosure(L, setTimeout, 1);
   lua_setglobal(L, "setTimeout");
   
+  lua_register(L, "dump", dump_data);
+
   cout << "top == " << lua_gettop(L) << "\n";
 }
 
@@ -276,8 +346,8 @@ void LuaTester::runTest(string path, string hostname, uint16_t port) {
   result = luaL_loadfilex(L, path.c_str(), NULL);
   if (result != LUA_OK) {
     cout << "load error:" << lua_tostring(L, -1) << "\n";
-    abort();
   }
+  assert(result == LUA_OK);
   lua_pushstring(L, hostname.c_str());
   lua_pushinteger(L, port);
 
@@ -301,14 +371,93 @@ void LuaTester::runTest(string path, string hostname, uint16_t port) {
   cout << "top == " << lua_gettop(L) << "\n";
 }
 
-void LuaTester::event(string code) {
+void message_to_table(lua_State *L, const google::protobuf::Message &msg);
+
+void field_to_lua(lua_State *L, const google::protobuf::Reflection *r, const google::protobuf::Message &msg, const google::protobuf::FieldDescriptor *f) {
+  using namespace google::protobuf;
+  string scratch;
+  switch (f->cpp_type()) {
+  case FieldDescriptor::CPPTYPE_INT32:
+    lua_pushinteger(L, r->GetInt32(msg, f));
+    break;
+  case FieldDescriptor::CPPTYPE_BOOL: // 7
+    lua_pushboolean(L, r->GetBool(msg, f));
+    break;
+  case FieldDescriptor::CPPTYPE_ENUM: // 8
+    lua_pushstring(L, r->GetEnum(msg, f)->name().c_str());
+    break;
+  case FieldDescriptor::CPPTYPE_STRING:
+    lua_pushstring(L, r->GetStringReference(msg, f, &scratch).c_str());
+    break;
+  case FieldDescriptor::CPPTYPE_MESSAGE:
+    message_to_table(L, r->GetMessage(msg, f));
+    break;
+  default:
+    lua_pushstring(L, (string("other") + to_string(f->cpp_type())).c_str());
+  }
+}
+
+void field_to_lua(lua_State *L, const google::protobuf::Reflection *r, const google::protobuf::Message &msg, const google::protobuf::FieldDescriptor *f, int index) {
+  using namespace google::protobuf;
+  string scratch;
+  switch (f->cpp_type()) {
+  case FieldDescriptor::CPPTYPE_INT32:
+    lua_pushinteger(L, r->GetRepeatedInt32(msg, f, index));
+    break;
+  case FieldDescriptor::CPPTYPE_ENUM:
+    lua_pushstring(L, r->GetRepeatedEnum(msg, f, index)->name().c_str());
+    break;
+  case FieldDescriptor::CPPTYPE_STRING:
+    lua_pushstring(L, r->GetRepeatedStringReference(msg, f, index, &scratch).c_str());
+    break;
+  case FieldDescriptor::CPPTYPE_MESSAGE:
+    message_to_table(L, r->GetRepeatedMessage(msg, f, index));
+    break;
+  default:
+    lua_pushstring(L, (string("other") + to_string(f->cpp_type())).c_str());
+  }
+}
+
+void message_to_table(lua_State *L, const google::protobuf::Message &msg) {
+  using namespace google::protobuf;
+  const Reflection *r = msg.GetReflection();
+  vector<const FieldDescriptor*> fields;
+  r->ListFields(msg, &fields);
+
+  lua_createtable(L, 0, 0);
+
+  for (vector<const FieldDescriptor*>::iterator it = fields.begin(); it != fields.end(); ++it) {
+    const FieldDescriptor *f = *it;
+    if (f->is_repeated()) {
+      int count = r->FieldSize(msg, f);
+      lua_createtable(L, count, 0);
+      for (int i=0; i<count; i++) {
+        lua_pushinteger(L, i);
+        field_to_lua(L, r, msg, f, i);
+        lua_settable(L, -3);
+      }
+    } else {
+      field_to_lua(L, r, msg, f);
+    }
+    lua_setfield(L, -2, f->name().c_str());
+  }
+
+  //dump_stack(L, "made table");
+}
+
+void LuaTester::event(string code, const google::protobuf::Message &msg, int id) {
   lua_getglobal(L, "onEvent");
   if (lua_type(L, -1) == LUA_TNIL) {
     lua_remove(L, -1);
     return;
   }
   lua_pushstring(L, code.c_str());
-  int result = lua_pcall(L, 1, 0, 0);
+
+  message_to_table(L, msg);
+
+  lua_pushinteger(L, id);
+
+  int result = lua_pcall(L, 3, 0, 0);
   if (result != LUA_OK) {
     cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
     lua_remove(L, -1);
@@ -342,6 +491,7 @@ int main(int argc, char **argv) {
   thread_setup();
   evthread_use_pthreads();
   SSL_library_init();
+  init_events();
   string hostname = "dev-server.chipuppoker.com";
   string certpath = "../qt-client/client/resources/DevServerCertificate.pem";
   uint16_t port  = 12346;

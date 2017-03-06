@@ -37,6 +37,7 @@ in {
         description = "autogenerate self-signed keys if they are missing";
       };
       autoConfirm = mkBool "auto-confirm all accounts" false;
+      testingEnv = mkBool "testing environment" false;
     };
   };
   config = mkIf config.services.poker.enable {
@@ -60,8 +61,8 @@ in {
         enable = true;
         virtualHosts = {
           ${config.networking.hostName} = {
-            forceSSL = true;
-            enableACME = true;
+            forceSSL = ! cfg.testingEnv;
+            enableACME = ! cfg.testingEnv;
             locations = {
               "/".proxyPass = "http://127.0.0.1:3000/";
               "/unpacked".root = "/home/poker/";
@@ -90,6 +91,7 @@ in {
       '';
       serviceConfig = {
         User = "poker";
+        Restart = "on-failure";
       };
       requires = [ "mongodb.service" "nginx.service" ];
       after = [ "mongodb.service" "nginx.service" ];

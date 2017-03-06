@@ -16,30 +16,56 @@ static int client_connect(lua_State *L);
 static int client_disconnect(lua_State *L);
 static int client_sendHello(lua_State *L);
 
-void dump_stack(lua_State *L, string context) {
-  cout << "dumping stack for: " << context << "\n";
-  for (int i=1; i <= lua_gettop(L); i++) {
-    int type = lua_type(L, i);
-    cout << i << " " << lua_typename(L, type) << " == ";
-    switch (type) {
+void pretty_print(lua_State *L, int i, string indent) {
+  int initial = lua_gettop(L);
+  int type = lua_type(L, i);
+  cout << "(" << lua_typename(L, type) << ") ";
+  switch (type) {
     case LUA_TSTRING:
     case LUA_TNUMBER:
       lua_pushvalue(L, i);
-      cout << lua_tostring(L, -1);
+      cout << '"' << lua_tostring(L, -1) << '"';
       lua_remove(L, -1);
+      break;
+    case LUA_TTABLE:
+      cout << "{\n";
+      lua_pushnil(L);
+      while (lua_next(L, i) != 0) {
+        if (lua_type(L, -2) == LUA_TSTRING) {
+          cout << indent << lua_tostring(L, -2) << " == ";
+        } else if (lua_type(L, -2) == LUA_TNUMBER) {
+          cout << indent << lua_tointeger(L, -2) << " == ";
+        } else cout << indent << "other == ";
+        pretty_print(L, lua_absindex(L, -1), indent + "  ");
+        lua_pop(L, 1);
+      }
+      cout << indent << "}";
       break;
     default:
       cout << "other";
       break;
-    }
-    cout << "\n";
+  }
+  cout << "\n";
+  assert(initial == lua_gettop(L));
+}
+
+void dump_stack(lua_State *L, string context) {
+  cout << "dumping stack for: " << context << "\n";
+  for (int i=1; i <= lua_gettop(L); i++) {
+    cout << i << " ";
+    pretty_print(L, i, "  ");
   }
   cout << "\n";
 }
 
+int dump_data(lua_State *L) {
+  string context = luaL_checkstring(L, 1);
+  dump_stack(L, context);
+  return 0;
+}
+
 static int delete_client(lua_State *L) {
   PokerClient *client = static_cast<PokerClient*>(lua_touserdata(L, lua_upvalueindex(1)));
-  dump_stack(L, "finalizer");
   delete client;
   return 0;
 }
@@ -79,16 +105,25 @@ static int client_scCreateClub(lua_State *L) {
   return 0;
 }
 
+static int client_sendMessage(lua_State *L) {
+  PokerClient *client = static_cast<PokerClient*>(lua_touserdata(L, lua_upvalueindex(1)));
+  string code = luaL_checkstring(L, 2);
+  luaL_checktype(L, 3, LUA_TTABLE);
+  client->sendMessage(L, code, 3);
+  return 0;
+}
+
 int makeClient(lua_State *L) {
   cout << __func__ << " top == " << lua_gettop(L) << "\n";
-  assert(lua_isstring(L, 1));
-  assert(lua_isnumber(L, 2));
+  luaL_checkstring(L, 1);
+  luaL_checkint(L, 2);
+  int id = luaL_optint(L, 3, 0);
   LuaTester *tester = static_cast<LuaTester*>(lua_touserdata(L, lua_upvalueindex(1)));
 
   string hostname = lua_tostring(L, 1);
   uint16_t port = lua_tointeger(L, 2);
 
-  PokerClient *client = new PokerClient(tester, hostname, port);
+  PokerClient *client = new PokerClient(tester, hostname, port, id);
 
   lua_createtable(L, 0, 0);
   int table = lua_gettop(L);
@@ -112,6 +147,7 @@ int makeClient(lua_State *L) {
     { "login", client_login },
     { "register", client_register },
     { "scCreateClub", client_scCreateClub },
+    { "sendMessage", client_sendMessage },
     { NULL, NULL}
   };
 

@@ -1,0 +1,28 @@
+diff --git a/fs/9p/vfs_inode.c b/fs/9p/vfs_inode.c
+index 30ca770c5e0b..f8ab4a66acaf 100644
+--- a/fs/9p/vfs_inode.c
++++ b/fs/9p/vfs_inode.c
+@@ -483,6 +483,9 @@ static int v9fs_test_inode(struct inode *inode, void *data)
+ 
+ 	if (v9inode->qid.type != st->qid.type)
+ 		return 0;
++
++	if (v9inode->qid.path != st->qid.path)
++		return 0;
+ 	return 1;
+ }
+ 
+diff --git a/fs/9p/vfs_inode_dotl.c b/fs/9p/vfs_inode_dotl.c
+index afaa4b6de801..c3dd0d42bb3a 100644
+--- a/fs/9p/vfs_inode_dotl.c
++++ b/fs/9p/vfs_inode_dotl.c
+@@ -87,6 +87,9 @@ static int v9fs_test_inode_dotl(struct inode *inode, void *data)
+ 
+ 	if (v9inode->qid.type != st->qid.type)
+ 		return 0;
++
++	if (v9inode->qid.path != st->qid.path)
++		return 0;
+ 	return 1;
+ }
+ 

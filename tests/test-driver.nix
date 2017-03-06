@@ -1,4 +1,4 @@
-{ stdenv, protobuf, libressl, lua, libevent }:
+{ clangStdenv, stdenv, protobuf, libressl, lua, libevent }:
 
 let
   lib = stdenv.lib;
@@ -9,8 +9,10 @@ let
     baseName == "Makefile"
   );
 in stdenv.mkDerivation {
+  preferLocalBuild = true;
   name = "test-driver";
   buildInputs = [ protobuf libressl lua libevent ];
   src = builtins.filterSource filter ./.;
   enableParallelBuilding = true;
+  dontStrip = true;
 }
