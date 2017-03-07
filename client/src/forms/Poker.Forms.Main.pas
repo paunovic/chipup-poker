@@ -1112,9 +1112,7 @@ begin
 
   dmMain.SelfInfo.Clubs.Lock;
   try
-    acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.TryGetValue(FSelectedClub, club)) and
-                               ((club.IsPrivate) or
-                                (club.Owner = dmMain.SelfInfo.MongoId));
+    acOpenClubLobby.Enabled := dmMain.SelfInfo.Clubs.TryGetValue(FSelectedClub, club);
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
