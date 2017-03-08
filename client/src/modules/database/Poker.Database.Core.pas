@@ -66,7 +66,7 @@ procedure TDatabase.Connect;
 begin
   FConnection := TSQLDBSQLite3ConnectionProperties.Create(StringToUTF8(FDatabasePath), '', '', StringToUTF8(FDatabasePassword));
   FConnection.MainSQLite3DB.Synchronous := smNormal;
-  FConnection.MainSQLite3DB.LockingMode := lmExclusive;
+  FConnection.MainSQLite3DB.LockingMode := lmNormal;
   FConnection.MainSQLite3DB.PageSize := 4096;
 
   ExecuteNoResult('CREATE TABLE IF NOT EXISTS blobs (id INTEGER PRIMARY KEY, data BLOB)');
