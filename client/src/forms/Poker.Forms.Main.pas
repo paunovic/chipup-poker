@@ -553,7 +553,8 @@ begin
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FSelectedClub, club) then
   try
-    if club.Games.Count > 0 then
+    if (not club.IsPrivate) and
+       (club.Games.Count > 0) then
       OpenClubTable(FSelectedClub, club.Games.Values.ToArray[0].MongoId);
   finally
     dmMain.SelfInfo.Clubs.Unlock;
