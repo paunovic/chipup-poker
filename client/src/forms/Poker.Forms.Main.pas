@@ -538,6 +538,8 @@ end;
 procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
 var
   form: TForm;
+  club: TClubInfo;
+  game: TGameInfo;
 begin
   if not dmMain.CheckAuthed then
     Exit;
@@ -549,6 +551,14 @@ begin
       form.BringToFront;
       Exit;
     end;
+
+  if dmMain.SelfInfo.Clubs.GetAndLock(FSelectedClub, club) then
+  try
+    if club.Games.Count > 0 then
+      OpenClubTable(FSelectedClub, club.Games.Values.ToArray[0].MongoId);
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
 
   FormsContainer.RunForm(TfrmClubLobby, self, [FSelectedClub.Memory], TRUE);
 end;
