@@ -109,26 +109,27 @@ handlers[codes.scCloseGame] = function (args,token) {
 		}.bind(this));
 	}.bind(this));
 };
+
 handlers[codes.scCreateGame] = function (args,token) {
-	var game_type,blinds,seats,clubid,gamename,params,game_limit;
-	try {
-		params = pb.Parse(args,'Poker.Game');
-		clubid = myutils.toMongoId(params.club_mongoid);
-		game_type = params.game_type;
-		game_limit = params.game_limit;
-		blinds = params.blinds;
-		seats = params.seats;
-		gamename = params.gamename;
-		if (checkGameParams(gamename,seats,game_type,game_limit,params.buyin_min,params.buyin_max,blinds,regexLimits)) {
-			this.log('invalid create game:%j',params);
-			this.reply(0,"invalid params");
-			return;
-		}
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Club.getClubById(clubid,function (err,club) {
+  var game_type,blinds,seats,clubid,gamename,params,game_limit;
+  try {
+    params = pb.Parse(args,'Poker.Game');
+    clubid = myutils.toMongoId(params.club_mongoid);
+    game_type = params.game_type;
+    game_limit = params.game_limit;
+    blinds = params.blinds;
+    seats = params.seats;
+    gamename = params.gamename;
+    if (checkGameParams(gamename,seats,game_type,game_limit,params.buyin_min,params.buyin_max,blinds,regexLimits)) {
+      this.log('invalid create game:%j',params);
+      this.reply(0,"invalid params");
+      return;
+    }
+  } catch (e) {
+    this.error(e);
+    return;
+  }
+  Club.getClubById(clubid,function (err,club) {
 		if (err == 'not found') {
 			this.reply(0,"club not found");
 			return;

@@ -1100,24 +1100,26 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 		}.bind(this));
 	}
 };
+
 handlers[codes.scContactUs] = function (args,token) {
-	var params;
-	try {
-		params = pb.Parse(args,'Poker.ContactMessage');
-		if ((params.message.length < global.sharedconfig.minSizes.ContactMessage) || (params.message.length > global.sharedconfig.stringSizes.ContactMessage)) {
-			return;
-		}
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	this.log('raw args:%s parsed:%j',args,params);
-	var types = {cmQuestions:'Questions',cmSuggestions:'Suggestions',cmOther:'Other',cmBugReport:'Bugs'};
-	var queue = types[params.reason];
-	RT.postTicket(queue,this.email,params.message);
-	this.send(codes.srContactUsOk);
-	token.stop();
+  var params;
+  try {
+    params = pb.Parse(args,'Poker.ContactMessage');
+    if ((params.message.length < global.sharedconfig.minSizes.ContactMessage) || (params.message.length > global.sharedconfig.stringSizes.ContactMessage)) {
+      return;
+    }
+  } catch (e) {
+    this.error(e);
+    return;
+  }
+  this.log('raw args:%s parsed:%j',args,params);
+  var types = {cmQuestions:'Questions',cmSuggestions:'Suggestions',cmOther:'Other',cmBugReport:'Bugs'};
+  var queue = types[params.reason];
+  RT.postTicket(this.email, queue, params.message);
+  this.send(codes.srContactUsOk);
+  token.stop();
 };
+
 handlers[codes.scSubscriptionPlanChange] = function (args,token) {
 	var params;
 	try {
