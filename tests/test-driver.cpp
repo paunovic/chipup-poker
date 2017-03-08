@@ -172,6 +172,11 @@ void init_events() {
 void PokerClient::handlePacket(int event_code, string payload) {
   //printf("got event %d of size %lud\n", event_code, payload.size());
   google::protobuf::Message *m = NULL;
+  switch (event_code) {
+  case ServerCodes::srLogout:
+    tester->event("srLogout", this);
+    return;
+  }
   if (events[event_code].m) {
     m = events[event_code].m->New();
     m->ParseFromString(payload);
@@ -260,6 +265,19 @@ void PokerClient::sendMessage(lua_State *L, string code_str, int index) {
   delete out;
 }
 
+void PokerClient::sendMessage(lua_State *L, string code_str) {
+  using namespace google::protobuf;
+  const ::google::protobuf::EnumDescriptor* ed = ServerCodes_descriptor();
+  Poker::ServerCodes code;
+  auto evd = ed->FindValueByName(code_str);
+  if (!evd) {
+    luaL_error(L, "invalid server code");
+    return;
+  }
+  code = (Poker::ServerCodes) evd->number();
+  sendMessage(code);
+}
+
 void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg) {
   string payload, prefix;
   unsigned int i, n;
@@ -289,6 +307,26 @@ void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::M
   }
   write(buffer, packet_size);
   //printf("sent event %d of size %ud\n", code, packet_size);
+}
+
+void PokerClient::sendMessage(Poker::ServerCodes code) {
+  int n, i;
+  string prefix;
+  RpcMessage header;
+  header.set_methodid(code);
+  header.set_datasize(0);
+  header.SerializeToString(&prefix);
+
+  int packet_size = 2 + prefix.length();
+  char buffer[packet_size];
+  n=0;
+  buffer[n++] = prefix.length() & 0xff;
+  buffer[n++] = prefix.length() >> 8;
+  const char *prefix_raw = prefix.data();
+  for (i=0; i<prefix.length(); i++) {
+    buffer[n++] = prefix_raw[i];
+  }
+  write(buffer, packet_size);
 }
 
 static int debug_print(lua_State *L) {
@@ -461,6 +499,29 @@ void message_to_table(lua_State *L, const google::protobuf::Message &msg) {
   }
 
   //dump_stack(L, "made table");
+}
+
+void LuaTester::event(string code, PokerClient *client) {
+  luaL_getmetatable(L, "testdriver.connections"); // 1
+  lua_pushlightuserdata(L, client); // 2
+  lua_gettable(L, -2); // 2
+  lua_remove(L, -2); // -1
+  lua_getfield(L, -1, "onEvent");
+  if (lua_type(L, -1) != LUA_TFUNCTION) {
+    lua_pop(L, 2);
+    return;
+  }
+
+  lua_pushvalue(L, -2);
+  lua_remove(L, -3);
+  lua_pushstring(L, code.c_str());
+
+  int result = lua_pcall(L, 2, 0, 0);
+  if (result != LUA_OK) {
+    cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
+    lua_remove(L, -1);
+  }
+  assert(lua_gettop(L) == 0);
 }
 
 void LuaTester::event(string code, const google::protobuf::Message &msg, PokerClient *client) {

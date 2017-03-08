@@ -108,8 +108,13 @@ static int client_scCreateClub(lua_State *L) {
 static int client_sendMessage(lua_State *L) {
   PokerClient *client = static_cast<PokerClient*>(lua_touserdata(L, lua_upvalueindex(1)));
   string code = luaL_checkstring(L, 2);
-  luaL_checktype(L, 3, LUA_TTABLE);
-  client->sendMessage(L, code, 3);
+  int type = lua_type(L, 3);
+  if (type == LUA_TTABLE) {
+    luaL_checktype(L, 3, LUA_TTABLE);
+    client->sendMessage(L, code, 3);
+  } else {
+    client->sendMessage(L, code);
+  }
   return 0;
 }
 

@@ -42,6 +42,8 @@ public:
   void handlePacket(int event_code, std::string payload_str);
   void sendMessage(Poker::ServerCodes code, const google::protobuf::Message &msg);
   void sendMessage(lua_State *L, std::string code, int index);
+  void sendMessage(lua_State *L, std::string code);
+  void sendMessage(Poker::ServerCodes code);
 
 private:
 };
@@ -53,6 +55,7 @@ public:
   void runTest(std::string path, std::string hostname, uint16_t port);
   void set_success(bool success);
   void event(std::string code, const google::protobuf::Message &msg, PokerClient *client);
+  void event(std::string code, PokerClient *client);
 
   struct event_base *base;
   bool success;

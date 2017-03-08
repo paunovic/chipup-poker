@@ -7,12 +7,12 @@ function onEvent(self, code, obj)
 end
 
 local client1 = makeClient(hostname, port, onEvent)
+local state = 0;
 print("client1:",client1)
 client1:connect()
 client1:sendHello()
 
 function abort()
-  dbg("timeout, failing")
   client1:disconnect()
 end
 handlers["srHello"] = function ()
@@ -22,15 +22,26 @@ end
 handlers["srRegisterReply"] = function ()
   client1:login("username","password")
 end
-handlers["srLoginReply"] = function ()
-  client1:scCreateClub(true, "club name", "password", 30);
+handlers["srLoginReply"] = function (self, obj)
+  if state == 0 then
+    client1:scCreateClub(true, "club name", "password", 30);
+  else
+    if obj.clubs[0].members[0].unlimited_limit == true then
+      set_success(true);
+    end
+  end
 end
 handlers["srCreateClubReply"] = function (self, obj)
   dump("made club", obj);
   if obj.club.members[0].unlimited_limit then
-    set_success(true)
+    self:sendMessage("scLogout");
   end
 end
+handlers.srLogout = function (self)
+  state = 1;
+  client1:login("username","password");
+end
+--set_success(true)
 
 setTimeout(abort, 0, 5);
 return true
