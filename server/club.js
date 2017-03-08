@@ -299,13 +299,15 @@ Club.prototype.goPublic = function (cb) {
 		}.bind(this));
 	}.bind(this));
 };
+
 Club.prototype.updateLimitPostWin = function (change,userid,callback) {
-	this.balance[userid] -= change;
-	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,row) {
-		if (row) return callback();
-		models.ClubBalance.create({clubid:this.clubid, userid:userid, balance:change, balance_limit:this.obj.default_balance_limit, unlimited_limit:this.obj.unlimited_default_balance},callback);
-	}.bind(this));
+  this.balance[userid] -= change;
+  models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,row) {
+    if (row) return callback();
+    models.ClubBalance.create({clubid:this.clubid, userid:userid, balance:change, balance_limit:this.obj.default_balance_limit, unlimited_limit:this.obj.unlimited_default_balance},callback);
+  }.bind(this));
 };
+
 Club.prototype.buyin = function (userid,chips) {
 	if (!this.balance[userid]) this.balance[userid] = -chips;
 	else this.balance[userid] -= chips;
@@ -315,29 +317,32 @@ Club.prototype.cashout = function (userid,chips) {
 	this.balance[userid] += chips;
 	console.log('cashout balance',this.balance);
 }
+
 Club.prototype.getPotentialLosses = function (userid,cb) {
-	models.ClubBalance.findOne({clubid:this.clubid, userid:userid},function (err,row) {
-		assert.ifError(err);
-		if (!row && !this.balance[userid]) return cb(0,this.obj.unlimited_default_balance,this.obj.default_balance_limit);
-		if (!this.balance[userid]) return cb(row.balance,row.unlimited_limit,row.balance_limit);
-		if (!row) return cb(this.balance[userid],this.obj.unlimited_default_balance,this.obj.default_balance_limit);
-		//console.log('gpl row:%j',row);
-		cb(this.balance[userid] + row.balance,row.unlimited_limit,row.balance_limit);
-	}.bind(this));
+  models.ClubBalance.findOne({clubid:this.clubid, userid:userid},function (err,row) {
+    assert.ifError(err);
+    if (!row && !this.balance[userid]) return cb(0,this.obj.unlimited_default_balance,this.obj.default_balance_limit);
+    if (!this.balance[userid]) return cb(row.balance,row.unlimited_limit,row.balance_limit);
+    if (!row) return cb(this.balance[userid],this.obj.unlimited_default_balance,this.obj.default_balance_limit);
+    //console.log('gpl row:%j',row);
+    cb(this.balance[userid] + row.balance,row.unlimited_limit,row.balance_limit);
+  }.bind(this));
 }
+
 Club.prototype.updateLimit = function (userid,limit,unlimited,cb) {
-	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$set:{balance_limit:limit, unlimited_limit:unlimited}},function (err,row) {
-		assert.ifError(err);
-		if (row) {
-			var user = global.activeUsers[userid];
-			console.log(arguments);
-			if (user) {
-				user.sendClubStatus(this);
-			}
-			cb(true);
-		} else cb(false);
-	}.bind(this));
+  models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$set:{balance_limit:limit, unlimited_limit:unlimited}},function (err,row) {
+    assert.ifError(err);
+    if (row) {
+      var user = global.activeUsers[userid];
+      console.log(arguments);
+      if (user) {
+        user.sendClubStatus(this);
+      }
+      cb(true);
+    } else cb(false);
+  }.bind(this));
 }
+
 Club.prototype.resetPlayerLimit = function (userid,cb) {
 	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$set:{balance:0}},function (err,row) {
 		assert.ifError(err);
@@ -368,7 +373,7 @@ function containsObjectID(list,id) {
 	return false;
 }
 
-Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self,connection) {
+Club.makeClubProtobuf = function makeClubProtobuf(input, userlist, stats ,self, connection) {
   var c = JSON.parse(JSON.stringify(input));
   assert(stats);
   if (stats.length > 1) assert(self);
@@ -501,60 +506,64 @@ Club.dupCheck = function (name,cb) {
 		else cb(false);
 	});
 }
+
 Club.createClub = function (name,password,owner,rake,buyin_reset,cb) {
-	assert.equal(typeof buyin_reset,'number');
-	var doc = new mdb.models.Clubs({name:name, password:password, owner:owner, rake:rake, is_private:true, unlimited_default_balance:true, default_balance_limit:100000, buyin_reset:buyin_reset});
-	myutils.getNextSequence('club',function (seq) {
-		doc.seq = seq;
-		doc.save(function (err) {
-			assert.ifError(err);
-			Club.getClubById(doc._id,function (err,clubObj) {
-				assert.ifError(err);
-				if (err) console.log(err);
-				assert(clubObj);
-				clubObj.updateLimitPostWin(0,owner,function (){
-					cb(true,clubObj);
-				});
-			});
-		});
-	});
+  assert.equal(typeof buyin_reset,'number');
+  var doc = new mdb.models.Clubs({name:name, password:password, owner:owner, rake:rake, is_private:true, unlimited_default_balance:true, default_balance_limit:100000, buyin_reset:buyin_reset});
+  myutils.getNextSequence('club',function (seq) {
+    doc.seq = seq;
+    doc.save(function (err) {
+      assert.ifError(err);
+      Club.getClubById(doc._id,function (err,clubObj) {
+        assert.ifError(err);
+        if (err) console.log(err);
+        assert(clubObj);
+        clubObj.updateLimitPostWin(0,owner,function (){
+          cb(true,clubObj);
+        });
+      });
+    });
+  });
 }
+
 Club.registerHandlers = function (handlers) {
-handlers[codes.scCreateClub] = function (args,token) {
-	var params = pb.Parse(args,'Poker.Club');
-	if (!regexLimits.clubname.exec(params.name)) {
-		this.send(codes.srCreateClubReply,{status:'csInvalidName'},'Poker.ClubCommandReply');
-		return;
-	}
-	if ((params.rake < 0) || (params.rake > 10)) {
-		this.reply(0,"invalid rake");
-		return;
-	}
-	if (!params.password) {
-		this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
-		return;
-	} else if (!regexLimits.clubpassword.exec(params.password)) {
-		this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
-		return;
-	} else if ([30,60,90,120].indexOf(params.buyin_reset) == -1) {
-		this.reply(0,'invalid buyin reset');
-		return;
-	}
-	// FIXME, dont allow a blank pw on priv clubs
-	Club.dupCheck(params.name,function (dup) {
-		if (dup) {
-			this.log('SR_CREATECLUB_NAME_EXISTS');
-			this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
-			return;
-		}
-		Club.createClub(params.name,params.password,this.userid,params.rake,params.buyin_reset,function (worked,club) {
-			if (worked) {
-				var out = Club.makeClubProtobuf(club.obj,null,[],club,this);
-				this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
-			}
-		}.bind(this));
-	}.bind(this));
-}
+  handlers[codes.scCreateClub] = function (args,token) {
+    var params = pb.Parse(args,'Poker.Club');
+    if (!regexLimits.clubname.exec(params.name)) {
+      this.send(codes.srCreateClubReply,{status:'csInvalidName'},'Poker.ClubCommandReply');
+      return;
+    }
+    if ((params.rake < 0) || (params.rake > 10)) {
+      this.reply(0,"invalid rake");
+      return;
+    }
+    if (!params.password) {
+      this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
+      return;
+    } else if (!regexLimits.clubpassword.exec(params.password)) {
+      this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
+      return;
+    } else if ([30,60,90,120].indexOf(params.buyin_reset) == -1) {
+      this.reply(0,'invalid buyin reset');
+      return;
+    }
+    // FIXME, dont allow a blank pw on priv clubs
+    Club.dupCheck(params.name,function (dup) {
+      if (dup) {
+        this.log('SR_CREATECLUB_NAME_EXISTS');
+        this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
+        return;
+      }
+      Club.createClub(params.name,params.password,this.userid,params.rake,params.buyin_reset,function (worked,club) {
+        if (worked) {
+          models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
+            var out = Club.makeClubProtobuf(club.obj, null, stats, club, this);
+            this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+          }.bind(this));
+        }
+      }.bind(this));
+    }.bind(this));
+  }
 handlers[codes.scDeleteClub] = function (args,token) {
 	function deleteClub(clubObj) {
 		clubObj.deleteClub(function (err) {
