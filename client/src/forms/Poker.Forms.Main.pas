@@ -643,7 +643,7 @@ begin
 
       if (Assigned(member)) and
          (member.Status = msSuspended) then
-        err := 'You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.'
+        err := 'You are currently suspended in this club, and cannot join any tables. Please contact the club owner to resolve this issue.'
       else
         if Tables.GetAndLockTable(game.MongoId, ttLive, table) then
         begin
