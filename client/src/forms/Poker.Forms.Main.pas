@@ -539,7 +539,6 @@ procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
 var
   form: TForm;
   club: TClubInfo;
-  game: TGameInfo;
 begin
   if not dmMain.CheckAuthed then
     Exit;
