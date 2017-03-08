@@ -1,6 +1,7 @@
 #include <openssl/ssl.h>
 #include <string>
 #include <lua.hpp>
+#include <chrono>
 
 #include "message.pb.h"
 
@@ -31,7 +32,7 @@ private:
 
 class PokerClient : public Client {
 public:
-  PokerClient(LuaTester *tester, std::string hostname, uint16_t port, int id);
+  PokerClient(LuaTester *tester, std::string hostname, uint16_t port);
   ~PokerClient();
   void sendHello();
   void sendRegister(std::string username, std::string password, std::string email);
@@ -43,7 +44,6 @@ public:
   void sendMessage(lua_State *L, std::string code, int index);
 
 private:
-  int id;
 };
 
 class LuaTester {
@@ -52,10 +52,11 @@ public:
   virtual ~LuaTester();
   void runTest(std::string path, std::string hostname, uint16_t port);
   void set_success(bool success);
-  void event(std::string code, const google::protobuf::Message &msg, int id);
+  void event(std::string code, const google::protobuf::Message &msg, PokerClient *client);
 
   struct event_base *base;
   bool success;
+  std::chrono::steady_clock::time_point start;
 private:
   lua_State *L;
 };

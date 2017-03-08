@@ -4,7 +4,7 @@ with import  <nixpkgs/nixos/lib/testing.nix> { inherit system; };
 
 let
   mypkgs = import ../default.nix;
-  makeLuaTest = source: makeTest {
+  makeLuaTest = source: mongo: makeTest {
     name = "lua-test";
     nodes = {
       server = { pkgs, ... }:
@@ -29,7 +29,10 @@ let
       $server->waitForUnit("poker");
       $server->waitForOpenPort(12346);
       $server->sleep(5);
-      print $server->succeed("valgrind --leak-check=full test-driver -h localhost -e /home/poker/chipuppoker/cert.pem -c ${source}");
+      print $server->succeed("time valgrind --leak-check=full test-driver -h localhost -e /home/poker/chipuppoker/cert.pem -c ${source}");
+      ${if mongo != null then ''
+        print $server->execute("echo '${mongo}' | mongo poker");
+      '' else ""}
       $server->shutdown;
     '';
   };
@@ -49,7 +52,9 @@ in {
       $server->shutdown;
     '';
   };
-  register_login = makeLuaTest ./register_login.lua;
-  makeClub = makeLuaTest ./makeClub.lua;
-  simpleGame = makeLuaTest ./simpleGame.lua;
+  register_login = makeLuaTest ./register_login.lua null;
+  makeClub = makeLuaTest ./makeClub.lua ''
+    db.clubBalances.find().pretty()
+  '';
+  simpleGame = makeLuaTest ./simpleGame.lua null;
 }

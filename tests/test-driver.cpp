@@ -19,6 +19,7 @@
 
 using namespace std;
 using namespace Poker;
+using namespace std::chrono;
 
 void *read_loop(void*data);
 
@@ -30,34 +31,6 @@ void hex_dump(string data) {
     printf("%02x ", c);
   }
   printf("\n");
-}
-
-void print_cn_name(const char* label, X509_NAME* const name) {
-  int idx = -1, success = 0;
-  unsigned char *utf8 = NULL;
-
-  do {
-    if(!name) break; /* failed */
-
-    idx = X509_NAME_get_index_by_NID(name, NID_commonName, -1);
-    if(!(idx > -1))  break; /* failed */
-
-    X509_NAME_ENTRY* entry = X509_NAME_get_entry(name, idx);
-    if(!entry) break; /* failed */
-
-    ASN1_STRING* data = X509_NAME_ENTRY_get_data(entry);
-    if(!data) break; /* failed */
-
-    int length = ASN1_STRING_to_UTF8(&utf8, data);
-    if(!utf8 || !(length > 0))  break; /* failed */
-
-    fprintf(stdout, "  %s: %s\n", label, utf8);
-    success = 1;
-  } while(0);
-
-  if(utf8) OPENSSL_free(utf8);
-
-  if(!success) fprintf(stdout, "  %s: <not available>\n", label);
 }
 
 class Context {
@@ -115,16 +88,12 @@ void Client::disconnect() {
 }
 
 bool Client::write(const char *data, int len) {
-  for (int i=0; i<len; i++) {
-    //printf("%02x ", data[i]);
-  }
-  //printf("\n");
   int result = bufferevent_write(bev, data, len);
   assert(result == 0);
   return true;
 }
 
-PokerClient::PokerClient(LuaTester *tester, string hostname, uint16_t port, int id) : Client(tester, hostname, port), id(id) {
+PokerClient::PokerClient(LuaTester *tester, string hostname, uint16_t port) : Client(tester, hostname, port) {
 }
 
 PokerClient::~PokerClient() {
@@ -173,6 +142,15 @@ void init_events() {
   x(srLoginReply, LoginReply);
   x(srRegisterReply, RegisterReply);
   x(srCreateClubReply, ClubCommandReply); // 4
+  x(srJoinClubReply, ClubCommandReply); // 5
+
+  x(srCreateGameOk, Game); // 24
+
+  x(seClubChange, Club); // 53
+
+  x(seGameChange, Game); // 55
+  x(seGameCreate, Game); // 56
+  x(seGameDelete, Game); // 57
   x(seTableStatus, TableStatus); // 58
 
   x(scHello, HelloParams);
@@ -180,17 +158,24 @@ void init_events() {
   x(scRegister, RegisterParams); // 73
   x(scCreateClub, Club); // 76
   x(scJoinClub, Club); // 77
+
+  x(scCreateGame, Game); // 87
+  x(scCloseGame, CloseGameData); // 88
   x(scTableJoin, Game); // 89
+  x(scTableLeave, Game); // 90
+  x(scTableSit, TableSit); // 91
+
+  x(scApproveClubMember, ChangeClubPlayerFlag); // 121
 #undef x
 }
 
 void PokerClient::handlePacket(int event_code, string payload) {
-  printf("got event %d of size %lud\n", event_code, payload.size());
+  //printf("got event %d of size %lud\n", event_code, payload.size());
   google::protobuf::Message *m = NULL;
   if (events[event_code].m) {
     m = events[event_code].m->New();
     m->ParseFromString(payload);
-    tester->event(events[event_code].name, *m, id);
+    tester->event(events[event_code].name, *m, this);
     delete m;
   } else {
     cout << "unhandled event code " << event_code << "\n";
@@ -229,23 +214,27 @@ void PokerClient::sendMessage(lua_State *L, string code_str, int index) {
       return;
     }
     switch (f->type()) {
-    case FieldDescriptor::TYPE_BOOL:
+    case FieldDescriptor::TYPE_INT32: // 5
+      luaL_checkint(L, -1);
+      r->SetInt32(out, f, lua_tointeger(L, -1));
+      break;
+    case FieldDescriptor::TYPE_BOOL: // 8
       luaL_checktype(L, -1, LUA_TBOOLEAN);
       r->SetBool(out, f, lua_toboolean(L, -1));
       break;
-    case FieldDescriptor::TYPE_STRING:
+    case FieldDescriptor::TYPE_STRING: // 9
       luaL_checkstring(L, -1);
       r->SetString(out, f, lua_tostring(L, -1));
       break;
-    case FieldDescriptor::TYPE_BYTES:
+    case FieldDescriptor::TYPE_BYTES: // 12
       luaL_checkstring(L, -1);
       r->SetString(out, f, lua_tostring(L, -1));
       break;
-    case FieldDescriptor::TYPE_UINT32:
+    case FieldDescriptor::TYPE_UINT32: // 13
       luaL_checkint(L, -1);
       r->SetUInt32(out, f, lua_tointeger(L, -1));
       break;
-    case FieldDescriptor::TYPE_ENUM:
+    case FieldDescriptor::TYPE_ENUM: // 14
       evd = f->enum_type()->FindValueByName(lua_tostring(L, -1));
       if (!evd) {
         luaL_error(L, "invalid enum value %s", lua_tostring(L, -1));
@@ -299,7 +288,26 @@ void PokerClient::sendMessage(Poker::ServerCodes code, const google::protobuf::M
     buffer[n++] = payload_raw[i];
   }
   write(buffer, packet_size);
-  printf("sent event %d of size %ud\n", code, packet_size);
+  //printf("sent event %d of size %ud\n", code, packet_size);
+}
+
+static int debug_print(lua_State *L) {
+  LuaTester *tester = static_cast<LuaTester*>(lua_touserdata(L, lua_upvalueindex(1)));
+  steady_clock::time_point now = steady_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(now - tester->start);
+  double time = time_span.count();
+  cout << "<" << time << "> ";
+  for (int i=1; i <= lua_gettop(L); i++) {
+    lua_pushvalue(L, i);
+    if (lua_type(L, -1) == LUA_TSTRING) {
+      cout << lua_tostring(L, -1);
+    } else {
+      cout << "other";
+    }
+    lua_pop(L, 1);
+  }
+  cout << "\n";
+  return 0;
 }
 
 LuaTester::LuaTester(struct event_base *base) : base(base) {
@@ -308,14 +316,7 @@ LuaTester::LuaTester(struct event_base *base) : base(base) {
   luaL_openlibs(L);
 
   cout << "top == " << lua_gettop(L) << "\n";
-  lua_pushlightuserdata(L, this);
-  lua_pushcclosure(L, makeClient, 1);
-  lua_setglobal(L, "makeClient");
 
-  lua_pushlightuserdata(L, this);
-  lua_pushcclosure(L, ::set_success, 1);
-  lua_setglobal(L, "set_success");
-  
   lua_createtable(L, 0, 0);
   lua_pushinteger(L, 0);
   lua_setfield(L, -2, "counter");
@@ -325,7 +326,21 @@ LuaTester::LuaTester(struct event_base *base) : base(base) {
   lua_pushcclosure(L, setTimeout, 1);
   lua_setglobal(L, "setTimeout");
   
-  lua_register(L, "dump", dump_data);
+  
+  luaL_Reg funcs[] = {
+    { "dump", dump_data },
+    { "dbg", debug_print },
+    { "makeClient", makeClient },
+    { "set_success", ::set_success },
+    { NULL, NULL }
+  };
+  
+  lua_pushglobaltable(L);
+  lua_pushlightuserdata(L, this);
+  luaL_setfuncs(L, funcs, 1);
+  lua_pop(L, 1);
+
+  start = steady_clock::now();
 
   cout << "top == " << lua_gettop(L) << "\n";
 }
@@ -377,8 +392,11 @@ void field_to_lua(lua_State *L, const google::protobuf::Reflection *r, const goo
   using namespace google::protobuf;
   string scratch;
   switch (f->cpp_type()) {
-  case FieldDescriptor::CPPTYPE_INT32:
+  case FieldDescriptor::CPPTYPE_INT32: // 1
     lua_pushinteger(L, r->GetInt32(msg, f));
+    break;
+  case FieldDescriptor::CPPTYPE_UINT32:
+    lua_pushinteger(L, r->GetUInt32(msg, f));
     break;
   case FieldDescriptor::CPPTYPE_BOOL: // 7
     lua_pushboolean(L, r->GetBool(msg, f));
@@ -445,23 +463,28 @@ void message_to_table(lua_State *L, const google::protobuf::Message &msg) {
   //dump_stack(L, "made table");
 }
 
-void LuaTester::event(string code, const google::protobuf::Message &msg, int id) {
-  lua_getglobal(L, "onEvent");
-  if (lua_type(L, -1) == LUA_TNIL) {
-    lua_remove(L, -1);
+void LuaTester::event(string code, const google::protobuf::Message &msg, PokerClient *client) {
+  luaL_getmetatable(L, "testdriver.connections"); // 1
+  lua_pushlightuserdata(L, client); // 2
+  lua_gettable(L, -2); // 2
+  lua_remove(L, -2); // -1
+  lua_getfield(L, -1, "onEvent");
+  if (lua_type(L, -1) != LUA_TFUNCTION) {
+    lua_pop(L, 2);
     return;
   }
+
+  lua_pushvalue(L, -2);
+  lua_remove(L, -3);
   lua_pushstring(L, code.c_str());
-
   message_to_table(L, msg);
-
-  lua_pushinteger(L, id);
 
   int result = lua_pcall(L, 3, 0, 0);
   if (result != LUA_OK) {
     cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
     lua_remove(L, -1);
   }
+  assert(lua_gettop(L) == 0);
 }
 
 bool Client::connect(Context *context) {
@@ -535,7 +558,8 @@ int main(int argc, char **argv) {
   // needs 2.1 libevent_global_shutdown();
   if (!success) {
     cout << "test failed\n";
-    return -1;
+    cout.flush();
+    return -2;
   }
   return 0;
 }

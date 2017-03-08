@@ -1,15 +1,15 @@
 local hostname,port = ...
 
-print("need to connect to "..hostname..":"..port)
+function onEvent(self, code, msg)
+  print("event handler:"..code)
+  handlers[code](self, msg)
+end
 
-local client1 = makeClient(hostname, port)
+local client1 = makeClient(hostname, port, onEvent)
 print("client1:",client1)
 client1:connect()
 client1:sendHello()
 
-function ding()
-  print("ding from lua");
-end
 function abort()
   client1:disconnect()
 end
@@ -21,16 +21,11 @@ end
 handlers["srRegisterReply"] = function ()
   client1:login("username","password")
 end
-handlers["srLoginReply"] = function (msg)
+handlers["srLoginReply"] = function (self, msg)
   if msg["login_status"] == "lrSuccess" then
     set_success(true);
   end
 end
-function onEvent(code, msg)
-  print("event handler:"..code)
-  handlers[code](msg)
-end
 
-setTimeout(ding, 0, 1);
 setTimeout(abort, 0, 5);
 return true

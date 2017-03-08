@@ -117,28 +117,28 @@ int makeClient(lua_State *L) {
   cout << __func__ << " top == " << lua_gettop(L) << "\n";
   luaL_checkstring(L, 1);
   luaL_checkint(L, 2);
-  int id = luaL_optint(L, 3, 0);
+  luaL_checktype(L, 3, LUA_TFUNCTION);
   LuaTester *tester = static_cast<LuaTester*>(lua_touserdata(L, lua_upvalueindex(1)));
 
   string hostname = lua_tostring(L, 1);
   uint16_t port = lua_tointeger(L, 2);
 
-  PokerClient *client = new PokerClient(tester, hostname, port, id);
+  PokerClient *client = new PokerClient(tester, hostname, port);
 
-  lua_createtable(L, 0, 0);
+  lua_createtable(L, 0, 0); // 4
   int table = lua_gettop(L);
   printf("tbl %d\n", table);
 
-  lua_createtable(L, 0, 0); // metatable
+  lua_createtable(L, 0, 0); // 5 metatable
 
   luaL_Reg metatable[] = {
     { "__gc", delete_client },
     { NULL, NULL }
   };
-  lua_pushlightuserdata(L, client);
-  luaL_setfuncs(L, metatable, 1);
+  lua_pushlightuserdata(L, client); // 6
+  luaL_setfuncs(L, metatable, 1); // -1
 
-  lua_setmetatable(L, table);
+  lua_setmetatable(L, table); // -1
 
   luaL_Reg funcs[] = {
     { "connect", client_connect },
@@ -151,8 +151,17 @@ int makeClient(lua_State *L) {
     { NULL, NULL}
   };
 
-  lua_pushlightuserdata(L, client);
-  luaL_setfuncs(L, funcs, 1);
+  lua_pushlightuserdata(L, client); // 5
+  luaL_setfuncs(L, funcs, 1); // -1
+
+  lua_pushvalue(L, 3);
+  lua_setfield(L, -2, "onEvent");
+
+  luaL_newmetatable(L, "testdriver.connections"); // 5
+  lua_pushlightuserdata(L, client); // 6
+  lua_pushvalue(L, -3); // 7
+  lua_settable(L, -3); // -2
+  lua_pop(L, 1); // -1
   
   cout << __func__ << " top == " << lua_gettop(L) << "\n";
   return 1;
