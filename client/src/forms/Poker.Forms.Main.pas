@@ -538,6 +538,7 @@ end;
 procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
 var
   form: TForm;
+  club: TClubInfo;
 begin
   if not dmMain.CheckAuthed then
     Exit;
@@ -549,6 +550,15 @@ begin
       form.BringToFront;
       Exit;
     end;
+
+  if dmMain.SelfInfo.Clubs.GetAndLock(FSelectedClub, club) then
+  try
+    if (not club.IsPrivate) and
+       (club.Games.Count > 0) then
+      OpenClubTable(FSelectedClub, club.Games.Values.ToArray[0].MongoId);
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
 
   FormsContainer.RunForm(TfrmClubLobby, self, [FSelectedClub.Memory], TRUE);
 end;
@@ -633,7 +643,7 @@ begin
 
       if (Assigned(member)) and
          (member.Status = msSuspended) then
-        err := 'You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.'
+        err := 'You are currently suspended in this club, and cannot join any tables. Please contact the club owner to resolve this issue.'
       else
         if Tables.GetAndLockTable(game.MongoId, ttLive, table) then
         begin
