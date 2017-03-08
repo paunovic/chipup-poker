@@ -1287,13 +1287,13 @@ object frmDebug: TfrmDebug
       item
         StyleName = 'Time'
         Alignment = rvaCenter
-        Options = [rvpaoReadOnly]
+        Options = [rvpaoNoWrap, rvpaoReadOnly]
         Tabs = <>
       end
       item
         StyleName = 'Type'
         Alignment = rvaCenter
-        Options = [rvpaoReadOnly]
+        Options = [rvpaoNoWrap, rvpaoReadOnly]
         Tabs = <>
       end
       item
