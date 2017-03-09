@@ -17,14 +17,18 @@ void Game::update(Poker::Game &in) {
 	std::string tournid = in.tournament();
 	this->tournamentid = QByteArray(tournid.data(),tournid.length());
 
-	gamename = in.gamename().c_str();
-	type = in.game_type();
-	blinds = in.blinds();
-	switch (blinds) {
-	case Poker::Game::gb1x2:
-		sb = 1;
-		bb = 2;
-		break;
+  gamename = in.gamename().c_str();
+  type = in.game_type();
+  blinds = in.blinds();
+  switch (blinds) {
+  case Poker::Game::gb1x2:
+    sb = 1;
+    bb = 2;
+    break;
+  case Poker::Game::gb2x4:
+    sb = 2;
+    bb = 4;
+    break;
 	case Poker::Game::gb5x5:
 		sb = bb = 5;
 		break;
@@ -40,6 +44,18 @@ void Game::update(Poker::Game &in) {
 		sb = 25;
 		bb = 50;
 		break;
+  case Poker::Game::gb15x30:
+    sb = 15;
+    bb = 30;
+    break;
+  case Poker::Game::gb30x60:
+    sb = 30;
+    bb = 60;
+    break;
+  case Poker::Game::gb40x80:
+    sb = 40;
+    bb = 80;
+    break;
 	case Poker::Game::gb50x100:
 		sb = 50;
 		bb = 100;
