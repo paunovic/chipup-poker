@@ -77,7 +77,7 @@ in {
     systemd.services.poker = {
       description = "main poker process";
       wantedBy = [ "multi-user.target" ];
-      path = with pkgs; [ poker innoextract bsdiff ];
+      path = with pkgs; [ poker innoextract bsdiff breakpad ];
       enable = true;
       environment = {
         CONFIG_FILE = pkgs.writeText "poker.json" (builtins.toJSON poker_config);

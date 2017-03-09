@@ -165,6 +165,11 @@ void init_events() {
   x(scTableLeave, Game); // 90
   x(scTableSit, TableSit); // 91
 
+  x(scPutChips, PutChips); // 97
+
+  x(scTablePlayNow, Game); // 99
+  x(scTableSitOutNextHand, TableBoolFlag); // 100
+
   x(scApproveClubMember, ChangeClubPlayerFlag); // 121
 #undef x
 }
@@ -173,6 +178,9 @@ void PokerClient::handlePacket(int event_code, string payload) {
   //printf("got event %d of size %lud\n", event_code, payload.size());
   google::protobuf::Message *m = NULL;
   switch (event_code) {
+  case 0:
+    cout << "code 0 " << payload;
+    break;
   case ServerCodes::srLogout:
     tester->event("srLogout", this);
     return;
@@ -459,6 +467,9 @@ void field_to_lua(lua_State *L, const google::protobuf::Reflection *r, const goo
   switch (f->cpp_type()) {
   case FieldDescriptor::CPPTYPE_INT32:
     lua_pushinteger(L, r->GetRepeatedInt32(msg, f, index));
+    break;
+  case FieldDescriptor::CPPTYPE_UINT32:
+    lua_pushinteger(L, r->GetRepeatedUInt32(msg, f, index));
     break;
   case FieldDescriptor::CPPTYPE_ENUM:
     lua_pushstring(L, r->GetRepeatedEnum(msg, f, index)->name().c_str());

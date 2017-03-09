@@ -336,73 +336,75 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 		game.members[seatIdx].sitOutBB = params.flag;
 	}.bind(this));
 };
+
 handlers[codes.scTablePlayNow] = function (args,token) {
-	var id;
-	try {
-		var params = pb.Parse(args,'Poker.Game');
-		id = myutils.toMongoId(params._id);
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Game.getGame(id,function (err,game) {
-		if (!game) return;
-		if (game.state2 == 'gsClosed') return;
-		game.Lock.writeLock(function (release) {
-			function finish(events) { // teDeal
-				game.updateMongoState({members:true},function () {
-					game.broadcastStatus(null,true,events);
-					token.stop();
-					release();
-				});
-			}
-			var seatIdx = game.findSeat(this);
-			if (seatIdx === -1) {
-				this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
-				release();
-				return;
-			}
-			if (game.members[seatIdx].chips === 0) {
-				this.reply(0,'you dont have enough chips');
-				release();
-				return;
-			}
-			game.members[seatIdx].sitOutNextRound = false;
-			game.members[seatIdx].sitOutBB = false;
-			game.members[seatIdx].autoplay = false;
-			if (game.members[seatIdx].status != 'psOutOfPlay') {
-				finish([]);
-				return;
-			}
-			if (game.club && game.club.isSuspended(this.userid)) {
-				game.standUp(this,function (folded,events2,offset) {
-					game.broadcastStatus(null,true,events2);
-					release();
-				}.bind(this));
-				return;
-			}
-			game.members[seatIdx].status = 'psOutOfHand';
-			//game.members[seatIdx].sitTime = Date.now();
-			if (game.state == 'tsIdle') {
-				if (!game.dealTimer) {
-					game.dealTimer = setTimeout(function () {
-						game.dealTimer = null;
-						game.Lock.writeLock(function (release) {
-							game.stateMachine(function (events) {
-								game.broadcastStatus(null,true,events);
-								release();
-							}.bind(this),null,{silent:true},[],0);
-						}.bind(this));
-					}.bind(this),5000);
-					finish([]);
-				} else {
-					game.log('waiting for deal timer');
-					finish([]);
-				}
-			} else finish([]);
-		}.bind(this));
-	}.bind(this));
+  var id;
+  try {
+    var params = pb.Parse(args,'Poker.Game');
+    id = myutils.toMongoId(params._id);
+  } catch (e) {
+    this.error(e);
+    return;
+  }
+  Game.getGame(id,function (err,game) {
+    if (!game) return;
+    if (game.state2 == 'gsClosed') return;
+    game.Lock.writeLock(function (release) {
+      function finish(events) { // teDeal
+        game.updateMongoState({members:true},function () {
+          game.broadcastStatus(null,true,events);
+          token.stop();
+          release();
+        });
+      }
+      var seatIdx = game.findSeat(this);
+      if (seatIdx === -1) {
+        this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
+        release();
+        return;
+      }
+      if (game.members[seatIdx].chips === 0) {
+        this.reply(0,'you dont have enough chips');
+        release();
+        return;
+      }
+      game.members[seatIdx].sitOutNextRound = false;
+      game.members[seatIdx].sitOutBB = false;
+      game.members[seatIdx].autoplay = false;
+      if (game.members[seatIdx].status != 'psOutOfPlay') {
+        finish([]);
+        return;
+      }
+      if (game.club && game.club.isSuspended(this.userid)) {
+        game.standUp(this,function (folded,events2,offset) {
+          game.broadcastStatus(null,true,events2);
+          release();
+        }.bind(this));
+        return;
+      }
+      game.members[seatIdx].status = 'psOutOfHand';
+      //game.members[seatIdx].sitTime = Date.now();
+      if (game.state == 'tsIdle') {
+        if (!game.dealTimer) {
+          game.dealTimer = setTimeout(function () {
+            game.dealTimer = null;
+            game.Lock.writeLock(function (release) {
+              game.stateMachine(function (events) {
+                game.broadcastStatus(null,true,events);
+                release();
+              }.bind(this),null,{silent:true},[],0);
+            }.bind(this));
+          }.bind(this),5000);
+          finish([]);
+        } else {
+          game.log('waiting for deal timer');
+          finish([]);
+        }
+      } else finish([]);
+    }.bind(this));
+  }.bind(this));
 };
+
 handlers[codes.scShowCards] = function (args,token) {
 	var id;
 	try {

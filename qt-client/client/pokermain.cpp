@@ -16,7 +16,7 @@
 #include <QMessageBox>
 
 #include "pokermain.h"
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "club.h"
 #include "tablestatus.h"
 #include "data/user.h"
@@ -171,11 +171,11 @@ void PokerMain::socket_ready() {
 void PokerMain::doneHashing() {
 	Poker::HelloParams hp;
 #ifdef Q_OS_WIN
-	hp.set_appcode(Poker::HelloParams::QtWindows32);
+	hp.set_appcode(Poker::HelloParams::acQtWindows32);
 #elif defined(Q_OS_LINUX)
-	hp.set_appcode(Poker::HelloParams::QtLinux32);
+	hp.set_appcode(Poker::HelloParams::acQtLinux32);
 #elif defined(Q_OS_MAC)
-	hp.set_appcode(Poker::HelloParams::QtMac);
+	hp.set_appcode(Poker::HelloParams::acQtMac);
 #endif
 	hp.set_debug(false);
 	foreach (Core::UpdateFileInfo item, hasher->files) {
@@ -607,74 +607,76 @@ void PokerMain::seReservedSeatTimeout(std::string data) {
 	emit sit_timeout(out->gameid);
 	emit table_status(out);
 }
+
 void PokerMain::srLoginReply(std::string data) {
-	Poker::LoginReply lr;
-	int i;
-	qDebug() << "srLoginReply";
-	lr.ParseFromString(data);
-	if (lr.login_status() == LoginReply::lrSuccess) {
-		QResource::registerResource(datadir.absoluteFilePath("scripts.rcc"));
-		qDebug() << "sucess!";
-		reconnectState = SignedIn;
-		// TODO, convert and use tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
-		clubs.clear();
-		for (i=0; i<lr.clubs_size(); i++) {
-			Poker::Club c = lr.clubs(i);
-			Data::Club *c_out = new Data::Club;
-			c_out->update(c);
-			clubs.add(c_out);
-		}
-		games.clear();
-		for (i=0; i<lr.games_size(); i++) {
-			Poker::Game g = lr.games(i);
-			Data::Game *g_out = new Data::Game;
-			g_out->update(g);
-			games.append(g_out);
-			qDebug() << "found game" << g_out->gameid.toHex();
-		}
-		for (i=0; i<lr.users_size(); i++) {
-			Poker::User u = lr.users(i);
-			Data::User *u_out = new Data::User;
-			u_out->update(u);
-			users.append(u_out);
-		}
-		Poker::User self = lr.self();
-		self_->update(self);
-		for (i=0; i<lr.reconnect_tables_size(); i++) {
-			Poker::TableStatus ts = lr.reconnect_tables(i);
-			QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
-			out->update(ts);
-			bool found = false;
-			foreach (QWidget *widget, QApplication::topLevelWidgets()) {
-				qDebug() << widget << widget->metaObject()->className();
-				Table *tbl = qobject_cast<Table*>(widget);
-				if (tbl) {
-					if (out->gameid == tbl->getGameId()) {
-						found = true;
-						break;
-					}
-				}
-			}
-			qDebug() << "tbl found?" << found;
-			if (!found) {
-				qDebug() << "lookign for game" << out->gameid.toHex();
-				const Data::Game *game = getGame(out->gameid);
-				Q_ASSERT(game);
-				Table *t = new Table();
-				const Data::Club *club = clubs.getClub(game->clubid);
-				t->setGame(game,club);
-				t->show();
-			}
-			emit table_status(out);
-		}
-		emit login_sucess();
-		emit clubs_changed();
-		emit games_changed();
-	} else {
-		qDebug() << "failure";
-		emit login_failure();
-	}
+  Poker::LoginReply lr;
+  int i;
+  lr.ParseFromString(data);
+  qDebug() << "srLoginReply" << lr.DebugString().c_str();
+  if (lr.login_status() == LoginReply::lrSuccess) {
+    QResource::registerResource(datadir.absoluteFilePath("scripts.rcc"));
+    qDebug() << "sucess!";
+    reconnectState = SignedIn;
+    // TODO, convert and use tournament_infos,registered_tournaments,clubs,self,games,player_club_statuses
+    clubs.clear();
+    for (i=0; i<lr.clubs_size(); i++) {
+      Poker::Club c = lr.clubs(i);
+      Data::Club *c_out = new Data::Club;
+      c_out->update(c);
+      clubs.add(c_out);
+    }
+    games.clear();
+    for (i=0; i<lr.games_size(); i++) {
+      Poker::Game g = lr.games(i);
+      Data::Game *g_out = new Data::Game;
+      g_out->update(g);
+      games.append(g_out);
+      qDebug() << "found game" << g_out->gameid.toHex();
+    }
+    for (i=0; i<lr.users_size(); i++) {
+      Poker::User u = lr.users(i);
+      Data::User *u_out = new Data::User;
+      u_out->update(u);
+      users.append(u_out);
+    }
+    Poker::User self = lr.self();
+    self_->update(self);
+    for (i=0; i<lr.reconnect_tables_size(); i++) {
+      Poker::TableStatus ts = lr.reconnect_tables(i);
+      QSharedPointer<Data::TableStatus> out(new Data::TableStatus);
+      out->update(ts);
+      bool found = false;
+      foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+        qDebug() << widget << widget->metaObject()->className();
+        Table *tbl = qobject_cast<Table*>(widget);
+        if (tbl) {
+          if (out->gameid == tbl->getGameId()) {
+            found = true;
+            break;
+          }
+        }
+      }
+      qDebug() << "tbl found?" << found;
+      if (!found) {
+        qDebug() << "lookign for game" << out->gameid.toHex();
+        const Data::Game *game = getGame(out->gameid);
+        Q_ASSERT(game);
+        Table *t = new Table();
+        const Data::Club *club = clubs.getClub(game->clubid);
+        t->setGame(game,club);
+        t->show();
+      }
+      emit table_status(out);
+    }
+    emit login_sucess();
+    emit clubs_changed();
+    emit games_changed();
+  } else {
+    qDebug() << "failure";
+    emit login_failure();
+  }
 }
+
 const Data::Game *PokerMain::getGame(QByteArray gameid) const {
 	foreach (const Data::Game *g, games) {
 		qDebug() << "searching" << g->gameid.toHex();

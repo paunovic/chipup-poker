@@ -14,7 +14,12 @@ TEMPLATE = app
 #CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
 QMAKE_CXXFLAGS += -g
-INCLUDEPATH += ../protobuf/ ../google-breakpad/
+win32 {
+  INCLUDEPATH += ../protobuf/ ../google-breakpad/
+}
+unix {
+  INCLUDEPATH += ../google-breakpad/
+}
 TARGET = chipuppoker
 target.path = /${out}/bin
 INSTALLS += target
@@ -33,7 +38,7 @@ unix {
 LIBS += -L../protobuf/ -L../google-breakpad/
 }
 linux {
-LIBS += -lgoogle-breakpad
+LIBS += -lgoogle-breakpad -lprotos
 }
 mac {
 #LIBS +=  -F/Users/clever -framework Breakpad
@@ -42,8 +47,6 @@ LIBS += -lgoogle-breakpad -framework CoreFoundation
 LIBS += -lprotobuf
 SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
     pokermain.cpp pokermain_shared.cpp \
-    cpp/common.pb.cc \
-    cpp/message.pb.cc \
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
     registerwindow.cpp \
     csseditor.cpp \

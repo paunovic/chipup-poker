@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QDebug>
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "pokermain.h"
 
 namespace Data {

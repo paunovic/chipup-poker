@@ -1,7 +1,7 @@
 #ifndef DATA_TABLEMESSAGE_H
 #define DATA_TABLEMESSAGE_H
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 
 namespace Data {
 

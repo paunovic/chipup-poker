@@ -4,7 +4,7 @@
 #include <QList>
 #include <QObject>
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "data/hand.h"
 
 namespace Data {

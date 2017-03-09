@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 
 namespace Ui {
 class CreateClub;

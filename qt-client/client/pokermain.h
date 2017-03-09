@@ -16,7 +16,7 @@
 #error SSL disabled in QT!
 #endif
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "club.h"
 #include "game.h"
 #include "tablestatus.h"

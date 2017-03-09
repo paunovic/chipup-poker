@@ -44,6 +44,6 @@ HEADERS += \
     google_breakpad/common/minidump_format.h \
     client/windows/crash_generation/crash_generation_client.h
 unix {
-    target.path = /usr/lib
+    target.path = ${out}/lib
     INSTALLS += target
 }

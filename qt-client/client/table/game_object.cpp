@@ -3,11 +3,11 @@
 #include "tableprivate.h"
 
 GameObject::GameObject(TablePrivate *table) {
-	this->table = table;
+  this->table = table;
 }
+
 GameObject::~GameObject() {
-	qDebug() << "deleting";
-	qDebug() << this;
+  qDebug() << "deleting" << this;
 }
 
 void GameObject::setPosition(float x, float y) {
@@ -79,12 +79,13 @@ float GameObject::getRenderHeight() const {
 }
 
 void GameObject::setSide(int side){
-	qDebug() << internal << "setting side to" << side;
-	//qDebug() << "chip" << internal << side;
-	internal->keyside = (AlignmentSide) side;
-	internal->redraw = true;
-	internal->updateGeometry();
+  //qDebug() << internal << "setting side to" << side;
+  //qDebug() << "chip" << internal << side;
+  internal->keyside = (AlignmentSide) side;
+  internal->redraw = true;
+  internal->updateGeometry();
 }
+
 void GameObjectUi::drawDebug(QPainter &p) {
 	qDebug() << this << "current side" << keyside;
 	switch (keyside) {

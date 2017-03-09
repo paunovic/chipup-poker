@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QSharedPointer>
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 //#include "data/seatinfo.h"
 #include "data/tableevent.h"
 #include "data/pot.h"

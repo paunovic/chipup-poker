@@ -4,7 +4,7 @@
 #include <QVariant>
 #include <QAbstractListModel>
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "club.h"
 
 namespace Data {

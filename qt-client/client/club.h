@@ -3,7 +3,7 @@
 #include <QString>
 #include <QAbstractListModel>
 #include <QDebug>
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "data/clubmember.h"
 
 namespace Data {

@@ -60,9 +60,6 @@ void Game::update(Poker::Game &in) {
 		sb = 4;
 		bb = 8;
 		break;
-	case Poker::Game::gb10x10:
-		sb = bb = 10;
-		break;
 	case Poker::Game::gb25x25:
 		sb = bb = 25;
 		break;

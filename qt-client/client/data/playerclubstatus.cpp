@@ -1,5 +1,5 @@
 #include "playerclubstatus.h"
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 
 namespace Data {
 

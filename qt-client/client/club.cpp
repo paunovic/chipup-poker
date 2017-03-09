@@ -28,12 +28,13 @@ void Club::update(const Poker::Club &in) {
 
 	seq = in.seq();
 	name = in.name().c_str();
-	qDebug() << "updating club" << name;
+	qDebug() << "updating club" << name << in.DebugString().c_str();
 	std::string clubid = in._id();
 	this->clubid = QByteArray(clubid.data(),clubid.length());
 	is_private = in.is_private();
 	std::string ownerid = in.owner();
 	owner = QByteArray(ownerid.data(),ownerid.length());
+        assert(ownerid.length() == 12);
 	const Data::User *userTest = core->findUser(owner);
 	if (!userTest) toFetch.append(owner);
 	QList<QByteArray> valid_members;

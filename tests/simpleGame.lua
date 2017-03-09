@@ -3,11 +3,16 @@ local clubseq;
 local clubid;
 local bot2_id;
 local handlers = {}
+local idle = 0;
 
 print("need to connect to "..hostname..":"..port)
 
 function onEvent(client, code, obj)
-  dbg(" IN ".. client.name ..": "..code)
+  idle = 0;
+  if code == "seTableStatus" then
+  else
+    dbg(" IN ".. client.name ..": "..code)
+  end
   if client.handlers and client.handlers[code] then
     client.handlers[code](client, obj);
   elseif handlers[code] then
@@ -38,10 +43,15 @@ client2:connect()
 client1:sendMessage("scHello",{ debug = false, appcode = "acDelphiWindows" });
 client2:sendMessage("scHello",{ debug = false, appcode = "acDelphiWindows" });
 
-function abort()
-  dbg("timeout, failing")
-  client1:disconnect()
-  client2:disconnect()
+function tick()
+  idle = idle + 1;
+  if idle > 10 then
+    dbg("timeout, failing")
+    client1:disconnect()
+    client2:disconnect()
+  else
+    setTimeout(tick, 0, 1);
+  end
 end
 local a_ready1 = false;
 local a_ready2 = false;
@@ -52,6 +62,7 @@ function check_a()
 end
 handlers["srLoginReply"] = function (self, obj)
   dbg("login reply#".. self.name);
+  self.state = 0;
   if self.name == "bot1" then
     self:sendMessage("scCreateClub", { is_private = true, name = "club name", password = "password", rake = 0, buyin_reset = 30 });
   else
@@ -63,15 +74,21 @@ end
 
 handlers.srJoinClubReply = function (self, obj)
   if obj.status == "csSuccess" then
-    dbg("clubid size " .. #clubid .. " string " .. clubid);
+    if not obj.club.members[0].unlimited_limit then return end
+    if not obj.club.members[1].unlimited_limit then return end
+
+    if not obj.club.members[0].status == "msActive" then return end
+    if not obj.club.members[1].status == "msActive" then return end
     client1:sendMessage("scCreateGame", { club_mongoid = clubid, game_type = "gtHoldem", game_limit = "glNoLimit", blinds = "gb5x5", seats = 5, gamename = "TBL#1" });
   end
 end
 
 local club_once = true;
 handlers.seClubChange = function (self, obj)
+  --dump("club change", obj);
   if self.name == "bot1" and club_once then
     club_once = false;
+    dbg("clubid " .. clubid .. " len " .. #clubid);
     client1:sendMessage("scApproveClubMember", { club_mongo_id = clubid, player_mongo_id = bot2_id, flag = true });
   end
 end
@@ -84,22 +101,56 @@ handlers.srCreateClubReply = function (self, obj)
 end
 
 handlers.srCreateGameOk = function (self, obj)
-  dump("made game", obj);
   client1:sendMessage("scTableJoin", { _id = obj._id });
   client2:sendMessage("scTableJoin", { _id = obj._id });
 end
 
-local state = 0;
+local leaving = false;
 handlers.seTableStatus = function (self, obj)
-  dump("table status", obj);
-  if state == 0 and obj.state == "tsIdle" then
-    self:sendMessage("scTableSit", { game_id = obj.table_mongo_id, seat_index = self.seat, chips = 200 });
+  if leaving then dump("leaving", obj); end
+  local show_events = true;
+  if obj.handid then
+    if obj.state == "tsPreFlop" then
+      show_events = false;
+    elseif obj.state == "tsFlop" then
+      show_events = false;
+    elseif obj.state == "tsTurn" then
+      show_events = false;
+    elseif obj.state == "tsRiver" then
+      show_events = false;
+    else
+      dbg(self.name.." TS state#"..obj.handid..":"..obj.state);
+    end
+  else
+    dbg(self.name.." TS state#:"..obj.state);
+  end
+  if show_events and obj.events then
+    for k,v in ipairs(obj.events) do
+      dbg(k.." = " .. v.event);
+      if v.event == "teWinning" then
+        if obj.handid == 3 then
+          self:sendMessage("scTableSitOutNextHand", { table_mongo_id = obj.table_mongo_id, flag = true });
+          leaving = true;
+        end
+      end
+    end
+  end
+  --dump("table status", obj);
+  if self.state == 0 and obj.state == "tsIdle" then
+    if self.sitting then
+      self:sendMessage("scTablePlayNow", { _id = obj.table_mongo_id });
+      self.state = 1;
+    else
+      self:sendMessage("scTableSit", { game_id = obj.table_mongo_id, seat_index = self.seat, chips = 20000 });
+      self.sitting = true;
+    end
+  elseif (obj.state == "tsPreFlop" or obj.state == "tsFlop" or obj.state == "tsTurn" or obj.state == "tsRiver") and self.state == 1 then
+    if self.seat == obj.current_seat then
+      dbg(self.name.." my turn!");
+      self:sendMessage("scPutChips", { table_mongo_id = obj.table_mongo_id, chip_amount = obj.minimum_bet, current_state = obj.state });
+    end
   end
 end
 
-function onEvent(code, obj, id)
-end
-
-setTimeout(abort, 0, 5);
+setTimeout(tick, 0, 1);
 return true
-

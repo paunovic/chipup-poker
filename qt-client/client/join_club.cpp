@@ -1,6 +1,6 @@
 #include "join_club.h"
 #include "ui_join_club.h"
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "pokermain.h"
 
 JoinClub::JoinClub(QWidget *parent) : QDialog(parent), ui(new Ui::JoinClub) {

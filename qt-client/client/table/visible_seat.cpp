@@ -52,7 +52,7 @@ void VisibleSeat::resizeEvent(QResizeEvent*) {
 		height = ((qreal)avatar.height()*width)/avatar.width();
 	} else {
 		height = width;
-		qWarning("avatar missing from a seat");
+		//qWarning("avatar missing from a seat");
 	}
 	float x,y;
 	if (jsobj->left()) x = this->width() * 0.68;
@@ -92,7 +92,7 @@ void VisibleSeat::paintEvent(QPaintEvent *) {
 	int targetheight = heightForWidth(width());
 	if (!jsobj->getEmpty()) {
 		if (avatar.width()) painter.drawPixmap(avatarLocation,avatar,QRectF());
-		else qWarning("avatar missing from a seat");
+		//else qWarning("avatar missing from a seat");
 	}
 	painter.drawPixmap(0,0,width(),targetheight,pix);
 	if (!jsobj->getEmpty()) {

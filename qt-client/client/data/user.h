@@ -2,7 +2,7 @@
 #define DATA_USER_H
 
 #include <QObject>
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 
 namespace Data {
 

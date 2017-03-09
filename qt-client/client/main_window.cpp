@@ -196,10 +196,11 @@ void MainWindow::on_actionContact_Us_triggered() {
 void MainWindow::on_actionDisconnect_triggered() {
 	core->testDisconnect();
 }
+
 void MainWindow::resizeEvent(QResizeEvent*) {
-	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
-	QSize priv = ui->gridPrivateClubs->size();
-	qDebug() << "root size" << size() << "private size" << priv << (priv/em);
+  int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
+  QSize priv = ui->gridPrivateClubs->size();
+  //qDebug() << "root size" << size() << "private size" << priv << (priv/em);
 }
 
 void MainWindow::on_actionCrash_triggered()

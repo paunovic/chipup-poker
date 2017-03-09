@@ -1,6 +1,6 @@
 #include "clubmember.h"
 
-#include "cpp/message.pb.h"
+#include <poker/message.pb.h>
 #include "pokermain.h"
 #include "club.h"
 
@@ -11,12 +11,14 @@ ClubMember::ClubMember()
 }
 
 void ClubMember::update(Poker::ClubMember &in) {
-	std::string temp = in._id();
-	_id = QByteArray(temp.data(),temp.length());
+  std::string temp = in._id();
+  _id = QByteArray(temp.data(),temp.length());
 
-	if (in.has_suspended()) {
-		suspended = in.suspended();
-	} else suspended = false;
+  if (in.has_status()) {
+    suspended = in.status() == Poker::ClubMember::msSuspended;
+  } else {
+    suspended = false;
+  }
 
 	if (in.has_balance_limit()) {
 		balance_limit = in.balance_limit();
