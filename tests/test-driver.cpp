@@ -164,6 +164,7 @@ void init_events() {
   x(scTableJoin, Game); // 89
   x(scTableLeave, Game); // 90
   x(scTableSit, TableSit); // 91
+  x(scTableStandUp, Game); // 92
 
   x(scPutChips, PutChips); // 97
 
