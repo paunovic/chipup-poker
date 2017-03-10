@@ -1,48 +1,50 @@
+#!/usr/bin/env node
 var fs = require('fs');
 
 var config = require('./config');
 
 var rand = -1;
 var getRandom;
+
 if (config.random_seed) {
-	var srand = require('srand');
-	srand.seed(config.random_seed);
-	getRandom = function (size,cb) {
-		var buffer = new Buffer(size);
-		for (var x=0; x<size; x++) {
-			buffer[x] = parseInt(srand.random() * 255);
-		}
-		cb(buffer);
-	}
+  var srand = require('srand');
+  srand.seed(config.random_seed);
+  getRandom = function (size,cb) {
+    var buffer = new Buffer(size);
+    for (var x=0; x<size; x++) {
+      buffer[x] = parseInt(srand.random() * 255);
+    }
+    cb(buffer);
+  }
 } else {
-fs.open('/dev/urandom','r',function (err,fd) {
-	if (err) {
-		getRandom = function winGetRandom(size,callback) {
-			var buffer = new Buffer(size);
-			for (var x=0; x<size; x++) buffer[x] = Math.floor(Math.random() * 255);
-			callback(buffer);
-		}
-		console.log('falling back to Math.random, reason: cant open random:',err);
-	} else {
-		rand = fd;
-		getRandom = function getRandom(size,callback) {
-			var buffer = new Buffer(size);
-			fs.read(rand,buffer,0,size,null,function () {
-				callback(buffer);
-			});
-		}
-	}
-	if (require.main === module) {
-		var deck = new Deck();
-		console.log('initial  deck is',deck.prettyPrint());
-		deck.shuffle(function () {
-			console.log('shuffled deck is',deck.prettyPrint());
-			var hand = new Hand();
-			deck.draw(3,hand);
-			console.log('first 3 cards are',hand.prettyPrint());
-		});
-	}
-});
+  fs.open('/dev/urandom','r',function (err,fd) {
+    if (err) {
+      getRandom = function winGetRandom(size,callback) {
+        var buffer = new Buffer(size);
+        for (var x=0; x<size; x++) buffer[x] = Math.floor(Math.random() * 255);
+        callback(buffer);
+      }
+      console.log('falling back to Math.random, reason: cant open random:',err);
+    } else {
+      rand = fd;
+      getRandom = function getRandom(size,callback) {
+        var buffer = new Buffer(size);
+        fs.read(rand,buffer,0,size,null,function () {
+          callback(buffer);
+        });
+      }
+    }
+    if (require.main === module) {
+      var deck = new Deck();
+      console.log('initial  deck is',deck.prettyPrint(true));
+      deck.shuffle(function () {
+        console.log('shuffled deck is',deck.prettyPrint(true));
+        var hand = new Hand();
+        deck.draw(3,hand);
+        console.log('first 3 cards are',hand.prettyPrint(true));
+      });
+    }
+  });
 }
 module.exports.Deck = Deck;
 module.exports.Hand = Hand;
@@ -95,27 +97,34 @@ function getSuit(code,spaces) {
 		}
 	}
 }
+
 Deck.prototype.shuffle = function shuffle(callback) {
-	var output = [];
-	var recurse = function () {
-		if (this.cards.length) {
-			getRandom(2,function (buffer) {
-				var index2 = buffer.readUInt16LE(0) % this.cards.length;
-				var index = 0;
-				//console.log(index2);
-				var x = this.cards.splice(index2,1);
-				output.push(x[0]);
-				recurse();
-			}.bind(this));
-		} else {
-			this.cards = output;
-			// sidepots
-			//this.cards = [6,49,39,21,45,11,25,38,29,33,1,30,43,4,3,23,20,40,19,8,42,35,18,14,2,32,31,47,27,24,26,22,28,44,37,41,51,46,12,9,0,10,36,17,5,16,7,15,34,50,48,13];
-			callback();
-		}
-	}.bind(this);
-	recurse();
+  var output = [];
+  var stack = [];
+  if (config.stack) stack = config.stack;
+  var recurse = function () {
+    if (this.cards.length) {
+      getRandom(2,function (buffer) {
+        var index2 = buffer.readUInt16LE(0) % this.cards.length;
+        if (stack.length) {
+          var next = stack.shift();
+          var idx = this.cards.indexOf(next);
+          if (idx != -1) index2 = idx;
+        }
+        var x = this.cards.splice(index2,1);
+        output.push(x[0]);
+        recurse();
+      }.bind(this));
+    } else {
+      this.cards = output;
+      // sidepots
+      //this.cards = [6,49,39,21,45,11,25,38,29,33,1,30,43,4,3,23,20,40,19,8,42,35,18,14,2,32,31,47,27,24,26,22,28,44,37,41,51,46,12,9,0,10,36,17,5,16,7,15,34,50,48,13];
+      callback();
+    }
+  }.bind(this);
+  recurse();
 }
+
 // TODO, use the same logic as the DAG, dont shuffle
 Deck.prototype.draw = function (count,hand) {
 	//console.log('before:'+this.prettyPrint());
