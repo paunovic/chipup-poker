@@ -58,6 +58,7 @@ in {
         enable = true;
       };
       nginx = {
+        clientMaxBodySize = "20m";
         enable = true;
         virtualHosts = {
           ${config.networking.hostName} = {
