@@ -29,9 +29,9 @@ unix {
 }
 mac {
   SOURCES += ../mac/poker/message.pb.cc ../mac/poker/common.pb.cc ../mac/poker/extra.pb.cc
-  INCLUDEPATH += ../mac/ /usr/local/include/
+  INCLUDEPATH += ../mac/ ../protobuf/protobuf-2.5.0/src/
   #LIBS +=  -F/Users/clever -framework Breakpad
-  LIBS += -lgoogle-breakpad -framework CoreFoundation -L/usr/local/lib/ -lprotobuf-lite
+  LIBS += -lgoogle-breakpad -framework CoreFoundation -L../protobuf/
 }
 linux {
   LIBS += -lgoogle-breakpad -lprotos

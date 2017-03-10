@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = lib
-INCLUDEPATH += .
+INCLUDEPATH += . protobuf-2.5.0/src
 
 CONFIG += static
 
@@ -36,6 +36,7 @@ SOURCES += protobuf-2.5.0/src/google/protobuf/message_lite.cc \
     protobuf-2.5.0/src/google/protobuf/stubs/stringprintf.cc \
     protobuf-2.5.0/src/google/protobuf/descriptor_database.cc \
     protobuf-2.5.0/src/google/protobuf/stubs/structurally_valid.cc \
+    protobuf-2.5.0/src/google/protobuf/io/strtod.cc
 
 HEADERS += \
     config.h

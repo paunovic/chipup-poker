@@ -12,13 +12,21 @@ QT += script network gui testlib scripttools
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia uitools
 lessThan(QT_MAJOR_VERSION,5): CONFIG += uitools
 INCLUDEPATH += ../client/
+
 win32 {
-LIBS += -L../../protobuf/ -L../protobuf/release/ -L../protobuf/debug/
+ LIBS += -L../../protobuf/ -L../protobuf/release/ -L../protobuf/debug/
 }
 unix {
-LIBS += -L../protobuf/
+ LIBS += -L../protobuf/
 }
-LIBS += -lprotobuf -lprotos
+mac {
+  INCLUDEPATH += ../mac/ ../protobuf/protobuf-2.5.0/src/
+  SOURCES += ../mac/poker/message.pb.cc ../mac/poker/extra.pb.cc ../mac/poker/common.pb.cc
+}
+linux {
+  LIBS += -lprotos
+}
+LIBS += -lprotobuf
 #message($$QMAKESPEC)
 
 DEFINES += testcase

@@ -6,11 +6,14 @@ TEMPLATE = subdirs
 
 # Directories
 #linux {
-SUBDIRS += google-breakpad
+  SUBDIRS += google-breakpad
 #}
 win32 {
-#SUBDIRS += google-breakpad
-SUBDIRS += protobuf
+  #SUBDIRS += google-breakpad
+  SUBDIRS += protobuf
+}
+mac {
+  SUBDIRS += protobuf
 }
 SUBDIRS += client test
 
