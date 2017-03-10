@@ -9,6 +9,6 @@ cp -vi ${../common.proto} common.proto
 cp -vir ${../google} google
 protoc --cpp_out=. message.proto extra.proto common.proto
 for x in *.cc; do g++ -c $x -o ''${x%.*}.o ; done
-cp -vi *.h $out/include/poker/
+cp -vi *.h *.cc $out/include/poker/
 ar rvs $out/lib/libprotos.a *.o
 ''

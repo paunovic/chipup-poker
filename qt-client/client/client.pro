@@ -14,15 +14,28 @@ TEMPLATE = app
 #CONFIG += qt.debug debug
 QMAKE_INFO_PLIST = Info.plist
 QMAKE_CXXFLAGS += -g
-win32 {
-  INCLUDEPATH += ../protobuf/ ../google-breakpad/
-}
-unix {
-  INCLUDEPATH += ../google-breakpad/
-}
 TARGET = chipuppoker
 target.path = /${out}/bin
 INSTALLS += target
+
+win32 {
+  INCLUDEPATH += ../protobuf/ ../google-breakpad/
+  LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/ -L../google-breakpad/release/ -lgoogle-breakpad
+  DEFINES += BUILDNUM=$(BUILDNUM)
+}
+unix {
+  INCLUDEPATH += ../google-breakpad/
+  LIBS += -L../protobuf/ -L../google-breakpad/
+}
+mac {
+  SOURCES += ../mac/poker/message.pb.cc ../mac/poker/common.pb.cc ../mac/poker/extra.pb.cc
+  INCLUDEPATH += ../mac/
+  #LIBS +=  -F/Users/clever -framework Breakpad
+  LIBS += -lgoogle-breakpad -framework CoreFoundation
+}
+linux {
+  LIBS += -lgoogle-breakpad -lprotos
+}
 
 # to compile into a dmg:
 # codesign -f -s "Tox CI (jenkins) CSA" qtox.app --deep
@@ -30,20 +43,6 @@ INSTALLS += target
 # cd osx_img
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
-win32 {
-LIBS += -L../protobuf/release/ -L../protobuf/debug/ -L../google-breakpad/debug/ -L../google-breakpad/release/ -lgoogle-breakpad
-DEFINES += BUILDNUM=$(BUILDNUM)
-}
-unix {
-LIBS += -L../protobuf/ -L../google-breakpad/
-}
-linux {
-LIBS += -lgoogle-breakpad -lprotos
-}
-mac {
-#LIBS +=  -F/Users/clever -framework Breakpad
-LIBS += -lgoogle-breakpad -framework CoreFoundation
-}
 LIBS += -lprotobuf
 SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
     pokermain.cpp pokermain_shared.cpp \
