@@ -26,14 +26,14 @@ handlers["srLoginReply"] = function (self, obj)
   if state == 0 then
     client1:scCreateClub(true, "club name", "password", 30);
   else
-    if obj.clubs[0].members[0].unlimited_limit == true then
+    if obj.clubs[1].members[1].unlimited_limit == true then
       set_success(true);
     end
   end
 end
 handlers["srCreateClubReply"] = function (self, obj)
   dump("made club", obj);
-  if obj.club.members[0].unlimited_limit then
+  if obj.club.members[1].unlimited_limit then
     self:sendMessage("scLogout");
   end
 end
