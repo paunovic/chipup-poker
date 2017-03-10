@@ -1,5 +1,7 @@
 package Poker;
 
+option optimize_for = SPEED;
+
 import "common.proto";
 import "extra.proto";
 

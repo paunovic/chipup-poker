@@ -1,5 +1,7 @@
 package Poker;
 
+option optimize_for = SPEED;
+
 message RpcMessage {
 	required int32 MethodId = 1;
 	optional int32 DataSize = 2 [ default = 0];
