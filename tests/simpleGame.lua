@@ -22,12 +22,15 @@ function onEvent(client, code, obj)
   end
 end
 
+
 local client1 = makeClient(hostname, port, onEvent)
 local client2 = makeClient(hostname, port, onEvent)
 client1.name = "bot1";
 client2.name = "bot2";
 client1.seat = 1;
 client2.seat = 2;
+client1.leaving = 0;
+client2.leaving = 0;
 
 handlers.srHello = function (self, obj)
   self:sendMessage("scRegister", { displayName = self.name, password = "password", email = self.name .. "@example.com" })
@@ -35,6 +38,11 @@ end
 handlers.srRegisterReply = function (self, obj)
   dbg("register reply#".. self.name);
   self:sendMessage("scLogin", { username = self.name, password = "password" });
+end
+
+handlers.srLogout = function (self)
+  self:disconnect();
+  set_success(true);
 end
 
 client1:connect()
@@ -74,11 +82,11 @@ end
 
 handlers.srJoinClubReply = function (self, obj)
   if obj.status == "csSuccess" then
-    if not obj.club.members[0].unlimited_limit then return end
     if not obj.club.members[1].unlimited_limit then return end
+    if not obj.club.members[2].unlimited_limit then return end
 
-    if not obj.club.members[0].status == "msActive" then return end
     if not obj.club.members[1].status == "msActive" then return end
+    if not obj.club.members[2].status == "msActive" then return end
     client1:sendMessage("scCreateGame", { club_mongoid = clubid, game_type = "gtHoldem", game_limit = "glNoLimit", blinds = "gb5x5", seats = 5, gamename = "TBL#1" });
   end
 end
@@ -105,9 +113,19 @@ handlers.srCreateGameOk = function (self, obj)
   client2:sendMessage("scTableJoin", { _id = obj._id });
 end
 
-local leaving = false;
 handlers.seTableStatus = function (self, obj)
-  if leaving then dump("leaving", obj); end
+  --if self.leaving == 2 and self.seat == 1 then dump(self.name .. " leaving " .. self.leaving, obj); end
+  if self.leaving == 1 then
+    for k,v in ipairs(obj.seats) do
+      if v.seat_index == self.seat then
+        if v.status == "psOutOfPlay" then
+          dbg(self.name.." need to leave");
+          self:sendMessage("scTableStandUp", { _id = obj.table_mongo_id });
+          self.leaving = 2;
+        end
+      end
+    end
+  end
   local show_events = true;
   if obj.handid then
     if obj.state == "tsPreFlop" then
@@ -127,15 +145,23 @@ handlers.seTableStatus = function (self, obj)
   if show_events and obj.events then
     for k,v in ipairs(obj.events) do
       dbg(k.." = " .. v.event);
-      if v.event == "teWinning" then
+      if v.event == "teStandUp" then
+        if v.seat == self.seat then
+          dbg(self.name.." has stood up, leaving");
+          self:sendMessage("scTableLeave", { _id = obj.table_mongo_id });
+          setTimeout(function ()
+            self:sendMessage("scLogout");
+          end, 0, 2)
+        end
+      elseif v.event == "teWinning" then
         if obj.handid == 3 then
           self:sendMessage("scTableSitOutNextHand", { table_mongo_id = obj.table_mongo_id, flag = true });
-          leaving = true;
+          self.leaving = 1;
         end
       end
     end
   end
-  --dump("table status", obj);
+  --dump(self.name.." table status", obj);
   if self.state == 0 and obj.state == "tsIdle" then
     if self.sitting then
       self:sendMessage("scTablePlayNow", { _id = obj.table_mongo_id });
@@ -150,6 +176,9 @@ handlers.seTableStatus = function (self, obj)
       self:sendMessage("scPutChips", { table_mongo_id = obj.table_mongo_id, chip_amount = obj.minimum_bet, current_state = obj.state });
     end
   end
+end
+handlers.srTableStandUpOk = function (self, obj)
+  handlers.seTableStatus(self, obj);
 end
 
 setTimeout(tick, 0, 1);

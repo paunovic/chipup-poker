@@ -11,6 +11,9 @@ class LuaTester;
 extern Context *gContext;
 
 inline void set_context(Context *context) { gContext = context; }
+inline const char *lua_pushstring(lua_State *L, const std::string str) {
+  return lua_pushlstring(L, str.c_str(), str.length());
+}
 
 class Client {
 public:

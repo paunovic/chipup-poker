@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <iomanip>
 
 #include <event2/thread.h>
 #include <event2/event.h>
@@ -146,6 +147,8 @@ void init_events() {
 
   x(srCreateGameOk, Game); // 24
 
+  x(srTableStandUpOk, TableStatus); // 29
+
   x(seClubChange, Club); // 53
 
   x(seGameChange, Game); // 55
@@ -156,6 +159,7 @@ void init_events() {
   x(scHello, HelloParams);
   x(scLogin, LoginParams);
   x(scRegister, RegisterParams); // 73
+
   x(scCreateClub, Club); // 76
   x(scJoinClub, Club); // 77
 
@@ -343,7 +347,7 @@ static int debug_print(lua_State *L) {
   steady_clock::time_point now = steady_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(now - tester->start);
   double time = time_span.count();
-  cout << "<" << time << "> ";
+  cout << "<" << setw(9) << time << "> ";
   for (int i=1; i <= lua_gettop(L); i++) {
     lua_pushvalue(L, i);
     if (lua_type(L, -1) == LUA_TSTRING) {
@@ -410,7 +414,7 @@ void LuaTester::runTest(string path, string hostname, uint16_t port) {
     cout << "load error:" << lua_tostring(L, -1) << "\n";
   }
   assert(result == LUA_OK);
-  lua_pushstring(L, hostname.c_str());
+  lua_pushstring(L, hostname);
   lua_pushinteger(L, port);
 
   result = lua_pcall(L, 2, 1, 0);
@@ -449,16 +453,16 @@ void field_to_lua(lua_State *L, const google::protobuf::Reflection *r, const goo
     lua_pushboolean(L, r->GetBool(msg, f));
     break;
   case FieldDescriptor::CPPTYPE_ENUM: // 8
-    lua_pushstring(L, r->GetEnum(msg, f)->name().c_str());
+    lua_pushstring(L, r->GetEnum(msg, f)->name());
     break;
   case FieldDescriptor::CPPTYPE_STRING:
-    lua_pushstring(L, r->GetStringReference(msg, f, &scratch).c_str());
+    lua_pushstring(L, r->GetStringReference(msg, f, &scratch));
     break;
   case FieldDescriptor::CPPTYPE_MESSAGE:
     message_to_table(L, r->GetMessage(msg, f));
     break;
   default:
-    lua_pushstring(L, (string("other") + to_string(f->cpp_type())).c_str());
+    lua_pushstring(L, (string("other") + to_string(f->cpp_type())));
   }
 }
 
@@ -473,16 +477,16 @@ void field_to_lua(lua_State *L, const google::protobuf::Reflection *r, const goo
     lua_pushinteger(L, r->GetRepeatedUInt32(msg, f, index));
     break;
   case FieldDescriptor::CPPTYPE_ENUM:
-    lua_pushstring(L, r->GetRepeatedEnum(msg, f, index)->name().c_str());
+    lua_pushstring(L, r->GetRepeatedEnum(msg, f, index)->name());
     break;
   case FieldDescriptor::CPPTYPE_STRING:
-    lua_pushstring(L, r->GetRepeatedStringReference(msg, f, index, &scratch).c_str());
+    lua_pushstring(L, r->GetRepeatedStringReference(msg, f, index, &scratch));
     break;
   case FieldDescriptor::CPPTYPE_MESSAGE:
     message_to_table(L, r->GetRepeatedMessage(msg, f, index));
     break;
   default:
-    lua_pushstring(L, (string("other") + to_string(f->cpp_type())).c_str());
+    lua_pushstring(L, (string("other") + to_string(f->cpp_type())));
   }
 }
 
@@ -500,7 +504,7 @@ void message_to_table(lua_State *L, const google::protobuf::Message &msg) {
       int count = r->FieldSize(msg, f);
       lua_createtable(L, count, 0);
       for (int i=0; i<count; i++) {
-        lua_pushinteger(L, i);
+        lua_pushinteger(L, i + 1);
         field_to_lua(L, r, msg, f, i);
         lua_settable(L, -3);
       }
@@ -526,7 +530,7 @@ void LuaTester::event(string code, PokerClient *client) {
 
   lua_pushvalue(L, -2);
   lua_remove(L, -3);
-  lua_pushstring(L, code.c_str());
+  lua_pushstring(L, code);
 
   int result = lua_pcall(L, 2, 0, 0);
   if (result != LUA_OK) {
@@ -549,7 +553,7 @@ void LuaTester::event(string code, const google::protobuf::Message &msg, PokerCl
 
   lua_pushvalue(L, -2);
   lua_remove(L, -3);
-  lua_pushstring(L, code.c_str());
+  lua_pushstring(L, code);
   message_to_table(L, msg);
 
   int result = lua_pcall(L, 3, 0, 0);
