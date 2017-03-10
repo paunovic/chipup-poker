@@ -25,17 +25,19 @@ win32 {
 }
 unix {
   INCLUDEPATH += ../google-breakpad/
-  LIBS += -L../protobuf/ -L../google-breakpad/
+  LIBS += -L../google-breakpad/
 }
 mac {
   SOURCES += ../mac/poker/message.pb.cc ../mac/poker/common.pb.cc ../mac/poker/extra.pb.cc
   INCLUDEPATH += ../mac/ /usr/local/include/
   #LIBS +=  -F/Users/clever -framework Breakpad
-  LIBS += -lgoogle-breakpad -framework CoreFoundation
+  LIBS += -lgoogle-breakpad -framework CoreFoundation -L/usr/local/lib/
 }
 linux {
   LIBS += -lgoogle-breakpad -lprotos
 }
+
+LIBS += -lprotobuf
 
 # to compile into a dmg:
 # codesign -f -s "Tox CI (jenkins) CSA" qtox.app --deep
@@ -43,7 +45,6 @@ linux {
 # cd osx_img
 # ln -s /Applications Applications
 # hdiutil create -format UDBZ -verbose -ov -imagekey zlib-level=9 -volname "ChipUP Poker" -srcfolder . chipuppoker.dmg
-LIBS += -lprotobuf
 SOURCES += main.cpp loginwindow.cpp data/chat.cpp \
     pokermain.cpp pokermain_shared.cpp \
     main_window.cpp club.cpp game.cpp join_club.cpp createclub.cpp \
