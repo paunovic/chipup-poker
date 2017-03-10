@@ -282,7 +282,7 @@ Server.prototype.addMac = function (req,res) {
 	console.log(req.body,req.files);
 	if (req.files && req.files.dmg) {
 		var localFile = req.files.dmg.path;
-		var name1 = localFile.split('/')[1];
+		var name1 = localFile.split('/').pop();
 		var version = 'FIXME';
 		var revision = req.body.githash;
 		var debug ='release';
