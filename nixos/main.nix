@@ -11,6 +11,7 @@ in {
       notificationSender = "clever@chipuppoker.com";
       port = 3001;
       listenHost = "localhost";
+      useSubstitutes = true;
     };
     fail2ban = {
       enable = true;
@@ -148,8 +149,10 @@ in {
     };
     extraGroups.sslkeys.gid = 500;
   };
+  nix.trustedUsers = [ "builder" ];
   nix.buildMachines = [
-    { hostName = "dev-server.chipuppoker.com"; maxJobs = 1; speedFactor = 1; sshKey = "/var/lib/hydra/queue-runner/.ssh/id_rsa"; sshUser = "builder"; system = "x86_64-linux"; }
+    { hostName = "dev-server.chipuppoker.com"; maxJobs = 1; speedFactor = 1; sshKey = "/var/lib/hydra/queue-runner/.ssh/id_rsa"; sshUser = "builder"; system = "x86_64-linux"; supportedFeatures = [ "nixos-test" "big-parallel" ]; }
+    { hostName = "192.168.123.11"; maxJobs = 4; speedFactor = 1; sshKey = "/var/lib/hydra/queue-runner/.ssh/id_rsa"; sshUser = "builder"; system = "x86_64-linux"; supportedFeatures = [ "kvm" "nixos-test" "big-parallel" ]; }
   ];
   networking.firewall = {
     allowedTCPPorts = [ 25 12346 9989 53 ];

@@ -58,7 +58,7 @@ in {
         enable = true;
       };
       nginx = {
-        clientMaxBodySize = "20m";
+        clientMaxBodySize = "100m";
         enable = true;
         virtualHosts = {
           ${config.networking.hostName} = {
@@ -78,7 +78,7 @@ in {
     systemd.services.poker = {
       description = "main poker process";
       wantedBy = [ "multi-user.target" ];
-      path = with pkgs; [ poker innoextract bsdiff breakpad ];
+      path = with pkgs; [ poker innoextract bsdiff breakpad gnutar bzip2 ];
       enable = true;
       environment = {
         CONFIG_FILE = pkgs.writeText "poker.json" (builtins.toJSON poker_config);
