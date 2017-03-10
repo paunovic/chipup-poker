@@ -12,8 +12,8 @@ child.exec('git rev-parse HEAD',function (err,stdout,stderr) {
 });
 
 function finish(revision) {
-	//doUpload(version,'master.chipuppoker.com');
-	doUpload(revision,'dev-server.chipuppoker.com');
+  doUpload(revision,'chipuppoker.com');
+  doUpload(revision,'dev-server.chipuppoker.com');
 	//doUpload(version,'poker.angeldsis.com');
 }
 function doUpload(revision,host) {
