@@ -48,16 +48,30 @@ void ClubLobby::setClub(Data::Club *club) {
 
 	if (club->owner == core->self()->id) ui->stackOwner->setCurrentIndex(0);
 	else ui->stackOwner->setCurrentIndex(1);
+  on_btClubHome_clicked();
 }
+
 void ClubLobby::on_btClubHome_clicked() {
-	ui->stackedWidget->setCurrentIndex(0);
+  ui->stackedWidget->setCurrentIndex(0);
+  ui->btClubHome->setChecked(true);
+  ui->btTables->setChecked(false);
+  ui->btStats->setChecked(false);
 }
+
 void ClubLobby::on_btTables_clicked() {
-	ui->stackedWidget->setCurrentIndex(1);
+  ui->stackedWidget->setCurrentIndex(1);
+  ui->btClubHome->setChecked(false);
+  ui->btTables->setChecked(true);
+  ui->btStats->setChecked(false);
 }
+
 void ClubLobby::on_btStats_clicked() {
-	ui->stackedWidget->setCurrentIndex(2);
+  ui->stackedWidget->setCurrentIndex(2);
+  ui->btClubHome->setChecked(false);
+  ui->btTables->setChecked(false);
+  ui->btStats->setChecked(true);
 }
+
 void ClubLobby::user_selected(const QItemSelection &selected, const QItemSelection &) {
 	if (selected.indexes().length() == 0) return;
 

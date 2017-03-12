@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>821</width>
     <height>600</height>
    </rect>
   </property>
@@ -32,7 +32,9 @@ QPushButton:disabled {
 	border-image: url(:resources/button_mainform_disabled.png) 0 0 0 0 stretch stretch;
 	color: #6e6e6e;
 }
-</string>
+QPushButton:checked {
+  color: green;
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -98,11 +100,14 @@ QPushButton:disabled {
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="tabSelection">
       <item>
        <widget class="QPushButton" name="btClubHome">
         <property name="text">
          <string>CLUB HOME</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -111,12 +116,18 @@ QPushButton:disabled {
         <property name="text">
          <string>TABLES</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btStats">
         <property name="text">
          <string>STATS</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -138,7 +149,7 @@ QPushButton:disabled {
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
@@ -308,30 +319,95 @@ QPushButton:disabled {
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
-       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0">
+      <widget class="QWidget" name="page_tables">
+       <layout class="QVBoxLayout" name="horizontalLayout_4" stretch="0,1,0">
         <item>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pushButton_14">
+         <widget class="QLabel" name="lblTables">
+          <property name="text">
+           <string>Tables</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeView" name="treeView"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QPushButton" name="pbCreateTable">
             <property name="text">
-             <string>PushButton</string>
+             <string>Create a Table...</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="pushButton_15">
+          <item>
+           <widget class="QPushButton" name="pbCloseTable">
             <property name="text">
-             <string>PushButton</string>
+             <string>Close Table...</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="page_3">
-       <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QTreeView" name="treeView_2"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QPushButton" name="pbDeleteStats">
+              <property name="text">
+               <string>Delete Selected Stats</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,0">
+          <item>
+           <widget class="QTreeView" name="treeView_3"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="treeView_4"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -342,8 +418,8 @@ QPushButton:disabled {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>19</height>
+     <width>821</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>
