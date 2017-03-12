@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
 	core->game_model.setFilter(NULL);
 
 	game_selection_model = new QItemSelectionModel(&core->game_model);
-	connect(game_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(game_selected(const QItemSelection&,const QItemSelection&)));
+  //connect(game_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(game_selected(const QItemSelection&,const QItemSelection&)));
 	ui->gridGames->setModel(&core->game_model);
 	ui->gridGames->setSelectionModel(game_selection_model);
 	core->RegisterListener(this);

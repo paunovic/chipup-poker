@@ -296,40 +296,40 @@ void PokerMain::fileSaved(Core::UpdateFileInfo)  {
 }
 
 void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
-	Poker::HelloReply hr;
-	Poker::PingReply ping_reply;
-	int recv_time = uptime.elapsed();
+  Poker::HelloReply hr;
+  Poker::PingReply ping_reply;
+  int recv_time = uptime.elapsed();
 
-	switch (code) {
-	case Poker::srHello:
-		hr.ParseFromString(data);
-		validCharacters = hr.valid_chars_regex();
-		max_play_time = hr.max_play_time();
-		send_ping();
-		if (allowUpdates && hr.update_files_size()) {
-			doUpdate(hr);
-		} else {
-			uploader->checkForDumps();
-			emit protocol_ready(true);
-			if (reconnectState == SignedIn) {
-				doLogin(username,password);
-			}
-		}
-		break;
-	case Poker::srLoginReply: // 2
-		srLoginReply(data);
-		break;
-    case Poker::srRegisterReply: { // 3
-        Poker::RegisterReply rr;
-        rr.ParseFromString(data);
-        switch (rr.status()) {
-        case RegisterReply::regSuccess:
-            emit register_success();
-            break;
-        default:
-            qDebug() << "srRegisterReply unhandled status" << rr.status();
-        }
-        break; }
+  switch (code) {
+  case Poker::srHello:
+    hr.ParseFromString(data);
+    validCharacters = hr.valid_chars_regex();
+    max_play_time = hr.max_play_time();
+    send_ping();
+    if (allowUpdates && hr.update_files_size()) {
+      doUpdate(hr);
+    } else {
+      uploader->checkForDumps();
+      emit protocol_ready(true);
+      if (reconnectState == SignedIn) {
+        doLogin(username,password);
+      }
+    }
+    break;
+  case Poker::srLoginReply: // 2
+    srLoginReply(data);
+    break;
+  case Poker::srRegisterReply: { // 3
+    Poker::RegisterReply rr;
+    rr.ParseFromString(data);
+    switch (rr.status()) {
+    case RegisterReply::regSuccess:
+      emit register_success();
+      break;
+    default:
+      qDebug() << "srRegisterReply unhandled status" << rr.status();
+    }
+    break; }
 	case Poker::srCreateClubReply: { // 4
 		Poker::ClubCommandReply ccr;
 		ccr.ParseFromString(data);
@@ -411,55 +411,54 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
 		emit secondary_login();
 		break;
-	case Poker::srJoinClubReply: {
-		// TODO, parse games in ccr
-		Poker::ClubCommandReply ccr;
-		ccr.ParseFromString(data);
-		qDebug() << "status" << ccr.status();
-		switch (ccr.status()) {
-		case ClubCommandReply::csSuccess: {
-			std::string clubid1 = ccr.club()._id();
-			QByteArray clubid = QByteArray(clubid1.data(),clubid1.length());
-			qDebug() << "clubid" << clubid.toHex();
-			bool clubfound = false;
-			int i;
-			for (i=0; i<clubs.size(); i++) {
-				if (clubs.at(i)->clubid == clubid) {
-					Data::Club *c = clubs.at(i);
-					bool old_private = c->is_private;
-					c->update(ccr.club());
-					clubs.modified(c,old_private);
-					clubfound = true;
-					break;
-				}
-			}
-			if (!clubfound) {
-				// TODO
-				Data::Club *c = new Data::Club();
-				c->update(ccr.club());
-				clubs.add(c);
-			}
-			for (i=0; i<ccr.games_size(); i++) {
-				Poker::Game g = ccr.games(i);
-				Data::Game *g_out = new Data::Game;
-				g_out->update(g);
-				games.append(g_out);
-				qDebug() << "found game" << g_out->gameid.toHex();
-			}
-			emit clubs_changed();
-			break; }
-		case ClubCommandReply::csInvalidClubId: {
-			QMessageBox::warning(0,tr("Error"),tr("Invalid Club ID"));
-			break; }
-		default:
-			// TODO
-			qDebug() << "unhandled srJoinClubReply status" << ccr.status();
-		}
-		break;
-	}
-	case Poker::seChat: // 50
-		seChat(data);
-		break;
+  case Poker::srJoinClubReply: {
+    // TODO, parse games in ccr
+    Poker::ClubCommandReply ccr;
+    ccr.ParseFromString(data);
+    qDebug() << "status" << ccr.status();
+    switch (ccr.status()) {
+    case ClubCommandReply::csSuccess: {
+      std::string clubid1 = ccr.club()._id();
+      QByteArray clubid = QByteArray(clubid1.data(),clubid1.length());
+      qDebug() << "clubid" << clubid.toHex();
+      bool clubfound = false;
+      int i;
+      for (i=0; i<clubs.size(); i++) {
+        if (clubs.at(i)->clubid == clubid) {
+          Data::Club *c = clubs.at(i);
+          bool old_private = c->is_private;
+          c->update(ccr.club());
+          clubs.modified(c,old_private);
+          clubfound = true;
+          break;
+        }
+      }
+      if (!clubfound) {
+        // TODO
+        Data::Club *c = new Data::Club();
+        c->update(ccr.club());
+        clubs.add(c);
+      }
+      for (i=0; i<ccr.games_size(); i++) {
+        Poker::Game g = ccr.games(i);
+        Data::Game *g_out = new Data::Game;
+        g_out->update(g);
+        games.append(g_out);
+        //qDebug() << "found game" << g_out->gameid.toHex();
+      }
+      emit clubs_changed();
+      break; }
+    case ClubCommandReply::csInvalidClubId: {
+      QMessageBox::warning(0,tr("Error"),tr("Invalid Club ID"));
+      break; }
+    default:
+      // TODO
+      qDebug() << "unhandled srJoinClubReply status" << ccr.status();
+    }
+    break; }
+  case Poker::seChat: // 50
+    seChat(data);
+    break;
 	case Poker::seClubChange: // 53
 		qDebug() << "seClubChange";
 		seClubChange(data);
@@ -567,16 +566,17 @@ void PokerMain::seTableStatus(std::string data, bool addonok) {
 	fh.close();
 #endif
 }
+
 Data::User *PokerMain::findUser(QByteArray userid) {
-	QList<Data::User*>::Iterator i;
-	for (i=users.begin(); i != users.end(); ++i) {
-		Data::User *u = *i;
-		if (u->id == userid) return u;
-	}
-	qDebug() << "finding user" << userid.toHex();
-	qDebug() << "none found";
-	return 0;
+  QList<Data::User*>::Iterator i;
+  for (i=users.begin(); i != users.end(); ++i) {
+    Data::User *u = *i;
+    if (u->id == userid) return u;
+  }
+  //qDebug() << "failed to find user" << userid.toHex();
+  return 0;
 }
+
 void PokerMain::seClubChange(std::string data) {
 	Poker::Club input;
 	input.ParseFromString(data);
@@ -612,7 +612,7 @@ void PokerMain::srLoginReply(std::string data) {
   Poker::LoginReply lr;
   int i;
   lr.ParseFromString(data);
-  qDebug() << "srLoginReply" << lr.DebugString().c_str();
+  qDebug() << "srLoginReply";
   if (lr.login_status() == LoginReply::lrSuccess) {
     QResource::registerResource(datadir.absoluteFilePath("scripts.rcc"));
     qDebug() << "sucess!";
@@ -631,7 +631,7 @@ void PokerMain::srLoginReply(std::string data) {
       Data::Game *g_out = new Data::Game;
       g_out->update(g);
       games.append(g_out);
-      qDebug() << "found game" << g_out->gameid.toHex();
+      //qDebug() << "found game" << g_out->gameid.toHex();
     }
     for (i=0; i<lr.users_size(); i++) {
       Poker::User u = lr.users(i);

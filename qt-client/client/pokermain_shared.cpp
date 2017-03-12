@@ -34,7 +34,7 @@ void PokerMain::GetPlayers(QList<QByteArray> &toFetch) {
   Poker::GetUserParams gup;
   foreach (QByteArray id, toFetch) {
     assert(id.length() == 12);
-    qDebug() << "requesting player" << id.toHex() << "length" << id.length();
+    //qDebug() << "requesting player" << id.toHex() << "length" << id.length();
     gup.add_user_mongo_ids(std::string(id.data(),id.length()));
   }
   core->sendMessage(Poker::scGetPlayers,&gup);

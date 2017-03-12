@@ -15,26 +15,27 @@ UpdateHasher::UpdateHasher(QDir approot): approot(approot)
 }
 
 void UpdateHasher::startHashing(QString scriptspath) {
-    qDebug() << QThread::currentThread() << "scriptpath:" << scriptspath;
-    files.clear();
+  qDebug() << QThread::currentThread() << "scriptpath:" << scriptspath;
+  files.clear();
 #if defined(Q_OS_MAC)
-	recurseDirectory(approot,approot);
+  recurseDirectory(approot,approot);
 #endif
-	UpdateFileInfo scripts;
-	scripts.path = "assets/scripts.rcc";
-	QFile fh(scriptspath);
-	if (fh.exists()) {
-		if (fh.open(QFile::ReadOnly)) {
-			QCryptographicHash hasher(QCryptographicHash::Sha256);
-			hasher.addData(&fh);
-			fh.close();
-			scripts.hash = hasher.result();
-		} else qDebug() << "failed to open scripts.rcc";
-	} else qDebug() << "scripts.rcc not found, hash left blank";
-	this->files.append(scripts);
-	qDebug() << "done hashing in thread";
-	emit doneHashing();
+  UpdateFileInfo scripts;
+  scripts.path = "assets/scripts.rcc";
+  QFile fh(scriptspath);
+  if (fh.exists()) {
+    if (fh.open(QFile::ReadOnly)) {
+      QCryptographicHash hasher(QCryptographicHash::Sha256);
+      hasher.addData(&fh);
+      fh.close();
+      scripts.hash = hasher.result();
+    } else qDebug() << "failed to open scripts.rcc";
+  } else qDebug() << "scripts.rcc not found, hash left blank";
+  this->files.append(scripts);
+  qDebug() << "done hashing in thread";
+  emit doneHashing();
 }
+
 void UpdateHasher::recurseDirectory(QDir root, QDir path) {
 	//qDebug() << "checking" << path;
 	QFileInfoList files = path.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
