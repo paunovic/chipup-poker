@@ -329,7 +329,7 @@ QPushButton:checked {
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="QTreeView" name="gridTables"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">

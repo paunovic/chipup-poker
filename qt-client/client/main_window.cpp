@@ -24,53 +24,54 @@ void crash()
 }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWindow) {
-	currentClub = 0;
+  currentClub = 0;
 
-	ui->setupUi(this);
-	connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
-	connect(ui->btTournaments,SIGNAL(clicked()),this,SLOT(tournaments()));
-	
-	public_club_selection_model = new QItemSelectionModel(&core->clubs.public_club_model);
-	connect(public_club_selection_model,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(public_club_selected(QItemSelection,QItemSelection)));
-	ui->gridPublicClubs->setModel(&core->clubs.public_club_model);
-	ui->gridPublicClubs->setSelectionModel(public_club_selection_model);
-	ui->gridPublicClubs->hideColumn(0);
-	ui->gridPublicClubs->hideColumn(2);
-	
-	private_club_selection_model = new QItemSelectionModel(&core->clubs.private_club_model);
-	connect(private_club_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(private_club_selected(const QItemSelection&,const QItemSelection&)));
-	ui->gridPrivateClubs->setModel(&core->clubs.private_club_model);
-	ui->gridPrivateClubs->setSelectionModel(private_club_selection_model);
-	//ui->gridPrivateClubs->setSortingEnabled(true);
+  ui->setupUi(this);
+  connect(ui->btHomeGames,SIGNAL(clicked()),this,SLOT(homeGames()));
+  connect(ui->btTournaments,SIGNAL(clicked()),this,SLOT(tournaments()));
 
-	core->game_model.setFilter(NULL);
+  public_club_selection_model = new QItemSelectionModel(&core->clubs.public_club_model);
+  connect(public_club_selection_model,SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(public_club_selected(QItemSelection,QItemSelection)));
+  ui->gridPublicClubs->setModel(&core->clubs.public_club_model);
+  ui->gridPublicClubs->setSelectionModel(public_club_selection_model);
+  ui->gridPublicClubs->hideColumn(0);
+  ui->gridPublicClubs->hideColumn(2);
 
-	game_selection_model = new QItemSelectionModel(&core->game_model);
+  private_club_selection_model = new QItemSelectionModel(&core->clubs.private_club_model);
+  connect(private_club_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(private_club_selected(const QItemSelection&,const QItemSelection&)));
+  ui->gridPrivateClubs->setModel(&core->clubs.private_club_model);
+  ui->gridPrivateClubs->setSelectionModel(private_club_selection_model);
+  //ui->gridPrivateClubs->setSortingEnabled(true);
+
+  core->game_model.setFilter(NULL);
+
+  game_selection_model = new QItemSelectionModel(&core->game_model);
   //connect(game_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(game_selected(const QItemSelection&,const QItemSelection&)));
-	ui->gridGames->setModel(&core->game_model);
-	ui->gridGames->setSelectionModel(game_selection_model);
-	core->RegisterListener(this);
-	int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
-	ui->gridPublicClubs->setMinimumWidth(em*31);
-	ui->gridPrivateClubs->setMinimumWidth(em*31);
-	ui->gridPrivateClubs->setMinimumHeight(em*18);
-	ui->gridGames->setMinimumHeight(em*18);
-	//for (int i=0; i<5; i++) {
-	//	ui->gridGames->resizeColumnToContents(i);
-	//}
-	//setFixedSize(size());
-	ui->gridGames->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui->gridGames->setModel(&core->game_model);
+  ui->gridGames->setSelectionModel(game_selection_model);
+  core->RegisterListener(this);
+  int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
+  ui->gridPublicClubs->setMinimumWidth(em*31);
+  ui->gridPrivateClubs->setMinimumWidth(em*31);
+  ui->gridPrivateClubs->setMinimumHeight(em*18);
+  ui->gridGames->setMinimumHeight(em*18);
+  //for (int i=0; i<5; i++) {
+  //  ui->gridGames->resizeColumnToContents(i);
+  //}
+  //setFixedSize(size());
+  ui->gridGames->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-	ui->actionAlways_Run_it_Twice->setChecked(core->config().value("table/autoDouble").toBool());
-	ui->actionConfirmation_on_fold->setChecked(core->config().value("table/confirmFold").toBool());
-	ui->actionAlways_Check_Fold->setChecked(core->config().value("table/autoCheckFold").toBool());
-	setWindowTitle(QString("ChipUP Poker version %1").arg(build_number));
-	setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
-									QApplication::desktop()->availableGeometry()));
+  ui->actionAlways_Run_it_Twice->setChecked(core->config().value("table/autoDouble").toBool());
+  ui->actionConfirmation_on_fold->setChecked(core->config().value("table/confirmFold").toBool());
+  ui->actionAlways_Check_Fold->setChecked(core->config().value("table/autoCheckFold").toBool());
+  setWindowTitle(QString("ChipUP Poker version %1").arg(build_number));
+  setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), QApplication::desktop()->availableGeometry()) );
 }
+
 MainWindow::~MainWindow() {
-	delete ui;
+  delete ui;
 }
+
 void MainWindow::homeGames() {
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->btTournaments->setChecked(false);
@@ -207,6 +208,7 @@ void MainWindow::on_actionCrash_triggered()
 {
     crash();
 }
+
 void MainWindow::On_chat_event(Data::Chat packet) {
 	if (packet.event != Poker::ChatEvent::ceServerMessage) return;
 	qDebug() << "global msg" << packet.msg;

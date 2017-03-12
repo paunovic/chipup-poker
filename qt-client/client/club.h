@@ -27,35 +27,35 @@ public:
 class ClubListModel : public QAbstractListModel {
 Q_OBJECT
 public:
-	enum Column {
-		clubId,
-		clubName,
-		clubStatus
-	};
-	ClubListModel(QObject *parent=0) : QAbstractListModel(parent) {
-	}
+  enum Column {
+    clubId,
+    clubName,
+    clubStatus
+  };
+  ClubListModel(QObject *parent=0) : QAbstractListModel(parent) {
+  }
 
-	int rowCount(const QModelIndex &parent=QModelIndex()) const {
-		Q_UNUSED(parent);
-		return m_entries.count();
-	}
-	int columnCount(const QModelIndex &parent=QModelIndex()) const {
-		Q_UNUSED(parent);
-		return 3;
-	}
-	QVariant data(const QModelIndex &index,int role) const;
-    QVariant headerData(int, Qt::Orientation, int) const;
-	void modified(Club *item);
-	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
-	Club* getClub(const QModelIndex index) { return m_entries.at(index.row()); }
+  int rowCount(const QModelIndex &parent=QModelIndex()) const {
+    Q_UNUSED(parent);
+    return m_entries.count();
+  }
+  int columnCount(const QModelIndex &parent=QModelIndex()) const {
+    Q_UNUSED(parent);
+    return 3;
+  }
+  QVariant data(const QModelIndex &index,int role) const;
+  QVariant headerData(int, Qt::Orientation, int) const;
+  void modified(Club *item);
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+  Club* getClub(const QModelIndex index) { return m_entries.at(index.row()); }
 
-	friend class ClubList;
+  friend class ClubList;
 protected:
-	void clear();
-	void append(Club*);
-	void remove(const Club *);
+  void clear();
+  void append(Club*);
+  void remove(const Club *);
 
-	QList<Club*> m_entries;
+  QList<Club*> m_entries;
 };
 
 class ClubList : public QObject {

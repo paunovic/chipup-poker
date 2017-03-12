@@ -4,13 +4,10 @@
 #include "ui_clublobby.h"
 #include "pokermain.h"
 
-ClubLobby::ClubLobby(QWidget *parent) :
-	QMainWindow(parent),
-	ui(new Ui::ClubLobby)
-{
-	ui->setupUi(this);
-	core->RegisterListener(this);
-	setAttribute(Qt::WA_DeleteOnClose,true);
+ClubLobby::ClubLobby(QWidget *parent) : QMainWindow(parent), ui(new Ui::ClubLobby) {
+  ui->setupUi(this);
+  core->RegisterListener(this);
+  setAttribute(Qt::WA_DeleteOnClose,true);
 }
 
 ClubLobby::~ClubLobby()
@@ -19,35 +16,38 @@ ClubLobby::~ClubLobby()
 }
 
 void ClubLobby::setClub(Data::Club *club) {
-	this->club = club;
-	ui->lbClubName->setText(club->name);
-	const Data::User *owner = core->findUser(club->owner);
-	if (owner) {
-		ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
-	} else ui->lbOwner->setText("Loading...");
-	ui->lbMembers->setText(QString(tr("Members: %1")).arg(club->members.length()));
-	ui->lbClubSeq->setText(QString(tr("Club ID: %1")).arg(club->seq));
-	ui->lbClubName->setText(club->name);
+  this->club = club;
+  ui->lbClubName->setText(club->name);
+  const Data::User *owner = core->findUser(club->owner);
+  if (owner) {
+    ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
+  } else ui->lbOwner->setText("Loading...");
+  ui->lbMembers->setText(QString(tr("Members: %1")).arg(club->members.length()));
+  ui->lbClubSeq->setText(QString(tr("Club ID: %1")).arg(club->seq));
+  ui->lbClubName->setText(club->name);
 
-	selection_model = new QItemSelectionModel(&club->members);
-	connect(selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(user_selected(const QItemSelection&,const QItemSelection&)));
-	ui->gridMembers->setModel(&club->members);
-	ui->gridMembers->setSelectionBehavior(QAbstractItemView::SelectRows);
-	ui->gridMembers->setSelectionModel(selection_model);
+  selection_model = new QItemSelectionModel(&club->members);
+  connect(selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(user_selected(const QItemSelection&,const QItemSelection&)));
+  ui->gridMembers->setModel(&club->members);
+  ui->gridMembers->setSelectionBehavior(QAbstractItemView::SelectRows);
+  ui->gridMembers->setSelectionModel(selection_model);
 
-	bool visible = core->self()->id == club->owner;
-	ui->btResetBalances->setVisible(visible);
-	ui->btResetPlayerBalance->setVisible(visible);
-	ui->btGiveOwnership->setVisible(visible);
-	ui->btPromoteToManager->setVisible(visible);
+  core->game_model.setFilter(club);
+  ui->gridTables->setModel(&core->game_model);
 
-	ui->btSuspend->setVisible(visible);
-	ui->btRemove->setVisible(visible);
-	ui->btSetLimit->setVisible(visible);
-	ui->btMute->setVisible(visible);
+  bool visible = core->self()->id == club->owner;
+  ui->btResetBalances->setVisible(visible);
+  ui->btResetPlayerBalance->setVisible(visible);
+  ui->btGiveOwnership->setVisible(visible);
+  ui->btPromoteToManager->setVisible(visible);
 
-	if (club->owner == core->self()->id) ui->stackOwner->setCurrentIndex(0);
-	else ui->stackOwner->setCurrentIndex(1);
+  ui->btSuspend->setVisible(visible);
+  ui->btRemove->setVisible(visible);
+  ui->btSetLimit->setVisible(visible);
+  ui->btMute->setVisible(visible);
+
+  if (club->owner == core->self()->id) ui->stackOwner->setCurrentIndex(0);
+  else ui->stackOwner->setCurrentIndex(1);
   on_btClubHome_clicked();
 }
 
