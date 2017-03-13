@@ -62,7 +62,7 @@ public:
 	void setAllowUpdates(bool in) { allowUpdates = in; }
 
 	Data::ClubList clubs;
-	Data::GameListModel game_model;
+//Data::GameListModel game_model;
 	QList<Data::Game*> games;
 	Poker::ValidCharsRegex validCharacters;
 	bool delayQuit;
@@ -82,7 +82,6 @@ signals:
 	void sit_ok(QByteArray gameid);
 	void seat_taken(QByteArray gameid);
 	void PlayerClubStatus(Data::PlayerClubStatus &pcs);
-	void club_changed(const Data::Club *);
 	void reserved_seat_free(QByteArray gameid, quint32 seat_index);
 	void startHashing(QString scriptspath);
 	void sit_timeout(QByteArray gameid);
@@ -90,6 +89,13 @@ signals:
 	void tableAddonOk(QByteArray gameid);
 	void clubLeft(const Data::Club *club);
 	void UserFetched(const Data::User *user);
+
+  void club_changed(const Data::Club *);
+  void game_changed(const Data::Game *g);
+
+  void game_added(const Data::Game *g);
+
+  void game_removed(const Data::Game *g);
 public slots:
     void try_connect();
     void socket_state_change(QAbstractSocket::SocketState state);

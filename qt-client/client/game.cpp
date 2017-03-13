@@ -5,7 +5,7 @@
 
 using namespace Data;
 Game::Game() {
-	seats = 2;
+  seats = 2;
 }
 void Game::update(Poker::Game &in) {
 	std::string gameid = in._id();
@@ -92,6 +92,13 @@ void Game::update(Poker::Game &in) {
 	buyin_max = in.buyin_max();
 }
 
+GameListModel::GameListModel() {
+  connect(core, &PokerMain::game_changed, this, &GameListModel::game_changed);
+  connect(core, &PokerMain::game_added, this, &GameListModel::game_added);
+  connect(core, &PokerMain::game_removed, this, &GameListModel::game_removed);
+  filteredClub = NULL;
+}
+
 QVariant GameListModel::data(const QModelIndex &index,int role) const {
 	if (index.row() < 0 || index.row() >= m_entries.count()) return QVariant();
 	if (role == Qt::DisplayRole) {
@@ -162,7 +169,7 @@ void GameListModel::setFilter(const Club *club) {
 	}
 	setEntries(filtered);
 }
-void GameListModel::updated(const Game *g) {
+void GameListModel::game_changed(const Game *g) {
 	if (!filteredClub) return; // filter not set yet
 	if (filteredClub->clubid != g->clubid) return; // game not in filter
 	for (int i=0; i<m_entries.size(); i++) {
@@ -172,7 +179,7 @@ void GameListModel::updated(const Game *g) {
 		}
 	}
 }
-void GameListModel::add(const Game *g) {
+void GameListModel::game_added(const Game *g) {
 	if (!filteredClub) return; // filter not set yet
 	if (filteredClub->clubid != g->clubid) return; // game not in filter
 	int index = m_entries.size();
@@ -180,7 +187,7 @@ void GameListModel::add(const Game *g) {
 	m_entries.append(g);
 	endInsertRows();
 }
-void GameListModel::remove(const Game *g) {
+void GameListModel::game_removed(const Game *g) {
 	if (!filteredClub) return; // filter not set yet
 	if (filteredClub->clubid != g->clubid) return; // game not in filter
 	for (int i=0; i<m_entries.size(); i++) {

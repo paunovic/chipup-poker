@@ -518,7 +518,7 @@ void PokerMain::seGameChange(std::string data) {
 		if (games.at(i)->gameid == gameid) {
 			Data::Game *g2 = games[i];
 			g2->update(g);
-			game_model.updated(g2);
+			emit game_changed(g2);
 			break;
 		}
 	}
@@ -532,24 +532,25 @@ void PokerMain::seGameCreate(std::string data) {
 	Data::Game *g2 = new Data::Game;
 	g2->update(g);
 	games.append(g2);
-	game_model.add(g2);
+  emit game_added(g2);
 }
 void PokerMain::seGameDelete(std::string data) {
-	Poker::Game g;
-	g.ParseFromString(data);
+  Poker::Game g;
+  g.ParseFromString(data);
 
-	qDebug() << "seGameDelete";
+  qDebug() << "seGameDelete";
 
-	std::string rawid = g._id();
-	QByteArray gameid(rawid.data(),rawid.length());
-	for (int i=0; i<games.size(); i++) {
-		if (games.at(i)->gameid == gameid) {
-			game_model.remove(games[i]);
-			games.removeAt(i);
-			break;
-		}
-	}
+  std::string rawid = g._id();
+  QByteArray gameid(rawid.data(),rawid.length());
+  for (int i=0; i<games.size(); i++) {
+    if (games.at(i)->gameid == gameid) {
+      emit game_removed(games[i]);
+      games.removeAt(i);
+      break;
+    }
+  }
 }
+
 void PokerMain::seTableStatus(std::string data, bool addonok) {
 	Poker::TableStatus ts;
 	ts.ParseFromString(data);

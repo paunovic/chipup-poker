@@ -7,7 +7,10 @@
 #include <poker/message.pb.h>
 #include "club.h"
 
+class PokerMain;
+
 namespace Data {
+
 class Game {
 public:
 	Game();
@@ -27,9 +30,7 @@ public:
 class GameListModel : public QAbstractListModel {
 Q_OBJECT
 public:
-	GameListModel() {
-		filteredClub = NULL;
-	}
+	GameListModel();
 
 	int rowCount(const QModelIndex &parent=QModelIndex()) const {
 		Q_UNUSED(parent);
@@ -47,10 +48,11 @@ public:
 		endResetModel();
 	}
 	void setFilter(const Club *club);
-	void updated(const Game *g);
-	void add(const Game *g);
-	void remove(const Game *g);
 	const Game *getGame(const QModelIndex &index) const;
+private slots:
+  void game_added(const Game *g);
+  void game_changed(const Game *g);
+  void game_removed(const Game *g);
 
 protected:
 	QList<const Game*> m_entries;

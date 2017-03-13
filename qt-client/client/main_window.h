@@ -50,4 +50,5 @@ private:
 	Ui::MainWindow *ui;
 	QItemSelectionModel *public_club_selection_model,*private_club_selection_model, *game_selection_model;
 	Data::Club *currentClub;
+  Data::GameListModel game_model;
 };

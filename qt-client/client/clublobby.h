@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "club.h"
+#include "game.h"
 
 class QItemSelectionModel;
 class QItemSelection;
@@ -40,6 +41,7 @@ private:
 	const Data::Club *club;
 	QItemSelectionModel *selection_model;
 	const Data::ClubMember *currentMember;
+  Data::GameListModel game_model;
 };
 
 #endif // CLUBLOBBY_H

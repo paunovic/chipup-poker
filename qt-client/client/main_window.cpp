@@ -43,11 +43,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),ui(new Ui::MainWin
   ui->gridPrivateClubs->setSelectionModel(private_club_selection_model);
   //ui->gridPrivateClubs->setSortingEnabled(true);
 
-  core->game_model.setFilter(NULL);
+  game_model.setFilter(NULL);
 
-  game_selection_model = new QItemSelectionModel(&core->game_model);
+  game_selection_model = new QItemSelectionModel(&game_model);
   //connect(game_selection_model,SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),this,SLOT(game_selected(const QItemSelection&,const QItemSelection&)));
-  ui->gridGames->setModel(&core->game_model);
+  ui->gridGames->setModel(&game_model);
   ui->gridGames->setSelectionModel(game_selection_model);
   core->RegisterListener(this);
   int em = ui->gridPrivateClubs->fontMetrics().boundingRect("M").width();
@@ -94,7 +94,7 @@ void MainWindow::private_club_selected(const QItemSelection &selected, const QIt
 	currentClub = core->private_clubs().at(row);
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
-	core->game_model.setFilter(currentClub);
+  game_model.setFilter(currentClub);
 	//for (int i=0; i<5; i++) {
 	//	ui->gridGames->resizeColumnToContents(i);
 	//}
@@ -107,7 +107,7 @@ void MainWindow::public_club_selected(const QItemSelection &selected, const QIte
 	currentClub = core->public_clubs().at(row);
 	qDebug() << "selected:" << currentClub->name << currentClub->clubid.toHex();
 
-	core->game_model.setFilter(currentClub);
+  game_model.setFilter(currentClub);
 	//for (int i=0; i<5; i++) {
 	//	ui->gridGames->resizeColumnToContents(i);
 	//}
@@ -160,8 +160,8 @@ void MainWindow::on_actionSelf_Tests_triggered() {
 	st->show();
 }
 void MainWindow::on_gridGames_doubleClicked(const QModelIndex &index) {
-	qDebug() << "double click" << index.row();
-	const Data::Game *game = core->game_model.getGame(index);
+  qDebug() << "double click" << index.row();
+  const Data::Game *game = game_model.getGame(index);
 	Poker::Game g;
 	g.set__id(game->gameid.data(),game->gameid.length());
 	core->sendMessage(Poker::scTableJoin,&g);

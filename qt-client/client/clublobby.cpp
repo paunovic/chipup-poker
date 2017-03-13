@@ -32,8 +32,8 @@ void ClubLobby::setClub(Data::Club *club) {
   ui->gridMembers->setSelectionBehavior(QAbstractItemView::SelectRows);
   ui->gridMembers->setSelectionModel(selection_model);
 
-  core->game_model.setFilter(club);
-  ui->gridTables->setModel(&core->game_model);
+  game_model.setFilter(club);
+  ui->gridTables->setModel(&game_model);
 
   bool visible = core->self()->id == club->owner;
   ui->btResetBalances->setVisible(visible);
