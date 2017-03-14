@@ -4,7 +4,9 @@ with import  <nixpkgs/nixos/lib/testing.nix> { inherit system; };
 
 let
   mypkgs = import ../default.nix;
-  makeLuaTest = source: mongo: makeTest {
+  makeLuaTest = makeLuaTest2 [];
+  makeLuaTest2 = stack: source: mongo:
+  makeTest {
     name = "lua-test";
     nodes = {
       server = { pkgs, ... }:
@@ -14,6 +16,7 @@ let
           enable = true;
           autoSelfSigned = true;
           testingEnv = true;
+          inherit stack;
         };
         services.klogd.enable = false;
         environment.systemPackages = [ mypkgs.test-driver pkgs.valgrind ];
@@ -33,6 +36,7 @@ let
       ${if mongo != null then ''
         print $server->execute("echo '${mongo}' | mongo poker");
       '' else ""}
+      $server->sleep(1);
       $server->shutdown;
     '';
   };
@@ -57,4 +61,5 @@ in {
     db.clubBalances.find().pretty()
   '';
   simpleGame = makeLuaTest ./simpleGame.lua null;
+  scenario1 = makeLuaTest2 [ 0 1 2 3 4 5 6 7 8 ] ./scenario1.lua null;
 }

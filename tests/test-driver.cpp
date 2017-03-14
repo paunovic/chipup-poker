@@ -147,6 +147,8 @@ void init_events() {
 
   x(srCreateGameOk, Game); // 24
 
+  x(srTableSitOk, TableStatus); // 27
+
   x(srTableStandUpOk, TableStatus); // 29
 
   x(seClubChange, Club); // 53
@@ -383,6 +385,7 @@ LuaTester::LuaTester(struct event_base *base) : base(base) {
     { "dbg", debug_print },
     { "makeClient", makeClient },
     { "set_success", ::set_success },
+    { "assert_eq", my_assert_eq },
     { NULL, NULL }
   };
   
@@ -560,6 +563,7 @@ void LuaTester::event(string code, const google::protobuf::Message &msg, PokerCl
   if (result != LUA_OK) {
     cout << "run error(" << result << "):" << lua_tostring(L, -1) << "\n";
     lua_remove(L, -1);
+    abort();
   }
   assert(lua_gettop(L) == 0);
 }

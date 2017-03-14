@@ -221,6 +221,21 @@ int set_success(lua_State *L) {
   return 0;
 }
 
+int my_assert_eq(lua_State *L) {
+  if (lua_gettop(L) != 2) luaL_error(L, "assert_eq needs 2 arguments");
+  int type1 = lua_type(L, 1);
+  int type2 = lua_type(L, 2);
+  if (type1 != type2) luaL_error(L, "assert_eq types %s and %s don't match", lua_typename(L, type1), lua_typename(L, type2));
+  switch (type1) {
+  case LUA_TNUMBER: // 3
+    if (lua_rawequal(L, 1, 2) == 0) luaL_error(L, "values %s and %s don't match", lua_tostring(L, 1), lua_tostring(L, 2));
+    break;
+  default:
+    luaL_error(L, "%d, %s isnt a supported type in assert_eq", type1, lua_typename(L, type1));
+  }
+  return 0;
+}
+
 int setTimeout(lua_State *L) {
   struct event_base *base = static_cast<struct event_base*>(lua_touserdata(L, lua_upvalueindex(1)));
   int seconds = 0;

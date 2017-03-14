@@ -18,13 +18,15 @@ let
     installers = "/home/poker/rawinstallers";
     diffs = "/home/poker/diffs";
     autoConfirm = cfg.autoConfirm;
+  } // lib.optionalAttrs (cfg.stack != []) {
+    stack = cfg.stack;
   };
   genkeyscript = ''
     if [ ! -f ${poker_config.certpath} ]; then
       ${pkgs.openssl}/bin/openssl req -x509 -newkey rsa:2048 -keyout ${poker_config.keypath} -out ${poker_config.certpath} -days 3650 -nodes -subj "/CN=localhost"
     fi
   '';
-  mkBool = description: default: mkOption { inherit default description; example = !default; };
+  mkBool = description: default: mkOption { inherit default description; example = !default; type = types.bool; };
 in {
   imports = [ ./snmpd.nix ];
   options = {
@@ -38,6 +40,12 @@ in {
       };
       autoConfirm = mkBool "auto-confirm all accounts" false;
       testingEnv = mkBool "testing environment" false;
+      stack = mkOption {
+        default = [];
+        description = "stack the deck for testing";
+        example = [ 0 1 2 3 ];
+        type = lib.types.listOf lib.types.int;
+      };
     };
   };
   config = mkIf config.services.poker.enable {
