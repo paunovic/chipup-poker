@@ -41,6 +41,9 @@ void pretty_print(lua_State *L, int i, string indent) {
       }
       cout << indent << "}";
       break;
+    case LUA_TBOOLEAN:
+      cout << lua_toboolean(L, -1);
+      break;
     default:
       cout << "other";
       break;
@@ -229,6 +232,9 @@ int my_assert_eq(lua_State *L) {
   switch (type1) {
   case LUA_TNUMBER: // 3
     if (lua_rawequal(L, 1, 2) == 0) luaL_error(L, "values %s and %s don't match", lua_tostring(L, 1), lua_tostring(L, 2));
+    break;
+  case LUA_TBOOLEAN:
+    if (lua_rawequal(L, 1, 2) == 0) luaL_error(L, "values %s and %s don't match", lua_toboolean(L, 1) ? "true":"false", lua_toboolean(L, 2) ? "true":"false");
     break;
   default:
     luaL_error(L, "%d, %s isnt a supported type in assert_eq", type1, lua_typename(L, type1));

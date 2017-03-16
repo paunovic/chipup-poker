@@ -132,6 +132,13 @@ struct EventInfo {
   const ::google::protobuf::Descriptor *descriptor;
 };
 
+static void debug_print_ts(LuaTester *tester) {
+  steady_clock::time_point now = steady_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(now - tester->start);
+  double time = time_span.count();
+  cout << "<" << setw(9) << time << "> ";
+}
+
 struct EventInfo events[200];
 
 void init_events() {
@@ -145,11 +152,19 @@ void init_events() {
   x(srCreateClubReply, ClubCommandReply); // 4
   x(srJoinClubReply, ClubCommandReply); // 5
 
+  x(srChangeClubDetailsReply, ClubCommandReply); // 7
+
   x(srCreateGameOk, Game); // 24
 
   x(srTableSitOk, TableStatus); // 27
 
   x(srTableStandUpOk, TableStatus); // 29
+
+  x(srTableStatsReply, TableStatsReplies); // 35
+
+  x(srPlayerLimitOk, PlayerLimitParams); // 39
+
+  x(srHandHistoryMsg, HandHistoryReply); // 42
 
   x(seClubChange, Club); // 53
 
@@ -158,12 +173,16 @@ void init_events() {
   x(seGameDelete, Game); // 57
   x(seTableStatus, TableStatus); // 58
 
+  x(sePlayerClubStatus, PlayerClubStatus); // 63
+
   x(scHello, HelloParams);
   x(scLogin, LoginParams);
   x(scRegister, RegisterParams); // 73
 
   x(scCreateClub, Club); // 76
   x(scJoinClub, Club); // 77
+
+  x(scChangeClubDetails, Club); // 81
 
   x(scCreateGame, Game); // 87
   x(scCloseGame, CloseGameData); // 88
@@ -177,6 +196,8 @@ void init_events() {
   x(scTablePlayNow, Game); // 99
   x(scTableSitOutNextHand, TableBoolFlag); // 100
 
+  x(scSetPlayerLimit, PlayerLimitParams); // 106
+
   x(scApproveClubMember, ChangeClubPlayerFlag); // 121
 #undef x
 }
@@ -186,7 +207,7 @@ void PokerClient::handlePacket(int event_code, string payload) {
   google::protobuf::Message *m = NULL;
   switch (event_code) {
   case 0:
-    cout << "code 0 " << payload;
+    cout << "code 0 " << payload << "\n";
     break;
   case ServerCodes::srLogout:
     tester->event("srLogout", this);
@@ -218,6 +239,8 @@ void PokerClient::sendMessage(lua_State *L, string code_str, int index) {
     luaL_error(L, "class for code %s not configured", code_str.c_str());
     return;
   }
+  debug_print_ts(tester);
+  cout << "OUT " << code_str << "\n";
 
   google::protobuf::Message *out = eventInfo.m->New();;
   auto descriptor = eventInfo.descriptor;
@@ -264,7 +287,7 @@ void PokerClient::sendMessage(lua_State *L, string code_str, int index) {
       break;
     default:
       delete out;
-      luaL_error(L, "type %d not supported", f->type());
+      luaL_error(L, "type %d not supported on field %s", f->type(), field_name.c_str());
       return;
     }
 
@@ -346,10 +369,8 @@ void PokerClient::sendMessage(Poker::ServerCodes code) {
 
 static int debug_print(lua_State *L) {
   LuaTester *tester = static_cast<LuaTester*>(lua_touserdata(L, lua_upvalueindex(1)));
-  steady_clock::time_point now = steady_clock::now();
-  duration<double> time_span = duration_cast<duration<double>>(now - tester->start);
-  double time = time_span.count();
-  cout << "<" << setw(9) << time << "> ";
+  debug_print_ts(tester);
+
   for (int i=1; i <= lua_gettop(L); i++) {
     lua_pushvalue(L, i);
     if (lua_type(L, -1) == LUA_TSTRING) {

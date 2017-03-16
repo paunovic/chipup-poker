@@ -1,11 +1,11 @@
 local hostname,port = ...
 local clubseq;
 local clubid;
-local bot2_id;
+local bot1_id, bot2_id;
 local handlers = {}
 local idle = 0;
 
-print("need to connect to "..hostname..":"..port)
+--print("need to connect to "..hostname..":"..port)
 
 function onEvent(client, code, obj)
   idle = 0;
@@ -73,6 +73,7 @@ handlers["srLoginReply"] = function (self, obj)
   self.state = 0;
   if self.name == "bot1" then
     self:sendMessage("scCreateClub", { is_private = true, name = "club name", password = "password", rake = 0, buyin_reset = 30 });
+    bot1_id = obj.self._id;
   else
     bot2_id = obj.self._id
     a_ready2 = true;
@@ -81,9 +82,10 @@ handlers["srLoginReply"] = function (self, obj)
 end
 
 handlers.srJoinClubReply = function (self, obj)
+  dump("join club reply", obj);
   if obj.status == "csSuccess" then
-    if not obj.club.members[1].unlimited_limit then return end
-    if not obj.club.members[2].unlimited_limit then return end
+    assert_eq(false, obj.club.members[1].unlimited_limit);
+    assert_eq(false, obj.club.members[2].unlimited_limit);
 
     if not obj.club.members[1].status == "msActive" then return end
     if not obj.club.members[2].status == "msActive" then return end
@@ -93,17 +95,33 @@ end
 
 local club_once = true;
 handlers.seClubChange = function (self, obj)
-  --dump("club change", obj);
+  dump("club change", obj);
   if self.name == "bot1" and club_once then
-    club_once = false;
-    dbg("clubid " .. clubid .. " len " .. #clubid);
-    client1:sendMessage("scApproveClubMember", { club_mongo_id = clubid, player_mongo_id = bot2_id, flag = true });
+    if 2 == #obj.members then
+      club_once = false;
+      client1:sendMessage("scApproveClubMember", { club_mongo_id = clubid, player_mongo_id = bot2_id, flag = true });
+    else
+      client1:sendMessage("scSetPlayerLimit", { clubid = clubid, userid = bot1_id, limit = 100000, unlimited = false; });
+    end
   end
 end
 
 handlers.srCreateClubReply = function (self, obj)
   clubseq = obj.club.seq;
   clubid = obj.club._id;
+
+  local c = {};
+  c.unlimited_default_balance = false;
+  c.rake = obj.club.rake;
+  c._id = obj.club._id;
+  c.buyin_reset = obj.club.buyin_reset;
+  c.default_balance_limit = obj.club.default_balance_limit;
+  c.name = obj.club.name;
+  c.password = "password";
+  self:sendMessage("scChangeClubDetails", c);
+end
+
+handlers.srPlayerLimitOk = function (self, obj)
   a_ready1 = true;
   check_a();
 end
@@ -217,6 +235,14 @@ handlers.seTableStatus = function (self, obj)
 end
 handlers.srTableStandUpOk = function (self, obj)
   handlers.seTableStatus(self, obj);
+end
+
+handlers.srHandHistoryMsg = function (self, obj)
+  --dump("srHandHistoryMsg", obj);
+end
+
+handlers.srTableStatsReply = function (self, obj)
+  --dump("srTableStatsReply", obj);
 end
 
 setTimeout(tick, 0, 1);

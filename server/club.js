@@ -799,37 +799,38 @@ handlers[codes.scJoinClub] = function (args,token) {
 		//this.log('join3',err,this.userid);
 	}.bind(this));
 }
-handlers[codes.scSetPlayerLimit] = function (args,token) {
-	var clubid;
-	try {
-		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		clubid = myutils.toMongoId(params.clubid);
-		var userid = myutils.toMongoId(params.userid);
-		//this.log('params:%j',params);
-		if (params.limit < 1) return this.reply(0,'limit too low');
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Club.getClubById(clubid,function (err,clubObj) {
-		if (err == 'not found') {
-			this.reply(0,'club not found');
-			return;
-		}
-		assert.ifError(err);
-		assert(clubObj);
-		if (!clubObj.isOwner(this.userid)) {
-			this.reply(0,'your not the owner');
-			return;
-		}
-		clubObj.updateLimit(userid,params.limit,params.unlimited,function (result) {
-			//clubObj.getTableStatsPacket([
-			if (result) this.send(codes.srPlayerLimitOk,args,'raw');
-			else this.reply(0,'player not found');
-			token.stop();
-		}.bind(this));
-	}.bind(this));
-}
+  handlers[codes.scSetPlayerLimit] = function (args,token) {
+    var clubid;
+    try {
+      var params = pb.Parse(args,'Poker.PlayerLimitParams');
+      clubid = myutils.toMongoId(params.clubid);
+      var userid = myutils.toMongoId(params.userid);
+      //this.log('params:%j',params);
+      if (params.limit < 1) return this.reply(0,'limit too low');
+    } catch (e) {
+      this.error(e);
+      return;
+    }
+    Club.getClubById(clubid,function (err,clubObj) {
+      if (err == 'not found') {
+        this.reply(0,'club not found');
+        return;
+      }
+      assert.ifError(err);
+      assert(clubObj);
+      if (!clubObj.isOwner(this.userid)) {
+        this.reply(0,'your not the owner');
+        return;
+      }
+      clubObj.updateLimit(userid,params.limit,params.unlimited,function (result) {
+        //clubObj.getTableStatsPacket([
+        if (result) this.send(codes.srPlayerLimitOk,args,'raw');
+        else this.reply(0,'player not found');
+        token.stop();
+      }.bind(this));
+    }.bind(this));
+  }
+
 handlers[codes.scResetPlayerBalance] = function (args,token) {
 	var clubid;
 	try {
@@ -898,10 +899,17 @@ handlers[codes.scResetPlayerBalances] = function (args,token) {
 	}.bind(this));
 };
 handlers[codes.scChangeClubDetails] = function (args,token) {
-	var params = pb.Parse(args,'Poker.Club');
-	var clubid = myutils.toMongoId(params._id);
-	this.log('change club details %j',params);
-	Club.getClubById(clubid,function changeDetail_cb1(err,club) {
+  var params = pb.Parse(args,'Poker.Club');
+  var clubid;
+  try {
+    var params = pb.Parse(args,'Poker.Club');
+    clubid = myutils.toMongoId(params._id);
+  } catch (e) {
+    this.error(e);
+    return;
+  }
+  this.log('change club details %j',params);
+  Club.getClubById(clubid,function changeDetail_cb1(err,club) {
 		if (err == 'not found') {
 			this.reply("000","club not found");
 			return;
@@ -1164,54 +1172,58 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			}.bind(this));
 		}.bind(this));
 	};
-	handlers[codes.scApproveClubMember] = function (args,token) {
-		var params,clubid,userid;
-		try {
-			params = pb.Parse(args,'Poker.ChangeClubPlayerFlag');
-			clubid = myutils.toMongoId(params.club_mongo_id);
-			userid = myutils.toMongoId(params.player_mongo_id);
-		} catch (e) {
-			this.error(e);
-			return;
-		}
-		Club.getClubById(clubid,function (err,clubObj) {
-			if (err == 'not found') {
-				this.reply(0,'club not found');
-				return;
-			}
-			if (!clubObj.isOwner(this.userid)) {
-				this.reply(0,'your not the owner');
-				return;
-			}
-			clubObj.obj.pendingApproval.pull(userid);
-			clubObj.obj.members.addToSet(userid);
-			clubObj.obj.save(function (err) {
-				assert.ifError(err);
-				console.log('need seClubChange',clubObj);
-				models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
-					var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
-					var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
-					this.log('userlist to inform:',userlist);
-					for (var x=0; x<userlist.length; x++) {
-						if (compareObjectID(userlist[x],userid)) continue;
-						var user = global.activeUsers[userlist[x]];
-						if (user) {
-							var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
-							user.send(codes.seClubChange,out,'Poker.Club');
-						}
-					}
-					models.Game.find({clubid:clubObj.clubid},function (err,games) {
-						assert.ifError(err);
-						for (var x=0; x<games.length; x++) {
-							games[x] = makeGameProtobuf(games[x]);
-						}
-						var joininfo = {status:'csSuccess',club:out,games:games};
-						if (global.activeUsers[userid]) global.activeUsers[userid].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}.bind(this));
-	};
+  handlers[codes.scApproveClubMember] = function (args,token) {
+    var params,clubid,userid;
+    try {
+      params = pb.Parse(args,'Poker.ChangeClubPlayerFlag');
+      clubid = myutils.toMongoId(params.club_mongo_id);
+      userid = myutils.toMongoId(params.player_mongo_id);
+    } catch (e) {
+      this.error(e);
+      return;
+    }
+    Club.getClubById(clubid,function (err,clubObj) {
+      if (err == 'not found') {
+        this.reply(0,'club not found');
+        return;
+      }
+      if (!clubObj.isOwner(this.userid)) {
+        this.reply(0,'your not the owner');
+        return;
+      }
+      if (!myutils.containsObjectID(clubObj.obj.pendingApproval, userid)) {
+        this.reply(0, "that user isnt in the club");
+        return;
+      }
+      clubObj.obj.pendingApproval.pull(userid);
+      clubObj.obj.members.addToSet(userid);
+      clubObj.obj.save(function (err) {
+        assert.ifError(err);
+        console.log('need seClubChange',clubObj);
+        models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
+          var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
+          var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj,this);
+          this.log('userlist to inform:',userlist);
+          for (var x=0; x<userlist.length; x++) {
+            if (compareObjectID(userlist[x],userid)) continue;
+            var user = global.activeUsers[userlist[x]];
+            if (user) {
+              var out = Club.makeClubProtobuf(clubObj.obj,null,stats,clubObj,user);
+              user.send(codes.seClubChange,out,'Poker.Club');
+            }
+          }
+          models.Game.find({clubid:clubObj.clubid},function (err,games) {
+            assert.ifError(err);
+            for (var x=0; x<games.length; x++) {
+              games[x] = makeGameProtobuf(games[x]);
+            }
+            var joininfo = {status:'csSuccess',club:out,games:games};
+            if (global.activeUsers[userid]) global.activeUsers[userid].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
+          }.bind(this));
+        }.bind(this));
+      }.bind(this));
+    }.bind(this));
+  };
 	handlers[codes.scChangePlayerManagerState] = function (args,token) {
 		var params,clubid,userid;
 		try {
