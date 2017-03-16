@@ -178,11 +178,11 @@ handlers.seTableStatus = function (self, obj)
             local extracted = extractCards(v.cards);
             assert_eq(2, #extracted);
             if self.seat == 1 then
-              assert_eq(0, extracted[1]);
-              assert_eq(1, extracted[2]);
+              assert_eq(12, extracted[1]);
+              assert_eq(15, extracted[2]);
             else
-              assert_eq(2, extracted[1]);
-              assert_eq(3, extracted[2]);
+              assert_eq(16, extracted[1]);
+              assert_eq(19, extracted[2]);
             end
           end
         end
@@ -190,19 +190,19 @@ handlers.seTableStatus = function (self, obj)
         dump("teFlop bets", v.bets);
         assert_eq(1, #v.cards);
         local extracted = extractCards(v.cards[1]);
-        assert_eq(4, extracted[1]);
-        assert_eq(5, extracted[2]);
-        assert_eq(6, extracted[3]);
+        assert_eq(20, extracted[1]);
+        assert_eq(24, extracted[2]);
+        assert_eq(28, extracted[3]);
       elseif v.event == "teTurn" then
         dump("teTurn bets", v.bets);
         assert_eq(1, #v.cards);
         local extracted = extractCards(v.cards[1]);
-        assert_eq(7, extracted[1]);
+        assert_eq(32, extracted[1]);
       elseif v.event == "teRiver" then
         dump("teRiver bets", v.bets);
         assert_eq(1, #v.cards);
         local extracted = extractCards(v.cards[1]);
-        assert_eq(8, extracted[1]);
+        assert_eq(40, extracted[1]);
       elseif v.event == "teStandUp" then
         if v.seat == self.seat then
           dbg(self.name.." has stood up, leaving");
@@ -212,6 +212,9 @@ handlers.seTableStatus = function (self, obj)
           end, 0, 2)
         end
       elseif v.event == "teWinning" then
+        if self.name == "bot1" then
+          dump("entire win packet", obj);
+        end
         self:sendMessage("scTableSitOutNextHand", { table_mongo_id = obj.table_mongo_id, flag = true });
         self.leaving = 1;
       end

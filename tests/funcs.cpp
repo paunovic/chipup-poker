@@ -16,15 +16,21 @@ static int client_connect(lua_State *L);
 static int client_disconnect(lua_State *L);
 static int client_sendHello(lua_State *L);
 
-void pretty_print(lua_State *L, int i, string indent) {
+void pretty_print(lua_State *L, int i, string indent, bool force_hex = false) {
   int initial = lua_gettop(L);
   int type = lua_type(L, i);
+  const char *str = NULL;
+  size_t len = 0;
+  string stdstring;
   cout << "(" << lua_typename(L, type) << ") ";
   switch (type) {
     case LUA_TSTRING:
     case LUA_TNUMBER:
       lua_pushvalue(L, i);
-      cout << '"' << lua_tostring(L, -1) << '"';
+      str = lua_tolstring(L, -1, &len);
+      stdstring = string(str,len);
+      str = NULL; len = 0;
+      cout << '"' << stdstring << '"';
       lua_remove(L, -1);
       break;
     case LUA_TTABLE:

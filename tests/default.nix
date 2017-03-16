@@ -61,5 +61,5 @@ in {
     db.clubBalances.find().pretty()
   '';
   simpleGame = makeLuaTest ./simpleGame.lua null;
-  scenario1 = makeLuaTest2 [ 0 1 2 3 4 5 6 7 8 ] ./scenario1.lua null;
+  scenario1 = makeLuaTest2 [ 12 15 16 19 20 24 28 32 40 ] ./scenario1.lua null;
 }
