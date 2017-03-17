@@ -308,6 +308,10 @@ void PokerClient::sendMessage(lua_State *L, string code_str) {
   const ::google::protobuf::EnumDescriptor* ed = ServerCodes_descriptor();
   Poker::ServerCodes code;
   auto evd = ed->FindValueByName(code_str);
+
+  debug_print_ts(tester);
+  cout << "OUT " << code_str << "\n";
+
   if (!evd) {
     luaL_error(L, "invalid server code");
     return;
@@ -595,7 +599,11 @@ bool Client::connect(Context *context) {
   res = getaddrinfo(hostname.c_str(), NULL, NULL, &out);
   assert(res == 0);
   int fd = ::socket(AF_INET, SOCK_STREAM, 0);
-  assert(fd != -1);
+  if (fd == -1) {
+    int saved = errno;
+    cout << strerror(saved) << " while trying to create socket\n";
+    abort();
+  }
   struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in*>(out->ai_addr);
   addr->sin_port = htons(port);
   res = ::connect(fd, out->ai_addr, out->ai_addrlen);
