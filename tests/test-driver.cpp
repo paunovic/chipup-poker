@@ -607,7 +607,11 @@ bool Client::connect(Context *context) {
   struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in*>(out->ai_addr);
   addr->sin_port = htons(port);
   res = ::connect(fd, out->ai_addr, out->ai_addrlen);
-  assert(res == 0);
+  if (res == -1) {
+    int saved = errno;
+    cout << strerror(saved) << " while trying to connect to server\n";
+    abort();
+  }
   
   freeaddrinfo(out);
   out = NULL;
