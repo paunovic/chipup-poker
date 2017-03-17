@@ -132,6 +132,7 @@ let
       elif [ -d "${src}" ]
       then
           # Restore write permissions to make building work
+          strippedName=server
           chmod -R u+w $strippedName
           
           # Move the extracted directory into the output folder
