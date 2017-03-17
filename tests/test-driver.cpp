@@ -598,14 +598,24 @@ bool Client::connect(Context *context) {
   int res;
   res = getaddrinfo(hostname.c_str(), NULL, NULL, &out);
   assert(res == 0);
-  int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+
+  if (out->ai_addr->sa_family == AF_INET) {
+    struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in*>(out->ai_addr);
+    addr->sin_port = htons(port);
+  } else if (out->ai_addr->sa_family == AF_INET6) {
+    struct sockaddr_in6 *addr = reinterpret_cast<struct sockaddr_in6*>(out->ai_addr);
+    addr->sin6_port = htons(port);
+  } else {
+    cout << "unsupported address family\n";
+    abort();
+  }
+
+  int fd = ::socket(out->ai_addr->sa_family, SOCK_STREAM, 0);
   if (fd == -1) {
     int saved = errno;
     cout << strerror(saved) << " while trying to create socket\n";
     abort();
   }
-  struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in*>(out->ai_addr);
-  addr->sin_port = htons(port);
   res = ::connect(fd, out->ai_addr, out->ai_addrlen);
   if (res == -1) {
     int saved = errno;
