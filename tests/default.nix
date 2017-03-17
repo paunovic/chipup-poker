@@ -21,10 +21,10 @@ let
         services.klogd.enable = false;
         environment.systemPackages = [ mypkgs.test-driver pkgs.valgrind ];
         boot.kernelParams = [ "quiet" ];
-        boot.kernelPackages =
-          let
-            self = pkgs.linuxPackagesFor (pkgs.linux.overrideDerivation (oldAttr: { patches = oldAttr.patches ++ [ ./fs-9p-Compare-qid.path-in-v9fs_test_inode.patch ]; })) self;
-          in self;
+        #boot.kernelPackages =
+        #  let
+        #    self = pkgs.linuxPackagesFor (pkgs.linux.overrideDerivation (oldAttr: { patches = oldAttr.patches ++ [ ./fs-9p-Compare-qid.path-in-v9fs_test_inode.patch ]; })) self;
+        #  in self;
       };
     };
     testScript = ''
@@ -61,5 +61,7 @@ in {
     db.clubBalances.find().pretty()
   '';
   simpleGame = makeLuaTest ./simpleGame.lua null;
-  scenario1 = makeLuaTest2 [ 12 15 16 19 20 24 28 32 40 ] ./scenario1.lua null;
+  scenario1 = makeLuaTest2 [ 12 15 16 19 20 24 28 32 40 ] ./scenario1.lua ''
+    db.clubBalances.find().pretty()
+  '';
 }
