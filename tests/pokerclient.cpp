@@ -4,7 +4,7 @@
 #include <event2/buffer.h>
 
 #include "test-driver.h"
-#include "message.pb.h"
+#include <poker/message.pb.h>
 
 using namespace std;
 using namespace Poker;

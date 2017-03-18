@@ -3,7 +3,7 @@
 #include <lua.hpp>
 #include <chrono>
 
-#include "message.pb.h"
+#include <poker/message.pb.h>
 
 class Context;
 class LuaTester;

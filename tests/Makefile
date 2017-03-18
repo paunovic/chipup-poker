@@ -1,5 +1,5 @@
-test-driver: message.pb.o test-driver.o locking.o common.pb.o extra.pb.o funcs.o pokerclient.o
-	${CXX} $^ -o $@ -g -lssl -lprotobuf -llua -levent_pthreads -levent -levent_openssl
+test-driver: test-driver.o locking.o funcs.o pokerclient.o
+	${CXX} $^ -o $@ -g -lssl -lprotobuf -llua -levent_pthreads -levent -levent_openssl -lprotos
 %.o: %.cpp
 	${CXX} -c -Wall -g -std=c++1z $< -o $@
 %.o: %.cc
