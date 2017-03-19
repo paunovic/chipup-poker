@@ -7,7 +7,7 @@ let
   pkgs = import <nixpkgs> { inherit config; };
   callPackage = pkgs.newScope self;
   multiArchSet = system: let arch_pkgs = import <nixpkgs> { inherit system config; }; in rec {
-    client = arch_pkgs.qt5.callPackage ./qt-client/client.nix { inherit protos; };
+    client = arch_pkgs.qt57.callPackage ./qt-client/client.nix { inherit protos; };
     protos = arch_pkgs.callPackage ./protos { inherit (arch_pkgs) runCommandCC; };
   };
   self = rec {
