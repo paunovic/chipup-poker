@@ -41,6 +41,9 @@ SOURCES += ../client/loginwindow.cpp ../client/table.cpp ../client/data/playercl
 HEADERS += ../client/sound_effects.h ../client/table/scriptagent.h ../client/data/clubmember.h ../client/data/winnerdata.h
 SOURCES += ../client/sound_effects.cpp ../client/table/scriptagent.cpp ../client/data/clubmember.cpp ../client/data/winnerdata.cpp
 
+HEADERS += ../client/clublobby.h
+SOURCES += ../client/clublobby.cpp
+
 RESOURCES += ../client/resources.qrc
 
-FORMS += ../client/table/table_sit.ui ../client/loginwindow.ui ../client/table.ui
+FORMS += ../client/table/table_sit.ui ../client/loginwindow.ui ../client/table.ui ../client/clublobby.ui

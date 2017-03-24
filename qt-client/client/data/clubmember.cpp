@@ -8,6 +8,7 @@ namespace Data {
 
 ClubMember::ClubMember()
 {
+  qDebug() << "new club member" << this;
 }
 
 void ClubMember::update(Poker::ClubMember &in) {
@@ -108,24 +109,30 @@ QString ClubMemberList::getStatus(const ClubMember *row) const {
 bool ClubMember::isOwner(const Club *club) const {
 	return club->owner == _id;
 }
-QVariant ClubMemberList::headerData(int row, Qt::Orientation, int role) const {
-	if (role != Qt::DisplayRole) return QVariant();
-	if (this->parent->owner == core->self()->id) {
-		switch (row) {
-		case 0: return "Name";
-		case 1: return "Balance";
-		case 2: return "Limit";
-		case 3: return "Status";
-		}
-	} else {
-		switch (row) {
-		case 0: return "Name";
-		case 1: return "Status";
-		}
-	}
 
-	return QVariant();
+QVariant ClubMemberList::headerData(int row, Qt::Orientation, int role) const {
+  Q_ASSERT(core);
+  if (role != Qt::DisplayRole) {
+    return QVariant();
+  }
+
+  if (this->parent->owner == core->self()->id) {
+    switch (row) {
+    case 0: return "Name";
+    case 1: return "Balance";
+    case 2: return "Limit";
+    case 3: return "Status";
+    }
+  } else {
+    switch (row) {
+    case 0: return "Name";
+    case 1: return "Status";
+    }
+  }
+
+  return QVariant();
 }
+
 void ClubMemberList::sort(int, Qt::SortOrder) {
 
 }

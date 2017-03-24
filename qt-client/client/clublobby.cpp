@@ -10,15 +10,17 @@ ClubLobby::ClubLobby(QWidget *parent) : QMainWindow(parent), ui(new Ui::ClubLobb
   setAttribute(Qt::WA_DeleteOnClose,true);
 }
 
-ClubLobby::~ClubLobby()
-{
-	delete ui;
+ClubLobby::~ClubLobby() {
+  delete ui;
 }
 
 void ClubLobby::setClub(Data::Club *club) {
+  currentMember = 0;
+
   this->club = club;
   ui->lbClubName->setText(club->name);
   const Data::User *owner = core->findUser(club->owner);
+  Q_ASSERT(owner);
   if (owner) {
     ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
   } else ui->lbOwner->setText("Loading...");
@@ -83,13 +85,16 @@ void ClubLobby::user_selected(const QItemSelection &selected, const QItemSelecti
 
 	refreshSelection();
 }
+
 void ClubLobby::On_club_changed(const Data::Club *club) {
-	if (club != this->club) return;
-	refreshSelection();
-	const Data::User *owner = core->findUser(club->owner);
-	ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
-	ui->lbMembers->setText(QString(tr("Members: %1")).arg(club->members.length()));
+  if (club != this->club) return;
+  refreshSelection();
+  const Data::User *owner = core->findUser(club->owner);
+  Q_ASSERT(owner);
+  ui->lbOwner->setText(QString(tr("Owner:%1")).arg(owner->displayName()));
+  ui->lbMembers->setText(QString(tr("Members: %1")).arg(club->members.length()));
 }
+
 void ClubLobby::refreshSelection() {
 	// TODO, handle null caused by kick
 	if (currentMember->suspended) ui->btSuspend->setText(tr("Reinstate"));

@@ -24,16 +24,12 @@ bool errorFilter(void *context
 , EXCEPTION_POINTERS *exinfo, MDRawAssertionInfo *assertions
 #endif
 ) {
+  Q_UNUSED(context);
   qDebug() << "errorFilter";
   return true;
 }
 #ifdef Q_OS_WIN
-bool dumpMade(const wchar_t* dump_path,
-    const wchar_t* minidump_id,
-    void* context,
-    EXCEPTION_POINTERS* exinfo,
-    MDRawAssertionInfo* assertion,
-    bool succeeded) {
+bool dumpMade(const wchar_t* dump_path, const wchar_t* minidump_id, void* context, EXCEPTION_POINTERS* exinfo, MDRawAssertionInfo* assertion, bool succeeded) {
   qDebug() << "dumpMade" << build_number << QString::fromWCharArray(dump_path) << QString::fromWCharArray(minidump_id) << succeeded;
 #elif defined(Q_OS_LINUX)
 bool dumpMade(const google_breakpad::MinidumpDescriptor& descriptor, void* context, bool succeeded) {
@@ -91,7 +87,7 @@ int main(int argc, char *argv[]) {
 
   LoginWindow *w = new LoginWindow;
   w->show();
-
+  
   int ret = a.exec();
   while (core->delayQuit) {
     //qDebug() << "delaying quit?" << core->delayQuit;

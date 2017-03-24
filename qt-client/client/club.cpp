@@ -4,7 +4,8 @@
 using namespace Data;
 
 Club::Club() {
-	members.setClub(this);
+  members.setClub(this);
+  seq = 999;
 }
 
 QVariant ClubListModel::data(const QModelIndex &index,int role) const {
@@ -81,9 +82,10 @@ void ClubListModel::clear() {
 	m_entries.clear();
 }
 void ClubList::add(Data::Club *input) {
-	clubs.append(input);
-	if (input->is_private) private_club_model.append(input);
-	else public_club_model.append(input);
+  Q_ASSERT(input);
+  clubs.append(input);
+  if (input->is_private) private_club_model.append(input);
+  else public_club_model.append(input);
 }
 void ClubListModel::append(Data::Club *item) {
 	int index = m_entries.size();

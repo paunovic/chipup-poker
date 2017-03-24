@@ -334,7 +334,7 @@ Club.prototype.updateLimit = function (userid,limit,unlimited,cb) {
     assert.ifError(err);
     if (row) {
       var user = global.activeUsers[userid];
-      console.log(arguments);
+      console.log("limit updated".red, row);
       if (user) {
         user.sendClubStatus(this);
       }

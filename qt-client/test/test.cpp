@@ -8,6 +8,8 @@
 #include "table/animatecore.h"
 #include "../client/data/tableevent.h"
 #include "../client/loginwindow.h"
+#include "../client/clublobby.h"
+
 
 #ifndef QFINDTESTDATA
 #define QFINDTESTDATA(x) QString("../../qt-client/test/") + x
@@ -520,11 +522,51 @@ void TestCase::simplegame() {
 	core = 0;
 	animateCore = 0;
 }
+
+void TestCase::club_lobby() {
+  PokerMain pm;
+  pm.setDataDir(QDir("datadir"));
+  core = &pm;
+  
+  QByteArray selfid;
+  selfid[0] = 1;
+  pm.self()->id = selfid;
+
+  Data::User *u = new Data::User(&pm);
+  u->id = selfid;
+  u->setDisplayName("user");
+  pm.users.append(u);
+
+  Data::Club *club = new Data::Club();
+  club->owner = selfid;
+  ClubLobby *cl = new ClubLobby();
+  cl->setClub(club);
+  
+  QFile styles(":/stylesheet.css");
+
+  if (!styles.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "failed to load css";
+  } else {
+    QByteArray buffer;
+    while (!styles.atEnd()) {
+      buffer.append(styles.readAll());
+    }
+    QString css(buffer);
+    cl->setStyleSheet(cl->styleSheet() + "\n" + css);
+  }
+
+  QPixmap output(cl->size());
+  cl->render(&output);
+  output.save("club_lobby.png");
+  delete cl;
+  core = 0;
+}
+
 void TestCase::render_bare_form_data() {
 	QTest::addColumn<QString>("formname");
 	QTest::addColumn<QString>("outname");
-	QTest::newRow("formname") << "../client/loginwindow.ui" << "loginwindow";
-	QTest::newRow("formname") << "../client/table.ui" << "table";
+	QTest::newRow("login") << "../client/loginwindow.ui" << "loginwindow";
+	QTest::newRow("table") << "../client/table.ui" << "table";
 }
 void TestCase::render_bare_form() {
 	QFETCH(QString,formname);

@@ -31,7 +31,7 @@
 
 using namespace Poker;
 
-PokerMain *core;
+PokerMain *core = 0;
 
 static void flagOffline(QMainWindow *window);
 
@@ -86,59 +86,68 @@ void PokerMain::httpsErrors(QNetworkReply *reply, const QList<QSslError> &errors
 }
 
 void PokerMain::replyFinished(QNetworkReply *reply) {
-	qDebug() << reply;
-	foreach (Core::UpdateFileInfo item, files_in) {
-		if (item.reply != reply) continue;
-		//qDebug() << "found it" << item.path;
-		int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-		if (reply->error() == QNetworkReply::ConnectionRefusedError) {
-			qDebug() << "connection refused while auto-updating";
-			reply->deleteLater();
-			return;
-		}
-		qDebug() << "status code" << status << reply->error();
-		if (status == 200) {
-			FileSaver *fs = new FileSaver(reply,item);
-		}
-		return;
-	}
-	reply->deleteLater();
+  qDebug() << reply;
+  foreach (Core::UpdateFileInfo item, files_in) {
+    if (item.reply != reply) continue;
+    //qDebug() << "found it" << item.path;
+    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (reply->error() == QNetworkReply::ConnectionRefusedError) {
+      qDebug() << "connection refused while auto-updating";
+      reply->deleteLater();
+      return;
+    }
+    qDebug() << "status code" << status << reply->error();
+    if (status == 200) {
+      FileSaver *fs = new FileSaver(reply,item);
+      Q_UNUSED(fs);
+    }
+    return;
+  }
+  reply->deleteLater();
 }
+
 void PokerMain::try_connect() {
-	if (socket.state() == QAbstractSocket::UnconnectedState) {
-		socket.connectToHostEncrypted(serverAddress,12346);
-	}
+  if (socket.state() == QAbstractSocket::UnconnectedState) {
+    socket.connectToHostEncrypted(serverAddress,12346);
+  }
 }
+
 void PokerMain::socket_state_change(QAbstractSocket::SocketState state) {
-	qDebug() << state;
-	switch (state) {
-	case QAbstractSocket::HostLookupState:
-		break;
-	case QAbstractSocket::ConnectingState:
-		break;
-	case QAbstractSocket::ConnectedState:
-		//qDebug() << "socket connected";
-		break;
-	case QAbstractSocket::ClosingState:
-		qDebug() << "socket closing";
-		break;
-	case QAbstractSocket::UnconnectedState:
-		QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
-		// set a timer to reconnect
-		qDebug() << "unconnected";
-		emit protocol_ready(false);
-		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
-			qDebug() << widget << widget->metaObject()->className();
-			QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget);
-			if (mainWindow) {
-				flagOffline(mainWindow);
-			}
-		}
-		try_connect();
-		break;
-	}
+  qDebug() << state;
+  switch (state) {
+  case QAbstractSocket::HostLookupState:
+    break;
+  case QAbstractSocket::ConnectingState:
+    break;
+  case QAbstractSocket::ConnectedState:
+    //qDebug() << "socket connected";
+    break;
+  case QAbstractSocket::ClosingState:
+    qDebug() << "socket closing";
+    break;
+  case QAbstractSocket::UnconnectedState:
+    QResource::unregisterResource(datadir.absoluteFilePath("scripts.rcc"));
+    // set a timer to reconnect
+    qDebug() << "unconnected";
+    emit protocol_ready(false);
+    foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+      qDebug() << widget << widget->metaObject()->className();
+      QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget);
+      if (mainWindow) {
+        flagOffline(mainWindow);
+      }
+    }
+    try_connect();
+    break;
+  case QAbstractSocket::BoundState:
+  case QAbstractSocket::ListeningState:
+    qDebug() << "socket in unexpected state";
+    abort();
+  }
 }
+
 static void flagOffline(QMainWindow *mainWindow) {
+  Q_UNUSED(mainWindow);
 }
 void PokerMain::socket_sslErrors(const QList<QSslError> &errors) {
 	qDebug() << "incoming err" << errors;
@@ -488,25 +497,29 @@ void PokerMain::parsePacket(Poker::ServerCodes code,std::string data) {
 		qDebug() << "unhandled raw rpc method:" << code;
 	}
 }
+
 void PokerMain::send_ping() {
-	Poker::PingParams pp;
-	pp.set_uptime(uptime.elapsed());
-	sendMessage(Poker::scPing,&pp);
+  Poker::PingParams pp;
+  pp.set_uptime(uptime.elapsed());
+  sendMessage(Poker::scPing,&pp);
 }
+
 QList<Data::Club*> PokerMain::public_clubs() {
-	QList<Data::Club*> out;
-	for (int i=0; i<clubs.size(); i++) {
-		if (!clubs.at(i)->is_private) out.append(clubs.at(i));
-	}
-	return out;
+  QList<Data::Club*> out;
+  for (int i=0; i<clubs.size(); i++) {
+    if (!clubs.at(i)->is_private) out.append(clubs.at(i));
+  }
+  return out;
 }
+
 QList<Data::Club*> PokerMain::private_clubs() {
-	QList<Data::Club*> out;
-	for (int i=0; i<clubs.size(); i++) {
-		if (clubs.at(i)->is_private) out.append(clubs.at(i));
-	}
-	return out;
+  QList<Data::Club*> out;
+  for (int i=0; i<clubs.size(); i++) {
+    if (clubs.at(i)->is_private) out.append(clubs.at(i));
+  }
+  return out;
 }
+
 void PokerMain::seGameChange(std::string data) {
 	Poker::Game g;
 	g.ParseFromString(data);
@@ -534,6 +547,7 @@ void PokerMain::seGameCreate(std::string data) {
 	games.append(g2);
   emit game_added(g2);
 }
+
 void PokerMain::seGameDelete(std::string data) {
   Poker::Game g;
   g.ParseFromString(data);

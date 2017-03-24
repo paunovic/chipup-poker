@@ -184,12 +184,14 @@ void MainWindow::on_gridPublicClubs_doubleClicked(const QModelIndex &index) {
 void MainWindow::on_btOpenClubLobby_clicked() {
 	clubTriggered(currentClub);
 }
+
 void MainWindow::clubTriggered(Data::Club *club) {
-	// TODO, if its a public club, dont let you open the lobby for some reason??
-	ClubLobby *cl = new ClubLobby();
-	cl->setClub(club);
-	cl->show();
+  // TODO, if its a public club, dont let you open the lobby for some reason??
+  ClubLobby *cl = new ClubLobby();
+  cl->setClub(club);
+  cl->show();
 }
+
 void MainWindow::on_actionContact_Us_triggered() {
 	ContactUs *cu = new ContactUs();
 	cu->show();
