@@ -68,6 +68,7 @@ type
     acAddChips: TAction;
     lbvClubBalance: TcxLabel;
     acReportBug: TAction;
+    lbvTableBalance: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -157,7 +158,7 @@ type
     procedure UpdateTableCaption;
     procedure UpdateHandHistoryLabel;
     procedure UpdateHandStrength;
-    procedure UpdateClubBalanceInfo;
+    procedure UpdatePlayerBalanceInfo;
     procedure UpdateWaitingListPositionCaption;
     procedure FocusWindow;
     procedure UncheckAutoplayOptions;
@@ -251,6 +252,7 @@ begin
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
       lbvClubBalance.Visible := FALSE;
+      lbvTableBalance.Visible := FALSE;
       lbsTableStats.Visible := FALSE;
       lbvWaitingListPosition.Visible := FALSE;
 
@@ -617,15 +619,19 @@ begin
   cbAutoCallAny.Checked := FALSE;
 end;
 
-procedure TfrmTable.UpdateClubBalanceInfo;
+procedure TfrmTable.UpdatePlayerBalanceInfo;
 var
-  club_balance: Integer;
+  club_balance, table_balance: Integer;
+  show_club_balance, show_table_balance: Boolean;
   table: TTable;
   club: TClubInfo;
   member: TPB_ClubMember;
   cstr: String;
 begin
-  club_balance := -1;
+  show_club_balance := FALSE;
+  show_table_balance := FALSE;
+  club_balance := 0;
+  table_balance := 0;
 
   if FTableType in [ttLive] then
   begin
@@ -634,7 +640,10 @@ begin
       if dmMain.SelfInfo.Clubs.GetAndLock(table.ClubId, club) then
       try
         if club.GetMemberInfo(dmMain.SelfInfo.MongoId, member) then
+        begin
           club_balance := member.ClubBalance;
+          show_club_balance := TRUE;
+        end;
       finally
         dmMain.SelfInfo.Clubs.Unlock;
       end;
@@ -643,19 +652,33 @@ begin
     end;
   end;
 
-  if club_balance <> -1 then
+  if show_club_balance then
   begin
     cstr := ChipsToStr(Abs(club_balance));
     if club_balance < 0 then
       cstr := '-' + cstr;
 
-    lbvClubBalance.Caption := Format('Your club balance: %s', [cstr])
+    lbvClubBalance.Caption := Format('Club balance: %s', [cstr])
   end
   else
     lbvClubBalance.Caption := '';
 
+  if show_table_balance then
+  begin
+    cstr := ChipsToStr(Abs(table_balance));
+    if table_balance < 0 then
+      cstr := '-' + cstr;
+
+    lbvTableBalance.Caption := Format('Table balance: %s', [cstr])
+  end
+  else
+    lbvTableBalance.Caption := '';
+
   lbvClubBalance.Visible := lbvClubBalance.Caption <> '';
   lbvClubBalance.Refresh;
+
+  lbvTableBalance.Visible := lbvTableBalance.Caption <> '';
+  lbvTableBalance.Refresh;
 
   UpdateHeaderLabelOrder;
 end;
@@ -1313,7 +1336,7 @@ begin
 
   UpdateHandStrength;
   UpdateHandHistoryLabel;
-  UpdateClubBalanceInfo;
+  UpdatePlayerBalanceInfo;
   UpdateTableCaption;
   UpdateHeaderLabelOrder;
 end;

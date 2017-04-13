@@ -291,7 +291,7 @@ object frmTable: TfrmTable
   object paTopLeftHeader: TPanel
     Left = 0
     Top = 0
-    Width = 367
+    Width = 510
     Height = 23
     BevelOuter = bvNone
     Color = clBlack
@@ -382,9 +382,9 @@ object frmTable: TfrmTable
     object lbvClubBalance: TcxLabel
       Left = 228
       Top = 0
-      Align = alClient
+      Align = alLeft
       AutoSize = False
-      Caption = 'Your club balance:'
+      Caption = 'Club balance:'
       ParentFont = False
       Style.Edges = []
       Style.Font.Charset = DEFAULT_CHARSET
@@ -411,6 +411,42 @@ object frmTable: TfrmTable
       Transparent = True
       Height = 23
       Width = 139
+      AnchorY = 12
+    end
+    object lbvTableBalance: TcxLabel
+      Left = 367
+      Top = 0
+      Align = alClient
+      AutoSize = False
+      Caption = 'Table balance:'
+      ParentFont = False
+      Style.Edges = []
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Sintony'
+      Style.Font.Style = [fsBold]
+      Style.Font.Quality = fqAntialiased
+      Style.HotTrack = True
+      Style.LookAndFeel.NativeStyle = True
+      Style.LookAndFeel.SkinName = ''
+      Style.TextColor = 13158600
+      Style.TextStyle = []
+      Style.TransparentBorder = True
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.SkinName = ''
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.SkinName = ''
+      StyleHot.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.SkinName = ''
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.Alignment.Vert = taVCenter
+      Transparent = True
+      ExplicitLeft = 228
+      ExplicitWidth = 139
+      Height = 23
+      Width = 143
       AnchorY = 12
     end
   end
@@ -941,7 +977,7 @@ object frmTable: TfrmTable
     Left = 216
     Top = 52
     Bitmap = {
-      494C010106000900180030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101060009001C0030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
